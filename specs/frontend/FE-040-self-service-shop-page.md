@@ -2,7 +2,7 @@
 id: FE-040
 title: Simple owner-controlled business profiles
 status: in_progress
-related: [FE-060, BE-045, FE-056, FE-054, FE-046, FE-044, FE-041, BE-031, FE-038, BE-032, DEP-030, ADR-0018, FE-042, FE-043]
+related: [FE-066, FE-060, BE-045, FE-056, FE-054, FE-046, FE-044, FE-041, BE-031, FE-038, BE-032, DEP-030, ADR-0018, FE-042, FE-043]
 owners: [product, frontend]
 last_updated: 2026-09-21
 change_level: L2
@@ -369,3 +369,7 @@ Bounded accents personalize the fixed profile; no new layout/tint controls or
 product-photo tint. Validated business-profile JSON, atomic owner publication,
 legacy defaults and consented staff privacy retain the existing contracts.
 See FE-054 for focused tests/captures and pending rollout.
+
+S106 / FE-066: preserve all eight original public contact fields and links.
+First publication retains its original contact rules. Only public business-inbox
+submission/navigation is retired; transport and owner support remain.

@@ -2,7 +2,7 @@
 id: FE-042
 title: Paginated category results and standard page workspaces
 status: in_progress
-related: [FE-048, FE-030, FE-032, FE-040, FE-041, BE-033, DEP-030, FE-008, FE-043]
+related: [FE-048, FE-030, FE-032, FE-040, FE-041, BE-033, DEP-030, FE-008, FE-043, FE-065]
 owners: [product, frontend, operations]
 last_updated: 2026-09-23
 change_level: L2
@@ -245,3 +245,12 @@ browser captures in .local/offering-results/ with capture-offering-results.mjs.
 Desktop/390/320 screenshots reviewed. Tile imagery is a controlled fixture;
 marker data/handlers are real. Physical native-device evidence, owner visual
 approval, full/release gates, commit and deployment are not claimed.
+
+
+## S103 incremental results — local candidate
+
+FE-065 / BE-054 supersede initial empty activation and five-card page controls
+for independent discovery only. Web/mobile web and native start with 12 cards
+and append the next bounded server batch on scroll, retaining the existing
+description and source-business destinations. Legacy paged API callers retain
+five-row compatibility. No change to owner workflows or publication.

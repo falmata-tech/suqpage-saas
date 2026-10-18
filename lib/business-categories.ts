@@ -6,7 +6,7 @@ export const BUSINESS_CATEGORY_OPTIONS = [
   { key: "machinery-tools", label: "Tools, machines & metalwork" },
   { key: "home-living", label: "Furniture, art & building" },
   { key: "fashion-textiles", label: "Clothes, fabrics & leather" },
-  { key: "other-manufacturing", label: "Other products & services" },
+  { key: "other-manufacturing", label: "Other products" },
 ] as const;
 
 export type BusinessCategoryKey = (typeof BUSINESS_CATEGORY_OPTIONS)[number]["key"];

@@ -24,6 +24,7 @@ import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import { evaluateCompositionFitness } from "./showroom-guidance";
 import { parseShowroomContentBlocks } from "./showroom-content-blocks";
 import type { ContentRevision, SessionUser } from "./types";
+import {isActiveProductKind} from './offerings';
 
 const row = <T,>(value: unknown): T =>
   ({ ...(value as Record<string, unknown>) }) as T;
@@ -466,7 +467,7 @@ export async function decideRevision(
     .slice(0, 1000);
   if (decision === "reject" && comment.length < 5) {
     throw new RevisionError(
-      "Tell Suqpage what should change in at least 5 characters.",
+      "Tell MirtPage what should change in at least 5 characters.",
     );
   }
   return runtimeTransaction(async () => {
@@ -700,6 +701,9 @@ export async function publishApprovedRevision(
     revision.request_id,
     revision.business_id,
   );
+  if (validated.products.some(product=>!isActiveProductKind(product.offeringKind))) {
+    throw new RevisionError("Choose Ready to ship or Made to order for this product.",400);
+  }
   const staged = await stagePrivateImages(validated, revision.request_id);
   try {
     return runtimeTransaction(async () => {

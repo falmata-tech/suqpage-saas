@@ -155,12 +155,22 @@ credentials. The provider-returned before-state and patch are retained together
 under `.local/production-auth-plans` with private permissions. A provider-masked
 secret is not recoverable merely because it appears in that backup.
 
+For the staged MirtPage transition, `--patch` cannot change origin fields. Use
+finite `plan --project sjeiiqxgscuqajpgddcc --from-phase legacy --to-phase dual-old-primary`
+selection instead. The other admitted edges are dual-old-primary→dual-new-primary
+and the separately reviewed reverse primary transition. Both dual policies retain
+the old callback; no callback removal or mail/provider field can be mixed into
+this operation. This local support is focused-tested under BE-059/DEP-049, not a
+claim of verified new-domain HTTPS or permission to apply. Complete the protected
+provider/DNS/backlog prerequisites and review the exact resulting digest first.
+
 After the owner reviews that exact plan, use:
 
 `npm run ops:auth-config -- apply --project sjeiiqxgscuqajpgddcc --plan PLAN_ID --approve REVIEWED_DIGEST`
 
-Version-2 plans bind credential source and a token fingerprint without storing the
-token. A changed login/source or older unbound plan requires a fresh review.
+Version-3 plans bind credential source/fingerprint and the operation kind without
+storing the token. Origin-transition plans also bind source/target policy. Old
+version-2 plans are refused before provider reads; prepare a fresh exact plan.
 Plans expire after ten minutes. Apply revalidates the backup, digest, scope,
 project health, and unchanged remote state before one narrow PATCH and complete
 readback. Existing customization flags for approved nonempty subject/template
@@ -186,9 +196,11 @@ repository path, not an OS sandbox; restrict management credentials accordingly.
    retained, existing, create, linked, and conflict counts.
 4. Resolve every conflict. Then run the same exact release with
    `SUQPAGE_APPROVE_AUTH_MIGRATION=1 npm run migrate:auth:supabase -- --apply`.
-5. Configure the exact production site URL and redirect allowlist in Supabase.
-   Add the local callback and the selected host's deploy-preview wildcard only
-   where needed; do not use a broad production wildcard.
+5. Configure production Auth only through the exact reviewed DEP-029 policy
+   and digest. Keep localhost and deploy previews in their isolated Supabase
+   lanes; never add their callback or wildcard to the production project. For
+   MirtPage, use the finite BE-059 old/new-origin transition after HTTPS and
+   compatibility prerequisites pass.
 6. Before enabling public email-code entry, configure hosted Supabase custom
    SMTP and send one code to a non-team address. For the bounded tester launch,
    a dedicated Gmail account may use `smtp.gmail.com`, port `587`, its complete

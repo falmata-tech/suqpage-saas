@@ -30,7 +30,7 @@ async function active(businessId: number): Promise<boolean> {
 export const pagePublicationPort: PagePublicationPort = {
   latest,
   async publishable(businessId) {
-    return Boolean(await runtimeGet("SELECT 1 FROM businesses b WHERE b.id=? AND (b.status='active' OR (b.status='draft' AND EXISTS(SELECT 1 FROM products p WHERE p.business_id=b.id AND p.is_published=1)))", [businessId]));
+    return Boolean(await runtimeGet("SELECT 1 FROM businesses b WHERE b.id=? AND (b.status='active' OR (b.status='draft' AND EXISTS(SELECT 1 FROM products p WHERE p.business_id=b.id AND p.is_published=1 AND p.offering_kind<>'service')))", [businessId]));
   },
   async previous(businessId, revision) {
     const row = await runtimeGet<PublicationRow>("SELECT * FROM owner_page_publications WHERE business_id=? AND revision<? ORDER BY revision DESC LIMIT 1", [businessId, revision]);
@@ -47,7 +47,7 @@ export const pagePublicationPort: PagePublicationPort = {
           AND COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END)='client')`,
       [draft.businessId, draft.version, actor.id]);
       if (!locked.changes) return null;
-      const business = await runtimeRun("UPDATE businesses SET content_version=content_version WHERE id=? AND (status='active' OR (status='draft' AND EXISTS(SELECT 1 FROM products p WHERE p.business_id=businesses.id AND p.is_published=1)))", [draft.businessId]);
+      const business = await runtimeRun("UPDATE businesses SET content_version=content_version WHERE id=? AND (status='active' OR (status='draft' AND EXISTS(SELECT 1 FROM products p WHERE p.business_id=businesses.id AND p.is_published=1 AND p.offering_kind<>'service')))", [draft.businessId]);
       if (!business.changes) return null;
       const current = await latest(draft.businessId);
       if ((current?.revision || 0) !== expectedRevision) return null;

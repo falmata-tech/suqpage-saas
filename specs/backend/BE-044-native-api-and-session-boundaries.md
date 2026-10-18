@@ -2,13 +2,91 @@
 id: BE-044
 title: Native API and session boundaries
 status: in_progress
-related: [BE-032, BE-048, BE-047, BE-045, FE-056, FE-054, FE-053, FE-026, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023, BE-046, BE-050, BE-051, BE-052]
+related: [BE-058, BE-055, BE-032, BE-048, BE-047, BE-045, FE-056, FE-054, FE-053, FE-026, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023, BE-046, BE-050, BE-051, BE-052, BE-054, BE-056, FE-041, FE-065, BE-057, FE-068]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-07
+last_updated: 2026-10-17
 change_level: L3
 ---
 
 # BE-044 — Native API and session boundaries
+
+## S130/S131 — additive public catalog detail (ready)
+
+FE-065 S130 and FE-041 S131 add optional SearchItem city/region and Shop categories/
+Offering category identity to existing responses. Project city/region from the
+same canonical search product row, without joining a separately capped map feed.
+Project category identity/names only by matching the current tenant Catalog's
+active categories and product category ID; ignore inactive/foreign hydrated names.
+Counts/choices cannot include retired services or private hidden products in a
+public response. Existing owner private preview scope stays private. Preserve
+old callers and optional-field omission; no schema, endpoint, query per card,
+permission, provider or application-data mutation. Focused pure projection tests
+must prove these positive/negative cases and existing offering/public boundaries.
+
+## S115 focused owner team-editing parity (ready)
+
+GIVEN an authenticated current business owner WHEN opening Your page THEN the
+private home draft includes its canonical `assistanceEnabled` setting. WHEN the
+owner changes Team editing THEN `owner/page` accepts the bounded `assistance`
+action with only `action`, `version`, and boolean `enabled`, and uses the existing
+owner-page consent service and atomic version/role checks. Reject content fields,
+foreign business IDs, malformed booleans, stale versions and staff identities;
+preserve page content and publication. Existing start/save clients remain
+compatible. This adds no permission, provider, schema or guest workflow.
+
+Evidence required: the native API regression exercises current consent projection,
+enable/disable, malformed/foreign/stale rejection and unchanged page content;
+FE-053/FE-056 focused editor tests and local visual review remain separate.
+
+Local verification: `scripts/test-mobile-api.ts` passes against its disposable
+PostgreSQL schema, including canonical home projection, consent enable/disable,
+unchanged profile, malformed/foreign/stale rejection and retained session/API
+security workflows. This is neither production deployment nor installed-device
+proof; TRACEABILITY records S115's remaining visual/release gates.
+
+## S107 bounded client Auth transport
+
+GIVEN an email-code, verification, refresh or local sign-out provider request
+WHEN its connection or response body stalls THEN the mobile Auth HTTP adapter
+aborts that individual request within 20 seconds. Return the existing connection
+error through the Auth SDK rather than leaving the UI indefinitely busy. Preserve
+the SDK's normal refresh/retry/error policy; the adapter does not send another
+OTP, delete a session, change roles or retry a request itself.
+
+GIVEN a caller abort signal THEN preserve its cancellation. Successful responses
+retain their status, headers and body for SDK interpretation, including an empty
+204 response; 401 and refresh responses are not rewritten into success. Remove
+deadline timers and abort listeners after completion. Bound decoded Auth bodies
+to 2 MiB and return a safe connection error for oversized data, without logging
+provider response bytes or credentials. This is a client adapter for the existing
+Supabase provider, not a provider/configuration/dependency change.
+
+Tests: `scripts/test-mobile-auth-fetch.ts` exercises the typed fetch adapter and
+installed Auth SDK through controlled transport ports, including connection/body
+stalls, OTP acknowledgement, refresh/status passthrough, cancellation and cleanup.
+No provider request, code delivery or actual identity is needed. Existing staff
+denial, tenant, bearer and session regressions remain mandatory; native-device
+and release evidence remain separate.
+
+S107 local logout failure: WHEN logout begins THEN immediately clear private
+rendered/session/basket state and fence owner requests and restored Auth events.
+Always attempt persistent local session removal, even when the provider returns
+an SDK `{error}` result or throws. WHEN provider or device removal fails THEN
+show the existing safe localized connection error in an Account sign-out retry
+state; block new authentication until an explicit logout retry confirms cleanup.
+Keep this failure state at provider scope so focused editor unmounts cannot lose
+it. Manual UI callers handle rejections, and concurrent logout taps share one
+attempt. Successful cleanup releases the fence and ordinary email login returns.
+The separate web session remains untouched. Persistent storage failure cannot be
+claimed as completed logout across a whole app-process restart; visible retry is
+required. `scripts/test-mobile-logout-ui.ts` covers SDK-result errors, storage
+errors, immediate private clearing, stale Auth events, owner-request denial and
+actual Account/Settings rejection/retry controls with no unhandled rejection.
+Use the installed Auth SDK's default refresh coordination. Its deprecated custom
+`processLock` creates an additional unhandled promise when storage deletion
+rejects, even when the sign-out caller catches the error. The installed-SDK
+controlled-storage regression must prove rejected deletion reaches the caller
+with no secondary unhandled rejection; never filter global errors to hide it.
 
 ## S88 — staff identity denial throughout mobile
 
@@ -169,3 +247,12 @@ are removed; controlled map tiles and isolated API fixtures are documented in
 scripts. Evidence: .local/multiple-location-review/ and .local/live-transport-review/.
 Both typechecks and localization checks pass. Owner visual/native-speaker review,
 physical device tests, build/full release gates and deployment remain pending.
+
+
+## S105 social-contact revision
+
+FE-066 / BE-055 supersede new customer messages to business inboxes. Only
+configured social accounts receive visitor handoffs; chosen products and the
+simple message follow the active UI language. Retained private history stays
+scoped. Public transport chat and authenticated owner support remain unchanged.
+Local implementation and review evidence are tracked in checklist S105.

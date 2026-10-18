@@ -1,3 +1,10 @@
+import {trackingHttpHandler} from '../tracking-http-runtime';
+import {createTrackingHttpHandler,type TrackingHttpPorts} from '../tracking-http';
+import {isCountryCode} from '../countries';
+import {readOwnerTransport,commandOwnerTransport} from '../owner-transport';
+import {TransportPlanError} from '../transport-plan-contract';
+import {createTransportPlanHttpHandler,type TransportPlanHttpPorts} from '../transport-plan-http';
+import {validMarketLocationParams,validMarketFilterParams} from '../market-search';
 import {resolveProductVideoUrl} from '../tiktok-short-link';
 import {CatalogSafetyError,excludedBusinessIds} from '../catalog-safety';
 import {submitListingReport} from '../listing-reports';
@@ -35,7 +42,8 @@ import { BUSINESS_CATEGORY_OPTIONS } from "../business-categories";
 import { parseBusinessHandle } from "../business-handle";
 import { parseAccountPhone, parseAccountName, saveAccountProfile } from "../account-contacts";
 import { getHandleAvailability } from "../handle-availability";
-import { createPublicInquiry, InquiryError } from "../inquiries";
+import { InquiryError } from "../inquiries";
+import { RETIRED_BUSINESS_INQUIRY } from "../business-inquiry-policy";
 import { hashPrivateValue, requestIpFromHeaders } from "../security";
 import { consumeRuntimeRateLimit } from "../rate-limit-runtime";
 import { createPublicClientWorkspace, SignupError } from "../signup";
@@ -50,6 +58,7 @@ import {
 import { saveOwnerPageAndPublication } from "../owner-page-save-runtime";
 import { changePagePublication } from "../owner-page-publication";
 import { ownerPagePort } from "../owner-page-runtime";
+import { setOwnerPageAssistance } from "../owner-page-service";
 import { OwnerPageError } from "../owner-page-domain";
 import { ProductUpkeepError } from "../product-upkeep-domain";
 import { accountContactPort } from "../account-contact-runtime";
@@ -64,6 +73,7 @@ import {
   createPublicSupportConversation,
   postPublicSupportMessage,
   closePublicSupportConversation,
+  resumePublicSupportConversation,
   listSupportConversations,
   getSupportConversation,
   postSupportMessage,
@@ -101,11 +111,13 @@ async function dispatch(
   request: Request,
   path: string[],
   identityPort?: NativeIdentityPort,
+  marketPort:typeof getMarketplaceDiscoveryView=getMarketplaceDiscoveryView,
 ) {
   const method = request.method,
     url = new URL(request.url),
     key = path.join("/"),
     q = url.searchParams;
+  if (method === "POST" && key === "inquiries") return json(RETIRED_BUSINESS_INQUIRY, 410);
   const ip = hashPrivateValue(requestIpFromHeaders(request.headers));
   const rate = await consumeRuntimeRateLimit(
     `mobile:${method === "GET" ? "read" : "write"}:${ip}`,
@@ -121,8 +133,12 @@ async function dispatch(
   if (method === "GET" && key === "market") {
     if ((q.get("q") || "").length > 120 || url.search.length > 2500)
       throw new MobileError("Search is too long.");
+    if(!validMarketFilterParams(q)||q.has('scope')&&(!['businesses','products'].includes(q.get('scope')||'')||!validMarketLocationParams(q)))throw new MobileError('Check your search filters.');
     return marketDto(
-      await getMarketplaceDiscoveryView({
+      await marketPort({
+        scope:q.get("scope")==="businesses"?"businesses":q.get("scope")==="products"?"products":undefined,
+        country:q.getAll("country"),city:q.getAll("city"),offeringType:q.get("offeringType")||"",
+        madeToOrder:q.get('madeToOrder')??undefined,
         industry: q.getAll("category"),
         q: q.get("q") || "",
         place: q.getAll("place"),
@@ -185,7 +201,9 @@ async function dispatch(
   if (method === "GET" && key === "places") {
     const query = q.get("q") || "";
     if (query.length > 80) throw new MobileError("Use a shorter place name.");
-    return { places: findPlaceSuggestions(query) };
+    const country=q.get("country")||"ET";
+    if(!isCountryCode(country))throw new MobileError("Choose a country.");
+    return { places: findPlaceSuggestions(query,country) };
   }
   if (method === "GET" && key === "categories")
     return { categories: BUSINESS_CATEGORY_OPTIONS };
@@ -193,8 +211,6 @@ async function dispatch(
     return getHandleAvailability(
       mobileParse(() => parseBusinessHandle(q.get("handle"))),
     );
-  if (method === "POST" && key === "inquiries")
-    return createPublicInquiry(await jsonBody(request), ip);
   if(method==='POST'&&key==='reports')return submitListingReport(listingReportPort,await jsonBody(request),ip);
   if ((path[0]==='transport'||path[0]==='buying') && path.length===2 && path[1]==='attention') {
     const token=request.headers.get('X-Suqpage-Buying-Session')||'';
@@ -258,6 +274,7 @@ async function dispatch(
         throw new MobileError("This chat changed. Please refresh.", 409);
       if (b.action === 'read') await acknowledgePublicRead(token, { messageId: b.messageId, publicRef: b.publicRef });
       else if (b.action === "close") await closePublicSupportConversation(token);
+      else if (b.action === 'resume') await resumePublicSupportConversation(token,b.publicRef);
       else if (b.action === "message")
         await postPublicSupportMessage(
           token,
@@ -288,6 +305,7 @@ async function dispatch(
       "businessName",
       "businessCategory",
       "placeId",
+      "countryCode",
       "accentColor",
       "handle",
       "consent",
@@ -308,6 +326,14 @@ async function dispatch(
   const actor = await nativeOwner(request, identityPort),
     bid = actor.business_id,
     route = path.slice(1).join("/");
+  if(route==='transport'){
+    if(method==='GET'){
+      const query:Record<string,unknown>={};for(const[key,value]of q){if(key in query)throw new MobileError('Request could not be accepted.');query[key]=value;}
+      return readOwnerTransport(actor,query);
+    }
+    if(method==='POST')return commandOwnerTransport(actor,await jsonBody(request));
+    throw new MobileError('Method not allowed.',405);
+  }
   if (method === "GET" && route === "home") return ownerHome(actor);
   if (method === "GET" && route === "business")
     return readOwnerBusiness(actor, bid);
@@ -352,6 +378,13 @@ async function dispatch(
         status: c.status,
         publicRef: c.publicRef,
         lastMessageAt: c.lastMessageAt,
+        resolvedAt:c.resolvedAt,
+        agentJoined:c.agentJoined,
+        replyState:c.replyState??null,
+        staffReplyDueAt:c.staffReplyDueAt??null,
+        idleWarningAt:c.idleWarningAt??null,
+        idleEndsAt:c.idleEndsAt??null,
+        idleEndedAt:c.idleEndedAt??null,
       })),
       page: p.page,
       pages: p.totalPages,
@@ -363,11 +396,20 @@ async function dispatch(
     return {
       conversation: {
         id: c.conversation.id,
+        category:c.conversation.assistanceCategory,
+        assistanceCategory:c.conversation.assistanceCategory,
+        resolvedAt:c.conversation.resolvedAt,
         subject: c.conversation.subject,
         status: c.conversation.status,
         agentJoined: c.conversation.agentJoined,
+        replyState:c.conversation.replyState??null,
+        staffReplyDueAt:c.conversation.staffReplyDueAt??null,
         assignedUserName: c.conversation.assignedUserName,
         publicRef: c.conversation.publicRef,
+        idleWarningAt:c.conversation.idleWarningAt??null,
+        idleEndsAt:c.conversation.idleEndsAt??null,
+        idleEndedAt:c.conversation.idleEndedAt??null,
+        ...(c.conversation.transportPlan?{transportPlan:c.conversation.transportPlan,transportPlanLink:c.conversation.transportPlanLink}:{}),
       },
       messages: c.messages.map((m) => ({
         id: m.id,
@@ -460,6 +502,10 @@ async function dispatch(
     });
   }
   if (route === "page") {
+    if (b.action === "assistance") {
+      allowFields(b, ["action", "version", "enabled"]);
+      return setOwnerPageAssistance(ownerPagePort, actor, bid, b.version, b.enabled);
+    }
     allowFields(b, ["action", "version", "content"]);
     if (b.action !== "start" && b.action !== "save")
       throw new MobileError("Invalid page action.");
@@ -552,9 +598,11 @@ async function dispatch(
 export async function handleMobileRequest(
   request: Request,
   path: string[],
-  dependencies?: { identity?: NativeIdentityPort; invalidate?: () => void },
+  dependencies?: { identity?: NativeIdentityPort; invalidate?: () => void; market?: typeof getMarketplaceDiscoveryView; transportPlan?:TransportPlanHttpPorts; tracking?:TrackingHttpPorts },
 ) {
   let response: Response;
+  const planRoute=path.length===1&&path[0]==='transport-plan';
+  const trackingRoute=path[0]==='tracking';
   const origin = request.headers.get("origin");
   const cors = nativeCors(origin);
   try {
@@ -564,10 +612,17 @@ export async function handleMobileRequest(
       if (!cors) throw new MobileError("Origin not allowed.", 403);
       response = new Response(null, { status: 204 });
     } else {
-      const value = await dispatch(request, path, dependencies?.identity);
+      const value = trackingRoute
+        ? await (dependencies?.tracking?createTrackingHttpHandler(dependencies.tracking,'native'):trackingHttpHandler('native'))(request,path.slice(1))
+        : planRoute
+        ? await createTransportPlanHttpHandler(dependencies?.transportPlan||{
+          read:async()=>{throw new TransportPlanError('Transport plan was not found.','not_found');},
+          allow:async source=>(await consumeRuntimeRateLimit('transport-plan:'+hashPrivateValue(requestIpFromHeaders(source.headers)),600,60_000)).allowed,
+        })(request)
+        : await dispatch(request, path, dependencies?.identity, dependencies?.market);
       response =
         value instanceof Response ? value : json(value ?? { saved: true });
-      if(request.method==='POST' && (path[0]==='inquiries'||path[0]==='transport'||path[0]==='buying'||path[0]==='owner'&&path[1]==='support')){
+      if(request.method==='POST' && (path[0]==='transport'||path[0]==='buying'||path[0]==='owner'&&['support','transport'].includes(path[1]))){
         try{scheduleAttentionDelivery();}catch{/* Direct adapter tests have no Next request lifecycle; scheduled delivery remains durable. */}
       }
       if (
@@ -606,14 +661,20 @@ export async function handleMobileRequest(
       status,
     );
   }
+  if(planRoute||trackingRoute){
+    response.headers.set('Cache-Control','private, no-store');
+    response.headers.set('Referrer-Policy','no-referrer');response.headers.set('X-Robots-Tag','noindex, nofollow, noarchive');
+    if(!response.headers.has('Vary'))response.headers.set('Vary','Authorization');
+  }
   if (cors) {
     response.headers.set("Access-Control-Allow-Origin", origin!);
-    response.headers.set("Vary", "Origin");
-    response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    response.headers.set("Vary", planRoute||trackingRoute?`${response.headers.get('Vary')}, Origin`:"Origin");
+    response.headers.set("Access-Control-Allow-Methods", planRoute?"GET, HEAD, OPTIONS":"GET, POST, OPTIONS");
     response.headers.set(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, X-Suqpage-Buying-Session",
+      trackingRoute?"Content-Type, Authorization, If-None-Match":planRoute?"Authorization, If-None-Match":"Content-Type, Authorization, X-Suqpage-Buying-Session",
     );
+    if(planRoute||trackingRoute)response.headers.set('Access-Control-Expose-Headers','ETag');
   }
-  return response;
+  return planRoute&&request.method==='HEAD'?new Response(null,{status:response.status,headers:response.headers}):response;
 }

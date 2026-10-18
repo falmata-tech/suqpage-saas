@@ -3,6 +3,7 @@ import {File,Paths} from 'expo-file-system';
 import {randomUUID} from 'expo-crypto';
 import {preparePrivateImage,type PrivateImageResource} from './private-image';
 import { storefrontAccent } from "../../../lib/storefront-accent";
+import { PLATFORM_BRAND } from "../../../lib/brand";
 import React from "react";
 import {
   View,
@@ -48,6 +49,9 @@ export function Icon({
     down: "m5 9 7 7 7-7",
     menu: "M4 5h16 M4 12h16 M4 19h16",
     grid: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
+    globe: "M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0 M2 12h20 M12 2c-5 5-5 15 0 20 M12 2c5 5 5 15 0 20",
+    package: "m3 7 9-5 9 5v10l-9 5-9-5V7 M3 7l9 5 9-5 M12 12v10 M7 4l10 5",
+    tag: "M3 3h8l10 10-8 8L3 11V3 M7 7h.01",
     pin: "M12 22s8-8 8-13a8 8 0 1 0-16 0c0 5 8 13 8 13 M15 9a3 3 0 1 1-6 0 3 3 0 0 1 6 0",
     panel: "M3 3h18v18H3z M8 3v18 M12 9l3 3-3 3",
     minus: "M4 12h16",
@@ -82,26 +86,13 @@ export function Icon({
 }
 export function Brand() {
   return (
-    <View style={[s.row, { gap: 4 }]}>
+    <View style={s.row}>
       <Image
-        source={require("../assets/icon.png")}
-        style={{ width: 28, height: 32 }}
+        source={require("../assets/mirtpage-wordmark.png")}
+        accessibilityLabel={PLATFORM_BRAND.name}
+        resizeMode="contain"
+        style={{ width: 28 * PLATFORM_BRAND.wordmark.width / PLATFORM_BRAND.wordmark.height, height: 28 }}
       />
-      <Text
-        style={{
-          fontWeight: "900",
-          fontSize: 22,
-          color: colors.ink,
-          letterSpacing: -0.7,
-          fontFamily: Platform.select({
-            ios: "Helvetica Neue",
-            android: "sans-serif",
-            web: "Arial",
-          }),
-        }}
-      >
-        suq<Text style={{ color: colors.brand }}>page</Text>
-      </Text>
     </View>
   );
 }
@@ -110,14 +101,17 @@ export function Copy({
   muted = false,
   big = false,
   heading = false,
+  selectable = false,
 }: {
   children: React.ReactNode;
   muted?: boolean;
   big?: boolean;
   heading?: boolean;
+  selectable?: boolean;
 }) {
   return (
     <Text
+      selectable={selectable}
       accessibilityRole={heading ? "header" : undefined}
       style={{
         color: muted ? colors.muted : colors.ink,
@@ -137,6 +131,7 @@ export function Button({
   secondary = false,
   disabled = false,
   icon,
+  wrapLabel=false,
 }: {
   accentColor?: string;
   label: string;
@@ -144,6 +139,7 @@ export function Button({
   secondary?: boolean;
   disabled?: boolean;
   icon?: string;
+  wrapLabel?:boolean;
 }) {
   const accent = storefrontAccent(accentColor);
   const textColor = accent ? secondary ? accent.ink : accent.on : secondary ? colors.ink : "white";
@@ -161,7 +157,7 @@ export function Button({
       ]}
     >
       {icon ? <Icon name={icon} color={textColor} /> : null}
-      <Text style={[s.buttonText, { color: textColor }]}>
+      <Text style={[s.buttonText, { color: textColor },wrapLabel?{flexShrink:1}:null]}>
         {label}
       </Text>
     </Pressable>
@@ -171,18 +167,22 @@ export function Chip({
   label,
   onPress,
   selected = false,
+  minHeight = 42,
 }: {
   label: string;
   onPress: () => void;
   selected?: boolean;
+  minHeight?: number;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
+      aria-pressed={selected}
       onPress={onPress}
       style={[
         s.chip,
+        {minHeight},
         selected && { backgroundColor: colors.soft, borderColor: colors.brand },
       ]}
     >
@@ -197,12 +197,12 @@ export function Chip({
     </Pressable>
   );
 }
-export function Field({ label, ...props }: TextInputProps & { label: string }) {
+export function Field({ label, hideLabel=false, ...props }: TextInputProps & { label: string; hideLabel?:boolean }) {
   return (
     <View style={{ gap: 6 }}>
-      <Text style={{ fontWeight: "600", color: colors.ink, fontSize: 14 }}>
+      {!hideLabel&&<Text style={{ fontWeight: "600", color: colors.ink, fontSize: 14 }}>
         {label}
-      </Text>
+      </Text>}
       <TextInput
         accessibilityLabel={label}
         placeholderTextColor={colors.muted}

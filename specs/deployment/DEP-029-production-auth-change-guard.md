@@ -2,9 +2,9 @@
 id: DEP-029
 title: Guarded production Auth configuration changes
 status: done
-related: [DEP-032, DEP-028, ADR-0014]
+related: [BE-059, DEP-049, DEP-048, DEP-032, DEP-028, ADR-0014]
 owners: [operations, security]
-last_updated: 2026-09-21
+last_updated: 2026-10-18
 change_level: L3
 ---
 
@@ -19,16 +19,19 @@ fail-closed plan/apply command, not the Supabase configuration-push command.
 
 ## Scope and contracts
 
-- One explicitly named production project and its exact HTTPS origin are pinned
-  in the tool. There is no linked-project, working-directory, Preview, or local
-  configuration fallback. No provider writes occur during this implementation.
-  S18 prepares the owner's verified chosen origin `https://suqpage.com`; using the
-  new allowlist does not claim DNS/TLS cutover. The old hosted origin is no longer
-  an admissible new configuration value. Apply waits for domain and access readiness.
-- Plan is read-only remotely. It validates an explicit JSON patch, checks project
+- The exact production project is pinned. S145 local support under BE-059 admits
+  only legacy Suqpage primary/callback, dual Suqpage primary, and dual MirtPage
+  primary. Both dual policies contain the exact HTTPS apex callbacks in old/new
+  order. Allowed edges are legacy→dual-old-primary→dual-new-primary and the
+  separately reviewed reverse primary edge. No callback removal, wildcard, www,
+  port, unrelated host, Preview or linked-directory fallback. This local guard
+  support does not claim DNS/TLS readiness or authorize any hosted write.
+- Plan is read-only remotely. It validates an explicit settings patch or finite origin transition, checks project
   identity/health, and retains the provider-returned configuration and exact patch
   in an exclusive private local plan before returning its review digest.
-- Only exact production URL/callback, safe email-code settings, the reviewed
+- An origin transition changes only `site_url` and `uri_allow_list` together.
+  Legacy settings patches cannot write either field or mix a transition with mail,
+  OTP or provider fields. Existing safe email-code settings, the reviewed
   repository email templates/subjects, and security-enforcing boolean values are
   permitted. S17 also permits the exact Suqpage sender display name and reviewed
   repository subjects/content for all six Auth and seven security emails. It does
@@ -69,8 +72,10 @@ fail-closed plan/apply command, not the Supabase configuration-push command.
   to allow an interactive macOS permission response; token and
   subprocess errors never appear in output or files. Existing Go keyring base64
   encoding is normalized and malformed/oversized tokens fail closed.
-  Version-2 plans bind the selected credential source and a protected token
-  fingerprint. A switched credential/source or old unbound plan cannot apply.
+  Version-3 plans bind the selected credential source and protected token
+  fingerprint, operation kind, and any exact source/target origin phases. A
+  switched credential/source cannot apply; old version-2 plans are refused before
+  provider reads rather than silently reinterpreted.
   No token bytes are retained in plans. Project/health checks, exact allowlist,
   protected backup, owner digest review, expiry, drift checks, one-use attempts,
   non-retrying write and readback remain required.
@@ -141,6 +146,15 @@ raw provider command. Existing DEP-028 provider restoration remains pending.
 
 Scope, target, prohibited edits, failure paths, tests, privacy, and rollout are
 specified. No new hosted provider, paid service, or application feature is added.
+
+## Current local S145 extension evidence
+
+`npm run test:production-auth-config` passes62 injected-port/credential cases;
+scoped strict types and whitespace pass. Positive finite transitions, illegal/
+mixed/retirement/tampered policies, version2 rejection before reads, and existing
+credential/backup/drift/attempt/readback failures are covered. Full current-source
+integration/rollout remains pending; no hosted plan or provider write occurred.
+Earlier dated rollout evidence below applies only to its own historical source.
 
 ## Evidence
 

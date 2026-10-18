@@ -1,4 +1,4 @@
-export type KnownPlace = { id: string; name: string; localName: string; kind: string; region: string; latitude: number; longitude: number };
+export type KnownPlace = { id: string; name: string; localName: string; kind: string; region: string; latitude: number; longitude: number; countryCode?: string; aliases?: readonly string[] };
 export const PLACE_SEARCH_LIMIT = 8;
 const normalized = (value: string) => value.normalize('NFKC').toLocaleLowerCase('en').trim().replace(/\s+/g, ' ');
 export function searchKnownPlaces(places: readonly KnownPlace[], query: string): KnownPlace[] {
@@ -6,7 +6,7 @@ export function searchKnownPlaces(places: readonly KnownPlace[], query: string):
   const needle = normalized(query);
   if (needle.length < 2) return [];
   const matches = places.flatMap(place => {
-    const names = [normalized(place.name), normalized(place.localName)];
+    const names = [normalized(place.name), normalized(place.localName), ...(place.aliases || []).map(normalized)];
     const text = `${names.join(' ')} ${normalized(place.region)}`;
     if (!needle.split(' ').every(part => text.includes(part))) return [];
     const score = names.includes(needle) ? 0 : names.some(name => name.startsWith(needle)) ? 1 : 2;

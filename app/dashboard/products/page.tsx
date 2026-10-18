@@ -8,6 +8,7 @@ import ProductUpkeepList from "@/components/ProductUpkeepList";
 import { requireUser } from "@/lib/auth";
 import { resolveProductBusiness } from "@/lib/dashboard";
 import { listProductsPage } from "@/lib/scalable-queries";
+import {productListView,productEditorHref} from '@/lib/product-workspace-navigation';
 
 export const dynamic = "force-dynamic";
 
@@ -28,24 +29,25 @@ export default async function ProductsPage({
   const business = await resolveProductBusiness(user, query.business);
   if (!business) return null;
   const products = await listProductsPage(business.id, query, true);
+  const listOrigin=productListView({q:query.q,page:products.page});
   return (
     <DashboardShell user={user} business={business}>
       <div className="navigation-trail">
         <nav aria-label={t("Breadcrumb")}>
-          <Link href={`/dashboard?business=${business.id}`}>{t("Overview")}</Link>
+          <Link href={user.access_role==='client'?'/dashboard/profile':`/dashboard?business=${business.id}`}>{t(user.access_role==='client'?"Account":"Overview")}</Link>
           <span aria-hidden="true">/</span>
-          <span>{t("Products & services")}</span>
+          <span>{t("Products")}</span>
         </nav>
       </div>
       <div className="dashboard-head">
         <div>
-          <h1>{t("Products & services")}</h1>
+          <h1>{t("Products")}</h1>
         </div>
-        <Link
+        <div className="inline-actions">{user.access_role!=='client'?<Link className="btn secondary" href={`/dashboard/catalog?business=${business.id}`}>{t("Categories")}</Link>:null}<Link
           className="btn brand"
-          href={`/dashboard/products/new?business=${business.id}`}
+          href={productEditorHref('new',business.id,listOrigin)}
         >
-          {t("Add product or service")}</Link>
+          {t("Add product")}</Link></div>
       </div>
       {query.saved ? (
         <p className="notice">{t("Item saved.")}</p>
@@ -59,7 +61,7 @@ export default async function ProductsPage({
       />
       {products.items.length ? (
         <>
-          <ProductUpkeepList products={products.items} businessId={business.id} />
+          <ProductUpkeepList products={products.items} businessId={business.id} listOrigin={listOrigin}/>
           <PaginationNav
             result={products}
             pathname="/dashboard/products"
@@ -68,13 +70,13 @@ export default async function ProductsPage({
         </>
       ) : (
         <section className="empty-state">
-          <h2>{query.q ? t("No matching items") : t("No products or services yet")}</h2>
-          <p>{query.q ? t("Try another name or category.") : t("Add the first product or service to your page.")}</p>
+          <h2>{query.q ? t("No matching items") : t("No products yet")}</h2>
+          <p>{query.q ? t("Try another name or category.") : t("Add the first product to your page.")}</p>
           <Link
             className="btn brand"
-            href={`/dashboard/products/new?business=${business.id}`}
+            href={productEditorHref('new',business.id,listOrigin)}
           >
-            {t("Add first product or service")}</Link>
+            {t("Add first product")}</Link>
         </section>
       )}
     </DashboardShell>

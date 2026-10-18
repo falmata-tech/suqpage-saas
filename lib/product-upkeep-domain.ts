@@ -3,7 +3,7 @@ import { parseProductMedia, type ProductMedia } from "./product-media";
 import type { Product } from "./types";
 import {
   normalizeQuantityMode,
-  offeringKinds,
+  isActiveProductKind,
   quantityModes,
   type OfferingKind,
   type QuantityMode,
@@ -20,6 +20,7 @@ export type ProductImageAction = "keep" | "remove" | "replace";
 export type ProductOptionInput = { name: string; values: string[] };
 
 export type BasicProductCommand = {
+  preserveOfferingKind?: boolean;
   media?: ProductMedia[];
   preserveMetadata?: boolean;
   updateListingState?: boolean;
@@ -165,9 +166,10 @@ export function parseBasicProductCommand(
   if (!availabilityValues.has(availability)) {
     throw new ProductUpkeepError("Choose a valid availability.");
   }
-  const offeringKind = text(raw.offeringKind, 40) as OfferingKind;
-  if (!offeringKinds.includes(offeringKind)) {
-    throw new ProductUpkeepError("Choose a valid offering type.");
+  const omittedOfferingKind = raw.offeringKind === undefined;
+  const offeringKind = omittedOfferingKind ? "standard_product" : text(raw.offeringKind, 40);
+  if (!isActiveProductKind(offeringKind)) {
+    throw new ProductUpkeepError("Choose Ready to ship or Made to order for this product.", 400, "invalid_product_kind");
   }
   const submittedQuantityMode = text(raw.quantityMode, 20) as QuantityMode;
   if (!quantityModes.includes(submittedQuantityMode)) {
@@ -207,6 +209,7 @@ export function parseBasicProductCommand(
     ...(raw.optionGroups !== undefined ? { optionGroups: parseProductOptions(raw.optionGroups) } : {}),
     ...(raw.isPublished !== undefined ? { isPublished: raw.isPublished as boolean } : {}),
     kind,
+    ...(kind === "update" && omittedOfferingKind ? { preserveOfferingKind: true } : {}),
     businessId: positiveInteger(raw.businessId, "Business"),
     productId,
     expectedContentVersion: positiveInteger(

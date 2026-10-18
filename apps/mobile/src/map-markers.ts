@@ -1,62 +1,40 @@
-import {pointInMapViewport} from '../../../lib/map/map-display-location';
-import Supercluster from "supercluster";
+import {mapClusterIndex,mapClusterMarkers,mapExposedGroup,MAP_GROUP_DEFAULT_CAPACITY,type MapClusterBounds} from '../../../lib/map/map-clustering';
 import type { MapShop, NearbyGroup } from "@suqpage/contracts";
 import { shopCoordinate } from "./native-map-model";
 
-type Counts = { featured: number; live: number };
-type Point = Counts & { shopId: number };
-export type MapBounds = [number, number, number, number];
+export type MapBounds = MapClusterBounds;
 export type MarkerItem = {
   key: string;
   center: [number, number];
-  kind: "shop" | "cluster" | "nearby";
+  anchor: [number, number];
+  kind: "shop" | "cluster" | "nearby" | "aggregate";
+  expansionZoom?: number;
   count: number;
   presence: "featured" | "live" | "";
   shop?: MapShop;
   shops?: MapShop[];
-  expansionZoom?: number;
 };
-export function markerIndex(shops: MapShop[]) {
-  const index = new Supercluster<Point, Counts>({ radius: 52, maxZoom: 13, minPoints: 2,
-    map: p => ({ featured: p.featured, live: p.live }),
-    reduce: (a, b) => { a.featured += b.featured; a.live += b.live; } });
-  const seen = new Set<number>();
-  index.load(shops.flatMap(shop => {
+export function markerIndex(shops: MapShop[],capacity=MAP_GROUP_DEFAULT_CAPACITY) {
+  return mapClusterIndex(shops.flatMap(shop => {
     const coordinates = shopCoordinate(shop);
-    if (!coordinates || seen.has(shop.id)) return [];
-    seen.add(shop.id);
-    return [{ type: "Feature" as const, properties: { shopId: shop.id,
-      featured: shop.isFeatured ? 1 : 0, live: shop.isLive && !shop.isFeatured ? 1 : 0 },
-      geometry: { type: "Point" as const, coordinates } }];
-  }));
-  return index;
+    return coordinates?[{id:shop.id,longitude:coordinates[0],latitude:coordinates[1],featured:shop.isFeatured,live:shop.isLive}]:[];
+  }),capacity);
 }
-function presence(shops: MapShop[]): MarkerItem["presence"] {
-  return shops.some(s => s.isFeatured) ? "featured" : shops.some(s => s.isLive) ? "live" : "";
-}
-export function visibleMarkers(index: ReturnType<typeof markerIndex>, shops: MapShop[], groups: NearbyGroup[], bounds: MapBounds, zoom: number): MarkerItem[] {
-  const byId = new Map(shops.filter(s => shopCoordinate(s)).map(s => [s.id, s]));
-  const inside = ([x, y]: [number, number]) => pointInMapViewport(x,y,bounds);
-  const item = (shop: MapShop): MarkerItem => ({ key: `shop-${shop.id}`, kind: "shop", center: shopCoordinate(shop)!, count: 1, shop, presence: presence([shop]) });
-  if (zoom < 14) return index.getClusters(bounds, Math.floor(zoom)).flatMap(feature => {
-    const p = feature.properties;
-    if ("cluster_id" in p) return [{ key: `cluster-${p.cluster_id}`, kind: "cluster" as const,
-      center: feature.geometry.coordinates as [number, number], count: p.point_count,
-      presence: p.featured ? "featured" as const : p.live ? "live" as const : "" as const,
-      expansionZoom: Math.min(14, Math.max(zoom + 1, index.getClusterExpansionZoom(p.cluster_id))) }];
-    const shop = byId.get(p.shopId);
-    return shop ? [item(shop)] : [];
+export function visibleMarkers(index: ReturnType<typeof markerIndex>, shops: MapShop[], _groups: NearbyGroup[], bounds: MapBounds, zoom: number): MarkerItem[] {
+  const byId = new Map<number,MapShop>();
+  for(const shop of shops)if(!byId.has(shop.id)&&shopCoordinate(shop))byId.set(shop.id,shop);
+  return mapClusterMarkers(index,bounds,zoom).flatMap(marker=>{
+    const members=marker.ids.flatMap(id=>byId.has(id)?[byId.get(id)!]:[]);
+    if(!members.length)return [];
+    return [{key:marker.key,kind:marker.kind,center:marker.center,anchor:marker.anchor,count:members.length,...(marker.expansionZoom===undefined?{}:{expansionZoom:marker.expansionZoom}),
+      presence:members.some(s=>s.isFeatured)?'featured' as const:members.some(s=>s.isLive)?'live' as const:'' as const,
+      ...(marker.kind==='shop'?{shop:members[0]}:{shops:members})}];
   });
-  const grouped = new Set<number>();
-  const nearby: MarkerItem[] = [];
-  for (const group of groups) {
-    const members = [...new Set(group.showroomIds)].flatMap(id => byId.get(id) ? [byId.get(id)!] : []);
-    if (members.length < 2 || !Number.isFinite(group.latitude) || !Number.isFinite(group.longitude)) continue;
-    members.forEach(s => grouped.add(s.id));
-    const center: [number, number] = [group.longitude, group.latitude];
-    if (inside(center)) nearby.push({ key: `nearby-${group.key}`, kind: "nearby", center, count: members.length, shops: members, presence: presence(members) });
-  }
-  return [...nearby, ...[...byId.values()].filter(s => !grouped.has(s.id) && inside(shopCoordinate(s)!)).map(item)];
+}
+export function currentGroupMembers(index:ReturnType<typeof markerIndex>,shops:MapShop[],ids:readonly number[],normalizedZoom:number):MapShop[]{
+  const group=mapExposedGroup(index,ids,normalizedZoom);if(!group)return [];
+  const members=group.ids.flatMap(id=>{const shop=shops.find(item=>item.id===id);return shop?[shop]:[];});
+  return members.length===group.count?members:[];
 }
 export function markerNameLines(name: string): string {
   const words = name.trim().split(/\s+/).flatMap(w => Array.from(w).length > 13 ? (w.match(/.{1,13}/gu) || [w]) : [w]);

@@ -60,14 +60,22 @@ export class PostgresCatalogRepository {
     if (!business) return undefined;
 
     const activeClause = includeDrafts ? "" : "AND is_active=1";
-    const publishedClause = includeDrafts ? "" : "AND p.is_published=1";
+    const publishedClause = includeDrafts ? "" : "AND p.is_published=1 AND p.offering_kind<>'service'";
+    // Retire service-only navigation metadata without discarding deliberately
+    // empty showroom sections or anything from authorized private management.
+    const productSection = (column: "collection_id" | "category_id", alias: string) => includeDrafts ? "" : `AND NOT (
+      EXISTS(SELECT 1 FROM products retired WHERE retired.business_id=${alias}.business_id
+        AND retired.${column}=${alias}.id AND retired.is_published=1 AND retired.offering_kind='service')
+      AND NOT EXISTS(SELECT 1 FROM products physical WHERE physical.business_id=${alias}.business_id
+        AND physical.${column}=${alias}.id AND physical.is_published=1 AND physical.offering_kind<>'service')
+    )`;
     const [collections, categories, products] = await Promise.all([
       this.runner.query<Collection>(
-        `SELECT * FROM collections WHERE business_id=? ${activeClause} ORDER BY sort_order,name`,
+        `SELECT collection.* FROM collections collection WHERE collection.business_id=? ${activeClause} ${productSection("collection_id", "collection")} ORDER BY sort_order,name`,
         [businessId],
       ),
       this.runner.query<Category>(
-        `SELECT * FROM categories WHERE business_id=? ${activeClause} ORDER BY sort_order,name`,
+        `SELECT category.* FROM categories category WHERE category.business_id=? ${activeClause} ${productSection("category_id", "category")} ORDER BY sort_order,name`,
         [businessId],
       ),
       this.runner.query<Product>(`

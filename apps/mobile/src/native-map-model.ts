@@ -1,6 +1,7 @@
 import type { FeatureCollection, Point } from 'geojson';
 import type { MapShop } from '@suqpage/contracts';
 import { mapDisplayLocation } from '../../../lib/map/map-display-location';
+import {MAP_MAX_ZOOM} from '../../../lib/map/map-clustering';
 
 export const initialMapView = {center: [39.7, 9.03] as [number, number], zoom: 6};
 export const osmStyle = {
@@ -27,6 +28,6 @@ export function shopFeatures(shops: MapShop[]): FeatureCollection<Point, {shopId
 export function selectedMapShop(id: unknown, shops: MapShop[]): MapShop | undefined {
   return typeof id === 'number' ? shops.find(shop => shop.id === id && shopCoordinate(shop) !== null) : undefined;
 }
-export function nextMapZoom(current: number, direction: 1 | -1): number {
-  return Math.max(1, Math.min(19, (Number.isFinite(current) ? current : 6) + direction));
+export function nextMapZoom(current: number, direction: 1 | -1, maximum=MAP_MAX_ZOOM): number {
+  return Math.max(1, Math.min(maximum, (Number.isFinite(current) ? current : 6) + direction));
 }

@@ -5,6 +5,7 @@ import { getDb, closeDbForTests } from './testing/postgres-fixture';
 import { GET, POST } from '../app/api/public-support/route';
 import { handleMobileRequest } from '../lib/mobile/router';
 import * as support from '../lib/support';
+import {joinAssignedSupportConversation} from './testing/support-join';
 import type { SessionUser } from '../lib/types';
 async function main() {
  const db=await getDb();process.env.NEXT_PUBLIC_APP_URL='http://127.0.0.1:3102';
@@ -34,6 +35,7 @@ async function main() {
   await assert.rejects(()=>support.getSupportConversation(ownerHelp,id));
   await support.saveTransportHandoff(dispatcher,id,{company:'Private Carrier',contact:'private carrier contact',previousId:0});
   await support.postSupportMessage(dispatcher,id,{audience:'note',message:'Private commission agreement',idempotencyKey:crypto.randomUUID()});
+  await joinAssignedSupportConversation(admin,id);
   await support.postSupportMessage(dispatcher,id,{audience:'reply',message:'When should we collect?',idempotencyKey:crypto.randomUUID()});
   const publicView=await request();assert.equal(publicView.data.conversation.messages.length,2);assert.ok(!JSON.stringify(publicView).includes('Private'));
   const followup={action:'message',publicRef,message:'Tomorrow morning',idempotencyKey:crypto.randomUUID()};
@@ -50,10 +52,11 @@ async function main() {
   await assert.rejects(()=>db.prepare("UPDATE support_conversations SET status='open' WHERE id=?").run(id));
   await support.reopenSupportConversation(dispatcher,id);assert.equal((await request()).data.conversation.status,'open');
   const native=await handleMobileRequest(new Request('https://suqpage.com/api/mobile/v1/transport',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...draft,category:undefined,idempotencyKey:crypto.randomUUID()})}),['transport']);
-  assert.equal(native.status,200);const n=await native.json();assert.equal(n.conversation.category,'shipment_observation');assert.equal(n.conversation.status,'waiting','dispatcher capacity enforced');
-  const nget=await handleMobileRequest(new Request('https://suqpage.com/api/mobile/v1/transport',{headers:{'X-Suqpage-Buying-Session':n.token}}),['transport']);assert.equal(nget.status,200);
+  assert.equal(native.status,200);const n=await native.json();assert.equal(n.conversation.category,'shipment_observation');assert.equal(n.conversation.status,'open','Legacy numerical limits do not block another transport request');assert.equal(n.conversation.assignedUserName,null,'Native clients do not announce an internal assignment before Join');
+  await joinAssignedSupportConversation(admin,n.conversation.id);
+  const nget=await handleMobileRequest(new Request('https://suqpage.com/api/mobile/v1/transport',{headers:{'X-Suqpage-Buying-Session':n.token}}),['transport']);assert.equal(nget.status,200);assert.equal((await nget.json()).conversation.assignedUserName,dispatcher.name);
   const wrong=await handleMobileRequest(new Request('https://suqpage.com/api/mobile/v1/buying',{headers:{'X-Suqpage-Buying-Session':n.token}}),['buying']);assert.equal(wrong.status,404);
-  console.log('PASS live transport web/native APIs, retry, route persistence, scoped dispatcher assignment/capacity, private carrier/commission notes, replies, token isolation, ending, history/resolution and reopening.');
+  console.log('PASS live transport web/native APIs, retry, route persistence, scoped unlimited dispatcher assignment, private carrier/commission notes, replies, token isolation, ending, history/resolution and reopening.');
  } finally {await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

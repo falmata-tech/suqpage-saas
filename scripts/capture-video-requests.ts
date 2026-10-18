@@ -1,21 +1,29 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import {chromium,expect} from '@playwright/test';
+import path from 'node:path';
+import {chromium,expect,type BrowserContext,type BrowserContextOptions,type Page} from '@playwright/test';
+import {createRequire} from 'node:module';
 import {createClient} from '@supabase/supabase-js';
 import {createServerClient,type CookieOptions} from '@supabase/ssr';
 import {createPostgresPool,postgresRuntimeConfig} from '../lib/postgres-runtime';
 import {curatedManifestForLegacyDesign} from '../lib/showroom-manifests';
 import {STARTER_VIDEO_REF,starterPage} from '../lib/business-starter';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
-import {updateSupportAgentSetting,reassignSupportConversation} from '../lib/support';
+import {updateSupportAgentSetting,reassignSupportConversation,getSupportConversation} from '../lib/support';
 import type {SessionUser} from '../lib/types';
+type MapTileFixture={fixtureId:string;servedCount():number;externalCount():number;assertNoExternalRequests():void};
+const {installMapTileFixture}=createRequire(path.resolve('package.json'))('./scripts/testing/map-tile-fixture.mjs') as {
+ installMapTileFixture(context:BrowserContext):Promise<MapTileFixture>;
+};
 async function main(){
  const base=process.env.SUQPAGE_TEST_BASE_URL||'http://127.0.0.1:3102',provider=new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!),target=new URL(process.env.SUQPAGE_POSTGRES_URL!);
  assert.equal(new URL(base).hostname,'127.0.0.1');assert.equal(provider.hostname,'127.0.0.1');assert.ok(['54321','56321'].includes(provider.port));assert.equal(target.hostname,'127.0.0.1');assert.ok(['54322','56322'].includes(target.port));
  const pool=createPostgresPool(postgresRuntimeConfig({SUQPAGE_POSTGRES_URL:target.href})!);
  const auth=createClient(provider.origin,process.env.SUQPAGE_SUPABASE_SERVICE_ROLE_KEY!,{auth:{persistSession:false,autoRefreshToken:false}});
  const browser=await chromium.launch(),ids:number[]=[],providerIds:string[]=[],dir=process.env.SUQPAGE_TEST_SCREENSHOT_DIR||'.local/video-request-review';fs.mkdirSync(dir,{recursive:true});let businessId:number|undefined;
+ const tileFixtures:MapTileFixture[]=[];
+ async function fixtureContext(options:BrowserContextOptions={}){const context=await browser.newContext({...options,serviceWorkers:'block'});tileFixtures.push(await installMapTileFixture(context));return context;}
  const handle=`video-review-${crypto.randomBytes(5).toString('hex')}`;
  const tikTok=process.env.SUQPAGE_TEST_PRODUCT_VIDEO_PROVIDER==='tiktok';
  const approvedUrl=tikTok?'https://www.tiktok.com/@scout2015/video/6718335390845095173':'https://www.youtube.com/watch?v=aqz-KE-bpKQ';
@@ -29,7 +37,7 @@ async function main(){
   const link=await auth.auth.admin.generateLink({type:'magiclink',email});assert.ok(!link.error&&link.data.properties.email_otp);
   const cookies:Array<{name:string;value:string;options:CookieOptions}>=[];
   const client=createServerClient(provider.origin,process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,{cookies:{getAll:()=>[],setAll:v=>{cookies.push(...v);}}});assert.ok(!(await client.auth.verifyOtp({email,token:link.data.properties.email_otp,type:'email'})).error);
-  const context=await browser.newContext();context.setDefaultNavigationTimeout(30000);context.setDefaultTimeout(15000);await context.addCookies(cookies.map(({name,value})=>({name,value,url:base,sameSite:'Lax' as const})));return {page:await context.newPage(),id};
+  const context=await fixtureContext();context.setDefaultNavigationTimeout(30000);context.setDefaultTimeout(15000);await context.addCookies(cookies.map(({name,value})=>({name,value,url:base,sameSite:'Lax' as const})));return {page:await context.newPage(),id};
  }
  try{
   businessId=Number((await pool.query("INSERT INTO businesses(handle,name,design_key,design_manifest_json,status,hero_image_path,process_video_ref) VALUES($1,'Video review business','composition',$2,'active',$3,$4) RETURNING id",[handle,JSON.stringify(curatedManifestForLegacyDesign('novatech')),starterPage.heroImage,STARTER_VIDEO_REF])).rows[0].id);
@@ -54,8 +62,22 @@ async function main(){
   await owner.page.getByRole('button',{name:'Send video request',exact:true}).click();await owner.page.waitForURL(/\/dashboard\/support\/\d+/);
   const id=Number(new URL(owner.page.url()).pathname.split('/').at(-1));
   await reassignSupportConversation(staffUser,id,staff.id);
+  const joinForReview=async(page:Page,conversationId:number)=>{
+   const assigned=(await getSupportConversation(staffUser,conversationId)).conversation;
+   assert.equal(assigned.assignedUserId,staff.id,'Only the current assignee can join for a public review reply');
+   assert.equal(assigned.agentJoined,false,'Opening the review never announces a staff Join');
+   await expect(page.getByRole('button',{name:'Join chat',exact:true})).toBeVisible();
+   await expect(page.getByRole('button',{name:'Approve video',exact:true})).toHaveCount(0);
+   await page.getByRole('button',{name:'Join chat',exact:true}).click();
+   await expect(page.getByLabel('Reply',{exact:true})).toBeVisible();
+   const joined=(await getSupportConversation(staffUser,conversationId)).conversation;
+   assert.equal(joined.assignedUserId,staff.id);assert.equal(joined.agentJoined,true,'The real Join action saves current-assignee acceptance');
+  };
+  const showReview=async()=>{if((staff.page.viewportSize()?.width??1440)<=720){const details=staff.page.getByRole('link',{name:'Details',exact:true});await expect(details).toBeVisible();await details.click();await expect(staff.page.getByRole('link',{name:'Back to conversation',exact:true})).toBeVisible();}await expect(staff.page.getByLabel('Reply to owner')).toBeVisible();};
+  await staff.page.goto(`${base}/dashboard/support/${id}`);await joinForReview(staff.page,id);
   for(const width of [1440,390]){
    mark(`staff review ${width}`);await staff.page.setViewportSize({width,height:900});await staff.page.goto(`${base}/dashboard/support/${id}`);
+   await showReview();
    await expect(staff.page.getByRole('button',{name:'Approve video',exact:true})).toBeEnabled();
    await expect(staff.page.locator('input[name=confirmed]')).toHaveCount(0);
    await staff.page.getByLabel('Video link',{exact:true}).fill(approvedUrl);
@@ -68,7 +90,7 @@ async function main(){
   await expect(staff.page.getByLabel('Video link',{exact:true})).toHaveCount(0);
   await owner.page.reload();await expect(owner.page.getByText(/Your product video is ready\./)).toBeVisible();
   assert.equal((await pool.query('SELECT video_ref FROM products WHERE id=$1',[productId])).rows[0].video_ref,approvedRef);
-  mark('public gallery');const visitor=await browser.newPage({viewport:{width:390,height:900}});
+  mark('public gallery');const visitor=await (await fixtureContext({viewport:{width:390,height:900}})).newPage();
   // Verify Suqpage selects the approved embed; do not depend on external playback.
   visitor.setDefaultNavigationTimeout(30000);visitor.setDefaultTimeout(15000);
   await visitor.route('https://www.youtube-nocookie.com/**',route=>route.fulfill({status:200,body:''}));
@@ -91,7 +113,7 @@ async function main(){
     assert.ok(await visitor.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await gallery.scrollIntoViewIfNeeded();await visitor.screenshot({path:`${dir}/web-inline-${width}.png`,style:'nextjs-portal {visibility:hidden}'});await gallery.getByRole('button',{name:'Photo 1',exact:true}).click();
    }
    mark('retained product editor');await owner.page.goto(`${base}/dashboard/products/${productId}`);await expect(owner.page.getByRole('textbox',{name:'Video link 2',exact:true})).toHaveValue('https://www.tiktok.com/player/v1/6718335390845095173');
-   mark('Expo inline provider fixture');const context=await browser.newContext({viewport:{width:390,height:844}}),mobile=await context.newPage();mobile.setDefaultTimeout(30000);mobile.setDefaultNavigationTimeout(60000);
+   mark('Expo inline provider fixture');const context=await fixtureContext({viewport:{width:390,height:844}}),mobile=await context.newPage();mobile.setDefaultTimeout(30000);mobile.setDefaultNavigationTimeout(60000);
    await context.route('https://www.tiktok.com/player/v1/**',route=>route.fulfill({contentType:'text/html',body:providerFixture}));
    await mobile.goto(`http://localhost:8082/product?handle=${handle}&id=${productId}`);await expect(mobile.getByRole('button',{name:'Inquire about this item only',exact:true})).toBeVisible({timeout:30000});
    await expect(mobile.getByRole('tab',{name:'Inquiries',exact:true})).toHaveCount(0);await expect(mobile.getByRole('tablist')).toHaveCount(1);
@@ -109,12 +131,14 @@ async function main(){
   await updateSupportAgentSetting(staffUser,{userId:staff.id,enabled:true,maxOpenConversations:2,queueScope:'support'});
   await reassignSupportConversation(staffUser,declineId,staff.id);
   await staff.page.goto(`${base}/dashboard/support/${declineId}`);
+  await joinForReview(staff.page,declineId);await showReview();
   mark('decline');await staff.page.getByLabel('Reply to owner').fill('Please share a downloadable copy of the video.');await staff.page.getByRole('button',{name:'Decline',exact:true}).click();
   await expect(staff.page.getByLabel('Reply to owner')).toHaveCount(0);
+  const back=staff.page.getByRole('link',{name:'Back to conversation',exact:true});if(await back.isVisible()){await back.click();await expect(staff.page.locator('.support-thread')).toBeVisible();}
   await expect(staff.page.getByText('Please share a downloadable copy of the video.',{exact:true})).toBeVisible();
   await owner.page.reload();await expect(owner.page.getByText('Please share a downloadable copy of the video.',{exact:true})).toBeVisible();
   assert.equal((await pool.query('SELECT video_ref FROM products WHERE id=$1',[productId])).rows[0].video_ref,approvedRef);
-  await owner.page.goto(`${base}/dashboard/page-editor`);await expect(owner.page.locator('#shop-video')).toBeEditable();await expect(owner.page.getByRole('link',{name:'Request a video',exact:true})).toHaveCount(0);
+  await owner.page.goto(`${base}/dashboard/page-editor?view=edit&task=video`);await expect(owner.page.locator('#shop-video')).toBeEditable();await expect(owner.page.getByRole('link',{name:'Request a video',exact:true})).toHaveCount(0);
   console.log('PASS owner video request submission, direct editable video controls and retained historical request routes, staff approval without channel setup, public approved embed, reply/decline, retained media and 390/1440 layouts. Local fixtures removed.');
  }catch(error){console.error('Video workflow failed at',phase,error instanceof Error?error.message:'Unknown failure');throw error;}finally{
   mark('cleanup');
@@ -122,6 +146,8 @@ async function main(){
   for(const id of ids){await pool.query('DELETE FROM audit_logs WHERE user_id=$1',[id]);await pool.query('DELETE FROM users WHERE id=$1',[id]);}
   for(const id of providerIds)assert.ok(!(await auth.auth.admin.deleteUser(id)).error);
   await browser.close();await pool.end();await closePostgresRuntimeForTests();
+  fs.writeFileSync(`${dir}/synthetic-map-tiles.json`,JSON.stringify({fixtures:tileFixtures.map(tiles=>({fixtureId:tiles.fixtureId,fulfilled:tiles.servedCount(),uncontrolledRequests:tiles.externalCount()})),providerAvailabilityTested:false},null,2)+'\n',{mode:0o600});
+  for(const tiles of tileFixtures)tiles.assertNoExternalRequests();
  }
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

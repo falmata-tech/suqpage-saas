@@ -2,7 +2,7 @@
 id: FE-059
 title: Choose the business city during initial setup
 status: in_progress
-related: [BE-047, FE-051, FE-053, BE-031, BE-038, BE-041, DEP-042]
+related: [BE-047, FE-051, FE-053, BE-031, BE-038, BE-041, DEP-042, FE-065, BE-054]
 owners: [product, frontend, backend]
 last_updated: 2026-10-07
 change_level: L2
@@ -16,15 +16,17 @@ The signup starter currently assumes Addis Ababa. A real owner must choose their
 business city alongside name, handle, category and private phone in the initial
 setup screen on web and mobile. Native first email verification opens the essential
 setup form directly, avoiding an extra Create page detour. Reuse bounded known-place search, show city and
-region in each suggestion, require one selected city, and clear selection whenever
+region as optional suggestion context, require one selected city, and clear selection whenever
 the search text changes. No map/GPS field or technical coordinates during signup.
 Keep the immediate rich private sample preview and subsequent Profile flow.
 On native, Business city appears immediately after Business name, ahead of category choices,
 with a Search city or town prompt. Both native entry routes (Account and
 /owner/setup) render the same field, suggestions and required-selection gate.
-Existing accounts are not backfilled or relocated. FE-058 frees the map viewport;
-the existing Ethiopia city catalog is still the admitted city dataset in this
-increment; international place data is a separate expansion.
+FE-065 / BE-054 locally extends this flow to required Country then City, retaining
+the 781 Ethiopian OSM IDs and adding the server-only ADR-0027 world catalog.
+Changing country clears the chosen city; reselecting the same country preserves
+it. Legacy known place IDs derive country server-side. Existing GPS stays intact.
+New flows and local demo corrections remain pending full gates/rollout.
 
 ## Scenarios
 

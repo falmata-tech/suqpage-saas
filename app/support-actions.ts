@@ -2,22 +2,24 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect, RedirectType } from "next/navigation";
-import {isQueueAgent} from "@/lib/capabilities";
-import {supportFormState,supportThreadHref,workloadViewState,workloadHref} from "@/lib/support-navigation";
+import {hasCapability,isQueueAgent} from "@/lib/capabilities";
+import {supportFormState,supportThreadHref,supportInboxHref,workloadViewState,workloadHref,staffListViewState,staffListHref} from "@/lib/support-navigation";
 import {scheduleAttentionDelivery} from "@/lib/attention-after";
 import { requireUser } from "@/lib/auth";
+import type {OwnerEditResult} from "@/lib/owner-edit-contract";
 import { createVideoRequest, reviewVideoRequest } from "@/lib/support-video-requests";
 import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import {
   claimSupportConversation,
+  joinSupportConversation,
   closeSupportConversation,
   createSupportConversation,
   postSupportMessage,
   reopenSupportConversation,
   reassignSupportConversation,
   SupportError,
-  saveTransportHandoff,
   updateSupportAgentSetting,
+  routeWaitingSupportConversations,
 } from "@/lib/support";
 import { audit } from "@/lib/security";
 import { stageSupportAttachment, SupportAttachmentError, type StagedSupportAttachment } from "@/lib/support-media";
@@ -63,6 +65,24 @@ function failure(path: string, error: unknown): never {
     ? error.message
     : "Support could not be updated.";
   redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`,RedirectType.replace);
+}
+
+export async function assignWaitingSupportConversationsAction(formData: FormData) {
+  const user = await requireUser();
+  const view = supportFormState(formData);
+  const returnPath = supportInboxHref(view);
+  let result: Awaited<ReturnType<typeof routeWaitingSupportConversations>>;
+  try {
+    if (!hasCapability(user, "operations:manage")) throw new SupportError("Operations access is required.", "forbidden");
+    const queue = formData.get("nav_queue");
+    if (queue !== "support" && queue !== "transport") throw new SupportError("Choose a support queue.", "invalid_setting");
+    result = await routeWaitingSupportConversations(user, Date.now(), { queue });
+    await audit("support.waiting_recovered", { userId: user.id, detail: { queue, routed: result.routed, remaining: result.remaining } });
+  } catch (error) { failure(returnPath, error); }
+  scheduleAttentionDelivery();
+  revalidatePath("/dashboard/support");
+  revalidatePath("/dashboard/support/agents");
+  redirect(`${returnPath}${returnPath.includes("?") ? "&" : "?"}routed=${result!.routed}&remaining=${result!.remaining}`, RedirectType.replace);
 }
 
 export async function createSupportConversationAction(formData: FormData) {
@@ -131,6 +151,20 @@ export async function claimSupportConversationAction(formData: FormData) {
   redirect(supportThreadHref(id,origin,{claimed:"1"}),RedirectType.replace);
 }
 
+export async function joinSupportConversationAction(formData:FormData){
+  const user=await requireUser();
+  const id=conversationId(formData);
+  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const returnPath=supportThreadHref(id,origin);
+  try{
+    await joinSupportConversation(user,id,{publicRef:formData.get('publicRef'),assignmentEpoch:formData.get('assignmentEpoch')});
+  }catch(error){failure(returnPath,error);}
+  scheduleAttentionDelivery();
+  revalidatePath('/dashboard/support');
+  revalidatePath(`/dashboard/support/${id}`);
+  redirect(returnPath,RedirectType.replace);
+}
+
 export async function closeSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
@@ -163,23 +197,35 @@ export async function reopenSupportConversationAction(formData: FormData) {
   redirect(supportThreadHref(id,origin,{reopened:"1"}),RedirectType.replace);
 }
 
-export async function updateSupportAgentSettingAction(formData: FormData) {
+async function saveSupportAgentSetting(formData: FormData, focused: boolean): Promise<OwnerEditResult> {
   const user = await requireUser();
   const view=workloadViewState({q:formData.get('view_q'),page:formData.get('view_page'),status:formData.get('view_status')});
+  let routing: Awaited<ReturnType<typeof updateSupportAgentSetting>>;
   try {
-    await updateSupportAgentSetting(user, {
+    routing = await updateSupportAgentSetting(user, {
       userId: formData.get("userId"),
       enabled: formData.get("enabled"),
-      maxOpenConversations: formData.get("maxOpenConversations"),
       queueScope: formData.get("queueScope") ?? undefined,
     });
     await audit("support.agent_setting_updated", { userId: user.id, detail: { targetUserId: formData.get("userId") } });
   } catch (error) {
+    if(focused)return {error:error instanceof SupportError?error.message:"Support could not be updated."};
     failure(workloadHref(view), error);
   }
+  scheduleAttentionDelivery();
   revalidatePath("/dashboard/support/agents");
   revalidatePath("/dashboard/support");
-  redirect(workloadHref(view,true),RedirectType.replace);
+  const returnToStaff=focused&&hasCapability(user,'platform:admin')&&formData.get('view_origin')==='staff';
+  const staffView=staffListViewState({q:formData.get('view_q'),page:formData.get('view_page'),role:formData.get('view_role')});
+  redirect(`${returnToStaff?staffListHref(staffView,true):workloadHref(view,true)}&routed=${routing.routed}&remaining=${routing.remaining}`,RedirectType.replace);
+}
+
+export async function updateSupportAgentSettingAction(formData: FormData) {
+  await saveSupportAgentSetting(formData,false);
+}
+
+export async function updateSupportAgentSettingEditAction(formData: FormData): Promise<OwnerEditResult> {
+  return saveSupportAgentSetting(formData,true);
 }
 
 export async function reassignSupportConversationAction(formData: FormData) {
@@ -204,13 +250,6 @@ export async function saveTransportHandoffAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
   const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
-  const returnPath=supportThreadHref(id,origin);
-  try {
-    await saveTransportHandoff(user, id, {
-      company: formData.get("company"), contact: formData.get("contact"), previousId: formData.get("previousId"),
-    });
-  } catch (error) { failure(returnPath, error); }
-  revalidatePath("/dashboard/support");
-  revalidatePath(`/dashboard/support/${id}`);
-  redirect(supportThreadHref(id,origin,{routed:"1"}),RedirectType.replace);
+  // Retained clients cannot append company records through a retired action.
+  redirect(supportThreadHref(id,origin,{error:'Create shipment plans from Tracking.'}),RedirectType.replace);
 }

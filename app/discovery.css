@@ -515,6 +515,10 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
   line-height: 1.25;
 }
 .discovery-map .leaflet-control-attribution a { color: #075d61; font-weight: 750; }
+.discovery-map-background-status { position: absolute; z-index: 5; top: 12px; left: 12px; width: min(300px, calc(100% - 96px)); padding: 12px; border: 1px solid #d5dfdf; border-radius: 12px; background: rgb(255 255 255 / 97%); color: #35454b; box-shadow: 0 4px 16px rgb(32 36 40 / 9%); }
+.discovery-map-background-status p { margin: 0 0 8px; font-size: .85rem; line-height: 1.45; }
+.discovery-map-background-status button { min-height: 48px; padding: 8px 14px; border: 1px solid #c5d1d1; border-radius: 8px; background: #fff; color: #a73500; font: inherit; font-size: .85rem; font-weight: 750; cursor: pointer; }
+.discovery-map-background-status button:focus-visible { outline: 3px solid var(--mp-focus); outline-offset: 2px; }
 .mp-map-div-icon { border: 0; background: transparent; }
 .mp-map-cluster,.mp-map-nearby {
   display: grid;

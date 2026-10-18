@@ -37,26 +37,28 @@ export function OwnerAttentionProvider({children}:{children:React.ReactNode}){
   },[session?.user.id]);
   return <Context.Provider value={{feed,reload,save}}>{children}</Context.Provider>;
 }
-function AlertsControl({state}:{state:State}){
+function AlertsControl({state,inline=false,preferencesOnly=false}:{state:State;inline?:boolean;preferencesOnly?:boolean}){
   const {t,locale}=useApp(),[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
   async function action(run:()=>Promise<void>){setBusy(true);setError('');try{await run();}catch(e){setError(e instanceof Error?e.message:'Could not update alerts. Try again.');}finally{setBusy(false);}}
   async function visit(item:AttentionItem){await state.save({action:'read',id:item.id});setOpen(false);openAttention(item.destination);}
   const available=Platform.OS==='web'?state.feed?.push?.web.available:state.feed?.push?.expo.available;
   const enabled=Platform.OS==='web'?state.feed?.enabled?.web:state.feed?.enabled?.expo;
-  return <>
-    <Pressable accessibilityRole="button" accessibilityLabel={t('Alerts')} style={[s.row,{alignSelf:'flex-end',minHeight:44,gap:8,padding:8}]} onPress={()=>{setOpen(true);void state.reload().catch(()=>setError('Alerts are temporarily unavailable.'));}}><Icon name="bell" color={colors.brand}/><Copy>{t('Alerts')}</Copy>{Boolean(state.feed?.unread)&&<Copy>{state.feed!.unread>99?'99+':state.feed!.unread}</Copy>}</Pressable>
-    <Sheet visible={open} title={t('Alerts')} onClose={()=>setOpen(false)}>
+  const content=<>
       {enabled&&<Button secondary disabled={busy||!state.feed} label={t('Play a sound for new alerts')} onPress={()=>void action(()=>state.save({action:'preferences',soundEnabled:!state.feed?.preferences.soundEnabled,language:locale}))}/>}
       {available&&state.feed&&<Copy muted>{t(state.feed.preferences.soundEnabled?'On':'Off')}</Copy>}
       {available&&<Button secondary disabled={busy} label={t(enabled?'Turn off notifications':'Turn on notifications')} onPress={()=>void action(async()=>{if(enabled){await state.save({action:'unsubscribe'});return;}const device=await notificationDevice(state.feed?.push?.web.publicKey);await state.save({action:'subscribe',device});})}/>}
-      {Boolean(state.feed?.unread)&&<Button secondary disabled={busy} label={t('Mark all read')} onPress={()=>void action(()=>state.save({action:'read_all',id:state.feed!.latestId}))}/>}
+      {!preferencesOnly&&Boolean(state.feed?.unread)&&<Button secondary disabled={busy} label={t('Mark all read')} onPress={()=>void action(()=>state.save({action:'read_all',id:state.feed!.latestId}))}/>}
       <Status error={error} loading={!state.feed&&!error}/>
-      {state.feed&&!state.feed.items.length&&<Copy>{t('No alerts yet.')}</Copy>}
-      {state.feed?.items.map(item=><Pressable key={item.id} accessibilityRole="button" disabled={busy} onPress={()=>void action(()=>visit(item))} style={{padding:14,gap:6,borderWidth:1,borderColor:colors.line,borderRadius:8,backgroundColor:item.read?'white':colors.soft}}><Copy>{t(attentionLabel(item))}</Copy><Copy muted>{new Date(item.createdAt).toLocaleString(locale,{hour12:true})}</Copy></Pressable>)}
-    </Sheet>
+      {preferencesOnly&&state.feed&&!available&&<Copy muted>{t('Notifications are not available right now.')}</Copy>}
+      {!preferencesOnly&&state.feed&&!state.feed.items.length&&<Copy>{t('No alerts yet.')}</Copy>}
+      {!preferencesOnly&&state.feed?.items.map(item=><Pressable key={item.id} accessibilityRole="button" disabled={busy} onPress={()=>void action(()=>visit(item))} style={{padding:14,gap:6,borderWidth:1,borderColor:colors.line,borderRadius:8,backgroundColor:item.read?'white':colors.soft}}><Copy>{t(attentionLabel(item))}</Copy><Copy muted>{new Date(item.createdAt).toLocaleString(locale,{hour12:true})}</Copy></Pressable>)}
+  </>;
+  return <>
+    {!inline&&<Pressable accessibilityRole="button" accessibilityLabel={t('Alerts')} style={[s.row,{alignSelf:'flex-end',minHeight:48,gap:8,padding:8}]} onPress={()=>{setOpen(true);void state.reload().catch(()=>setError('Alerts are temporarily unavailable.'));}}><Icon name="bell" color={colors.brand}/><Copy>{t('Alerts')}</Copy>{Boolean(state.feed?.unread)&&<Copy>{state.feed!.unread>99?'99+':state.feed!.unread}</Copy>}</Pressable>}
+    {inline?content:<Sheet visible={open} title={t('Alerts')} onClose={()=>setOpen(false)}>{content}</Sheet>}
   </>;
 }
-export function OwnerAlerts(){const state=useContext(Context);return state?<AlertsControl state={state}/>:null;}
+export function OwnerAlerts({inline=false,preferencesOnly=false}:{inline?:boolean;preferencesOnly?:boolean}={}){const state=useContext(Context);return state?<AlertsControl state={state} inline={inline} preferencesOnly={preferencesOnly}/>:null;}
 export function useOwnerAlertCount(){const state=useContext(Context);return state?.feed?.unread||0;}
 export function TransportAlerts({token}:{token:string}){
   const [feed,setFeed]=useState<Feed|null>(null);

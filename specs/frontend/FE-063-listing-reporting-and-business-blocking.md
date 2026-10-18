@@ -2,13 +2,59 @@
 id: FE-063
 title: Listing reports and business blocking
 status: in_progress
-related: [BE-051, DEP-044, FE-053]
+related: [BE-051, DEP-044, FE-049, FE-053]
 owners: [product, frontend, security]
 last_updated: 2026-10-10
 change_level: L2
 ---
 
 # FE-063 — Listing reports and business blocking
+
+## S134 — discreet anonymous safety controls (ready)
+
+The owner questions account-style blocking for anonymous visitors and requests
+research plus removal of internal/redundant UI explanations. Google's public-UGC
+policy requires in-app reporting and blocking even when the reader has no account:
+https://support.google.com/googleplay/android-developer/answer/9876937 . Merchant
+catalogs are contributed public content; retaining these controls is the relevant
+application of that rule, not a claim of individual review approval. No login is
+required and blocks remain visitor-browser/device preferences, not merchant bans.
+
+1. GIVEN a public showroom/product THEN show one quiet, labelled48px Listing
+   options action rather than separate Report/Block/Blocked list controls across
+   the page footer. It opens a bounded accessible dialog/Sheet with Report and
+   Block business actions and management of existing blocks. Report continues
+   through the existing form; never require an account or open two modal layers.
+   Actual-Chrome refinement, Ready before correction: the web safety footer sits
+   outside the runtime-root that receives the floating dock's measured clearance.
+   At the real maximum phone scroll its48px entry is still behind the transport
+   button. Reserve that existing measured CSS clearance after the footer action
+   too, so ordinary scroll exposes its whole hit target. Do not move the dock,
+   alter business content or weaken click-hit verification. Regress the actual
+   max-scroll entry→options→report/cancel/block/unblock workflow on phone web.
+   The focused700px regression also proves the dock's720px breakpoint precedes
+   the shell's680px bottom reserve. In that681–720px interval, add the same64px
+   mobile reserve already used by the runtime-root (plus safe-area inset); retain
+   the provider-measured height, five-point hit test and ordinary max scroll.
+2. GIVEN an existing block THEN preserve content/contact/discovery suppression,
+   clear Unblock and saved-list recovery. Cancel changes no preference/report.
+   Persistence failures stay visible/retryable and do not falsely claim success.
+   No report/blocked-list permission or backend/retention change is introduced.
+3. Review affected public browsing/contact/intake and account copy for internal
+   implementation comments, redundant demo notices or excessive explanation.
+   Remove only proven unnecessary user-facing text; keep actionable clipboard/
+   connection recovery, privacy/consent, stock honesty and private preview state.
+   Code comments are not UI text. Record what was found rather than inventing
+   defects or deleting useful guidance wholesale. Use FE-049 active en/am/om
+   wording and preserve literal merchant data.
+
+Ready: existing anonymous cookie/device storage, report form, bounded modal,
+current localized Listing options/Report/Block labels, policy and safe rollback
+are known. FE-053 controls native parity, BE-051 report security is unchanged;
+Master §§18/19/22 affected. Plan: consolidate controls → focused actual-source
+open/report/cancel/block/unblock/failure tests plus inherited report security →
+actual Chrome web/Expo journey with isolated visitor preferences → visual approval
+before full/commit/rollout. No schema/provider/dependency or hosted write.
 
 ## Problem and scope
 

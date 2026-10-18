@@ -8,6 +8,7 @@ import { updateDiscoveryProfile } from "../lib/discovery-admin";
 import { buildFeaturedProgramAgenda, featuredBoothWalkthroughs, featuredBroadcastPhase } from "../lib/featured-program";
 import { createExternalSponsorAd, SponsorAdminError } from "../lib/sponsor-admin";
 import {pointInMapViewport,wrappedMapLongitude} from '../lib/map-display-location';
+import {mapClusterIndex,mapClusterMarkers,mapExposedGroup,mapGroupCapacity,mapGroupPickerLayout,MAP_MAX_ZOOM} from '../lib/map/map-clustering';
 async function runPostgresFixture() {
     const discoveryMapSource = fs.readFileSync(path.join(process.cwd(), "components/DiscoveryWorkspace.tsx"), "utf8");
     const marketplaceMapSource = fs.readFileSync(path.join(process.cwd(), "components/MarketplaceMap.tsx"), "utf8");
@@ -16,22 +17,41 @@ async function runPostgresFixture() {
     const discoveryUiSource = `${discoveryMapSource}\n${marketplaceMapSource}\n${featuredUiSource}`;
     const featuredPageSource = fs.readFileSync(path.join(process.cwd(), "app/(public)/featured/page.tsx"), "utf8");
     const publicDiscoveryCacheSource = fs.readFileSync(path.join(process.cwd(), "lib/public-discovery-cache.ts"), "utf8");
+    const searchControlsSource = fs.readFileSync("components/MarketSearchControls.tsx", "utf8");
+    const marketFeedSource = fs.readFileSync("lib/use-market-feed.ts", "utf8");
+    const tileLoaderSource = fs.readFileSync("lib/map/map-tile-loader.ts", "utf8");
+    const groupDialogCss = fs.readFileSync("components/MapPreviewDialog.module.css", "utf8");
+    const independentSearchSource = discoveryMapSource.slice(discoveryMapSource.indexOf("function useIndependentSearch"), discoveryMapSource.indexOf("export default function DiscoveryWorkspace"));
     const nearbyViewerSource = discoveryMapSource.slice(discoveryMapSource.indexOf("function NearbyShowroomsViewer"));
-    assert.match(discoveryUiSource, /window\.setTimeout[\s\S]*420/);
-    assert.match(discoveryUiSource, /router\.replace/);
+    // FE-065: both scoped controllers debounce250ms and cancel superseded work;
+    // URL writes preserve framework history rather than restarting a global route.
+    for (const source of [independentSearchSource,marketFeedSource]) {
+        assert.match(source, /setTimeout\([\s\S]*,\s*250\)/);
+        assert.match(source, /clearTimeout\(timer\);\s*controller\.abort\(\)/);
+        assert.match(source, /controller\.signal\.aborted/);
+    }
+    assert.match(discoveryMapSource, /useIndependentSearch\('businesses',businessSearch,discovery,initialBusiness\)/);
+    assert.match(discoveryMapSource, /marketSearchParams\('products',productSearch\)/);
+    assert.match(discoveryMapSource, /window\.history\.replaceState\(window\.history\.state/);
     assert.doesNotMatch(discoveryUiSource, /type="submit">Search/);
     assert.match(discoveryUiSource, /navigator\.geolocation\.getCurrentPosition/);
-    assert.match(discoveryUiSource, /Filter by region or city/);
-    assert.match(discoveryMapSource, /<CategoryChooser compact categories=\{discovery\.industries\} value=\{discovery\.industry\.key\}/);
-    assert.match(fs.readFileSync("components/CategoryChooser.tsx", "utf8"), /aria-label=\{t\("Filter by category"\)\}/);
+    assert.match(discoveryMapSource, /<MarketSearchControls[\s\S]*scope=\{panelOpen\?'products':'businesses'\}[\s\S]*metadata=\{panelOpen\?productData:mapData\}/);
+    for (const label of ['Category','Country','City']) assert.ok(searchControlsSource.includes(`label:'${label}'`), `Explicit ${label} control remains available`);
+    assert.match(searchControlsSource, /disabled=\{f\.key==='city'&&!value\.countries\.length\}/, 'City requires an explicit selected country');
+    assert.ok(searchControlsSource.includes("cities:value.cities.filter(c=>next.includes(c.split(':')[0]))"), 'Changing countries removes cities outside the current selection');
+    assert.match(searchControlsSource, /type="checkbox" checked=\{selected\.includes\(c\.key\)\}/, 'Category and geography are bounded multi-select choices');
+    assert.match(searchControlsSource, /maxLength=\{80\}/, 'Unsent search text retains the canonical bound');
     assert.match(discoveryUiSource, /discovery-search-panel/);
     assert.match(marketplaceMapSource, /showroom\.primaryIndustryLabel/);
     assert.doesNotMatch(discoveryUiSource, /DiscoveryList|discovery-list|selectDiscoveryView/);
     assert.match(discoveryUiSource, /showroom\.primaryIndustryShortLabel/);
-    assert.match(discoveryUiSource, /NEARBY_GROUP_ZOOM = 14/);
+    assert.match(marketplaceMapSource, /item\.kind==='aggregate'[\s\S]*map\.setView/);
+    assert.match(marketplaceMapSource, /mapExposedGroup\(clusterIndexRef\.current,item\.ids,map\.getZoom\(\)\)/, 'Only the current separated terminal group can open its picker');
     assert.match(discoveryUiSource, /function NearbyShowroomsViewer/);
     assert.match(discoveryUiSource, /className=\{`nearby-showroom-viewer/);
     assert.match(discoveryUiSource, /className="nearby-showroom-grid"/);
+    assert.match(nearbyViewerSource, /showrooms\.length<=viewport\.capacity&&layout\.admitted/);
+    assert.match(nearbyViewerSource, /data-paginated="false"/);
     assert.doesNotMatch(discoveryUiSource, /SharedLocationPanel|shared-location-floor|shared-location-more|buildScrollableSharedLocationVenueLayout/);
     assert.doesNotMatch(nearbyViewerSource, /Row \{row\}|padStart|pagination|Show more/, "nearby cards expose no scheduled references, pagination, or incremental loading");
     assert.match(discoveryUiSource, /<b>\{booth\.reference\}<\/b>/, "Daily Featured Showrooms retains scheduled booth references");
@@ -46,9 +66,16 @@ async function runPostgresFixture() {
     assert.match(marketplaceMapSource, /mp-map-storefront/);
     assert.doesNotMatch(marketplaceMapSource, /point-halo|cluster-halo/);
     assert.match(marketplaceMapSource, /SHOWROOM_DETAIL_ZOOM/);
-    assert.match(marketplaceMapSource, /getClusters\(viewport, zoom\)/, "cluster projection is bounded to the visible Leaflet viewport");
-    assert.match(marketplaceMapSource, /pointInMapViewport\(group\.longitude,group\.latitude,viewport\)/, "terminal nearby markers remain viewport bounded");
-    assert.match(marketplaceMapSource, /pointInMapViewport\(showroom\.longitude,showroom\.latitude,viewport\)/, "showroom markers remain viewport bounded");
+    assert.match(marketplaceMapSource, /mapClusterMarkers\(clusterIndexRef\.current,viewport,zoom\)/, "shared hierarchy projection is bounded to the visible Leaflet viewport");
+    // Real shared adapter oracle: both a terminal group and an isolated shop
+    // are culled correctly; the antimeridian world copy keeps all eligible IDs.
+    const viewportIndex=mapClusterIndex([{id:1,latitude:0,longitude:179},{id:2,latitude:0,longitude:179.0001},{id:3,latitude:0,longitude:0}],3);
+    const visibleGroup=mapClusterMarkers(viewportIndex,[170,-1,190,1],MAP_MAX_ZOOM);
+    assert.deepEqual(visibleGroup.flatMap(marker=>marker.ids).sort((a,b)=>a-b),[1,2]);
+    assert.equal(visibleGroup[0]?.kind,'cluster');
+    assert.deepEqual(mapExposedGroup(viewportIndex,[1,2],MAP_MAX_ZOOM)?.ids,[1,2]);
+    assert.deepEqual(mapClusterMarkers(viewportIndex,[-1,-1,1,1],MAP_MAX_ZOOM).flatMap(marker=>marker.ids),[3]);
+    assert.deepEqual(mapClusterMarkers(viewportIndex,[50,10,60,20],MAP_MAX_ZOOM),[]);
     assert.match(marketplaceMapSource, /wrappedMapLongitude/, 'Markers use the visible world copy');
     assert.equal(wrappedMapLongitude(-175,179),185);
     assert.equal(pointInMapViewport(-175,0,[170,-10,190,10]),true);
@@ -59,8 +86,17 @@ async function runPostgresFixture() {
     assert.match(marketplaceMapSource, /keepBuffer: 0/, "the browser retains no speculative off-screen tile buffer");
     assert.match(marketplaceMapSource, /updateWhenIdle: true/, "tiles update after a gesture settles on lower-end devices");
     assert.match(marketplaceMapSource, /updateWhenZooming: false/, "zoom gestures do not continuously request intermediate tile layers");
-    assert.match(marketplaceMapSource, /detectRetina: false/, "retina overfetch remains disabled for the public tile service");
-    assert.doesNotMatch(marketplaceMapSource, /fetch\(|\/api\//, "the map renderer neither proxies nor prefetches basemap tiles");
+    assert.match(marketplaceMapSource, /L\.gridLayer\(/, 'S139 uses the public asynchronous raster lifecycle');
+    assert.match(marketplaceMapSource, /tileSize: 256/, "the standard raster grid does not multiply requests for retina displays");
+    assert.doesNotMatch(marketplaceMapSource, /L\.tileLayer\(|detectRetina:\s*true/);
+    assert.match(marketplaceMapSource, /createMapTileLoader/);
+    assert.match(marketplaceMapSource, /L\.Util\.template\(provider\.tileUrlTemplate, \{x:coords\.x,y:coords\.y,z:coords\.z\}\)/, 'Only immutable visible coordinates select direct provider URLs');
+    assert.doesNotMatch(marketplaceMapSource, /fetch\(|\/api\//, "the renderer delegates visible rasters without a proxy or prefetch API");
+    assert.match(tileLoaderSource, /cache:'default'/);
+    assert.match(tileLoaderSource, /credentials:'omit'/);
+    assert.match(tileLoaderSource, /referrerPolicy:'strict-origin-when-cross-origin'/);
+    assert.match(tileLoaderSource, /if\(!response\.ok\)/, 'A denied image cannot be presented as a successful tile');
+    assert.doesNotMatch(tileLoaderSource, /cache:\s*['"](?:reload|no-cache|no-store)['"]/);
     assert.doesNotMatch(discoveryMapSource, /\/geo\//, "the active marketplace no longer loads bundled geography layers");
     assert.doesNotMatch(discoveryMapSource, /d3-(?:geo|selection|transition|zoom)|geoMercator|geoPath/, "the gesture path no longer runs the custom D3 geography renderer");
     assert.match(discoveryUiSource, /walkthrough-current/);
@@ -68,20 +104,27 @@ async function runPostgresFixture() {
     assert.doesNotMatch(discoveryUiSource, /rail\.scrollTo/);
     assert.match(discoveryUiSource, /suqpage:discovery-navigation:v2/);
     assert.match(discoveryUiSource, /suqpage:last-marketplace-url:v1/);
-    assert.match(discoveryUiSource, /selectedShowroomId: number \| null/);
-    assert.match(discoveryUiSource, /setSelectedShowroomId\(savedSelection && selectionBelongsToGroup/);
+    assert.match(discoveryUiSource, /selectedShowroomId:\s*number\s*\|\s*null/);
+    assert.match(discoveryMapSource, /currentMapGroup\(groupIndex,mapData\.showrooms,saved\?\.activeNearbyGroupKey\|\|null,next\.zoom\)/);
+    assert.match(discoveryMapSource, /mapData\.showrooms\.some\(s=>s\.id===saved\.selectedShowroomId\)/, 'Saved selection must still be in the current public projection');
+    assert.match(discoveryMapSource, /setSelectedShowroomId\(restoredSelected\)/);
     assert.match(discoveryUiSource, /rememberCurrentPublicWorkspace/);
     assert.match(discoveryMapSource, /dialog\.showModal\(\)/, "map previews use the browser top layer above the search drawer");
     assert.match(discoveryMapSource, /onCancel=/, "Escape dismisses the modal");
     assert.match(nearbyViewerSource, /<MapPreviewDialog/, "nearby groups share the protected modal layer");
-    assert.match(nearbyViewerSource, /onClick=\{\(\) => onSelect\(showroom\.id\)\}/);
-    assert.match(discoveryMapSource, /mapViewRef\.current = mapView/);
+    assert.match(nearbyViewerSource, /onClick=\{\(\)\s*=>\s*onSelect\(showroom\.id\)\}/);
+    assert.match(discoveryMapSource, /mapViewRef\.current=bounded;setMapZoom\(bounded\.zoom\);rememberNavigation/);
     assert.doesNotMatch(discoveryCssSource, /background-size:\s*(?:34|36)px\s+(?:34|36)px/);
     assert.match(discoveryCssSource, /\[data-industry="electronics"\]/);
     assert.match(discoveryCssSource, /var\(--industry-accent/);
     assert.doesNotMatch(discoveryCssSource, /\.discovery-list|\.discovery-pages|\.discovery-tabs/);
-    assert.match(discoveryCssSource, /\.nearby-showroom-grid\s*\{[^}]*repeat\(3/);
-    assert.match(discoveryCssSource, /\.nearby-showroom-grid\s*\{[^}]*repeat\(2/);
+    assert.match(groupDialogCss, /grid-template-columns: repeat\(var\(--group-columns,2\)/);
+    assert.match(groupDialogCss, /grid-auto-rows: var\(--group-row-height,108px\)/);
+    assert.equal(mapGroupCapacity(320,448),3);
+    assert.equal(mapGroupCapacity(760,650),6);
+    const phoneGroup=mapGroupPickerLayout(320,448,1,3);
+    assert.equal(phoneGroup.admitted,true);assert.equal(phoneGroup.pageSize,3);assert.equal(phoneGroup.paged,false,'Every admitted member fits at once without paging');
+    assert.equal(mapGroupPickerLayout(320,448,1,4).admitted,false,'An oversized group cannot be silently truncated');
     assert.doesNotMatch(nearbyViewerSource, /overflow-y|scrollTo|IntersectionObserver/);
     assert.match(discoveryCssSource, /\.featured-gallery\s*\{[^}]*grid-template-columns/);
     assert.match(discoveryCssSource, /\.featured-card-media > img/);
@@ -98,7 +141,7 @@ async function runPostgresFixture() {
     assert.doesNotMatch(featuredUiSource, /d3-(?:geo|selection|transition|zoom)|supercluster/i, "Daily Featured does not import the geographic map engine");
     assert.match(publicDiscoveryCacheSource, /query \? getMarketplaceDiscoveryView\(\{\.\.\.input,excludedBusinessIds:excluded\}\)/, "free-form searches bypass the public result cache and retain current browser exclusions");
     assert.match(publicDiscoveryCacheSource, /revalidate: PUBLIC_DISCOVERY_REVALIDATE_SECONDS/, "common public projections use a bounded server cache");
-    assert.match(publicDiscoveryCacheSource, /public-marketplace-v10-multiple-locations/, "the marketplace cache identity separates the multi-location projection from older cached results");
+    assert.match(publicDiscoveryCacheSource, /public-marketplace-v11-products/, "the product-only cache identity cannot reuse retired service projections");
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-discovery-"));
     const db = await getDb();
     function distanceKm(left: {
@@ -351,7 +394,11 @@ async function runPostgresFixture() {
                 query: "Needle signal tester",
             }, "matching published offerings lead the bounded suggestion projection");
             assert.equal(search.searchProducts.length, 1, "a meaningful query projects its matching published product");
+            const searchedProduct = await db.prepare("SELECT offering_kind,availability FROM products WHERE id=? AND business_id=?").get(search.searchProducts[0].id,firstAddisBusinessId) as {offering_kind:string;availability:string};
+            assert.ok(searchedProduct, 'The product result belongs to the expected fixture business');
             assert.deepEqual(search.searchProducts[0], {
+                offeringKind: searchedProduct.offering_kind,
+                availability: searchedProduct.availability,
                 id: search.searchProducts[0].id,
                 name: "Needle signal tester",
                 description: "Needle signal tester",

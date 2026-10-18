@@ -4,7 +4,7 @@ title: Scoped attention events and bounded background push
 status: accepted
 date: 2026-10-07
 deciders: [product, engineering]
-related: [FE-062, BE-050, DEP-043, ADR-0023]
+related: [FE-062, BE-050, BE-018, DEP-043, ADR-0023]
 ---
 
 # ADR-0026 — Scoped attention events and bounded background push
@@ -63,3 +63,30 @@ architecture needs separate review. Device tokens remain private server-held
 capabilities, with authenticated/token-bound subscription and generic payloads.
 Primary contract: https://docs.expo.dev/push-notifications/sending-notifications/
 (Additional security). No hosted security setting changed during implementation.
+
+
+## Assigned-chat escalation email extension (S126)
+
+Reuse the existing Resend email provider through a narrow typed port. Add a
+private PostgreSQL email outbox attached to the existing overdue attention event;
+this does not introduce another notification platform, provider or schedule.
+The ten-minute deadline starts at the later of the oldest unanswered customer
+message or current assignment. Join, reads and notes are not public replies.
+Original customer wait and assignment history remain authoritative.
+
+Create one job per current assignment/message/admin or operations manager,
+atomically with the event. Resolve the canonical recipient, current role,
+assignment and unanswered cycle again before dispatch. Include only reference,
+queue, assigned staff name and an authenticated dashboard link. Do not email
+customer content, contact details or routes. A repeated cycle is deduplicated by
+the notification identity and stable provider idempotency key. Acceptance is not
+a claim of inbox delivery or reading. Bound dispatch to two sends per invocation,
+four-second HTTP calls, six attempts, thirty-second leases and a twenty-four-hour
+expiry. Do not hold database locks across provider calls.
+
+Local workers explicitly use the installed loopback Mailpit capture, with exact
+database/Auth target guards and relay/forwarding checked before actual tests.
+Default external delivery refuses a loopback database or Auth endpoint at any
+port. Hosted delivery requires existing verified sender/configuration and a
+separately reviewed rollout; local inbox evidence is not hosted email evidence.
+See BE-018, BE-050 and DEP-043 for contracts and mapped verification.

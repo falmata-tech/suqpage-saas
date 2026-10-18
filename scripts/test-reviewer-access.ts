@@ -13,6 +13,7 @@ import {nativeIdentityPort} from '../lib/mobile/http';
 import {handleMobileRequest} from '../lib/mobile/router';
 import {POST as startEmail} from '../app/api/auth/email/start/route';
 import {POST as webReview} from '../app/api/auth/review/route';
+import {publicationReadiness} from '../lib/publication-readiness';
 
 async function main() {
   assert.equal(reviewerBinding(undefined,undefined),null);
@@ -83,8 +84,14 @@ async function main() {
     r=await handleMobileRequest(get('session'),['session']);assert.equal(r.status,200);assert.equal((await r.json()).setupRequired,false);
     r=await handleMobileRequest(get('owner/home'),['owner','home']);assert.equal(r.status,200);const home=await r.json();assert.equal(home.shop.id,a.businessId);assert.equal(home.user.email,email);
     const ownerPost=(path:string,body:unknown)=>handleMobileRequest(new Request('http://127.0.0.1:3102/api/mobile/v1/'+path,{method:'POST',headers:{authorization:'Bearer '+nativeSession.access_token,'content-type':'application/json'},body:JSON.stringify(body)}),path.split('/'),{invalidate(){}});
-    const contacts=Object.fromEntries(Object.keys(home.draft.content.contacts).map(key=>[key,key==='email'?email:'']));
+    // The randomized Auth email is private; public publication uses a reserved NANP fixture, never a delivery destination.
+    const publicPhone='+12025550123';
+    const contacts=Object.fromEntries(Object.keys(home.draft.content.contacts).map(key=>[key,key==='phone'?publicPhone:'']));
+    assert.equal(publicationReadiness({...home.draft.content,contacts:{...contacts,email}},[],true).find(check=>check.key==='contacts')?.ready,false,'Private example login email remains ineligible as a public contact');
+    assert.equal(publicationReadiness({...home.draft.content,contacts},[],true).find(check=>check.key==='contacts')?.ready,true,'Reserved public SMS fixture satisfies the ordinary contact check');
     r=await ownerPost('owner/page',{action:'save',version:home.draft.version,content:{...home.draft.content,contacts,about:'LOCAL QA reviewer edited this ordinary demo page.'}});assert.equal(r.status,200);const saved=await r.json();assert.equal(saved.content.about,'LOCAL QA reviewer edited this ordinary demo page.');
+    assert.deepEqual(saved.content.contacts,contacts,'The saved public page keeps only the selected fixture contact');
+    assert.equal(JSON.stringify(saved.content).includes(email),false,'The private login email is absent from saved public page content');
     for(const item of home.shop.products){
       const latest=await (await handleMobileRequest(get('owner/home'),['owner','home'])).json();
       const form=new FormData();form.set('details',JSON.stringify({name:'LOCAL QA offering '+item.id,description:'A reviewed local test offering.',offeringKind:item.kind,priceMinor:item.priceMinor,availability:item.availability,expectedContentVersion:latest.shop.version,idempotencyKey:crypto.randomUUID(),isPublished:true}));
@@ -92,7 +99,10 @@ async function main() {
     }
     r=await ownerPost('owner/publish',{version:saved.version,revision:home.publicationRevision});const published=await r.json();assert.equal(r.status,200,'The restricted reviewer uses actual normal owner publishing: '+JSON.stringify(published));
     assert.equal((await db.prepare('SELECT status FROM businesses WHERE id=?').get(a.businessId)).status,'active');
-    r=await handleMobileRequest(new Request('http://127.0.0.1:3102/api/mobile/v1/shops/'+home.shop.handle),['shops',home.shop.handle]);assert.equal(r.status,200);assert.equal((await r.json()).about,'LOCAL QA reviewer edited this ordinary demo page.');
+    r=await handleMobileRequest(new Request('http://127.0.0.1:3102/api/mobile/v1/shops/'+home.shop.handle),['shops',home.shop.handle]);assert.equal(r.status,200);const publicShop=await r.json();assert.equal(publicShop.about,'LOCAL QA reviewer edited this ordinary demo page.');
+    assert.deepEqual(publicShop.contacts,contacts,'Ordinary publication exposes the public fixture contacts');
+    assert.equal(JSON.stringify(publicShop).includes(email),false,'The public shop projection never exposes the private reviewer login email');
+    assert.equal((await runtimeUserById(a.userId))?.email,email,'Editing public contacts preserves the private account email');
     r=await handleMobileRequest(new Request('http://127.0.0.1:3102/api/mobile/v1/owner/business',{method:'POST',headers:{authorization:'Bearer '+nativeSession.access_token,'content-type':'application/json'},body:JSON.stringify({businessId:b.businessId,name:'Forged cross-tenant edit'})}),['owner','business']);assert.equal(r.status,400);
     assert.equal((await handleMobileRequest(get('owner/products/999999'),['owner','products','999999'])).status,405,'A guessed owner-product GET cannot bypass the owner-home contract');
     await db.prepare("UPDATE user_access_profiles SET access_role='team_member' WHERE user_id=?").run(a.userId);

@@ -12,7 +12,7 @@ export default function CreateClientWorkspaceForm() {
   const [state, action, pending] = useActionState(createClientWorkspaceAction, initialState);
   return <form action={action} className="panel form-grid">
     <div className="field full"><label htmlFor="workspace-business-name">{t("Business name")}</label><input id="workspace-business-name" name="businessName" required maxLength={120}/></div>
-    <div className="field"><label htmlFor="workspace-handle">{t("Suqpage page handle")}</label><input id="workspace-handle" name="handle" required maxLength={80} placeholder={t("business-name")}/></div>
+    <div className="field"><label htmlFor="workspace-handle">{t("MirtPage page handle")}</label><input id="workspace-handle" name="handle" required maxLength={80} placeholder={t("business-name")}/></div>
     <div className="field"><label htmlFor="workspace-client-name">{t("Client name")}</label><input id="workspace-client-name" name="clientName" required maxLength={100}/></div>
     <div className="field"><label htmlFor="workspace-client-email">{t("Client email")}</label><input id="workspace-client-email" name="email" type="email" required maxLength={160}/></div>
     <div className="field full"><small>{t("The owner can add products and edit their standard page after accepting the invitation.")}</small></div>

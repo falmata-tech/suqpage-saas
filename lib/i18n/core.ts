@@ -1,12 +1,15 @@
 /** Display-only localization. Never use translated text as persisted or submitted data. */
 export const locales = ["en", "am", "om", "so", "ti"] as const;
 export type Locale = typeof locales[number];
+/** Retained catalogs above are compatibility data; only these languages are offered. */
+export const enabledLocales = ["en", "am", "om"] as const satisfies readonly Locale[];
+export type EnabledLocale = typeof enabledLocales[number];
 export const languageNames: Record<Locale, string> = {
   en: "English", am: "አማርኛ", om: "Afaan Oromo", so: "Soomaali", ti: "ትግርኛ",
 };
 export const localeCookie = "suqpage-language";
-export function parseLocale(value: unknown): Locale {
-  return typeof value === "string" && locales.includes(value as Locale) ? value as Locale : "en";
+export function parseLocale(value: unknown): EnabledLocale {
+  return typeof value === "string" && enabledLocales.includes(value as EnabledLocale) ? value as EnabledLocale : "en";
 }
 export type UiMessages = Readonly<Record<string, string>>;
 export type UiValues = Readonly<Record<string, string | number>>;

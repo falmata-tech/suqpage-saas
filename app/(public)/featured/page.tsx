@@ -5,8 +5,8 @@ import { getPublicFeaturedView, getPublicSponsors } from "@/lib/public-discovery
 
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Daily Featured | Suqpage",
-  description: "Discover today's featured businesses, products and services on Suqpage.",
+  title: "Daily Featured | MirtPage",
+  description: "Discover today's featured businesses, products on MirtPage.",
 };
 
 type FeaturedSearchParams = Promise<{ featuredDay?: string }>;

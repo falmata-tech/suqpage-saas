@@ -3,6 +3,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
 const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3001";
 const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "suqpage-showroom-navigation");
 fs.mkdirSync(output, { recursive: true });
@@ -11,7 +17,8 @@ const browser = await chromium.launch({ headless: true });
 const evidence = [];
 
 async function showroomCapture(name, viewport) {
-  const page = await browser.newPage({ viewport });
+  const page = await browser.newPage({serviceWorkers: 'block', viewport });
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(`${baseURL}/@addis-metalworks`, { waitUntil: "domcontentloaded", timeout: 60_000 });
@@ -57,12 +64,13 @@ async function showroomCapture(name, viewport) {
   assert.equal(metrics.documentWidth, metrics.viewportWidth);
   assert.ok(metrics.headerTop >= metrics.hostTop);
   assert.deepEqual(errors, []);
-  evidence.push({ name, metrics });
+  evidence.push({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false, name, metrics });
   await page.close();
 }
 
 async function discoveryCapture() {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 980 } });
+  const page = await browser.newPage({serviceWorkers: 'block', viewport: { width: 1440, height: 980 } });
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
   await page.goto(`${baseURL}/?industry=electronics`, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await page.locator(".discovery-map-stage").waitFor();
   for (let attempt = 0; attempt < 7 && !(await page.locator(".discovery-point").count()); attempt += 1) {
@@ -79,12 +87,13 @@ async function discoveryCapture() {
   const labelWidth = await label.evaluate((element) => element.getBoundingClientRect().width);
   assert.ok(labelWidth < 110);
   await page.screenshot({ path: path.join(output, "named-map-pin.png"), fullPage: false });
-  evidence.push({ name: "named-map-pin", lines, labelWidth: Math.round(labelWidth) });
+  evidence.push({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false, name: "named-map-pin", lines, labelWidth: Math.round(labelWidth) });
   await page.close();
 }
 
 async function featuredCapture() {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const page = await browser.newPage({serviceWorkers: 'block', viewport: { width: 390, height: 844 } });
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
   await page.goto(`${baseURL}/featured`, { waitUntil: "domcontentloaded", timeout: 60_000 });
   const today = page.locator(".featured-week a.today");
   await today.waitFor();
@@ -110,7 +119,7 @@ async function featuredCapture() {
   await page.mouse.up();
   await page.waitForTimeout(150);
   assert.equal(await preview.isVisible(), false);
-  evidence.push({ name: "featured-booth-preview", routePreserved: true, boothDragPreserved: true });
+  evidence.push({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false, name: "featured-booth-preview", routePreserved: true, boothDragPreserved: true });
   await page.close();
 }
 
@@ -123,4 +132,5 @@ try {
   console.log(JSON.stringify({ output, evidence }, null, 2));
 } finally {
   await browser.close();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests();
 }

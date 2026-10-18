@@ -2,15 +2,89 @@
 id: FE-052
 title: Clear launch journeys and natural interface language
 status: in_progress
-related: [BE-001, BE-032, FE-049, FE-030, FE-033, FE-046, DEP-030, FE-036, FE-053, DEP-044]
+related: [FE-066, BE-001, BE-032, FE-049, FE-030, FE-033, FE-046, DEP-030, FE-036, FE-053, DEP-044, FE-067, FE-065]
 owners: [product, frontend, backend]
-last_updated: 2026-10-12
+last_updated: 2026-10-15
 change_level: L3
 ---
 
 # FE-052 — Clear launch journeys and natural interface language
 
+## S143 About audience switch (ready)
+
+About remains inside the existing app navigation and shows one audience at a
+time: For customers or For businesses. Replace jump links/both stacked sections
+with accessible selected tabs; preserve approved inclusive showroom benefit copy,
+CTAs, legal links and map-return intent. Web uses real tab/tabpanel semantics,
+selected state and keyboard arrows/Home/End; native uses appropriate selected
+Pressable tabs and the active panel. Keep48px targets, wrapping native labels,
+clear heading hierarchy and no horizontal overflow at320/390/enlarged text.
+No accordion, intro modal, invented claim or merchant-content translation.
+FE-065 removes Market information controls; normal About navigation replaces it.
+Ready: existing en/am/om audience/copy keys and metadata retained; focused tabs,
+keyboard/CTAs/native-state tests plus actual Chrome web/Expo audience→Market→Back
+tasks precede visual approval and expensive gates. Master §§3/10/18/19/22 affected.
+
+Focused S143 coverage: `scripts/test-about-audiences.ts` exercises actual web
+and RNWeb tabs, selected panels, keyboard/CTAs, authored active locales and
+enlarged native text; `scripts/test-mobile-market-layout.ts` covers native
+audience state/navigation. Actual local Chrome evidence and its separate network
+cancellation limits are recorded in `.local/market-about-s143/verified.json`.
+
+## S132/S133 — inclusive showrooms and a clear transport invitation (ready)
+
+Newest owner copy notes are intent, not literal finished text. Suqpage presents
+products for businesses that sell, make or grow them. Customers arriving from
+social posts can understand the range, choices and merchant-listed availability,
+then take a specific product inquiry to the business's own messaging channels.
+Never imply automatic inventory/import, verified capacity, checkout or in-app
+business messaging. Services remain retired under FE-067.
+
+- GIVEN Market/About/account introductions and SEO THEN use the same inclusive,
+  professional, inviting explanation. The web Market is the landing page and
+  must visibly show a short meaningful headline and supporting text, including
+  phone web. This supersedes S128's no-visible-introduction rule only on web.
+  Use a plain light Market background for readable text, following the owner's
+  later suggestion; do not change merchant showroom backgrounds or identity.
+  Use compact typography/spacing and retain the centered switch and labeled
+  filters. Native Market keeps the compact canvas; narrative remains in About
+  and its existing info sheet. About gives customers and businesses distinct,
+  clear sections, without excessive hype or repetitive slogans.
+- GIVEN metadata WHEN Market/About/root cards render THEN titles/descriptions
+  reflect the same current narrative in the active locale. No new site URL,
+  invented service, keyword stuffing or provider indexing claim is included.
+  The static default-language PWA manifest description carries the same showroom/
+  product/availability/direct-contact meaning; it is not a new localized endpoint.
+- GIVEN the transport launcher THEN its English title is “Want help with
+  transport/shipping?” with “Chat live with our agents” as supporting text.
+  Native Amharic/Oromo communicate help moving goods and a live conversation;
+  they may expand in their own grammar. Keep readable wrapping, accessible name
+  and target size on web/phone/Expo. No generic “Transport chat” primary label.
+- GIVEN transport intake THEN explain pickup→destination and that agents help
+  arrange transport, with simple From/To and contact labels/placeholders. Retain
+  the same fields/validation, contact recovery, chat entry and existing privacy
+  behavior. No last-mile-only “delivery”, fee/availability promise or change to
+  assignment/Join/read/inactivity. Owner transport remains its own context.
+
+Ready: FE-049 enabled en/am/om and source catalogs, FE-065 web space, FE-053 native
+parity, FE-019/BE-018 transport behavior and all current UI ports are known.
+Master §§3/10/18/19/22 are affected. Root owns web intro/About/SEO integration;
+chat_owner_audit owns shared copy, TSV/catalogs, active language boundaries and
+transport labels/tests after this Ready. Existing agents retain S130/S131 files.
+Record before/current wording, focused semantic/selector/metadata/layout tests
+and actual Chrome Market/About/language/transport intake on web/Expo before
+visual approval and inherited full/commit/rollout gates. No backend writes or
+external sends are needed; rollback restores UI/catalogs only.
+
 ## Problem and scope
+
+S101 extends the uncommitted S100 narrative with researched language revisions
+under FE-049. Retain the accepted English idea while explaining the online
+business page, organized offerings and direct questions in each locale. The
+social-post benefit may move into the paragraph. Primary sources, terminology,
+register decisions and independent-review limits are recorded in locales/README.md.
+Apply the same draft to shared web/native UI and prepared marketing text;
+existing published graphics, provider listings and version 5 stay unchanged.
 
 Launch traffic needs an obvious search, honest examples and Featured messaging,
 and owners must act on their own inquiries. Contextual interface writing across
@@ -308,7 +382,7 @@ stubbed to avoid automated provider traffic; this is neither physical-device
 proof nor a first-time-user comprehension study. Visual acceptance, full gates,
 commit/deployment and subsequent store/social alignment are still pending.
 
-## S99.10 — accepted proximity and organized-store narrative (implemented and visually accepted, L1)
+## S99.10 — previous accepted narrative (released; superseded locally by S100)
 
 The owner accepts the full message: "See how close the businesses selling products
 you’ve loved on social media are to you. Browse their products, styles and services
@@ -364,3 +438,80 @@ No Google review, closed activation, opt-in, physical-device or campaign publica
 is inferred. Source/receipt evidence: .local/play-s99/narrative-s9910/source-gates.json,
 console-setup/s9910-final-two-locale-console-read.json and
 store-presentation/proximity-v1/provider-readback/verification.json.
+
+## S100 — digital showrooms near and far (local candidate, L1)
+
+The October 15 owner instruction supersedes S99.10's primary message. Further
+same-day steering asks to include the social-post browsing problem in a short
+headline. GIVEN Market on web, responsive web or native WHEN the introduction
+renders THEN the local candidate heading is "Explore a business’s digital
+showroom, without the social media clutter." The owner's further refinement
+explicitly requires the digital/online setting in the lead. Each locale names
+an online display/page naturally, rather than requiring an English loanword.
+Supporting text invites discovery near and far,
+organized product/style/service browsing, availability checks and direct questions.
+The business/showroom invitation belongs in the heading, never below an unrelated
+slogan. This revised candidate still needs actual layout approval.
+
+GIVEN About WHEN read THEN distinct customer/business sections describe exploring
+organized collections/models/colors/styles and creating a showroom customers can
+browse and inquire about, avoiding the need to piece together social posts.
+Availability wording refers to merchant-provided states and confirmation, never
+real-time inventory or variant stock. Production-capacity/lead-time benefits
+describe merchant-written descriptions and questions about how much the business
+can make and how long it takes; do not promise dedicated production fields in
+the simplified public views. Related account entry, map guidance, metadata and prepared listing/campaign
+copy use this message. Social channels may remain a sharing/contact option; prior
+social-post searching and nearby-only promises are not the lead. Buttons keep
+short, accurate task names. No change to map/filter/result behavior, inquiries,
+checkout boundaries, transport, merchant data or permissions.
+
+GIVEN another supported locale WHEN selected THEN explain the showroom as a
+business's online display of offerings using everyday Amharic, Afaan Oromo,
+Somali or Tigrinya. Do not mechanically translate "step into", English idioms or
+button grammar; the meaning and direct-contact action must remain clear. Keep
+merchant content literal. Agent-authored wording is not native-speaker approval.
+
+Readiness: exact lead/support copy, audiences, all five locales and shared ports
+are known; no material choice remains. Affected master sections 1/3/18/19/22 and
+the storefront-positioning section. Validate shared message coverage, narrative
+claims, prepared marketing limits, web/mobile types and real local desktop/390/
+320 layouts with no overflow/console errors. Existing capture fixtures stub only
+map tiles; label Expo-browser evidence separately from device testing. Explicit
+approval of these new layouts precedes full/release gates and any scoped commit.
+Prior visual approval applies to the previous wording. Provider listings, built
+graphics, the closed-test binary and deployed web stay on their verified versions
+until a separately reviewed rollout; preserve prior evidence. Rollback restores
+copy/catalog files only; no database/provider operation is needed.
+
+October 15 focused evidence: the refined shared narrative, About, map/account
+entry, localized metadata and prepared marketing text pass narrative/claim,
+homepage-composition, ten localization and both web/mobile type checks. Each
+translated catalog has 1,414 messages; shared values reach client dictionaries.
+Final capture-storefront-copy.mjs --copy-only passes 74 desktop/390/320 web and
+Expo-browser states in all five languages, including actual local map markers,
+both About audiences and account entry, with no overflow, uncaught script or
+React hydration errors. Screens use stubbed map tiles, not a mock catalog. A prior
+page-load timeout is resolved using explicit visible-content/font/image/map
+readiness; screenshot caret style injection is prevented. Evidence lives under
+.local/showroom-narrative-s100/refined-screens/. New visual approval, full gates,
+scoped commit, built promotional assets and web/Android delivery remain pending;
+no device or independent native-speaker review is inferred.
+
+The subsequent owner wording refinement explicitly adds "digital" in English and
+an online setting in every other locale's lead. Both typechecks, narrative/launch
+claims and ten localization tests pass, including a regression for explicit online
+meaning. Twenty-one focused Market/metadata views pass at desktop/390/320 web and
+Expo-browser sizes; see .local/showroom-narrative-s100/digital-lead/screens/.
+Unchanged About/account layouts retain the preceding 74-state receipt. New visual
+approval is not inferred from the wording correction; full gates/commit/rollout
+remain pending.
+
+
+## S105 social-contact revision
+
+FE-066 / BE-055 supersede new customer messages to business inboxes. Only
+configured social accounts receive visitor handoffs; chosen products and the
+simple message follow the active UI language. Retained private history stays
+scoped. Public transport chat and authenticated owner support remain unchanged.
+Local implementation and review evidence are tracked in checklist S105.

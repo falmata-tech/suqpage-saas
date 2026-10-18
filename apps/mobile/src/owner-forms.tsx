@@ -1,12 +1,20 @@
+import {OWNER_PAGE_TASKS,type OwnerPageTask} from '../../../lib/owner-page-tasks';
+import {publicContactFields} from '../../../lib/business-profile-contacts';
 import {Sheet} from "./chrome";
+import ProductSupply from './ProductSupply';
+import {visibleCatalogProduct} from './catalog-products';
+import {isActiveProductKind} from '../../../lib/offerings';
 import {File as PickedFile} from 'expo-file-system';
 import {appendPickedImage} from './image-upload';
 import CitySelector from './CitySelector';
-import { HandleInput, HandleEditor } from "./owner-handle";
+import CountrySelector from './CountrySelector';
+import { HandleInput } from "./owner-handle";
 import StorefrontAccentPicker from "./StorefrontAccentPicker";
 import { ShowroomContent } from "./ShowroomContent";
-import React, { useState } from "react";
-import { View, Platform, Alert } from "react-native";
+import {useOwnerEditGuard} from './owner-edit-navigation';
+import OwnerEditConfirmation from './OwnerEditConfirmation';
+import React, { useEffect, useRef, useState } from "react";
+import { View, Platform,Pressable,Text } from "react-native";
 import { router } from "expo-router";
 import * as Crypto from "expo-crypto";
 import * as ImagePicker from "expo-image-picker";
@@ -14,6 +22,8 @@ import type { OwnerHome, Profile, Media, Offering } from "@suqpage/contracts";
 import { useApp, useLoad, request, auth, API } from "./runtime";
 import {
   Copy,
+  Icon,
+  colors,
   Card,
   Field,
   Button,
@@ -24,6 +34,7 @@ import {
   useOpenLink,
 } from "./ui";
 export function useAction() {
+  const flight = useRef(false);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [notice, setNotice] = useState("");
@@ -31,7 +42,10 @@ export function useAction() {
     busy,
     error,
     notice,
+    isBusy: () => flight.current,
     run: async (fn: () => Promise<void | false>, message = "Saved") => {
+      if (flight.current) return;
+      flight.current = true;
       setBusy(true);
       setError("");
       setNotice("");
@@ -41,6 +55,7 @@ export function useAction() {
       } catch (e) {
         setError(e instanceof Error ? e.message : "Please try again.");
       } finally {
+        flight.current = false;
         setBusy(false);
       }
     },
@@ -84,7 +99,7 @@ export function Setup() {
   const openLink = useOpenLink();
   const { t, ownerRequest, session } = useApp(),
     action = useAction();
-  const [placeId,setPlaceId]=useState("");
+  const [placeId,setPlaceId]=useState(""),[countryCode,setCountryCode]=useState("");
   const [name, setName] = useState(""),
     [phone, setPhone] = useState(""),
     [business, setBusiness] = useState(""),
@@ -114,7 +129,8 @@ export function Setup() {
         value={business}
         onChangeText={setBusiness}
       />
-      <CitySelector onSelect={place=>setPlaceId(place?.id || "")}/>
+      <CountrySelector value={countryCode} onChange={value=>{setCountryCode(value);setPlaceId("");}}/>
+      <CitySelector key={countryCode} countryCode={countryCode} onSelect={place=>setPlaceId(place?.id || "")}/>
       <HandleInput value={handle} onChange={setHandle} onReady={setHandleReady} refreshKey={handleRevision} />
       <Copy>{t("Category")}</Copy>
       <Status {...categories} retry={categories.reload} />
@@ -160,6 +176,7 @@ export function Setup() {
               handle,
               businessCategory: category,
               placeId,
+              countryCode,
               consent,
               idempotencyKey: key,
             }); } catch (error) { setHandleReady(false); setHandleRevision(v => v + 1); throw error; }
@@ -174,232 +191,100 @@ export function Setup() {
   );
 }
 export function PageEditor({
-  home,
-  reload,
-  initialPreview = false,
-  onSaved,
+  home, reload, initialPreview = false, initialTask = 'about', onSaved, onCancel,backLabel='Back to your page',
 }: {
-  home: OwnerHome;
-  reload: () => void;
-  initialPreview?: boolean;
-  onSaved?: () => void;
+  home: OwnerHome; reload: () => void; initialPreview?: boolean;
+  initialTask?: OwnerPageTask; onSaved?: () => void; onCancel?: () => void;backLabel?:'Back to account'|'Back to your page';
 }) {
-  const { t, ownerRequest } = useApp(),
-    action = useAction();
-  const fallback: Profile = {
-    template: "profile-v1",
-    coverStyle: "blended",
-    introduction: "",
-    about: home.shop.about,
-    heroImage: home.shop.cover,
-    videoUrl: home.shop.videoUrl,
-    accentColor: home.shop.accentColor,
-    contacts: home.shop.contacts,
-  };
-  const [content, setContent] = useState<Profile>(
-      home.draft?.content || fallback,
-    ),
-    [video, setVideo] = useState(""),
-    [videoKey, setVideoKey] = useState(() => Crypto.randomUUID());
-  const [version, setVersion] = useState(home.draft?.version),
-    [preview, setPreview] = useState(initialPreview),
-    [colorOpen, setColorOpen] = useState(false);
-  const [publicationReview, setPublicationReview] = useState<{
-    version: number;
-    revision: number;
-    issues: OwnerHome["issues"];
-  } | null>(null);
-  const update = (key: keyof Profile, value: unknown) =>
-    setContent((p) => ({ ...p, [key]: value }));
-  async function reviewPublication() {
-    let reviewVersion = version;
-    if (JSON.stringify(content) !== JSON.stringify(home.draft?.content || fallback) || !version) {
-      const saved = await ownerRequest<{ version: number }>("owner/page", {
-        action: version ? "save" : "start", version, content,
-      });
-      reviewVersion = saved.version;
-      setVersion(saved.version);
-    }
-    const current = await ownerRequest<OwnerHome>("owner/home");
-    if (current.shop.status !== "draft" || !current.draft) { reload(); return; }
-    if (reviewVersion && current.draft.version !== reviewVersion) {
-      setContent(current.draft.content);
-      setVersion(current.draft.version);
-      throw new Error("The draft has changed. Reload and review it before publishing.");
-    }
-    setVersion(current.draft.version);
-    setPublicationReview({
-      version: current.draft.version,
-      revision: current.publicationRevision,
-      issues: current.issues,
-    });
+  const {t,ownerRequest}=useApp(),action=useAction(),flight=useRef(false);
+  const fallback:Profile={template:'profile-v1',coverStyle:'blended',introduction:'',about:home.shop.about,heroImage:home.shop.cover,videoUrl:home.shop.videoUrl,accentColor:home.shop.accentColor,contacts:home.shop.contacts};
+  const initial=home.draft?.content||fallback;
+  const [content,setContent]=useState<Profile>(initial),[savedContent,setSavedContent]=useState<Profile>(initial);
+  const [version,setVersion]=useState(home.draft?.version),[preview,setPreview]=useState(initialPreview||initialTask==='color');
+  const [task,setTask]=useState<OwnerPageTask>(initialTask),[colorOpen,setColorOpen]=useState(initialTask==='color');
+  const [assistance,setAssistance]=useState(home.draft?.assistanceEnabled??false),[savedAssistance,setSavedAssistance]=useState(home.draft?.assistanceEnabled??false);
+  const dirty=JSON.stringify(content)!==JSON.stringify(savedContent),unsaved=dirty||assistance!==savedAssistance;
+  const signature=JSON.stringify({content,assistance});
+  const guard=useOwnerEditGuard({dirty:unsaved,signature,busy:action.busy,isBusy:action.isBusy,discard:()=>{setContent(savedContent);setAssistance(savedAssistance);}});
+  const [publicationReview,setPublicationReview]=useState<{version:number;revision:number;issues:OwnerHome['issues']}|null>(null);
+  useEffect(()=>{setTask(initialTask);setPreview(initialPreview||initialTask==='color');setColorOpen(initialTask==='color');},[initialTask,initialPreview]);
+  const update=(key:keyof Profile,value:unknown)=>{guard.changed();setContent(current=>({...current,[key]:value}));};
+  function run(fn:()=>Promise<void|false>,message='Saved'){
+    if(flight.current)return;flight.current=true;
+    void action.run(async()=>{try{return await fn();}finally{flight.current=false;}},message);
   }
-  function openMissing(label: string) {
+  async function saveContent(){
+    const saved=await ownerRequest<{version:number}>('owner/page',{action:version?'save':'start',version,content});
+    setVersion(saved.version);setSavedContent(content);return saved.version;
+  }
+  async function saveTask(){
+    const checkpoint=guard.checkpoint();
+    const currentVersion=task!=='team'||dirty||!version?await saveContent():version;
+    if(task==='team'||assistance!==savedAssistance){
+      const saved=await ownerRequest<{version:number}>('owner/page',{action:'assistance',version:currentVersion,enabled:assistance});
+      setVersion(saved.version);setSavedAssistance(assistance);
+    }
+    guard.complete(onSaved,signature,checkpoint);
+  }
+  async function reviewPublication(){
+    let reviewVersion=version;
+    if(dirty||!version)reviewVersion=await saveContent();
+    const current=await ownerRequest<OwnerHome>('owner/home');
+    if(current.shop.status!=='draft'||!current.draft){reload();return;}
+    if(reviewVersion&&current.draft.version!==reviewVersion){setContent(current.draft.content);setSavedContent(current.draft.content);setVersion(current.draft.version);throw Error('The draft has changed. Reload and review it before publishing.');}
+    setVersion(current.draft.version);
+    setPublicationReview({version:current.draft.version,revision:current.publicationRevision,issues:current.issues});
+  }
+  function switchTask(next:OwnerPageTask){
+    setTask(next);setPreview(next==='color');setColorOpen(next==='color');
+    router.setParams({view:next});
+  }
+  function openMissing(label:string){
     setPublicationReview(null);
     if(label==='Replace or remove sample offerings')router.push({pathname:'/owner/[section]',params:{section:'products'}});
     else if(label==='Choose your business location')router.push({pathname:'/owner/[section]',params:{section:'business'}});
-    else {setPreview(false);router.setParams({view:'edit'});}
+    else switchTask(label==='Add your real contact details'?'contacts':'about');
   }
-  return (
-    <>
-      <Copy big>{t("Your page")}</Copy>
-      <ActionStatus state={action}/>
-
-      {preview ? (
-        <>
-          <Copy muted>{t(home.shop.status === "active" ? "Your page is live" : "Private until you publish")}</Copy>
-          <View style={s.row}>
-            <View style={{ flex: 1 }}><Button secondary label={t("Edit")} onPress={() => {router.setParams({view:"edit"}); setPreview(false);}} /></View>
-            {home.shop.status === "draft" && <View style={{ flex: 1 }}><Button label={t("Publish")} disabled={action.busy} onPress={() => void action.run(reviewPublication, "")} /></View>}
-          </View>
-          {colorOpen || JSON.stringify(content) !== JSON.stringify(home.draft?.content || fallback) ? <View style={{ flexDirection: 'row', gap: 8 }}>
-          <View style={{ flex: 1 }}><Button secondary label={t("Page color")} onPress={() => setColorOpen(!colorOpen)} /></View>
-          {colorOpen && <StorefrontAccentPicker value={content.accentColor || ""} onChange={v => update("accentColor", v)} disabled={action.busy} onClose={() => setColorOpen(false)} />}
-          <View style={{ flex: 1 }}><Button
-            disabled={action.busy}
-            label={t("Save changes")}
-            onPress={() =>
-              void action.run(async () => {
-                const result = await ownerRequest<{ version: number }>(
-                  "owner/page",
-                  { action: version ? "save" : "start", version, content },
-                );
-                setVersion(result.version);
-                onSaved?.();
-              })
-            }
-          /></View>
-          </View> : null}
-          <ShowroomContent preview shop={{
-            ...home.shop,
-            about: content.about || content.introduction,
-            cover: content.heroImage,
-            videoUrl: content.videoUrl,
-            accentColor: content.accentColor,
-            contacts: content.contacts || home.shop.contacts,
-            products: home.shop.products.filter(p => p.published),
-          }} />
-        </>
-      ) : (
-        <>
-          {!onSaved && <HandleEditor initialHandle={home.shop.handle} onSaved={reload} />}
-          <Photo refPath={content.heroImage} height={210} privateImage />
-          <Button
-            secondary
-            disabled={action.busy}
-            label={t("Cover photo")}
-            onPress={() =>
-              void action.run(async () => {
-                const picked = await pickImages();
-                if (!picked.length) return false;
-                const form = new FormData();
-                await addAsset(form, "file", picked[0]);
-                const r = await ownerRequest<{ ref: string }>(
-                  "owner/cover",
-                  undefined,
-                  form,
-                );
-                update("heroImage", r.ref);
-              }, "Photo ready. Save your page to apply it.")
-            }
-          />
-          <Copy muted>{t("TikTok, YouTube, Facebook videos or Instagram Reels")}</Copy>
-          <Field label={t("Business video")} value={content.videoUrl} onChangeText={value=>update("videoUrl",value)} autoCapitalize="none"/>
-          <Field
-            label={t("About the business")}
-            multiline
-            value={content.about}
-            onChangeText={(v) => update("about", v)}
-          />
-          <View style={s.wrap}>
-            {["blended", "overlay"].map((c) => (
-              <Chip
-                key={c}
-                label={t(c === "blended" ? "Blended" : "Overlay")}
-                selected={content.coverStyle === c}
-                onPress={() => update("coverStyle", c)}
-              />
-            ))}
-          </View>
-          <Button secondary label={t("Page color")} onPress={() => { setPreview(true); setColorOpen(true); }} />
-          <Copy big>{t("Public contact details")}</Copy>
-          {(
-            [
-              "phone",
-              "email",
-              "whatsapp",
-              "telegram",
-              "tiktok",
-              "instagram",
-              "facebook",
-              "website",
-            ] as const
-          ).map((key) => (
-            <Field
-              key={key}
-              label={t(
-                {
-                  phone: "Phone",
-                  email: "Email",
-                  whatsapp: "WhatsApp",
-                  telegram: "Telegram",
-                  tiktok: "TikTok",
-                  instagram: "Instagram",
-                  facebook: "Facebook",
-                  website: "Website",
-                }[key],
-              )}
-              value={content.contacts?.[key] || ""}
-              autoCapitalize="none"
-              onChangeText={(v) =>
-                setContent((p) => ({
-                  ...p,
-                  contacts: { ...p.contacts, [key]: v },
-                }))
-              }
-            />
-          ))}
-          <Button
-            secondary
-            label={t("Preview")}
-            onPress={() => setPreview(true)}
-          />
-          <Button
-            disabled={action.busy}
-            label={t("Save changes")}
-            onPress={() =>
-              void action.run(async () => {
-                const result = await ownerRequest<{ version: number }>(
-                  "owner/page",
-                  { action: version ? "save" : "start", version, content },
-                );
-                setVersion(result.version);
-                onSaved?.();
-              })
-            }
-          />
-          {home.shop.status === "draft" && <Button label={t("Publish page")} disabled={action.busy} onPress={()=>void action.run(reviewPublication,'')}/>}
-
-        </>
-      )}
-      {publicationReview&&<Sheet visible title={t('Publish page')} onClose={()=>{if(!action.busy)setPublicationReview(null);}}><ActionStatus state={action}/>
-        <Copy muted>{t('Your page and listed products or services will be visible to customers. You can update them any time.')}</Copy>
-        {publicationReview.issues.map(issue=><Button key={issue.label} secondary label={t(issue.label)} onPress={()=>openMissing(issue.label)}/>)}
-        <Button label={t('Publish page')} disabled={action.busy||publicationReview.issues.length>0} onPress={()=>void action.run(async()=>{await ownerRequest('owner/publish',{version:publicationReview.version,revision:publicationReview.revision});setPublicationReview(null);if(onSaved)onSaved();else reload();},'Your page is live')}/>
-        <Button secondary label={t('Cancel')} disabled={action.busy} onPress={()=>setPublicationReview(null)}/>
-      </Sheet>}
-      <ActionStatus state={action} />
-    </>
-  );
+  function cancel(){guard.requestLeave(()=>onCancel?.());}
+  const title=preview&&task!=='color'?'Your page':OWNER_PAGE_TASKS.find(item=>item.key===task)!.label;
+  return <>
+    <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
+      <Pressable accessibilityRole="button" accessibilityLabel={t(backLabel)} disabled={action.busy} onPress={cancel} style={{minHeight:48,minWidth:120,flex:1,flexDirection:'row',alignItems:'center',gap:6,paddingVertical:8,opacity:action.busy ? 0.45 : 1}}><Icon name="back" size={18} color={colors.brand}/><Text style={{color:colors.brand,fontSize:14,lineHeight:20,fontWeight:'600',flexShrink:1}}>{t(backLabel)}</Text></Pressable>
+      {!preview&&<Pressable accessibilityRole="button" accessibilityLabel={t('Preview')} disabled={action.busy} onPress={()=>setPreview(true)} style={{minHeight:48,minWidth:84,maxWidth:'45%',paddingVertical:8,paddingHorizontal:10,justifyContent:'center',opacity:action.busy ? 0.45 : 1}}><Text style={{color:colors.brand,fontSize:14,lineHeight:20,fontWeight:'600',flexShrink:1,textAlign:'right'}}>{t('Preview')}</Text></Pressable>}
+    </View>
+    <Copy big heading>{t(title)}</Copy>
+    <ActionStatus state={action}/>
+    <Copy muted>{t(unsaved?'Unsaved changes':home.shop.status==='active'?'Your page is live':'Private until you publish')}</Copy>
+    {preview?<>
+      <View style={s.row}><View style={{flex:1}}><Button secondary label={t('Edit')} disabled={action.busy} onPress={()=>{setPreview(false);if(task==='color')switchTask('about');}}/></View>{task!=='color'&&home.shop.status==='draft'&&<View style={{flex:1}}><Button label={t('Publish')} disabled={action.busy} onPress={()=>run(reviewPublication,'')}/></View>}</View>
+      {task==='color'&&<Button secondary label={t('Page color')} disabled={action.busy} onPress={()=>setColorOpen(true)}/>}
+      {colorOpen&&<StorefrontAccentPicker value={content.accentColor||''} onChange={value=>update('accentColor',value)} disabled={action.busy} onClose={()=>setColorOpen(false)}/>}
+      <ShowroomContent preview shop={{...home.shop,about:content.about||content.introduction,cover:content.heroImage,videoUrl:content.videoUrl,accentColor:content.accentColor,contacts:content.contacts||home.shop.contacts,products:home.shop.products.filter(visibleCatalogProduct)}}/>
+    </>:<>
+      {task==='about'&&<Card><Field label={t('About the business')} hideLabel multiline value={content.about||content.introduction} maxLength={3000} editable={!action.busy} onChangeText={value=>{guard.changed();setContent(current=>({...current,introduction:'',about:value}));}}/><Copy muted>{t('Tell visitors what makes your shop and products worth exploring.')}</Copy></Card>}
+      {task==='video'&&<Card><Copy muted>{t('TikTok, YouTube, Facebook videos or Instagram Reels')}</Copy><Field label={t('Business video')} hideLabel placeholder={t('Video link')} value={content.videoUrl} maxLength={500} editable={!action.busy} onChangeText={value=>update('videoUrl',value)} autoCapitalize="none"/></Card>}
+      {task==='cover'&&<Card><Photo refPath={content.heroImage} height={210} privateImage/><Button secondary label={t('Choose cover photo')} disabled={action.busy} onPress={()=>run(async()=>{const picked=await pickImages();if(!picked.length)return false;const form=new FormData();await addAsset(form,'file',picked[0]);const result=await ownerRequest<{ref:string}>('owner/cover',undefined,form);update('heroImage',result.ref);},'Photo ready. Save your page to apply it.')}/></Card>}
+      {task==='contacts'&&[
+        {label:'Social accounts',fields:publicContactFields.filter(field=>['whatsapp','telegram','tiktok','instagram','facebook'].includes(field.key))},
+        {label:'Business contacts',fields:publicContactFields.filter(field=>['phone','email','website'].includes(field.key))},
+      ].map(group=><Card key={group.label}><Copy heading>{t(group.label)}</Copy>{group.fields.map(field=><Field key={field.key} label={t(field.label)} value={content.contacts?.[field.key]||''} maxLength={500} editable={!action.busy} autoCapitalize="none" keyboardType={field.type==='tel'?'phone-pad':field.type==='email'?'email-address':'default'} onChangeText={value=>{guard.changed();setContent(current=>({...current,contacts:{...current.contacts,[field.key]:value}}));}}/>)}</Card>)}
+      {task==='team'&&<Card><Chip label={t('Allow team editing')} selected={assistance} minHeight={48} onPress={()=>{if(!action.isBusy()){guard.changed();setAssistance(value=>!value);}}}/><Copy muted>{t('The team can prepare changes. Your Save applies them to your live page.')}</Copy></Card>}
+    </>}
+    <View style={{flexDirection:'row',alignItems:'stretch',gap:10,flexWrap:'wrap'}}>{(!preview||task==='color'||unsaved)&&<View style={{flex:1,minWidth:120}}><Button label={t('Save changes')} wrapLabel disabled={action.busy} onPress={()=>run(saveTask)}/></View>}<View style={{flex:1,minWidth:120}}><Button secondary label={t('Cancel')} wrapLabel disabled={action.busy} onPress={cancel}/></View></View>
+    {publicationReview&&<Sheet visible title={t('Publish page')} onClose={()=>{if(!action.busy)setPublicationReview(null);}}><ActionStatus state={action}/><Copy muted>{t('Your page and listed products will be visible to customers. You can update them any time.')}</Copy>{publicationReview.issues.map(issue=><Button key={issue.label} secondary label={t(issue.label)} onPress={()=>openMissing(issue.label)}/>)}<Button label={t('Publish page')} disabled={action.busy||publicationReview.issues.length>0} onPress={()=>run(async()=>{const checkpoint=guard.checkpoint();await ownerRequest('owner/publish',{version:publicationReview.version,revision:publicationReview.revision});setPublicationReview(null);guard.complete(onSaved||reload,signature,checkpoint);},'Your page is live')}/><Button secondary label={t('Cancel')} disabled={action.busy} onPress={()=>setPublicationReview(null)}/></Sheet>}
+    <OwnerEditConfirmation guard={guard}/>
+  </>;
 }
 export function ProductEditor({
   home,
   id,
   onSaved,
+  onCancel,
 }: {
   home: OwnerHome;
   id?: string;
   onSaved: () => void;
+  onCancel: () => void;
 }) {
   const { t, ownerRequest } = useApp(),
     action = useAction();
@@ -411,7 +296,7 @@ export function ProductEditor({
         ? ""
         : String(product.priceMinor / 100),
     ),
-    [kind, setKind] = useState(product?.kind || "standard_product"),
+    [kind, setKind] = useState(product?.kind==='service'?"":product?.kind || "standard_product"),
     [availability, setAvailability] = useState(
       product?.availability || "available",
     ),
@@ -419,38 +304,47 @@ export function ProductEditor({
     [media, setMedia] = useState<Media[]>(product?.media || (home.exampleVideoRef?[{kind:"video",ref:home.exampleVideoRef}]:[])),
     [assets, setAssets] = useState<ImagePicker.ImagePickerAsset[]>([]),
     [video, setVideo] = useState(""),
-    [key] = useState(() => Crypto.randomUUID()),
-    [videoKey, setVideoKey] = useState(() => Crypto.randomUUID());
+    [key] = useState(() => Crypto.randomUUID());
+  const values={name,description,price,kind,availability,published,media,assets,video};
+  const baseline=useRef(values);
+  const signature=JSON.stringify(values),guard=useOwnerEditGuard({dirty:signature!==JSON.stringify(baseline.current),signature,busy:action.busy,isBusy:action.isBusy,discard:()=>{
+    const saved=baseline.current;setName(saved.name);setDescription(saved.description);setPrice(saved.price);setKind(saved.kind);setAvailability(saved.availability);setPublished(saved.published);setMedia(saved.media);setAssets(saved.assets);setVideo(saved.video);
+  }});
   if (id && !product) return <Copy>{t("Product not found.")}</Copy>;
   return (
     <>
-      <Copy big>{t(product ? "Edit offering" : "Add product or service")}</Copy>
-      <Field label={t("Name")} value={name} onChangeText={setName} />
+      <Copy big heading>{t(product ? "Edit product" : "Add product")}</Copy>
+      <Field label={t("Name")} value={name} onChangeText={value=>{guard.changed();setName(value);}} editable={!action.busy}/>
+      <Copy>{t('How is this product supplied?')}</Copy>
       <View style={s.wrap}>
         {[
-          ["standard_product", "Product"],
-          ["service", "Service"],
+          ["standard_product", "Ready to ship"],
           ["made_to_order", "Made to order"],
         ].map(([k, label]) => (
           <Chip
             key={k}
             label={t(label)}
             selected={kind === k}
-            onPress={() => setKind(k)}
+            minHeight={48}
+            onPress={() => {if(!action.isBusy()){guard.changed();setKind(k);}}}
           />
         ))}
       </View>
+      {!kind&&<Copy muted>{t('Choose Ready to ship or Made to order before saving.')}</Copy>}
+      {kind&&!isActiveProductKind(kind)&&<Copy muted>{t('The current supply type is kept unless you choose an option.')}</Copy>}
       <Field
         label={t("Description")}
         value={description}
-        onChangeText={setDescription}
+        onChangeText={value=>{guard.changed();setDescription(value);}}
         multiline
+        editable={!action.busy}
       />
       <Field
         label={t("Price in ETB")}
         value={price}
-        onChangeText={setPrice}
+        onChangeText={value=>{guard.changed();setPrice(value);}}
         keyboardType="decimal-pad"
+        editable={!action.busy}
       />
       <Copy>{t("Photos and videos")}</Copy>
       {media.map((m, i) => (
@@ -463,20 +357,22 @@ export function ProductEditor({
           <View style={s.row}>
             <Button
               secondary
-              disabled={i === 0}
+              disabled={action.busy || i === 0}
               label={t("Move up")}
-              onPress={() =>
+              onPress={() => {
+                if(action.isBusy())return;guard.changed();
                 setMedia((old) => {
                   const copy = [...old];
                   [copy[i - 1], copy[i]] = [copy[i], copy[i - 1]];
                   return copy;
-                })
-              }
+                });
+              }}
             />
             <Button
               secondary
+              disabled={action.busy}
               label={t("Remove")}
-              onPress={() => setMedia((old) => old.filter((_, j) => i !== j))}
+              onPress={() => {if(!action.isBusy()){guard.changed();setMedia((old) => old.filter((_, j) => i !== j));}}}
             />
           </View>
         </Card>
@@ -486,8 +382,9 @@ export function ProductEditor({
           <Photo refPath={a.uri} height={130} />
           <Button
             secondary
+            disabled={action.busy}
             label={t("Remove")}
-            onPress={() => setAssets((old) => old.filter((_, j) => j !== i))}
+            onPress={() => {if(!action.isBusy()){guard.changed();setAssets((old) => old.filter((_, j) => j !== i));}}}
           />
         </Card>
       ))}
@@ -505,10 +402,11 @@ export function ProductEditor({
               8
             )
               throw Error("Use up to 8 photos.");
-            setAssets((old) => [...old, ...chosen]);
+            if(chosen.length){guard.changed();setAssets((old) => [...old, ...chosen]);}
           }, "")
         }
       />
+      <Copy>{t('Availability')}</Copy>
       <View style={s.wrap}>
         {[
           ["available", "Available"],
@@ -520,22 +418,27 @@ export function ProductEditor({
             key={v}
             label={t(l)}
             selected={availability === v}
-            onPress={() => setAvailability(v)}
+            minHeight={48}
+            onPress={() => {if(!action.isBusy()){guard.changed();setAvailability(v);}}}
           />
         ))}
       </View>
-      <Card><Copy muted>{t("TikTok, YouTube, Facebook videos or Instagram Reels")}</Copy><Field label={t("Video link")} value={video} onChangeText={setVideo} autoCapitalize="none"/><Button secondary disabled={action.busy||!video.trim()||media.filter(item=>item.kind==='video').length>=4} label={t('Add video')} onPress={()=>void action.run(async()=>{const result=await ownerRequest<{ref:string}>('owner/video-link',{url:video});setMedia(current=>[...current,{kind:'video',ref:result.ref}]);setVideo('');return false;})}/></Card>
+      <ProductSupply kind={kind} availability={availability}/>
+      <Card><Copy muted>{t("TikTok, YouTube, Facebook videos or Instagram Reels")}</Copy><Field label={t("Video link")} value={video} onChangeText={value=>{guard.changed();setVideo(value);}} editable={!action.busy} autoCapitalize="none"/><Button secondary disabled={action.busy||!video.trim()||media.filter(item=>item.kind==='video').length>=4} label={t('Add video')} onPress={()=>void action.run(async()=>{const result=await ownerRequest<{ref:string}>('owner/video-link',{url:video});guard.changed();setMedia(current=>[...current,{kind:'video',ref:result.ref}]);setVideo('');return false;})}/></Card>
       <Chip
         label={t("Show on my page")}
         selected={published}
-        onPress={() => setPublished(!published)}
+        onPress={() => {if(!action.isBusy()){guard.changed();setPublished(!published);}}}
       />
       <ActionStatus state={action} />
-      <Button
+      <View style={{flexDirection:'row',alignItems:'stretch',gap:10,flexWrap:'wrap'}}><View style={{flex:1,minWidth:120}}><Button
         disabled={action.busy || !name.trim()}
         label={t("Save changes")}
+        wrapLabel
         onPress={() =>
           void action.run(async () => {
+            const checkpoint=guard.checkpoint();
+            if(!kind)throw Error('Choose Ready to ship or Made to order before saving.');
             const value = price.trim() === "" ? null : Number(price);
             if (value !== null && (!Number.isFinite(value) || value < 0))
               throw Error("Enter a valid price.");
@@ -546,7 +449,7 @@ export function ProductEditor({
                 name,
                 description,
                 priceMinor: value === null ? null : Math.round(value * 100),
-                offeringKind: kind,
+                ...(isActiveProductKind(kind)?{offeringKind:kind}:{}),
                 availability,
                 isPublished: published,
                 expectedContentVersion: home.shop.version,
@@ -560,12 +463,12 @@ export function ProductEditor({
               undefined,
               form,
             );
-            onSaved();
+            baseline.current=values;
+            guard.complete(onSaved,signature,checkpoint);
           })
         }
-      />
-
-
+      /></View><View style={{flex:1,minWidth:120}}><Button secondary wrapLabel disabled={action.busy} label={t('Cancel')} onPress={()=>guard.requestLeave(onCancel)}/></View></View>
+      <OwnerEditConfirmation guard={guard}/>
     </>
   );
 }

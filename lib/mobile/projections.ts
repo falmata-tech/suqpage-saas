@@ -10,6 +10,9 @@ import type { DiscoveryShowroom, MarketplaceDiscoveryView } from "../discovery";
 import { productMedia } from "../product-media";
 import { legacyPublicContacts } from "../business-profile-contacts";
 import { DISCOVERY_INDUSTRIES } from "../discovery-contract";
+import {isPublicProduct} from '../offerings';
+import {approvedDemoContactMethods} from '../demo-inquiry-policy';
+import {showroomCategories,showroomProductCategory} from '../showroom-categories';
 export function offeringDto(p: Product): Offering {
   return {
     id: p.id,
@@ -27,8 +30,9 @@ export function offeringDto(p: Product): Offering {
     })),
   };
 }
-export function shopDto(c: Catalog, p: ShopPageContent): Shop {
+export function shopDto(c: Catalog, p: ShopPageContent, includeRetired = false): Shop {
   const b = c.business;
+  const categories = showroomCategories(c);
   return {
     id: b.id,
     handle: b.handle,
@@ -39,10 +43,15 @@ export function shopDto(c: Catalog, p: ShopPageContent): Shop {
     videoUrl: p.videoUrl,
     accentColor: p.accentColor,
     contacts: p.contacts ?? legacyPublicContacts(b),
-    products: c.products.map(offeringDto),
+    products: c.products.filter(product=>includeRetired||Boolean(product.is_published)&&isPublicProduct(product)).map(product => {
+      const category = showroomProductCategory(b.id, categories, product);
+      return {...offeringDto(product), ...(category ? {categoryId:category.id,categoryName:category.name} : {})};
+    }),
+    ...(categories.length ? {categories:categories.map(({id,name})=>({id,name}))} : {}),
     version: b.content_version,
     status: b.status,
     isDemo: Boolean(b.is_demo),
+    approvedDemoContactMethods: approvedDemoContactMethods(b.is_demo, p.contacts ?? legacyPublicContacts(b), process.env.SUQPAGE_DEMO_INQUIRY_PHONE),
   };
 }
 export function mapShopDto(s: DiscoveryShowroom): MapShop {
@@ -52,6 +61,7 @@ export function mapShopDto(s: DiscoveryShowroom): MapShop {
     name: s.name,
     description: s.description,
     heroImagePath: s.heroImagePath,
+    countryCode:s.countryCode,cityId:s.cityId,
     city: s.city,
     region: s.region,
     latitude: s.latitude,
@@ -70,6 +80,10 @@ export function marketDto(v: MarketplaceDiscoveryView): Market {
     image: p.imagePath,
     handle: p.businessHandle,
     businessName: p.businessName,
+    city: p.city,
+    region: p.region,
+    offeringKind:p.offeringKind,
+    availability:p.availability,
   }));
   const businesses = v.searchBusinesses.map((b) => ({
     kind: "business" as const,
@@ -94,7 +108,8 @@ export function marketDto(v: MarketplaceDiscoveryView): Market {
       key: c.key,
       label: c.shortLabel,
     })),
-    places: v.places.map((p) => ({ key: p.key, label: p.label })),
+    places: v.places.map((p) => ({ key: p.key, label: p.label,countryCode:p.countryCode })),
+    countries:v.countries,
     page: v.resultPage.page,
     pages: v.resultPage.totalPages,
     total: v.resultPage.totalItems,

@@ -26,6 +26,7 @@ import {
   Package,
   Palette,
   RefreshCw,
+  Route,
   CalendarClock,
   Settings2,
   ShieldCheck,
@@ -71,6 +72,7 @@ export type WorkspaceNavIcon =
   | "supportAgents"
   | "reports"
   | "transport"
+  | "tracking"
   | "schedule"
   | "switch"
   | "workspace";
@@ -97,6 +99,7 @@ const icons: Record<WorkspaceNavIcon, LucideIcon> = {
   supportAgents: Headphones,
   reports: Flag,
   transport: Truck,
+  tracking: Route,
   schedule: CalendarClock,
   switch: RefreshCw,
   workspace: Store,
@@ -111,7 +114,7 @@ const mobileLabels: Record<string, string> = {
   "Business details": "Details",
   "Customer inquiries": "Inquiries",
   "My offerings": "Offerings",
-  "Products & services": "Items",
+  "Products": "Items",
   "Platform overview": "Overview",
   "Page project": "Page",
   "Your page": "Page",
@@ -158,9 +161,9 @@ function NavigationGroups({ groups, onNavigate, clientNavigation=false, supportQ
           })}
         </div>
       ))}
-      {!clientNavigation && <div className="workspace-nav-group workspace-nav-utility">
+      {<div className="workspace-nav-group workspace-nav-utility">
         <span className="workspace-nav-label">{t("Account")}</span>
-        <Link href="/dashboard/account" aria-current={pathname === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}><ShieldCheck aria-hidden="true" size={17}/><span>{t("Account security")}</span><NavigationPendingIndicator label={t("Account security")} /></Link>
+        {!clientNavigation&&<Link href="/dashboard/account" aria-current={pathname === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}><ShieldCheck aria-hidden="true" size={17}/><span>{t("Account security")}</span><NavigationPendingIndicator label={t("Account security")} /></Link>}
         <Link href="/" target="_blank" rel="noreferrer" onClick={onNavigate}><ExternalLink aria-hidden="true" size={17}/><span>{t("Public site")}</span><ExternalLink className="workspace-nav-external" aria-hidden="true" size={14}/></Link>
         <form action={logoutAction}><button type="submit"><LogOut aria-hidden="true" size={17}/><span>{t("Sign out")}</span></button></form>
       </div>}
@@ -194,7 +197,7 @@ export default function WorkspaceNavigation({
   const openerRef = useRef<HTMLButtonElement>(null);
   const previousRoute = useRef(routeKey);
   const allItems = groups.flatMap((group) => group.items);
-  const priority: WorkspaceNavIcon[] = staffNavigation ? ["support", "transport", "reports", "staff", "overview"] : ["overview", "businesses", "offerings", "pageEditor", "inquiries", "support"];
+  const priority: WorkspaceNavIcon[] = staffNavigation ? ["support", "transport", "tracking", "reports", "staff", "overview"] : ["overview", "businesses", "offerings", "pageEditor", "inquiries", "support"];
   const primaryItems = priority
     .map((icon) => allItems.find((item) => item.icon === icon && !item.external))
     .filter((item): item is WorkspaceNavItem => Boolean(item))

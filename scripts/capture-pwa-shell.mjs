@@ -5,6 +5,12 @@ import path from "node:path";
 import { localBrowserQuery, localBrowserCookies, closeLocalBrowserRuntime } from "./local-browser-auth.mjs";
 import { chromium } from "@playwright/test";
 
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
 const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3101";
 const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "mirtpage-pwa-shell");
 fs.mkdirSync(output, { recursive: true });
@@ -18,9 +24,10 @@ async function noOverflow(page, label) {
 }
 
 async function cleanPage(browser, viewport, authenticated = false) {
-  const context = await browser.newContext({ viewport });
+  const context = await browser.newContext({serviceWorkers: 'block', viewport });
   if (authenticated) await context.addCookies(cookies);
   const page = await context.newPage();
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
@@ -124,4 +131,5 @@ try {
 } finally {
   await browser.close();
   await closeLocalBrowserRuntime();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests();
 }

@@ -2,21 +2,21 @@
 import { useUiText } from "@/lib/i18n/ui";
 
 
-import { useEffect, useState, type ReactNode } from "react";
-import { useFormStatus } from "react-dom";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import {unstable_rethrow} from "next/navigation";
 import LoadingBar from "@/components/LoadingBar";
 import ProductMediaFields from "@/components/ProductMediaFields";
 import ProductOptionsFields from "@/components/ProductOptionsFields";
 import type { Catalog, Product } from "@/lib/types";
+import type {OwnerEditResult} from "@/lib/owner-edit-contract";
+import useFormExitGuard from "./useFormExitGuard";
 import {
-  availabilityLabel,
-  offeringKindDescriptions,
-  offeringKindLabels,
-  offeringKinds,
+  activeProductKinds,
+  isActiveProductKind,
+  productSupplyLabel,
   type OfferingKind,
 } from "@/lib/offerings";
-function ProductFormControls({ children }: { children: ReactNode }) {
-  const { pending } = useFormStatus();
+function ProductFormControls({ children, pending }: { children: ReactNode; pending: boolean }) {
   const [ready, setReady] = useState(false);
   const t = useUiText();
   useEffect(() => setReady(true), []);
@@ -26,7 +26,7 @@ function ProductFormControls({ children }: { children: ReactNode }) {
       <div className="field full" hidden={!busy}>
         {busy && <LoadingBar label={pending ? t("Saving...") : undefined} />}
       </div>
-      <fieldset style={{ display: "contents" }} aria-label={t("Products & services")} aria-busy={busy} disabled={busy}>
+      <fieldset style={{ display: "contents" }} aria-label={t("Products")} aria-busy={busy} disabled={busy}>
         {children}
       </fieldset>
     </>
@@ -41,24 +41,33 @@ export default function ProductForm({
   idempotencyKey,
   staffMode,
   exampleVideoRef,
+  cancelHref = `/dashboard/products?business=${businessId}`,
+  listOrigin,
 }: {
   catalog: Catalog;
   product?: Product;
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => OwnerEditResult | Promise<OwnerEditResult>;
   businessId: number;
   contentVersion: number;
   idempotencyKey: string;
   staffMode: boolean;
   exampleVideoRef?:string;
+  cancelHref?:string;
+  listOrigin?:{q?:string;page?:string};
 }) {
   const t = useUiText();
+  const formRef = useRef<HTMLFormElement>(null);
+  const inFlight = useRef(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const exit = useFormExitGuard(formRef, inFlight);
   const [name, setName] = useState(product?.name || "");
   const [description, setDescription] = useState(product?.description || "");
   const [availability, setAvailability] = useState(
     product?.availability || "available",
   );
-  const [offeringKind, setOfferingKind] = useState<OfferingKind>(
-    product?.offering_kind || "standard_product",
+  const [offeringKind, setOfferingKind] = useState<OfferingKind | "">(
+    !product ? "standard_product" : isActiveProductKind(product.offering_kind) ? product.offering_kind : "",
   );
   const [price, setPrice] = useState(
     product?.price_minor == null ? "" : (product.price_minor / 100).toFixed(product.price_minor % 100 ? 2 : 0),
@@ -68,9 +77,27 @@ export default function ProductForm({
   const [imagePreview, setImagePreview] = useState(product?.image_path || "");
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   return (
-    <form action={async formData => {for (const file of galleryFiles) formData.append("mediaImages",file); await action(formData);}} className="panel form-grid product-upkeep-form">
-      <ProductFormControls>
+    <form ref={formRef} aria-busy={saving} onSubmit={async event => {
+      event.preventDefault();
+      if (inFlight.current) return;
+      const formData = new FormData(event.currentTarget);
+      for (const file of galleryFiles) formData.append("mediaImages", file);
+      inFlight.current = true; setSaving(true); setError("");
+      try {
+        const result = await action(formData);
+        if (result) setError(result.error);
+        else exit.markSaved();
+      } catch (error) {
+        try { unstable_rethrow(error); }
+        catch (navigation) { exit.allowExit(); throw navigation; }
+        setError("Unable to connect. Please try again.");
+      } finally { inFlight.current = false; setSaving(false); }
+    }} className="panel form-grid product-upkeep-form">
+      {error ? <p className="error field full" role="alert">{t(error)}</p> : null}
+      <ProductFormControls pending={saving}>
       <input type="hidden" name="businessId" value={businessId} />
+      <input type="hidden" name="nav_q" value={listOrigin?.q || ""} />
+      <input type="hidden" name="nav_page" value={listOrigin?.page || ""} />
       <input
         type="hidden"
         name="expectedContentVersion"
@@ -120,7 +147,7 @@ export default function ProductForm({
           maxLength={40}
           value={quantityUnit}
           onChange={(event) => setQuantityUnit(event.target.value)}
-          placeholder={t("Example: piece, kg, hour, session or project")}
+          placeholder={t("Example: piece, kg, box or set")}
         />
       </div>
 
@@ -141,23 +168,24 @@ export default function ProductForm({
 
 
 
-      {!staffMode ? <div className="field"><label htmlFor="product-type">{t("What do you offer?")}</label><select id="product-type" name="offeringKind" value={offeringKind === 'service' ? 'service' : 'standard_product'} onChange={e=>setOfferingKind(e.target.value as OfferingKind)}><option value="standard_product">{t("Product")}</option><option value="service">{t("Service")}</option></select></div> : null}
-      {staffMode ? <>
       <div className="field">
-        <label htmlFor="product-offering-kind">{t("Product or service type")}</label>
+        <label htmlFor="product-offering-kind">{t("How is this product supplied?")}</label>
         <select
           id="product-offering-kind"
           name="offeringKind"
+          required
           value={offeringKind}
           onChange={(event) => setOfferingKind(event.target.value as OfferingKind)}
         >
-          {offeringKinds.map((kind) => (
-            <option key={kind} value={kind}>{t(offeringKindLabels[kind])}</option>
+          <option value="" disabled>{t("Choose a product type")}</option>
+          {activeProductKinds.map((kind) => (
+            <option key={kind} value={kind}>{t(kind === "made_to_order" ? "Made to order" : "Ready to ship")}</option>
           ))}
         </select>
-        <small>{offeringKindDescriptions[offeringKind]}</small>
+        {!offeringKind ? <small>{t("Choose how this product is supplied before saving.")}</small> : offeringKind === "made_to_order" ? <small>{t("Products are made after the customer orders.")}</small> : null}
       </div>
 
+      {staffMode ? <>
       <input type="hidden" name="quantityMode" value="optional" />
       <div className="field product-quantity-note">
         <strong>{t("Desired quantity is optional")}</strong>
@@ -178,9 +206,7 @@ export default function ProductForm({
         />
       </div>
 
-      {staffMode ? <>
       <div className="field"><label htmlFor="product-visibility">{t("Visibility")}</label><select id="product-visibility" name="isPublished" defaultValue={product?.is_published === 0 ? "0" : "1"}><option value="1">{t("Listed on my page")}</option><option value="0">{t("Hidden from buyers")}</option></select><small>{t("Your business must be published before buyers can see listed products.")}</small></div>
-      <ProductOptionsFields initial={(product?.option_groups || []).map(group => ({name:group.name,values:group.values.map(value=>value.value)}))} />
 
       <div className="field">
         <label htmlFor="product-availability">{t("Availability")}</label>
@@ -201,6 +227,8 @@ export default function ProductForm({
         </select>
       </div>
 
+      {staffMode ? <>
+      <ProductOptionsFields initial={(product?.option_groups || []).map(group => ({name:group.name,values:group.values.map(value=>value.value)}))} />
       <div className="field">
         <label htmlFor="product-category">{t("Category")}</label>
         <select
@@ -244,9 +272,8 @@ export default function ProductForm({
         </div>
         <div>
           <span className={`badge ${availability}`}>
-            {t(availabilityLabel(offeringKind, availability))}
+            {t(productSupplyLabel(offeringKind, availability))}
           </span>
-          {staffMode ? <small>{t(offeringKindLabels[offeringKind])}</small> : null}
           <strong>{name || t("Name preview")}</strong>
           {description ? <p>{description}</p> : null}
           {price ? <strong>ETB {price}</strong> : null}
@@ -255,12 +282,14 @@ export default function ProductForm({
         </div>
       </aside>
 
-      <div className="field full">
-        <button className="btn brand" type="submit">
-          {product ? t("Save changes") : t("Add item")}
+      <div className="field full inline-actions">
+        <button className="btn brand" type="submit" disabled={saving}>
+          {saving ? t("Saving...") : product ? t("Save changes") : t("Add item")}
         </button>
+        <button className="btn secondary" type="button" disabled={saving} onClick={() => exit.requestExit(cancelHref)}>{t("Cancel")}</button>
       </div>
       </ProductFormControls>
+      {exit.confirmation}
     </form>
   );
 }

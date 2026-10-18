@@ -4,6 +4,7 @@ import {NextRequest} from 'next/server';
 import {getDb,closeDbForTests} from './testing/postgres-fixture';
 import {GET,POST,DELETE} from '../app/api/public-support/route';
 import * as support from '../lib/support';
+import {joinAssignedSupportConversation} from './testing/support-join';
 import type {SessionUser} from '../lib/types';
 const base='http://127.0.0.1:3102';
 async function main(){
@@ -50,8 +51,10 @@ async function main(){
  await support.postSupportMessage(buyer,id,{message:'Private purchase follow-up',idempotencyKey:crypto.randomUUID()});
  const receipt=(await request('buying')).body.conversation;
  assert.deepEqual(receipt.messages.map((m:{body:string})=>m.body),[draft.message]);
- assert.equal(receipt.assignedUserName,buyer.name);
+ assert.equal(receipt.assignedUserName,null,'Automatic assignment is internal until explicit Join');
  const replyKey=crypto.randomUUID();
+ await joinAssignedSupportConversation(buyer,id);
+ assert.equal((await request('buying')).body.conversation.assignedUserName,buyer.name);
  await support.postSupportMessage(buyer,id,{message:'We can help. Which size?',audience:'reply',idempotencyKey:replyKey});
  assert.equal((await support.postSupportMessage(buyer,id,{message:'We can help. Which size?',audience:'reply',idempotencyKey:replyKey})).duplicate,true);
  await assert.rejects(()=>support.postSupportMessage(buyer,id,{message:'We can help. Which size?',audience:'note',idempotencyKey:replyKey}));
@@ -111,6 +114,7 @@ async function main(){
  const token=jar.get('suqpage_public_buying')!;
  await assert.rejects(()=>support.getPublicSupportConversation(token,Date.now()+support.PUBLIC_SUPPORT_SESSION_MS+1000));
  assert.equal((await request('help','GET',undefined,new Map([['suqpage_public_help',jar.get('suqpage_public_buying')!]]))).status,410);
+ await support.updateSupportAgentSetting(admin,{userId:buyer.id,enabled:false,queueScope:'transport'});
  for(const service of ['business_check','quality_check']){
   await request('buying','DELETE');await request('buying');
   const created=await request('buying','POST',{...draft,service,idempotencyKey:crypto.randomUUID()});assert.equal(created.status,201);
@@ -118,14 +122,16 @@ async function main(){
  const waiting=await support.listSupportConversations(admin,{queue:'transport',status:'waiting'});assert.equal(waiting.totalItems,2);
  await assert.rejects(()=>support.claimSupportConversation(help,waiting.items[0].id));
  await assert.rejects(()=>support.claimSupportConversation(buyer,waiting.items[0].id));
- await support.closeSupportConversation(buyer,id);await support.reopenSupportConversation(buyer,id);
+ await support.closeSupportConversation(buyer,id);await support.reopenSupportConversation(admin,id);
  await support.updateSupportAgentSetting(admin,{userId:other.id,enabled:true,maxOpenConversations:1,queueScope:'transport'});
  await support.reassignSupportConversation(admin,id,other.id);await assert.rejects(()=>support.getSupportConversation(buyer,id));
+ await support.updateSupportAgentSetting(admin,{userId:buyer.id,enabled:true,queueScope:'transport'});
+ await support.reassignSupportConversation(admin,waiting.items[0].id,null);
  await support.claimSupportConversation(buyer,waiting.items[0].id);
  assert.equal((await support.getSupportConversation(other,id)).conversation.assignedUserId,other.id);
  assert.equal((await support.listSupportConversations(admin,{queue:'support'})).totalItems,0);
  assert.equal(Number((await db.prepare('SELECT COUNT(*) n FROM support_conversations').get()).n),3);
- console.log('PASS unclassified buying requests, legacy choices, validation, database constraints, replay, channel isolation, private historical notes, explicit live replies, closed/reopen state, retry conflicts and isolated API, queue capacity, claim, close/reopen and reassignment.');
+ console.log('PASS unclassified buying requests, legacy choices, validation, database constraints, replay, channel isolation, private historical notes, explicit live replies, closed/reopen state, retry conflicts and isolated API, paused queues, claim, close/reopen and reassignment.');
  }finally{await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

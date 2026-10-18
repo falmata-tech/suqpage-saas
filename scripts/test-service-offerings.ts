@@ -32,33 +32,37 @@ async function main() {
     const owner = (await getUserById(userId))!;
     const business = (await getBusinessByHandle('service-fixture'))!;
     const command = { kind: 'create', businessId, productId: null, expectedContentVersion: business.content_version, idempotencyKey: 'service_fixture_create_001', name: 'Equipment inspection', description: 'Inspection of a customer-provided device.', availability: 'available', offeringKind: 'service', quantityMode: 'optional', capacitySummary: '', minimumOrderSummary: '', leadTimeSummary: '', priceMinor: null, quantityUnit: 'session', highlights: ['Written findings'], videoRef: '', categoryId: null, imageAction: 'keep', serviceNote: '', optionGroups: [], isPublished: true };
-    await executeBasicProductUpkeep(postgresProductUpkeepPort, owner, command, null);
+    await assert.rejects(()=>executeBasicProductUpkeep(postgresProductUpkeepPort, owner, command, null),/Choose Ready to ship or Made to order/);
+    const retainedServiceId=Number((await db.prepare("INSERT INTO products(business_id,name,slug,description,offering_kind,quantity_unit,highlights_json,is_published) VALUES(?,?,'equipment-inspection',?,'service','session','[\"Written findings\"]',1)").run(businessId,command.name,command.description)).insertedId);
     const catalog = (await getCatalogByBusinessId(businessId, true))!;
     const service = catalog.products.find(item => item.name === command.name)!;
     assert.equal(service.offering_kind, 'service');
     assert.equal(service.quantity_unit, 'session');
     assert.deepEqual(service.highlights, ['Written findings']);
-    assert.equal(catalogOfferingLabel(catalog.products), 'Products & services');
-    assert.equal(catalogOfferingLabel([service]), 'Services');
-    assert.equal(catalogOfferingLabel(catalog.products.filter(item => item.id === productId)), 'Products');
+    assert.equal(service.id,retainedServiceId);
+    assert.equal(catalogOfferingLabel(catalog.products),'Products');assert.equal(catalogOfferingLabel([service]),'Products','Private inspection does not change the current catalog label');
+    assert.deepEqual((await getCatalogByBusinessId(businessId))!.products.map(item=>item.id),[productId], 'Retired services remain private');
     assert.equal(normalizeOfferingKind('service'), 'service');
     assert.equal(productSellingUnit(service), 'Per session');
     assert.equal(productSellingUnit({ quantity_unit: '', offering_kind: 'service' }), '');
     assert.equal(availabilityLabel('service', 'limited'), 'Limited availability');
     assert.equal(productHref(business.handle, productId), `/@service-fixture?product=${productId}`);
     const input = { businessId, customerName: 'Fixture visitor', contact: '+447700900123', contactMethod: 'phone', idempotencyKey: 'service_inquiry_001', items: [{ productId: service.id, quantity: null, options: {} }] };
-    const inquiry = await createPublicInquiry(input, 'service-test-ip');
-    const line = await db.prepare('SELECT offering_kind_snapshot,quantity,quantity_intent FROM inquiry_items WHERE inquiry_id=?').get(inquiry.inquiryId);
+    const inquiryId=Number((await db.prepare("INSERT INTO inquiries(business_id,customer_name,contact,contact_method,status,source,idempotency_key,ip_hash) VALUES(?,'Historical visitor','+447700900123','phone','new','showroom','legacy_service_history','fixture')").run(businessId)).insertedId);
+    await db.prepare("INSERT INTO inquiry_items(inquiry_id,product_id,product_name_snapshot,quantity,quantity_intent,offering_kind_snapshot,quantity_mode_snapshot,options_json) VALUES(?,?,?,NULL,'','service','optional','{}')").run(inquiryId,service.id,service.name);
+    const line = await db.prepare('SELECT offering_kind_snapshot,quantity,quantity_intent FROM inquiry_items WHERE inquiry_id=?').get(inquiryId);
     assert.equal(line.offering_kind_snapshot, 'service');
     assert.equal(line.quantity, null);
     assert.equal(line.quantity_intent, ''); // Existing canonical representation of omitted intent.
-    await assert.rejects(() => executeBasicProductUpkeep(postgresProductUpkeepPort, { ...owner, business_id: businessId + 1 }, { ...command, idempotencyKey: 'service_foreign_001' }, null));
+    await assert.rejects(()=>createPublicInquiry(input,'service-test-ip'),/not available/);
+    await assert.rejects(() => executeBasicProductUpkeep(postgresProductUpkeepPort, { ...owner, business_id: businessId + 1 }, { ...command,offeringKind:'standard_product',idempotencyKey: 'service_foreign_001' }, null));
     await db.prepare("UPDATE products SET availability='unavailable' WHERE id=?").run(service.id);
     await assert.rejects(async () => createPublicInquiry({ ...input, idempotencyKey: 'service_unavailable_001' }, 'service-test-ip2'));
     await db.prepare("UPDATE products SET availability='available',is_published=0 WHERE id=?").run(service.id);
     await assert.rejects(async () => createPublicInquiry({ ...input, idempotencyKey: 'service_hidden_001' }, 'service-test-ip3'));
     assert.equal((await db.prepare('SELECT COUNT(*) total FROM inquiries').get()).total, 1);
-    console.log('PASS service fresh/upgrade constraints, unchanged IDs, owner upkeep, catalog labels, optional canonical inquiry snapshots and foreign/hidden/unavailable denial.');
+    assert.deepEqual(await db.prepare('SELECT offering_kind_snapshot,quantity,quantity_intent FROM inquiry_items WHERE inquiry_id=?').get(inquiryId),line,'Retired historical inquiry snapshots remain unchanged');
+    console.log('PASS historical service upgrade constraints/IDs and private snapshots, rejected active service writes/public admission, and foreign/hidden/unavailable denial.');
   } finally { await closeDbForTests(); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

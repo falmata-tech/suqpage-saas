@@ -6,114 +6,113 @@
   "locales": {
     "en": {
       "hook": [
-        "Products you loved",
-        "on social media.",
-        "Businesses nearby."
+        "Digital showrooms.",
+        "Products in one place.",
+        "Ask the business directly."
       ],
       "android": [
         "Android app",
         "coming soon."
       ],
       "web": "Explore at suqpage.com",
-      "visitorCaption": "See how close the businesses selling products you’ve loved on social media are to you. Browse their products, styles and services in organized online stores, then contact them directly without digging through old posts. Explore at suqpage.com. Android app coming soon.",
-      "businessCaption": "Give people who see your products on social media one organized store to browse. Show your products, styles and services, add your location, and share one link for direct inquiries. Create your store at suqpage.com. Android app coming soon.",
-      "transportCaption": "Bought from a business on SuqPage? Chat with our transport team to help get your purchase to you. Visit suqpage.com. Android app coming soon.",
+      "visitorCaption": "Discover businesses through their digital showrooms. See what businesses sell, make or grow—without digging through social posts. Browse products, choices and listed availability, then message the business directly. Explore at suqpage.com. Android app coming soon.",
+      "businessCaption": "Whether you sell, make or grow products, present them in a professional digital showroom. Share one link with the people who discover you on social media. Customers can explore your range and message you about the right products, while you agree the sale directly. Explore at suqpage.com. Android app coming soon.",
+      "transportCaption": "Tell us where to pick it up and where it needs to go. Our agents will help arrange the transport. Explore at suqpage.com. Android app coming soon.",
       "ownerHook": [
-        "Your social media",
-        "customers.",
-        "Your organized store."
+        "What you sell, make or grow.",
+        "One digital showroom."
       ],
-      "tiktokBio": "Social media products. Nearby businesses. Organized stores. suqpage.com",
-      "instagramBio": "Find businesses selling products you’ve loved on social media. Browse organized stores and contact them directly. suqpage.com"
+      "tiktokBio": "Digital showrooms for businesses. Browse and ask directly. suqpage.com",
+      "instagramBio": "Explore business collections. Ready-made or made to order. Ask directly. suqpage.com"
     },
     "am": {
       "hook": [
-        "በማኅበራዊ ሚዲያ",
-        "የወደዱት ምርት።",
-        "ቅርብዎ ያለ ንግድ።"
+        "ምርቶቹን ይወቁ።",
+        "በአንድ የኢንተርኔት ገጽ።",
+        "ንግዱን በቀጥታ ያነጋግሩ።"
       ],
       "android": [
         "የAndroid መተግበሪያ",
         "በቅርቡ።"
       ],
       "web": "suqpage.com ላይ ይመልከቱ",
-      "visitorCaption": "በማኅበራዊ ሚዲያ የወደዱትን ምርት የሚሸጠው ንግድ ምን ያህል ቅርብዎ እንደሆነ ይመልከቱ። ምርቶቹን፣ ዓይነቶቹንና አገልግሎቶቹን በተደራጀ የኦንላይን ሱቅ ይመልከቱ። የቆዩ ልጥፎችን ሳይፈትሹ፣ ከንግዱ ጋር በቀጥታ ይገናኙ። suqpage.com ላይ ይመልከቱ. የAndroid መተግበሪያ በቅርቡ።",
-      "businessCaption": "በማኅበራዊ ሚዲያ ምርቶችዎን ለሚያዩ ደንበኞች የተደራጀ ሱቅ ያዘጋጁ። ምርቶችዎን፣ ዓይነቶቻቸውንና አገልግሎቶችዎን ያሳዩ፣ ቦታዎን ያስቀምጡ፣ በቀጥታ እንዲጠይቁዎት አንድ ሊንክ ያጋሩ። ሱቅዎን suqpage.com ላይ ይፍጠሩ። የAndroid መተግበሪያ በቅርቡ።",
-      "transportCaption": "በSuqPage ካለ ንግድ እቃ ገዙ? የገዙት እቃ እርስዎ ጋር እንዲደርስ ከማጓጓዣ ቡድናችን ጋር ይወያዩ። suqpage.com ላይ ያግኙን። የAndroid መተግበሪያው በቅርቡ ይመጣል።",
+      "visitorCaption": "የንግዶችን ምርቶች በተደራጀ የኢንተርኔት ገጽ ይመልከቱ። የቆዩ ልጥፎችን ሳይፈትሹ፣ ንግዶች የሚሸጡትን፣ የሚያመርቱትን ወይም የሚያበቅሉትን ይወቁ። ምርቶቹን፣ ምርጫዎቹንና ስለ መገኘታቸው ያስቀመጡትን መረጃ ይመልከቱ፤ ከዚያ ንግዱን በቀጥታ ያነጋግሩ። suqpage.com ላይ ይመልከቱ. የAndroid መተግበሪያ በቅርቡ።",
+      "businessCaption": "የሚሸጡትን፣ የሚያመርቱትን ወይም የሚያበቅሉትን ምርት በውብና በተደራጀ የኢንተርኔት ገጽ ያቅርቡ። በማኅበራዊ ሚዲያ ለሚያገኙዎት ሰዎች አንድ ሊንክ ያጋሩ። ደንበኞችዎ የሚያቀርቡትን አይተው ስለሚፈልጉት ምርት መልዕክት ይልኩልዎታል፤ ሽያጩንም በቀጥታ በመነጋገር ይፈጽማሉ። suqpage.com ላይ ይመልከቱ. የAndroid መተግበሪያ በቅርቡ።",
+      "transportCaption": "ዕቃው ከየት ተነስቶ ወዴት እንዲደርስ እንደሚፈልጉ ይንገሩን። ቡድናችን ማጓጓዣውን ለማመቻቸት ያግዝዎታል። suqpage.com ላይ ይመልከቱ. የAndroid መተግበሪያ በቅርቡ።",
       "ownerHook": [
-        "የማኅበራዊ ሚዲያ",
-        "ደንበኞችዎ።",
-        "የተደራጀ ሱቅዎ።"
+        "ምርቶችዎ።",
+        "በተደራጀ የኢንተርኔት ገጽ።"
       ],
-      "tiktokBio": "የወደዱት ምርት። ቅርብዎ ያለ ንግድ። የተደራጀ ሱቅ። suqpage.com",
-      "instagramBio": "በማኅበራዊ ሚዲያ የወደዱትን ምርት የሚሸጠው ንግድ ቅርብዎ ሊሆን ይችላል። ምርቶቹን በተደራጀ ሱቅ ያዩ፤ በቀጥታ ይጠይቁ። suqpage.com"
+      "tiktokBio": "የንግዶችን ምርቶች በአንድ ገጽ ይመልከቱ። suqpage.com",
+      "instagramBio": "ዝግጁ ወይም በትዕዛዝ የሚሠሩ ምርቶችን ይመልከቱ። ንግዱን በቀጥታ ይጠይቁ። suqpage.com"
     },
     "om": {
       "hook": [
-        "Oomisha jaallatte",
-        "miidiyaa hawaasaa irraa.",
-        "Daldala si bira."
+        "Oomisha isaanii ilaalaa.",
+        "Fuula intarneetii tokko irraa.",
+        "Kallattiin isaan qunnamaa."
       ],
       "android": [
         "App Android",
         "dhihootti."
       ],
-      "web": "suqpage.com irratti ilaali",
-      "visitorCaption": "Daldalli oomisha miidiyaa hawaasaa irratti jaallatte gurguru hammam siif dhihoo akka ta’e ilaali. Oomisha, akkaataa fi tajaajila isaanii suuqiiwwan onlaayinii qindaa’an keessatti ilaali. Maxxansa durii keessa osoo hin barbaadin, daldalicha kallattiin qunnami. suqpage.com irratti ilaali. App Android dhihootti.",
-      "businessCaption": "Warra oomisha kee miidiyaa hawaasaa irratti arganiif suuqii qindaa’e tokko qopheessi. Oomisha, akkaataa fi tajaajila kee agarsiisi; bakka kee galchi; kallattiin si gaafachuuf liinkii tokko qoodi. Suuqii kee suqpage.com irratti qopheessi. App Android dhihootti.",
-      "transportCaption": "Daldala SuqPage irratti argite irraa bittee? Bittaa kee si bira geessuuf garee geejjibaa keenya waliin haasa’i. suqpage.com irratti nu argi. App Android dhihootti ni dhufa.",
+      "web": "suqpage.com irratti ilaalaa",
+      "visitorCaption": "Oomisha daldaltootaa fi oomishtootaa fuula intarneetii isaanii irraa ilaalaa. Maxxansa durii keessaa osoo hin barbaadin waan gurguran, oomishan ykn misoomsan ilaalaa. Oomishaalee, filannoowwan fi odeeffannoo argamummaa isaan galchan ilaalaatii kallattiin isaan qunnamaa. suqpage.com irratti ilaalaa. App Android dhihootti.",
+      "businessCaption": "Oomisha gurgurtan, oomishtan ykn misoomsitan fuula intarneetii bareedaa fi sirnaan qophaa’e irratti dhiheessaa. Namoota miidiyaa hawaasaa irratti isin arganiif liinkii tokko qoodaa. Maamiltoonni filannoo keessan ilaaluun waa’ee oomisha barbaadanii ergaa isiniif ergu; gurgurtaa immoo kallattiin waliin walii galtu. suqpage.com irratti ilaalaa. App Android dhihootti.",
+      "transportCaption": "Meeshaan eessaa akka ka’ee fi eessatti akka geessamu nuuf himaa. Gareen keenya geejjiba isaa qindeessuuf isin gargaara. suqpage.com irratti ilaalaa. App Android dhihootti.",
       "ownerHook": [
-        "Maamiltoota miidiyaa",
-        "hawaasaatiif",
-        "suuqii kee qopheessi."
+        "Oomisha keessan.",
+        "Fuula intarneetii qindaa’e irratti."
       ],
-      "tiktokBio": "Oomisha jaallatte. Daldala si bira. Suuqii qindaa’e. suqpage.com",
-      "instagramBio": "Daldala oomisha miidiyaa hawaasaa irratti jaallatte gurguru kaartaa irratti argi. Suuqii isaa ilaali; kallattiin qunnami. suqpage.com"
+      "tiktokBio": "Oomisha daldalaa fuula tokko irraa ilaalaa. suqpage.com",
+      "instagramBio": "Oomisha qophaaʼe ykn ajajaan hojjetamu ilaalaa. Daldalicha gaafadhaa. suqpage.com"
     },
     "so": {
       "hook": [
-        "Alaab aad jeclaatay.",
-        "Baraha bulshada.",
-        "Ganacsi kuu dhow."
+        "Alaabta ganacsiga.",
+        "Hal bog oo internetka ah.",
+        "Qoraallo hore ha dhex raadin."
       ],
       "android": [
         "App-ka Android",
         "dhawaan."
       ],
       "web": "Ka eeg suqpage.com",
-      "visitorCaption": "Eeg sida ay kuugu dhow yihiin ganacsiyada iibiya alaabtii aad baraha bulshada ku jeclaatay. Alaabtooda, noocyadeeda iyo adeegyada ka eeg dukaamo internet oo habaysan. Ganacsiga si toos ah ula xiriir, adigoon qoraalladii hore dhex raadin. Ka eeg suqpage.com. App-ka Android dhawaan.",
-      "businessCaption": "Dadka alaabtaada baraha bulshada ku arka u diyaari hal dukaan oo habaysan. Soo bandhig alaabtaada, noocyadeeda iyo adeegyada, ku dar goobtaada, hal link-na la wadaag si ay toos kuula soo xiriiraan. Dukaankaaga ka samee suqpage.com. App-ka Android dhawaan.",
-      "transportCaption": "Ganacsi ku jira SuqPage ma wax baad ka iibsatay? La hadal kooxdayada gaadiidka si aan kuu caawinno in alaabtu ku soo gaarto. Booqo suqpage.com. App-ka Android dhawaan ayuu imanayaa.",
+      "visitorCaption": "Ganacsiyada ku baro bogaggooda alaabta ee internetka. Ogow waxa ganacsiyadu iibiyaan, sameeyaan ama beertaan adigoon qoraallo hore dhex raadin. Eeg alaabta, noocyadeeda iyo helitaanka ay sheegeen, dabadeed si toos ah ula xiriir ganacsiga. Ka eeg suqpage.com. App-ka Android dhawaan.",
+      "businessCaption": "Haddii aad alaab iibiso, sameyso ama beerto, ku soo bandhig bog internet oo xirfad leh. Hal xiriiriye la wadaag dadka baraha bulshada kaa hela. Macaamiishu waxay arki karaan noocyada aad hayso oo waxay kaa weydiin karaan alaabta ay rabaan; iibka si toos ah ayaad uga heshiisaan. Ka eeg suqpage.com. App-ka Android dhawaan.",
+      "transportCaption": "Noo sheeg halka alaabta laga qaadayo iyo meesha la geynayo. Kooxdayadu waxay kaa caawinaysaa diyaarinta gaadiidka. Ka eeg suqpage.com. App-ka Android dhawaan.",
       "ownerHook": [
-        "Macaamiishaada",
-        "baraha bulshada.",
-        "Dukaan habaysan."
+        "Bog internet oo aad alaabtaada ku soo bandhigto."
       ],
-      "tiktokBio": "Alaab aad jeceshahay. Ganacsi kuu dhow. Dukaan habaysan. suqpage.com",
-      "instagramBio": "Ganacsiga alaabtii aad baraha bulshada ku jeclaatay wuu kuu dhowaan karaa. Dukaankiisa eeg, si toos ahna ula xiriir. suqpage.com"
+      "tiktokBio": "Alaabta ganacsiga hal bog ka eeg. suqpage.com",
+      "instagramBio": "Eeg alaab diyaar ah ama dalab lagu sameeyo. Ganacsiga si toos ah u weydii. suqpage.com"
     },
     "ti": {
       "hook": [
-        "ኣብ ማሕበራዊ ሚድያ",
-        "ዝፈተኹምዎ ፍርያት።",
-        "ቀረባኹም ዘሎ ንግዲ።"
+        "ፍርያት እቲ ንግዲ።",
+        "ኣብ ሓደ ናይ ኢንተርነት ገጽ።",
+        "ናይ ቀደም ጽሑፋት ከይደለኹም።"
       ],
       "android": [
         "ናይ Android ኣፕ",
         "ኣብ ቀረባ ግዜ።"
       ],
       "web": "ኣብ suqpage.com ተመልከቱ",
-      "visitorCaption": "ኣብ ማሕበራዊ ሚድያ ዝፈተኹምዎ ፍርያት ዝሸጡ ንግድታት ክንደይ ቀረባኹም ከም ዘለዉ ርኣዩ። ፍርያቶም፣ ዓይነታቶምን ኣገልግሎቶምን ኣብ ዝተወደቡ ናይ ኦንላይን ድኳናት ርኣዩ። ናይ ቀደም ጽሑፋት ከይደለኹም፣ ብቐጥታ ምስቲ ንግዲ ተራኸቡ። ኣብ suqpage.com ተመልከቱ. ናይ Android ኣፕ ኣብ ቀረባ ግዜ።",
-      "businessCaption": "ኣብ ማሕበራዊ ሚድያ ፍርያትኩም ንዝርእዩ ዓማዊል፣ ሓደ ዝተወደበ ድኳን ኣዳልዉ። ፍርያትኩም፣ ዓይነታቶምን ኣገልግሎትኩምን ኣቕርቡ፣ ቦታኹም ኣስፍሩ፣ ብቐጥታ ክሓትኹም ሓደ ሊንክ ኣካፍሉ። ድኳንኩም ኣብ suqpage.com ኣዳልዉ። ናይ Android ኣፕ ኣብ ቀረባ ግዜ።",
-      "transportCaption": "ካብ ኣብ SuqPage ዘሎ ንግዲ ገዚእኩም? ዝገዛእኩምዎ ናባኹም ንኽበጽሕ፣ ምስ ጉጅለ መጓዓዝያና ተዘራረቡ። ኣብ suqpage.com ርኸቡና። ናይ Android ኣፕ ኣብ ቀረባ ግዜ ይመጽእ።",
+      "visitorCaption": "ንግድታት ብናይ ኢንተርነት ገጾም ተፋለጡ። ናይ ቀደም ጽሑፋት ከይደለኹም፣ ንግድታት እንታይ ከም ዝሸጡ፣ ዘፍርዩ ወይ ዘብቁሉ ርኣዩ። ፍርያት፣ ምርጫታትን ናይ ምርካብ ሓበሬታኦምን ተመልከቱ፤ ድሕሪኡ ነቲ ንግዲ ብቐጥታ ርኸቡ። ኣብ suqpage.com ተመልከቱ. ናይ Android ኣፕ ኣብ ቀረባ ግዜ።",
+      "businessCaption": "እትሸጡዎ፣ እተፍርዩዎ ወይ እተብቁሉዎ ፍርያት ኣብ ጽቡቕን ስሩዕን ናይ ኢንተርነት ገጽ ኣቕርቡ። ኣብ ማሕበራዊ ሚድያ ንዝረኽቡኹም ሰባት ሓደ ሊንክ ኣካፍሉ። ዓማዊል ምርጫታትኩም ርእዮም ብዛዕባ ዝደለይዎ ፍርያት መልእኽቲ ይልእኩልኩም፤ መሸጣ ድማ ብቐጥታ ትሰማምዑ። ኣብ suqpage.com ተመልከቱ. ናይ Android ኣፕ ኣብ ቀረባ ግዜ።",
+      "transportCaption": "እቲ ኣቕሓ ካበይ ተላዒሉ ናበይ ክበጽሕ ከም እትደልዩ ንገሩና። ጉጅለና መጓዓዝያ ንምድላው ክሕግዘኩም እዩ። ኣብ suqpage.com ተመልከቱ. ናይ Android ኣፕ ኣብ ቀረባ ግዜ።",
       "ownerHook": [
-        "ዓማዊልኩም ናይ",
-        "ማሕበራዊ ሚድያ።",
-        "ዝተወደበ ድኳንኩም።"
+        "ፍርያትኩም እተርእዩሉ ናይ ኢንተርነት ገጽ።"
       ],
-      "tiktokBio": "ዝፈተኹምዎ ፍርያት። ቀረባኹም ዘሎ ንግዲ። ዝተወደበ ድኳን። suqpage.com",
-      "instagramBio": "ኣብ ማሕበራዊ ሚድያ ዝፈተኹምዎ ፍርያት ዝሸጥ ንግዲ ቀረባኹም ክኸውን ይኽእል። ድኳኑ ርኣዩ፣ ብቐጥታ ድማ ተራኸቡ። suqpage.com"
+      "tiktokBio": "ፍርያት ንግድታት ካብ ሓደ ገጽ ርኣዩ። suqpage.com",
+      "instagramBio": "ድሉዋትን ብትእዛዝ ዝስርሑን ፍርያት ርኣዩ። ነቲ ንግዲ ብቐጥታ ሕተቱ። suqpage.com"
     }
   },
-  "narrative": "See how close the businesses selling products you’ve loved on social media are to you. Browse their products, styles and services in organized online stores, then contact them directly without digging through old posts."
+  "narrative": "Discover businesses through their digital showrooms.",
+  "reviewNotes": "S132/S133 active text candidate: English, Amharic and Afaan Oromo. Somali/Tigrinya copy is retained as inactive draft compatibility. Existing generated promotional media is STALE relative to these words and must be rebuilt/reviewed before use. No provider publication or promotional media regeneration.",
+  "activeLanguages": [
+    "en",
+    "am",
+    "om"
+  ]
 }

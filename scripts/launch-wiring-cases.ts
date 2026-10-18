@@ -9,6 +9,7 @@ import { updateDiscoveryProfile } from '../lib/discovery-admin';
 import { runtimeCatalogByBusinessId } from '../lib/catalog-runtime';
 import { runtimeGet,runtimeRun } from '../lib/runtime-sql';
 import { createPublicInquiry } from '../lib/inquiries';
+import { findKnownPlace,findPlaceSuggestions } from '../lib/place-catalog';
 import type { SessionUser } from '../lib/types';
 
 export async function launchWiringCases(port:BasicProductUpkeepPort,owner:SessionUser,foreign:SessionUser,command:Record<string,unknown>,productId:number){
@@ -25,23 +26,30 @@ export async function launchWiringCases(port:BasicProductUpkeepPort,owner:Sessio
  await assert.rejects(()=>executeBasicProductUpkeep(port,foreign,{...command,kind:'update',productId,imageAction:'keep',idempotencyKey:randomUUID(),optionGroups:options},null),/cannot maintain/);
 
  const setup=await readOwnerBusiness(owner,bid);
- const proposed={name:'Launch fixture shop',expectedVersion:setup.business.content_version,locationVersion:setup.proposal?.version||0,category:'electronics',city:'Addis Ababa',region:'Addis Ababa',mode:'storefront',latitude:9.01234,longitude:38.76543};
+ const place=findPlaceSuggestions('Addis Ababa','ET')[0];assert.ok(place);assert.equal(place.countryCode,'ET');
+ const proposed={name:'Launch fixture shop',expectedVersion:setup.business.content_version,locationVersion:setup.proposal?.version||0,category:'electronics',city:place.name,region:place.region,countryCode:place.countryCode,placeId:place.id,mode:'storefront',latitude:9.01234,longitude:38.76543};
  await assert.rejects(()=>saveOwnerBusiness(foreign,bid,proposed),/Only the owner/);
  await saveOwnerBusiness(owner,bid,proposed);
  await assert.rejects(()=>saveOwnerBusiness(owner,bid,proposed),/changed/);
- const firstVersion=(setup.proposal?.version||0)+1;assert.equal((await readLocationProposal(bid))?.version,firstVersion);
+ const firstVersion=(setup.proposal?.version||0)+1;const firstProposal=await readLocationProposal(bid);assert.ok(firstProposal);assert.equal(firstProposal.version,firstVersion);
+ assert.equal(firstProposal.country_code,place.countryCode);assert.equal(firstProposal.place_id,place.id,'The owner proposal retains the selected canonical place');
  assert.ok(!(await listBusinessesPage({location:'pending',q:'Launch fixture shop'})).items.some(row=>row.id===bid),'Owner location Save requires no review');
  assert.equal((await readLocationProposal(bid))?.reviewed_version,firstVersion);
  assert.deepEqual(await runtimeGet('SELECT latitude,longitude FROM business_discovery_profiles WHERE business_id=?',[bid]),{latitude:9.01234,longitude:38.76543});
- const approval={businessId:bid,proposalVersion:firstVersion,industryKeys:['electronics'],boothImagePath:'',city:'Addis Ababa',zone:'Addis Ababa',region:'Addis Ababa',latitude:9.01234,longitude:38.76543,fallbackStyle:'technical',productionScale:'workshop',sponsored:false,sponsorPosition:100,excluded:false};
+ const approval={businessId:bid,proposalVersion:firstVersion,industryKeys:['electronics'],boothImagePath:'',city:place.name,zone:place.name,region:place.region,countryCode:place.countryCode,placeId:place.id,latitude:9.01234,longitude:38.76543,fallbackStyle:'technical',productionScale:'workshop',sponsored:false,sponsorPosition:100,excluded:false};
  await updateDiscoveryProfile(approval);
  assert.ok((await runtimeGet<{approved_at:number}>('SELECT approved_at FROM business_discovery_profiles WHERE business_id=?',[bid]))!.approved_at>0);
  const area={...proposed,mode:'area',expectedVersion:(await current()).business.content_version,locationVersion:firstVersion};
- assert.equal(parseOwnerBusinessChange(area).location?.latitude,null,'area mode discards submitted precise coordinates');
+ const parsedArea=parseOwnerBusinessChange(area,findKnownPlace).location;assert.ok(parsedArea);
+ assert.equal(parsedArea.latitude,null,'area mode discards submitted precise coordinates');assert.equal(parsedArea.longitude,null);
+ assert.equal(parsedArea.countryCode,place.countryCode);assert.equal(parsedArea.placeId,place.id,'Area parsing resolves the explicit canonical place');
  await saveOwnerBusiness(owner,bid,area);
  assert.equal((await readLocationProposal(bid))?.latitude,null);assert.equal((await readLocationProposal(bid))?.longitude,null);
  assert.ok((await runtimeGet<{approved_at:number}>('SELECT approved_at FROM business_discovery_profiles WHERE business_id=?',[bid]))!.approved_at>0);
  assert.deepEqual(await runtimeGet('SELECT latitude,longitude FROM business_discovery_profiles WHERE business_id=?',[bid]),{latitude:9,longitude:38.8},'Area Save replaces exact GPS immediately');
+ const areaSetup=await readOwnerBusiness(owner,bid);
+ assert.deepEqual(areaSetup.location,{city:place.name,region:place.region,country_code:place.countryCode,place_id:place.id,location_mode:'area',latitude:null,longitude:null},'The returned area projection retains canonical metadata without exposing precise coordinates');
+ assert.equal(areaSetup.existing?.country_code,place.countryCode);assert.equal(areaSetup.existing?.city_id,place.id);
  await assert.rejects(()=>updateDiscoveryProfile(approval),/owner changed/);
  await updateDiscoveryProfile({...approval,proposalVersion:firstVersion+1});
  const location=await runtimeGet<{latitude:number;longitude:number}>('SELECT latitude,longitude FROM business_discovery_profiles WHERE business_id=?',[bid]);assert.equal(location?.latitude,9);assert.equal(location?.longitude,38.8);

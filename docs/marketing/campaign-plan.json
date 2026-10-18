@@ -1,8 +1,8 @@
 {
   "status": "assets_prepared_not_published",
   "audiences": [
-    "customers finding the businesses behind social media products and browsing organized stores",
-    "businesses organizing their social media offerings, location and direct inquiries"
+    "customers exploring ready-made and made-to-order products from businesses near and far, then asking through their social accounts",
+    "retailers, growers and makers presenting products in a professional digital showroom, with conversations on their social channels"
   ],
   "accountSetup": [
     "Create the official SuqPage TikTok and Instagram accounts; choose a matching available handle.",
@@ -17,7 +17,7 @@
       "audience": "customers",
       "media": "visitor-story.png or coming-soon-video.mp4",
       "caption": "visitorCaption",
-      "purpose": "Show that the business selling a product someone loved on social media could be nearby; invite browsing its organized store."
+      "purpose": "Invite people to explore business showrooms near and far, compare their products and ask the business about what they like."
     },
     {
       "order": 2,
@@ -56,11 +56,9 @@
     "order": [
       "am",
       "om",
-      "so",
-      "ti",
       "en"
     ],
-    "guidance": "Use the audience's language for each post; rotate languages across posts or stories. Do not stack all five captions into one video. Match subtitles/poster and caption. The existing real app crops may show English UI; do not label them as fully localized device captures."
+    "guidance": "Use English, Amharic or Afaan Oromo for current posts; Somali/Tigrinya are inactive drafts. Match the audience, media subtitles and caption. Use one language per post rather than stacking captions. Existing media is stale: rebuild and review against the current UI before posting."
   },
   "publishSteps": [
     "Choose the matching language folder. Use 1080x1920 story/video assets for TikTok, Reels or Stories, and 1080x1350 feed assets for a carousel.",
@@ -73,8 +71,8 @@
   ],
   "releaseBoundaries": [
     "The website is live. Android is coming soon; no release date or public Play availability is promised.",
-    "Two more genuine testers are still needed for the current list to reach 12. The closed-test period begins only when at least 12 actual testers opt in and remain opted in for 14 continuous days.",
-    "Closed-track activation/review and physical-phone notifications are separate release gates. Preparing artwork is not approval from Google.",
+    "Twelve owner-confirmed accounts are eligible for the published private closed test. Actual enrollment is separate: at least 12 testers must opt in and remain opted in for 14 continuous days.",
+    "Private closed availability does not establish public production access or successful physical-phone notifications. Preparing artwork is not approval from Google.",
     "Google's optional preview video needs an eligible public/unlisted YouTube URL with ads off and no age restriction. The local MP4 is ready; no channel or URL is invented."
   ],
   "measurement": [
@@ -89,5 +87,6 @@
     "https://support.tiktok.com/en/using-tiktok/creating-videos/ai-generated-content",
     "https://support.google.com/googleplay/android-developer/answer/17262077?hl=en"
   ],
-  "formatNotes": "1080x1920 at 30 fps and 1080x1350 are chosen export formats. Instagram's official help page could not be fetched (429), so exact current Instagram limits are not asserted. Inspect the actual upload preview. Portrait captions end at 1530px, above the conservative bottom overlay margin; the profile pin is centered by its artwork bounds."
+  "formatNotes": "1080x1920 at 30 fps and 1080x1350 are chosen export formats. Instagram's official help page could not be fetched (429), so exact current Instagram limits are not asserted. Inspect the actual upload preview. Portrait captions end at 1530px, above the conservative bottom overlay margin; the profile pin is centered by its artwork bounds.",
+  "sourceState": "S132/S133 updates active text and three-language campaign selection. Existing generated media is STALE and must be rebuilt and reviewed before pairing it with these captions. No campaign has been published."
 }

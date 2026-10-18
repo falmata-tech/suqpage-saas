@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "status": "NOT_UPLOAD_READY",
+  "checkedAt": "2026-10-18",
+  "sources": [
+    {
+      "id": "listing-fields",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9859152?hl=en",
+      "checkedAt": "2026-10-18",
+      "supports": "App name30, short description80, full description4000; public contact email."
+    },
+    {
+      "id": "preview-assets",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9866151?hl=en",
+      "checkedAt": "2026-10-18",
+      "supports": "Icon, feature graphic, screenshot format/dimensions, real app imagery and accessible alt text."
+    },
+    {
+      "id": "listing-languages",
+      "url": "https://support.google.com/googleplay/android-developer/answer/9844778?hl=en",
+      "checkedAt": "2026-10-18",
+      "supports": "Store-listing translation codes include en-US and am. Oromo/om is not listed."
+    },
+    {
+      "id": "listing-practice",
+      "url": "https://support.google.com/googleplay/android-developer/answer/13393723?hl=en",
+      "checkedAt": "2026-10-18",
+      "supports": "Accurate, concise descriptions; localized text-bearing assets."
+    }
+  ],
+  "textLimits": {
+    "title": 30,
+    "shortDescription": 80,
+    "fullDescription": 4000,
+    "assetAltText": 140
+  },
+  "localePolicy": {
+    "activeInterfaceLocales": [
+      "en",
+      "am",
+      "om"
+    ],
+    "documentedListingCodes": {
+      "en": "en-US",
+      "am": "am"
+    },
+    "notDocumentedAsListingCode": [
+      "om"
+    ],
+    "source": "listing-languages",
+    "caution": "Store-listing language support is distinct from the Play Console interface language list. Recheck actual Console choices before upload."
+  },
+  "assets": {
+    "icon": {
+      "width": 512,
+      "height": 512,
+      "format": "PNG",
+      "bitDepth": 32,
+      "alphaAllowed": true,
+      "maxBytes": 1048576,
+      "status": "export_and_visual_review_pending"
+    },
+    "featureGraphic": {
+      "width": 1024,
+      "height": 500,
+      "formats": [
+        "JPEG",
+        "PNG"
+      ],
+      "pngBitDepth": 24,
+      "alphaAllowed": false,
+      "status": "design_and_visual_review_pending"
+    },
+    "phoneScreenshots": {
+      "plannedCount": 6,
+      "minimumCount": 2,
+      "maximumPerDeviceType": 8,
+      "minimumDimension": 320,
+      "maximumDimension": 3840,
+      "maximumAspectRatio": 2,
+      "formats": [
+        "JPEG",
+        "PNG"
+      ],
+      "pngBitDepth": 24,
+      "alphaAllowed": false,
+      "chosenWidth": 1080,
+      "chosenHeight": 1920,
+      "chosenOrientation": "portrait",
+      "chosenAspect": "9:16",
+      "recommendation": "At least four 1080x1920 portrait app screenshots satisfy the documented size/count recommendation; six are planned. This is not a promise of featuring or ranking.",
+      "status": "actual_approved_app_capture_required"
+    }
+  },
+  "contentRules": [
+    "Use actual approved MirtPage app captures; no generated screens, fabricated UI, fake reviews or fake download/ranking claims.",
+    "Use short distinct headlines and unique alt text; prioritize real UI in the first three screens.",
+    "Use approved marked-demo content and hide private identity, email codes, contacts, transcripts and shipment/customer details.",
+    "No Google Play badge or download link before the separate app is genuinely eligible and publicly available.",
+    "No carrier scans, GPS, verified-stock, instant-reply, checkout or delivery-date promise.",
+    "Prepare matching text-bearing assets for supported listing locales; keep Oromo promotional assets separate from Console uploads."
+  ],
+  "publicationPerformed": false
+}

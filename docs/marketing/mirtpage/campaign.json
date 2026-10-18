@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "NOT_PUBLISHED",
+  "uploadReadiness": "NOT_UPLOAD_READY",
+  "brand": "MirtPage",
+  "packageName": "com.mirtpage.app",
+  "narrativeAuthority": {
+    "file": "lib/storefront-copy.ts",
+    "sha256": "85cbb5c219ee2f8ed104f5856c6c191c44e29339dac22cbcd08d5c9b60bc37ca",
+    "headline": "A professional digital showroom for every business."
+  },
+  "plannedDomain": "https://mirtpage.com",
+  "domainStatus": "dns_and_https_verification_pending",
+  "publicSupportEmail": "marketvision.tech@gmail.com",
+  "activeLocales": [
+    "en",
+    "am",
+    "om"
+  ],
+  "officialSocialAccounts": {
+    "instagram": null,
+    "tiktok": null,
+    "facebook": null
+  },
+  "officialAccountStatus": "handles_unverified_no_posts_published_by_this_draft",
+  "publicDownloadUrl": null,
+  "googlePlayBadges": [],
+  "captions": {
+    "en": {
+      "visitor": "Explore what businesses sell, make and grow. See each business’s product range, collections, options and story together, along with the availability it lists. Find what interests you, then contact the business directly—without digging through social posts.",
+      "business": "Whether you sell online or from a shop, make products or grow them, give your business a showroom worth sharing. Bring your brand, story and range together in one organized place. Share one link so customers can explore what you offer and contact you directly.",
+      "transport": "Need help moving a purchase? Ask the transport team by chat. Verify your email in Tracking to view the shipment plans addressed to you and the route stages entered by the team.",
+      "comingSoon": "MirtPage is coming soon: digital showrooms for what businesses sell, make and grow. Website and Android launch details will follow after final review.",
+      "cta": "Launch details will follow."
+    },
+    "am": {
+      "visitor": "ንግዶች የሚሸጡትን፣ የሚሠሩትንና የሚያበቅሉትን ይመልከቱ። ምርቶቻቸውን፣ ስብስቦቻቸውን፣ አማራጮቻቸውንና ታሪካቸውን፣ ስለ ምርት አቅርቦት ካስቀመጡት መረጃ ጋር በአንድ ቦታ ያግኙ። የቆዩ የማኅበራዊ ሚዲያ ልጥፎችን ሳይፈትሹ፣ የፈለጉትን መርጠው ንግዱን በቀጥታ ያነጋግሩ።",
+      "business": "በኦንላይንም ሆነ በሱቅ ቢሸጡ፣ ምርት ቢሠሩም ሆነ ቢያበቅሉ፣ ለንግድዎ ማጋራት የሚያስደስት ማሳያ ገጽ ይፍጠሩ። የንግድዎን መለያ፣ ታሪክና ምርቶች በአንድ የተደራጀ ቦታ ያቅርቡ። ደንበኞች የሚያቀርቡትን ለማወቅና በቀጥታ ለማነጋገር አንድ ሊንክ ያጋሩ።",
+      "transport": "የገዙትን እቃ ለማጓጓዝ እርዳታ ይፈልጋሉ? የማጓጓዣ ቡድኑን በቻት ይጠይቁ። በመከታተያው ውስጥ የኢሜይል ኮድ በማስገባት ለእርስዎ የተዘጋጁ የጭነት ዕቅዶችንና ቡድኑ ያስቀመጣቸውን የጉዞ ደረጃዎች ይመልከቱ።",
+      "comingSoon": "MirtPage በቅርቡ ይመጣል። ንግዶች የሚሸጡትን፣ የሚሠሩትንና የሚያበቅሉትን የሚያሳዩበት ዲጂታል ማሳያ። የድረ ገጹና የአንድሮይድ መተግበሪያው መክፈቻ ዝርዝር ከመጨረሻ ግምገማ በኋላ ይነገራል።",
+      "cta": "የመክፈቻው ዝርዝር በኋላ ይነገራል።"
+    },
+    "om": {
+      "visitor": "Oomishaalee dhaabbileen daldalaa gurguran, hojjetan yookaan qonnaan oomishan ilaalaa. Oomishaalee, walitti qabama, filannoowwan fi seenaa isaanii, akkasumas odeeffannoo argamuu oomishaa isaan ibsan bakka tokkootti argadhaa. Maxxansa miidiyaa hawaasaa keessa osoo hin barbaadin, waan isin barbaachisu filadhaa; ergasii dhaabbaticha kallattiin quunnamaa.",
+      "business": "Onlaayinii yookaan suuqii keessatti yoo gurgurtan, oomisha yoo hojjettan yookaan qonnaan yoo oomishtan, daldala keessaniif fuula agarsiisaa qooduun nama gammachiisu qopheessaa. Maqaa, seenaa fi oomishaalee keessan bakka tokkootti sirnaan qindeessaa. Maamiltoonni waan isin dhiheessitan beekanii kallattiin isin quunnamuuf geessituu tokko qoodaa.",
+      "transport": "Waan bitatte geessuuf gargaarsa barbaaddaa? Garee geejjibaa karaa chaatii gaafadhu. Tracking keessatti koodii imeelii galchuun karoora fe'umsaa siif qophaa'ee fi sadarkaalee imalaa gareen galche ilaali.",
+      "comingSoon": "MirtPage dhiheenyatti ni dhufa. Waan daldaltoonni gurguran, hojjetanii fi oomishan agarsiisa dijitaalaa keessatti walitti fida. Odeeffannoon marsariitii fi appii Android erga gamaaggamni xumuramee booda ni qoodama.",
+      "cta": "Odeeffannoon jalqabaa booda ni qoodama."
+    }
+  },
+  "publicationGates": [
+    "Verify the exact domain registration, DNS, HTTPS and every public destination before adding live links.",
+    "Confirm official social-account ownership and handles; no account, post or paid campaign is created by these drafts.",
+    "Review en/am/om with fluent native speakers and the product owner.",
+    "Replace every planned asset with an actual approved app capture/export and review its phone crop.",
+    "Publish only accurate current release availability; no invented date, ranking, badge, public install link or testimonial.",
+    "Confirm music/media rights and applicable platform disclosures before any post."
+  ],
+  "publicationPerformed": false,
+  "mediaGenerated": false,
+  "translationStatus": "draft_native_speaker_review_pending",
+  "sourceState": "Separate MirtPage launch plan; existing Suqpage publication/history is unchanged."
+}

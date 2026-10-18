@@ -11,6 +11,28 @@ export const quantityModes = ["required", "optional"] as const;
 export type OfferingKind = (typeof offeringKinds)[number];
 export type QuantityMode = (typeof quantityModes)[number];
 
+// Storage and historical snapshots retain every offering kind above. New or
+// explicitly reclassified catalog entries are tangible products only.
+export const activeProductKinds = ["standard_product", "made_to_order"] as const;
+export type ActiveProductKind = (typeof activeProductKinds)[number];
+export function isActiveProductKind(value: unknown): value is ActiveProductKind {
+  return activeProductKinds.includes(value as ActiveProductKind);
+}
+export function isPublicProduct(product: { offering_kind?: unknown }): boolean {
+  return offeringKinds.includes(product.offering_kind as OfferingKind) && product.offering_kind !== "service";
+}
+
+/** Merchant supply context, independent of verified inventory or transport. */
+export function productSupplyLabel(kind: string, availability: string): string {
+  if (availability === "coming_soon") return "Coming soon";
+  if (availability === "unavailable") return kind === "made_to_order" ? "Not accepting orders" : "Unavailable";
+  if (availability === "limited") return kind === "made_to_order" ? "Limited capacity" : "Limited availability";
+  if (availability !== "available") return "Unavailable";
+  if (kind === "standard_product") return "Ready to ship";
+  if (kind === "made_to_order") return "Made to order";
+  return isPublicProduct({ offering_kind: kind }) ? "Available" : "Unavailable";
+}
+
 export const offeringKindLabels: Record<OfferingKind, string> = {
   standard_product: "Standard product",
   service: "Service",
@@ -62,9 +84,8 @@ export function offeringNoun(kind: OfferingKind): "service" | "product" {
   return kind === "service" ? "service" : "product";
 }
 
-export function catalogOfferingLabel(items: readonly { offering_kind: OfferingKind }[]): string {
-  const services = items.some(item => item.offering_kind === "service");
-  return services ? items.some(item => item.offering_kind !== "service") ? "Products & services" : "Services" : "Products";
+export function catalogOfferingLabel(_items: readonly { offering_kind: OfferingKind }[]): string {
+  return "Products";
 }
 
 export function normalizeOfferingKind(value: unknown): OfferingKind {

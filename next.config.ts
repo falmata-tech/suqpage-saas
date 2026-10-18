@@ -20,7 +20,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://tile.openstreetmap.org",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  "connect-src 'self' https://tile.openstreetmap.org",
   "frame-src 'self' https://www.youtube-nocookie.com https://www.tiktok.com https://www.facebook.com https://www.instagram.com",
   "form-action 'self'",
   "frame-ancestors 'none'",
@@ -61,6 +61,7 @@ const nextConfig: NextConfig = {
   },
   outputFileTracingIncludes: {
     "/*": [
+      "./lib/world-place-catalog.json",
       "./node_modules/next/dist/server/lib/source-maps.js",
       "./node_modules/next/dist/server/lib/lru-cache.js",
       "./node_modules/@img/sharp-linux-x64/**/*",
@@ -100,6 +101,26 @@ const nextConfig: NextConfig = {
       { key: "Cache-Control", value: "public, max-age=3600, must-revalidate" },
     ] },
     { source: "/(.*)", headers: securityHeaders },
+    ...["/tracking/:path*", "/api/tracking/:path*", "/api/mobile/v1/tracking/:path*"].map(source=>({source,headers:[
+      { key: "Cache-Control", value: "private, no-store" },
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+    ]})),
+    { source: "/transport-plan", headers: [
+      { key: "Cache-Control", value: "private, no-store" },
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+    ] },
+    { source: "/api/transport-plan", headers: [
+      { key: "Cache-Control", value: "private, no-store" },
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+    ] },
+    { source: "/api/mobile/v1/transport-plan", headers: [
+      { key: "Cache-Control", value: "private, no-store" },
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+    ] },
   ]; },
 };
 export default createNextIntlPlugin("./i18n/request.ts")(nextConfig);

@@ -2,13 +2,80 @@
 id: BE-032
 title: Tenant-owned page drafts and revocable staff assistance
 status: in_progress
-related: [FE-026, BE-044, FE-060, BE-048, BE-045, FE-056, FE-052, BE-031, FE-038, FE-040, DEP-030, ADR-0018, BE-033, BE-034, FE-019, BE-018, DEP-039]
+related: [BE-055, BE-054, FE-026, BE-044, FE-060, BE-048, BE-045, FE-056, FE-052, BE-031, FE-038, FE-040, DEP-030, ADR-0018, BE-033, BE-034, FE-019, BE-018, DEP-039, FE-047]
 owners: [backend, security]
-last_updated: 2026-10-07
+last_updated: 2026-10-17
 change_level: L2
 ---
 
 # BE-032 - Tenant-owned page drafts and revocable staff assistance
+
+## S122 — focused product-save adapter preserves authority (implemented locally; review pending)
+
+FE-047/FE-026 S122 reuse the existing product upkeep domain and PostgreSQL port.
+The focused web action returns expected errors without redirecting away from
+entered input, redacts unknown internal exceptions and preserves staged-media
+cleanup. Successful saves return to the canonical business Products list with
+bounded search/page and a saved notice. Navigation fields are explicitly admitted
+as hints and never become product/tenant authority or arbitrary return URLs.
+Keep expected content version, idempotency, fresh tenant/role authorization,
+publication and media limits unchanged. Existing legacy action callers remain
+compatible. Explicit owner availability/listed fields use existing
+`updateListingState`; omitted staff-only metadata stays canonical inside the
+existing transaction. Focused action/security and isolated persistence tests must
+prove spoofed hints, unknown-error redaction, stale/foreign denial and preservation.
+
+S122 local verification: scripts/test-product-edit-action.ts, scripts/test-product-upkeep.ts and actual private-QA product-save/recovery readback pass. Current source, protected
+readback and scoped harness failures are recorded in TRACEABILITY.md and
+`.local/workspace-audit-s122/`. Both typechecks, localization and spec validation
+pass. Visual approval, full/release/acceptance gates, commit and rollout remain
+pending; this is not physical Android or complete-application certification.
+
+## S115 — focused settings preserve unrelated fields (ready)
+
+GIVEN a focused identity/live/sharing settings submission WHEN current privileged
+authority and expected version are valid THEN update only that section and any
+explicitly admitted upload, preserving every omitted identity/contact/live/SEO/
+media field. Canonical values come from the database inside the version-fenced
+write, never hidden unvalidated client snapshots. Unknown/forged sections and
+cross-section payloads are rejected before mutation; old full-record forms remain
+compatible. Concurrent/stale saves, revoked role and failed audit roll back cleanly.
+Owner page tasks reuse existing complete validated profile/version contracts and
+must preserve untouched fields. FE-026/FE-056/FE-053 define UI; no new schema or
+provider is introduced. Add isolated preservation/concurrency/security regressions.
+
+Local evidence: `scripts/test-business-settings.ts` passes real disposable-schema
+version/race/tenant/fresh-role/section/forgery/audit rollback checks;
+`test-admin-editor-actions.ts` covers actual upload/error/return adapters and
+`test-owner-focused-tasks.ts` proves complete-profile preservation/retry behavior.
+UI/browser approval and full/release evidence remain separate in S115 TRACEABILITY.
+
+## S109 — protected focused business settings
+
+GIVEN an authorized administrator opens the canonical business settings editor
+THEN bind Save to the saved content version. WHEN another write changes that
+version before Save THEN reject the stale form without overwriting canonical
+identity/logo/contact/live/SEO data, retain entered values and explain refresh.
+Missing/invalid/foreign versions fail closed. Successful saves atomically update
+only authorized fields and advance the version once; existing tenant, fresh-role,
+media safety and owner publication rules remain authoritative. Do not invent a
+sign-in email change workflow or expand queue-agent business rights.
+
+This L2 data-integrity correction accompanies FE-026 S109's read-first/focused
+editor; no schema change. Add isolated PostgreSQL simultaneous/stale/foreign and
+expected-error/retry tests. Media/audit failure must not claim success or expose
+internal errors. Keep existing uploads recoverable under existing media contracts.
+
+GIVEN an administrator assigns page-editing assistance THEN offer only current
+legacy generic team members for a new grant and recheck the saved administrator,
+assignee role and queue scope atomically at Save. Support/Transport queue agents
+cannot receive a new business-editor assignment. GIVEN a retained historical
+association for an account that no longer has page-editing authority THEN keep
+that record visible as history, permit explicit revocation and prohibit
+reactivation; do not delete historical associations or widen page permissions.
+Owner assistance consent remains required. Isolated PostgreSQL regressions must
+prove filtered choices, forged/stale role denial, retained history, safe explicit
+revoke and audit rollback; FE-026 covers the focused business-context view.
 
 ## S88 — scoped queue staff have no page authority
 
@@ -295,7 +362,10 @@ commit and hosted rollout remain pending.
 
 For the current self-service first-Publish flow, the server rejects an unchanged
 starter About, any retained starter contact value, an unreviewed example location,
-and missing real offerings or listed starter offerings. The owner can replace or
+and missing real offerings or listed starter offerings. S102 / BE-054 retains
+recognition of historic starter contacts after safer new defaults: reserved
+phone ranges, example/test/invalid domains and the old sample social handle
+remain publication blockers, without changing real contacts or active-page Save. The owner can replace or
 remove optional sample contacts and offerings. UI readiness links lead to the
 relevant editable fields; the server rechecks while holding publication locks.
 Existing active-page Save, consent and tenant/version guards are preserved.
@@ -314,3 +384,7 @@ the starter video. `scripts/test-video-requests.ts` covers tenant/agent boundari
 forged saves, approval without channel setup, retries, stale targets and exact-field
 preservation; `scripts/capture-video-requests.ts` covers the real owner/staff forms.
 Local evidence passes; refreshed release and publication gates remain pending.
+
+S106 / FE-066 / BE-055: public page editors preserve all original contact
+fields and first-publication eligibility. Existing draft values are preserved;
+only public business-inbox submission is retired.

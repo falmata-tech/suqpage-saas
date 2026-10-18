@@ -2,7 +2,7 @@
 id: DEP-030
 title: Data-preserving Suqpage self-service rollout
 status: in_progress
-related: [FE-052, DEP-036, DEP-034, DEP-032, DEP-031, FE-041, FE-040, BE-032, ADR-0018, FE-042, BE-033, FE-043, BE-034]
+related: [FE-052, DEP-036, DEP-034, DEP-032, DEP-031, FE-041, FE-040, BE-032, ADR-0018, FE-042, BE-033, FE-043, BE-034, DEP-045]
 owners: [operations, security, product]
 last_updated: 2026-09-21
 change_level: L3

@@ -1,9 +1,14 @@
 import { parseBusinessHandle } from '../../../lib/business-handle';
 import { normalizeDiscoveryCategories, discoveryPlaceKey } from '../../../lib/discovery-contract';
+import {readMarketSearch,marketWorkspaceParams} from '../../../lib/market-search';
+import {isTrackingReference} from '../../../lib/tracking-contract';
 
 type Param = string | string[] | undefined;
 export type MarketLinkInput = { q?: Param; category?: Param; industry?: Param; place?: Param; page?: Param; view?: Param; _intent?: Param };
 const first = (value: Param) => typeof value === 'string' ? value : value?.[0] || '';
+let marketIntent=0;
+/** Distinguish a fresh explicit action from returning to an existing route. */
+export function createMarketNavigationIntent():string {return String(++marketIntent);}
 export function marketLinkState(input: MarketLinkInput) {
   const query = first(input.q).slice(0, 200).trim();
   const categories = normalizeDiscoveryCategories([...(typeof input.category === 'string' ? [input.category] : input.category || []), ...(typeof input.industry === 'string' ? [input.industry] : input.industry || [])]);
@@ -20,11 +25,21 @@ export function incomingSuqpagePath(input: string): string {
     if (!input || input.length > 16384 || /[\u0000-\u001f\u007f\\]/u.test(input)) return '/';
     let url = new URL(input, 'https://suqpage.com');
     if (url.username || url.password) return '/';
+    const canonicalSource=url.protocol==='https:'&&url.hostname==='suqpage.com'&&!url.port;
     if (url.protocol === 'suqpage:') {
       const path = `${url.hostname ? '/' + url.hostname : ''}${url.pathname}` || '/';
       url = new URL(path + url.search, 'https://suqpage.com');
     } else if (url.protocol !== 'https:' || url.hostname !== 'suqpage.com' || url.port) return '/';
     const path = decodeURIComponent(url.pathname).replace(/\/$/, '') || '/';
+    if(path==='/transport-plan'){
+      return canonicalSource&&url.pathname==='/transport-plan'&&!url.search?'/tracking':'/';
+    }
+    if(path==='/tracking'||path.startsWith('/tracking/')){
+      if(!canonicalSource||url.search||url.hash||url.pathname!==path)return '/';
+      if(path==='/tracking')return '/tracking';
+      const reference=path.slice('/tracking/'.length);
+      return isTrackingReference(reference)?'/tracking?'+new URLSearchParams({reference}):'/';
+    }
     if (path.startsWith('/@') || path.startsWith('/shop/')) {
       const handle = parseBusinessHandle(path.startsWith('/@') ? path.slice(2) : path.slice(6));
       const id = url.searchParams.get('product');
@@ -40,6 +55,9 @@ export function incomingSuqpagePath(input: string): string {
         ? `/product?${new URLSearchParams({handle,id})}` : `/shop/${handle}`;
     }
     if (path === '/' || path === '/market') {
+      if([...url.searchParams.keys()].some(key=>key.startsWith('b.')||key.startsWith('p.'))) {
+        return '/?'+marketWorkspaceParams(url.searchParams.get('view')==='search'?'products':'businesses',readMarketSearch(url.searchParams,'b.'),readMarketSearch(url.searchParams,'p.'));
+      }
       const state = marketLinkState({q:url.searchParams.get('q') || undefined,category:url.searchParams.getAll('category'),industry:url.searchParams.getAll('industry'),place:url.searchParams.getAll('place'),page:url.searchParams.get('page') || undefined,view:url.searchParams.get('view') || undefined});
       const params = new URLSearchParams();
       if(state.query)params.set('q',state.query);

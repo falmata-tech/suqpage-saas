@@ -8,10 +8,10 @@ const OFFLINE_URL = "/offline";
 const APP_SHELL = [
   OFFLINE_URL,
   "/manifest.webmanifest",
-  "/brand/suqpage-mark.svg",
-  "/pwa/suqpage-icon-192.png",
-  "/pwa/suqpage-icon-512.png",
-  "/pwa/suqpage-icon-maskable-512.png"
+  "/brand/mirtpage-panels-mark.svg",
+  "/pwa/mirtpage-panels-icon-192.png",
+  "/pwa/mirtpage-panels-icon-512.png",
+  "/pwa/mirtpage-panels-icon-maskable-512.png"
 ];
 
 const PRIVATE_PATHS = ["/api", "/dashboard", "/preview", "/login", "/request"];

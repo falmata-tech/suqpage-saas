@@ -5,19 +5,24 @@ const activeFiles = ["app", "components"].flatMap((root) => fs.readdirSync(root,
   .filter((file) => /\.(tsx?|css)$/.test(file)).map((file) => `${root}/${file}`));
 const violations = [];
 for (const file of activeFiles) {
-  if (/AfricMade|MirtPage/.test(fs.readFileSync(file, "utf8"))) violations.push(file);
+  const source=fs.readFileSync(file, "utf8");
+  const retiredVisibleLabels=[...source.matchAll(/(["'`])([^"'`\n]*\bSuq[Pp]age\b[^"'`\n]*)\1/g)]
+    .map(match=>match[2]).filter(value=>!value.startsWith("X-Suqpage-"));
+  if (/AfricMade/.test(source)||retiredVisibleLabels.length) violations.push(file);
 }
 
 assert.deepEqual(violations, [], `retired platform identity remains in: ${violations.join(", ")}`);
 assert.equal(JSON.parse(fs.readFileSync("package.json", "utf8")).name, "suqpage-saas-mvp");
-assert.ok(fs.existsSync("public/brand/suqpage-mark.svg"));
+assert.ok(fs.existsSync("public/brand/mirtpage-panels-mark.svg"));
 assert.ok(fs.existsSync("SUQPAGE-MASTER-PROMPT.md"));
-const mark = fs.readFileSync("public/brand/suqpage-mark.svg", "utf8").toLowerCase();
-assert.match(mark, /<title id="title">suqpage<\/title>/);
+const mark = fs.readFileSync("public/brand/mirtpage-panels-mark.svg", "utf8").toLowerCase();
+assert.match(mark, /<title id="title">mirtpage<\/title>/);
 assert.ok(mark.includes("#ff4b00"));
-const brand = fs.readFileSync("components/SuqpageBrand.tsx", "utf8");
-assert.match(brand, /aria-label=\{t\("Suqpage home"\)\}/);
-assert.match(brand, /<span>suq<\/span><span>page<\/span>/);
+const brand = fs.readFileSync("components/MirtPageBrand.tsx", "utf8");
+assert.match(brand, /aria-label=\{t\("MirtPage home"\)\}/);
+assert.match(brand, /PLATFORM_BRAND\.wordmark\.leading/);
+assert.match(brand, /PLATFORM_BRAND\.wordmark\.trailing/);
+assert.match(fs.readFileSync("components/SuqpageBrand.tsx", "utf8"),/export \{ default \} from "\.\/MirtPageBrand"/);
 const platformStyles = ["app/globals.css", "app/landing.css", "app/discovery.css"]
   .map((file) => fs.readFileSync(file, "utf8").toLowerCase())
   .join("\n");
@@ -40,10 +45,10 @@ assert.ok(showroomStyles.includes("background:rgb(255 255 255 / 96%)"));
 assert.ok(showroomStyles.includes("outline:3px solid #ff4b00"));
 const discoveryWorkspace = fs.readFileSync("components/DiscoveryWorkspace.tsx", "utf8");
 assert.doesNotMatch(discoveryWorkspace, /aria-label="Production scale"/);
-// FE-042 keeps the search surface inside the optional, labelled map drawer.
-assert.match(discoveryWorkspace, /id="discovery-search-panel" className="discovery-summary discovery-search-panel"/);
-assert.match(discoveryWorkspace, /aria-labelledby="discovery-panel-title" aria-hidden=\{!panelOpen\} inert=\{!panelOpen\}/);
-assert.match(discoveryWorkspace, /className="discovery-search" role="search"/);
+// FE-065 supersedes the old FE-042 shared drawer with independent labelled scopes.
+assert.match(discoveryWorkspace, /id="discovery-search-panel" className=\{independentStyles\.panel\}/);
+assert.match(discoveryWorkspace, /aria-label=\{t\('Products'\)\} aria-hidden=\{!panelOpen\} inert=\{!panelOpen\}/);
+assert.match(discoveryWorkspace, /<MarketSearchControls[^\n]+scope=\{panelOpen\?'products':'businesses'\}/);
 for (const publicRoute of ["app/(public)/page.tsx", "app/discover/page.tsx"]) {
   assert.doesNotMatch(fs.readFileSync(publicRoute, "utf8"), /query\.scale/);
 }
@@ -52,4 +57,4 @@ for (const file of ["app/(public)/[handle]/page.tsx", "app/preview/[handle]/page
   assert.match(source, /runtimePublishedPage\([^\n]+\|\| initialBusinessProfile\(catalog\)/);
   assert.match(source, /businessProfile=\{profile\}/);
 }
-console.log("Suqpage identity and shared public/preview renderer contracts passed.");
+console.log("MirtPage identity and shared public/preview renderer contracts passed; technical package identity retained.");

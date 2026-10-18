@@ -1,0 +1,20 @@
+.panel { width: min(100%, 660px); border: 1px solid #d6e1dc; border-radius: 16px; background: white; overflow: hidden; box-shadow: 0 8px 24px #283f3510; }
+.eyebrow { display: flex; align-items: center; gap: 7px; padding: 18px 18px 0; color: #a43107; font-size: 13px; font-weight: 650; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.actions a { min-height: 48px; display: inline-flex; align-items: center; }
+.panel > div:last-child { min-height: 0; }
+.panel form { display: grid; }
+.panel :global(.public-support-contact-fields) { display: grid; }
+.panel form > button[type=submit] { border: 0; border-radius: 8px; background: #b83200; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.panel form > button[type=submit]:disabled { opacity: .55; cursor: not-allowed; }
+.panel :global(.public-support-contact-fields) input { min-width: 0; width: 100%; border: 1px solid #bdcacc; border-radius: 8px; padding: 10px; font: inherit; }
+.panel form label { display: grid; min-width: 0; gap: 6px; color: #354a50; font-weight: 650; }
+.panel form textarea { resize: vertical; padding: 10px; border: 1px solid #bdcacc; border-radius: 8px; font: inherit; }
+.panel :is(button,a,input,textarea):focus-visible { outline: 3px solid #2459cc; outline-offset: 2px; }
+.history { display: grid; gap: 10px; }
+.history > a { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 72px; padding: 16px; background: white; border: 1px solid #d6e1dc; border-radius: 12px; color: #253037; text-decoration: none; }
+.history > a:hover { border-color: #c34410; background: #fff7f0; }
+.history > a:focus-visible { outline: 3px solid #2459cc; outline-offset: 2px; }
+.history > a > span:first-child { display: grid; min-width: 0; gap: 5px; overflow-wrap: anywhere; }
+.history small { color: #5c7076; }
+@media (max-width: 720px) { .panel { border-radius: 12px; } .history > a { padding: 12px; } }

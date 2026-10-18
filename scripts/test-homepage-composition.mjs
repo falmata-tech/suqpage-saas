@@ -12,6 +12,10 @@ const publicShell = read("components/PublicAppShell.tsx");
 const publicFrame = read("components/PublicAppFrame.tsx");
 const mobileNavigation = read("components/PublicMobileNavigation.tsx");
 const discoveryMapUi = read("components/DiscoveryWorkspace.tsx");
+const marketControls = read("components/MarketSearchControls.tsx");
+const marketSearch = read("lib/market-search.ts");
+const marketFeed = read("lib/use-market-feed.ts");
+const independentCss = read("components/IndependentMarket.module.css");
 const featuredUi = read("components/FeaturedShowroomsWorkspace.tsx");
 const discoveryUi = `${discoveryMapUi}\n${featuredUi}`;
 const discoveryCss = read("app/discovery.css");
@@ -20,12 +24,24 @@ const discoveryRuntime = read("lib/discovery.ts");
 const publicDiscoveryCache = read("lib/public-discovery-cache.ts");
 const landingCss = read("app/landing.css");
 const about = read("app/(public)/about/page.tsx");
+const aboutAudience = read("components/AboutAudience.tsx");
 const showroomUi = read("components/showroom/ShowroomApp.tsx");
 const showroomCss = read("components/showroom/showrooms.css");
 const nextConfig = read("next.config.ts");
 
-assert.match(market, /getPublicMarketplaceView/);
+// FE-065 supersedes the shared Market query. Keep both server projections and
+// their initial criteria distinct; Featured retains its separate cache contract.
+assert.match(market, /getIndependentPublicMarketplace\(['"]businesses['"],\s*initialBusiness\)/);
+assert.match(market, /getIndependentPublicMarketplace\(['"]products['"],\s*initialProduct\)/);
+assert.match(market, /initialBusiness=readMarketSearch\(params,['"]b\.['"]\);initialProduct=readMarketSearch\(params,['"]p\.['"]\)/);
+assert.match(market, /productDiscovery=\{productDiscovery\}[\s\S]*initialBusiness=\{initialBusiness\}[\s\S]*initialProduct=\{initialProduct\}/);
 assert.match(publicDiscoveryCache, /getMarketplaceDiscoveryView/);
+assert.match(publicDiscoveryCache, /const cachedIndependentBrowse = unstable_cache\([\s\S]*async \(scope:MarketScope\) => getMarketplaceDiscoveryView\(\{scope\}\)/);
+assert.match(publicDiscoveryCache, /if\(!hasMarketCriteria\(search\)&&search\.page===1&&!options\.excludedBusinessIds\?\.length&&!options\.readPort&&!options\.now\)return cachedIndependentBrowse\(scope\)/, 'Only finite default-browse scopes enter the shared cache');
+assert.match(publicDiscoveryCache, /export async function getIndependentPublicMarketplace[\s\S]*const excluded=await readExcludedBusinesses\(\);[\s\S]*excludedBusinessIds:excluded/, 'Personal exclusions are resolved before selecting a cached projection');
+assert.match(publicDiscoveryCache, /revalidate:PUBLIC_DISCOVERY_REVALIDATE_SECONDS,tags:\[['"]public-marketplace['"]\]/);
+assert.match(marketSearch, /MARKET_MAP_LIMIT = 200/);
+assert.match(marketSearch, /MARKET_PRODUCT_BATCH_SIZE = 12/);
 assert.match(publicLayout, /<PublicAppShell>/);
 assert.match(market, /<DiscoveryWorkspace[\s\S]*discovery=\{discovery\}[\s\S]*hideIntro/);
 assert.match(market, /t\(MARKET_STOREFRONT_COPY.title\)/);
@@ -47,16 +63,20 @@ assert.match(publicFrame, /href: "\/", label: "Market"/);
 assert.match(publicFrame, /href: "\/featured", label: "Featured", icon: Star/);
 assert.match(mobileNavigation, /href:\s*"\/featured",\s*label:\s*"Featured",\s*icon:\s*Star/);
 assert.doesNotMatch(`${publicFrame}\n${mobileNavigation}`, /CalendarClock/);
-assert.match(publicFrame, /href="\/dashboard\/profile"/);
-assert.match(read("app/dashboard/profile/page.tsx"), /href="\/about"/);
+assert.match(publicFrame, /<Link href=\{dashboardHref\}/);
+assert.match(publicShell, /dashboardHref=\{user\?workspaceHomeHref\(user\)/, 'The authenticated role supplies its authorized Account destination');
+assert.match(read("components/DashboardShell.tsx"), /href:['"]\/about['"],label:['"]About['"]/, 'Owner navigation retains the About task');
 assert.doesNotMatch(publicFrame, /href: "\/sponsors"/);
-assert.match(publicFrame, /aria-label=\{t\("Explore Suqpage"\)\}/);
+assert.match(publicFrame, /aria-label=\{t\("Explore MirtPage"\)\}/);
 assert.match(mobileNavigation, /href:\s*"\/",\s*label:\s*"Market"/);
-// FE-056: guests see Market/Featured/Account; signed-in owners also see Inquiries.
-assert.match(mobileNavigation, /items\.filter\(item=>item\.label!==['"]Inquiries['"]\|\|signedIn\)/);
-assert.match(mobileNavigation, /href:signedIn\?"\/dashboard\/inquiries":"\/login\?next=inquiries",label:"Inquiries"/);
-assert.match(mobileNavigation, /href:onboarding\?"\/request":signedIn\?"\/dashboard\/profile":"\/login",label:"Account"/);
-assert.doesNotMatch(mobileNavigation, /label:\s*"About"|t\("More"\)|aria-haspopup="dialog"/);
+// FE-066/FE-070: four public tasks, About reachable, Login/Account follows the
+// session, and retired business-inbox submission is never a navigation task.
+assert.match(mobileNavigation, /href:\s*"\/about",\s*label:\s*"About"/);
+assert.match(mobileNavigation, /href:onboarding\?"\/request":signedIn\?dashboardHref:"\/login"/);
+assert.match(mobileNavigation, /label:signedIn\?"Account":"Login"/);
+assert.match(mobileNavigation, /aria-label=\{t\("MirtPage application navigation"\)\}/);
+assert.doesNotMatch(`${publicFrame}\n${mobileNavigation}`, /label:\s*["']Inquiries["']|\/dashboard\/inquiries|login\?next=inquiries/);
+assert.doesNotMatch(mobileNavigation, /t\("More"\)|aria-haspopup="dialog"/);
 assert.doesNotMatch(mobileNavigation, /label: "Home"/);
 
 assert.match(landingCss, /suqpage-public-app-canvas-v1\.webp/);
@@ -64,12 +84,14 @@ assert.match(landingCss, /\.public-mobile-tabs \{ grid-template-columns: repeat\
 assert.match(landingCss, /\.public-market-experience > \.discovery/);
 assert.doesNotMatch(landingCss, /\.public-lobby/);
 
-assert.match(discoveryUi, /const action = "\/"/);
+assert.match(discoveryMapUi, /fetch\(['"]\/api\/discovery\?['"]\+key/);
 assert.match(discoveryUi, /discovery-workbench/);
-assert.match(discoveryUi, /discovery-compact-toolbar/);
-assert.match(discoveryUi, /<CategoryChooser/);
+assert.match(discoveryMapUi, /aria-label=\{t\(['"]Search for['"]\)\}/);
+assert.match(discoveryMapUi, /<MarketSearchControls[\s\S]*scope=\{panelOpen\?['"]products['"]:['"]businesses['"]\}[\s\S]*onChange=\{panelOpen\?setProductSearch:setBusinessSearch\}/);
 assert.doesNotMatch(discoveryMapUi, /filtersOpen|discovery-filter-toolbar/);
-assert.match(discoveryMapUi, /Clear location/);
+assert.match(marketControls, /aria-label=\{t\(['"]Clear search['"]\)\}/);
+assert.match(marketControls, /aria-label=\{t\(['"]Clear all['"]\)\}[\s\S]*onChange\(emptyMarketSearch\(\)\)/);
+// Retained category chooser remains accessible for its compatibility callers.
 assert.match(fs.readFileSync("components/CategoryChooser.tsx", "utf8"), /aria-label=\{t\("Filter by category"\)\}/);
 assert.match(discoveryRuntime, /ALL_DISCOVERY_INDUSTRIES = \{ key: "all", label: "All categories"/);
 assert.match(discoveryRuntime, /DISCOVERY_INDUSTRY_OPTIONS = \[\.\.\.DISCOVERY_INDUSTRIES, ALL_DISCOVERY_INDUSTRIES\]/);
@@ -78,7 +100,9 @@ assert.match(discoveryRuntime, /export async function getMarketplaceDiscoveryVie
 assert.match(discoveryRuntime, /export async function getFeaturedShowroomsView/);
 assert.match(discoveryRuntime, /export async function getSponsoredShowrooms/);
 assert.doesNotMatch(discoveryUi, /discovery-filter-sheet/);
-assert.match(discoveryUi, /Search & filters/);
+assert.match(marketControls, /key:['"]category['"],label:['"]Category['"]/);
+assert.match(marketControls, /key:['"]country['"],label:['"]Country['"]/);
+assert.match(marketControls, /key:['"]city['"],label:['"]City['"]/);
 assert.match(discoveryUi, /discovery-floating-tools/);
 assert.doesNotMatch(discoveryUi, /function IndustryStartChooser/);
 assert.match(discoveryUi, /inert=\{!panelOpen\}/);
@@ -95,29 +119,40 @@ assert.match(discoveryUi, /TikTok Live/);
 assert.match(discoveryUi, /resolveFeaturedProgramSessions/);
 assert.match(discoveryUi, /Livestream ended/);
 assert.match(discoveryUi, /navigator\.geolocation\.getCurrentPosition/);
-assert.match(discoveryUi, /Filter by region or city/);
-assert.match(discoveryUi, /name="q" type="search"[\s\S]*maxLength=\{80\}/);
-assert.match(discoveryUi, /role="combobox"/);
-assert.match(discoveryUi, /aria-autocomplete="list"/);
-assert.match(discoveryUi, /role="listbox"/);
+assert.match(marketControls, /type="search" maxLength=\{80\}/);
+assert.match(marketControls, /aria-label=\{t\(scope===['"]businesses['"]\?['"]Search businesses['"]:['"]Search products['"]\)\}/);
+assert.match(marketControls, /disabled=\{f\.key===['"]city['"]&&!value\.countries\.length\}/, 'A country is required before selecting a city');
+assert.match(marketControls, /aria-haspopup="dialog"/);
+assert.match(marketControls, /<dialog[\s\S]*aria-labelledby=/);
+assert.match(marketControls, /type="checkbox" checked=\{selected\.includes\(c\.key\)\}/);
 assert.match(discoveryRuntime, /\.slice\(0, 6\)/);
 assert.match(discoveryRuntime, /product\.is_published=1/);
 assert.match(discoveryCss, /\.discovery-search-suggestions\s*\{[^}]*position:\s*absolute/);
 assert.match(discoveryUi, /function MarketplaceSearchResults/);
-// S54: map businesses stay discoverable; the list is offerings only.
-assert.match(discoveryMapUi, /className="discovery-results-heading">\{t\("Products & services"\)\}/);
+// FE-065/FE-067: businesses stay on their independent map; cards are products.
+assert.match(discoveryMapUi, /className="discovery-results-heading">\{t\("Products"\)\}/);
 assert.doesNotMatch(discoveryMapUi, /discovery-search-result-types|discovery-result-filters|renderBusiness|toggleResultType/);
-assert.match(discoveryUi, /view: "search"/);
+assert.match(marketSearch, /view:mode===['"]products['"]\?['"]search['"]:['"]map['"]/);
 // S22/S24: the drawer hide control replaces the former separate map action.
-assert.match(discoveryUi, /aria-label=\{t\(panelOpen \? "Hide products" : "View products"\)\}/);
+assert.match(discoveryMapUi, /aria-label=\{t\(panelOpen\?['"]Map only['"]:['"]View products['"]\)\}/);
 assert.match(discoveryRuntime, /searchProducts:\s*DiscoveryProductResult\[\]/);
-// FE-042 replaces the former fixed result cap with a bounded database page.
+// FE-065 AC9 keeps bounded SQL pages and replaces visible Previous/Next links
+// with a single-flight append feed, explicit fallback and end announcement.
 assert.match(discoveryRuntime, /LIMIT \? OFFSET \?/);
-assert.match(discoveryUi, /Previous/);
-assert.match(discoveryUi, /Next/);
+assert.match(discoveryMapUi, /new IntersectionObserver[\s\S]*root:resultList\.current/);
+assert.match(discoveryMapUi, /if\(!enabled\|\|!hasMore\|\|loading\|\|loadingMore\|\|moreError/);
+assert.match(discoveryMapUi, /enabled=\{panelOpen\} resetKey=\{productKey\}/);
+assert.match(discoveryMapUi, /t\("Load more"\)/);
+assert.match(discoveryMapUi, /t\("You've seen all the results\."\)/);
+assert.match(marketFeed, /old\.key !== activeKey\.current[\s\S]*old\.loading \|\| more\.current \|\| old\.batch\.page >= old\.batch\.pages/);
+assert.match(marketFeed, /controller\.signal\.aborted \|\| generation\.current !== version \|\| activeKey\.current !== expectedKey/);
+assert.match(marketFeed, /const seen = new Set\(s\.batch\.items\.map\(item => item\.id\)\)/);
+assert.match(marketFeed, /moreError: ['"]Search is unavailable\. Try again\.['"]/);
+assert.match(independentCss, /:global\(\.discovery-search-results\)\{[^}]*overflow:auto/);
 assert.match(discoveryCss, /\.discovery-search-results\s*\{[^}]*overflow-y:\s*auto/);
 assert.match(discoveryUi, /className="featured-gallery"/);
-assert.match(discoveryCss, /\.discovery-workbench\s*\{[^}]*grid-template-columns:\s*320px minmax\(0, 1fr\)/);
+assert.match(independentCss, /\.stage\{[^}]*display:flex!important;flex-direction:column/);
+assert.match(independentCss, /\.stage \.mapPanel\[data-open=false\]\{[^}]*pointer-events:none/);
 assert.match(discoveryCss, /\.public-market-experience \.discovery-marketplace,[\s\S]*height:\s*100%/);
 assert.match(discoveryCss, /\.featured-gallery\s*\{[^}]*grid-template-columns/);
 assert.doesNotMatch(discoveryUi, /featured-floor|featured-floor-actions|Zoom in to featured showroom floor|Fit featured showroom floor/);
@@ -151,7 +186,10 @@ for (const [file, maximum] of images) {
   assert.ok(fs.statSync(target).size <= maximum, `${file} remains within its image budget`);
 }
 
-assert.match(about, /ABOUT_STOREFRONT_SECTIONS.map/);
+assert.match(about, /<AboutAudience\s*\/>/);
+assert.match(aboutAudience, /ABOUT_STOREFRONT_SECTIONS.map/);
+assert.match(aboutAudience, /role="tablist"[\s\S]*role="tab"[\s\S]*aria-selected=\{audience===section\.id\}/);
+assert.match(aboutAudience, /role="tabpanel"[\s\S]*hidden=\{audience!==section\.id\}/);
 assert.match(landingCss, /suqpage-workspace-context-v1\.webp/);
 assert.doesNotMatch(market + about + landingCss, /https?:\/\/[^"')]+\.(?:png|jpe?g|webp)/i);
 

@@ -28,11 +28,12 @@ async function main() {
     async function assertComplete(businessId: number, selectedCategory:BusinessCategoryKey="electronics", expectedReviewed=1) {
       const catalog = (await runtimeCatalogByBusinessId(businessId, true))!;
       assert.equal(catalog.business.status, 'draft');
-      for (const key of ['name','tagline','description','logo_path','favicon_path','hero_title','hero_subtitle','hero_image_path','process_video_ref','public_email','public_phone','whatsapp','telegram','tiktok','site_title','site_description','contact_email','live_platform','live_url'] as const) assert.ok(catalog.business[key], `Business ${key} is filled`);
+      for (const key of ['name','tagline','description','logo_path','favicon_path','hero_title','hero_subtitle','hero_image_path','process_video_ref','public_email','public_phone','whatsapp','site_title','site_description','contact_email','live_platform','live_url'] as const) assert.ok(catalog.business[key], `Business ${key} is filled`);
+      assert.equal(catalog.business.telegram,'');assert.equal(catalog.business.tiktok,'');
       assert.equal(catalog.business.is_live, 0);
       assert.equal(catalog.business.process_video_ref,categoryStarter(selectedCategory).videoRef);
       assert.equal(catalog.products.length, 3);
-      assert.deepEqual(catalog.products.map(p => p.offering_kind).sort(), ['service','standard_product','standard_product']);
+      assert.deepEqual(catalog.products.map(p => p.offering_kind).sort(), ['made_to_order','standard_product','standard_product']);
       for (const p of catalog.products) {
         for (const key of ['name','slug','description','image_path','video_ref','availability','category_id','collection_id'] as const) assert.ok(p[key], `Offering ${key} is filled`);
         assert.ok(p.price_minor! > 0); assert.equal(p.highlights.length, 0);
@@ -47,7 +48,11 @@ async function main() {
       assert.equal(draft.content.videoUrl,categoryStarter(selectedCategory).page.videoUrl);
       assert.ok(fs.existsSync(`public${draft.content.heroImage}`));
       const contacts = parsePublicContacts(draft.content.contacts);
-      for (const {key} of publicContactFields) assert.ok(contacts[key], `${key} has a stored example`);
+      for (const {key} of publicContactFields) {
+        if(['tiktok','instagram','telegram','facebook'].includes(key))assert.equal(contacts[key],'','No fictional handle may point to a real social account');
+        else assert.ok(contacts[key], `${key} has a stored safe example`);
+      }
+      assert.match(contacts.email!,/@example\.invalid$/);assert.equal(contacts.website,'https://example.invalid/');
       assert.notEqual(contacts.email, identity.email); assert.notEqual(contacts.phone, signup.phone);
       const location = await db.prepare('SELECT * FROM owner_location_proposals WHERE business_id=?').get(businessId);
       assert.equal(location.city, 'Addis Ababa'); assert.ok(location.region && location.place_id);

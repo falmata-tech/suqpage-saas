@@ -6,7 +6,7 @@ import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 import { SEEDED_FEATURED_HANDLES, seededMarketplaceBoothPath, } from "../lib/marketplace-seed";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { evaluateCompositionFitness } from "../lib/showroom-guidance";
-async function runPostgresFixture() {
+async function assertSeededBenchmarks() {
     const activeBusinesses = (await getAllBusinesses()).filter((business) => business.status === "active");
     const offeringKinds = new Set<string>();
     const quantityModes = new Set<string>();
@@ -35,7 +35,7 @@ async function runPostgresFixture() {
         }
         assert.ok(fs.existsSync(path.join(process.cwd(), "public", seededMarketplaceBoothPath(business.handle))), `${business.handle} has a generated booth image`);
     }
-    assert.deepEqual([...offeringKinds].sort(), ["service", "standard_product"], "reset fixtures demonstrate the simplified product/service choices");
+    assert.deepEqual([...offeringKinds].sort(), ["made_to_order", "standard_product"], "reset fixtures demonstrate both accepted product-only supply choices");
     assert.deepEqual([...quantityModes].sort(), ["optional"], "reset fixtures use optional desired quantity");
     const benchmarkHandles = new Set([
         "selam-weave",
@@ -114,7 +114,13 @@ async function runPostgresFixture() {
     assert.deepEqual([...middleSequences], ["content-story-process>catalog-1"], "all benchmarks preserve one story and process chapter before products");
     assert.deepEqual([...surfaceSequences], ["surface>accent-soft>secondary-soft>canvas>strong>inverse"], "all benchmarks introduce both palette families before the strong close");
     console.log("Sixty-six designed discovery showrooms with four offerings and ten validated benchmark compositions passed.");
-    await closeDbForTests();
+}
+async function runPostgresFixture() {
+    try {
+        await assertSeededBenchmarks();
+    } finally {
+        await closeDbForTests();
+    }
 }
 runPostgresFixture().catch(error => {
     console.error(error);

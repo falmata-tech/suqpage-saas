@@ -1,4 +1,4 @@
-import { publicContactFields, publicContactLinks } from '../lib/business-profile-contacts';
+import { publicContactLinks } from '../lib/business-profile-contacts';
 import { inquiryHandoffs } from '../lib/product-inquiry';
 import assert from 'node:assert/strict';
 import { getDb, seedFixture, closeDbForTests } from './testing/postgres-fixture';
@@ -11,9 +11,10 @@ async function main() {
     const products = await db.prepare(`SELECT p.* FROM products p JOIN businesses b ON b.id=p.business_id
       WHERE b.handle=ANY(?::text[])`).all(Object.keys(SEEDED_MARKETPLACE_PROFILES));
     assert.ok(products.length >= 264);
-    assert.ok(products.some(p => p.offering_kind === 'service'));
+    assert.ok(products.some(p => p.offering_kind === 'made_to_order'));
+    assert.equal(products.filter(p=>p.offering_kind==='service').length,0);
     for (const product of products) {
-      assert.ok(['standard_product', 'service'].includes(product.offering_kind));
+      assert.ok(['standard_product', 'made_to_order'].includes(product.offering_kind));
       assert.ok(product.name && product.description && product.image_path && product.video_ref);
       assert.equal(product.highlights_json, '[]');
       assert.equal(product.quantity_unit, '');
@@ -31,9 +32,13 @@ async function main() {
     assert.equal(pages.length,66);
     for (const page of pages) {
       const contacts=JSON.parse(page.content_json).contacts;
-      assert.equal(publicContactLinks(contacts).length,publicContactFields.length);
-      for(const key of ['telegram','tiktok','instagram','facebook']) assert.equal(contacts[key],'alhayabrand');
-      assert.deepEqual(inquiryHandoffs(contacts,'Demo inquiry').map(link=>link.kind),['whatsapp','telegram','sms']);
+      assert.deepEqual(publicContactLinks(contacts).map(link=>link.kind),['phone','email','website','whatsapp']);
+      assert.match(contacts.email,/@example\.invalid$/);
+      assert.match(contacts.phone,/^\+447700900\d{3}$/);
+      assert.match(contacts.whatsapp,/^\+447700900\d{3}$/);
+      assert.equal(contacts.website,'https://example.invalid/');
+      for(const key of ['telegram','tiktok','instagram','facebook']) assert.equal(contacts[key],'','Fake demo handles must not point at real social accounts');
+      assert.deepEqual(inquiryHandoffs(contacts,'Demo inquiry').map(link=>link.kind),['whatsapp','phone']);
     }
     const coverage = await db.prepare(`SELECT b.id,
       EXISTS(SELECT 1 FROM users u JOIN user_access_profiles a ON a.user_id=u.id WHERE u.business_id=b.id AND a.access_role='client') owner,

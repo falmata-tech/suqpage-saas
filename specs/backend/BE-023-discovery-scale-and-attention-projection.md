@@ -2,13 +2,29 @@
 id: BE-023
 title: Discovery scale and attention projection
 status: in_progress
-related: [BE-015, BE-018, BE-020, BE-021, BE-022, BE-029, FE-021, FE-024, FE-030, FE-032, FE-033, FE-036, DEP-017, DEP-019, DEP-020, DEP-024, DEP-026]
+related: [BE-015, BE-018, BE-020, BE-021, BE-022, BE-029, FE-021, FE-024, FE-030, FE-032, FE-033, FE-036, DEP-017, DEP-019, DEP-020, DEP-024, DEP-026, BE-054, FE-053, FE-058]
 owners: [backend, security, operations]
-last_updated: 2026-08-15
+last_updated: 2026-10-17
 change_level: L3
 ---
 
 # BE-023 - Discovery scale and attention projection
+
+## S127 — screen-sized fixed groups (ready; latest owner direction)
+
+FE-021 S127 controls the shared modal capacity (up to6 desktop/3 phone, reduced
+for height/font scale), compact nearby partitions and current-member validation.
+Every final circle at maximum opens all members at once: no list scrolling, Next/Previous or
+connecting lines. Normal outer clusters merge on zoom-out and click to zoom in; only final
+all-fit groups stop splitting and open the modal ONLY at maximum normalized18
+(native raw17). Any counted circle below maximum zooms instead; restored state
+below maximum cannot expose the modal. Screen-capacity or eligible
+data/filter changes may repartition final groups. Preserve existing coordinates/provider/API cap, current-row authority,
+short-stage48px controls, focus/camera return and native-authored labels. Native
+and Expo use the same capacity policy with their actual safe-area dimensions.
+Do not use legacy server nearbyGroups as current visual membership authority.
+Current implementation/testing is in progress; earlier global-three/leader/paging
+evidence is superseded, not approval. Full/visual/release/rollout gates stay open.
 
 ## S41 current discovery filter contract
 
@@ -102,18 +118,21 @@ preserve tenant isolation and predictable query cost.
 - The selected-industry marketplace total, map rows, nearby groups, and place
   options use one parameterized eligibility predicate. A cross-listed business
   appears once in the selected result.
-- Public map, sponsor, Daily Featured, and nearby-group rows project the
-  allowlisted primary visual industry key and label. Nearby grouping considers
-  only eligible rows in the same reviewed city within 800 meters. It preserves
+- Public map, sponsor, Daily Featured, and legacy nearby-group rows project the
+  allowlisted primary visual industry key and label. The legacy `nearbyGroups`
+  compatibility projection considers eligible non-area rows in the same
+  reviewed city within 800 meters. It preserves
   every authoritative business coordinate, forms deterministic balanced groups
   of no more than six, and emits no one-business group. A nearby group carries
   only stable showroom IDs; the complete public showroom records remain in the
   single canonical showroom array and are not duplicated inside group payloads.
+  This geographic partition does not control current frontend visual markers;
+  FE-021 S127 uses screen-capacity fixed visual groups, all visible at once with no paging.
 - The marketplace base executes its unfiltered eligibility projection once.
   When no valid place filter is selected, the place-option source and visible
   showroom source reuse that result rather than issuing an identical second
   database query.
-- Nearby grouping partitions eligible rows by normalized city and region, then
+- Legacy compatibility grouping partitions eligible rows by normalized city and region, then
   uses bounded geographic grid buckets to compare only neighboring candidates.
   It preserves the exact 800-meter distance check and deterministic output but
   must not scan the complete marketplace once per showroom.
@@ -153,9 +172,9 @@ Scenario: Public route receives legacy scale state
   WHEN the public adapter builds discovery
   THEN the scale query is ignored
 
-Scenario: Large discovery projection avoids quadratic grouping
+Scenario: Legacy discovery grouping remains bounded and compatible
   GIVEN thousands of eligible showrooms are spread across reviewed locations
-  WHEN the marketplace projection builds nearby groups
+  WHEN the marketplace projection builds its retained nearbyGroups response
   THEN candidates are partitioned by city and geographic bucket
   AND only neighboring buckets receive exact distance checks
   AND the result preserves bounded groups and authoritative coordinates
@@ -196,12 +215,13 @@ Scenario: Visitor explicitly keeps all industries
   THEN it returns the same de-duplicated combined rows with All industries selected
   AND no business acquires all as a persisted industry membership
 
-Scenario: Nearby coordinates create bounded map groups
-  GIVEN two or more eligible businesses in one reviewed city are within 800 meters
+Scenario: Nearby coordinates preserve the legacy group payload
+  GIVEN two or more eligible non-area businesses in one reviewed city are within 800 meters
   WHEN the marketplace projection is built
   THEN deterministic balanced nearby groups contain no more than six businesses each
   AND the source coordinates remain unchanged
-  AND a business outside the proximity threshold remains an individual map row
+  AND a business outside the proximity threshold remains an ungrouped public map row
+  AND current frontend visual groups independently follow FE-021 S127 fixed screen-capacity policy
 
 Scenario: Cross-listed showroom receives stable visual metadata
   GIVEN one eligible showroom belongs to multiple allowlisted industries
@@ -294,3 +314,12 @@ eligible showroom, published-offering, and reviewed-place suggestions. Tests
 prove the two-character threshold, six-result limit, duplicate collapse,
 industry scoping, and denial of excluded or unpublished content. Type,
 homepage-contract, and specification checks also pass.
+
+
+## S103 independent browse bounds — local candidate
+
+BE-054 defines a SQL limit of 200 business rows with a matching aggregate count
+and 12-card independent product batches. Unfiltered first-page browsing shares
+two finite 20-second public-marketplace cache entries across web/native adapters;
+query text, selected filters, later pages and personal exclusions bypass them.
+Legacy API behavior, sponsors and Featured remain independent.

@@ -1,10 +1,11 @@
+import {redirect} from "next/navigation";
+import {workspaceHomeHref} from "@/lib/capabilities";
 
 import { inquiryContactLinks } from "@/lib/inquiry-contact-links";
 import { getUiText } from "@/lib/i18n/server";
 import CollectionToolbar from "@/components/CollectionToolbar";
 import DashboardShell from "@/components/DashboardShell";
 import PaginationNav from "@/components/PaginationNav";
-import { redirect } from "next/navigation";
 import { updateInquiryStatusAction } from "@/app/actions";
 import { requireUser } from "@/lib/auth";
 import { isClient } from "@/lib/capabilities";
@@ -19,11 +20,11 @@ export default async function InquiriesPage({ searchParams }: { searchParams:Pro
   if (user.access_role === "team_member") redirect("/dashboard");
   const query = await searchParams;
   const business = await resolveBusiness(user, query.business);
-  if (!business) return null;
+  if (!business) redirect(workspaceHomeHref(user));
   const client = isClient(user);
   const inquiries = await listInquiriesPage(business.id, {...query,inquiryId:query.inquiry});
   return <DashboardShell user={user} business={business}>
-    <div className="dashboard-head"><div><h1>{t("Customer inquiries")}</h1><p>{client ? t("Review inquiries sent from your Suqpage page.") : t("See what customers asked about and how to reach them.")}</p></div></div>
+    <div className="dashboard-head"><div><h1>{t("Inquiry history")}</h1><p>{client ? t("Saved inquiries from before social-only contact.") : t("Saved inquiries from before social-only contact.")}</p></div></div>
     {query.error ? <p className="error" role="alert">{t(query.error)}</p> : null}
     {!query.error && query.saved ? <p className="notice">{t("Inquiry status updated.")}</p> : null}
     {query.inquiry?<a className="small-btn" href="/dashboard/inquiries">{t('All inquiries')}</a>:null}

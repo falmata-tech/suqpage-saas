@@ -207,6 +207,6 @@ export function assertProductionConfiguration() {
   }
   const identityConfig = assertSupabaseAuthConfiguration();
   if (!identityConfig.emailOtpEnabled) {
-    throw new Error("Suqpage production requires verified email-code sign-in.");
+    throw new Error("MirtPage production requires verified email-code sign-in.");
   }
 }

@@ -2,13 +2,23 @@
 id: DEP-034
 title: Additive service offering rollout
 status: done
-related: [DEP-035, FE-044, BE-037, DEP-012, DEP-030]
+related: [DEP-035, FE-044, BE-037, DEP-012, DEP-030, DEP-046]
 owners: [operations, security]
 last_updated: 2026-09-21
 change_level: L3
 ---
 
 # DEP-034 — Service offering rollout
+
+## S112 superseding local contract
+
+FE-067 / BE-056 / DEP-046 supersede active service-listing admission and its
+product/service UI for the local candidate. The scenarios and release evidence
+below describe the historical rollout; stored kinds, rows and inquiry/revision
+history remain readable, but new service writes and public service discovery are
+retired in the candidate. Do not apply destructive constraint/data removal.
+Visual approval, full gates and a separate rollout remain pending.
+
 
 ## Problem and scope
 

@@ -2,13 +2,46 @@
 id: BE-033
 title: Standard page lifecycle and server-paginated discovery
 status: in_progress
-related: [BE-041, FE-042, BE-001, BE-003, BE-032, DEP-030, ADR-0019, BE-009, BE-034]
+related: [BE-041, FE-042, FE-026, BE-001, BE-003, BE-032, DEP-030, ADR-0019, BE-009, BE-034]
 owners: [backend, security, operations]
-last_updated: 2026-09-21
+last_updated: 2026-10-17
 change_level: L3
 ---
 
 # BE-033 — Standard page lifecycle and discovery pagination
+
+## S115 — category mutations recheck the saved staff function (ready)
+
+L2 security correction accompanying FE-026's focused category screens. Master
+§§13,18–19 retain their existing rule that scoped chat agents have no catalog
+authority; no schema, provider, privilege expansion or hosted mutation is needed.
+
+GIVEN a current Support or Transport agent with a retained business assignment
+WHEN category create/update/delete executes, including with an earlier generic
+team-member snapshot THEN reject before changing categories, product relations,
+business content version or audit records. Read the current role, tenant and
+queue function inside the mutation transaction; coordinate with existing staff
+scope/assignment changes rather than trusting a caller's missing or old scope.
+
+GIVEN an owner of the selected tenant or a current generic team member with an
+active assignment THEN retain permitted category maintenance. GIVEN a foreign
+owner, unassigned/revoked team member or revoked role THEN deny without changes.
+Category deletion still preserves products and clears only the selected tenant's
+category relationship. A failed audit rolls back the mutation and version.
+
+Definition of Ready is met: the invariant and affected fields are explicit;
+`scripts/test-standard-page-postgres.ts --category-security` uses a disposable
+local PostgreSQL schema and its own accounts to verify all three commands,
+stale scoped principals, ordinary assigned staff, foreign/revoked denial and
+audit rollback. The retained lifecycle mode and permission/publication tests
+remain unchanged. Full gates and deployment stay behind the current visual gate.
+
+Local verification 2026-10-17: the isolated `--category-security` mode passes
+current/scoped/stale/forged staff, all three denied commands without row/version/
+audit changes, all three allowed generic-staff commands, owner/foreign/revoked
+boundaries, rollback after failed audit and product preservation on deletion.
+The disposable schema is removed on completion. No shared/hosted data, provider,
+full/release gate or deployment was touched by this focused verification.
 
 ## Current release evidence — 2026-09-14
 

@@ -2,7 +2,7 @@
 id: DEP-041
 title: Demo account inbox aliases
 status: done
-related: [BE-022, BE-030]
+related: [BE-022, BE-030, DEP-045]
 owners: [operations, security]
 last_updated: 2026-09-23
 change_level: L4

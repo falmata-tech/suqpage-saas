@@ -10,6 +10,21 @@ change_level: L4
 
 # DEP-026 - Netlify and bounded Supabase capabilities rollout
 
+## S139 blocked browser basemap (local candidate; no rollout)
+
+FE-021 S139 and ADR-0016 control the status-aware direct tile loader and explicit
+public/private referrer policies. CSP adds only the exact existing tile host to
+connect-src for its one CORS request per visible tile; no wildcard, proxy, service,
+credential or paid-provider change. Browser caching stays default; no automatic
+fallback/retry or block evasion. Web and Expo browser share the loader; native
+MapLibre identity/cache are untouched. Automated map drivers use synthetic tiles,
+and provider availability is explicitly outside that evidence. Regression scope:
+HTTP403PNG/CORS/decode/abort, same-camera manual retry, Tracking→Market policy
+restoration, private Tracking denial of outgoing referrers, preserved business
+projection and existing UI/cluster lifecycle. Full/release/build and live rollout
+remain gated by visual approval and normal operations. Rollback is application
+code only; no database/configuration mutation or restore is needed.
+
 ## S39 owner-only live support
 
 No migration: local schema stays 55. Deploy the public buying-only API and UI

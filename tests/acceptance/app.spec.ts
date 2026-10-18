@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import type {Page} from '@playwright/test';
+import {test, expect} from './fixtures';
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 
@@ -37,8 +38,9 @@ async function loginWithEmailCode(page: Page, email: string, destination: RegExp
   await expect(page).toHaveURL(destination);
 }
 async function signOut(page: Page) {
-  if (!await page.getByRole('button',{name:'Sign out',exact:true}).isVisible()) await page.goto('/dashboard/profile');
-  await page.getByRole("button", { name: "Sign out",exact:true }).click(); await expect(page).toHaveURL(/\/login$/);
+  const accountSignOut=page.getByRole('main').getByRole('button',{name:'Sign out',exact:true});
+  if (!await accountSignOut.isVisible()) await page.goto('/dashboard/account');
+  await accountSignOut.click(); await expect(page).toHaveURL(/\/login$/);
 }
 
 // FE-040–043/BE-032–034: current standard-page acceptance replaces retired studios.
@@ -56,6 +58,7 @@ test('passwordless signup, private account contacts and sign-out',async({page})=
   await page.getByLabel('Category',{exact:true}).selectOption('home-living');
   await page.getByLabel('Account phone (private)',{exact:true}).fill('+447700900999');
   await expect(page.getByRole('button',{name:'Finish setup',exact:true})).toBeDisabled();
+  await page.getByRole('combobox',{name:'Country',exact:true}).selectOption('ET');
   await page.getByRole('combobox',{name:'Business city',exact:true}).fill('Addis Ababa');
   await page.getByRole('option').filter({hasText:'Addis Ababa'}).first().click();
   await expect(page.locator('input[name=placeId]')).not.toHaveValue('');
@@ -73,20 +76,27 @@ test('passwordless signup, private account contacts and sign-out',async({page})=
   await expect(page.locator('[data-business-profile] [class*=coverTint]')).toHaveCount(0);
   await page.getByRole('button',{name:'Choose color #B6FF00',exact:true}).click();
   await page.getByRole('button',{name:'Save',exact:true}).click();
-  await expect(page.getByText('Private draft saved',{exact:true})).toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard\/profile\/showroom\?saved=page$/);
+  await expect(page.getByText('Changes saved.',{exact:true})).toBeVisible();
   await page.reload();
-  await page.getByRole('button',{name:'Page color',exact:true}).click();
+  await page.getByRole('link',{name:'Page color',exact:true}).click();
+  await expect(page).toHaveURL(/task=color&returnTo=showroom$/);
   await expect(page.getByRole('button',{name:'Choose color #B6FF00',exact:true})).toHaveAttribute('aria-pressed','true');
   await page.getByRole('button',{name:'Default',exact:true}).click();
   await page.getByRole('button',{name:'Save',exact:true}).click();
-  await expect(page.getByText('Private draft saved',{exact:true})).toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard\/profile\/showroom\?saved=page$/);
+  await expect(page.getByText('Changes saved.',{exact:true})).toBeVisible();
   await page.reload();
+  await page.getByRole('link',{name:'Page color',exact:true}).click();
   await expect(page.locator('[data-business-profile]')).not.toHaveAttribute('data-store-accent');
-  await page.goto('/dashboard/business');await expect(page.getByLabel('Business name',{exact:true})).toHaveValue('Acceptance signup shop');
-  await page.goto('/dashboard/account');await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900999');
+  await page.goto('/dashboard/business');await expect(page.locator('#owner-business-name')).toHaveCount(0);await expect(page.getByText('Acceptance signup shop',{exact:true}).last()).toBeVisible();
+  await page.getByRole('link',{name:'Edit',exact:true}).click();await expect(page.getByLabel('Business name',{exact:true})).toHaveValue('Acceptance signup shop');
+  await page.getByRole('button',{name:'Cancel',exact:true}).click();await expect(page).toHaveURL(/\/dashboard\/business$/);await expect(page.locator('#owner-business-name')).toHaveCount(0);
+  await page.goto('/dashboard/account');await expect(page.locator('#profile-phone')).toHaveCount(0);await expect(page.getByText('+447700900999',{exact:true})).toBeVisible();
+  await page.getByRole('link',{name:'Edit account details',exact:true}).click();await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900999');
   await page.getByLabel('Account phone',{exact:true}).fill('+447700900998');await page.getByRole('button',{name:'Save changes',exact:true}).click();
-  await expect(page.getByText('Account phone saved.',{exact:true})).toBeVisible();
-  await page.reload();await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900998');
+  await expect(page).toHaveURL(/\/dashboard\/account\?contact=saved$/);await expect(page.getByText('Changes saved.',{exact:true})).toBeVisible();await expect(page.locator('#profile-phone')).toHaveCount(0);
+  await page.reload();await expect(page.getByText('+447700900998',{exact:true})).toBeVisible();await page.getByRole('link',{name:'Edit account details',exact:true}).click();await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900998');
   await page.goto('/request');await expect(page).toHaveURL(/\/dashboard\/profile$/);
   await signOut(page);await page.goto('/dashboard');await expect(page).toHaveURL(/\/login/);
 });
@@ -98,14 +108,14 @@ test('self-service owner, staff product controls and inquiry lifecycle',async({}
   });
 });
 
-test('category pagination retains the map on desktop and phones',async({},testInfo)=>{
+test('category product batches retain the independent map on desktop and phones',async({},testInfo)=>{
   test.setTimeout(180_000);
   execFileSync(process.execPath,[path.join(process.cwd(),'scripts/capture-category-pagination.mjs')],{
     env:{...process.env,SUQPAGE_TEST_SCREENSHOT_DIR:testInfo.outputPath('category')},stdio:'pipe',timeout:150_000,maxBuffer:2*1024*1024,
   });
 });
 
-test('linked products, inquiry selection and progressive reply contact',async({page})=>{
+test('linked products and social-only contact with no inbox submission',async({page})=>{
   for(const width of [1440,390,320]){
     await page.setViewportSize({width,height:900});await page.goto('/@selam-weave');
     await page.locator('a[href*="?product="]').first().click();await expect(page).toHaveURL(/product=\d+/);
@@ -113,9 +123,11 @@ test('linked products, inquiry selection and progressive reply contact',async({p
     await page.getByRole('button',{name:'Inquire about this product only',exact:true}).click();
     const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();
     await expect(page.getByLabel('Reply phone number',{exact:true})).toHaveCount(0);
-    await expect(dialog.getByRole('button',{name:'Copy inquiry',exact:true})).toBeVisible();
-    await dialog.getByRole('button',{name:'Send inquiry on Suqpage',exact:true}).click();
-    await expect(page.getByLabel('Reply phone number',{exact:true})).toBeVisible();
+    await expect(dialog.getByRole('button',{name:'Copy message',exact:true})).toBeVisible();
+    await expect(dialog.getByRole('button',{name:'Send inquiry on Suqpage',exact:true})).toHaveCount(0);
+    await expect(dialog.getByRole('heading',{name:'Message the business',exact:true})).toBeVisible();
+    await dialog.getByRole('button',{name:'Copy message',exact:true}).click();
+    await expect(dialog.getByRole('textbox',{name:'Inquiry message',exact:true})).toHaveValue(/I'd like to ask about:/);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
     await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);
   }
@@ -140,7 +152,8 @@ test('API authorization, validation, health, and security headers',async({reques
   }
   expect((await request.get('/api/page-drafts/1')).status()).toBe(405);
   expect((await request.post('/api/page-drafts/1',{data:{action:'start'}})).status()).toBe(401);
-  expect((await request.post('/api/inquiries',{data:{businessId:1,customerName:'X',contact:'12345',items:[]}})).status()).toBe(400);
+  const retired=await request.post('/api/inquiries',{data:{businessId:1,customerName:'X',contact:'12345',items:[]}});
+  expect(retired.status()).toBe(410);expect(await retired.json()).toMatchObject({code:'inquiry_retired'});
   const home=await request.get('/');expect(home.headers()['x-frame-options']).toBe('DENY');
   expect(home.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
   expect(home.headers()['content-security-policy']).toContain("frame-src 'self' https://www.youtube-nocookie.com");

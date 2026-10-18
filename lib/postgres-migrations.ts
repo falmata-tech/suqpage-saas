@@ -1,6 +1,7 @@
 import { SCALE_DEMO_BUSINESSES } from "./scale-demo-seed";
 import { SPELLING_INDEX_SQL } from "./search-index";
 import { DISCOVERY_INDUSTRIES } from "./discovery-contract";
+import ethiopianPlaces from './place-catalog.json';
 import baseline from "./postgres-baseline.json";
 import { OWNER_BUSINESS_SCHEMA_SQL, OWNER_PLACE_ANCHOR_SCHEMA_SQL } from "./owner-business-schema";
 import { PAGE_REVIEW_SCHEMA_SQL } from "./page-review-schema";
@@ -766,6 +767,287 @@ export async function migratePostgresDatabase(
         }
       }
       await runner.query('INSERT INTO schema_migrations(version) VALUES(63)');applied.push(63);
+    }
+    const migration64 = await runner.query('SELECT version FROM schema_migrations WHERE version=64');
+    if (!migration64.rows.length) {
+      await runner.query(`ALTER TABLE business_discovery_profiles
+        ADD COLUMN country_code TEXT NOT NULL DEFAULT '' CHECK(country_code='' OR country_code ~ '^[A-Z]{2}$'),
+        ADD COLUMN city_id TEXT NOT NULL DEFAULT '' CHECK(length(city_id)<=100);
+        ALTER TABLE owner_location_proposals ADD COLUMN country_code TEXT NOT NULL DEFAULT '' CHECK(country_code='' OR country_code ~ '^[A-Z]{2}$');`);
+      // Only an existing canonical Ethiopian ID establishes a country. Keep all
+      // coordinates and unknown legacy placements unchanged.
+      await runner.query("UPDATE owner_location_proposals SET country_code='ET' WHERE place_id=ANY(?::text[])", [ethiopianPlaces.map(place => place.id)]);
+      await runner.query(`UPDATE business_discovery_profiles p SET country_code=l.country_code,city_id=l.place_id
+        FROM owner_location_proposals l WHERE l.business_id=p.business_id AND l.country_code='ET'
+        AND p.city=l.city AND p.region=l.region`);
+      const checks = await runner.query<{conname:string; definition:string}>(`SELECT conname,pg_get_constraintdef(oid) definition FROM pg_constraint
+        WHERE conrelid='owner_location_proposals'::regclass AND contype='c'`);
+      for (const name of ['owner_location_place_anchor_check','owner_location_proposals_check']) {
+        const check=checks.rows.find(check=>check.conname===name);
+        if(!check||!['latitude','longitude','3','15','32','49'].every(token=>check.definition.includes(token)))throw Error('Unexpected owner coordinate constraint; review the migration target.');
+        await runner.query(`ALTER TABLE owner_location_proposals DROP CONSTRAINT ${quotedRole(name)}`);
+      }
+      await runner.query(`ALTER TABLE owner_location_proposals
+        ADD CONSTRAINT owner_location_privacy_coordinates_check CHECK(
+          (location_mode='area' AND latitude IS NULL AND longitude IS NULL) OR
+          (location_mode='storefront' AND latitude IS NOT NULL AND longitude IS NOT NULL AND
+            latitude BETWEEN -90 AND 90 AND longitude BETWEEN -180 AND 180)),
+        ADD CONSTRAINT owner_location_place_anchor_check CHECK(
+          (place_id IS NULL AND place_latitude IS NULL AND place_longitude IS NULL) OR
+          (place_id IS NOT NULL AND length(place_id) BETWEEN 1 AND 100 AND place_latitude IS NOT NULL AND
+            place_longitude IS NOT NULL AND place_latitude BETWEEN -90 AND 90 AND place_longitude BETWEEN -180 AND 180));
+        CREATE INDEX discovery_country_city ON business_discovery_profiles(country_code,city_id) WHERE approved_at>0;
+        INSERT INTO schema_migrations(version) VALUES(64)`);
+      const profileChecks=await runner.query<{conname:string;definition:string}>(`SELECT conname,pg_get_constraintdef(oid) definition FROM pg_constraint WHERE conrelid='business_discovery_profiles'::regclass AND contype='c'`);
+      for(const [name,tokens] of [['ck_business_discovery_profiles_1',['latitude','3','15']],['ck_business_discovery_profiles_2',['longitude','32','49']]] as const) {
+        const check=profileChecks.rows.find(check=>check.conname===name);
+        if(!check||!tokens.every(token=>check.definition.includes(token)))throw Error('Unexpected discovery coordinate constraint; review the migration target.');
+        await runner.query(`ALTER TABLE business_discovery_profiles DROP CONSTRAINT ${quotedRole(name)}`);
+      }
+      await runner.query(`ALTER TABLE business_discovery_profiles ADD CONSTRAINT discovery_world_coordinates_check CHECK(latitude BETWEEN -90 AND 90 AND longitude BETWEEN -180 AND 180)`);
+      applied.push(64);
+    }
+    const migration65 = await runner.query('SELECT version FROM schema_migrations WHERE version=65');
+    if (!migration65.rows.length) {
+      await runner.query(`ALTER TABLE support_conversations
+        ADD COLUMN awaiting_participant_since BIGINT,
+        ADD COLUMN idle_ended_at BIGINT;
+        CREATE INDEX support_open_participant_idle ON support_conversations(participant_kind,awaiting_participant_since,id)
+          WHERE status='open' AND assigned_user_id IS NOT NULL
+            AND awaiting_participant_since IS NOT NULL AND resolved_at IS NULL;
+        INSERT INTO schema_migrations(version) VALUES(65)`);
+      applied.push(65);
+    }
+    const migration66 = await runner.query('SELECT version FROM schema_migrations WHERE version=66');
+    if (!migration66.rows.length) {
+      // Existing sender roles cannot safely be reconstructed after a role change.
+      // Leave historical rows NULL; all new sends record server-derived authority.
+      await runner.query(`ALTER TABLE support_messages ADD COLUMN sender_side TEXT
+        CHECK(sender_side IN ('participant','staff'));
+        INSERT INTO schema_migrations(version) VALUES(66)`);
+      applied.push(66);
+    }
+    const migration67 = await runner.query('SELECT version FROM schema_migrations WHERE version=67');
+    if (!migration67.rows.length) {
+      await runner.query(`ALTER TABLE support_conversations
+        ADD COLUMN awaiting_staff_since BIGINT,
+        ADD COLUMN awaiting_staff_message_id BIGINT,
+        ADD COLUMN overdue_notified_message_id BIGINT,
+        ADD COLUMN staff_joined_assignment_id BIGINT,
+        ADD CONSTRAINT support_staff_reply_anchor_check CHECK(
+          (awaiting_staff_since IS NULL AND awaiting_staff_message_id IS NULL) OR
+          (awaiting_staff_since IS NOT NULL AND awaiting_staff_message_id IS NOT NULL
+            AND awaiting_staff_since>=0 AND awaiting_staff_message_id>0)),
+        ADD CONSTRAINT support_reply_notification_anchor_check CHECK(overdue_notified_message_id IS NULL OR overdue_notified_message_id>0),
+        ADD CONSTRAINT support_explicit_join_assignment_check CHECK(staff_joined_assignment_id IS NULL OR staff_joined_assignment_id>0);
+        ALTER TABLE attention_notifications DROP CONSTRAINT attention_notifications_kind_check;
+        ALTER TABLE attention_notifications ADD CONSTRAINT attention_notifications_kind_check
+          CHECK(kind IN ('inquiry','waiting_chat','assigned','reassigned','joined','message','closed','reopened','reply_overdue'))`);
+      // Original send-side is authoritative. A historical visitor or original
+      // owner is also certain; another legacy user may have been staff, including
+      // an ambiguous old note, so never infer an unanswered cycle across it.
+      // Known transport notes are not replies. Preserve all historical messages,
+      // read/join cursors and events, and do not accept legacy read-generated joins.
+      await runner.query(`WITH cycles AS (
+        SELECT c.id,first_unanswered.id message_id,first_unanswered.created_at
+        FROM support_conversations c
+        LEFT JOIN LATERAL (
+          SELECT m.id FROM support_messages m WHERE m.conversation_id=c.id AND (
+            (m.sender_side='staff' AND
+              (c.assistance_category NOT IN ('shipment_observation','buying_assistance') OR m.visitor_visible)) OR
+            (m.sender_side IS NULL AND m.sender_kind='user' AND NOT
+              (c.participant_kind='client' AND m.sender_user_id=c.opened_by_user_id)))
+          ORDER BY m.id DESC LIMIT 1
+        ) possible_reply ON TRUE
+        CROSS JOIN LATERAL (
+          SELECT m.id,m.created_at FROM support_messages m
+          WHERE m.conversation_id=c.id AND m.id>COALESCE(possible_reply.id,0)
+            AND m.created_at>=0 AND (
+              m.sender_side='participant' OR
+              (m.sender_side IS NULL AND (
+                (c.participant_kind='visitor' AND m.sender_kind='visitor') OR
+                (c.participant_kind='client' AND m.sender_kind='user' AND m.sender_user_id=c.opened_by_user_id))))
+          ORDER BY m.id LIMIT 1
+        ) first_unanswered
+        WHERE c.status IN ('waiting','open') AND c.resolved_at IS NULL
+      ) UPDATE support_conversations c SET awaiting_staff_since=cycles.created_at,
+          awaiting_staff_message_id=cycles.message_id,overdue_notified_message_id=cycles.message_id
+        FROM cycles WHERE c.id=cycles.id`);
+      // Only cycles still needing their first escalation enter the worker index;
+      // legacy cycles are visible as overdue without a catch-up push flood.
+      await runner.query(`CREATE INDEX support_staff_reply_pending ON support_conversations(awaiting_staff_since,id)
+        WHERE status IN ('waiting','open') AND resolved_at IS NULL
+          AND awaiting_staff_since IS NOT NULL AND awaiting_staff_message_id IS NOT NULL
+          AND overdue_notified_message_id IS DISTINCT FROM awaiting_staff_message_id;
+        INSERT INTO schema_migrations(version) VALUES(67)`);
+      applied.push(67);
+    }
+    const migration68 = await runner.query('SELECT version FROM schema_migrations WHERE version=68');
+    if (!migration68.rows.length) {
+      await runner.query(`ALTER TABLE support_conversations DROP CONSTRAINT support_resolution_check;
+        ALTER TABLE support_conversations ADD CONSTRAINT support_resolution_check CHECK(resolved_at IS NULL OR status='closed');
+        ALTER TABLE support_events DROP CONSTRAINT ck_support_events_1;
+        ALTER TABLE support_events ADD CONSTRAINT ck_support_events_1 CHECK(event_type IN
+          ('created','assigned','reassigned','message','closed','reopened','transport_handoff','joined','idle_ended'));
+        CREATE INDEX support_idle_end_evidence_latest ON support_events(conversation_id,id DESC) WHERE event_type='idle_ended';
+        INSERT INTO schema_migrations(version) VALUES(68)`);
+      applied.push(68);
+    }
+    const migration69 = await runner.query('SELECT version FROM schema_migrations WHERE version=69');
+    if (!migration69.rows.length) {
+      await runner.query(`ALTER TABLE support_conversations ADD COLUMN overdue_notified_assignment_id BIGINT
+          CHECK(overdue_notified_assignment_id IS NULL OR overdue_notified_assignment_id>=0);
+        UPDATE support_conversations c SET overdue_notified_assignment_id=COALESCE((
+          SELECT MAX(a.id) FROM support_assignments a WHERE a.conversation_id=c.id
+            AND a.assigned_user_id=c.assigned_user_id AND a.released_at IS NULL),0)
+          WHERE c.overdue_notified_message_id IS NOT NULL;
+        CREATE TABLE attention_email_deliveries (
+          id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+          notification_id BIGINT NOT NULL UNIQUE REFERENCES attention_notifications(id) ON DELETE CASCADE,
+          state TEXT NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','sending','accepted','failed','ignored')),
+          attempts INTEGER NOT NULL DEFAULT 0 CHECK(attempts BETWEEN 0 AND 6),
+          created_at BIGINT NOT NULL,
+          next_attempt_at BIGINT NOT NULL,
+          lease_until BIGINT,
+          expires_at BIGINT NOT NULL,
+          accepted_at BIGINT,
+          error_category TEXT CHECK(error_category IS NULL OR length(error_category)<=80)
+        );
+        CREATE INDEX attention_email_delivery_due ON attention_email_deliveries(next_attempt_at,id) WHERE state IN ('pending','sending');
+        REVOKE ALL ON attention_email_deliveries FROM PUBLIC;
+        REVOKE ALL ON SEQUENCE attention_email_deliveries_id_seq FROM PUBLIC;
+        ALTER TABLE attention_email_deliveries ENABLE ROW LEVEL SECURITY`);
+      const roles=await runner.query<{rolname:string}>("SELECT rolname FROM pg_roles WHERE rolname IN ('anon','authenticated','suqpage_runtime','mirtpage_runtime')");
+      for(const role of roles.rows){
+        if(['anon','authenticated'].includes(role.rolname)){
+          await runner.query(`REVOKE ALL ON attention_email_deliveries FROM ${quotedRole(role.rolname)}`);
+          await runner.query(`REVOKE ALL ON SEQUENCE attention_email_deliveries_id_seq FROM ${quotedRole(role.rolname)}`);
+        }
+        else {
+          await runner.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON attention_email_deliveries TO ${quotedRole(role.rolname)}`);
+          await runner.query(`CREATE POLICY ${quotedRole(`attention_email_deliveries_${role.rolname}`)} ON attention_email_deliveries
+            TO ${quotedRole(role.rolname)} USING (true) WITH CHECK (true)`);
+          await runner.query(`GRANT USAGE,SELECT ON SEQUENCE attention_email_deliveries_id_seq TO ${quotedRole(role.rolname)}`);
+        }
+      }
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(69)');
+      applied.push(69);
+    }
+    const migration70 = await runner.query('SELECT version FROM schema_migrations WHERE version=70');
+    if (!migration70.rows.length) {
+      await runner.query(`CREATE TABLE support_transport_plans (
+          conversation_id BIGINT PRIMARY KEY REFERENCES support_conversations(id) ON DELETE CASCADE,
+          version INTEGER NOT NULL CHECK(version>0),
+          legs JSONB NOT NULL CHECK(jsonb_typeof(legs)='array' AND jsonb_array_length(legs) BETWEEN 1 AND 12 AND octet_length(legs::text)<=24000),
+          share_nonce TEXT NOT NULL CHECK(share_nonce ~ '^[a-f0-9]{64}$'),
+          share_token_hash TEXT NOT NULL UNIQUE CHECK(share_token_hash ~ '^[a-f0-9]{64}$'),
+          updated_by_user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+          updated_at BIGINT NOT NULL CHECK(updated_at>=0)
+        );
+        REVOKE ALL ON support_transport_plans FROM PUBLIC;
+        ALTER TABLE support_transport_plans ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE support_events DROP CONSTRAINT ck_support_events_1;
+        ALTER TABLE support_events ADD CONSTRAINT ck_support_events_1 CHECK(event_type IN
+          ('created','assigned','reassigned','message','closed','reopened','transport_handoff','joined','idle_ended','transport_plan_updated','transport_plan_link_replaced'));
+        CREATE INDEX support_transport_plan_events_latest ON support_events(conversation_id,id DESC)
+          WHERE event_type IN ('transport_plan_updated','transport_plan_link_replaced')`);
+      const roles=await runner.query<{rolname:string}>("SELECT rolname FROM pg_roles WHERE rolname IN ('anon','authenticated','service_role','suqpage_runtime','mirtpage_runtime')");
+      for(const role of roles.rows){
+        if(['anon','authenticated','service_role'].includes(role.rolname))await runner.query(`REVOKE ALL ON support_transport_plans FROM ${quotedRole(role.rolname)}`);
+        else{
+          await runner.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON support_transport_plans TO ${quotedRole(role.rolname)}`);
+          await runner.query(`CREATE POLICY ${quotedRole(`transport_plan_${role.rolname}`)} ON support_transport_plans
+            TO ${quotedRole(role.rolname)} USING (true) WITH CHECK (true)`);
+        }
+      }
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(70)');
+      applied.push(70);
+    }
+    const migration71=await runner.query('SELECT version FROM schema_migrations WHERE version=71');
+    if(!migration71.rows.length){
+      await runner.query(`CREATE TABLE tracking_recipients (
+          id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+          email TEXT NOT NULL UNIQUE CHECK(length(email) BETWEEN 3 AND 254),
+          email_hash TEXT NOT NULL UNIQUE CHECK(email_hash ~ '^[a-f0-9]{64}$'),
+          locale TEXT NOT NULL DEFAULT 'en' CHECK(locale IN ('en','am','om')),
+          verified_at BIGINT NOT NULL CHECK(verified_at>=0)
+        );
+        CREATE TABLE tracking_challenges (
+          id TEXT PRIMARY KEY CHECK(id ~ '^[a-f0-9]{32}$'),
+          email TEXT NOT NULL CHECK(length(email) BETWEEN 3 AND 254),
+          email_hash TEXT NOT NULL CHECK(email_hash ~ '^[a-f0-9]{64}$'),
+          nonce TEXT NOT NULL CHECK(nonce ~ '^[a-f0-9]{64}$'),
+          code_hash TEXT NOT NULL CHECK(code_hash ~ '^[a-f0-9]{64}$'),
+          locale TEXT NOT NULL CHECK(locale IN ('en','am','om')),
+          attempts INTEGER NOT NULL DEFAULT 0 CHECK(attempts BETWEEN 0 AND 5),
+          created_at BIGINT NOT NULL,expires_at BIGINT NOT NULL CHECK(expires_at>created_at),
+          consumed_at BIGINT,superseded_at BIGINT
+        );
+        CREATE INDEX tracking_challenge_email_latest ON tracking_challenges(email_hash,created_at DESC,id DESC);
+        CREATE INDEX tracking_challenge_expiry ON tracking_challenges(expires_at,id);
+        CREATE TABLE tracking_sessions (
+          token_hash TEXT PRIMARY KEY CHECK(token_hash ~ '^[a-f0-9]{64}$'),
+          recipient_id BIGINT NOT NULL REFERENCES tracking_recipients(id) ON DELETE CASCADE,
+          created_at BIGINT NOT NULL,expires_at BIGINT NOT NULL CHECK(expires_at>created_at),revoked_at BIGINT
+        );
+        CREATE INDEX tracking_session_recipient ON tracking_sessions(recipient_id);
+        CREATE INDEX tracking_session_expiry ON tracking_sessions(expires_at,token_hash);
+        CREATE TABLE tracking_shipments (
+          id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+          reference TEXT NOT NULL UNIQUE CHECK(reference ~ '^SHP-[A-F0-9]{20}$'),
+          recipient_id BIGINT NOT NULL REFERENCES tracking_recipients(id),
+          label TEXT NOT NULL DEFAULT '' CHECK(length(label)<=120),
+          version INTEGER NOT NULL DEFAULT 1 CHECK(version>0),
+          legs JSONB NOT NULL CHECK(jsonb_typeof(legs)='array' AND jsonb_array_length(legs) BETWEEN 1 AND 12 AND octet_length(legs::text)<=24000),
+          created_by_user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+          idempotency_key TEXT NOT NULL CHECK(idempotency_key ~ '^[A-Za-z0-9_-]{16,100}$'),
+          created_at BIGINT NOT NULL,updated_at BIGINT NOT NULL,revoked_at BIGINT,
+          UNIQUE(created_by_user_id,idempotency_key)
+        );
+        CREATE INDEX tracking_recipient_shipments ON tracking_shipments(recipient_id,id DESC) WHERE revoked_at IS NULL;
+        CREATE TABLE tracking_events (
+          id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+          shipment_id BIGINT NOT NULL REFERENCES tracking_shipments(id) ON DELETE CASCADE,
+          actor_user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+          event_type TEXT NOT NULL CHECK(event_type IN ('submitted','updated','revoked')),
+          detail JSONB NOT NULL CHECK(octet_length(detail::text)<=25000),created_at BIGINT NOT NULL
+        );
+        CREATE INDEX tracking_event_latest ON tracking_events(shipment_id,id DESC);
+        CREATE TABLE tracking_email_deliveries (
+          id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+          kind TEXT NOT NULL CHECK(kind IN ('code','initial')),
+          challenge_id TEXT UNIQUE REFERENCES tracking_challenges(id) ON DELETE CASCADE,
+          shipment_id BIGINT UNIQUE REFERENCES tracking_shipments(id) ON DELETE CASCADE,
+          CHECK((kind='code' AND challenge_id IS NOT NULL AND shipment_id IS NULL) OR (kind='initial' AND shipment_id IS NOT NULL AND challenge_id IS NULL)),
+          state TEXT NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','sending','accepted','failed','ignored')),
+          attempts INTEGER NOT NULL DEFAULT 0 CHECK(attempts BETWEEN 0 AND 6),
+          created_at BIGINT NOT NULL,next_attempt_at BIGINT NOT NULL,expires_at BIGINT NOT NULL,
+          lease_until BIGINT,accepted_at BIGINT,error_category TEXT CHECK(error_category IS NULL OR length(error_category)<=80)
+        );
+        CREATE INDEX tracking_email_due ON tracking_email_deliveries(next_attempt_at,id) WHERE state IN ('pending','sending')`);
+      const tables=['tracking_recipients','tracking_challenges','tracking_sessions','tracking_shipments','tracking_events','tracking_email_deliveries'];
+      const roles=await runner.query<{rolname:string}>("SELECT rolname FROM pg_roles WHERE rolname IN ('anon','authenticated','service_role','suqpage_runtime','mirtpage_runtime')");
+      for(const table of tables){
+        await runner.query(`REVOKE ALL ON ${table} FROM PUBLIC; ALTER TABLE ${table} ENABLE ROW LEVEL SECURITY`);
+        const sequence=['tracking_recipients','tracking_shipments','tracking_events','tracking_email_deliveries'].includes(table)?`${table}_id_seq`:null;
+        if(sequence)await runner.query(`REVOKE ALL ON SEQUENCE ${sequence} FROM PUBLIC`);
+        for(const role of roles.rows){
+          if(['anon','authenticated','service_role'].includes(role.rolname)){
+            await runner.query(`REVOKE ALL ON ${table} FROM ${quotedRole(role.rolname)}`);
+            if(sequence)await runner.query(`REVOKE ALL ON SEQUENCE ${sequence} FROM ${quotedRole(role.rolname)}`);
+          }else{
+            await runner.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON ${table} TO ${quotedRole(role.rolname)}`);
+            await runner.query(`CREATE POLICY ${quotedRole(`${table}_${role.rolname}`)} ON ${table} TO ${quotedRole(role.rolname)} USING (true) WITH CHECK (true)`);
+            if(sequence)await runner.query(`GRANT USAGE,SELECT ON SEQUENCE ${sequence} TO ${quotedRole(role.rolname)}`);
+          }
+        }
+      }
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(71)');applied.push(71);
+    }
+    const migration72=await runner.query('SELECT version FROM schema_migrations WHERE version=72');
+    if(!migration72.rows.length){
+      await runner.query('ALTER TABLE tracking_recipients ALTER COLUMN verified_at DROP NOT NULL');
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(72)');applied.push(72);
     }
     return { applied };
   });

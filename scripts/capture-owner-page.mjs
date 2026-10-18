@@ -112,9 +112,8 @@ try {
   await expect(page.getByLabel("Introduction", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("radio")).toHaveCount(0);
   await page.getByText("Public contact details", { exact: false }).click();
-  await page.getByLabel("Public email", { exact: true }).fill("hello@example.com");
-  await page.getByLabel("Public phone", { exact: true }).fill("+251911234567");
-  await page.getByLabel("Website", { exact: true }).fill("https://example.com/");
+  await page.getByLabel("Instagram username", { exact: true }).fill("owner_page_fixture");
+  await page.getByLabel("WhatsApp number", { exact: true }).fill("+251911234567");
   await page.getByLabel("Instagram username", { exact: true }).fill("@example_shop");
 
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
@@ -153,9 +152,10 @@ try {
   await visitor.goto(`${base.origin}/@${before.handle}`);
   await expect(visitor.locator("[data-business-profile]")).toBeVisible();
   const contactArea = visitor.getByRole("region", { name: "Connect with this business" });
-  await expect(contactArea.getByRole("link", { name: "+251911234567", exact: true })).toHaveAttribute("href", "tel:+251911234567");
-  await expect(contactArea.getByRole("link", { name: "hello@example.com", exact: true })).toHaveAttribute("href", "mailto:hello%40example.com");
-  await expect(contactArea.getByRole("link", { name: "Website (new tab)", exact: true })).toHaveAttribute("href", "https://example.com/");
+  await expect(contactArea.locator('a[href^="tel:"]')).toHaveCount(0);
+  await expect(contactArea.getByRole("link", { name: "WhatsApp (new tab)", exact: true })).toHaveAttribute("href", "https://wa.me/251911234567");
+  await expect(contactArea.getByRole("link", { name: "hello@example.com", exact: true })).toHaveCount(0);
+  await expect(contactArea.getByRole("link", { name: "Website (new tab)", exact: true })).toHaveCount(0);
   await expect(contactArea.getByRole("link", { name: "Instagram (new tab)", exact: true })).toHaveAttribute("rel", "noopener noreferrer");
 
   await expect(visitor.getByRole("region", { name: "Business introduction" })).toContainText("Textiles for your home and wardrobe.");

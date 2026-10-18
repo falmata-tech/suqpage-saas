@@ -1,4 +1,57 @@
-# Suqpage Project Master Prompt
+<!-- S145 staged rebrand: user confirms MirtPage, current palette, purchased
+mirtpage.com through GoDaddy and chooses NEW com.mirtpage.app/separate Play app. FE-070/BE-059/DEP-049 and
+proposed ADR-0029 govern the staged data-preserving transition. This note records
+approved direction, not a completed hosted/domain/app cutover. Existing product
+and release facts below remain current until their verified phase is reconciled. -->
+
+Local S145 candidate (not released): shared web/native presentation, original
+two-panel M artwork and active English/Amharic/Oromo copy now use MirtPage. The
+latest local introduction is “A professional digital showroom for every business.”
+Customer copy explains what businesses sell, make and grow, with identity,
+story, products and optional collections together, followed by direct contact
+through the business's configured channels, without searching social-post history.
+Existing merchant content/design and application workflows are preserved. Both
+web push workers locally accept the exact legacy and new titles; shared sender
+titles and Android channel IDs remain compatible. The final public identity is
+MirtPage throughout; old names remain only where historical records, stable
+provider/protocol identities or a verified transition require them. This does not
+authorize deleting business data or replacing credentials. Backend/email/default
+phases and the new Android/Play release remain pending under FE-070/BE-059/DEP-049;
+current deployed application facts below are unchanged.
+The owner approved the combined local visuals on 2026-10-18 and requires the
+same approved M geometry and exact logo colors across web, native and exported
+assets. Full release gates and hosted changes remain separate. The owner also
+confirms the new domain purchased; independently verify its exact registration
+and DNS before preparing the guarded cutover. Exact GoDaddy7-record and Netlify
+site/domain beforeimages are verified. The independently approved new aliases
+and exact A/www DNS records are now saved/read back, preserving the existing
+primary and deployed application. Managed HTTPS now covers all four reviewed
+hosts; eight root/health probes and the unchanged published deploy/asset paths
+are verified. The new Firebase Android registration and separate Free MirtPage
+Play Draft exist for com.mirtpage.app; generated client configuration is protected.
+These are staging operations; canonical/runtime/mail/data/native release has not
+cut over. Hosted Auth now adds only the exact mirtpage.com/auth/callback alongside
+the old callback; site_url remains https://suqpage.com and Google login disabled.
+An independent243-field readback matches the approved patch with241 non-target
+fields unchanged; new-primary Auth remains a separate unapplied phase. The
+refined en/am/om text passes27 actual headed Chrome checks/27 states across
+desktop/phone web and Expo, with no app/request/console/lifecycle errors. The owner
+approves this revised copy and full checks on2026-10-18; unchanged artwork
+approval remains valid. The complete 76-group application check and full web
+release gate now pass on source-bound isolated candidates. Release includes a
+clean dependency audit, production build, finite public-catalog artifact privacy
+guard, provider-backed HTTP/security checks and migration/data-isolation checks.
+Full browser acceptance now passes all20 cases with exit0 on isolated snapshot
+9e8e8e04774ca23af878169c64e6704e60cca35a17df3e9c50d560abdb953f00. Its
+application/dependency inputs match the passing release; later test repairs
+preserve assertions. Owned test resources are removed and normal previews remain
+healthy. Earlier failed/interrupted attempts and13 raw stream-closed errors are
+retained. Their occurrence times are unavailable because the synchronous test
+runner buffers asynchronous app-log forwarding; shutdown versus navigation is
+unproven. Passing local gates do not establish application deployment, a new
+native binary or store release.
+
+# MirtPage Project Master Prompt
 
 > **Read this file before changing any Suqpage code, design, data model, copy, integration, or deployment configuration.**
 >
@@ -52,14 +105,14 @@ separate under DEP-042/DEP-043. Current evidence is in
 ## 1. Your role
 
 You are working on **Suqpage**, a multi-tenant platform giving African businesses
-an organized storefront for their offerings and a direct inquiry channel. People
-can find where businesses selling products they loved on social media are located,
-browse their products/styles/services in organized stores and contact them without
-searching old posts. Owners organize their offerings and share a store customers
-can find on the map. People discover
-businesses, products, services and custom work through geography, search results
+an organized digital showroom for their offerings and links to their own social accounts.
+People explore showrooms from businesses around them and further away, browse
+products, collections and styles in one place and ask the business directly.
+Owners organize their offerings and share a showroom customers can find on the
+map or open from a link. People discover
+businesses, products and custom-made items through geography, search results
 and featured visibility. Growers, makers, traders, retailers, home businesses and
-service providers retain their own identity. Suqpage is an online showroom for
+workshops retain their own identity. Suqpage is an online showroom for
 makers and manufacturers who have no physical retail store or showroom, an
 online extension of existing shops, and a shopfront for people selling from home.
 Customers discover offerings and contact the business directly; this promise does
@@ -85,14 +138,14 @@ When a user gives an explicit instruction that conflicts with an older preferenc
 ### Current experience (FE-040–FE-042, BE-032/BE-033, DEP-030)
 
 One shared business profile uses each business's canonical catalog or current
-published owner profile. The shared profile serves product sellers and service providers
+published owner profile. The local FE-067 product-only profile serves businesses selling or making physical products
 with a hero/video poster, one About, linked offerings and a separate contact section.
 Public and private account contacts remain separate. The current editor is enabled
 by default and supports saved drafts, private image uploads, consented staff help,
 owner first Publish, subsequent live Save and retained restore. The interactive preview
 cannot send inquiries or persist a visitor cart. New workspaces under
 FE-046/BE-039 start with sample text, illustrations, video and public
-contacts, a general-area example and product/service offerings.
+contacts, a general-area example and ready/made-to-order sample products.
 Owners replace the examples; original account identity and existing pages stay intact.
 
 Category/search results use five-row database pages alongside a persistent map.
@@ -147,36 +200,60 @@ Suqpage gives each participating artisan, farm, workshop, or small manufacturer 
 /@green-terrace-farm
 ```
 
-The Suqpage page is designed to turn passive browsing into a structured product inquiry. It is not a checkout page.
+The Suqpage page helps customers browse offerings and prepare a clear message to the business on its configured social accounts. It is not a checkout page.
 
 ---
 
 ## 3. The problem Suqpage solves
 
-Suqpage gives social-media businesses an organized storefront for their collection.
-Customers can browse named products and services, understand the models, colors,
+The local S132 candidate under FE-049/FE-052 explains the inclusive showroom
+story: businesses that sell, make or grow products organize their range alongside
+social posts; customers browse choices and listed availability before sending a
+specific message. Web Market has a compact visible introduction on a plain light
+background and matching localized SEO/OG/Twitter descriptions. Native keeps the
+compact Market and explains the story in About. Amharic/Oromo wording explains
+the idea rather than mirroring English. Focused and actual Chrome copy/intake
+journeys pass; independent first-language review, visual approval, full gates and
+rollout remain separate. Existing promotional graphics/listings are not silently
+claimed rebuilt or published.
+
+Suqpage gives businesses an organized digital showroom for their offerings.
+Customers can browse named products, understand the models, colors,
 styles or types the business has described, see photos/videos and ask about the
 right item. Business owners organize their offerings and share one link alongside
-their social posts. Inquiries go directly to the business on Suqpage or its chosen
-social channels; checkout, automatic imports, structured variant selectors and
+their social posts. The local FE-066 candidate routes business questions only through configured
+social accounts; customer inbox submission on Suqpage is retired. Transport live
+chat and private owner support remain active. Existing private inquiry history
+is retained with its authorization boundaries. In this candidate, checkout, automatic imports, structured variant selectors and
 confirmed stock are not implied.
 
-The current S99.10 local copy uses the owner-accepted narrative: "See how close
-the businesses selling products you’ve loved on social media are to you. Browse
-their products, styles and services in organized online stores, then contact them
-directly without digging through old posts." The first sentence is the heading;
-the second is its supporting paragraph. Customer and business About sections explain browsing the collection
-and creating/sharing a storefront respectively. The five languages use contextual
-phrasing rather than literal English idioms. Existing map/search/filter prominence
-and behavior remain unchanged; no social account or physical shop is required.
-Focused narrative/catalog/type checks and 69 actual web/Expo-browser states pass.
-The owner explicitly approves the new phone layouts and full release checks on
-October 12. Complete gates and new web/Android delivery remain separate; released
-Play version 3 does not contain this latest copy. Map proximity is visual discovery,
-not a new numeric-distance or social-account-matching feature. Aligned five-language
-campaign materials and English/Amharic listing artwork are prepared and verified
-locally under DEP-044; previous assets/readbacks stay preserved. Scoped Console
-draft alignment is in progress and does not submit Google review or activate a track.
+Following further October 15 steering, S100's local candidate heading is "Explore
+a business’s digital showroom, without the social media clutter." The digital/online
+setting is explicit in every locale’s lead. Supporting text invites
+discovery near and far, what businesses sell/make/offer, organized collections
+and custom-made products, and direct social contact. Customer and business About sections explain collections,
+models/colors/styles, merchant-listed availability and creating/sharing a showroom.
+Production capacity and timing are merchant-written descriptions and direct
+questions, not new dedicated fields, verified facts or real-time inventory.
+Each language explains the online display in everyday local wording instead of
+literally translating the English invitation. Existing map/search/filter behavior
+and prominence stay unchanged; no social account or physical shop is required.
+Focused narrative/catalog/type checks and 142 S101 local browser states pass;
+new layout review and full gates are
+pending under FE-052/FE-049. Prepared listing/campaign source text is aligned;
+previously generated artwork and provider receipts stay preserved. Deployed web
+and closed Play version 5 retain the preceding S99.10 narrative until a verified
+new rollout. Map proximity remains visual discovery, not a numeric-distance or
+social-account-matching feature. No provider operation or new binary is implied
+by this local text change.
+
+S101 refines the non-English local candidate after the owner's wording review:
+the heading explains a business's organized internet page; the supporting text
+carries the social-post problem, nearby/distant discovery and direct questions.
+Meaning may move between heading and paragraph rather than follow English word
+order. Primary references and language-specific decisions are in locales/README.md
+(FE-049). This remains an agent-authored local candidate pending visual approval
+and full gates; it is not an independently reviewed or published translation.
 
 Many of these businesses have products and production capabilities spread
 across posts, stories, image galleries, chats, and status updates. Consumer and
@@ -187,11 +264,12 @@ wholesale buyers struggle to understand:
 - what colors, sizes, specifications, or variations exist;
 - which products they want to ask about;
 - how to send a complete inquiry without repeatedly taking screenshots or typing product names;
-- how the business can retain the inquiry if a social-app handoff fails.
+- how to keep a clear product message ready when a social-app handoff fails.
 
 Suqpage gives each shop a consistent public page. It organizes each
 participant's story, process, products, capabilities, reviewed location, and
-contact options; supports map, region, category, product, and capability search;
+contact options; supports separate business-map and product discovery
+with category, country and city filters;
 and lets buyers contact the participant directly for small purchases, custom
 work, repeat orders, or larger trade inquiries. Business owners can contact Suqpage support from their authenticated dashboard.
 The local S57 transport service connects customers to staff who arrange
@@ -228,10 +306,11 @@ bounded backoff and same-browser recovery. General guest Help stays retired;
 old buying APIs/history remain compatible without a new public buying entry.
 Only visitor messages and explicit staff replies are public. Historical notes,
 carrier contacts, commission discussions and attachments remain private. End chat
-releases live capacity and preserves contacts and history; X only hides the chat.
+removes the chat from open workload and preserves contacts and history; X only hides the chat.
 Staff can call and add private notes to ended cases, mark them resolved separately,
-or reopen them. The dedicated transport queue retains capacity, claim, assignment,
-reassignment, Active/Chat history/Resolved filters and private carrier handoff.
+or reopen them. The dedicated transport queue retains workload, claim, assignment,
+reassignment and Active/Chat history/Resolved filters. The local candidate
+retires the superseded private company-handoff form in favor of Tracking.
 Business-owner dashboard support remains separate. Local migration 59 extends
 closed-only resolution to transport; deployed schema remains 58 until rollout.
 
@@ -245,10 +324,11 @@ No hosted Realtime configuration or native app has been deployed.
 - a multi-tenant market-discovery and public-page SaaS;
 - a dynamic catalog and availability manager;
 - an inquiry-cart system;
-- a lightweight customer lead-capture system;
-- a single-product or grouped inquiry builder with configured WhatsApp, Telegram
-  and SMS handoffs, copy, and phone-required submission into the business’s inbox;
-- an inquiry management dashboard;
+- a localized single-product or grouped message builder with configured WhatsApp,
+  Telegram and SMS draft handoffs and visible copy fallback; TikTok, Instagram and
+  Facebook are ordinary public profile links, separate from messaging;
+- tenant-scoped retained inquiry history, outside primary navigation; new public
+  business-inbox submissions return 410 under local FE-066/BE-055;
 - a first-party customer support workspace;
 - anonymous, token-scoped transport/delivery conversations (local S57) with live text replies,
   status, private staff notes and retry-safe persistence. Pickup, destination, name and phone
@@ -266,7 +346,7 @@ No hosted Realtime configuration or native app has been deployed.
 - a controlled SaaS pilot whose existing fictional Ethiopian catalog includes
   artisans, farms, workshops and small manufacturers. Product retailers and
   home sellers are eligible; additional retailer examples remain checklist S6.
-  The offering contract also admits repair and other service offerings. Ten are curated benchmark identities and all fixtures have durable fictional briefs,
+  The local FE-067/BE-056 candidate retires public service listings; retained service records stay private until explicitly converted to products. Ten are curated benchmark identities and all fixtures have durable fictional briefs,
   advised palettes, independent logos and heroes, coordinated booths, and four
   imaged offerings while exercising discovery and high-volume operations.
 
@@ -297,6 +377,9 @@ Use the terms **inquiry**, **inquiry cart**, and **customer inquiry**. Do not ca
 
 ## 5. Non-negotiable design philosophy
 
+Local Tracking (BE-058/FE-069/DEP-048, ADR-0028) is separate from accounts and chats. Staff create independent shipments for a valid requested email before verification; recipients verify that email only to read their shipment list. A recipient may have several plans across different or absent chats. The S141 correction has focused and actual Chrome/Expo evidence; visual/full/release gates remain open with no new deployment.
+
+
 ### 5.1 One profile, each business's content
 
 FE-054 adds locally verified optional tenant accents: an 8% cover-poster tint,
@@ -317,6 +400,16 @@ There is no separate Introduction field or custom layout selector. Account conta
 are edited separately from the public contact values. Owners and consented staff
 use the same standard page editor; owner consent governs staff assistance.
 
+Chat assignment is internal routing. Only the assigned staff member's explicit
+Join chat announces an agent to a customer; reading or claiming is not joining.
+Unanswered staff work remains unresolved and visible; customer-idle endings retain
+factual reply/read-at-ending evidence under BE-018/050 and FE-019.
+
+The local management candidate opens saved summaries and named task screens.
+Your page groups content, appearance and sharing/access; a focused edit exposes
+only that task while preserving the complete validated page profile. Required
+contacts and editing permissions are not hidden in management accordions.
+
 ### 5.2 Suqpage must have its own platform identity
 
 The Suqpage public root must not look like any client page. It is a polished,
@@ -325,11 +418,12 @@ TikTok and other in-app browsers. `FE-021`, `FE-024`, `FE-027`, `FE-028`,
 `FE-029`, `FE-030`, and `FE-036` define the current composition, narrative,
 venue art direction, and platform visual system. `/` opens directly into the
 geographic Market; there is no intermediate landing lobby or duplicate search.
-The compact introduction presents the showroom benefit: everything a business
-offers in one place. Supporting copy invites visitors to discover nearby
-businesses, their story, offerings, capabilities and location, then make direct
-contact. It remains visible on phones. About pairs this with the owner promise:
-one shareable link to what they offer, alongside their existing social channels. Functional
+The web Market retains its compact visible introduction and SEO narrative.
+The native Market keeps the explanation in About. Neither surface has a
+duplicate information icon or introductory overlay. One localized programmatic
+Market heading remains. About switches between customer browsing benefits and
+the business promise: one organized, shareable showroom alongside existing
+social channels. Only the selected audience panel is shown. Functional
 navigation and action labels stay task-specific. Visitors can search by product,
 category or location. Individual
 and household buyers are the primary public audience; traders and retailers can
@@ -342,42 +436,31 @@ education remains on `/about`. The
 Market controls and map sit on one quiet, production-led architectural canvas
 instead of looking like unrelated sections or decorative cards. The canvas has
 no people, factual business attribution, unsupported statistics, or tenant
-branding. The combined marketplace map loads immediately with **All categories**
-and no orientation chooser. The local S56 candidate uses one compact horizontal
-map toolbar: results toggle at far left, search, category and location icon buttons.
-Category and location icons show the number of active selections, with no badge
-when cleared. Filter menus open on demand and show active selections; the toolbar is the shared
-header for map-only and open-results views. The product list and zoom tools start
-below it, preserving map space at 320px. Only one active control set is mounted.
-Closed-view searches/filters update the map without opening results; open-view
-changes update both map and list. The drawer contains
-one five-row paginated list labeled Products & services. Each result identifies its
-business with a localized “From {business}” link to the main showroom, separate
-from the product-details target; merchant names remain verbatim on web and mobile.
-The local S54 candidate
-removes business cards and result-type controls; businesses remain on the filtered
-map with their existing previews. Public web/mobile boundaries normalize old
-type parameters before SQL counts/pagination. There are no result tabs. It starts closed on a
-fresh visit and opens for query/category/place deep links. Hiding and reopening
-retains the query, filters, result page, map center and zoom. Explicit web view=map
-URLs stay closed on reload even with filters; query changes preserve view choice.
-Map controls remain
-on the right; attribution and fixed phone navigation stay visible. Selecting a
-map business opens its preview above the drawer. The map stays mounted.
-The local FE-030/FE-042 implementation places Category and Region or city side
-by side above the product/service results; there is no Filters disclosure. No selected category
-means all categories, shown only as the control's empty-state label, not a menu
-option. Visitors may select several categories and remove individual selections
-or clear them together. Category sets match any selected membership; location
-and query further narrow that set. Each scope has its own clear action, changes
-reset paging and preserve the other scope, and selected valid locations remain
-even when its new category scope returns no matches. Parameterized PostgreSQL
-exact/fuzzy queries, map rows, counts and pagination use the same canonical
-category set and location union; overlapping city/region selections return records once.
-Locations accept up to 16 selections, with OR within locations and AND with search
-and categories; single-location URLs remain valid. S57 is deployed on the web and native API in S61. No search schema change is needed.
-Transport/delivery help uses a compact accessible icon alongside an open drawer on narrow
-screens so it cannot cover pagination. S56/S57 controls are deployed on web and included in the finished internal Android APK.
+branding. The S103 revision of the local S102 Market (FE-065 / BE-054) is
+implemented locally with bounded initial browsing (200 map businesses / 12
+cards), products appended on scroll, and a centered switch above opposing
+sliding panels. Focused evidence passes; visual approval/full gates are pending. Businesses and Products have independent query/category/
+country/city scopes. Text updates results after a short debounce without Enter;
+products have a Made-to-order toggle; it narrows products only and resets with Clear. A labeled switch slides the
+product panel over the persistent map, leaving a map strip visible. In map view,
+a panel edge remains visible. Product controls cover the map search controls;
+only the active scope's search controls are interactive. Map zoom remains on the
+right. Each product has a short literal description and a separate localized
+From business link. Filters have visible words and selection counts, support
+multiple values and clearing, and reset only their own pagination. Country is
+chosen before City; choices come from eligible published businesses. New UI has
+no region chooser. Legacy geographic URLs/API callers remain compatible.
+Map previews open above the panels and remain bounded on phones. Query/filter
+state, paging and camera survive switching and return navigation. The local
+candidate also remembers the selected Businesses/Products panel on ordinary
+Market returns; explicit navigation takes precedence as specified in §10. Hidden panel
+content is inert and Escape restores the Businesses switch focus. Reduced motion
+removes sliding. Shared positioning remains the digital-showroom narrative in §3.
+This local implementation is awaiting actual visual approval/full release gates;
+the live web/installed Android releases retain their previous shared controls.
+The local S113 candidate keeps a labeled **Transport chat** action alongside an
+open narrow panel, with measured product-feed scroll clearance. No checkout or
+transport booking is implied.
 Opening a permanent Suqpage page navigates in the same tab to its canonical tenant
 route and unmounts the map or Daily Featured runtime. Desktop and tablet retain
 the Suqpage application rail around the tenant-owned page. Phones use an
@@ -454,8 +537,9 @@ On phones, Daily Featured avoids a vertical wall of controls: its long
 description is omitted, broadcast status is compact, and all seven fixed weekdays
 fit in one compact segmented row above the gallery. Daily Featured uses an
 ordinary responsive image-card grid that grows downward without venue scaling,
-map-style zoom, or pagination. Nearby groups use at most six fixed-readable
-image cards over the unchanged map. Long platform education lives on `/about` and
+map-style zoom, or pagination. The Ready S127 map picker admits only what fits together on the current
+screen: up to6 desktop/3 phone, reduced for height/font scale, without list
+scrolling or pager controls over the unchanged map. Long platform education lives on `/about` and
 signup lives on `/request`. There is no duplicated
 all-business directory or browser-side full-catalog List fan-out. The public
 Daily Featured route is a bounded application workspace rather than a scrolling
@@ -463,17 +547,17 @@ promotional document. Its gallery owns the available workspace below one compact
 broadcast status, collapsed schedule summary, attached sponsor surface, and fixed
 weekday ribbon. Expanding the schedule scrolls its agenda internally without
 hiding application navigation.
-The public application shell exposes Market, Daily featured, About, and More on
-phones. Desktop and More navigation separate Explore, Account, and
-Information. Anonymous visitors see Sign in only; authenticated visitors see
-Dashboard only; account creation remains available from the sign-in route. More
-contains direct contact, privacy, and terms rather than repeating the same
-destinations in two navigation surfaces.
-Each screen has one communication job. Market helps visitors find businesses, products and services. About explains
+The local public application shell exposes Market, Featured, About and
+Login while signed out or Account after sign-in. No customer-inquiry inbox is
+exposed. Desktop navigation separates Explore, Account and Information; legal,
+Login and setup routes share the same public shell. The Account destination stays
+role-aware: owners enter their compact hub and staff enter their authorized web
+workspace. Account creation remains available from Login.
+Each screen has one communication job. Market helps visitors find businesses and products. About explains
 an accessible digital presence for African businesses, the Ethiopia-first catalog,
 and discovery through location, search, result lists and Daily Featured. Login explains passwordless account access. Setup
-collects private account details. Business owners use Dashboard → Support for
-platform questions. There is no public Ask for help entry. Transport & delivery, with a Live chat sublabel, opens route/name/phone intake and
+collects private account details. Business owners use Account → Support for
+platform questions. There is no public Ask for help entry. Need help with transport?, with an invitation to chat live with transport agents, opens route/name/phone intake and
 then live text chat. Staff arrange carriers outside Suqpage. General visitor
 support stays closed; business owners use their authenticated support dashboard.
 Transport intake, staff queue and native API are deployed; the same service is
@@ -531,28 +615,57 @@ bulk-download, package, or service-worker-cache those tiles, and it sends no
 search, account, showroom, or private-location data in tile URLs. OpenStreetMap
 supplies visual road and place context only; Supabase remains authoritative for
 reviewed coordinates, eligibility, industries, search, and place filters.
+The local browser correction uses Leaflet's public asynchronous GridLayer and
+one status-checked CORS fetch per visible256px tile, with default caching,
+omitted credentials and an origin-only cross-origin referrer. Successful blobs
+are released after decoding; obsolete work is cancelled on unload/disposal.
+Private Tracking keeps no-referrer; public metadata explicitly restores the
+public policy on SPA return. Failed raster is removed while business markers,
+camera and controls remain available with a localized48px Retry map action.
+Retry does not change provider/identity/URL or bypass caches. Internal failure
+kind/status never includes request URLs, response bodies or customer data.
 Cluster and marker reconciliation occurs after Leaflet movement settles and is
 bounded to the committed viewport. Exact storefront/legacy businesses keep their saved WGS84 coordinates. City/area
 shops use stable business-ID-based offsets within 1.5 km of the public anchor,
 without changing saved coordinates or shifting when filters/pagination change.
-Nearby markers form numbered zoom-dependent clusters. At neighborhood zoom,
-exact/legacy same-city businesses within 800 meters form deterministic balanced nearby groups
-of at most six. Larger cohorts split into separate markers. Activating one opens
-a lightweight two-column phone or three-column desktop card viewer over the
-unchanged map, with no pagination, internal scroll, simulated architecture, or
-deeper zoom requirement. Selecting a nearby card replaces that list inside the
-same bounded map inspector and provides **Back to nearby**; it never opens a
-second popup or scrim over the retained list, and persistent support controls do
-not overlap the inspector. Isolated businesses use a compact accessible action-orange
+The latest Ready S127 correction (FE-021/053/058, BE-023) requires screen-sized
+nearby groups: up to six cards on large two-column screens, three on phones,
+reduced further for short/enlarged-text layouts. Every separated final circle opens all its shops
+at once, without a scrollable list or Next/Previous controls. Nearby connected
+3-kilometer neighborhoods partition by the shared compactness/capacity policy;
+extra small groups avoid remote remainders. Only businesses with no eligible peer within the3-kilometer nearby area
+use individual shop icons; forced one-card groups at exceptional capacities remain
+numbered circles. Normal outer clusters merge nearby final groups when zoomed out; clicking
+one zooms in. A terminal group already separated from the outer hierarchy opens
+its all-fit modal immediately at the current camera, without a street-detail
+jump. Restored keys must still be exposed terminal groups rather than hidden
+members of a current aggregate. Screen-capacity or actual data/filter changes may rebuild final groups. Plain circle spacing adds no connecting lines or centroid
+markers and may not displace a badge more than800meters from its true public
+anchor; broad zoom may retain overlap rather than imply a different town. Leaflet interaction maximum18 and MapLibre raw17 stay matched; source
+capability19, public200-row API scope and older-client nearbyGroups remain
+unchanged. Return navigation must revalidate and preserve current group, selection,
+focus and camera. This latest refinement is implemented and focused/browser-tested locally;
+visual/full/release/commit and coordinated rollout gates remain pending.
+Expo observes actual container layout so markers appear without manually resizing
+the browser. Marker actions use current handlers after zoom completion; compact
+map controls occupy only their visible row and do not intercept the map behind
+an invisible full-width wrapper.
+The locally focused/browser-tested short-web correction reclaims the duplicate
+Market strip and uses
+horizontal map controls/compact transport clear of the inactive pane handle on
+short phones, preserving the normal-height layout.
+Isolated businesses use a compact accessible action-orange
 map-pin containing a familiar upright storefront and the
 actual business name in a bounded multi-line label. A generic Showroom caption
 and horizontally unbounded names are prohibited.
 Perspective platforms or device-like silhouettes are prohibited.
 Activating an individual marker centers at local-detail zoom and opens the richer
-business preview in one click. Cluster clicks always zoom forward. City/area shops
-remain separately selectable at detailed zoom rather than joining Nearby groups. The map marker does not load booth
-or hero photography. Map previews and nearby groups use a native modal above
-the search drawer and map, bounded to the viewport with scrollable content.
+business preview in one click. Counted groups, including city/area display points,
+use the same picker policy. Display offsets apply once and never rewrite saved
+coordinates. The map marker does not load booth or hero photography. Map previews
+and group pickers use a modal above the search drawer and map. Individual detail
+may scroll for long content; every member of the screen-admitted final group
+fits together without list scrolling or a pager.
 Close, Escape or backdrop dismissal preserves search and drawer state and returns
 focus to the trigger or a visible drawer control after marker redraw. Selecting
 a business result also preserves the open drawer. Short landscape windows let
@@ -651,7 +764,8 @@ collection are outside the launch flow.
 
 Standing UI standard: use clear, specific labels and icons that match the action.
 A message icon opens an inquiry, list-plus adds a selection, clipboard-list reviews
-selections, and send confirms sending. Let those controls explain themselves.
+selections, and social-account links copy the message before opening their
+destination. Suqpage never claims an external message was delivered. Let those controls explain themselves.
 Do not add filler paragraphs, repeated instructions, implementation details,
 internal notes, release status or backend terminology to public or workspace UI.
 Keep concise errors, outcomes, required input constraints and privacy/consent text
@@ -736,12 +850,21 @@ and present them but must not invent or silently translate them.
 
 ## 7. Dynamic catalog model
 
-FE-058 is locally implemented: web/native maps pan worldwide at zoom 1–19,
+FE-058 is locally implemented: web/native maps pan worldwide, with interaction capped at normalized18
+(native raw17) and source tile capability19,
 while initial/reset views remain Ethiopia and filters remain selected. Approximate
 city offsets wrap worldwide coordinates; exact GPS is unchanged. This does not
-expand the current Ethiopia city catalog or relocate existing businesses.
+relocate existing businesses. S102 separately adds the server-only world city
+catalog and country/city metadata described in §10 and ADR-0027; existing OSM
+Ethiopian IDs and coordinates remain intact.
 
 Suqpage stores business content in the database. Client renderers must consume dynamic data rather than hard-coding products. FE-054 stores the optional accentColor in existing versioned PostgreSQL page draft/publication JSON, with no migration or backfill.
+
+Local S127 map navigation stores only bounded public final-group IDs, selection anchor and
+a camera reference for up to two hours, scoped to API origin and business-search
+identity. Oversized legacy selections are cleared while their camera can remain;
+a restored selection must exactly match a current screen-admitted group. Fresh eligible rows remain authoritative; no private data or business
+snapshot is saved, and no database schema changes.
 
 Core hierarchy:
 
@@ -761,6 +884,13 @@ tables and revision fields are compatibility-only recovery input: current seed,
 recipe, admin, product-upkeep, and public-renderer workflows do not create,
 select, display, or derive editorial content from them.
 
+Planned local S131 (FE-041/FE-053, BE-044) styles those optional merchant categories
+as wrapping, accent-aware showroom choices and labels assigned products. A shop
+without categories keeps a flat grid. Categories remain optional; no signup or
+publication requirement or owner permission changes. Canonical active categories,
+public-product counts, search intersection and additive native DTO parity are
+specified; implementation/verification and visual/full/rollout gates are pending.
+
 Examples of merchant-defined option groups:
 
 ```text
@@ -776,12 +906,20 @@ Region
 Count
 ```
 
-Suqpage uses **Offering** as the internal umbrella for a standard product,
-service, made-to-order work, manufacturing capability, or production supply. Public
-pages use **Products**, **Services**, or **Products & services** according to their
-listed content. The compatible
-`products` table and recipe array remain the current transport; they do not
-limit an offering to stocked retail merchandise.
+The local FE-067/BE-056 catalog is **Products** only. New active writes choose
+`standard_product` (Ready to ship) or `made_to_order` (Made to order). Availability
+is separate: unavailable/coming-soon items never claim immediate shipping, and
+legacy manufacturing/production records stay neutral until an explicit owner
+choice. Ready is a merchant declaration, not verified stock or a carrier promise.
+**Offering** and all five historical kinds remain storage/recovery compatibility;
+service records/IDs/revisions/inquiry history are retained privately but services
+are excluded from public rows, counts, metadata, direct links and social selection.
+The compatible `products` table and recipe array remain; no migration is needed.
+
+The local focused owner product editor exposes descriptive Availability and
+Listed/Hidden status on web as well as native. These are existing product fields,
+not inventory counts. Explicit owner changes use the existing scoped/versioned
+upkeep command; omitted staff metadata remains authoritative on the server.
 
 Rules:
 
@@ -800,13 +938,15 @@ Rules:
    is never compared with, reserved from, or deducted from inventory. Retained
    numeric quantity and `quantity_mode=required` values are compatibility input
    and normalize to current text/optional behavior.
-10. Every stored offering has one kind: `standard_product`, `service`,
-    `made_to_order`, `manufacturing_capability`, or `production_supply`.
+10. Active product creation/reclassification accepts `standard_product` or
+    `made_to_order`. Historical `service`, `manufacturing_capability` and
+    `production_supply` remain readable; omitted valid legacy product kinds stay
+    unchanged, while a service needs explicit conversion before a new save.
 11. Capacity, minimum-order, and lead-time summaries are optional bounded
     merchant facts. The platform and AI must not calculate, verify, or invent
     them. The shared public product view omits these production facts.
 12. An offering may display one optional non-negative ETB price, one normalized
-    merchant-defined offered-by unit (including hours, sessions and projects), and up to six concise highlights. These
+    merchant-defined offered-by unit (such as pieces, kg, boxes or sets), and up to six concise highlights. These
     fields support inquiry context only and never create checkout, payment, tax,
     inventory, or price-verification behavior.
 13. The deployed gallery accepts four reviewed YouTube videos and one header video.
@@ -845,44 +985,73 @@ publication is verified. No additional product fields or approval step is introd
 
 ## 8. Product and inquiry workflow
 
-The S91 implementation records one owner alert with each canonical in-app inquiry
-transaction. Its link opens that exact permitted inquiry; reading an alert does
-not change inquiry status. External social handoffs create no platform alert.
-Inquiries without a client owner alert platform/operations managers (FE-062/BE-050).
+The local FE-066/BE-055 candidate retires new customer messages into business
+inboxes and their primary navigation/counters. Both new-inquiry APIs return 410;
+no new business-inquiry row or alert is created. Retained private histories remain
+authorized. External social handoffs create no platform alert or delivery claim.
+Transport chat and private owner Support keep their own messages and alerts.
 
 
 Product cards open a shareable `/@handle?product=<id>` view inside the business’s
 product section (FE-041). The route reloads directly, supports browser back/forward,
-and provides a return link to the page’s product/service catalog. Unknown, foreign or unpublished product references
+and provides a return link to the page’s product catalog. Unknown, foreign or unpublished product references
 show a safe unavailable state. Cards have no Video badge; details use an ordered photo/video gallery (FE-050/BE-042), name, description, optional
 price, canonical selling unit and feature chips. Capacity, minimum order, lead time
 and internal offering-kind labels stay out of this public view. Single-value option
 groups need no selector; their canonical defaults remain part of the inquiry.
 
+The local S129 FE-041/FE-053 implementation gives native showroom cards short
+descriptions, separate details/Add actions and a bounded required-options picker
+without leaving the grid. Web phone excerpts remain visible. Canonical stock,
+per-business lists, preview guards and social handoffs are preserved. Focused
+source/store tests and source-bound installed-Chrome public journeys pass, with
+response-only options/stock fixtures explicitly labelled. The current private
+preview is also verified through ordinary local sign-in without catalog changes.
+Visual approval, full gates and rollout remain separate; this is not a new build.
+
+The local S131 candidate adds optional accent-aware category chips, visible
+product membership and category/search intersection, preserving S129 Add/options
+and each shop's separate saved list. Public details→Back retains only bounded
+origin/business-scoped search/category criteria in app memory (32 shops, two-hour
+expiry), never catalog/account/private-preview snapshots. Canonical refreshed
+categories determine whether the selection remains valid. Narrow native grids
+use measured container width: two150px cards plus12px gap when possible, otherwise
+one full-width card; enlarged text keeps one column. Current source/store tests,
+six rendered geometry cases and real320/390private-preview supplements pass.
+Visual approval and full/commit/release gates remain.
+
 Expected customer flow:
 
 1. Open a product, review photo/video/features, and choose any available options.
-2. Choose **Inquire about this product only** (or **service only**) for that selection
+2. Choose **Inquire about this product only** for that selection
    alone, or **Add to inquiry list** to save it while continuing to browse.
    Cards use the same label, then **Added to inquiry list**; the selected-item
-   control says **View inquiry list** with a count. A direct inquiry never merges
+   control is a floating **Inquiry list** action with the current business's count
+   only on that business's showroom/product pages in the local candidate. Separate
+   businesses retain separate lists; Market/Featured/About do not show a saved-shop
+   launcher. A direct inquiry never merges
    with, clears or submits the visitor’s saved group.
 3. A single selection uses a compact product summary. Multiple selections show an
    editable inquiry list; zero selections show no persistent cart button. Saved
    references are revalidated against current tenant products/options and capped
    at 20, matching server limits. Desired quantity remains optional bounded text.
-4. Choose configured WhatsApp, Telegram or SMS, **Copy inquiry**, or **Send inquiry on
-   Suqpage**. Only validated effective public contacts supply handoff destinations;
-   SMS uses public phone and never implies WhatsApp availability.
-5. App actions prepare a message for the visitor to review and send. Copy retains
-   visible/selectable text, including a clipboard-failure fallback. None of these
-   actions creates an inbox inquiry or claims external delivery.
-6. Only choosing **Send inquiry on Suqpage** reveals the reply-phone field and explicit
-   **Send inquiry** confirmation. Back to sending options hides the phone again.
-   Sending disables edits; bounded failure, retry-safe idempotency and explicit
-   success remain. An obsolete response cannot mark a different selection sent.
-7. Platform delivery retains canonical tenant validation and requires a normalized
-   phone with 7–15 digits. Phone is never stored in the browser’s saved cart.
+4. Choose a configured WhatsApp, Telegram or SMS message destination.
+   Only validated effective public contacts supply destinations; a public phone
+   never implies WhatsApp availability. The owner-approved demo destinations follow
+   the narrowly derived public policy below; unrelated example contacts stay inert.
+5. Activating a message destination copies the simple message and selected product
+   links in the current interface language before opening its supported
+   destination. WhatsApp/Telegram also receive supported draft text. Other
+   SMS receives its supported message body. TikTok, Instagram and Facebook open
+   their ordinary profiles from showroom identity/footer links without copying an
+   inquiry or claiming a universal inbox route.
+6. Optional manual copy and visible/selectable text remain available when the
+   visitor wants another destination or clipboard/opening fails. Preserve their
+   selections. Nothing is automatically sent, and returning from another app
+   does not confirm delivery, purchase or payment.
+7. There is no Suqpage business-send confirmation or required visitor phone field.
+   Canonical tenant/product validation remains; saved cart state contains item
+   references, not private customer contact details.
 
 The inquiry composer is a bounded floating panel with outer margins on desktop
 and a safe-area-aware bottom sheet on phones. It has an anchored header, one
@@ -890,8 +1059,9 @@ scroll region, keyboard focus containment, Escape/close and opener restoration.
 All actions have at least a 44px touch target. It is rendered outside clipping
 ancestors; the product detail itself is an ordinary navigable section, not a modal.
 
-A canonical inquiry record created by the public **Send inquiry** action
-contains:
+Historical private inquiry records retain their existing fields and authorization;
+the local candidate does not create them through a public business-send action.
+Their retained schema contains:
 
 - business;
 - a neutral visitor label;
@@ -905,7 +1075,7 @@ contains:
 - status;
 - timestamps.
 
-Supported inquiry statuses:
+Retained historical inquiry statuses:
 
 ```text
 new
@@ -923,7 +1093,7 @@ The system must prevent:
 - invalid option names;
 - invalid option values;
 - unreasonable quantities;
-- duplicate submissions caused by repeated social-button taps;
+- duplicate in-flight copy/open operations caused by repeated social-button taps;
 - oversized payloads;
 - uncontrolled spam.
 
@@ -934,7 +1104,8 @@ Use idempotency, rate limiting, canonical database validation, and tenant checks
 ## 9. Social messaging and clipboard behavior
 
 The native app opens ordinary HTTPS links in a system in-app browser with a
-Close/Back control. Recognized WhatsApp phone and Telegram username links try the
+Close/Back control. Recognized WhatsApp phone and Telegram username/explicit
+international-phone links try the
 installed app first and fall back to their original HTTPS destination. Phone,
 SMS and email use system handlers. Closing or returning from these destinations
 never confirms message delivery, payment or an order. Other apps control their
@@ -950,8 +1121,8 @@ Required behavior:
 ### WhatsApp
 
 - Use the exact business number.
-- Store the number in international digits-only format.
-- Do not include `+`, spaces, dashes, or a local leading zero.
+- Accept validated international phone values with an optional leading `+`;
+  normalize formatting and use international digits only in the WhatsApp URL.
 - Embed the structured inquiry directly into the WhatsApp link when possible.
 
 Example stored value:
@@ -962,9 +1133,11 @@ Example stored value:
 
 ### Telegram
 
-- Store a username or supported Telegram profile value.
+- Store a username or explicit `+` international phone value.
 - Recommended stored format is the username without `@`.
 - Use Telegram’s supported draft-text link behavior when available.
+- Explicit phone links use the supported phone identity, never a guessed username
+  or an arbitrary invitation hash. Account/privacy settings still control access.
 
 Example stored value:
 
@@ -979,13 +1152,13 @@ When automatic copy is blocked, the customer must still see:
 - the complete inquiry message;
 - a copy button;
 - selectable text;
-- configured WhatsApp and Telegram actions only.
+- the business's configured social-account actions, without invented destinations.
 
 Never pre-open `about:blank` and wait for asynchronous clipboard permission.
 
 ---
 
-The owner editor asks for Product or Service, name, optional ETB price and one
+The local FE-067 owner editor asks how the product is supplied (Ready to ship or Made to order), name, optional ETB price and one
 description (FE-048/BE-041). The FE-060/BE-048 local candidate extends the existing
 eight-photo/four-video gallery to direct TikTok, YouTube, public Facebook videos
 and Instagram Reels. Owners enter links in the cover/product editor and Save;
@@ -1012,73 +1185,151 @@ Fresh demo and starter offerings use the simple fields; useful old demo facts ar
 included in descriptions. No automatic service inference or translation occurs.
 The owner approved this experience; release evidence is recorded in docs/SUQPAGE-RELEASE-2026-09-21.md.
 
+The local S128 toolbar (FE-065/FE-053) removes the duplicate visual Market title
+row, retaining a centered Businesses/Products switch with a non-layout localized
+heading. S143 removes the redundant Info control and its reserved spacing; the
+ordinary switch row is at most52px with48px targets, while enlarged labels may
+wrap accessibly rather than be clipped. Search and all labeled filters share one row at sufficient
+measured content width (web35rem, native760px at ordinary font scale), including
+landscape; phones and enlarged text retain readable wrapping rows. Selection
+counts and48px targets remain visible. Native keeps the narrative in About;
+the web landing page also has S132's compact visible introduction.
+Focused tests and actual Chrome local-API journeys verify independent searches,
+filter clearing, reload and showroom return. Visual approval, full gates, commit
+and rollout remain pending; this does not update the live site or installed APK.
+
 ## 10. Market discovery behavior
 
-Under BE-040/FE-042/DEP-037, query results form one backend-paginated list:
-normal matches first, then spelling matches ranked by PostgreSQL similarity.
-There is no separate match section or badge. English and Amharic typo fixtures
-are verified; this is spelling tolerance, not translation or semantic search.
-Exact results remain complete. Indexed probes and per-business offering expansion
-are bounded, with at most 100 approximate products and 100 approximate businesses.
-Filters and public visibility apply before admission. Current text is indexed
-directly, so edits require no synchronization service. Schema 48 adds pg_trgm,
-fuzzystrmatch and four expression indexes; backups retain extension dependencies.
-Operational and quality evidence is in docs/SUQPAGE-RELEASE-2026-09-21.md (S21).
+The local S140 correction removes the forced maximum-zoom step from terminal
+groups. Larger outer circles still zoom normally; an already-separated group
+opens its exact screen-admitted businesses without moving the map. S139 keeps
+failed basemap detail separate from working business discovery and protects
+pending zoom/preview-return cancellation. Focused and actual Chrome evidence is
+recorded under FE-021/FE-058; visual/full/release/rollout gates remain open.
 
-Suqpage’s directory must scale without dumping every tenant onto the page by default.
+The local S132 web landing-page direction supersedes S128's removal of the
+visible web introduction. Compact headline/supporting text sits on a plain light
+background, retaining the centered scope switch, labelled filters and native
+canvas gain. Actual Chrome covers active-language web/Expo and short/landscape
+pointer/filter/intake tasks; visual approval and rollout remain pending.
 
-Default behavior:
+The local S130 candidate (FE-065/FE-053) retains product excerpts and adds canonical
+business city, richer bounded final-group rows and country names formatted for
+the current locale. Installed Chrome lacks Oromo country-name data and currently
+falls back to English for those names; other authored Oromo UI remains localized.
+S127 capacity/grouping is unchanged. No inferred location, per-card fetch or
+private data is introduced. Actual public API, product/business navigation and
+rich preview journeys pass. S136 corrects a separately proven fractional Leaflet
+resize/return gap without weakening the half-pixel contract. A weak map-instance
+intent prevents chained resize rounding; deliberate pan/zoom replaces it. Actual
+SDK rendering/bounds remain independent from the persisted geographical intent.
+Seven installed-SDK and two adapter regressions plus three real full-showroom
+returns each on web/Expo pass the original half-pixel limit without accumulated
+drift. No private SDK fields, tile resets, grouping or provider changes are used.
+Visual approval/full gates/rollout remain pending.
 
-- load the combined geographic map with All categories selected; no chooser is required;
-- selecting a category, including All categories, opens its paginated results;
-  list ranking remains independent of sponsorship;
-- de-duplicate businesses with more than one industry membership and keep the
-  Daily Featured weekday industry independent from that map filter;
-- provide live search plus simple Industry controls;
-- show five-row category- or query-driven product/service result pages in the optional
-  left drawer over the persistent map on desktop and phones. Product results link
-  directly to the selected product; query changes retain map center/zoom;
-- after two characters, provide at most six de-duplicated, public-eligible
-  Suqpage page, published-offering, and reviewed-place suggestions scoped to the
-  active industry and place. Hide duplicate autocomplete once full results appear;
-- keep search and compact category/location icon buttons in one shared top row,
-  with the results toggle at far left, on web and native. Filter menus support
-  multiple clearable categories and multiple clearable cities/regions. The results panel places
-  a Products & services heading above one offering-only list, and fixes page controls
-  below the scrollable rows. Offering-only results are deployed on web and included in the internal Android APK;
-- hide product results without clearing filters; search/filter controls stay
-  available over the map, hidden list content is inert, Escape returns focus to
-  the results opener, and reduced-motion preferences disable sliding;
-- support business name, handle, product, industry, and relevant description search;
-- search matches all meaningful query terms, in any order,
-  across one offering and its business name/handle/published About/public location.
-  Case-insensitive matching handles Unicode, Latin accents, separator punctuation
-  and simple English singular/plural alternatives. Common request words are ignored
-  when substantive terms remain. Literal wildcard escaping, exact/prefix title
-  ranking, eligibility and five-row backend pagination remain (BE-040/BE-041).
-  Query-only links open All categories results. Valid place filters survive zero
-  matches without broadening geography. One-character queries can be submitted; punctuation-only input never expands to
-  all listings. Delayed responses preserve newer typing and Back restores the query.
-  PostgreSQL evaluates bounded term groups and count queries omit sorting; it does
-  not translate queries or analyze images/videos;
-- the deployed BE-040 ranking correction prefers the original meaningful
-  words anywhere in an offering title over description-only or plural-alternative
-  matches, after exact-title/whole-title-prefix matches. Thus `gras` puts Farm
-  Grass with Dirt ahead of grain matches. Counts, eligibility and five-row SQL
-  pagination remain unchanged;
-- keep reviewed production-scale metadata
-  available to authorized administrators without exposing it as a public filter;
-- keep live search, available-location filtering, and zoom/center
-  controls within one discovery workbench; progressively disclose industry and
-  place in the same optional drawer on phones and keep map navigation on the map;
-- ignore legacy public `scale` query state so no invisible filter narrows results;
-- ensure mobile usability and keyboard accessibility.
+The local S102 implementation (FE-065 / BE-054 / DEP-045 / ADR-0027) is
+implemented with focused evidence, awaiting visual approval/full gates and rollout.
+Published web and installed APK versions remain unchanged until a separate release.
+
+- FE-065/FE-053 retain the selected Businesses/map or Products panel and each
+  scope's independent criteria when returning from a showroom, product or another
+  page through Back or Market. New sessions default to Businesses. Only bounded
+  public view/search criteria are remembered (browser-tab session/native app
+  memory, two-hour snapshot validity); result payloads, account data and credentials
+  are not stored. Explicit view/filter/history entries win over memory. Deliberate
+  Explore the map and Clear filters actions remain explicit; Featured's source
+  return is separate and cannot replace the Market preference.
+
+- Web discovery pairs each response with its canonical scope/query key. Cached
+  initial results cannot stand in for another current search; canceled requests
+  cannot leave permanent loading or replace newer results. Pending/error data
+  cannot invalidate or overwrite a saved eligible map selection. Only after the
+  current response and matching restored group/selection/camera commit may SDK
+  callbacks persist the view. Both Leaflet adapters use the same center-preserving
+  resize correction, ignore hidden zero-size containers and fence disposed work.
+  Loading-row changes and ordinary container resizing preserve the saved camera
+  within half a projected pixel. These are local return/lifecycle corrections;
+  no API, database, map-provider or clustering contract changes.
+
+- Businesses searches identity, handle, published profile and public location,
+  returning map markers only. Products searches physical goods with
+  source-business context. S103 uses one incremental 12-card server-paged list,
+  without business cards or mixed-result tabs. Made to order is an optional product-only filter; retired Services links fail explicitly rather than broaden.
+- S103 opens with bounded initial results and clears back to default browsing,
+  superseding S102 empty activation. Additional products load on scroll only while
+  the panel is open, with one request at a time, ID deduplication, cancellation,
+  preserved position on panel switches, retry and an accessible Load more fallback.
+  The native list is virtualized. A centered switch and click/drag edge handles
+  select opposing panels; hidden controls are inert and motion can be reduced.
+  The map returns at most 200 business rows with a matching count; a visible
+  prompt offers search/filter narrowing when capped. Only unfiltered first-page
+  anonymous defaults share two 20-second server cache keys. Filters, free-form
+  queries, later pages and visitor exclusions bypass that cache. No polling.
+  Search is debounced, aborts obsolete requests and never requires Enter or a
+  search-button click. Failed requests show a retry action rather than mismatched
+  previous results. The other scope's inputs, results and paging remain unchanged.
+- Category choices are clearable multi-select; no choice means all categories.
+  Country precedes City. Up to 16 countries/cities can be selected, with OR inside
+  a set and AND across different filters. Country changes remove incompatible city
+  selections; invalid explicit API geography is rejected, not silently broadened.
+- Country/city menu choices and counts derive only from eligible active public
+  businesses with approved discovery placement and published offerings. Draft,
+  excluded and visitor-blocked businesses never enter rows, counts, metadata or
+  typo fallback. Same-named cities retain country/canonical-city identity.
+- Product rows retain literal merchant descriptions, line-clamped to the available
+  space, and separately linked From business labels. Item and business targets
+  remain distinct. Sponsored placements do not change query ranking.
+- Matching remains parameterized PostgreSQL word matching across one offering
+  and its business context, with Unicode/case/Latin-accent/separator handling,
+  English singular/plural alternatives, literal wildcard escaping and original
+  exact/prefix-title priority (including gras/grass). Bounded indexed typo probes
+  produce normal matches first, then at most 100 approximate records per kind.
+  Business typo matching cannot admit a business just because its product matched.
+  Type, geography, category and visibility apply before approximate admission.
+- New URL state stores both scopes separately. Old unscoped mobile API callers
+  retain the combined map/product contract; old web/app query/category/place links
+  open the indicated scope and retain legacy geographic restrictions internally.
+  Region is not a new public filter. Public production-scale input stays retired.
+- Web/mobile-web and native render their own compact labeled controls and sliding
+  panels. The map stays mounted and visible behind/beside the product panel;
+  only the active search controls are shown. Native remains a real Expo interface,
+  not a web-wrapper screen. Country/city and media values remain server authority.
+
+Signup and owner edits resolve a selected place ID to country, city and area
+coordinates. New interfaces require Country and City; selecting a different
+country invalidates the city, while choosing the same country preserves it.
+Country labels appear in the visitor's language after hydration, avoiding CLDR
+version mismatches. Legacy known Ethiopian place IDs can derive country on the
+server; a supplied mismatching country is rejected atomically. Exact storefront
+coordinates now accept valid worldwide ranges; home-area mode still stores no
+exact proposal coordinates. Migration 64 adds country/city metadata and widens
+only obsolete coordinate constraints, without moving existing pins.
+
+ADR-0027 retains the 781 OSM Ethiopian anchors and adds an offline GeoNames
+cities5000 catalog. The full city file is server-only and explicitly traced into
+web deployments; clients receive bounded country-scoped suggestions. There is no
+paid geocoding service or startup network dependency. Local-name aliases include
+Finfinnee, Muqdisho and ኣስመራ. Smaller/unlisted towns remain a documented coverage
+limit, and city selection is not proof of a street address. Data provenance and
+attribution are in docs/operations/COUNTRY-CITY-CATALOG.md.
+
+DEP-045 locally corrected 67 marked demos' public contacts and known location
+metadata after a protected backup. Public examples use reserved numbers and
+example.invalid; social contact destinations are absent and external demo
+contact actions are inert. Private sign-in aliases, real businesses, products,
+inquiries and GPS stayed intact. Two additional labeled local-only test agents
+were created through the administrator service, and one unlinked local setup
+review identity is retained. No hosted Auth/configuration changed or email left
+the local mail service. Protected accounts/workflow instructions are in
+.local/discovery-s102/TEST-ACCOUNTS.md, never in a build or public repository.
 
 Local FE-021/FE-053 shop markers have orange bodies, thin continuous white rims and 11px bold
 orange business names on cream plates. Selection changes the nameplate to orange
 with white text. Cluster/nearby/badge styling remains unchanged. Counts and
-live/featured authority, coordinate anchors, clustering,
-selection/zoom and page previews remain unchanged. Full business names stay in
+live/featured authority and coordinate anchors remain unchanged. Local S127
+supersedes grouping/click/zoom behavior with the bounded picker described in §5.2;
+the orange/white individual-marker and counted-circle styling is preserved. Full business names stay in
 accessible labels while visible names wrap within the compact marker width.
 
 ---
@@ -1110,8 +1361,7 @@ the search text changes. Existing businesses and invitation defaults are preserv
 FE-061/BE-049 locally chooses a complete editable example pack from each of the
 eight setup categories in the same transaction: category photos/copy and one
 admitted example video for cover and offerings, using the chosen city in sample
-copy. Existing edited pages are never generally backfilled. Other products &
-services keeps its declared category/city without a nonexistent public-industry
+copy. Existing edited pages are never generally backfilled. Other products keeps its declared category/city without a nonexistent public-industry
 tag; after publication it participates in All-category map and text search with
 neutral category presentation, rather than being relabeled Electronics.
 
@@ -1155,6 +1405,12 @@ accounts change email, existing provider UUIDs stay intact, and previously unlin
 demo accounts gain one identity link. Real account emails remain unchanged. Legacy
 local session cookies remain readable through the same authorization checks; new
 cookies use Suqpage names and logout revokes both local token names (BE-036).
+
+The local S102 setup adds required Country and City to the initial details,
+using canonical server-known places. Country changes clear city selection;
+owner Dashboard → Business details uses the same country-scoped catalog. No
+unpublished sample starts in edit mode. The currently published setup below
+remains the prior version until rollout (FE-065 / BE-054).
 
 The deployed web and internal Android setup combines owner name, verified-email display,
 private phone, business name, chosen handle, category and consent on one screen.
@@ -1200,18 +1456,36 @@ Requirements controlled by `FE-038`, `BE-031`, and `DEP-028`:
 
 ## 12. Fulfillment boundary
 
-Suqpage does not book, quote, dispatch, or track delivery. Businesses and
-customers confirm payment, collection, shipping, returns, and fulfillment
-directly after an inquiry. No workspace may expose a logistics provider,
-delivery request, delivery status, or simulated fulfillment capability.
+Local candidate transport tracking shows an arranged journey: ordered providers, air/truck/van/car/motorcycle methods and From/To per stage. Staff may edit independently of active or ended chats. There are no dates, ETA, scan events, completion/current-carrier claims or bookings. External scan integration remains unimplemented.
 
-The former demonstration routes remain retired and return the normal not-found
+
+Suqpage does not provide automated carrier booking, dispatch, tracking or checkout.
+Businesses and customers agree purchases and payment directly. The active human
+transport-arrangement service is separate: visitors share their route in live chat,
+authorized transport agents discuss options and retain private follow-up notes.
+Independent Tracking records the agreed provider sequence separately. This does not claim an automated booking, carrier integration,
+payment system or confirmed transport merely because a chat starts.
+
+The local BE-018/FE-019 owner-transport candidate also lets business owners start
+that same service from Account → Transport chat, for goods going to customers or
+coming into the business. These requests belong to the authenticated business,
+not a guest browser token, and use the same transport staff queue.
+
+The former simulated logistics demonstration routes remain retired and return the normal not-found
 response. Dormant legacy tables may remain through the data-preserving rollback
 window, but application code must not read or mutate them.
 
 ---
 
 ## 13. User roles and standard page workspaces
+
+The locally verified Tracking workspace gives fresh transport/all-scoped staff and managers a separate list, read-first detail and explicit New/Edit/Save/Cancel tasks. Support-only staff and business owners have no editing authority. Visitors and business owners enter Tracking from transport chat, verify their email themselves and see their own multiple plans without creating or replacing a business account.
+
+The local S142 workspace removes the obsolete per-conversation Transport plan
+tab and Transport company form. Stale authenticated actions cannot save or replace
+old plans/handoffs; authorized obsolete plan routes redirect to independent
+Tracking. Its own New/Edit tasks are not conditional on a conversation, assigned
+chat or prior email verification. Support-only staff remain denied.
 
 The deployed FE-063/BE-051 Reports queue is web-only for support-scoped staff and
 administrators/operations. Staff can claim work, managers can assign it, and
@@ -1228,12 +1502,27 @@ remove/unpublish violations before support marks them resolved. Ordinary tools
 are not weapons merely because they have sharp edges. Public Terms are verified
 in all five languages; no automatic screening is claimed.
 
-Local S91 attention covers owner inquiries/support replies, matching staff waiting
-work, assignment/reassignment, public replies and ended/reopened cases. Visitors
-receive assignment and a separate first-join event, then unread public replies.
+Local S91 attention covers owner support replies, matching staff waiting
+work, internal assignment/reassignment, public replies and ended/reopened cases.
+Customers receive a joined event only after the current assignee explicitly
+clicks Join chat, followed by unread public replies. Their API projections hide
+assigned names before explicit acceptance; opening/Claim/reads never join.
 Opening/refreshing a chat never establishes Read: only explicit acknowledgement of
 an incoming visible message does. Managers inspecting an agent's case do not
 establish that agent's read/join. Private transport notes remain private.
+
+The local S119 receipt candidate observes every incoming footer in one batched
+native transcript observer; the newest reply need not be visible to confirm an
+earlier one. Async measurements recheck focus, app state, overlay generation and
+conversation identity before admitting a read. Web uses the actual visual
+viewport and scroll clipping bounds. A new saved assignment epoch resets the
+observer's acknowledgement cache for accurate visible reads. Explicit Join has
+its own current-assignment/reference fence and idempotent event; older implicit
+read-generated joins are retained as history but do not establish acceptance.
+New message sender sides are saved under fresh server role/tenant authority;
+later role changes cannot recast them. Migration66 is additive and nullable,
+with no historical backfill; ambiguous old non-opener messages retain conservative
+legacy interpretation. These changes are locally tested, not a hosted rollout.
 
 
 The access-profile layer distinguishes platform administrator, operations manager,
@@ -1249,27 +1538,84 @@ queue or Staff area stays highlighted on its detail screens. Inbox search, statu
 and pagination survive conversation actions and back links. Navigation hints
 never grant queue or tenant access.
 
+Staff conversations put transcript and reply first. Needs staff reply, Overdue
+and Waiting for customer describe response work independently of assignment.
+A compact Reply status filter preserves queue/search/return context. Public
+replies require explicit Join by the current assignee; inspecting managers retain
+permitted assignment/notes without pretending to join for someone else.
+Management and request details sit alongside on desktop. On phones an explicit
+Details view replaces the chat temporarily, preserving the reply draft; Back
+returns to the conversation. The old company form/summary and conversation-plan
+tab are removed. Independent Tracking retains version-fenced New/Edit tasks and
+inbox returns remain scoped. Waiting, assigned,
+joined, ended and resolved states are distinct: an ended unassigned case never
+says it is waiting for staff. Transport has a separate Waiting view. The local
+S121 server worker picks up old waiting work automatically, by current open
+workload and longest since saved assignment among eligible receiving staff.
+New chats and availability changes retain immediate routing, without a numerical
+agent cap. Unassigning a case returns it to automatic waiting; pausing an agent's
+receiving setting stops new assignments to that agent. No bulk recovery button,
+inbox visit or client write is needed. Assignment remains distinct from joining.
+These local refinements await visual/full/release gates and hosted publication.
+
 Administrators manage business moderation, staff assignments, marketplace
 visibility, sponsorship, Daily Featured schedules and support. They can
 invite a private business and suspend or restore established visibility. Page and
 location approval queues/actions are retired; historical records remain. Private
 page editing and draft media access still require current owner assistance consent.
-Business details edits operational identity,
-notification, live and sharing settings; public contacts link to the consented page
-editor. Legacy social values are preserved. Staff tables omit retired page-review
+The selected business has one contextual navigation: Overview, Your page when
+consented, Products, Business details, Location & visibility, and Access.
+Overview shows saved status/activity without another complete menu or status form.
+Its saved facts link to the matching business task. Business and Staff directories
+use consistent task labels; Staff has peer Accounts and Workload & availability
+destinations, and Manage opens one focused agent editor. Save/Cancel preserve the
+bounded originating filters. The selected business tab reveals itself inside
+its own navigation on narrow screens without scrolling the document or stealing
+focus. These S118 refinements are locally verified and await visual/release gates.
+Categories belong under Products; category rows are read first, and Add/Edit or
+removal confirmation opens just the selected task. Business details separates
+identity/notification, live presentation and sharing into focused read/edit tasks.
+Access contains owner sign-in/recovery, staff assistance and established-page
+suspension/restoration. Contextual sponsor editing keeps that business selected.
+Legacy social values are preserved. Staff tables omit retired page-review
 counts, and status guidance distinguishes staff drafts from owner live Save.
+Location & visibility uses canonical Country/City selection without requiring
+invented region or zone text. The saved public pin remains independent of a city
+change; unrelated edits preserve omitted geography/media/industry/sponsorship.
+Invalid explicit coordinates and mismatched city/country selections fail
+atomically. Staff assistance returns to that business's Access section.
+Owner Business details shows the current applied location after a reviewed admin
+correction, with pending owner drafts kept distinct from reviewed history. A
+name/logo-only Save preserves that applied pin and proposal. Admin location
+corrections advance the owner business-version fence so an older form cannot
+replay its previous location.
 
 ### Owner (client)
 
 Verified signup or an invitation creates a complete private sample workspace.
 New signup opens the filled page preview automatically. Both web and native first setup
 collect account/business details and the chosen handle together, then expose
-address edits in Page on the deployed version. The FE-056 local candidate groups
-page/account/business/handle editors under Profile, with separate edit/save/return
-screens and authoritative visits/inquiry/offering counts. Its first address change is immediate and later
+address edits in Page on the deployed version. The FE-056 local candidate opens
+a compact Account hub with saved showroom identity/status, three authoritative
+visit/offering metrics and six task destinations: Your page, Products,
+Business details, Account settings, Support and Transport chat. Transport has its
+own paired route/contact intake, live conversation and private history; Support
+handles business/account/page questions separately. Your page groups Preview,
+About, cover photo, business video, page color, public contacts, page address and
+team editing. Each Edit opens only that task; contacts remain visible as Social
+accounts and Business contacts with all saved values preserved. Page address owns
+handle editing; Business details owns identity, category and location. Color edits
+retain full-page preview. Cancel confirms unsaved changes; task switches preserve
+the working profile. New task returns lead to Your page, while older Account-return
+links remain compatible. Saved business/private settings
+open readable summaries; Edit opens a focused screen with Save/Cancel and a clear
+Account return. Native notifications and private profile editing are separate views.
+Private account records, legal links and every edit form are not stacked on the hub. FE-066 removes the primary
+customer inbox and new-inquiry metrics; retained inquiry history stays private
+and scoped. Its first address change is immediate and later
 changes have a 30-day interval (support exceptions require an audited administrator).
 Owners replace examples, save business details/location, edit their page and
-products/services, then Publish directly when at least one offering is listed.
+products, then Publish directly when at least one physical product is listed.
 FE-056 locally exposes Publish beside Edit above the private preview's cover.
 It opens current server readiness with links to missing details and blocks
 confirmation until ready. A changed draft is refreshed for another review;
@@ -1277,17 +1623,28 @@ publication conflicts/errors preserve the preview and confirmation for recovery.
 Subsequent page Save updates the live publication atomically; stale/foreign writes
 and self-reactivation of suspended businesses are rejected. Private account
 contacts remain separate from public page contacts. Owners can restore a retained
-publication, revoke assistance, read inquiries, use support, manage account security
+publication, revoke assistance, use support, manage account security
 and view aggregate visits. Categories remain available to authorized staff without cluttering owner navigation. Existing catalog IDs, options, inquiry
 snapshots and tenant boundaries remain compatible. The S27 local editor adds
 ordered photos/video links and resets uploaded-file state to saved references
 after a successful save; later description edits reuse those saved images.
 
+The local S122 refinements keep that compact Account structure. Product Add/Edit
+has paired Save/Cancel actions and returns to the same bounded Products search
+and page, with Account as the owner's parent and Overview for authorized staff.
+Business-details Cancel sits with Save. Expected failures retain the draft and
+unknown focused product-save errors use a safe connection message. Pending saves
+block duplicate submission and app-owned exits. Native header, stack and persistent
+navigation use the installed router lifecycle and a shared unsaved-change guard;
+Keep editing retains input, Discard restores the saved snapshot, and only the
+acknowledged save can leave its current editor. No draft is promised after process
+termination. Visual/full release gates and rollout remain pending.
+
 The designated main-admin identity is verified and linked in local and production,
 with no business-owner association; existing business content and Auth identity
 are preserved. Local S88 staff creation offers Support agent and Transport agent,
 stored as team_member plus the corresponding queue scope. New agents are enabled
-with capacity three; incompatible open cases block role changes. Scoped agents
+without a numerical conversation limit; incompatible open cases block role changes. Scoped agents
 have their queue as the workspace and no business/product/design authority.
 Legacy generic staff/operator identities are retained with Queue controls matching
 their actual access profile. New role controls show full names on phones and
@@ -1311,20 +1668,30 @@ manage support assignments. Business staff assignment
 remains an administrator action. Team members only see actively assigned businesses;
 page editing also requires current owner consent. Staff Save never publishes on
 behalf of the owner. Support-agent settings enable Business support, Transport dispatch or All requests
-and set a shared open-case limit. Team members see eligible waiting requests and
-their own assigned history; managers see both queues. Assignment and capacity checks
-are transactional across concurrent workers. Staff can claim, reply, close and
-reopen authorized cases; managers can reassign open cases and inspect assignment
+and choose whether staff receive new chats. The local S108 candidate automatically
+assigns matching work to the enabled agent with the fewest open conversations;
+equal workloads rotate by least-recent saved assignment, with never-assigned
+agents first. No numerical limit blocks automatic assignment, claim, reassignment
+or reopen, including workloads above 100. Pausing new chats retains existing
+ownership/replies/history. Saving receiving availability or creating an agent
+routes the oldest eligible waiting cases in a bounded batch of 100 and reports
+routed/remaining counts. The local minute worker also recovers eligible waiting
+work automatically, with at most25 transitions per tick; this is not an agent
+capacity limit. Reads never reshuffle existing ownership. Legacy stored
+limits remain inert. Team members see eligible waiting requests and their own
+assigned history; managers see both queues. Selection, assignment/history and
+notification enqueueing are transactional across concurrent workers. Staff can
+claim, explicitly Join, reply, mark authorized work resolved and reopen cases; managers can reassign open cases and inspect assignment
 history. Assigned transport dispatchers and managers choose Reply for a
 visitor-facing message or Internal note for private work. Existing staff messages
-remain private; only explicit new replies are shared. The transport queue has Active,
+remain private; only explicit new replies are shared. Both support queues have Active,
 Chat history (ended but unresolved), and Resolved lists with server pagination and
 search by requester/name, phone or reference. Intake summaries appear in the list
 and full original intake/contact in the case. Ended and resolved transport and historical buying cases
 accept private follow-up notes, but public replies require reopening. Mark resolved
-closes any active chat, releases capacity, and records the staff decision; visitor
+closes any active chat, removes it from open workload, and records the staff decision; visitor
 End chat never marks a request resolved. Historical transport cases
-retain private notes and audited company handoffs. Unassigned
+retain private notes; the obsolete company-handoff feature is retired locally. Unassigned
 staff cannot reply, add notes, close or route a waiting request before
 claiming it. Visitor messages contribute to the staff unread count.
 No live role uses custom service-request assignments, revision projects or page
@@ -1332,10 +1699,15 @@ approval queues.
 
 ### Public customer
 
-Visitors browse category/search results in five-row backend pages in the optional map drawer,
-open shareable products, choose relevant options and inquire about one product or
-an independently saved group. Configured app handoffs and copy need no reply-phone
-form; Send on Suqpage reveals that field and confirms canonical inbox persistence.
+The local FE-065/FE-066 experience separates business search on the map from
+product cards, with bounded initial results and incremental product
+loading. Visitors open shareable offerings, choose options and prepare a message
+about one product or a saved group. Activating a configured social account first
+copies the localized message and selected products, then opens the destination;
+manual Copy is an extra option. Phone, email and website keep their normal
+destinations. No visitor reply-phone form or new Suqpage business-inbox message
+is created. Historical inquiries remain private; public transport chat and
+authenticated owner support are unchanged.
 Only active businesses, published products and approved discovery geography enter
 public projections. Account phone/email never supply public contacts implicitly.
 
@@ -1345,7 +1717,7 @@ Publication also applies pending saved location/category setup atomically, so a
 populated starter does not need an extra unchanged Business details Save before
 search can find it. Already-applied admin placements/exclusions are preserved.
 
-Owner business setup at `/dashboard/business` saves the name/logo, category and
+The released baseline business setup at `/dashboard/business` saves the name/logo, category and
 public location immediately without staff approval. City/town search resolves one
 of 781 admitted place records server-side. Area mode stores the public place
 anchor separately, removes exact storefront coordinates and uses a coarse public
@@ -1356,6 +1728,12 @@ administrator exclusion or suspension. City markers receive stable display-only
 offsets within 1.5 km of the public anchor and are labelled approximate; exact GPS
 and unclassified legacy points stay unchanged (FE-048/BE-041). No external geocoder
 is used. Public contacts remain in the page editor and account contacts in settings.
+
+The local BE-054/ADR-0027 candidate requires Country and a selected canonical City
+for signup and location edits, uses the worldwide offline place catalog and keeps
+typed-but-unselected replacements unsavable. Existing storefront privacy and
+display-only offsets remain; administrator coordinates accept finite worldwide
+bounds without changing the canonical country/city identity.
 
 ## 14. Retired custom-page workflow and compatibility
 
@@ -1380,6 +1758,70 @@ operational disable switch, not a route back to the retired workflow.
 ---
 
 ## 15. Current technical architecture
+
+The local web/Expo basemap adapter uses the existing exact OSM provider through
+a shared typed, bounded browser loader. The exact host is allowed by connect-src;
+there is no proxy, new provider, credential, package or database change. Native
+MapLibre identity/cache and signing remain unchanged. GridLayer owns geometry;
+the loader owns status/decode/timeout/abort/object-URL lifetime. TileLayer's
+image-only abort routine is not mixed with asynchronous fetches.
+
+Local interactive development can start web, automatic queue pickup and idle maintenance together with
+`npm run dev:with-worker -- --port 3102`. The supervisor validates the existing
+local target and prepares services before starting owned children; a child
+failure is visible and stops its sibling. It never discovers/kills independent
+processes or automatically restarts them. Existing web-only and standalone worker
+commands remain for quiet captures. No additional provider or data store is used.
+Automatic routing, customer inactivity and unanswered-response escalation each
+use independent failure handling and the
+shared support-work try-lock, bounded candidate/transition counts and transaction
+timeouts. The hosted minute adapter preserves notification-first delivery and
+rechecks its maintenance-start budget before each task. These worker adapters are
+locally focused-tested; no hosted deployment is claimed.
+The current local database includes migrations67/68; hosted migration/API/web/native
+delivery must remain coordinated under DEP-043 before this code is released.
+
+Owner editor navigation is client UI state only. Product list origins are bounded
+fixed-path hints and never tenant authority. Native removal prevention uses the
+installed Expo router's React Navigation lifecycle; retained navigation controls
+also consult the focused editor. There is no new provider, dependency, schema or
+private draft store for these S122 refinements.
+
+Local inquiry selection persistence stores only bounded product/option/quantity
+references. Web uses the current showroom's existing localStorage key. Native
+uses the existing document filesystem, with an Expo-browser localStorage adapter;
+keys include the canonical API origin and business ID. Reads coalesce before any
+write; writes serialize, failures preserve usable selections and expose Retry,
+and fresh public catalog data revalidates IDs/options before counts or messages.
+There is no new database, dependency or cross-device synchronization. A temporary
+in-memory migration bridge preserves an older already-open basket only.
+
+Demo destination approval is derived afresh on the server from current effective
+public contacts. A nonsecret deployment setting admits only exact owner-approved
+demo phone destinations; a fixed public example registry admits the official
+TikTok, Instagram and Facebook profiles plus example.com. Unrelated fake demo
+destinations remain inert. Client snapshots cannot manufacture approval, and no
+private contact field is used. Current exact data/configuration operations are
+local only; hosted admission requires its own reviewed target/backup plan.
+
+S102 adds typed independent discovery/URL contracts, web and native API adapters,
+country/city persistence and a server-only offline place-data adapter. No new SDK,
+provider credentials or application data store is introduced. See §10 / ADR-0027.
+
+Local owner transport uses one typed application handler behind authenticated
+web `/api/owner-transport` and native `owner/transport` adapters. Existing support
+tables retain the account-owned case, intake, assignment, messages and history;
+there is no new schema, provider or guest-token migration. Private contact
+defaults are supplied only to the authorized owner destination.
+
+Focused privileged settings merge only the admitted section with the canonical
+locked business record under the existing version fence and audit transaction.
+Native owner home includes current team-editing consent; its bounded assistance
+command delegates to the same versioned owner-only consent service as web.
+Category mutations reload both role and chat queue scope inside their transaction;
+old staff assignments and stale principal snapshots cannot grant scoped agents
+catalog authority. These local changes add no schema or provider.
+
 
 The local native build configuration uses one permanent application name Suqpage
 and Android package com.suqpage.app for development, internal APK and store builds.
@@ -1430,8 +1872,12 @@ profile/shop DTO fields carry the business choice through existing save contract
 
 The native app follows the phone web hierarchy: compact brand/locale
 header, a full map with a sliding filter/result drawer, Featured and showroom
-grids. The FE-056 local candidate uses Market/Featured/Account for guests and adds
-Inquiries only for signed-in linked owners, with one bottom bar and a Profile hub.
+grids. The local candidate uses one Market/Featured/About/Login bottom bar,
+with Login becoming Account after sign-in. Owners use a compact Account hub and
+focused task screens; customer-inquiry navigation remains retired. About is
+directly reachable; legal/Login/setup routes share the public shell. Role-aware
+Account links open owner, admin or scoped agent workspaces without changing
+permissions. Staff and administrator accounts remain web-only.
 FE-060 embeds four public video providers inside isolated native WebView/browser
 iframe adapters, with bounded failure/retry and no external video handoff. Owners
 save these links directly; historical reviews remain separate. The owner has authorized the workflow audit and tester-build gates;
@@ -1557,8 +2003,11 @@ SVG fetches carry no Auth header; web/raster/private-image adapters stay unchang
 The corrected development-client logo was owner-approved; the final signed APK
 also renders it. Source/archive/signature/runtime/OS-domain checks are verified.
 DEP-042 records the consumed exception and remaining manual device/store limits.
-The internal Android app uses storefront/name markers, numbered clusters, nearby
-lists and public live/featured badges matching the web map. Native marker selection
+The internal Android release uses storefront/name markers, numbered clusters,
+nearby lists and public live/featured badges matching its released web map. The
+local S127 candidate adds the screen-sized fixed-group picker and matched scale caps;
+its native controller is focused-tested and Expo is reviewed separately. It has
+not been built into an installed Android release. Native marker selection
 opens the existing preview; scope changes clear stale selection. The authenticated
 page preview includes the edited cover/story/contacts and offering galleries.
 The Android app maps canonical suqpage.com public store/product,
@@ -1666,6 +2115,8 @@ physical/authenticated phone checks remain (BE-044/FE-053).
 
 ## 16. Security requirements
 
+Local tracking uses separate six-digit, ten-minute, one-use email codes with five atomic attempts and bounded resend/rate limits. Tracking-only opaque sessions expire after seven days and use web HttpOnly cookies or separate native secure storage. Shipments are recipient-authorized before every list/detail/304; a locator alone grants nothing. Managers can revoke one shipment without affecting others. Initial-mail outbox retries preserve the submitted snapshot and locale and freshly check revocation.
+
 Deployed BE-051 reports accept only canonical public targets and bounded details.
 Concurrent/retried submission is idempotent, changed replay conflicts, and salted
 IP hashes enforce a rate limit without storing raw IPs. Responses expose only a
@@ -1737,7 +2188,20 @@ shell commands remain outside repository enforcement.
 - Add tests for cross-tenant reads and writes.
 - Administrators must use explicit privileged paths rather than accidental tenant bypasses.
 
+Account-owned transport derives its business and opener from current authorized
+owner records. Exact ID/reference guards precede chat commands; private staff
+notes, note attachments and carrier handoffs stay hidden through both new and
+retained owner adapters. Owners end sessions unresolved; only authorized staff
+resolve the transport request. Owner history and technical Support remain separate.
+
 ### Public inquiries
+
+In the local FE-066/BE-055 candidate, both public business-inquiry creation APIs
+return 410 before body parsing, persistence or notification work. External social
+drafts are convenience messages, not order or database authority. Historical
+inquiry access remains authenticated and tenant-scoped. The retained domain
+compatibility code preserves the following validation rules; they do not enable
+new public submissions:
 
 - Validate products from the database.
 - Require the product to belong to the target business.
@@ -1798,6 +2262,19 @@ shell commands remain outside repository enforcement.
   serialization blanks the private notification email; inquiry delivery resolves
   its destination on the server.
 
+- The owner-approved local demo contact correction changes only marked demos'
+  public SMS/WhatsApp/Telegram values to +19528552202 and their public profile
+  examples to TikTok `tiktok`, Instagram `instagram`, Facebook `facebookapp`, and
+  `https://example.com/`. Real-business/private values are preserved. A fresh
+  server-derived per-method approval permits inbox methods only when effective
+  public contacts match `SUQPAGE_DEMO_INQUIRY_PHONE`, and permits only the exact
+  provider-owned profile/site examples independently. Missing phone configuration
+  denies demo inbox launches; other fake destinations and email remain protected.
+  No approval supplied by a saved snapshot/client becomes authority. Existing
+  draft/publication/catalog versions are preserved and required changes appended;
+  the private reviewer remains unpublished. Hosted correction/configuration is a
+  separate reviewed operation, not implied by local data evidence.
+
 - Next.js Server Actions and custom browser mutation APIs derive trusted origins
   from one exact-origin policy. Development admits only the request/canonical
   origins, explicitly configured origins, localhost, and the current
@@ -1824,6 +2301,25 @@ Individual 44px shop hitboxes do not intercept neighboring shops; counted marker
 styles and behavior stay original. Production demo coordinates remain unchanged.
 
 ## 17. Data, migrations, and deployment boundary
+
+Local schema72 permits an unverified tracking recipient without fabricating a
+verification timestamp. A protected native backup and migration readback preserve
+all earlier data at activation; recipient reads still require verified sessions.
+Submit atomically records an independent shipment, audit and initial-details email
+job; existing guarded Mailpit/Resend adapters send outside transactions.
+The separately authorized S144 cleanup then removes4obsolete local case plans
+and9related events using a protected exact archive and isolated restore rehearsal.
+All70other public-table/protected-event fingerprints remain unchanged. Live
+schema63 has no old plan table and zero target events, so live cleanup is a
+verified no-op. No new hosted configuration, migration or deployment occurred.
+Anonymous legacy APIs/projections and local obsolete editing screens are retired;
+there is no guessed recipient, backfill or automatic legacy import.
+
+Local migration66 adds a nullable message sender-side field without rewriting
+historical rows. Its protected before-image, rollback rehearsal, preservation
+readback and no-op replay are recorded under S119. Release database changes before
+the dependent API/web code; retain additive columns on code rollback. No hosted
+migration or provider configuration was changed by the S119 audit.
 
 Local and hosted migration 63 add the private listing-report table after protected
 backups and an actual isolated restore rehearsal. The original production-table
@@ -1931,7 +2427,7 @@ Archive backups include both extension definitions; restoration creates their
 namespace in the approved empty target. Prior application code remains compatible.
 
 DEP-029 governs production Auth configuration maintenance. The repository's
-guarded command pins the production project and HTTPS origin, rejects local and
+guarded command pins the production project and finite exact HTTPS policies, rejects local and
 unknown settings or credential changes, and creates a read-only review plan with
 a private provider-returned backup. Apply requires the owner's reviewed digest,
 a fresh unchanged remote state, and one narrow write followed by readback.
@@ -1940,8 +2436,15 @@ subjects/templates; all other metadata and provider fields must stay unchanged.
 Credential selection defaults to explicit `SUPABASE_ACCESS_TOKEN`; an opt-in
 `--credential-source cli` reads only the default Supabase CLI macOS Keychain
 entry, with bounded private subprocess output. No credential fallback occurs.
-Version-2 plans bind the selected source and token fingerprint; changed logins
-and old unbound plans are rejected. Management tokens never enter plan files.
+Local S145 version-3 plans bind credential source/fingerprint and operation kind.
+Origin transitions additionally bind exact source/target phases and may change
+only site URL plus callbacks: legacy → dual-old-primary → dual-new-primary,
+with a separately reviewed reverse primary transition. Both dual policies retain
+the old callback; legacy settings patches cannot change either origin field.
+Old version-2 plans are refused before provider reads and must be replanned.
+The focused injected-port/credential suite passes62 tests; hosted transition and
+full integration gates remain pending under BE-059/DEP-049. Management tokens
+never enter plan files.
 Hosted configuration pushes and raw-command workarounds are prohibited, including
 during incident recovery. Google/SMTP credential changes are separate authorized
 owner operations; masked provider secrets are not claimed recoverable from a
@@ -2011,6 +2514,45 @@ configuration, and preflight checks.
 
 ## 18. Language and localization rules
 
+Local tracking interface and email copy are authored from the intended meaning for enabled en/am/om. Provider and place names stay literal. Inactive so/ti remain disabled; newly retained compatibility entries may use English and are not presented as completed native translations. Actual active-language web/Expo layouts are captured; native human language review is not claimed.
+
+
+The local S132 candidate enables English, Amharic and Afaan Oromo choices only.
+Somali/Tigrinya catalogs and identifiers remain for compatibility; inactive stored
+choices display English. Afar is not available. No customer data is translated or
+deleted. The web selector stays disabled until its first client effect and during
+language refresh, preventing a proven pre-hydration selection reset. Actual Chrome
+switches all three active languages successfully. S133 uses authored vocabulary
+for the transport/shipping invitation, live agents and pickup/destination intake.
+
+S130/S131 reuse localized location, Product category, All and result/action labels.
+Merchant names/descriptions remain literal. Country formatting requests the current
+locale, with the installed browser's English fallback when its locale data is
+absent (currently Oromo in Chrome). Active-language layouts and retained catalog
+completeness/fallback have separate evidence; automated checks do not establish
+independent native-speaker endorsement.
+
+The local staff workflow uses native-authored lifecycle wording through the
+authoritative interface TSV and generated catalogs. S121 removes obsolete manual
+queue/hold guidance. The S125 customer states keep assignment internal and
+distinguish Waiting for our team, explicit joining, Waiting for your reply and
+ended/resolved. Staff reply priority, Join and factual inactivity labels use the
+same authored catalogs. All four retained non-English catalogs now contain 1617 keys,
+including native-authored S127 business-picker actions and count labels. User
+names and request text remain literal. Automated completeness does not replace a human first-language review.
+S122 editor actions, stock/visibility and Country/City reuse these same existing
+localized labels; no new English-only task text is introduced.
+
+S102 search, Country/City/Type, empty/error/retry and setup labels are authored
+for all five interfaces. Region is a legacy data field, not a new visible filter.
+Place and merchant names remain literal; country display names may use locale
+data. Technical catalog coverage does not certify first-language fluency.
+
+Local management task/group labels, contextual owner sign-in and removal/unsaved
+confirmations use shared native-authored catalogs. Technical coverage and actual
+five-language layout checks remain distinct from first-language human review.
+
+
 S91 alert events, sound/notification controls, first-join and Sent/Read labels use
 all five supported interface catalogs. Business names and message bodies remain
 literal. Notification payload text uses the saved interface preference and never
@@ -2037,15 +2579,23 @@ purchase. Non-English chat labels include (Live Chat). Merchant content, intake
 fields and conversation behavior remain unchanged;
 catalog/layout evidence does not substitute for native-speaker review.
 
+S101's local language pass rewrites 138 existing shared source rows and adds the
+missing owner "Last 30 days" metric. Public/owner/staff wording distinguishes
+selected products from questions, an account from its public page, and a resolved
+case from an ended chat. Platform-owned words inside inquiry labels are translated
+before interpolation; merchant names, descriptions and quantities stay literal.
+Shared owner metric labels and explicit status aliases prevent dynamic labels
+from silently reverting to English. English positioning and domain contracts
+remain unchanged. References inform the draft; coverage is not proof of fluency.
+
 Rules:
 
 - Use short, everyday English throughout public pages and dashboards. Name the
-  actual action: add to an inquiry list, view it, or send an inquiry. Use products,
-  services and businesses rather than platform jargon. Do not add filler,
+  actual action: add to an inquiry list, view it, or send an inquiry. Use products and businesses rather than platform jargon; support/transport services retain their own meaning. Do not add filler,
   repeated button explanations, internal notes or implementation terminology.
-  S99.10 copy retains nearby-business/social-product context, organized stores
-  and direct contact, with local phrasing rather than English
-  sentence structure; brands and appropriate technical terms retain English.
+  S100 local copy describes business showrooms near and far, organized offerings
+  and direct questions, using everyday phrasing rather than English invitation
+  metaphors or sentence structure; brands and appropriate technical terms retain English.
   The S67 copy pass clarifies inquiry-list actions, transport labels, video loading
   and retry wording in context. Preserve meaningful privacy/security guidance and merchant-authored content.
 - translate interface labels, buttons, help text, status labels, and platform copy;
@@ -2064,6 +2614,98 @@ Rules:
 
 ## 19. UX and accessibility requirements
 
+Local map degradation keeps the existing camera, business markers and previews
+usable on a neutral surface, with concise native-language status and48px Retry.
+Ordinary zooming and preview→showroom→Back must not turn obsolete tile loads into
+a false error. Final groups preview at their current camera; only outer aggregate
+groups zoom further. No provider block notice or internal HTTP detail is UI copy.
+
+The local transport window offers Tracking even without an active chat. One shell-owned entry leads to Email → code → shipment list → ordered detail,
+separate from start/resume chat; returning preserves short-lived drafts in browser memory. Staff use focused task pages and version-fenced drafts, not accordions or permanently editable records. Conditional detail updates stop when hidden and clear revoked/expired data. Staff email status is read afresh on navigation/reload.
+
+Local shipment stages use readable method words, origin/destination pairs and48px
+editing controls with explicit Save/Cancel. Recipient views use verified Tracking
+access and bounded visible refresh; no fake progress or current-custodian claim.
+
+The local S133 transport launcher shows a clear question and smaller live-agent
+line, wrapping within existing accessible targets and measured dock clearance.
+S134 consolidates anonymous Report/Block/list controls into one quiet Listing
+options entry and bounded modal. These account-free visitor preferences are not
+merchant bans. Actual Chrome verifies report Cancel and reversible local block/
+unblock; inherited report/tenant security passes. The footer reserves measured
+floating-dock space, including the681–720px breakpoint gap. Keep privacy/preview/
+stock/error recovery guidance; no additional proven internal-note text was found
+in the affected tasks. Chat lifecycle behavior is unchanged by these copy/UI edits.
+
+S131 category choices wrap with48px targets, counts, a clear selected state and
+the showroom accent. Long merchant names fit without horizontal-only hidden
+choices. S130 adds detail within existing map-row budgets, omitting the excerpt
+before location when large text needs space; fonts and all-fit limits are retained.
+These are local candidates awaiting visual/full/release gates.
+
+The local Market toolbar has no separate visual title row inside its controls;
+S132's web landing introduction supplies the visible page heading above it.
+A centered, permanently visible48px two-choice switch
+and Info lead to search and labeled filters. Inline placement uses actual content
+width rather than the window width; narrow content and larger text wrap honestly.
+Do not shrink targets, hide filter words/counts, or add a fixed height that clips
+text. Default viewport budgets and actual measurements are mapped in FE-065.
+Language choices and retained catalogs follow §18. Expo Chrome
+layout/flow checks do not establish installed Android, TalkBack or OS font scaling.
+
+The local S127 counted-business picker follows §5.2: adaptive readable cards,
+48-pixel controls and all-fit shop cards without a pager or inner list scrolling.
+Opening a business and returning preserves its valid group/selection and map
+view. Hidden or zero-size Market layouts must not replace the active visitor
+camera context. Individual detail may scroll; the picker does not force zoom.
+
+Staff chat work follows the task order in §13: conversation and reply before
+secondary record editing, accurate lifecycle labels, and explicit editing with
+Cancel. Desktop context columns must collapse after the conversation on phones;
+navigation/filter context and private handoff authority must survive that layout.
+Waiting is a server-managed automatic queue. Web and native owner support keep
+the same reference and show Waiting for our team until explicit Join; customer
+views never announce internal assignment or response deadlines. No staff bulk
+recovery action is needed. Retain agent receiving controls; the superseded
+per-case company handoff form is removed from the local workspace.
+
+S102/S103 require separate labeled business/product searches with immediate typing,
+bounded initial browsing and filter dialogs, paired panel edges, inert
+hidden content, keyboard dismissal/focus restoration and reduced-motion support.
+New geography selection is country-first and clearable within discovery. See §10.
+Market's Android panel-closing Back handler is active only while Market is focused.
+Expo's router owns browser history events; do not independently consume its
+intermediate navigation events or overwrite an outgoing page's URL. Repeated
+explicit map actions remain distinct from an ordinary detail return. Both browser
+map adapters cancel owned work and finish an active SDK zoom before destruction,
+so delayed resize/zoom events cannot touch a removed or replacement map.
+
+Management opens readable saved records with explicit task navigation. Do not use
+accordions to hide required editors, or render every record as an editable form.
+Keep selected business context stable and use one clear section parent for back
+navigation. Focused owner tasks retain Save/Cancel and unsaved recovery; publication
+and restore controls belong in the full Preview. Staff Assignment history has its
+own read-only screen and returns to the same authorized conversation/list origin.
+Staff chat has one compact route/reference header. Transcript and composer take
+priority over management details; desktop shows details beside the chat. On phones
+Details/Back is an explicit view that preserves the unsent reply DOM and value;
+the hidden transcript cannot acknowledge messages. Join, assignment epochs,
+reply authority and inactivity clocks remain server-controlled.
+Business entity/task wording stays consistent across lists, headings and local
+navigation. Narrow business navigation reveals its active section without page
+scroll/focus theft. Overview facts link to their allowed Products, Location &
+visibility and Access tasks. Staff Accounts and Workload are peer tasks; Manage
+opens the selected existing focused editor, and Save/Cancel preserves the bounded
+origin. Queue-role authorization, saved read-first screens and consent stay intact.
+
+Product editors provide a visible Products parent and Save/Cancel together.
+Application links and native header/stack/persistent navigation must not silently
+discard an edited draft. A pending or failed save stays recoverable; a late
+acknowledgement from a departed screen cannot redirect the current screen.
+Admin location editing puts the form before the phone summary and separates
+canonical city identity from its public map pin.
+
+
 Entry-page copy must identify the offer and business context at a glance. Use
 ordinary product, service, business and store words instead of making a slogan
 or metaphor explain the platform. The paragraph adds the customer benefit and
@@ -2074,10 +2716,19 @@ and check narrow-phone layout without sacrificing map access. FE-052 records the
 primary homepage/app content guidance; these are writing principles, not evidence
 of an unperformed customer comprehension or conversion study.
 
-The S99.10 local Market introduction uses the owner-accepted nearby-business/social-product narrative above
-the unchanged map/search controls. About retains distinct customer and business
-sections with browsing and setup actions. Actual phone layouts are explicitly
-accepted; full release checks and web/native rollout remain separate (FE-052).
+The S100 local Market headline combines the business-showroom invitation with
+the benefit of browsing without social-post clutter above unchanged map/search
+controls. The supporting paragraph explains near/far discovery, organized browsing,
+availability checks and direct questions. About retains distinct customer and
+business tabs with browsing and setup actions, showing one panel at a time. Web
+tabs support arrow keys and Home/End; native controls expose their selected state. New layout approval/full
+checks are pending; S99.10's prior approval does not cover this candidate (FE-052).
+
+S101 permits a plain explanation of "digital showroom" as an internet business
+page in non-English headings. Help text carries the task/benefit when a compact
+button cannot. Check complete screens with actual merchant content and every
+affected audience; an English source phrase or dictionary entry alone does not
+prove a useful interface. Both clients retain the existing map and inquiry flow.
 
 The local staff workspace uses short queue labels, matching support/transport
 icons, wrapping phone tabs and 44px breadcrumb/back targets. Conversation actions
@@ -2113,10 +2764,17 @@ Start chat in short viewports. Suqpage styling is retained. The owner approved
 the S58 layout for release; physical-keyboard/device verification remains separate.
 Payload and chat lifecycle remain the S57 contract.
 
-The local S90 launcher uses a prominent question and smaller supporting sentence
-that wraps naturally beneath it. The open phone Market drawer retains a compact chat icon with
-the complete accessible name; the expanded entry fits 320px screens without
-covering search/result controls. Existing palette and focus behavior are retained.
+The local S113 launcher uses the short visible **Transport chat** label on all
+public screen sizes. The existing transport invitation and paired route/contact
+intake remain one activation away; no intermediate menu precedes the form. A saved
+inquiry action sits above transport, and measured scroll clearance keeps final
+product/card actions reachable. Existing palette and focus behavior are retained.
+
+Local FE-019/FE-056 owner transport keeps that paired intake and chat styling
+inside a focused Account destination with Back to account and Chat history.
+The owner's editable saved contact defaults never appear on public controls;
+route fields start empty. Owner transport and technical Support remain distinct
+tasks, with contextual introductions authored for all five interface languages.
 
 All public pages and dashboards must work on mobile and desktop. FE-054 derives
 readable foreground/border roles from custom accents (including white, black and
@@ -2195,7 +2853,8 @@ structured inquiry, not online checkout.
 1. A verified owner creates a private business account or accepts an individual
    invitation. No custom-page request, public upload or fabricated project is created.
 2. The owner replaces starter examples, saves business details and location, then
-   edits About, cover/video, public contacts and simple product/service listings.
+   opens Your page to edit About, cover/video, color or public contacts as focused
+   tasks, and manages physical products from Products.
 3. Uploads require scoped authorization. Private media stays private until its
    associated business is active and the offering/cover is public.
 4. First Publish validates current draft/revision and at least one listed offering,
@@ -2207,7 +2866,13 @@ structured inquiry, not online checkout.
    offerings. Unknown areas have no pin. City offsets are display-only.
 6. Live owner Save applies page changes atomically and retains history. Staff
    assistance remains draft-only, assigned where required, and revocably consented.
-7. Inquiries, support, security and visits remain connected to the same workspace.
+7. Owner support, security and visits remain connected to the same workspace.
+   Retained business-inquiry history stays private; the local FE-066 candidate
+   removes its primary inbox navigation and new-inquiry metrics. Customer contact
+   uses configured external accounts, while transport chat keeps its own queue.
+   In the local owner-transport candidate, Account → Transport chat lets the
+   business initiate the same service and recover its own cases/history across
+   authenticated sessions. Public visitor cases are never adopted by contact matching.
    Visual approval, full gates and hosted rollout are distinct from local evidence.
 
 ---
@@ -2222,6 +2887,148 @@ All success replies are real; fixtures are removed and production chats untouche
 Physical Android/rebuilt APK and hosted rollout remain separate gates.
 
 ## 22. Testing and definition of done
+
+Map automation must use declared local synthetic tiles intercepted before any
+public request, with service-worker bypass prevented and no escaped requests.
+Never continue real community tiles through cache-disabled routing or run public
+headless pan/zoom matrices. Real provider availability is a separate ordinary
+human browser check; fixture success cannot establish an OSM unblock. Local S139
+tests cover403PNG, decode/CORS/timeout, pending rapid zoom beyond10seconds,
+unload and explicit retry. S140 tests distinguish aggregate expansion from
+camera-preserving terminal previews and reject stale/hidden group keys.
+
+Local S142 focused/actual evidence covers compact staff chat, explicit phone
+Details/Back preserving drafts, auto-assignment/Join/public reply/read, hidden
+unread protection, notes/clocks and resolution in transport and owner support.
+12functional checks/19states retain original failed attempts and a separately
+completed existing-case continuation. Message bubbles fit content. The strict
+network receipt retains an unproven late body cancellation after HTTP200; no
+clean-network/full-gate result is claimed. All labelled cases are resolved,
+original records remain intact, and ordinary local previews are restored.
+
+Local S141 adds five isolated tracking and seven migration-compatibility suites,
+protected71→72 activation and9headed Chrome/Expo journeys in12states. Staff
+submit two plans before recipient verification; real local Mailpit code access,
+multiple plans, Save/Cancel, recipient denial and account/session/draft separation
+are verified. S143 focused tests cover32cases plus10rendered contexts, including
+large-text native wrapping;36functional app checks/36screens cover en/am/om on
+desktop web, phone web and Expo. The initial strict browser receipt retains15
+cancelled stale discovery GETs during navigation/scope changes; this is not a
+claim of a clean network run. Runtime, console, HTTP API, unexpected writes and
+lifecycle errors are zero. Full/release/commit/rollout gates remain separate.
+
+Local S138 evidence covers isolated migration/security/concurrency/outbox/pagination and legacy regressions, current types/localization, plus actual installed Chrome desktop/phone and Expo tasks with real Mailpit/API/PostgreSQL. The preserved initial locale-reload assertion failure and canonical Copy correction have focused/actual continuations; no failed receipt is relabelled. Visual approval precedes full/check/acceptance/release gates. There is no new production release or Android/device/push proof.
+
+
+S129–S136 focused/browser review is combined where the UI is dependent;
+no unfinished card/category/preview/copy/safety task is silently dropped. Active
+locale layout review is en/am/om after S132, while retained catalog completeness
+and fallback are still tested. Old five-language browser receipts remain honest
+historical evidence, not proof of new wording/layouts. Source-bound actual tasks,
+explicit visual approval and inherited full/commit/rollout gates stay separate.
+
+Affected UI/UX, navigation and management changes require real Chrome user
+journeys, not only source review or component renders. Cover the affected visitor,
+owner, support/transport staff and admin tasks on desktop/phone web and the
+Expo mobile localhost app, using real local APIs and checking saved authority.
+Click, type, navigate, Save/Cancel, reload and exercise relevant empty/error/
+permission states. Follow `docs/operations/BROWSER-WORKFLOW-REVIEW.md`; retain
+honest screenshots, request/state evidence and controlled-port limitations.
+S135 distinguishes planned browser cleanup from unexpected close/crash/deadline
+events, which fail the journey. Isolated headless installed-Chrome passes do not
+prove the earlier unclassified visible-page closure repaired. Keep local servers
+and unrelated user tabs running; retain the original failed receipts.
+Physical Android-only behavior still needs emulator/device checks. This focused
+review precedes explicit visual approval and expensive full gates under AGENTS.md;
+browser interaction is not a replacement for persistence/security regressions.
+
+The local S122 wider workspace audit covers38 admin/staff,38 owner-web and33
+Expo initial states. Focused product/controller/navigation tests and isolated
+PostgreSQL metadata, tenant/version and effective-location tests pass. Real
+private-QA signup and26 web states verify product saving, recovery and admin
+geography;11 final web states close the reproduced stale owner-location defect.
+Actual Expo journeys verify header/footer draft protection, acknowledged About
+and Product saves, Products returns, reauthentication/readback and a business-name
+save that preserves the complete applied pin/profile and proposal. Original
+harness failures and separate checkpoint continuations remain explicit. Both
+typechecks,17localization cases/1577keys and199spec links pass. Current visuals
+and private role-by-role test instructions are under `.local/workspace-audit-s122/`.
+Existing shops are protected; only the new unpublished QA workspace is written.
+Visual approval, full/release/acceptance gates, commit, hosted delivery and an
+updated Android artifact remain outstanding. This evidence does not certify
+physical Android, OS notification delivery or every app workflow.
+
+S121 corrects the old waiting backlog dependency: three focused isolated routing
+suites,12worker/controller cases, six staff UI cases and the native owner
+lifecycle regression pass. The actual local worker assigns all5 existing waiting
+cases once, by eligible workload/tie-break, preserving messages, prior history
+and unrelated records. Its historical reference/routing proof remains; current
+customer presence follows S125 explicit Join rather than early assignment captions. A controlled failed mobile read
+recovers automatically in10.708seconds without Retry. Original coordination/
+cold-restart observer failures remain failed and retained; separate current-state
+and recovery receipts establish their own scoped outcomes. A10,000-row isolated
+candidate query takes5.438ms but uses scan/sort, not index-backed FIFO; no hosted
+scale guarantee follows. Both typechecks,17localization cases/1577keys and199spec
+links pass. Ordinary web/worker startup is restored with saved provider settings
+unchanged. `.local/queue-recovery-s121/review.html` links current local visuals
+and limitations. No visual/full/release approval, commit, hosted migration/
+deployment or new Android artifact is claimed by this local correction.
+
+S119 has focused visible-read/controller evidence (20 cases), staff route/action/
+mounted-editor evidence (six cases), supervised-startup/entry evidence (ten
+cases), isolated PostgreSQL routing/recovery/inactivity/receipt/owner-adapter
+suites and fresh native PostgreSQL installation/idempotence evidence. Final web
+and mobile typechecks pass; localization17/17 covers1577 keys per non-English
+catalog. Real local Chrome/Expo workflows verify new assignment, joining,
+both-direction replies/read cursors, older-visible/newer-offscreen reads and
+ending. The actual idle worker closes a labelled case whose deadline alone was
+accelerated; a real30-minute wait is not claimed. Twelve final desktop/phone
+English/Amharic admin states verify chat-first layout, explicit company Edit/
+Cancel and unchanged inspected customer data. Original strict harness failures
+remain preserved, with independent workflow reconciliation rather than false
+pass labels. Focus/media are controlled test ports; physical Android/OS behavior
+is still unverified. Migration66 backup/rehearsal/readback preserves old messages
+and records. Diagnostic QA cases are removed; three ended review cases remain.
+S119 traceability records exact receipts. Visual approval, full/release/acceptance,
+scoped commit and hosted/new-Android rollout remain separate pending steps.
+
+S118 has92 passing focused persistence, canonicalization, contact-policy,
+handoff, navigation, React/native-controller and retained workflow cases. After
+moving three deprecated pointerEvents props into styles,26 targeted cases and
+both TypeScript checks pass; localization has17 passing cases and1574 keys per
+non-English catalog. Actual local desktop/phone web and Expo journeys prove
+independent A/B lists, reload, quantity changes, direct-item isolation, ordinary
+profile links and enabled WhatsApp/Telegram/SMS choices. Twelve admin states and
+three journeys verify contextual tasks and filtered returns without saves.
+External openers/clipboard/media are controlled; no messages are sent. Navigation
+cancellations of intercepted analytics requests are separately classified, with
+original failed attempts retained. These are not installed Android, filesystem
+binary, SMS delivery or external-account evidence. Two protected local operations
+cover all67 marked demos with rollback rehearsals, preserved immutable history,
+private/real records and verified no-op replay. S118 traceability retains receipts.
+Visual approval, full gates, scoped commit and hosted/native delivery remain open.
+
+The selected-panel return fix has 27 passing focused pure, actual React/native
+controller, app-link/security and installed-Leaflet regressions, plus web/native
+TypeScript checks. Local desktop/phone navigation and current Expo browser
+journeys are recorded in S117 traceability. Original map/route race failures are
+retained alongside clean post-fix checks, not relabeled as successful runs.
+External tiles/media are controlled in captures; these are not installed Android,
+MapLibre, OS-notification or third-party playback evidence. Existing visual/full
+release gates, scoped commit and new web/Android delivery remain outstanding.
+
+The local management structure has focused React/SSR/native-controller, actual
+local-navigation and isolated PostgreSQL/API evidence. These checks cover saved
+summaries, selected-task editors, field preservation, unsaved cancellation,
+current-role/queue denial and version/audit rollback. Visual approval, expensive
+full/release gates, commit, production and a new Android binary remain distinct
+outstanding steps. Detailed current receipts are in S115 traceability.
+
+S102 has focused SQL/API, signup/starter, isolation, locale, deep-link and browser
+evidence. Actual visual approval, full check/release/acceptance gates, scoped
+commit and any hosted/native rollout remain pending; compilation/screenshots
+alone do not make it complete. Specs/TRACEABILITY.md retains exact evidence.
+
 
 FE-064/BE-052 focused tests prove real local provider password/JWT login, fresh
 PostgreSQL owner/demo/role/UUID boundaries, revocation on authority races, bounded
@@ -2308,7 +3115,21 @@ and both type checks pass. S98 approved full gates, source commit, web/actual AP
 rollout and native map/cluster/shop-preview checks are verified. Physical-phone
 checks remain separate; local demo-coordinate corrections are not applied live.
 
-S99.10 copy uses shared web/native constants and all five locale catalogs. Metro
+S101's researched local wording passes twelve localization regressions, narrative/
+marketing/category checks, both typechecks, homepage composition and 190-spec
+validation. Actual local screenshots cover 74 shared-copy, 40 web product/inquiry/
+owner/staff, 12 loaded native-owner and 16 native public states (142 total).
+Receipts: .local/language-research-s101/. Final runs check overflow and browser
+errors; merchant identities, selected items and typed inquiry contact text remain
+literal. Map tiles alone are stubbed; Expo browser is not native-device evidence.
+A local framework timing error on /dashboard's redirect is recorded in FE-049;
+canonical Profile captures pass without suppressing errors or changing redirects.
+Explicit layout approval, full checks, scoped commit and publication remain
+pending. Prepared marketing text does not replace built artwork or provider
+listings. No independent first-language review or fluent-translation certification
+is inferred from coverage/research. Domain actions and data contracts are unchanged.
+
+S99.10 released copy uses shared web/native constants and all five locale catalogs. Metro
 watches the shared lib directory so copy edits invalidate the local native
 preview; private runtime-data directories are not included. Focused
 narrative, localization/content-boundary and type checks precede viewport review;
@@ -2517,6 +3338,16 @@ When given a new Suqpage task:
 11. Run the release checks.
 12. State clearly what is complete, what is mocked, and what remains outside the MVP boundary.
 
+Maintain the current work board in `docs/SUQPAGE-TRANSITION-CHECKLIST.md` across
+new requests. Each compatible request remains open until its own completion
+evidence exists; only an explicit owner correction/cancellation supersedes it.
+Assign independent workstreams to agents with clear file/verification ownership;
+the primary agent retains integration, dependencies and final accountability.
+Track implemented, tested, visually approved and deployed states separately.
+Resume the first unmet dependency instead of restarting completed provider setup
+or abandoning earlier work. Run expensive release gates only after the existing
+AGENTS.md approval requirements are met; delegation does not waive those gates.
+
 ### 24.1 Keep this product contract synchronized
 
 This file is a living statement of Suqpage's current product reality. Every
@@ -2578,8 +3409,10 @@ independent of broadcast spotlights, with pause/navigation and accessibility
 safeguards. Visitor/owner copy positions Suqpage as a professional digital
 storefront alongside social-media selling, including shop or area map location.
 Focused carousel tests and 69 final web/mobile-browser language/viewport states
-pass. About separates customer browsing from the business-owner offer. The deployed copy revision addresses nearby social-media businesses and their
-organized offerings, while keeping existing map/search features unchanged.
+pass. About separates customer browsing from the business-owner offer. The deployed
+S99.10 revision addresses nearby social-media businesses and their organized
+offerings. S100's local candidate leads with digital showrooms near and far,
+organized browsing and direct questions; map/search features stay unchanged.
 Agent-authored translations have not received independent native-speaker approval.
 Five-locale signed Android switches and public web layout checks pass. Web and
 internal Android are released; see the S69/S70 record for exact gates, artifacts
@@ -2623,3 +3456,310 @@ privacy, provider-failure and HTTP checks. Actual browser/Expo owner and visitor
 sound/mute checks also pass. This candidate is uncommitted and not deployed. Visual approval/full
 release gates, reviewed Firebase/Web Push configuration, rebuilt Android and
 actual OS delivery remain separate outstanding checks.
+
+
+### Local shell and owner management candidate
+
+FE-036/FE-026/FE-056/FE-053 define a consistent public shell for Market, Featured,
+About and legal/account-entry/setup pages, grouped Suqpage side navigation, visible
+About and session-aware Login/Account labels. The compact owner Account hub has
+real activity and five management destinations, with a separate showroom menu
+and readable business/private settings summaries. Focused edit/save/return and
+initial private preview remain. FE-019/BE-018 require
+a real local audit of support and transport, including automatically observing
+staff reopen in a closed owner's browser. Shell/dashboard implementation and focused role/navigation/locale evidence pass.
+The final combined real local web/Expo chat audit passes, including assignment,
+attachments, private notes, capacity, retry, read/history, resolution and reopen.
+Visible closed owner web threads reconcile reopening every 30 seconds; active
+threads refresh every five seconds and hidden tabs suspend updates.
+Visual approval, full gates and
+publication remain pending; no production or native binary change is implied.
+
+
+Local FE-066/BE-055 behavior, corrected by S106, supersedes business-inbox submission and new-inquiry
+navigation/metrics above. Visitors retain selected products and prepare a simple
+message in their active interface language, with literal merchant text and a
+public link for each item. All original configured public contact fields and links remain.
+WhatsApp/Telegram receive encoded draft text and SMS its supported body; these
+three inbox choices first attempt clipboard copy and retain a selectable fallback.
+TikTok/Instagram/Facebook are ordinary profile links with no inquiry copying.
+No required visitor phone form,
+automatic sending or new business-inquiry rows are created. Existing SMS
+external handoffs remain. Existing history
+remains private and scoped. Transport chat and authenticated owner support,
+including assignment/replies/read notifications, are explicitly unchanged.
+This is local candidate work, pending visual approval/full gates and a separate
+web/API plus Android rollout; no new deployment is implied.
+
+### Local workflow recovery and validation
+
+The current local audit candidate supplies localized route/root recovery with
+Retry and a fixed Market destination, without exposing private errors. Missing
+business context on protected management pages returns the actor to the correct
+role workspace; it never selects a tenant implicitly. Compact discovery controls
+retain 44-unit targets. Owner city editing invalidates a typed replacement until
+a canonical city is selected, exposes lookup/category failures and Retry, and
+preserves an explicit storefront until the owner changes city. Web cover upload
+and save each have a 20-second response bound, retain unsaved input on failure
+and require an acknowledged save before returning to Dashboard.
+
+Business and handle editors retain fields after a rejected save, display
+localized retry feedback and prevent duplicate in-flight commands. Mobile
+transport recovery-storage failure stops loading and offers Retry before allowing
+a new intake; an unknown saved session is never discarded implicitly. Native
+Auth SDK HTTP calls use a bounded 20-second transport/body adapter with caller
+cancellation and a response-size limit. Existing SDK authentication, session and
+refresh policies remain authoritative (FE-053/BE-044).
+
+Local sign-out immediately fences private UI/requests and retains a visible
+provider-scoped Retry if SDK or persistent device cleanup fails. New sign-in is
+blocked until that retry confirms cleanup. The existing provider now uses its
+documented default coordination; the deprecated custom processLock caused a
+secondary unhandled storage-error promise and is removed. No error listener,
+credential, provider or package-version change is used to hide the failure.
+
+These FE_BASE/FE-026/FE-056/FE-065 candidates have focused regression evidence.
+The local role screen inventory, owner persistence, first-Publish and paired
+support/transport behavior checks are complete; dedicated attention/read-receipt
+browser checks also pass. Strict combined chat captures retain a Next development
+performance-timing exception. Native-device interaction and full production-mode
+gates remain separate pending evidence.
+BE-054 also corrects admin map placement to finite worldwide GPS bounds without
+changing country/city identity, proposal versions or tenant authority. A private
+local test-account guide is linked from `docs/SUQPAGE-DEMO-ACCOUNT-ACCESS.md`.
+Visual approval, production-mode full gates, scoped commit and rollout remain
+separate. The local Android debug build is a test artifact, not a released APK.
+
+
+### Local S108/S109 workflow candidate (review pending)
+
+BE-018/FE-019 unlimited balanced assignment is implemented and focused-tested on
+isolated PostgreSQL, with actual local web/Expo visitor/staff reference agreement,
+assignment changes, paused-assignee form preservation and separate agent joining.
+Public chat displays its reference; delayed recovery/polls cannot overwrite newer
+state or another case. The reported older local case is preserved unchanged; its
+original conflicting browser display has not been conclusively attributed.
+
+FE-026 S109 reorganizes admin navigation into platform-wide work and an authorized
+business context. Business details/location/showroom/products/access are reached
+from that context rather than a second expanding sidebar. Lists show saved records;
+staff creation has a dedicated route, and settings/location/sponsor/lineup/workload
+editors open deliberately with Save/Cancel. Owner Business details and Account
+settings also open saved summaries; explicit Account task/Edit links open their
+focused editor. Business settings use BE-032 optimistic version/fresh-role checks;
+validation/network failures retain input and unexpected errors are sanitized.
+Sign-in email remains provider-managed; queue roles gain no business editing rights.
+
+FE-065/FE-053 S109 compact exploration keeps the accepted narrative in an explicit
+About dialog/sheet and on desktop. A centered mode switch and one active labeled
+search/filter toolbar leave most phone content space for map/products. The other
+panel retains a restrained edge, with a 48px dedicated toggle/drag target; panels
+follow the handle and honor reduced motion. Products starts at the right; pull
+left over the initial Businesses map, then pull the left-side map handle right to
+return. Map gestures, product scroll and
+independent search state remain separate. Short screens use a compact transport
+control to avoid overlapping the handle. Five-language native-browser evidence is
+separate from real Android device/MapLibre verification, which remains pending.
+Market return-selection and explicit navigation precedence follow §10; leaving
+the map also cleans up pending SDK animations/events before its view is destroyed.
+
+These are local candidates, not deployed behavior. Focused evidence is recorded
+in TRACEABILITY S108/S109; actual visual approval, full production-mode/release
+checks, reviewed scoped commits and coordinated rollout remain separate gates.
+
+
+### Local S110 owner Account candidate (review pending)
+
+FE-056 keeps the public account gateway simple: Login before authentication,
+Account afterward. The saved owner hub shows showroom identity/status, three real
+activity measures and five task rows. Your page opens its own four-action menu;
+Business details and Account settings open saved summaries with explicit Edit.
+Native private profile edits and notification preferences have separate screens.
+Sign out is in private settings and retains the provider-scoped failure/Retry
+behavior. Existing APIs, ownership and private/public data boundaries are reused.
+Focused web/native component and browser evidence precedes visual approval and
+full release checks; this is not a deployed web or Android change.
+
+
+### Local S111 chat session upkeep and public reachability (review pending)
+
+BE-018/FE-019/FE-036/FE-053/DEP-043 define the focused-tested local implementation:
+only a staff public reply starts waiting-for-participant inactivity. Guest transport
+warns after25 minutes and ends after30; owner support warns after23 hours and ends
+after24. No unanswered customer request, assignment/join/read or internal note
+starts that clock. Server maintenance is indexed, small-batch, nonblocking and
+reuses the notification schedule. Automatic ending is unresolved history, with
+contacts/messages retained and explicit authorized same-case Resume. Clients
+show server deadlines/reasons; no browser heartbeat/close timer is authority.
+Transport help appears across supported public routes except account/setup/chat
+flows; owners use the prominent Account → Support task. Additive local schema and
+focused tests precede any hosted migration or app release. Focused database/component and actual local web/Expo evidence passes. Visual
+approval, full production-mode/release gates, reviewed scoped commit and any
+hosted migration/web/Android rollout remain pending; no deployed claim is made.
+
+The minute maintenance command processes at most 25 cases from two indexed,
+bounded participant candidate sets, ordered by ending deadline. Its three-second
+work-start budget controls starting more cases; it is not an exact transaction
+deadline. Statements are bounded and a transaction-local five-second idle timeout
+releases locks if an interrupted worker stops issuing queries. Notification work
+runs first and late maintenance defers. The guarded local:chat-worker command
+provides recurring upkeep for the local preview; it refuses hosted/production
+targets and never migrates or changes provider configuration. Old conversations
+have no retroactive clocks. A worker backlog may delay ending after eligibility.
+
+The owner-support reply-only interface rejects unsupported explicit private-note
+intent before writing, avoiding accidental visible replies. Transport keeps its
+existing private-note behavior; ambiguous historical messages are preserved.
+
+
+### Local S112 product-only catalog candidate (focused tested; review pending)
+
+The newest owner instruction supersedes active service listings and product/service
+filtering in §§2–4,7–8,10–11,13,18,20–22,25 and prepared launch narrative. FE-067 /
+BE-056 / DEP-046 define a product-only local candidate: retailers, farms, workshops
+and manufacturers list physical products, with Ready to ship or Made to order
+choices and a product-scope Made-to-order toggle. Availability stays independent;
+unavailable products never claim immediate shipping. No stock count, checkout or
+transport guarantee is introduced. Transport help and owner support remain active.
+
+The local candidate is implemented and focused-tested, not deployed. Historical
+service records/snapshots remain preserved privately; public service admission and
+new service writes are retired. Legacy manufacturing/production kinds stay neutral
+until an explicit owner choice. Demo sources and local marked demo content were audited and corrected for actual
+repair/diagnostic listings as well as incorrectly classified physical products. Preserve real tenant text, IDs/handles, login aliases, safe fake
+public contacts, GPS and chat/history. No new migration/provider/dependency is
+required; local correction needs protected before-images and exact invariants.
+Focused tests and actual five-language web/Expo visuals precede the still-pending
+S107–S112 visual approval/full gates and any separately authorized rollout.
+
+S112 focused evidence includes canonical product writes/history/public admission,
+independent exact/fuzzy/count/metadata/custom filters and active catalog labels;
+web and native editors, social selection and gallery compatibility are covered.
+The reviewed one-time local correction retains66 maintained demos/264 products
+(163 standard,101 made to order), and updates the private reviewer fixture's three
+physical samples while leaving it unpublished. Protected hashes and readonly
+replay prove identity, contacts, GPS, media, historical snapshots and other tenants
+are preserved. No hosted data operation or new binary is claimed.
+
+The S112 native-browser review reproduced and corrected two narrow defects: Space
+activation of the custom checkbox and a delayed Leaflet resize callback after
+map teardown. Installed-Leaflet/actual-React tests cover mounted updates and safe
+unmount/remount; browser results do not establish Android MapLibre behavior.
+Localization generation now scans native app/src before pruning client messages,
+so native-only product labels remain available in all1546-message catalogs.
+All five languages retain contextual support/transport explanations. Details,
+strict original failures and bounded supplements are in S112 traceability; visual
+approval and full release gates remain pending with S107–S111.
+
+
+### Local public floating actions candidate (review pending)
+
+FE-041/FE-036/FE-053 refine §§8–9,13,18–19 and public reachability. Once selections
+are added, a compact floating Inquiry list shows only the current business's count
+above Transport chat on its showroom/product screens on desktop/phone web/native.
+There is no empty persistent list action. A direct product inquiry stays separate:
+opening, changing quantity, copying or closing it never merges/clears the group.
+The existing configured social auto-copy/handoffs and extra manual copy remain.
+
+Web selections persist per showroom as references revalidated against current
+canonical products/options. Native keeps independent per-business reference lists
+using existing document storage (Expo browser localStorage), isolated by API
+origin. Each holds at most20 canonical IDs/options/optional quantities, never
+catalog snapshots, contacts or private account data. Loading cannot overwrite an
+unread saved list; failed writes preserve in-memory choices and provide localized
+retry feedback. A one-release in-memory bridge preserves an already-open older
+basket. Lists survive local reload/restart, without cross-device sync. The global
+last-shop fallback is removed: Market/Featured/About/account/setup and another
+empty shop cannot expose A's list. The composer route explicitly identifies the
+business and rehydrates fresh public authority before counting or copying.
+
+Transport chat opens the existing route intake in one tap, or the recovered chat;
+Start chat explicitly creates a request. Arranging the web dock keeps its single
+chat instance and unsent intake draft intact. Native root and Market placements
+remain separate to avoid duplicates. Short Market stages show transport only,
+without a business inquiry-list icon. Readable contextual labels in all five
+languages, at least 48px targets, measured footer/scroll clearance and safe areas
+apply. No new message is automatically sent, and no business inbox is restored.
+
+The earlier S113 component and local web/Expo evidence contains105 unique
+states across five interface languages, with two historical centered short-web
+showroom shots explicitly superseded. Normal web recovery uses a themed loading
+bar while its fresh session GET is pending; only a completed failure shows Retry.
+A deferred-fetch regression proves this transition and unsent-draft preservation.
+S118 supersedes the global-list lifetime: its current per-business lists and
+contact choices have the focused/current-source evidence in §22. Explicit visual approval together
+with S107–S112, full gates, a scoped commit, deployment and a new Android binary
+remain separate and pending. Installed Android is not claimed.
+
+### Local S114 owner transport candidate (review pending)
+
+Account → Transport chat gives business owners the visitor-equivalent paired
+intake and live conversation, for customers' goods or incoming stock. The separate
+authenticated web/native adapters derive tenant/opener from current authority;
+contact defaults are editable and private, and routes start blank. Account history
+recovers the canonical case across sessions, without adopting a visitor token.
+Technical Support stays separate. Both visitor and owner transport reach the same
+authorized staff queue; staff retain callback details and private follow-up notes.
+Owners end sessions unresolved; staff resolution remains explicit and distinct.
+Private notes, carrier details and note attachments stay hidden through retained
+owner adapters as well. The owner23h/24h inactivity window remains authoritative.
+
+Focused PostgreSQL/security/API/component tests and actual local web/Expo/staff
+exchanges verify creation, assignment/join, both-way replies/read receipts, history,
+reload, unresolved ending and resolution. Sixty current five-language visual
+states pass; the raw test-tool failures and their classifications remain preserved
+in S114 traceability. Source/catalog/type/spec checks pass. No further schema or
+provider is introduced; existing pending release prerequisites still apply.
+Visual approval, full gates, commit, hosted rollout and an updated Android binary
+remain pending; browser preview evidence does not establish installed-device or
+OS notification delivery.
+
+
+
+Local S125 chat candidate (BE-018/050, FE-019/053/062, DEP-043) separates internal
+assignment from deliberate current-assignment Join and public replies. Reads do
+not join. First/next unanswered cycles keep their oldest customer anchor, use an
+internal ten-minute target and one staff/manager overdue alert without resolving
+the request or replaying old alerts. Guest25/30minute and owner23/24hour inactivity
+windows begin only after a public staff reply. Due endings retain an immutable
+staff-only record of reply/message timestamps and confirmed-read state at ending;
+unknown historical proof is never fabricated. Staff explicitly resolves either
+queue, while participant End and inactivity remain unresolved follow-up history.
+Migrations67/68/69 are backed-up, rollback-rehearsed and applied only locally. Focused
+security/persistence/component checks pass; actual Chrome web confirms Join,
+replies/reads, overdue escalation, real-worker ending and retained unread proof.
+Actual Expo390 verifies visitor/owner Join, both-direction replies/reads and
+ended/resolved history across15functional states; its strict network receipt
+remains mixed for two cancelled read requests with unproven cause. Current
+visual/full/release gates and installed-device evidence remain pending.
+
+Local S126 extension (BE-018/050, DEP-043) gives a new assignee ten-minute
+response grace after the later of current assignment or oldest unanswered message,
+without rewriting original customer wait. Join, reads and private notes are not
+public replies. Assigned overdue work adds one admin/operations-manager email per
+cycle/assignment/recipient through a private durable outbox and the existing
+Resend port. Fresh authority/cycle checks suppress stale unsent jobs. Emails
+contain reference, queue, assigned staff name and an authenticated link, never
+customer identity/contact/message/route. Bounded retries and stable idempotency
+protect against duplicate sends. Unassigned overdue queues create internal alerts
+without staff-blaming email. Prior cycles receive no catch-up email flood.
+
+Schema69 and actual local Chrome/Mailpit proof pass: six authorized managers,
+one email each across three bounded worker runs; the next run sends none. Public
+reply clears overdue and staff resolution retains history. Local workers only
+use verified Mailpit; external email rejects loopback database/Auth endpoints and
+DSN target overrides. The current catalogs contain 1606 keys across four non-English languages,
+including S127 picker labels.
+No provider credential/configuration, hosted database, public web or Android
+release is changed by this local candidate. Current visual/full/release/commit
+and coordinated hosted/device rollout gates remain pending.
+
+
+Local S127 map refinement (FE-021/053/058, BE-023) implements the shared
+screen-sized fixed-group policy and all-fit picker in §5.2. Prior dynamic,
+global-three and leader/paging evidence is historical. Latest implementation
+and verification are in progress; visual approval and full gates remain pending. New picker copy is authored for all five
+interface languages; business names remain unchanged. Actual Chrome workflow and
+controlled density evidence are recorded separately in TRACEABILITY. Visual
+approval, full gates, commit and coordinated web/Android rollout remain pending.
+No database migration, dependency, provider, coordinate or chat change is needed.

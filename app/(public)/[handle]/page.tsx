@@ -48,5 +48,5 @@ export default async function ShowroomPage({ params, searchParams }: {
   const query = await searchParams;
   const source = query.ref === "featured" ? "featured" : query.ref === "discovery" ? "directory" : "direct";
   return <><ShowroomVisitBeacon handle={catalog.business.handle} source={source} />
-    <ShowroomApp catalog={publicBusinessCatalog(catalog)} businessProfile={profile} withinPublicApp /></>;
+    <ShowroomApp catalog={publicBusinessCatalog(catalog, profile.contacts, process.env.SUQPAGE_DEMO_INQUIRY_PHONE)} businessProfile={profile} withinPublicApp /></>;
 }

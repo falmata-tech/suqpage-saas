@@ -56,3 +56,11 @@ export function canOperateBusiness(user: SessionUser, businessId: number) {
 export function isClient(user: SessionUser) {
   return user.access_role === "client";
 }
+
+/** Navigation hint only; each workspace still enforces its own authorization. */
+export function workspaceHomeHref(user:SessionUser):string {
+  if(isQueueAgent(user))return `/dashboard/support?queue=${user.staff_queue_scope}`;
+  if(hasCapability(user,'platform:admin'))return '/dashboard/admin';
+  if(user.access_role==='client'&&user.business_id)return '/dashboard/profile';
+  return '/dashboard';
+}

@@ -2,7 +2,7 @@
 id: BE-038
 title: Canonical place anchors for owner locations
 status: done
-related: [FE-059, BE-047, BE-041, FE-045, DEP-035, BE-034]
+related: [FE-059, BE-047, BE-041, FE-045, DEP-035, BE-034, BE-054, ADR-0027]
 owners: [product, backend, operations]
 last_updated: 2026-09-21
 change_level: L3

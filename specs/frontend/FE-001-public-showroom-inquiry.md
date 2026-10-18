@@ -2,7 +2,7 @@
 id: FE-001
 title: Public showroom discovery and inquiry experience
 status: done
-related: [FE-041, BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012, FE-016, FE-020, FE-021]
+related: [FE-066, FE-041, BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012, FE-016, FE-020, FE-021]
 owners: [product, frontend]
 last_updated: 2026-08-01
 change_level: L2
@@ -155,3 +155,12 @@ form and search panel beside the persistent map. It supersedes earlier public
 modal, production-fact, persistent empty-cart and map-replacement statements here.
 Retained data, canonical server security and legacy recovery contracts remain.
 Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+
+
+## S105 social-contact revision
+
+FE-066 / BE-055 supersede new customer messages to business inboxes. Only
+configured social accounts receive visitor handoffs; chosen products and the
+simple message follow the active UI language. Retained private history stays
+scoped. Public transport chat and authenticated owner support remain unchanged.
+Local implementation and review evidence are tracked in checklist S105.

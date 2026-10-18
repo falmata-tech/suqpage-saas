@@ -2,7 +2,7 @@
 id: BE-040
 title: Simple offering upkeep and word search
 status: in_progress
-related: [BE-044, BE-041, BE-009, FE-047, DEP-037, FE-019, BE-018, DEP-039]
+related: [BE-044, BE-041, BE-009, FE-047, DEP-037, FE-019, BE-018, DEP-039, BE-054, BE-056]
 owners: [product, backend, operations]
 last_updated: 2026-09-27
 change_level: L2

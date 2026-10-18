@@ -30,7 +30,7 @@ async function main() {
             status: "draft",
             contact_email: "aster@example.test",
             whatsapp: "+447700900123",
-            public_email: "hello@example.test",
+            public_email: "hello@example.invalid",
             public_phone: "+447700900123",
         });
         assert.match((await db.prepare("SELECT handle FROM businesses WHERE id=?").get(created.businessId) as {

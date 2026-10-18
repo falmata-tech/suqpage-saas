@@ -5,6 +5,7 @@ import {
   canManageBusiness,
   canViewBusiness,
   hasCapability,
+  workspaceHomeHref,
 } from "./capabilities";
 import type { SessionUser } from "./types";
 import { runtimeGet } from "./runtime-sql";
@@ -19,7 +20,7 @@ export async function resolveBusiness(user: SessionUser, requested?: string | nu
 
 export async function resolveManagedBusiness(user: SessionUser, requested?: string | number | null) {
   const business = await resolveBusiness(user, requested);
-  if (!business) return null;
+  if (!business) redirect(workspaceHomeHref(user));
   const assigned = user.access_role === "team_member" && Boolean(await getAssignedBusiness(user.id, business.id));
   if (!canManageBusiness(user, business.id, assigned)) redirect("/dashboard");
   return business;
@@ -30,7 +31,7 @@ export async function resolveProductBusiness(
   requested?: string | number | null,
 ) {
   const business = await resolveBusiness(user, requested);
-  if (!business) return null;
+  if (!business) redirect(workspaceHomeHref(user));
   const assigned =
     user.access_role === "team_member" &&
     Boolean(await getAssignedBusiness(user.id, business.id));

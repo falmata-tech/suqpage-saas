@@ -62,8 +62,8 @@ try {
   await admin.goto(`${base}/dashboard/settings?business=${businessId}`);
   await admin.getByRole('link',{name:'Edit page contacts',exact:true}).click();
   await admin.locator('summary').filter({hasText:'Public contact details'}).click();
-  await expect(admin.getByLabel('Public email',{exact:true})).toBeVisible();
-  const publicEmail=await admin.getByLabel('Public email',{exact:true}).inputValue();assert.ok(publicEmail);
+  await expect(admin.getByLabel('WhatsApp number',{exact:true})).toBeVisible();
+  const publicSocial=await admin.getByLabel('WhatsApp number',{exact:true}).inputValue();assert.ok(publicSocial);
   await owner.goto(`${base}/dashboard/account`);await expect(owner.locator('input[type=password]')).toHaveCount(0);await capture(owner,'owner-account');
   const inquiry=(await pool.query("INSERT INTO inquiries(business_id,customer_name,contact,contact_method,status,idempotency_key) VALUES($1,'Wiring audit buyer','buyer@example.test','email','new',$2) RETURNING id",[businessId,randomUUID()])).rows[0];
   await admin.goto(`${base}/dashboard/inquiries?business=${businessId}`);

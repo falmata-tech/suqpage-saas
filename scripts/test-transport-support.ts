@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { getDb, closeDbForTests } from "./testing/postgres-fixture";
-import { createPublicSupportConversation, getPublicSupportConversation, getSupportConversation, listSupportConversations, saveTransportHandoff, getTransportHandoff, closeSupportConversation, postSupportMessage, postPublicSupportMessage, closePublicSupportConversation, getPublicSupportAttachment } from "../lib/support";
+import { createPublicSupportConversation, getPublicSupportConversation, getSupportConversation, listSupportConversations, saveTransportHandoff, getTransportHandoff, closeSupportConversation, postSupportMessage, postPublicSupportMessage, closePublicSupportConversation, getPublicSupportAttachment, updateSupportAgentSetting, SupportError } from "../lib/support";
+import { joinAssignedSupportConversation } from "./testing/support-join";
 import type { SessionUser } from "../lib/types";
 
 async function main() {
@@ -11,6 +12,11 @@ async function main() {
   try {
     const inserted = await db.prepare("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES('transport@example.test','x','Transport admin','admin',0)").run();
     const admin: SessionUser = {id:inserted.insertedId,email:"transport@example.test",name:"Transport admin",role:"admin",access_role:"platform_admin",business_id:null,must_change_password:0};
+    await db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'platform_admin')").run(admin.id);
+    const dispatcherId = (await db.prepare("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES('transport-dispatcher@example.test','x','Transport dispatcher','admin',0)").run()).insertedId;
+    const dispatcher: SessionUser = {id:dispatcherId,email:"transport-dispatcher@example.test",name:"Transport dispatcher",role:"admin",access_role:"team_member",business_id:null,must_change_password:0};
+    await db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'team_member')").run(dispatcher.id);
+    await updateSupportAgentSetting(admin,{userId:dispatcher.id,enabled:true,queueScope:"transport"});
     const client = {...admin,role:"owner",access_role:"client",business_id:999} as SessionUser;
     const agent = {...admin,access_role:"team_member"} as SessionUser;
     const draft = {category:"shipment_observation",name:"Test name",phone:"+251 (911) 223-344",origin:"Addis Ababa",destination:"Adama",idempotencyKey:crypto.randomUUID()};
@@ -26,6 +32,8 @@ async function main() {
       await assert.rejects(()=>createPublicSupportConversation({...draft,...changed},"fixture",Date.now(),token),/already open/);
     }
     const view = await getSupportConversation(admin,first.id);
+    assert.equal(view.conversation.assignedUserId,dispatcher.id,"A persisted receiving transport agent gets the automatic assignment");
+    assert.equal(view.conversation.agentJoined,false,"Reading an automatically assigned request never joins its agent");
     assert.equal(view.conversation.visitorEmail,null);
     assert.equal(view.conversation.visitorPhone,"+251911223344");
     assert.equal(view.conversation.requesterLabel,"Test name");
@@ -57,7 +65,23 @@ async function main() {
     await postSupportMessage(admin,first.id,{message:'Private callback note',idempotencyKey:crypto.randomUUID()});
     const receipt = await getPublicSupportConversation(token);
     assert.deepEqual(receipt.messages.map(m=>m.body),["From: Addis Ababa\nTo: Adama"]);assert.equal(receipt.assignedUserName,null);
-    await postSupportMessage(admin,first.id,{message:'Which day?',audience:'reply',idempotencyKey:crypto.randomUUID()});
+    assert.equal(receipt.agentJoined,false,"Private notes do not announce a staff Join");
+    const replyState = () => db.prepare(`SELECT staff_joined_assignment_id,awaiting_participant_since,last_message_at,
+      (SELECT COUNT(*) FROM support_messages WHERE conversation_id=?) messages,
+      (SELECT COUNT(*) FROM support_events WHERE conversation_id=?) events,
+      (SELECT COUNT(*) FROM attention_notifications WHERE conversation_id=?) notifications
+      FROM support_conversations WHERE id=?`).get(first.id,first.id,first.id,first.id);
+    const beforeDeniedReply = await replyState();
+    for (const sender of [dispatcher,admin]) await assert.rejects(
+      () => postSupportMessage(sender,first.id,{message:'Must Join before a public reply',audience:'reply',idempotencyKey:crypto.randomUUID()}),
+      error => error instanceof SupportError && error.code === 'join_required',
+    );
+    assert.deepEqual(await replyState(),beforeDeniedReply,"Denied unjoined/inspecting-manager replies change no message, event, alert or customer-idle clock");
+    const joinedAgent = await joinAssignedSupportConversation(admin,first.id);
+    assert.equal(joinedAgent.id,dispatcher.id,"Explicit Join is performed by the actual current assignee");
+    assert.equal((await getPublicSupportConversation(token)).agentJoined,true);
+    assert.equal((await getPublicSupportConversation(token)).assignedUserName,dispatcher.name);
+    await postSupportMessage(joinedAgent,first.id,{message:'Which day?',audience:'reply',idempotencyKey:crypto.randomUUID()});
     await postPublicSupportMessage(token,{message:'Tomorrow',idempotencyKey:crypto.randomUUID()},'live-transport');
     assert.deepEqual((await getPublicSupportConversation(token)).messages.map(m=>m.body),['From: Addis Ababa\nTo: Adama','Which day?','Tomorrow']);
     await closePublicSupportConversation(token);
@@ -86,7 +110,7 @@ async function main() {
     assert.equal((await listSupportConversations(admin,{queue:"transport",status:"closed",q:"Adama"})).totalItems,1);
     await assert.rejects(()=>db.prepare("UPDATE support_conversations SET visitor_email=NULL WHERE id=?").run(help.id));
     await assert.rejects(()=>db.prepare("UPDATE support_conversations SET transport_destination='' WHERE id=?").run(first.id));
-    console.log("PASS transport intake, migration constraints, contacts, replay, pagination, search/status, role/tenant isolation, concurrent audited handoff and private projection.");
+    console.log("PASS transport intake, migration constraints, contacts, replay, pagination, search/status, persisted staff authority, current-assignee explicit Join, unchanged denied replies, role/tenant isolation, concurrent audited handoff and private projection.");
   } finally { await closeDbForTests(); }
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

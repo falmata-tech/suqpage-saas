@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "status": "NOT_UPLOAD_READY",
+  "brand": "MirtPage",
+  "packageName": "com.mirtpage.app",
+  "assetFilesCreated": [],
+  "artworkStatus": "planned_only_no_actual_screenshots_or_raster_exports",
+  "icon": {
+    "sourceCandidate": "public/brand/mirtpage-panels-mark.svg",
+    "file": null,
+    "approved": false
+  },
+  "featureGraphic": {
+    "file": null,
+    "approved": false,
+    "headlines": {
+      "en": "A digital showroom for every business.",
+      "am": "ለንግድዎ ዲጂታል ማሳያ።",
+      "om": "Agarsiisa dijitaalaa daldala keetiif."
+    },
+    "artDirection": "Use the approved MirtPage identity and a restrained composition grounded in a real approved showroom capture. Keep key content central; never invent a screen."
+  },
+  "screens": [
+    {
+      "id": "01-showroom",
+      "route": "/shop/<approved-demo-handle>",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "Know the business.",
+        "am": "የንግዱን ታሪክ ይወቁ።",
+        "om": "Daldalicha beeki."
+      },
+      "alt": {
+        "en": "A digital showroom with business identity, its story and product range.",
+        "am": "የንግዱን መለያ፣ ታሪክና ምርቶች በአንድ ላይ የሚያሳይ ዲጂታል ማሳያ።",
+        "om": "Agarsiisa dijitaalaa maqaa daldalaa, seenaa fi oomishaalee isaa walitti qabu."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    },
+    {
+      "id": "02-collections",
+      "route": "/shop/<approved-demo-handle>",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "Explore the collection.",
+        "am": "ምርቶቹን በስብስብ ይመልከቱ።",
+        "om": "Tuuta oomishaalee ilaali."
+      },
+      "alt": {
+        "en": "A showroom product grid with named collection chips and short product descriptions.",
+        "am": "የምርት ስብስብ ምርጫዎችና አጭር መግለጫ ያላቸውን ምርቶች የሚያሳይ ገጽ።",
+        "om": "Oomishaalee garee isaanii filachuun ilaaluuf filannoo fi ibsa gabaabaa qabu."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    },
+    {
+      "id": "03-product",
+      "route": "/product?handle=<approved-demo-handle>&id=<approved-product>",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "See the details.",
+        "am": "የምርቱን ዝርዝር ይወቁ።",
+        "om": "Ibsa oomishaa ilaali."
+      },
+      "alt": {
+        "en": "Product photos, description, choices and availability listed by the business.",
+        "am": "የምርቱን ፎቶ፣ መግለጫ፣ ምርጫና ንግዱ ያስቀመጠውን የመገኘት መረጃ የሚያሳይ ገጽ።",
+        "om": "Suuraa, ibsa, filannoo fi odeeffannoo argama oomishaa daldalichi kaa'e."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    },
+    {
+      "id": "04-discovery",
+      "route": "/(tabs)?view=map",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "Find businesses near and far.",
+        "am": "ንግዶችን በካርታ ያግኙ።",
+        "om": "Daldala kaartaa irratti argadhu."
+      },
+      "alt": {
+        "en": "The business map with clear search controls and a business preview showing its city.",
+        "am": "የንግድ ካርታ፣ ግልጽ የፍለጋ ቁጥጥሮችና ከተማውን የሚያሳይ የንግድ ቅድመ እይታ።",
+        "om": "Kaartaa daldalaa, barbaacha fi dursee ilaaluu maqaa magaalaa agarsiisu."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    },
+    {
+      "id": "05-social",
+      "route": "/inquiry?handle=<approved-demo-handle>",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "Choose items. Ask directly.",
+        "am": "ምርት መርጠው በቀጥታ ይጠይቁ።",
+        "om": "Filadhu; kallattiin gaafadhu."
+      },
+      "alt": {
+        "en": "Selected products with a prepared inquiry, external contact channels and a manual copy option.",
+        "am": "የተመረጡ ምርቶች፣ የተዘጋጀ ጥያቄ፣ የንግዱ የውጭ አድራሻዎችና መልዕክት የመቅዳት ምርጫ።",
+        "om": "Oomishaalee filataman, ergaa gaaffii, karaa quunnamtii alaa fi filannoo waraabuu."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    },
+    {
+      "id": "06-transport",
+      "route": "/buying",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "Get help with transport.",
+        "am": "ለማጓጓዣ እርዳታ ይጠይቁ።",
+        "om": "Gargaarsa geejjibaa gaafadhu."
+      },
+      "alt": {
+        "en": "Transport chat intake with pickup and destination fields and a link to email-verified Tracking.",
+        "am": "መነሻና መድረሻ የሚሞላበት የማጓጓዣ ቻትና በኢሜይል ኮድ ወደሚከፈት መከታተያ የሚወስድ ሊንክ።",
+        "om": "Chaatii geejjibaa bakka ka'umsaa fi ga'umsaa galchan; liinkii Tracking koodii imeeliin banamu."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    }
+  ],
+  "capturePolicy": {
+    "source": "actual approved new MirtPage Android app",
+    "width": 1080,
+    "height": 1920,
+    "syntheticOrGeneratedScreensAllowed": false,
+    "privateDataAllowed": false,
+    "approvedDemoContentOnly": true,
+    "screenReview": "pending",
+    "newAppCapture": "pending",
+    "translationReview": {
+      "en": "pending",
+      "am": "pending_native_speaker",
+      "om": "pending_native_speaker"
+    },
+    "omUse": "promotional_only_not_a_documented_Console_listing_locale",
+    "optionalTabletAssets": "not_planned_no_tablet_listing_claim"
+  },
+  "sources": [
+    "preview-assets",
+    "listing-languages",
+    "listing-practice"
+  ]
+}

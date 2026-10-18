@@ -1,505 +1,160 @@
-import { normalizeDiscoveryPlaces, discoveryPlaceKey } from "../../../../lib/discovery-contract";
-import { MARKET_STOREFRONT_COPY } from "../../../../lib/storefront-copy";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ScrollView,
-  Animated,
-  Platform,
-  Keyboard,
-  BackHandler,
-  AccessibilityInfo,
-  useWindowDimensions,
-  StyleSheet,
-} from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
-import { marketLinkState, type MarketLinkInput } from "../../src/incoming-link";
-import type { Market, MapShop } from "@suqpage/contracts";
-import { request, useApp, useLoad } from "../../src/runtime";
-import {
-  Screen,
-  Copy,
-  Photo,
-  Status,
-  Icon,
-  colors,
-  Button,
-  useOpenLink,
-} from "../../src/ui";
-import {
-  BuyingLauncher,
-  CategoryArt,
-  IconButton,
-  Sheet,
-} from "../../src/chrome";
-import MarketMap from "../../src/MarketMap";
+import MarketSearchControls from '../../src/MarketSearchControls';
+import ProductSupply from '../../src/ProductSupply';
+import {marketSearchParams,marketWorkspaceParams,type MarketScope,type MarketSearch} from '../../../../lib/market-search';
+import {emptyMarketWorkspace,hasExplicitMarketIntent,marketWorkspaceFromParams} from '../../../../lib/market-workspace';
+import {useMarketFeed,type MarketBatch} from '../../../../lib/use-market-feed';
+import {countryName} from '../../../../lib/countries';
+import {MAP_MAX_ZOOM,MAP_NATIVE_MAX_ZOOM,mapGroupCapacity} from '../../../../lib/map/map-clustering';
+import React,{useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {View,Text,Pressable,FlatList,Animated,Platform,Keyboard,BackHandler,AccessibilityInfo,useWindowDimensions,StyleSheet,PanResponder} from 'react-native';
+import {router,useFocusEffect,useIsFocused,useLocalSearchParams} from 'expo-router';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {readMarketSession,rememberMarketSession} from '../../src/market-session';
+import type {Market,MapShop,SearchItem} from '@suqpage/contracts';
+import {API,request,useApp} from '../../src/runtime';
+import {Screen,Copy,Photo,Status,Icon,colors,Button,useOpenLink} from '../../src/ui';
+import {IconButton,Sheet} from '../../src/chrome';
+import PublicActionDock from '../../src/PublicActionDock';
+import MarketMap from '../../src/MarketMap';
+import MapGroupPicker,{type MapGroupPosition} from '../../src/MapGroupPicker';
+import {readMapReturnSession,rememberMapReturnSession} from '../../src/map-return-session';
+import {initialMapView} from '../../src/native-map-model';
+import {markerIndex,currentGroupMembers} from '../../src/map-markers';
 import {useBlockedBusinesses} from '../../src/blocked-businesses';
-import type { MapControls } from "../../src/map-contract";
-export default function MarketScreen() {
-  const blocked=useBlockedBusinesses();
-  const { t } = useApp();
-  const openLink = useOpenLink();
-  const { width } = useWindowDimensions();
-  const incomingParams = useLocalSearchParams<MarketLinkInput>();
-  const incoming = marketLinkState(incomingParams);
-  const incomingKey = JSON.stringify({ ...incoming, intent: incomingParams._intent });
-  const [stageHeight, setStageHeight] = useState(500),
-    [panel, setPanel] = useState(incoming.open),
-    [drawerVisible, setDrawerVisible] = useState(incoming.open),
-    [query, setQuery] = useState(incoming.query),
-    [text, setText] = useState(incoming.query),
-    [categories, setCategories] = useState<string[]>(incoming.categories),
-    [place, setPlace] = useState(incoming.place),
-    [page, setPage] = useState(incoming.page),
-    [picker, setPicker] = useState(""),
-    [selected, setSelected] = useState<MapShop | null>(null),
-    [nearby, setNearby] = useState<MapShop[]>([]),
-    [reduced, setReduced] = useState(false);
-  const map = useRef<MapControls>(null),
-    opener = useRef<React.ElementRef<typeof Pressable>>(null),
-    search = useRef<TextInput>(null),
-    results = useRef<ScrollView>(null),
-    progress = useRef(new Animated.Value(0)).current;
-  const focusPanelControl = useRef(false);
-  useEffect(() => {
-    const target: ReturnType<typeof marketLinkState> = JSON.parse(incomingKey);
-    setText(target.query); setQuery(target.query); setCategories(target.categories);
-    setPlace(target.place); setPage(target.page); setPanel(target.open);
-  }, [incomingKey]);
-  useEffect(() => {
-    if (Platform.OS !== "web" || !focusPanelControl.current) return;
-    focusPanelControl.current = false;
-    const frame = requestAnimationFrame(() => {
-      if (panel) search.current?.focus();
-      else (opener.current as unknown as { focus?: () => void })?.focus?.();
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [panel]);
-  const drawerWidth = Math.min(440, width - 58);
-  const params = new URLSearchParams({
-    q: query,
-    place,
-    page: String(page),
-  });
-  categories.forEach((c) => params.append("category", c));
-  if(blocked.list.length)params.set('exclude',blocked.list.map(v=>v.id).join(','));
-  const key = params.toString();
-  const load = useLoad(() => request<Market>("market?" + key), [key]);
-  const data = blocked.ready&&!load.data?.showrooms.some(shop=>blocked.list.some(b=>b.id===shop.id))?load.data:undefined;
-  const [filterOptions, setFilterOptions] = useState<Pick<Market, "categories" | "places"> | null>(null);
-  useEffect(()=>{if(data)setFilterOptions({categories:data.categories,places:data.places});},[data]);
-  useEffect(() => {
-    setSelected(null);
-    setNearby([]);
-  }, [key]);
-  useEffect(() => {
-    void AccessibilityInfo.isReduceMotionEnabled().then(setReduced);
-    const sub = AccessibilityInfo.addEventListener(
-      "reduceMotionChanged",
-      setReduced,
-    );
-    return () => sub.remove();
-  }, []);
-  useEffect(() => {
-    if (panel) setDrawerVisible(true);
-    const animation = Animated.timing(progress, {
-      toValue: panel ? 1 : 0,
-      duration: reduced ? 0 : 220,
-      useNativeDriver: Platform.OS !== "web",
-    });
-    animation.start(({ finished }) => {
-      if (finished && !panel) setDrawerVisible(false);
-    });
-    return () => animation.stop();
-  }, [panel, reduced, progress]);
-  useEffect(() => {
-    if (Platform.OS === "web") return;
-    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
-      if (panel) {
-        hide();
-        return true;
-      }
-      return false;
-    });
-    return () => sub.remove();
-  }, [panel]);
-  function hide() {
-    focusPanelControl.current = true;
-    setPanel(false);
-    Keyboard.dismiss();
-  }
-  function choose(change: () => void) {
-    change();
-    setPage(1);
-    results.current?.scrollTo({ y: 0, animated: false });
-  }
-  function submit() {
-    choose(() => setQuery(text.trim()));
-    Keyboard.dismiss();
-  }
-  function chooseBusiness(shop: MapShop) {
-    map.current?.focus(shop);
-    setSelected(shop);
-  }
-  const selectedPlaces = normalizeDiscoveryPlaces(place);
-  const chosenPlace = data?.places.filter(p => selectedPlaces.includes(p.key)).map(p=>p.label).join(", ") || place;
-  const controls = <View style={m.compactToolbar}>
-    <Pressable ref={opener} accessibilityRole="button" accessibilityLabel={t(panel ? "Hide products" : "View products")} accessibilityState={{expanded:panel}} {...(Platform.OS === "web" ? { "aria-expanded": panel } : {})} onPress={()=>{focusPanelControl.current=true; panel ? hide() : setPanel(true);}} style={[m.compactButton,m.resultsToggle,panel && m.activeFilter]}><Icon name={panel ? "back" : "panel"} size={16}/><Text style={m.resultsToggleText}>{t(panel ? "Hide products" : "View products")}</Text></Pressable>
-    <View style={m.searchInput}>
-      <TextInput ref={search} accessibilityLabel={t("Search")} placeholder={t("Search")} placeholderTextColor={colors.muted} value={text} onChangeText={setText} onSubmitEditing={submit} returnKeyType="search" style={{flex:1,minWidth:0,height:42,padding:8,fontSize:14,color:colors.ink}}/>
-      {text.length>0 && <Pressable accessibilityRole="button" accessibilityLabel={t("Clear search")} onPress={()=>choose(()=>{setText("");setQuery("");})} style={{width:44,minHeight:44,alignItems:"center",justifyContent:"center"}}><Icon name="close" size={16}/></Pressable>}
-    </View>
-    <Pressable accessibilityRole="button" accessibilityLabel={t("Search")} onPress={submit} style={m.searchButton}><Icon name="search" size={20} color="white"/></Pressable>
-    {[{scope:"category",label:"Category",value:categories.length ? t("Categories")+` (${categories.length})` : t("All categories"),icon:"grid",count:categories.length,active:categories.length>0},{scope:"place",label:"Region or city",value:chosenPlace||t("All Ethiopia"),icon:"pin",count:selectedPlaces.length,active:!!place}].map(filter=><Pressable key={filter.scope} accessibilityRole="button" accessibilityLabel={t(filter.label)+": "+filter.value} accessibilityState={{selected:filter.active}} onPress={()=>setPicker(filter.scope)} style={[m.compactButton,filter.active && m.activeFilter]}><Icon name={filter.icon} size={21}/>{filter.count > 0 && <Text testID={`${filter.scope}-count`} style={m.filterCount}>{filter.count}</Text>}</Pressable>)}
-  </View>;
-  return (
-    <Screen scroll={false}>
-      <View style={m.intro}>
-        <Text style={m.eyebrow}>{t("Suqpage Market").toUpperCase()}</Text>
-        <Text style={m.headline}>
-          {t(MARKET_STOREFRONT_COPY.title)}
-        </Text>
-        <Text style={m.description}>
-          {t(
-            MARKET_STOREFRONT_COPY.description,
-          )}
-        </Text>
-      </View>
-      <View
-        style={m.stage}
-        onLayout={(e) => setStageHeight(e.nativeEvent.layout.height)}
-      >
-        <MarketMap
-          ref={map}
-          height={stageHeight}
-          shops={data?.showrooms || []}
-          onSelect={chooseBusiness}
-          groups={data?.nearbyGroups}
-          selectedId={selected?.id}
-          onGroup={setNearby}
-        />
-        <View style={m.mapTools}>
-          <IconButton
-            label={t("Zoom in")}
-            icon="plus"
-            onPress={() => map.current?.zoom(1)}
-          />
-          <IconButton
-            label={t("Zoom out")}
-            icon="minus"
-            onPress={() => map.current?.zoom(-1)}
-          />
-          <IconButton
-            label={t("Center Ethiopia")}
-            icon="target"
-            onPress={() => map.current?.reset()}
-          />
-        </View>
-        {controls}
-        <Animated.View
-          testID="search-drawer"
-          pointerEvents={panel ? "auto" : "none"}
-          accessibilityElementsHidden={!panel}
-          importantForAccessibility={panel ? "auto" : "no-hide-descendants"}
-          style={[
-            m.drawer,
-            {
-              width: drawerWidth,
-              visibility: drawerVisible ? "visible" : "hidden",
-              transform: [
-                {
-                  translateX: progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-drawerWidth, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
-          {...(Platform.OS === "web"
-            ? {
-                onKeyDown: (e: { key: string; preventDefault: () => void }) => {
-                  if (e.key === "Escape") {
-                    e.preventDefault();
-                    hide();
-                  }
-                },
-              }
-            : {})}
-        >
-          <ScrollView
-            ref={results}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ padding: 12, gap: 12, paddingBottom: 18 }}
-          >
-            <Text accessibilityRole="header" style={{ fontSize: 16, fontWeight: "700", color: colors.ink }}>{t("Products & services")}</Text>
-            <Status {...load} retry={load.reload} />
-            {data && (
-              <>
-                <Text accessibilityLiveRegion="polite" style={m.count}>
-                  {t("{count} results", { count: data.total })}
-                </Text>
-                {data.items.filter(item => item.kind === "product").map((item) => (
-                  <View key={item.kind + "-" + item.id} style={m.result}>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel={item.name}
-                      onPress={() => router.push({ pathname: "/product", params: { handle: item.handle, id: item.id } })}
-                      style={m.resultProduct}
-                    >
-                      <View style={{ width: 78 }}>
-                        <Photo refPath={item.image} height={92} />
-                      </View>
-                      <View style={{ flex: 1, gap: 6, paddingVertical: 7 }}>
-                        <Text numberOfLines={2} style={m.resultName}>
-                          {item.name}
-                        </Text>
-                      </View>
-                    </Pressable>
-                    <Pressable accessibilityRole="link" onPress={() => router.push({ pathname: "/shop/[handle]", params: { handle: item.handle } })} style={m.resultBusiness}>
-                      <Text style={m.resultBusinessName}>{t("From {business}", { business: item.businessName })}</Text>
-                    </Pressable>
-                  </View>
-                ))}
-                {data.items.length === 0 && (
-                  <Copy>{t("No matches found")}</Copy>
-                )}
-                <View style={m.pagination}>
-                  <IconButton
-                    label={t("Previous")}
-                    icon="back"
-                    disabled={page <= 1}
-                    onPress={() => {
-                      setPage((p) => p - 1);
-                      results.current?.scrollTo({ y: 0 });
-                    }}
-                  />
-                  <Text style={m.small}>
-                    {data.page} / {Math.max(1, data.pages)}
-                  </Text>
-                  <IconButton
-                    label={t("Next")}
-                    icon="arrow"
-                    disabled={data.page >= data.pages}
-                    onPress={() => {
-                      setPage((p) => p + 1);
-                      results.current?.scrollTo({ y: 0 });
-                    }}
-                  />
-                </View>
-              </>
-            )}
-          </ScrollView>
-        </Animated.View>
-        <View style={[m.buying, { right: panel ? 7 : 12, bottom: 24 }]}>
-          <BuyingLauncher compact={panel} />
-        </View>
-      </View>
-      <Pressable accessibilityRole="link"
-        onPress={() => void openLink("https://www.openstreetmap.org/copyright")}
-        style={{backgroundColor: "white", padding: 5}}>
-        <Text style={{textAlign: "right", fontSize: 11, color: colors.ink}}>© OpenStreetMap contributors</Text>
-      </Pressable>
-      <Sheet
-        visible={!!picker}
-        title={t(picker === "category" ? "Categories" : "Region or city")}
-        onClose={() => setPicker("")}
-      >
-        <Button
-          secondary
-          label={t("Clear")}
-          onPress={() =>
-            choose(() =>
-              picker === "category" ? setCategories([]) : setPlace(""),
-            )
-          }
-        />
-        {(picker === "category" ? filterOptions?.categories : filterOptions?.places)
-          ?.filter((c) => c.key !== "all")
-          .map((c) => {
-            const checked =
-              picker === "category"
-                ? categories.includes(c.key)
-                : selectedPlaces.includes(c.key);
-            return (
-              <Pressable
-                key={c.key}
-                accessibilityRole="checkbox"
-                disabled={picker === "place" && !checked && selectedPlaces.length >= 16}
-                accessibilityState={{ checked }}
-                {...(Platform.OS === "web" ? { "aria-checked": checked } : {})}
-                onPress={() =>
-                  choose(() =>
-                    picker === "category"
-                      ? setCategories((old) =>
-                          old.includes(c.key)
-                            ? old.filter((v) => v !== c.key)
-                            : [...old, c.key],
-                        )
-                      : setPlace(old => discoveryPlaceKey(normalizeDiscoveryPlaces(old).includes(c.key) ? normalizeDiscoveryPlaces(old).filter(key=>key!==c.key) : [...normalizeDiscoveryPlaces(old),c.key])),
-                  )
-                }
-                style={m.choice}
-              >
-                {picker === "category" && <CategoryArt name={c.key} />}
-                <Text style={{ flex: 1, fontSize: 15, color: colors.ink }}>
-                  {picker === "category" ? t(c.label) : c.label}
-                </Text>
-                {checked && <Icon name="check" color={colors.brand} />}
-              </Pressable>
-            );
-          })}
-        {(picker === "category" ? categories.length > 0 : !!place) && <Button secondary label={t(picker === "category" ? "Clear categories" : "Clear location")} onPress={()=>choose(()=>picker === "category" ? setCategories([]) : setPlace(""))}/>}
-        <Button label={t("Done")} onPress={() => setPicker("")} />
-      </Sheet>
-      <Sheet visible={nearby.length > 0} title={t('Nearby')} onClose={() => setNearby([])}>
-        {nearby.map(shop => <Button key={shop.id} secondary label={shop.name} onPress={() => {setNearby([]); chooseBusiness(shop);}}/>)}
-      </Sheet>
-      <Sheet
-        visible={!!selected}
-        title={t("Business")}
-        onClose={() => setSelected(null)}
-      >
-        {selected && (
-          <>
-            <Photo refPath={selected.heroImagePath} height={180} />
-            <Copy big>{selected.name}</Copy>
-            <Copy muted>
-              {selected.city} · {selected.region}
-            </Copy>
-            <Copy>{selected.description}</Copy>
-            <Button
-              label={t("Explore this business")}
-              onPress={() => {
-                const handle = selected.handle;
-                setSelected(null);
-                router.push({ pathname: "/shop/[handle]", params: { handle } });
-              }}
-            />
-          </>
-        )}
-      </Sheet>
-    </Screen>
-  );
+import type {MapControls,MapViewpoint} from '../../src/map-contract';
+const EMPTY_SHOPS:MapShop[]=[];
+const PANEL_EDGE=16;
+const horizontalHandleMove=({dx,dy}:{dx:number;dy:number})=>Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.3;
+async function loadBatch(params:string,signal:AbortSignal):Promise<MarketBatch<Market,SearchItem>> {
+ const data=await request<Market>('market?'+params,{signal});
+ return {data,items:data.items,page:data.page,pages:data.pages,total:data.total};
 }
-const m = StyleSheet.create({
-  intro: {
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    backgroundColor: "#fbfcfc",
-    gap: 4,
-    borderBottomWidth: 1,
-    borderColor: colors.line,
-  },
-  eyebrow: {
-    fontSize: 10,
-    letterSpacing: 0.5,
-    fontWeight: "800",
-    color: colors.brand,
-  },
-  headline: {
-    fontSize: 18,
-    lineHeight: 22,
-    fontWeight: "800",
-    color: colors.ink,
-  },
-  description: { fontSize: 12, lineHeight: 17, color: "#47606b" },
+function useIndependentMarket(scope:MarketScope,value:MarketSearch,excluded:string) {
+ const key=marketSearchParams(scope,value).toString()+(excluded?'&exclude='+excluded:'');
+ return useMarketFeed(key,loadBatch);
+}
+export default function MarketScreen() {
+ const blocked=useBlockedBusinesses(),{t,locale}=useApp(),openLink=useOpenLink(),{width,height:viewportHeight,fontScale}=useWindowDimensions(),insets=useSafeAreaInsets(),focused=useIsFocused();
+ const groupCapacity=mapGroupCapacity(Math.max(0,Math.min(700,width-insets.left-insets.right-24)),Math.max(0,viewportHeight-insets.top-insets.bottom-24),fontScale);
+ const mapRouteFocused=useRef(focused);mapRouteFocused.current=focused;
+ const incomingParams=useLocalSearchParams<Record<string,string|string[]>>(),incomingKey=JSON.stringify(incomingParams);
+ const incoming=useMemo(()=>{const params=new URLSearchParams();for(const[key,value]of Object.entries(incomingParams))for(const item of Array.isArray(value)?value:[value])params.append(key,item);return params;},[incomingKey]);
+ const initial=useRef<ReturnType<typeof emptyMarketWorkspace>|null>(null);
+ if(!initial.current)initial.current=hasExplicitMarketIntent(incoming)?marketWorkspaceFromParams(incoming):readMarketSession()||emptyMarketWorkspace();
+ const [businessSearch,setBusinessSearch]=useState(initial.current.business),[productSearch,setProductSearch]=useState(initial.current.product),[panel,setPanel]=useState(initial.current.mode==='products');
+ const businessScope=marketSearchParams('businesses',businessSearch).toString(),previousBusinessScope=useRef(businessScope);
+ const [returned]=useState(()=>readMapReturnSession(API,businessScope));
+ const [appliedIncomingKey,setAppliedIncomingKey]=useState(incomingKey);
+ const [stageHeight,setStageHeight]=useState(500),[selected,setSelected]=useState<MapShop|null>(null),[nearbyIds,setNearbyIds]=useState<number[]>(returned?.ids||[]),[reduced,setReduced]=useState(false);
+ const [pickerPosition,setPickerPosition]=useState<MapGroupPosition>({page:returned?.page||0,anchor:returned?.anchor??null});
+ const camera=useRef<MapViewpoint>(returned?{center:returned.camera.center,zoom:Platform.OS==='web'?returned.camera.zoom:Math.max(1,returned.camera.zoom-1)}:initialMapView);
+ const groupTrigger=useRef<{focus?:()=>void;isConnected?:boolean}|null>(null);
+ const [dockHeight,setDockHeight]=useState(48);
+ const [mapZoom,setMapZoom]=useState(camera.current.zoom);
+ const map=useRef<MapControls>(null),results=useRef<FlatList<SearchItem>>(null),progress=useRef(new Animated.Value(panel?1:0)).current;
+ const panelState=useRef(panel),progressValue=useRef(panel?1:0),dragStart=useRef(0),dragOrigin=useRef(panel),dragged=useRef(false),animation=useRef<Animated.CompositeAnimation|null>(null);
+ panelState.current=panel;
+ const animatePanel=useCallback((next:boolean)=>{animation.current?.stop();animation.current=Animated.timing(progress,{toValue:next?1:0,duration:reduced?0:240,useNativeDriver:Platform.OS!=='web'});animation.current.start();},[progress,reduced]);
+ const settlePanel=useCallback((next:boolean)=>{Keyboard.dismiss();setPanel(next);if(next===panelState.current)animatePanel(next);},[animatePanel]);
+ const handleGesture=useMemo(()=>PanResponder.create({
+  onMoveShouldSetPanResponder:(_,g)=>horizontalHandleMove(g),
+  onMoveShouldSetPanResponderCapture:(_,g)=>horizontalHandleMove(g),
+  onPanResponderGrant:()=>{dragged.current=true;dragOrigin.current=panelState.current;dragStart.current=progressValue.current;animation.current?.stop();Keyboard.dismiss();},
+  onPanResponderMove:(_,g)=>progress.setValue(Math.max(0,Math.min(1,dragStart.current-g.dx/Math.max(1,width-PANEL_EDGE*2)))),
+  onPanResponderRelease:(_,g)=>settlePanel(Math.abs(g.dx)>=48?g.dx<0:dragOrigin.current),
+  onPanResponderTerminate:()=>settlePanel(dragOrigin.current),
+  onPanResponderTerminationRequest:()=>true,
+ }),[progress,settlePanel,width]);
+ const excluded=blocked.list.map(v=>v.id).join(','),businesses=useIndependentMarket('businesses',businessSearch,excluded),products=useIndependentMarket('products',productSearch,excluded);
+ const businessData=businesses.batch?.data,productData=products.batch?.data;
+ const shops=useMemo(()=>blocked.ready?businessData?.showrooms.filter(s=>!blocked.list.some(b=>b.id===s.id))||EMPTY_SHOPS:EMPTY_SHOPS,[blocked.ready,businessData?.showrooms,blocked.list]);
+ const currentMapIndex=useMemo(()=>markerIndex(shops,groupCapacity),[shops,groupCapacity]);
+ const nearby=useMemo(()=>currentGroupMembers(currentMapIndex,shops,nearbyIds,mapZoom+(Platform.OS==='web'?0:1)),[currentMapIndex,nearbyIds,shops,mapZoom]);
+ const selectedShop=selected&&(!nearbyIds.length||nearby.length>0)?shops.find(shop=>shop.id===selected.id)||null:null;
+ const selectedLocation=selectedShop?[selectedShop.city.trim(),(selectedShop.countryCode?countryName(selectedShop.countryCode,locale):'')||selectedShop.region.trim()].filter((value,index,values)=>value&&values.indexOf(value)===index).join(' · '):'';
+ const productKey=marketSearchParams('products',productSearch).toString();
+ useFocusEffect(useCallback(()=>{
+  if(appliedIncomingKey===incomingKey)return;
+  if(hasExplicitMarketIntent(incoming)){const next=marketWorkspaceFromParams(incoming);setBusinessSearch(next.business);setProductSearch(next.product);setPanel(next.mode==='products');}
+  setAppliedIncomingKey(incomingKey);
+ },[incomingKey,appliedIncomingKey]));
+ useFocusEffect(useCallback(()=>{
+  // Apply explicit navigation before persisting; a bare Market return retains
+  // the existing independent searches, loaded feed and mounted map.
+  if(appliedIncomingKey!==incomingKey)return;
+  const state={mode:panel?'products' as const:'businesses' as const,business:businessSearch,product:productSearch};
+  rememberMarketSession(state);
+  // Expo can focus this tab before its asynchronous history transition finishes.
+  // Never replace the outgoing page's URL during that interval.
+  if(Platform.OS==='web'&&window.location.pathname==='/'){const params=marketWorkspaceParams(state.mode,businessSearch,productSearch);window.history.replaceState(window.history.state,'','/?'+params.toString());}
+ },[businessSearch,productSearch,panel,incomingKey,appliedIncomingKey]));
+ // Expo Router owns browser Back/Forward and updates local route params. A raw
+ // popstate listener would also consume the stale intermediate entry emitted by
+ // the router's own history.go, which its navigation adapter deliberately ignores.
+ useEffect(()=>{if(previousBusinessScope.current===businessScope)return;previousBusinessScope.current=businessScope;setSelected(null);setNearbyIds([]);setPickerPosition({page:0,anchor:null});saveReturn([],{page:0,anchor:null});},[businessScope]);
+ useEffect(()=>{if(!blocked.ready||businesses.loading||!businessData||!nearbyIds.length||nearby.length)return;setSelected(null);setNearbyIds([]);setPickerPosition({page:0,anchor:null});saveReturn([],{page:0,anchor:null});},[blocked.ready,businesses.loading,businessData,nearbyIds,nearby.length]);
+ useEffect(()=>{results.current?.scrollToOffset({offset:0,animated:false});},[productKey]);
+ useEffect(()=>{void AccessibilityInfo.isReduceMotionEnabled().then(setReduced);const sub=AccessibilityInfo.addEventListener('reduceMotionChanged',setReduced);return()=>sub.remove();},[]);
+ useEffect(()=>{const id=progress.addListener(({value})=>{progressValue.current=value;});return()=>progress.removeListener(id);},[progress]);
+ useEffect(()=>{animatePanel(panel);return()=>animation.current?.stop();},[panel,animatePanel]);
+ useFocusEffect(useCallback(()=>{if(Platform.OS==='web')return;const sub=BackHandler.addEventListener('hardwareBackPress',()=>{if(panel){setPanel(false);Keyboard.dismiss();return true;}return false;});return()=>sub.remove();},[panel]));
+ function chooseBusiness(shop:MapShop){map.current?.focus(shop);setSelected(shop);}
+ function saveReturn(ids=nearbyIds,position=pickerPosition){const [longitude,latitude]=camera.current.center;rememberMapReturnSession(API,businessScope,{ids,page:position.page,anchor:position.anchor,camera:{center:[((longitude+180)%360+360)%360-180,latitude],zoom:Math.max(1,Math.min(MAP_MAX_ZOOM,camera.current.zoom+(Platform.OS==='web'?0:1)))}});}
+ function rememberView(view:MapViewpoint){if(!mapRouteFocused.current)return;camera.current=view;saveReturn(previousBusinessScope.current===businessScope?nearbyIds:[],previousBusinessScope.current===businessScope?pickerPosition:{page:0,anchor:null});}
+ function rememberPosition(position:MapGroupPosition){setPickerPosition(position);saveReturn(nearbyIds,position);}
+ function openGroup(members:MapShop[]){const ids=[...new Set(members.map(shop=>shop.id))].sort((a,b)=>a-b);if(!currentGroupMembers(currentMapIndex,shops,ids,camera.current.zoom+(Platform.OS==='web'?0:1)).length)return;if(Platform.OS==='web')groupTrigger.current=document.activeElement as HTMLElement|null;setSelected(null);setNearbyIds(ids);setPickerPosition({page:0,anchor:null});saveReturn(ids,{page:0,anchor:null});}
+ function closeGroup(){const ids=nearbyIds.join(',');setSelected(null);setNearbyIds([]);setPickerPosition({page:0,anchor:null});saveReturn([],{page:0,anchor:null});if(Platform.OS==='web')requestAnimationFrame(()=>requestAnimationFrame(()=>{const trigger=groupTrigger.current;if(trigger?.isConnected)trigger.focus?.();else document.querySelector<HTMLElement>(`[data-map-group-ids="${ids}"] [role="button"]`)?.focus();}));}
+ function loadMore(){if(panel&&!products.moreError)products.loadMore();}
+ const drawerWidth=width-PANEL_EDGE,items=blocked.ready?(products.batch?.items||[]).filter(i=>i.kind==='product'):[];
+ return <Screen scroll={false}>
+  <Text accessibilityRole="header" style={m.programmaticTitle}>{t('MirtPage Market')}</Text>
+  <View testID="market-mode-row" style={m.modeRow}><View style={m.modeSwitch} accessibilityRole="tablist" accessibilityLabel={t('Search for')}>{[{key:'businesses',label:'Businesses',icon:'map'},{key:'products',label:'Products',icon:'package'}].map(mode=><Pressable key={mode.key} accessibilityRole="tab" accessibilityState={{selected:panel===(mode.key==='products')}} aria-selected={panel===(mode.key==='products')} onPress={()=>settlePanel(mode.key==='products')} style={[m.modeButton,panel===(mode.key==='products')&&m.activeMode]}>{width>360&&<Icon name={mode.icon} size={16}/>}<Text style={m.modeText}>{t(mode.label)}</Text></Pressable>)}</View></View>
+  <View style={m.activeControls}><MarketSearchControls scope={panel?'products':'businesses'} value={panel?productSearch:businessSearch} onChange={panel?setProductSearch:setBusinessSearch} metadata={(panel?productData:businessData)||null}/>{Boolean(panel?products.loading||products.error:businesses.loading||businesses.error)&&<Status loading={panel?products.loading:businesses.loading} error={panel?products.error:businesses.error} retry={panel?products.retry:businesses.retry}/>}</View>
+  <View testID="market-stage" style={m.stage} onLayout={e=>setStageHeight(e.nativeEvent.layout.height)}>
+   <Animated.View accessibilityElementsHidden={panel} importantForAccessibility={panel?'no-hide-descendants':'auto'} style={[m.mapPanel,{pointerEvents:panel?'none':'auto',width:drawerWidth,zIndex:panel?1:8,transform:[{translateX:progress.interpolate({inputRange:[0,1],outputRange:[0,-(width-PANEL_EDGE*2)]})}]}]}>
+    <MarketMap ref={map} height={Math.max(100,stageHeight)} shops={shops} groupCapacity={groupCapacity} onSelect={chooseBusiness} groups={blocked.ready?businessData?.nearbyGroups:[]} selectedId={selectedShop?.id} onGroup={openGroup} onZoomChange={setMapZoom} initialView={camera.current} onViewChange={rememberView}/>
+    <View testID="map-tools" style={[m.mapTools,stageHeight<380&&{flexDirection:'row'},stageHeight<180&&{left:12,right:'auto',top:8}]}><IconButton touchSize={48} label={t('Zoom in')} icon="plus" disabled={mapZoom>=(Platform.OS==='web'?MAP_MAX_ZOOM:MAP_NATIVE_MAX_ZOOM)} onPress={()=>map.current?.zoom(1)}/><IconButton touchSize={48} label={t('Zoom out')} icon="minus" disabled={mapZoom<=1} onPress={()=>map.current?.zoom(-1)}/><IconButton touchSize={48} label={t('Reset map')} icon="target" onPress={()=>map.current?.reset()}/></View>
+    {!businesses.loading&&!businesses.error&&shops.length===0&&<View style={m.mapHint}><Text style={m.small}>{t('No businesses match these filters.')}</Text></View>}
+    {(businessData?.total||0)>shops.length&&<View style={m.mapLimit}><Text style={m.small}>{t('Showing {count} businesses. Search or filter to see more.',{count:shops.length})}</Text></View>}
+   </Animated.View>
+   <Animated.View testID="search-drawer" accessibilityElementsHidden={!panel} importantForAccessibility={panel?'auto':'no-hide-descendants'} style={[m.drawer,{pointerEvents:panel?'auto':'none',zIndex:panel?8:1,width:drawerWidth,transform:[{translateX:progress.interpolate({inputRange:[0,1],outputRange:[width-PANEL_EDGE*2,0]})}]}]}>
+    <FlatList ref={results} testID="product-feed" data={items} keyExtractor={item=>String(item.id)} keyboardShouldPersistTaps="handled" contentContainerStyle={{padding:12,gap:12,paddingBottom:dockHeight+36}} initialNumToRender={6} windowSize={5} maxToRenderPerBatch={6} onEndReached={loadMore} onEndReachedThreshold={0.3}
+     ListHeaderComponent={<Text accessibilityRole="header" style={{fontSize:16,fontWeight:'700',color:colors.ink}}>{t('Products')}</Text>}
+     ListEmptyComponent={!products.loading&&!products.error?<View style={{paddingVertical:24,gap:10}}><Copy big>{t('No matches found')}</Copy><Copy muted>{t('Try another product, category or city.')}</Copy></View>:null}
+     renderItem={({item})=><View style={m.result}><Pressable accessibilityRole="button" accessibilityLabel={item.name} onPress={()=>router.push({pathname:'/product',params:{handle:item.handle,id:item.id}})} style={m.resultProduct}><View style={{width:78}}><Photo refPath={item.image} height={98}/></View><View style={{flex:1,gap:5,paddingVertical:7}}><Text numberOfLines={2} style={m.resultName}>{item.name}</Text><ProductSupply kind={item.offeringKind} availability={item.availability}/><Text numberOfLines={2} style={m.small}>{item.description}</Text>{Boolean(item.city?.trim()||item.region?.trim())&&<Text testID={`product-result-location-${item.id}`} numberOfLines={1} style={m.small}>{item.city?.trim()||item.region?.trim()}</Text>}</View></Pressable><Pressable accessibilityRole="link" onPress={()=>router.push({pathname:'/shop/[handle]',params:{handle:item.handle}})} style={m.resultBusiness}><Text style={m.resultBusinessName}>{t('From {business}',{business:item.businessName})}</Text></Pressable></View>}
+     ListFooterComponent={<View style={{paddingVertical:10}}><Status loading={products.loadingMore} error={products.moreError} retry={products.loadMore}/>{products.hasMore&&!products.loadingMore&&!products.moreError?<Button secondary label={t('Load more')} onPress={products.loadMore}/>:items.length>0&&!products.hasMore?<Text accessibilityLiveRegion="polite" style={m.small}>{t("You've seen all the results.")}</Text>:null}</View>}/>
+   </Animated.View>
+   {/* Pressable owns its responder handlers; the wrapper takes over handle drags. */}
+   <Animated.View {...handleGesture.panHandlers} style={[m.panelPeek,{transform:[{translateX:progress.interpolate({inputRange:[0,1],outputRange:[width-80,0]})}]}]}><Pressable accessibilityRole="button" accessibilityLabel={t(panel?'Map only':'View products')} onPressIn={()=>{dragged.current=false;}} onPress={()=>{if(!dragged.current)settlePanel(!panel);dragged.current=false;}} style={m.handleButton}><View style={m.grip}/><Icon name={panel?'arrow':'back'} size={18}/></Pressable></Animated.View>
+   <View testID="market-public-actions" onLayout={event=>setDockHeight(Math.max(48,Math.ceil(event.nativeEvent.layout.height)))} style={[m.buying,stageHeight<180?width>=600?{right:80,bottom:8}:panel?{right:12,bottom:8}:{left:12,bottom:8}:stageHeight<320?{left:Math.max(16,(width-Math.min(244,width-24))/2),bottom:24}:{right:panel?7:12,bottom:24}]}><PublicActionDock placement="market" horizontal={stageHeight>=180&&stageHeight<320} compact={panel||stageHeight<320}/></View>
+  </View>
+  <Pressable accessibilityRole="link" onPress={()=>void openLink('https://www.openstreetmap.org/copyright')} style={{backgroundColor:'white',padding:5}}><Text style={{textAlign:'right',fontSize:11,color:colors.ink}}>© OpenStreetMap contributors</Text></Pressable>
+  {nearby.length>0&&<MapGroupPicker visible={focused&&!selectedShop} shops={nearby} initialPage={pickerPosition.page} initialAnchor={pickerPosition.anchor} onPositionChange={rememberPosition} onClose={closeGroup} onSelect={shop=>{rememberPosition({...pickerPosition,anchor:shop.id});setSelected(shop);}}/>}
+  <Sheet visible={focused&&Boolean(selectedShop)} title={t('Business')} onClose={()=>nearbyIds.length?closeGroup():setSelected(null)}>{selectedShop&&<>{nearby.length>0&&<Button secondary label={t('Back to businesses')} onPress={()=>setSelected(null)}/>}<Photo refPath={selectedShop.heroImagePath} height={180}/><Copy big>{selectedShop.name}</Copy>{Boolean(selectedLocation)&&<Copy muted>{selectedLocation}</Copy>}<Copy>{selectedShop.description}</Copy><Button label={t('Explore this business')} onPress={()=>{const handle=selectedShop.handle;saveReturn();setSelected(null);router.push({pathname:'/shop/[handle]',params:{handle}});}}/></>}</Sheet>
+ </Screen>;
+}
+const m=StyleSheet.create({
+ programmaticTitle:{position:'absolute',width:1,height:1,overflow:'hidden',color:'transparent'},
+ modeRow:{flexDirection:'row',alignItems:'center',justifyContent:'center',paddingHorizontal:12,backgroundColor:'white'},
+ modeSwitch:{maxWidth:'100%',flexShrink:1,flexDirection:'row',gap:2,backgroundColor:'#f5f7f6',borderWidth:1,borderColor:colors.line,borderRadius:10},
+ modeButton:{flexShrink:1,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:6,minWidth:48,minHeight:48,paddingHorizontal:12,borderRadius:8},activeMode:{backgroundColor:colors.soft},modeText:{fontSize:12,fontWeight:'700',color:colors.ink,flexShrink:1,textAlign:'center'},
+ activeControls:{paddingHorizontal:12,paddingBottom:8,gap:7,backgroundColor:'white',borderBottomWidth:1,borderColor:colors.line},
+ mapPanel:{position:'absolute',left:0,top:0,bottom:0,overflow:'hidden',borderRightWidth:1,borderColor:colors.line,borderTopRightRadius:14,backgroundColor:'#dfe9e8'},
+ mapTools:{position:'absolute',right:12,top:12,gap:7},mapHint:{position:'absolute',top:12,left:12,right:70,backgroundColor:'#fffffff2',padding:9,borderRadius:8},mapLimit:{position:'absolute',left:12,bottom:100,right:65,padding:8,borderRadius:8,backgroundColor:'white'},
+ drawer:{position:'absolute',left:PANEL_EDGE,top:0,bottom:0,backgroundColor:'white',borderLeftWidth:1,borderColor:colors.line,boxShadow:'-4px 0 14px #0002'},
+ panelPeek:{position:'absolute',zIndex:11,left:PANEL_EDGE,top:'50%',marginTop:-24,height:48,width:48,backgroundColor:'#fffaf6',borderWidth:1,borderColor:colors.line,borderRadius:14,boxShadow:'0 3px 12px #20353726'},handleButton:{minWidth:48,minHeight:48,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:6},
+ grip:{width:3,height:18,borderRadius:2,backgroundColor:'#d5a48b'},
+ buying:{position:'absolute',zIndex:14},
   stage: {
     flex: 1,
-    minHeight: 180,
+    minHeight: 0,
     backgroundColor: "#dfe9e8",
     overflow: "hidden",
   },
-  mapTools: { position: "absolute", right: 9, top: 66, gap: 7 },
-  compactToolbar:{position:"absolute",left:10,right:10,top:10,zIndex:10,maxWidth:680,flexDirection:"row",alignItems:"center",gap:6},
-  resultsToggle: { width: 68, flexDirection: "column", gap: 1, padding: 2 },
-  resultsToggleText: { fontSize: 11, lineHeight: 11, fontWeight: "700", textAlign: "center", color: colors.ink },
-  compactButton:{width:44,height:44,flexShrink:0,alignItems:"center",justifyContent:"center",borderWidth:1,borderColor:colors.line,borderRadius:7,backgroundColor:"white"},
-  activeFilter:{borderColor:colors.brand,backgroundColor:colors.soft},
-  filterCount:{position:"absolute",top:1,right:2,minWidth:14,paddingHorizontal:2,borderRadius:8,backgroundColor:colors.brand,color:"#fff",fontSize:10,lineHeight:14,fontWeight:"700",textAlign:"center"},
-  floatingControls: { position:"absolute",left:10,top:12,gap:8 },
-  opener: {
-    alignSelf:"flex-start",
-    maxWidth:"100%",
-    minHeight:44,
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    padding: 9,
-    boxShadow: "0 4px 12px #0001",
-  },
-  openerText: { fontSize: 14, fontWeight: "800", color: colors.ink, flexShrink:1 },
   small: { fontSize: 12, lineHeight: 17, color: colors.muted },
-  openerArrow: { backgroundColor: colors.brand, padding: 9, borderRadius: 6 },
-  drawer: {
-    position: "absolute",
-    left: 0,
-    top: 64,
-    bottom: 0,
-    backgroundColor: "white",
-    borderRightWidth: 1,
-    borderColor: colors.line,
-    boxShadow: "4px 0 14px #0002",
-  },
-  searchRow: { flexDirection: "row", gap: 6, alignItems: "center", backgroundColor:"white", borderRadius:8 },
-  searchInput: {
-    flex: 1,
-    minWidth: 0,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 6,
-    minHeight: 44,
-    backgroundColor:"white",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  searchButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.brand,
-    borderRadius: 6,
-  },
-  filterRow: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
-  filterLabel: { fontSize: 12, color: colors.ink, fontWeight: "600" },
-  select: {
-    minHeight: 44,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    flexDirection: "row",
-    gap: 5,
-    alignItems: "center",
-  },
-  clear: { fontSize: 12, color: colors.brand },
-  checkbox: {
-    flexDirection: "row",
-    gap: 6,
-    alignItems: "center",
-    minHeight: 30,
-    flexShrink: 1,
-  },
-  check: {
-    width: 17,
-    height: 17,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 3,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   count: { fontSize: 12, color: colors.muted, paddingTop: 4 },
   resultProduct: { flexDirection: "row", gap: 10, paddingRight: 8 },
-  resultBusiness: { marginLeft: 88, minHeight: 44, justifyContent: "center", paddingVertical: 4, paddingRight: 8 },
+  resultBusiness: { marginLeft: 88, minHeight: 48, justifyContent: "center", paddingVertical: 4, paddingRight: 8 },
   resultBusinessName: { color: colors.brand, fontSize: 12, lineHeight: 18, fontWeight: "700", textDecorationLine: "underline" },
   result: {
     borderWidth: 1,
@@ -513,21 +168,5 @@ const m = StyleSheet.create({
     lineHeight: 19,
     fontWeight: "700",
     color: colors.ink,
-  },
-  pagination: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 4,
-  },
-  buying: { position: "absolute" },
-  choice: {
-    minHeight: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderColor: colors.line,
   },
 });

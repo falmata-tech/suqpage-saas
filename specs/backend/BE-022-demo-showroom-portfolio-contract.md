@@ -2,7 +2,7 @@
 id: BE-022
 title: Demo showroom portfolio contract
 status: in_progress
-related: [DEP-041, FE-023, BE-013, BE-021, BE-023, DEP-019]
+related: [DEP-041, FE-023, BE-013, BE-021, BE-023, DEP-019, DEP-045, BE-056, DEP-046]
 owners: [backend, design-systems]
 last_updated: 2026-09-21
 change_level: L2

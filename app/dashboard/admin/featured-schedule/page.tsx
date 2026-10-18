@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { CalendarClock } from "lucide-react";
 import DashboardShell from "@/components/DashboardShell";
 import FeaturedLineupSelector from "@/components/FeaturedLineupSelector";
+import FocusedEditForm from '@/components/FocusedEditForm';
 import { saveFeaturedProgramDayAction } from "@/app/staff-actions";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
@@ -38,7 +39,7 @@ function normalizedProgramDate(value: string | undefined) {
 }
 
 export default async function FeaturedSchedulePage({ searchParams }: {
-  searchParams: Promise<{ date?: string; saved?: string; error?: string }>;
+  searchParams: Promise<{ date?: string; saved?: string; error?: string; edit?:string }>;
 }) {
   const t = await getUiText();
   const user = await requireUser();
@@ -61,6 +62,7 @@ export default async function FeaturedSchedulePage({ searchParams }: {
   const effectiveOrder = new Map(effectiveIds.map((businessId, index) => [businessId, index + 1]));
   const agenda = buildFeaturedProgramAgenda(requestedDate, effectiveIds.length, Date.parse(`${requestedDate}T00:00:00+03:00`), policy);
   const sponsorForSlot = (slot: number | undefined) => slot && sponsorPlacements.length ? sponsorPlacements[(slot - 1) % sponsorPlacements.length] : null;
+  const readHref=`/dashboard/admin/featured-schedule?date=${requestedDate}`;
 
   return (
     <DashboardShell user={user} business={null}>
@@ -99,7 +101,7 @@ export default async function FeaturedSchedulePage({ searchParams }: {
           <div><span className="eyebrow">{requestedDate}</span><h2><CategoryIllustration name={assignment.industry.key} size={36}/>{t(assignment.industry.label)}</h2><p>{t("Automatic rotates up to {limit} eligible businesses each week. Manual lets you choose their order.", {limit: MAX_FEATURED_SHOWROOMS})}</p></div>
           <span className="badge active">{effectiveIds.length} {" "}{t("scheduled")}</span>
         </div>
-        <form key={`${requestedDate}:${effectiveMode}:${effectiveIds.join(",")}`} action={saveFeaturedProgramDayAction}>
+        {query.edit==='lineup'?<FocusedEditForm key={`${requestedDate}:${effectiveMode}:${effectiveIds.join(",")}`} action={saveFeaturedProgramDayAction} cancelHref={readHref} submitLabel="Save lineup" disabled={!eligible.length} className="form-grid">
           <input type="hidden" name="dateIso" value={requestedDate}/>
           <div className="featured-mode-picker" role="radiogroup" aria-labelledby="featured-mode-title">
             <strong className="featured-mode-title" id="featured-mode-title">{t("Scheduling mode")}</strong>
@@ -114,8 +116,8 @@ export default async function FeaturedSchedulePage({ searchParams }: {
               position: effectiveOrder.get(business.id) || Math.min(index + 1, MAX_FEATURED_SHOWROOMS),
             }))}
           /> : <div className="empty-state">{t("No businesses in this category are ready to feature yet.")}</div>}
-          <div className="featured-lineup-actions"><p>{t("Eligibility is checked again when you save and whenever the public schedule is read.")}</p><button className="btn" type="submit" disabled={!eligible.length}>{t("Save lineup")}</button></div>
-        </form>
+          <div className="featured-lineup-actions"><p>{t("Eligibility is checked again when you save and whenever the public schedule is read.")}</p></div>
+        </FocusedEditForm>:<><ol className="compact-business-list">{effectiveIds.map(id=><li key={id} className="compact-business-row"><span><strong>{eligibleById.get(id)?.name}</strong><small>@{eligibleById.get(id)?.handle}</small></span><Link className="small-btn" href={`/dashboard?business=${id}`}>{t('Open workspace')}</Link></li>)}</ol><Link className="btn brand" href={`${readHref}&edit=lineup`}>{t('Edit')}</Link></>}
       </section>
 
       <section className="panel featured-agenda-preview">

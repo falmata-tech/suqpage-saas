@@ -1,92 +1,64 @@
+import Link from 'next/link';
+import {redirect} from 'next/navigation';
+import DashboardShell from '@/components/DashboardShell';
 import HandleSettingsForm from '@/components/HandleSettingsForm';
+import FocusedEditForm from '@/components/FocusedEditForm';
+import recordStyles from '@/components/BusinessRecordFacts.module.css';
+import styles from '@/components/BusinessSettingsTasks.module.css';
+import {getUiText} from '@/lib/i18n/server';
+import {requireUser} from '@/lib/auth';
+import {resolveManagedBusiness} from '@/lib/dashboard';
 import {readHandleSettings} from '@/lib/business-handle-runtime';
 import {saveBusinessHandleAction} from '@/app/dashboard/business/handle-actions';
+import {updateBusinessAction} from '@/app/actions';
+import {LIVE_PLATFORMS,LIVE_PLATFORM_LABELS} from '@/lib/live-showroom';
+import type {BusinessSettingsSection} from '@/lib/business-settings-runtime';
 
-import { getUiText } from "@/lib/i18n/server";
-import Link from "next/link";
-import { authDriver } from "@/lib/config";
-import { ownerPageEditorEnabled, ownerPagePort } from "@/lib/owner-page-runtime";
-import { readOwnerPage } from "@/lib/owner-page-service";
-import { OwnerPageError } from "@/lib/owner-page-domain";
-import DashboardShell from "@/components/DashboardShell";
-import { adminResetClientPasswordAction, updateBusinessAction } from "@/app/actions";
-import { requireUser } from "@/lib/auth";
-import { hasCapability } from "@/lib/capabilities";
-import { resolveManagedBusiness as resolveBusiness } from "@/lib/dashboard";
-import { LIVE_PLATFORMS, LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
-import { listBusinessClientAccess } from "@/lib/scalable-queries";
+export const dynamic='force-dynamic';
+const tasks=[{key:'identity',label:'Business identity'},{key:'live',label:'Live presentation'},{key:'sharing',label:'Browser and sharing details'}] as const;
 
-export const dynamic = "force-dynamic";
-
-export default async function SettingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ business?: string; saved?: string; error?: string; accessError?: string }>;
-}) {
-  const t = await getUiText();
-  const user = await requireUser();
-  const params = await searchParams;
-  const business = await resolveBusiness(user, params.business);
-  if (!business) return null;
-  const platformAdmin = hasCapability(user, "platform:admin");
-  const managed = authDriver() === "supabase";
-  let canEditPage = false;
-  if (ownerPageEditorEnabled()) {
-    try { await readOwnerPage(ownerPagePort, user, business.id); canEditPage = true; }
-    catch (error) { if (!(error instanceof OwnerPageError && error.status === 403)) throw error; }
+export default async function SettingsPage({searchParams}:{searchParams:Promise<{business?:string;section?:string;edit?:string;user?:string;saved?:string;error?:string;accessError?:string}>}){
+  const t=await getUiText(),actor=await requireUser(),query=await searchParams;
+  const business=await resolveManagedBusiness(actor,query.business);
+  if(query.edit==='recovery'||query.accessError||query.saved==='password'){
+    const legacy=new URLSearchParams({business:String(business.id)});
+    if(query.edit==='recovery'){legacy.set('edit','recovery');legacy.set('user',String(Number(query.user)||0));}
+    if(query.accessError)legacy.set('accessError',query.accessError.slice(0,300));
+    if(query.saved==='password')legacy.set('saved','password');
+    redirect('/dashboard/access?'+legacy);
   }
-  const owners = platformAdmin ? await listBusinessClientAccess(business.id) : [];
-  return (
-    <DashboardShell user={user} business={business}>
-      <div className="dashboard-head">
-        <div>
-          <span className="eyebrow">{t("Business workspace")}</span>
-          <h1>{t("Business details")}</h1>
-        </div>
-      </div>
-      {params.saved === "password" && !managed ? <p className="notice">{t("Temporary owner password saved. Existing sessions were revoked.")}</p> : params.saved ? <p className="notice">{t("Business details saved.")}</p> : null}
-      {params.error ? <p className="error">{params.error}</p> : null}
-      {platformAdmin?<HandleSettingsForm key={business.content_version} settings={await readHandleSettings(user,business.id)} businessId={business.id} admin action={saveBusinessHandleAction}/>:null}
-      <form className="panel form-grid" action={updateBusinessAction}>
-        <input type="hidden" name="businessId" value={business.id} />
-        <div className="field full settings-section-heading"><span className="eyebrow">{t("Identity")}</span><h2>{t("Business identity")}</h2></div>
-        <div className="field"><label>{t("Business name")}</label><input aria-label={t("Business name")} required name="name" defaultValue={business.name} /></div>
-        <div className="field settings-media-field"><label>{t("Logo")}</label>{business.logo_path ? <img src={business.logo_path} alt={t("Current business logo")} /> : <div className="settings-media-empty">{t("No logo uploaded")}</div>}<input aria-label={t("Replace logo")} type="file" name="logo" accept="image/jpeg,image/png,image/webp" /></div>
-        <div className="field full settings-section-heading"><h2>{t("Notifications")}</h2></div>
-        <div className="field"><label>{t("Notification email")}</label><input aria-label={t("Notification email")} type="email" name="contactEmail" defaultValue={business.contact_email} /></div>
-        <div className="field full settings-section-heading"><span className="eyebrow">{t("Live")}</span><h2>{t("Live presentation")}</h2></div>
-        <div className="field">
-          <label>{t("Live platform")}</label>
-          <select aria-label={t("Live platform")} name="livePlatform" defaultValue={business.live_platform}>
-            <option value="">{t("Not configured")}</option>
-            {LIVE_PLATFORMS.map((platform) => <option key={platform} value={platform}>{LIVE_PLATFORM_LABELS[platform]}</option>)}
-          </select>
-        </div>
-        <div className="field">
-          <label>{t("Live-session link")}</label>
-          <input aria-label={t("Live-session link")} type="url" name="liveUrl" defaultValue={business.live_url} placeholder="https://..." />
-        </div>
-        <label className="check-field field full">
-          <input type="checkbox" name="isLive" defaultChecked={Boolean(business.is_live)} />
-          {t("Show this business as live now on its page and across the Suqpage Market")}</label>
-        <div className="field full settings-section-heading"><span className="eyebrow">{t("Search")}</span><h2>{t("Browser and sharing details")}</h2></div>
-        <div className="field"><label>{t("Page title")}</label><input aria-label={t("Page title")} name="siteTitle" defaultValue={business.site_title || business.name} /></div>
-        <div className="field full"><label>{t("Search and sharing description")}</label><textarea aria-label={t("Search and sharing description")} name="siteDescription" defaultValue={business.site_description || business.description} /></div>
-        <div className="field full"><small>{t("Images are limited to valid JPEG, PNG, or WebP files of 5 MB or less.")}</small></div>
-        <div className="field full"><button className="btn brand">{t("Save business details")}</button></div>
-      </form>
-      <section className="panel"><h2>{t("Public contacts")}</h2>
-        {canEditPage ? <Link className="btn" href={`/dashboard/page-editor?business=${business.id}`}>{t("Edit page contacts")}</Link>
-          : <p>{t("The owner manages public contacts in their page editor and can enable staff assistance there.")}</p>}
+  const section:BusinessSettingsSection=tasks.some(task=>task.key===query.section)?query.section as BusinessSettingsSection:'identity';
+  const title=tasks.find(task=>task.key===section)!.label;
+  const readHref=`/dashboard/settings?business=${business.id}&section=${section}`;
+  const editing=query.edit==='details',handle=section==='identity'&&query.edit==='handle';
+  return <DashboardShell user={actor} business={business}>
+    <div className="dashboard-head standard-page-heading"><h1>{t('Business details')}</h1></div>
+    {query.saved?<p className="notice" role="status">{t('Business details saved.')}</p>:null}
+    {query.error?<p className="error" role="alert">{t(query.error)}</p>:null}
+    <div className={styles.workspace}>
+      <nav className={styles.tasks} aria-label={t('Business details')}>{tasks.map(task=><Link key={task.key} href={`/dashboard/settings?business=${business.id}&section=${task.key}`} aria-current={task.key===section?'page':undefined}>{t(task.label)}</Link>)}</nav>
+      <section className="panel">
+        <div className="dashboard-section-head"><h2>{t(handle?'Page address':title)}</h2>{!editing&&!handle?<Link className="btn brand" href={`${readHref}&edit=details`}>{t('Edit')}</Link>:null}</div>
+        {handle?<><HandleSettingsForm key={business.content_version} settings={await readHandleSettings(actor,business.id)} businessId={business.id} admin action={saveBusinessHandleAction}/><Link className="btn secondary" href={readHref}>{t('Cancel')}</Link></>:editing?
+          <FocusedEditForm action={updateBusinessAction} cancelHref={readHref} submitLabel="Save business details" className="form-grid">
+            <input type="hidden" name="businessId" value={business.id}/><input type="hidden" name="expectedVersion" value={business.content_version}/><input type="hidden" name="section" value={section}/>
+            {section==='identity'?<>
+              <div className="field full"><label htmlFor="business-name">{t('Business name')}</label><input id="business-name" required name="name" maxLength={100} defaultValue={business.name}/></div>
+              <div className="field full settings-media-field"><label htmlFor="business-logo">{t('Logo')}</label>{business.logo_path?<img src={business.logo_path} alt={t('Current business logo')}/>:<span>{t('No logo uploaded')}</span>}<input id="business-logo" type="file" name="logo" accept="image/jpeg,image/png,image/webp"/><small>{t('Images are limited to valid JPEG, PNG, or WebP files of 5 MB or less.')}</small></div>
+              <div className="field full"><label htmlFor="business-email">{t('Notification email')}</label><input id="business-email" type="email" name="contactEmail" maxLength={160} defaultValue={business.contact_email}/></div>
+            </>:section==='live'?<>
+              <div className="field full"><label htmlFor="business-live-platform">{t('Live platform')}</label><select id="business-live-platform" name="livePlatform" defaultValue={business.live_platform}><option value="">{t('Not configured')}</option>{LIVE_PLATFORMS.map(platform=><option key={platform} value={platform}>{LIVE_PLATFORM_LABELS[platform]}</option>)}</select></div>
+              <div className="field full"><label htmlFor="business-live-url">{t('Live-session link')}</label><input id="business-live-url" type="url" name="liveUrl" defaultValue={business.live_url} placeholder="https://..."/></div>
+              <label className="check-field field full"><input type="checkbox" name="isLive" defaultChecked={Boolean(business.is_live)}/>{t('Show this business as live now on its page and across the MirtPage Market')}</label>
+            </>:<>
+              <div className="field full"><label htmlFor="business-title">{t('Page title')}</label><input id="business-title" name="siteTitle" maxLength={120} defaultValue={business.site_title||business.name}/></div>
+              <div className="field full"><label htmlFor="business-description">{t('Search and sharing description')}</label><textarea id="business-description" name="siteDescription" maxLength={240} rows={4} defaultValue={business.site_description||business.description}/></div>
+            </>}
+          </FocusedEditForm>:
+          section==='identity'?<>{business.logo_path?<img src={business.logo_path} alt={t('Current business logo')} width={80} height={80} style={{objectFit:'contain'}}/>:null}<dl className={recordStyles.facts}><dt>{t('Business name')}</dt><dd>{business.name}</dd><dt>{t('Page address')}</dt><dd>@{business.handle} · <Link href={`${readHref}&edit=handle`}>{t('Edit')}</Link></dd><dt>{t('Notification email')}</dt><dd>{business.contact_email||t('Not configured')}</dd></dl></>:
+          section==='live'?<dl className={recordStyles.facts}><dt>{t('Live platform')}</dt><dd>{business.live_platform||t('Not configured')}</dd><dt>{t('Live-session link')}</dt><dd>{business.live_url||t('Not configured')}</dd><dt>{t('Live')}</dt><dd>{t(business.is_live?'Yes':'No')}</dd></dl>:
+          <dl className={recordStyles.facts}><dt>{t('Page title')}</dt><dd>{business.site_title||business.name}</dd><dt>{t('Search and sharing description')}</dt><dd>{business.site_description||business.description||t('Not set')}</dd></dl>}
       </section>
-      {platformAdmin ? <section className="panel owner-access" id="owner-sign-in">
-        <div className="dashboard-head"><div><h2>{t("Owner sign-in")}</h2><p>{managed ? t("Owners sign in with a code sent to their account email.") : t("Recover access with a temporary password.")}</p></div></div>
-        {params.accessError ? <p className="error">{params.accessError}</p> : null}
-        {owners.length ? owners.map((owner) => <div className="owner-access-record" key={owner.id}>
-          <div className="record-head"><div><strong>{owner.name}</strong><p>{owner.email}</p></div><span className={`badge ${!managed && owner.must_change_password ? "limited" : "active"}`}>{!managed && owner.must_change_password ? t("password change required") : t("active")}</span></div>
-          {!managed ? <details className="admin-form-disclosure" open={params.saved === "password" || Boolean(params.accessError)}><summary>{t("Account recovery")}{" "}<span>{t("Reset the owner's temporary password")}</span></summary><div className="admin-form-disclosure-body"><form action={adminResetClientPasswordAction} className="form-grid"><input type="hidden" name="userId" value={owner.id}/><input type="hidden" name="businessId" value={business.id}/><div className="field full"><label htmlFor={`temporary-password-${owner.id}`}>{t("New temporary password")}</label><input id={`temporary-password-${owner.id}`} type="password" name="temporaryPassword" minLength={12} required/></div><div className="field full"><small>{t("Use at least 12 characters with upper-case, lower-case, and a number. The owner must change it after signing in.")}</small></div><div className="field full"><button className="btn">{t("Reset owner password")}</button></div></form></div></details> : null}
-        </div>) : <p className="muted">{t("The owner invitation has not been accepted yet. Sign-in details will appear here after activation.")}</p>}
-      </section> : null}
-    </DashboardShell>
-  );
+    </div>
+  </DashboardShell>;
 }

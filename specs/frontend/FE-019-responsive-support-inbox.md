@@ -2,13 +2,239 @@
 id: FE-019
 title: Responsive client and staff support inbox
 status: in_progress
-related: [FE-060, BE-048, FE-049, FE-053, ADR-0023, FE-024, FE-026, FE-036, BE-018, BE-024, DEP-015, DEP-026, ADR-0009, ADR-0012, BE-032, BE-040, BE-042, DEP-039, FE-057, FE-062]
+related: [FE-060, BE-048, FE-049, FE-053, FE-056, ADR-0023, FE-024, FE-026, FE-036, BE-018, BE-024, DEP-015, DEP-026, ADR-0009, ADR-0012, BE-032, BE-040, BE-042, DEP-039, FE-057, FE-062, DEP-043, BE-050, FE-068]
 owners: [frontend, customer-support]
-last_updated: 2026-10-08
+last_updated: 2026-10-17
 change_level: L3
 ---
 
 # FE-019 - Responsive client and staff support inbox
+
+## S142 compact staff conversation and retired company handoff (ready)
+
+Latest owner correction: chat is the primary task, not a tall dashboard report.
+Use one compact staff header with an inbox return, queue/reference once, subject/
+route and concise current reply/assignment state. Remove repeated Back/reference
+rows, oversized title margins, redundant raw open-status and obsolete plan tabs.
+At normal1440×900, the transcript should start within160px below the dashboard
+content origin and provide at least300px before its own scroll, with reachable
+composer. At390×844 default Conversation keeps management panels out of the chat
+stack; a48px Details action opens an explicit bounded details view, not accordions.
+Retain the mounted composer/draft across Details/Back. Desktop shows existing
+management/request context alongside the transcript, not above it.
+
+GIVEN hidden Details mode THEN chat read observers are inactive; unseen replies
+cannot be acknowledged. GIVEN Join/reply/assign/resolve/note/history actions THEN
+fresh authority, receipt/assignment epochs, SLA/idle clocks and inbox-return
+context remain unchanged. Details mode is explicitly allowlisted and stripped on
+return to inbox. Actions returning to Details preserve that mode. No arbitrary
+return URL or credential in navigation. Support as well as transport uses the
+same compact shell. Long labels, errors, success notices and reply drafts fit
+phone/desktop at48px controls; success notice must not dominate the viewport.
+
+Remove the old Transport company add/edit form and queue summary. Stale handoff
+actions authenticate and deny without appending events. Tracking stages are the
+only current provider-entry workflow. Retire obsolete case-plan screens/actions;
+historical-data cleanup is the separately scoped S144 operation, not UI mutation.
+
+Ready: existing support/receipt/transport authority contracts retained; no new
+schema or business rule. Focused navigation/React/read-visibility/retired-action
+regressions and actual Chrome admin/transport/support desktop+phone tasks verify
+typing, Details→Back, reply→counterpart/read, Join/assignment/resolve and real
+local API/DB outcomes on labelled fixtures. en/am/om labels reuse authored keys.
+Master §§13/18/19/22 need verified reconciliation. Visual/full/rollout gates stay.
+
+## S125 — actionable response states and explicit Join (ready)
+
+GIVEN staff views active work THEN show Needs staff reply, Overdue or Waiting for
+customer from the authoritative BE-018 response state, with a compact labeled
+Reply status filter and preserved queue/search/page/return context. Assignment is
+secondary internal information. Closed unresolved work shows Chat ended and
+Needs follow-up; Resolved is distinct. Authorized staff uses Mark resolved for
+both Support and Transport; participant ending never resolves a request.
+
+GIVEN a current internally assigned staff member opens a conversation THEN offer
+Join chat before the public-reply composer. Opening/reading/Claim never joins.
+Join must be a deliberate server-validated action for the current assignment;
+wrong assignees/roles and stale forms cannot join. Public reply requires joining;
+private notes preserve existing access. Customers see Waiting for our team before
+explicit Join, never Assigned to/name/internal workload or overdue deadlines.
+After Join they may see the joining agent, and after a public reply Waiting for
+your reply. Preserve visible reads, draft recovery, history, resume and idle
+warnings. Owner/client views never expose staff filters or internal due dates.
+
+Cover staff/admin and owner/visitor on desktop/phone web and affected Expo8082,
+including actual Join, public reply, read acknowledgment and terminal recovery.
+Focused tests precede visual review; explicit visual approval precedes full gates.
+Related BE-018/050, FE-053/062 and DEP-043 govern matching layers.
+
+### S125 staff-visible no-customer-reply evidence (ready)
+
+GIVEN a staff conversation has a persisted idle_ended event WHEN authorized staff
+opens it THEN show a compact Ended after no customer reply explanation with last
+team reply time, ending time and Confirmed read / Not marked read at ending.
+This is a factual system record, not a claim of delivery or customer fault.
+Retain it after later reopening/resolution. Customers receive the existing clear
+inactivity reason; internal evidence is not exposed in customer DTOs or views.
+Historical endings without this event do not receive reconstructed proof.
+Tests cover presentation/localization plus authoritative paired worker readback.
+
+## S121 — waiting is an automatic queue (ready)
+
+BE-018 S121 supersedes the S119 bulk-manual-recovery and implicit hold text.
+GIVEN eligible staff WHEN a case waits THEN the server maintenance route assigns
+it automatically by workload without clicking Assign waiting chats or visiting
+the inbox. New cases keep immediate assignment. Remove the bulk manual button
+and hidden-hold explanation; keep per-case claim/reassignment and availability
+management. Unassigning a case puts it back into the automatic queue. Visitor,
+staff and admin show the same saved reference/assignee while distinguishing
+assignment from joining. Cases with no eligible staff continue to show Waiting.
+
+Focused UI/action and real local Chrome/affected Expo flows must observe the
+same waiting case change to Assigned through the running worker, with no staff
+assignment action. Preserve drafts, history, receipts and native polling bounds.
+
+S121 local evidence: six focused actual staff route/action/mounted-editor tests
+pass in `scripts/test-support-staff-ui.ts`. Owner lifecycle parity is exercised
+by `scripts/test-mobile-owner-transport.ts`. Actual Chrome admin and assigned
+transport staff see the automatically assigned older case in Active, with the
+same reference and agent. Expo owner support shows its original reference and
+Assigned before Joined, using real focused reads. The same-case reconnect receipt
+is `.local/queue-recovery-s121/native-agent/reconnect/review-receipt.json`.
+One deliberately aborted read then recovers automatically in10.708s without
+Retry/navigation/commands; recovery/review-receipt.json records the controlled
+failure and real retry. Original coordination/cold-restart strict failures remain
+failed and retained. This is local Chrome/Expo evidence, not physical Android or
+seamless restart proof. Current visual/full/release gates remain pending.
+
+## S119 — verify the actual chat workflow (ready)
+
+The historical bulk-manual-recovery/implicit-hold acceptance below is superseded
+by S121. Its lifecycle, conversation-first and explicit editor requirements stay.
+
+Staff-task acceptance (ready before implementation):
+- GIVEN a queue row or staff detail WHEN a request is waiting, assigned but not
+  joined, joined, manually ended, automatically ended or resolved THEN show the
+  saved lifecycle accurately. A closed unassigned case never says it is waiting
+  for an agent; a joined case names that saved agent. Assignment is not joining.
+- GIVEN Transport THEN expose Active, Waiting, Chat history and Resolved as
+  shallow contextual destinations; preserve bounded search/page origins and
+  role-pinned queue access. Do not show an empty carrier-selection placeholder
+  as if every live/ended request has incomplete business work.
+- GIVEN an operations-authorized queue view WHEN explicitly choosing Assign
+  waiting chats THEN POST a bounded recovery command for that queue, retain the
+  list context and report authoritative routed/remaining counts. Hide this action
+  from clients and queue agents. It never runs during GET/polling and does not
+  override a manager's deliberate waiting hold. BE-018 governs routing/security.
+- Focused actual SSR/action tests cover these states, role-filtered actions,
+  current assignment, safe origin/feedback and no hidden editor/GET mutation.
+  Local phone/desktop review remains separate from full/release approval.
+
+Conversation-workspace acceptance (S119, ready before implementation):
+- GIVEN an authorized staff conversation WHEN opening its detail THEN the
+  transcript and reply composer are the primary task. Request/contact details,
+  assignment actions/history and private transport-company work occupy a
+  secondary desktop column and follow the conversation on phones. These tasks
+  do not push the transcript below an always-open company editor or a duplicate
+  request-summary textarea. Preserve existing reply/claim/reopen/resolve rules.
+- GIVEN transport-company work is authorized WHEN viewing the conversation
+  THEN show saved company/contact details read-first, or a deliberate Add action
+  when none exists. Only Edit/Add opens the bounded company fields; Cancel
+  returns to the read view without submitting, and keyboard focus enters/leaves
+  that pane predictably. Closed conversations keep their existing read-only
+  company state. No accordion, new route authority or private-data exposure.
+- GIVEN a company edit is saved THEN retain the existing conversation ID,
+  previous-company version fence and allowlisted inbox origin. Copy request
+  remains a secondary action using the same request text, with a selectable
+  fallback only when clipboard access fails. Focused actual route/component
+  tests cover task order, authorization, closed/read/edit/cancel states, fields
+  and hidden fences; parent-owned phone/desktop captures precede visual review.
+
+Focused S119 workspace evidence: `scripts/test-support-staff-ui.ts` passes six
+cases, including actual route SSR with the real company component and an actual
+mounted React company pane. The added cases verify transcript/composer-before-
+context order, role-filtered company reads, assigned read epoch/queue origin,
+closed internal-note preservation, deliberate Add/Edit, focus/Cancel with zero
+writes, pending duplicate fencing, network-failure field retention/private-error
+redaction, previous-company/navigation fields and clipboard fallback. The
+browser test uses controlled action/clipboard ports, not a database or provider;
+actual local desktop/phone capture, owner visual approval and full/release gates
+remain separate and pending. Test-harness-only sandbox launch and missing
+browser `__name` bootstrap failures were classified before the final passing run.
+
+GIVEN the same canonical request on visitor, staff and admin screens WHEN staff
+assignment exists but joining has not happened THEN clearly distinguish assigned
+from joined, using consistent primary status on web and mobile. Never label an
+assigned request as an unassigned waiting request. A legitimately waiting old
+request remains waiting until a routing command changes its saved assignment.
+
+BE-050 S119 governs visible footers, asynchronous focus loss, assignment/join
+epochs and participant-side colleague receipts. BE-018 S111 owns the actual
+inactivity deadline: only a public staff reply starts waiting-for-participant;
+unanswered customer requests must not silently expire. Verify a labelled actual
+local case through Chrome and the running maintenance worker, with any accelerated
+test clock explicitly identified. Preserve history, resumability and resolution.
+Admin task improvements must follow observed task/navigation problems rather
+than another broad visual rewrite. Record desktop/phone evidence, retain failures
+and request visual review before full release gates.
+
+## S115 staff history is a deliberate destination (ready)
+
+GIVEN an authorized staff member in a conversation WHEN opening Assignment history
+THEN show its existing read-only history on a separate contextual screen, with
+one clear Back action to that conversation and its bounded inbox origin. Do not
+bury history in a transcript accordion. Owners and unrelated staff cannot access
+assignment history; retain the existing conversation permissions and no new write.
+Focused route tests cover contextual links, current access denial, safe origins
+and absence of editors on the history screen.
+
+## S111 — clear inactivity and recovery (ready)
+
+BE-018 S111 owns persisted inactivity eligibility and timing. Public transport and
+owner support render the server deadline: a concise warning after25 minutes
+(guest) or23 hours(owner), explaining that a message keeps the chat active.
+Clients never decide/write closure. Polling pauses while hidden/inactive, has one
+in-flight request, bounded deadlines/backoff, and slows ended histories to30s.
+
+GIVEN an automatic ending THEN show a clear localized reason and Resume chat
+with history/draft retained; distinguish it from manually ended and resolved.
+Resume is the themed primary48px action; starting another request is secondary
+while Resume is available. Both web/native actions use Suqpage controls rather
+than browser-default buttons. Manual endings retain a single primary new-request
+action.
+Staff see the inactivity reason in the existing history/detail view, and can
+follow up or resolve. Closing a live session is not proof the job is complete.
+GIVEN Resume succeeds THEN observe authoritative assignment/waiting/join state
+under the same reference; show pending/error/retry and block duplicate commands.
+Security/privacy and hidden/read-receipt behavior remain unchanged.
+Focused tests use actual web/native components for deadlines, explicit resume,
+failure-retained drafts, stale response fences, polling cadence/visibility and
+no client-side close writes; actual local paired flows verify server wiring.
+
+
+Mapped focused regressions: `scripts/test-chat-inactivity-ui.ts` and `scripts/test-support-thread-refresh.ts` execute real React/native-adapter renderers and React transitions. Actual local paired evidence is `.local/workflow-audit-s111/paired/verified.json`; settled web visual readiness uses `.local/workflow-audit-s111/web-ready/workflow-outcome.json`. These do not establish physical Android or production-mode release readiness.
+
+## S108 — clear unlimited workload and authoritative assignment
+
+GIVEN the staff workload screen THEN show open-chat counts and receives-new-chats
+availability, with no cap input, cap progress or at-capacity filter. Explain that
+new work goes to the eligible agent with the fewest open chats; equal loads rotate.
+Pausing reception retains existing work. Matching queue and permissions stay.
+
+GIVEN a saved assignee changes during thread refresh THEN the assignment selector
+reflects the current saved assignee, including a paused current agent. Its saved
+value remains a successful form control (never a disabled selected option that
+submits no assignee); saving unchanged does not silently unassign it. Ordinary
+refresh preserves an intentional
+unsaved choice. Assignment and transcript header use one public reference.
+GIVEN visitor recovery/refresh runs THEN show that reference and fence stale
+requests so old assignment state cannot masquerade as a different case. Assignment,
+agent joining, waiting and closed remain distinct on web and mobile.
+
+Cross-layer BE-018 S108 controls routing/security. Focused component and real local
+phone/desktop captures prove picker synchronization, delayed recovery, reference
+agreement, >100 counts and no cap controls. New text is native-readable in all
+five locales. Preserve pending S107 review; no hosted changes or release here.
 
 ## S48 — staff-reviewed showroom and product videos (in progress)
 
@@ -823,3 +1049,69 @@ and carried through every case form/action; breadcrumb/back preserve that list.
 A direct case/alert chooses its actual queue and sensible status fallback. Scoped
 agents are pinned to their permitted queue; URLs are navigation state, never
 permission authority. No support domain/assignment/history semantics change.
+
+
+## S104 live workflow verification and closed-thread updates
+
+GIVEN authenticated owner support or guest transport WHEN intake succeeds THEN
+existing live messages/status, correct scoped queue, assignment/claim, explicit
+public replies, private notes, truthful join/read events, end/history/resolution
+and reopen remain functional without manual refresh. General guest support stays
+closed. Staff management remains web-only. GIVEN a closed owner support thread
+WHEN staff reopens it THEN its visible owner browser receives that state
+automatically; use a slower bounded refresh for closed threads, suspend hidden
+tabs and reconcile on return. Do not fabricate current agent availability.
+Actual local visitor/owner/agent exchanges, privacy and negative permission
+checks supplement isolated tests. Label test records and remove only those
+records; no customer chats, external notifications or hosted tests are authorized.
+BE-018/BE-050/FE-062 govern server authority and read receipts.
+
+S104 focused local evidence passes in TRACEABILITY: actual role/navigation and
+combined support/transport HTTP workflows plus desktop/phone/five-language
+captures. Visual approval, full gates, scoped commit and rollout remain pending.
+
+
+## S114 owner transport — locally verified, visual/full gates pending
+
+GIVEN a linked business owner WHEN opening Account → Transport chat THEN open the
+same paired From/To and Name/Phone transport intake and live conversation as the
+visitor flow, within the owner workspace and with Back to account. Keep technical
+Support separate. Prefill editable contact name and saved business phone only
+inside this authenticated destination; leave route empty and never overwrite typed
+drafts or recovered conversations. Owner-specific introduction explains transport
+for customers/business stock naturally in all five languages; UI styling stays
+Suqpage's current design. No guest conversation is silently adopted.
+
+GIVEN an active account-owned transport case THEN recover it across sessions/devices
+through owner authorization; provide a clear Chat history destination and explicit
+new-request action, without an extra menu before the first intake. Selecting a
+history case opens its exact reference. Maintain waiting/assignment/join, message,
+read, loading/error/retry, end, automatic-end/resume and resolution distinctions.
+Owner history and staff transport queue refer to the same canonical case. No
+private staff notes/carrier details are visible to owners. Transport remains
+text-only; technical support retains its attachment behavior.
+
+All controls fit desktop/320/390/short and five languages, with 48px touch actions,
+keyboard/focus, bounded polling, hidden-screen pause and failure-retained drafts.
+API/persistence/security follow BE-018 S114; FE-053/FE-056 share account placement.
+Focused component and actual local paired owner/staff tests precede visual
+approval/full gates. Visitor transport behavior and owner technical support remain.
+
+GIVEN the visitor dialog is dismissed and immediately reopened WHEN its earlier
+native close event arrives THEN preserve the new open intent and fresh-session
+loading state; never close the newly opened chat or display stale assignment.
+Ordinary Close/Cancel still dismiss the dialog and retain unsent intake fields.
+
+S114 focused mappings: `scripts/test-owner-transport-workspace.ts` (actual React
+intake/retry/key/unmount and server authorization/history/legacy redirect/staff
+summary), `scripts/test-chat-assignment-state.ts` (shared stale recovery and rapid
+reopen), and `scripts/test-mobile-owner-transport.ts` (native authority/lifecycle).
+
+
+S142 actual-review correction: a bounded transcript viewport must not stretch a
+short message bubble to fill its height. Message bubbles fit their own contents;
+remaining room belongs to the transcript background. GIVEN one short message
+WHEN desktop or phone staff chat loads THEN the bubble retains natural text
+height AND the transcript keeps its bounded useful viewing area. Cover real CSS
+with a focused geometry regression and recapture retained labelled app cases;
+no duplicate test conversation or chat-state change is needed for this correction.

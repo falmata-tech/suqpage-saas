@@ -33,7 +33,7 @@ for(const locale of locales){
 // Omit copy used exclusively by server renderers from the browser context.
 // Keep all dynamic/shared constants and all unknown keys conservatively.
 const serverOnly = new Set(), shared = new Set();
-for (const root of ['app','components','lib']) for (const name of fs.readdirSync(root,{recursive:true})) {
+for (const root of ['app','components','lib','apps/mobile/app','apps/mobile/src']) for (const name of fs.readdirSync(root,{recursive:true})) {
   if (!/\.(ts|tsx)$/.test(name)) continue;
   const file=`${root}/${name}`, source=fs.readFileSync(file,'utf8');
   const ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true,name.endsWith('.tsx')?ts.ScriptKind.TSX:ts.ScriptKind.TS);

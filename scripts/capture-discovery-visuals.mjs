@@ -3,6 +3,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
 const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
 const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "suqpage-discovery-visuals");
 fs.mkdirSync(output, { recursive: true });
@@ -11,7 +17,8 @@ const browser = await chromium.launch({ headless: true });
 const evidence = [];
 
 async function capture(name, viewport, action) {
-  const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
+  const page = await browser.newPage({serviceWorkers: 'block', viewport, deviceScaleFactor: 1 });
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
   const featuredExperience = name.includes("featured") || name.includes("showroom-preview");
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
@@ -138,7 +145,7 @@ async function capture(name, viewport, action) {
   assert.deepEqual(errors, [], `${name} has no browser errors`);
   const screenshot = path.join(output, `${name}.png`);
   await page.screenshot({ path: screenshot, fullPage: false });
-  evidence.push({ name, screenshot, ...metrics });
+  evidence.push({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false, name, screenshot, ...metrics });
   await page.close();
 }
 
@@ -265,4 +272,5 @@ try {
   console.log(JSON.stringify(evidence, null, 2));
 } finally {
   await browser.close();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests();
 }

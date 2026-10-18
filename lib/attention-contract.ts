@@ -1,4 +1,4 @@
-export const attentionKinds = ['inquiry','waiting_chat','assigned','reassigned','joined','message','closed','reopened'] as const;
+export const attentionKinds = ['inquiry','waiting_chat','assigned','reassigned','joined','message','closed','reopened','reply_overdue'] as const;
 export type AttentionKind = typeof attentionKinds[number];
 export type AttentionDestination = { screen: 'inquiries' | 'owner-chat' | 'transport-chat' | 'support-chat' | 'support-queue'; id?: number; businessId?:number };
 export type AttentionItem = { id: number; kind: AttentionKind; channel: 'support' | 'transport' | null; createdAt: number; read: boolean; destination: AttentionDestination };

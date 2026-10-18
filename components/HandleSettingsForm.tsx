@@ -1,15 +1,19 @@
 'use client';
 import type {OwnerEditResult} from '@/lib/owner-edit-contract';
-import {useState} from 'react';
+import {useRef,useState} from 'react';
+import {unstable_rethrow} from 'next/navigation';
 import Link from 'next/link';
 import HandleField from './HandleField';
+import LoadingBar from './LoadingBar';
 import {useUiText} from '@/lib/i18n/ui';
 import type {HandleSettings} from '@/lib/business-handle-runtime';
 
-export default function HandleSettingsForm({settings,businessId,admin=false,action,returnTo}:{settings:HandleSettings;businessId:number;admin?:boolean;action:(form:FormData)=>Promise<OwnerEditResult>;returnTo?:'page'|'profile'}) {
+export default function HandleSettingsForm({settings,businessId,admin=false,action,returnTo}:{settings:HandleSettings;businessId:number;admin?:boolean;action:(form:FormData)=>Promise<OwnerEditResult>;returnTo?:'page'|'profile'|'showroom'}) {
   const t=useUiText();const [ready,setReady]=useState(false);const [saving,setSaving]=useState(false);const [error,setError]=useState('');
+  const inFlight=useRef(false);
   const locked=!admin&&settings.nextChangeAt>Date.now();
-  return <form className="panel form-grid" action={async form=>{setSaving(true);try{const result=await action(form);if(result)setError(result.error);}finally{setSaving(false);}}}>
+  return <form aria-busy={saving} className="panel form-grid" onSubmit={async event=>{event.preventDefault();if(inFlight.current)return;const form=new FormData(event.currentTarget);inFlight.current=true;setSaving(true);setError('');try{const result=await action(form);if(result)setError(result.error);}catch(error){unstable_rethrow(error);setError('Unable to connect. Please try again.');}finally{inFlight.current=false;setSaving(false);}}}>
+    {saving&&<div className="field full"><LoadingBar/></div>}
     {error?<p className="field full error" role="alert">{t(error)}</p>:null}
     <input type="hidden" name="businessId" value={businessId}/><input type="hidden" name="expectedVersion" value={settings.contentVersion}/>
     {returnTo ? <input type="hidden" name="returnTo" value={returnTo}/> : null}

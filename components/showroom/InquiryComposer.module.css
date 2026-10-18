@@ -45,3 +45,5 @@
 .empty { display: grid; justify-items: center; gap: 14px; padding: 24px 0; text-align: center; font-size: 14px; }
 .clear { margin: 16px auto 0; display: block; min-height: 44px; border: 0; background: transparent; color: #667178; font-size: 12px !important; text-decoration: underline; }
 @media (max-width: 600px) { .overlay { padding: 12px 8px max(8px,env(safe-area-inset-bottom)); align-items: flex-end; } .panel { max-height: calc(100dvh - 24px - env(safe-area-inset-bottom)); border-radius: 14px; } .head { padding: 20px 18px; } .head h2 { font-size: 20px; } .scroll { padding: 18px; } .summary { gap: 10px; } .summary img, .thumb { width: 48px; height: 48px; } .channels a, .channels button { font-size: 12px; } }
+
+.manualCopy{display:flex;justify-content:flex-end;margin-top:10px}.manualCopy button{display:flex;align-items:center;gap:6px;min-height:44px;padding:8px 10px;border:0;background:transparent;color:#59676b;font-size:13px;text-decoration:underline;text-underline-offset:3px}

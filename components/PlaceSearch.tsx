@@ -5,8 +5,8 @@ import { useEffect, useId, useRef, useState } from 'react';
 import type { KnownPlace } from '@/lib/place-search';
 import styles from './PlaceSearch.module.css';
 
-export default function PlaceSearch({ value, selected, onChange, onSelect, inputId="owner-city", selectionRequired=false }: {
-  inputId?:string; selectionRequired?:boolean; value: string; selected: KnownPlace | null; onChange: (value: string) => void; onSelect: (place: KnownPlace) => void;
+export default function PlaceSearch({ value, selected, onChange, onSelect, inputId="owner-city", selectionRequired=false, countryCode="ET" }: {
+  inputId?:string; selectionRequired?:boolean; countryCode?:string; value: string; selected: KnownPlace | null; onChange: (value: string) => void; onSelect: (place: KnownPlace) => void;
 }) {
   const t = useUiText();
   const id = useId();
@@ -16,12 +16,12 @@ export default function PlaceSearch({ value, selected, onChange, onSelect, input
   const [active, setActive] = useState(-1);
   const [status, setStatus] = useState('');
   useEffect(() => {
-    if (!open || selected || value.trim().length < 2) { setResults([]); setStatus(''); return; }
+    if (!countryCode || !open || selected || value.trim().length < 2) { setResults([]); setStatus(''); return; }
     const controller = new AbortController();
     setResults([]); setActive(-1); setStatus('Searching places…');
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/places?q=${encodeURIComponent(value)}`, { signal: controller.signal });
+        const response = await fetch(`/api/places?q=${encodeURIComponent(value)}&country=${countryCode}`, { signal: controller.signal });
         if (!response.ok) throw new Error('Search unavailable');
         const body = await response.json() as { places: KnownPlace[] };
         if (controller.signal.aborted) return;
@@ -31,14 +31,14 @@ export default function PlaceSearch({ value, selected, onChange, onSelect, input
       }
     }, 200);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [value, open, selected, selectionRequired]);
+  }, [value, open, selected, selectionRequired, countryCode]);
   function choose(place: KnownPlace) { onSelect(place); setOpen(false); setActive(-1); }
   const expanded = open && results.length > 0;
   useEffect(() => {
     if (expanded && document.activeElement === input.current && window.matchMedia("(max-width: 700px)").matches) input.current?.scrollIntoView({block:"center",behavior:"instant"});
   }, [expanded]);
   return <div className={styles.search}>
-    <input ref={input} id={inputId} name={selectionRequired?undefined:"city"} value={value} maxLength={80} autoComplete="off" role="combobox"
+    <input ref={input} id={inputId} name={selectionRequired?undefined:"city"} value={value} maxLength={80} autoComplete="off" disabled={!countryCode} role="combobox"
       aria-autocomplete="list" aria-expanded={expanded} aria-controls={expanded ? `${id}-results` : undefined}
       aria-activedescendant={expanded && active >= 0 ? `${id}-${active}` : undefined} aria-describedby={`${id}-status`}
       placeholder={t("Search a city or town")} onFocus={event => { setOpen(true); if (window.matchMedia("(max-width: 700px)").matches) event.currentTarget.scrollIntoView({block:"center",behavior:"instant"}); }} onBlur={() => setOpen(false)}
@@ -58,6 +58,6 @@ export default function PlaceSearch({ value, selected, onChange, onSelect, input
       </li>)}
     </ul> : null}
     <small id={`${id}-status`} role="status">{selected ? selectionRequired ? `${selected.name}, ${selected.region}` : t("Selected: {value1}, {value2}. Area coordinates filled.", { value1: selected.name, value2: selected.region }) : t(status) || t("Search by city or town name, including local names.")}</small>
-    <small className={styles.attribution}>{t("Place data ©")}{" "}<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">{t("OpenStreetMap contributors")}<span className="sr-only"> {" "}{t("(new tab)")}</span></a>.</small>
+    <small className={styles.attribution}>{t("Place data ©")}{" "}<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">{t("OpenStreetMap contributors")}<span className="sr-only"> {" "}{t("(new tab)")}</span></a>{" · "}<a href="https://www.geonames.org/about.html" target="_blank" rel="noopener noreferrer">GeoNames</a></small>
   </div>;
 }

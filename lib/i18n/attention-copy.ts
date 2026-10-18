@@ -4,5 +4,6 @@ export function attentionLabel(item:AttentionItem):string {
   return {
     inquiry:'New customer inquiry',waiting_chat:'A new chat is waiting',reassigned:'Chat reassigned',
     joined:'An agent joined your chat',message:'New chat message',closed:'Chat ended',reopened:'Chat reopened',
+    reply_overdue:'A chat is overdue for a reply.',
   }[item.kind];
 }

@@ -1,22 +1,22 @@
 "use client";
-import {pointInMapViewport,wrappedMapLongitude} from '@/lib/map-display-location';
+import {wrappedMapLongitude} from '@/lib/map-display-location';
 import { useUiText } from "@/lib/i18n/ui";
 
 
-import Supercluster from "supercluster";
 import { mapDisplayLocation } from "@/lib/map-display-location";
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
-import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
+import {clampMapZoom,MAP_MAX_ZOOM,MAP_GROUP_MAX_MEMBERS,mapClusterIndex,mapClusterMarkers,mapExposedGroup} from '@/lib/map/map-clustering';
+import {resizeLeafletPreservingCenter,leafletViewForPersistence} from '@/lib/map/leaflet-resize';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import type { Map as LeafletMap, Marker, GridLayer } from "leaflet";
 import type { DiscoveryNearbyGroup, DiscoveryShowroom } from "@/lib/discovery";
 import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 import { mapProviderConfig } from "@/lib/map-provider";
+import { createMapTileLoader } from "@/lib/map/map-tile-loader";
 
 const ETHIOPIA_CENTER: [number, number] = [9.145, 40.4897];
 const ETHIOPIA_BOUNDS: [[number, number], [number, number]] = [[2.5, 31.5], [15.5, 49.5]];
 const DEFAULT_ZOOM = 5;
-const NEARBY_GROUP_ZOOM = 14;
 const SHOWROOM_DETAIL_ZOOM = 12;
-const CLUSTER_MAX_ZOOM = NEARBY_GROUP_ZOOM - 1;
 const STOREFRONT_GLYPH = `<svg class="mp-map-storefront" viewBox="0 7 36 25" aria-hidden="true"><rect x="5" y="9" width="26" height="23" rx="2" fill="currentColor" stroke="white" stroke-width="1.5"/><path d="M5 3H31L34 11H2Z" fill="currentColor" stroke="white" stroke-width="1.5"/><path d="M9 16H27M9 19H27M11 30V23H25V30" fill="none" stroke="white" stroke-width="1.4"/></svg>`;
 
 type MapView = {
@@ -24,18 +24,20 @@ type MapView = {
   zoom: number;
 };
 
-type MarkerProperties = {
-  showroomId: number;
-  sponsored: boolean;
-  live: boolean;
-  featured: boolean;
+type LeafletPendingZoom = LeafletMap & {
+  _animatingZoom?: boolean;
+  _onZoomTransitionEnd?: () => void;
 };
 
-type ClusterProperties = {
-  sponsoredCount: number;
-  liveCount: number;
-  featuredCount: number;
-};
+function removeOwnedMap(map: LeafletMap) {
+  map.stop();
+  // Leaflet 1.9.4 remove()/stop() leave its 250ms zoom fallback pending.
+  // Finish only this active instance while its pane exists; the SDK's later
+  // fallback then sees a completed zoom. No global patch or animation disable.
+  const pending = map as LeafletPendingZoom;
+  if (pending._animatingZoom && typeof pending._onZoomTransitionEnd === "function") pending._onZoomTransitionEnd();
+  map.remove();
+}
 
 export type MarketplaceMapController = {
   zoomIn: () => void;
@@ -47,7 +49,7 @@ export type MarketplaceMapController = {
 
 type MarketplaceMapProps = {
   showrooms: DiscoveryShowroom[];
-  nearbyGroups: DiscoveryNearbyGroup[];
+  groupCapacity?:number;
   featuredNowBusinessId: number | null;
   selectedShowroomId: number | null;
   requestedView: MapView | null;
@@ -102,8 +104,8 @@ function presenceFor(showroom: DiscoveryShowroom, featuredNowBusinessId: number 
 
 const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>(function MarketplaceMap({
   showrooms: sourceShowrooms,
-  nearbyGroups,
   featuredNowBusinessId,
+  groupCapacity=3,
   selectedShowroomId,
   requestedView,
   onViewChange,
@@ -117,63 +119,41 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
   const showrooms = useMemo(() => sourceShowrooms.map(mapDisplayLocation), [sourceShowrooms]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
-  const tileLayerRef = useRef<TileLayer | null>(null);
+  const tileLayerRef = useRef<GridLayer | null>(null);
+  const retryTiles = useRef<(() => void) | null>(null);
+  const [tileFailed, setTileFailed] = useState(false);
   const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const markerRefs = useRef<Marker[]>([]);
   const requestedViewRef = useRef(requestedView);
   const callbackRef = useRef({ onViewChange, onOpenNearbyGroup, onSelectShowroom, onError });
-  const dataRef = useRef({ showrooms, nearbyGroups, featuredNowBusinessId, selectedShowroomId });
-  const clusterIndex = useMemo(() => {
-    const index = new Supercluster<MarkerProperties, ClusterProperties>({
-      radius: 52,
-      maxZoom: CLUSTER_MAX_ZOOM,
-      minPoints: 2,
-      map: (properties) => ({
-        sponsoredCount: properties.sponsored ? 1 : 0,
-        liveCount: properties.live && !properties.featured ? 1 : 0,
-        featuredCount: properties.featured ? 1 : 0,
-      }),
-      reduce: (accumulated, properties) => {
-        accumulated.sponsoredCount += properties.sponsoredCount;
-        accumulated.liveCount += properties.liveCount;
-        accumulated.featuredCount += properties.featuredCount;
-      },
-    });
-    index.load(showrooms.map((showroom) => ({
-      type: "Feature" as const,
-      properties: {
-        showroomId: showroom.id,
-        sponsored: showroom.sponsored,
-        live: showroom.isLive,
-        featured: showroom.id === featuredNowBusinessId,
-      },
-      geometry: { type: "Point" as const, coordinates: [showroom.longitude, showroom.latitude] },
-    })));
-    return index;
-  }, [featuredNowBusinessId, showrooms]);
+  const dataRef = useRef({ showrooms, featuredNowBusinessId, selectedShowroomId });
+  const clusterIndex = useMemo(() => mapClusterIndex(showrooms.map(showroom=>({
+    id:showroom.id,latitude:showroom.latitude,longitude:showroom.longitude,
+    featured:showroom.id===featuredNowBusinessId,live:showroom.isLive,
+  })),groupCapacity), [featuredNowBusinessId,showrooms,groupCapacity]);
   const clusterIndexRef = useRef(clusterIndex);
 
   callbackRef.current = { onViewChange, onOpenNearbyGroup, onSelectShowroom, onError };
-  dataRef.current = { showrooms, nearbyGroups, featuredNowBusinessId, selectedShowroomId };
+  dataRef.current = { showrooms, featuredNowBusinessId, selectedShowroomId };
   clusterIndexRef.current = clusterIndex;
   requestedViewRef.current = requestedView;
 
   useImperativeHandle(forwardedRef, () => ({
-    zoomIn() { mapRef.current?.zoomIn(); },
-    zoomOut() { mapRef.current?.zoomOut(); },
-    reset() { mapRef.current?.fitBounds(ETHIOPIA_BOUNDS, { animate: true, padding: [12, 12] }); },
-    centerAt(latitude, longitude, zoom = 12) { mapRef.current?.setView([latitude, longitude], Math.max(zoom, mapRef.current.getZoom()), { animate: true }); },
+    zoomIn() { const map=mapRef.current;if(map)map.setZoom(clampMapZoom(map.getZoom()+1)); },
+    zoomOut() { const map=mapRef.current;if(map)map.setZoom(clampMapZoom(map.getZoom()-1)); },
+    reset() { mapRef.current?.fitBounds(ETHIOPIA_BOUNDS, { animate: true, padding: [12, 12],maxZoom:MAP_MAX_ZOOM }); },
+    centerAt(latitude, longitude, zoom = 12) { mapRef.current?.setView([latitude, longitude], clampMapZoom(Math.max(zoom, mapRef.current.getZoom())), { animate: true }); },
     getView() {
       const map = mapRef.current;
       if (!map) return { center: ETHIOPIA_CENTER, zoom: DEFAULT_ZOOM };
-      const center = map.getCenter();
-      return { center: [center.lat, center.lng], zoom: map.getZoom() };
+      const view = leafletViewForPersistence(map);
+      return { center: [view.center.lat, view.center.lng], zoom: view.zoom };
     },
   }), []);
 
   useEffect(() => {
     if (!requestedView || !mapRef.current) return;
-    mapRef.current.setView(requestedView.center, requestedView.zoom, { animate: false });
+    mapRef.current.setView(requestedView.center, clampMapZoom(requestedView.zoom), { animate: false });
   }, [requestedView]);
 
   useEffect(() => {
@@ -181,6 +161,18 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
     let map: LeafletMap | null = null;
     let resizeObserver: ResizeObserver | null = null;
     let resizeFrame = 0;
+    let resizeTimer: number | undefined;
+    let commitView: (() => void) | null = null;
+    let resizing = false;
+    let disposeTiles: (() => void) | undefined;
+    const invalidateMapSize = () => {
+      if (disposed || !map || mapRef.current !== map) return;
+      let resized = false;
+      resizing = true;
+      try { resized = resizeLeafletPreservingCenter(map); }
+      finally { resizing = false; }
+      if (resized) commitView?.();
+    };
 
     void import("leaflet").then((L) => {
       if (disposed || !containerRef.current) return;
@@ -191,7 +183,8 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
         zoom: DEFAULT_ZOOM,
         minZoom: 1,
         worldCopyJump: true,
-        maxZoom: provider.maxZoom,
+        trackResize: false,
+        maxZoom: MAP_MAX_ZOOM,
         zoomControl: false,
         preferCanvas: true,
         wheelDebounceTime: 80,
@@ -201,21 +194,65 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
       mapRef.current = map;
       map.attributionControl.setPosition("bottomleft");
       if (requestedViewRef.current) {
-        map.setView(requestedViewRef.current.center, requestedViewRef.current.zoom, { animate: false });
+        map.setView(requestedViewRef.current.center, clampMapZoom(requestedViewRef.current.zoom), { animate: false });
       }
       markerLayerRef.current = L.layerGroup().addTo(map);
-      tileLayerRef.current = L.tileLayer(provider.tileUrlTemplate, {
-        attribution: provider.attributionHtml,
-        maxNativeZoom: provider.maxNativeZoom,
-        maxZoom: provider.maxZoom,
-        keepBuffer: 0,
-        updateWhenIdle: true,
-        updateWhenZooming: false,
-        detectRetina: false,
-      }).addTo(map);
+      // Keep attribution present when only the failed raster is removed.
+      map.attributionControl.addAttribution(provider.attributionHtml);
+      const startTiles = () => {
+        if (disposed || !map || mapRef.current !== map) return;
+        disposeTiles?.();
+        if (tileLayerRef.current) map.removeLayer(tileLayerRef.current);
+        setTileFailed(false);
+        if (containerRef.current) { containerRef.current.dataset.tileStatus = 'loading'; delete containerRef.current.dataset.tileFailure; delete containerRef.current.dataset.tileHttpStatus; }
+        // GridLayer is Leaflet's asynchronous-tile extension. TileLayer's img
+        // abort routine would overwrite callbacks owned by this fetch loader.
+        const layer = L.gridLayer({
+          attribution: provider.attributionHtml,
+          maxNativeZoom: provider.maxNativeZoom,
+          maxZoom: provider.maxZoom,
+          keepBuffer: 0,
+          updateWhenIdle: true,
+          updateWhenZooming: false,
+          tileSize: 256,
+        });
+        const loader = createMapTileLoader({
+          getTileUrl: (coords: import('leaflet').Coords) => L.Util.template(provider.tileUrlTemplate, {x:coords.x,y:coords.y,z:coords.z}),
+          onFailure: failure => {
+            if (disposed || !map || mapRef.current !== map || tileLayerRef.current !== layer) return;
+            loader.dispose();
+            map.removeLayer(layer);
+            tileLayerRef.current = null;
+            if (containerRef.current) {
+              containerRef.current.dataset.tileStatus = 'degraded';
+              containerRef.current.dataset.tileFailure = failure.kind;
+              if (failure.status !== undefined) containerRef.current.dataset.tileHttpStatus = String(failure.status);
+            }
+            setTileFailed(true);
+          },
+        });
+        Object.assign(layer, {createTile: (coords: import('leaflet').Coords, done: import('leaflet').DoneCallback) => loader.createTile(coords, done)});
+        layer.on('tileunload', event => loader.unload(event.tile));
+        layer.on('tileabort', event => loader.unload(event.tile));
+        layer.on('load', () => {
+          if (!disposed && tileLayerRef.current === layer && containerRef.current) containerRef.current.dataset.tileStatus = 'ready';
+        });
+        disposeTiles = () => loader.dispose();
+        tileLayerRef.current = layer;
+        layer.addTo(map);
+      };
+      retryTiles.current = startTiles;
+      startTiles();
 
       const renderMarkers = () => {
-        if (!map || !markerLayerRef.current || !containerRef.current) return;
+        if (disposed || !map || mapRef.current !== map || !markerLayerRef.current || !containerRef.current) return;
+        // A modal can restore its trigger before the selected-marker update
+        // runs. Keep that deliberate map focus through our own DOM replacement.
+        // Focus inside a dialog or any other control is never claimed here.
+        const active=document.activeElement;
+        const focused=active instanceof HTMLElement&&containerRef.current.contains(active)?active.closest<HTMLElement>('.leaflet-marker-icon'):null;
+        const focusedGroup=focused?.querySelector<HTMLElement>('[data-map-group-key]')?.dataset.mapGroupKey;
+        const focusedShop=focused?.querySelector<HTMLElement>('[data-showroom-id]')?.dataset.showroomId;
         markerLayerRef.current.clearLayers();
         markerRefs.current = [];
         const data = dataRef.current;
@@ -229,8 +266,9 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
           bounds.getNorth(),
         ];
         const showroomById = new Map(data.showrooms.map((showroom) => [showroom.id, showroom]));
-        const groupedShowroomIds = new Set(data.nearbyGroups.flatMap((group) => group.showroomIds));
         let mountedMarkerCount = 0;
+        let mountedGroupCount = 0;
+        let restoredMarkerFocus=false;
 
         const addMarker = (marker: Marker, accessibleName: string) => {
           const coordinate=marker.getLatLng();
@@ -245,146 +283,110 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
             event.stopPropagation();
             marker.fire("click");
           });
+          if(element&&((focusedGroup&&element.querySelector<HTMLElement>('[data-map-group-key]')?.dataset.mapGroupKey===focusedGroup)
+            ||(focusedShop&&element.querySelector<HTMLElement>('[data-showroom-id]')?.dataset.showroomId===focusedShop))){element.focus({preventScroll:true});restoredMarkerFocus=true;}
           markerRefs.current.push(marker);
           mountedMarkerCount += 1;
         };
 
-        if (zoom >= NEARBY_GROUP_ZOOM) {
-          for (const group of data.nearbyGroups) {
-            if (!pointInMapViewport(group.longitude,group.latitude,viewport)) continue;
-            const groupShowrooms = group.showroomIds.map((id) => showroomById.get(id)).filter((item): item is DiscoveryShowroom => Boolean(item));
-            const featured = group.showroomIds.includes(data.featuredNowBusinessId || -1);
-            const liveCount = groupShowrooms.filter((showroom) => showroom.isLive && showroom.id !== data.featuredNowBusinessId).length;
-            const status = featured ? `<span class="mp-map-status mp-map-status-featured">${escapeHtml(t("Featured"))}</span>` : liveCount ? `<span class="mp-map-status mp-map-status-live">${liveCount} ${escapeHtml(t("Live"))}</span>` : "";
-            const icon = L.divIcon({
-              className: "mp-map-div-icon",
-              html: `<span class="mp-map-nearby${featured ? " is-featured" : liveCount ? " is-live" : ""}" data-nearby-group-key="${escapeHtml(group.key)}"><b>${group.count}</b><small>${escapeHtml(t("Nearby"))}</small>${status}</span>`,
-              iconSize: [58, 58],
-              iconAnchor: [29, 29],
+        for (const item of mapClusterMarkers(clusterIndexRef.current,viewport,zoom)) {
+          const [longitude,latitude]=item.center;
+          if(item.kind==='aggregate'){
+            const status=item.presence?`<span class="mp-map-status mp-map-status-${item.presence}">${escapeHtml(t(item.presence==='featured'?'Featured':'Live'))}</span>`:'';
+            const icon=L.divIcon({className:'mp-map-div-icon',html:`<span class="mp-map-cluster${item.presence?` is-${item.presence}`:''}" data-map-group-kind="aggregate" data-map-group-key="${escapeHtml(item.key)}" data-map-group-count="${item.count}" data-map-member-ids="${item.ids.join(',')}"><b>${item.count}</b>${status}</span>`,iconSize:[48,48],iconAnchor:[23,23]});
+            const label=t('{count} businesses. Zoom in.',{count:item.count});
+            const marker=L.marker([latitude,longitude],{icon,keyboard:true,title:label,alt:label,riseOnHover:true,autoPanOnFocus:false});
+            marker.on('click',()=>{
+              if(!map||mapRef.current!==map)return;
+              const nextZoom=clampMapZoom(Math.max(map.getZoom()+1,item.expansionZoom??map.getZoom()+1));
+              if(nextZoom>map.getZoom())map.setView(marker.getLatLng(),nextZoom,{animate:true});
             });
-            const marker = L.marker([group.latitude, group.longitude], {
-              icon,
-              keyboard: true,
-              title: t("{count} nearby businesses in {city}", { count: group.count, city: group.city }),
-              alt: t("{count} nearby businesses in {city}", { count: group.count, city: group.city }),
-              riseOnHover: true,
-            }).on("click", () => callbackRef.current.onOpenNearbyGroup(group));
-            addMarker(marker, t("{count} nearby businesses in {city}. Open nearby businesses.", { count: group.count, city: group.city }));
+            addMarker(marker,label);
+            mountedGroupCount++;
+            continue;
           }
-          for (const showroom of data.showrooms) {
-            if (groupedShowroomIds.has(showroom.id) || !pointInMapViewport(showroom.longitude,showroom.latitude,viewport)) continue;
-            const presence = presenceFor(showroom, data.featuredNowBusinessId);
-            const lines = markerLabelLines(showroom.name).map((line) => `<span>${escapeHtml(line)}</span>`).join("");
-            const status = presence.kind ? `<em class="mp-map-status mp-map-status-${presence.kind}">${escapeHtml(t(presence.kind === "featured" ? "Featured" : "Live"))}</em>` : "";
-            const icon = L.divIcon({
-              className: "mp-map-div-icon",
-              html: `<span class="mp-map-showroom${data.selectedShowroomId === showroom.id ? " is-selected" : ""}${presence.kind ? ` is-${presence.kind}` : ""}" data-showroom-id="${showroom.id}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind ? ` data-presence="${presence.kind}"` : ""}>${STOREFRONT_GLYPH}<b>${lines}</b>${status}</span>`,
-              iconSize: [44, 44],
-              iconAnchor: [22, 25],
+          if(item.kind==='cluster'){
+            const members=item.ids.flatMap(id=>showroomById.get(id)?[showroomById.get(id)!]:[]);
+            if(members.length!==item.count||members.length<1||members.length>Math.min(MAP_GROUP_MAX_MEMBERS,clusterIndexRef.current.capacity))continue;
+            const status=item.presence?`<span class="mp-map-status mp-map-status-${item.presence}">${escapeHtml(t(item.presence==='featured'?'Featured':'Live'))}</span>`:'';
+            const icon=L.divIcon({className:'mp-map-div-icon',html:`<span class="mp-map-cluster${item.presence?` is-${item.presence}`:''}" data-map-group-kind="cluster" data-map-group-key="${escapeHtml(item.key)}" data-map-group-count="${item.count}" data-map-member-ids="${item.ids.join(',')}"><b>${item.count}</b>${status}</span>`,iconSize:[48,48],iconAnchor:[23,23]});
+            const label=item.count===1?t('1 business. View business.'):t('{count} businesses. View businesses.',{count:item.count});
+            const group:DiscoveryNearbyGroup={key:item.key,latitude:item.anchor[1],longitude:item.anchor[0],count:item.count,showroomIds:item.ids,
+              city:members.every(shop=>shop.city===members[0].city)?members[0].city:'',
+              region:members.every(shop=>shop.region===members[0].region)?members[0].region:''};
+            const marker=L.marker([latitude,longitude],{icon,keyboard:true,title:label,alt:label,riseOnHover:true,autoPanOnFocus:false});
+            marker.on('click',()=>{
+              if(!map||mapRef.current!==map)return;
+              if(mapExposedGroup(clusterIndexRef.current,item.ids,map.getZoom()))callbackRef.current.onOpenNearbyGroup(group);
             });
-            const marker = L.marker([showroom.latitude, showroom.longitude], {
-              icon,
-              keyboard: true,
-              title: showroom.name,
-              alt: `${showroom.name}, ${t(showroom.primaryIndustryLabel)}, ${showroom.city}`,
-              riseOnHover: true,
-            }).on("click", () => callbackRef.current.onSelectShowroom(showroom));
-            addMarker(marker, `${showroom.name}, ${t(showroom.primaryIndustryLabel)}, ${showroom.city}. ${t("Open page preview")}.`);
+            addMarker(marker,label);
+            mountedGroupCount++;
+            continue;
           }
-        } else {
-          const markers = clusterIndexRef.current.getClusters(viewport, zoom);
-          for (const feature of markers) {
-            const [longitude, latitude] = feature.geometry.coordinates;
-            if ("cluster_id" in feature.properties) {
-              const clusterId = feature.properties.cluster_id;
-              const featuredCount = feature.properties.featuredCount || 0;
-              const liveCount = feature.properties.liveCount || 0;
-              const status = featuredCount ? `<span class="mp-map-status mp-map-status-featured">${escapeHtml(t("Featured"))}</span>` : liveCount ? `<span class="mp-map-status mp-map-status-live">${liveCount} ${escapeHtml(t("Live"))}</span>` : "";
-              const icon = L.divIcon({
-                className: "mp-map-div-icon",
-                html: `<span class="mp-map-cluster${featuredCount ? " is-featured" : liveCount ? " is-live" : ""}"><b>${feature.properties.point_count}</b>${status}</span>`,
-                iconSize: [46, 46],
-                iconAnchor: [23, 23],
-              });
-              const marker = L.marker([latitude, longitude], {
-                icon,
-                keyboard: true,
-                title: t("{count} nearby businesses", { count: feature.properties.point_count }),
-                alt: t("{count} nearby businesses. Zoom in to see them.", { count: feature.properties.point_count }),
-              }).on("click", () => {
-                const expansionZoom = clusterIndexRef.current.getClusterExpansionZoom(clusterId);
-                map?.setView([latitude, longitude], Math.min(Math.max(zoom + 1, expansionZoom), NEARBY_GROUP_ZOOM), { animate: true });
-              });
-              addMarker(marker, t("{count} nearby businesses. Zoom in to see them.", { count: feature.properties.point_count }));
-              continue;
-            }
-            const showroom = showroomById.get(feature.properties.showroomId);
-            if (!showroom) continue;
-            const presence = presenceFor(showroom, data.featuredNowBusinessId);
-            const lines = markerLabelLines(showroom.name).map((line) => `<span>${escapeHtml(line)}</span>`).join("");
-            const status = presence.kind ? `<em class="mp-map-status mp-map-status-${presence.kind}">${escapeHtml(t(presence.kind === "featured" ? "Featured" : "Live"))}</em>` : "";
-            const icon = L.divIcon({
-              className: "mp-map-div-icon",
-              html: `<span class="mp-map-showroom${data.selectedShowroomId === showroom.id ? " is-selected" : ""}${presence.kind ? ` is-${presence.kind}` : ""}" data-showroom-id="${showroom.id}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind ? ` data-presence="${presence.kind}"` : ""}>${STOREFRONT_GLYPH}<b>${lines}</b>${status}</span>`,
-              iconSize: [44, 44],
-              iconAnchor: [22, 25],
-            });
-            const marker = L.marker([latitude, longitude], {
-              icon,
-              keyboard: true,
-              title: showroom.name,
-              alt: `${showroom.name}, ${t(showroom.primaryIndustryLabel)}, ${showroom.city}`,
-              riseOnHover: true,
-            }).on("click", () => {
-              if ((map?.getZoom() || 0) < SHOWROOM_DETAIL_ZOOM) {
-                map?.setView([latitude, longitude], SHOWROOM_DETAIL_ZOOM, { animate: true });
-              }
+          const showroom=showroomById.get(item.ids[0]);
+          if(!showroom)continue;
+          const presence=presenceFor(showroom,data.featuredNowBusinessId);
+          const lines=markerLabelLines(showroom.name).map(line=>`<span>${escapeHtml(line)}</span>`).join('');
+          const status=presence.kind?`<em class="mp-map-status mp-map-status-${presence.kind}">${escapeHtml(t(presence.kind==='featured'?'Featured':'Live'))}</em>`:'';
+          const icon=L.divIcon({className:'mp-map-div-icon',
+            html:`<span class="mp-map-showroom${data.selectedShowroomId===showroom.id?' is-selected':''}${presence.kind?` is-${presence.kind}`:''}" data-showroom-id="${showroom.id}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind?` data-presence="${presence.kind}"`:''}>${STOREFRONT_GLYPH}<b>${lines}</b>${status}</span>`,iconSize:[44,44],iconAnchor:[22,25]});
+          const marker=L.marker([latitude,longitude],{icon,keyboard:true,title:showroom.name,
+            alt:`${showroom.name}, ${t(showroom.primaryIndustryLabel)}, ${showroom.city}`,riseOnHover:true})
+            .on('click',()=>{
+              if((map?.getZoom()||0)<SHOWROOM_DETAIL_ZOOM)map?.setView([latitude,longitude],clampMapZoom(SHOWROOM_DETAIL_ZOOM),{animate:true});
               callbackRef.current.onSelectShowroom(showroom);
             });
-            addMarker(marker, `${showroom.name}, ${t(showroom.primaryIndustryLabel)}, ${showroom.city}. ${showroom.locationMode === "area" ? t("Approximate city area") + ". " : ""}${t("Open page preview")}.`);
-          }
+          addMarker(marker,`${showroom.name}, ${t(showroom.primaryIndustryLabel)}, ${showroom.city}. ${showroom.locationMode==='area'?t('Approximate city area')+'. ':''}${t('Open page preview')}.`);
         }
 
+        if((focusedGroup||focusedShop)&&!restoredMarkerFocus){
+          const controls=containerRef.current.closest('.discovery-map-stage')?.querySelectorAll<HTMLButtonElement>('.discovery-floating-buttons button:not(:disabled)');
+          const control=controls&&[...controls].find(element=>element.getClientRects().length&&!element.closest('[inert]'));
+          (control||containerRef.current).focus({preventScroll:true});
+        }
         containerRef.current.dataset.mapZoom = String(zoom);
         const center = map.getCenter();
         containerRef.current.dataset.mapCenter = `${center.lat.toFixed(5)},${center.lng.toFixed(5)}`;
+        containerRef.current.dataset.mapCenterPrecise = `${center.lat},${center.lng}`;
         containerRef.current.dataset.mapMarkerCount = String(mountedMarkerCount);
-        containerRef.current.dataset.nearbyGroupCount = String(data.nearbyGroups.length);
+        containerRef.current.dataset.nearbyGroupCount = String(mountedGroupCount);
       };
 
-      const commitView = () => {
-        if (!map) return;
+      commitView = () => {
+        if (disposed || resizing || !map || mapRef.current !== map) return;
         renderMarkers();
-        const center = map.getCenter();
-        callbackRef.current.onViewChange({ center: [center.lat, center.lng], zoom: map.getZoom() });
+        const view = leafletViewForPersistence(map);
+        callbackRef.current.onViewChange({ center: [view.center.lat, view.center.lng], zoom: view.zoom });
       };
       map.on("moveend", commitView);
-      tileLayerRef.current.on("tileerror", () => {
-        if (containerRef.current) containerRef.current.dataset.tileStatus = "degraded";
-      });
-      tileLayerRef.current.on("load", () => {
-        if (containerRef.current && containerRef.current.dataset.tileStatus !== "degraded") {
-          containerRef.current.dataset.tileStatus = "ready";
-        }
-      });
       renderMarkers();
       resizeObserver = new ResizeObserver(() => {
+        if (disposed || !map || mapRef.current !== map) return;
         window.cancelAnimationFrame(resizeFrame);
-        resizeFrame = window.requestAnimationFrame(() => map?.invalidateSize({ pan: false }));
+        resizeFrame = window.requestAnimationFrame(invalidateMapSize);
       });
       resizeObserver.observe(containerRef.current);
-      window.setTimeout(() => map?.invalidateSize({ pan: false }), 120);
-    }).catch(() => callbackRef.current.onError());
+      resizeTimer = window.setTimeout(invalidateMapSize, 120);
+    }).catch(() => { if (!disposed) callbackRef.current.onError(); });
 
     return () => {
       disposed = true;
-      markerRefs.current = [];
+      retryTiles.current = null;
+      disposeTiles?.();
       resizeObserver?.disconnect();
       window.cancelAnimationFrame(resizeFrame);
-      mapRef.current = null;
-      tileLayerRef.current = null;
-      markerLayerRef.current = null;
-      map?.remove();
+      window.clearTimeout(resizeTimer);
+      const instance = map;
+      map = null;
+      // SDK resize events can arrive after remove() has destroyed its pane.
+      if (commitView) instance?.off("moveend", commitView);
+      if (mapRef.current === instance) {
+        markerRefs.current = [];
+        mapRef.current = null;
+        tileLayerRef.current = null;
+        markerLayerRef.current = null;
+      }
+      if (instance) removeOwnedMap(instance);
     };
   }, []);
 
@@ -392,17 +394,20 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
     const map = mapRef.current;
     if (!map) return;
     map.fire("moveend");
-  }, [clusterIndex, featuredNowBusinessId, nearbyGroups, selectedShowroomId, showrooms, t]);
+  }, [clusterIndex, featuredNowBusinessId, selectedShowroomId, showrooms, t]);
 
-  return <div
+  return <><div
     ref={containerRef}
     className="discovery-map"
     data-map-provider={mapProviderConfig().id}
     data-map-marker-count="0"
     data-map-zoom={DEFAULT_ZOOM}
     role="region"
-    aria-label={t("Interactive OpenStreetMap map with clustered Suqpage page locations")}
-  />;
+    aria-label={t("Interactive OpenStreetMap map with clustered MirtPage page locations")}
+  />{tileFailed && <div className="discovery-map-background-status" role="status">
+    <p>{t('Map background is unavailable. You can still explore businesses.')}</p>
+    <button type="button" onClick={() => retryTiles.current?.()}>{t('Retry map')}</button>
+  </div>}</>;
 });
 
 export default MarketplaceMap;

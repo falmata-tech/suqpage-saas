@@ -9,13 +9,13 @@ export default function AccountDeletion() {
   async function compose() {
     setError("");
     try {
-      await openLink("mailto:falmata.dawano@gmail.com?subject=Suqpage%20account%20deletion%20request");
+      await openLink("mailto:falmata.dawano@gmail.com?subject=MirtPage%20account%20deletion%20request");
     } catch {
       setError(t("Could not open your email app. Send your request to the address below."));
     }
   }
   return <Screen>
-    <Copy big>{t("Delete your Suqpage account")}</Copy>
+    <Copy big>{t("Delete your MirtPage account")}</Copy>
     <Card>
       <Copy>{t("Send your request from the email you use to sign in. Include your page handle, if you have one.")}</Copy>
       <Copy muted>{t("Our team will verify your identity and confirm the data to be removed before deleting your account.")}</Copy>

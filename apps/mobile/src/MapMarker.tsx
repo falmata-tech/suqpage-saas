@@ -9,9 +9,9 @@ export function MapMarker({ item, selected, label, badge, nearby, onPress }: {
   const color = selected ? "#c93600" : "#fa4b00";
   return <Pressable accessibilityRole="button" accessibilityLabel={label}
     accessibilityState={{ selected }} onPress={onPress}
-    pointerEvents={item.kind === "shop" ? "box-none" : "auto"}
-    style={[s.touch, item.kind === "shop" && s.shopTouch]}>
-    {badge !== "" && <Text style={[s.badge, { backgroundColor: item.presence === "featured" ? "#c04a1d" : "#a92f00" }]}>{badge}</Text>}
+    pointerEvents="box-none"
+    style={[s.touch, item.kind === "shop" ? s.shopTouch:s.groupTouch]}>
+    {badge !== "" && <Text pointerEvents="none" style={[s.badge, { backgroundColor: item.presence === "featured" ? "#c04a1d" : "#a92f00" }]}>{badge}</Text>}
     {item.kind === "shop" ? <>
       <View style={s.shopHit}>
       <Svg width={36} height={34} viewBox="0 0 36 34" aria-hidden>
@@ -21,16 +21,18 @@ export function MapMarker({ item, selected, label, badge, nearby, onPress }: {
       </Svg>
       </View>
       <Text numberOfLines={3} style={[s.name, selected && s.selectedName]}>{markerNameLines(item.shop?.name || "")}</Text>
-    </> : <View style={[s.cluster, item.kind === "nearby" && s.nearby]}>
+    </> : <View pointerEvents="auto" style={s.groupHit}><View pointerEvents="none" style={[s.cluster, item.kind === "nearby" && s.nearby]}>
       <Text style={s.count}>{item.count}</Text>
       {item.kind === "nearby" && <Text style={s.small}>{nearby}</Text>}
-    </View>}
+    </View></View>}
   </Pressable>;
 }
 const s = StyleSheet.create({
   touch: { width: 96, minHeight: 58, alignItems: "center", justifyContent: "center", paddingTop: 14, paddingBottom: 3 },
   // The 44px hit frame adds 10px; these offsets keep the existing glyph/name pixels.
   shopTouch: { paddingTop: 9 },
+  groupTouch:{paddingTop:13},
+  groupHit:{width:48,height:48,alignItems:'center',justifyContent:'center'},
   shopHit: { width: 44, height: 44, alignItems: "center", justifyContent: "center", marginBottom: -5 },
   name: { maxWidth: 94, backgroundColor: "#fff4e9", borderColor: "#c93600", borderWidth: 1,
     borderRadius: 4, paddingHorizontal: 4, paddingVertical: 3,

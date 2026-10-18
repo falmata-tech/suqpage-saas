@@ -3,14 +3,21 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
 const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
 const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "suqpage-public-app-shell");
 const scope = process.env.SUQPAGE_CAPTURE_SCOPE || "all";
 fs.mkdirSync(output, { recursive: true });
 
 async function openPage(browser, route, viewport) {
-  const context = await browser.newContext({ viewport, reducedMotion: "reduce" });
+  const context = await browser.newContext({serviceWorkers: 'block', viewport, reducedMotion: "reduce" });
   const page = await context.newPage();
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
@@ -360,4 +367,5 @@ try {
   console.log(`Focused public application visuals passed: ${output}`);
 } finally {
   await browser.close();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests();
 }

@@ -2,13 +2,31 @@
 id: FE-036
 title: Routed public marketplace application
 status: in_progress
-related: [FE-041, FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, FE-038, FE-039, BE-023, DEP-025, FE-033, FE-052, FE-053]
+related: [FE-041, FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, FE-038, FE-039, BE-023, DEP-025, FE-033, FE-052, FE-053, FE-056, DEP-043, BE-018]
 owners: [product, frontend, design]
-last_updated: 2026-10-05
+last_updated: 2026-10-17
 change_level: L2
 ---
 
 # FE-036 - Routed public marketplace application
+
+## S111 — public transport help reachability (ready)
+
+Show the existing transport live-chat launcher on public Market, Featured, About,
+showrooms/product views, legal/information and supported public recovery screens.
+Exclude Login, signup/account setup, account deletion/private account and all
+owner/staff/admin management screens; those are account workflows. Never overlay
+a second launcher on the transport conversation itself. Owner Account → Support
+remains a prominent private task with current alerts and real conversation APIs.
+One launcher per public surface, consistent Suqpage theme/copy and48px minimum
+target; compact presentation on constrained screens must not cover navigation,
+map/product handles or primary actions. Web shell and native route adapter
+implement platform placement independently; route tests and phone captures
+cover guest/authenticated public use and exclusions. General guest support and
+direct business-inquiry inbox stay closed/retired respectively.
+
+
+Mapped focused regression: `scripts/test-public-transport-launcher.ts` tests route exclusions and actual web/native shell components. Actual local layout/modal/action evidence is `.local/workflow-audit-s111/native-agent/final-evidence.json`, with preserved classified failed attempts and separate completed segments. Full visual/release gates remain pending.
 
 ## Problem and outcome
 
@@ -327,3 +345,64 @@ checks (1,228 messages), sponsor rotation browser fixtures and 69 final viewport
 language captures pass. Evidence in specs/TRACEABILITY.md and checklist S51.
 Native-device checks, owner visual approval, full release gates, commit and
 rollout remain pending. Earlier copy drafts are superseded.
+
+
+## S104 consistent platform navigation — in progress
+
+The owner requests a cleaner grouped sidebar in Suqpage's own visual identity.
+GIVEN Market, Featured, About, Privacy, Terms, account deletion, Login, initial
+setup or contact receipt WHEN navigating THEN retain one public app shell, one
+brand/language header and one main landmark. Preserve existing URLs and server
+auth/setup redirects. No competing page-specific top navigation or duplicate
+phone tabs. Client showroom identity/immersive phone behavior remain unchanged.
+GIVEN desktop THEN expose Explore (Market/Featured), Account (Login when anonymous,
+Dashboard when authenticated, plus authorized inquiries) and Information
+(About/Privacy/Terms) in a bordered rounded navigation surface. Current route,
+focus/hover/pending feedback and long translated labels remain clear.
+GIVEN phone THEN expose Market, Featured, About, authenticated Inquiries and
+Login/Dashboard in one adaptive bottom bar. Privacy/Terms/deletion are reachable
+from About and their shared shell, never a second navigation model.
+Dashboard links resolve the existing role-specific owner/admin/scoped-agent home; labels never grant
+authentication or change permissions. No new guest general-support service.
+Ready: FE-026/FE-056/FE-053/FE-049/FE-019 and existing auth/runtime ports apply.
+Focused routing/auth/landmark/keyboard/overflow tests and all-five-language
+1440/390/320 captures precede explicit visual approval and full gates. No migration;
+rollback restores previous UI/routes without data writes.
+
+S104 focused local evidence passes in TRACEABILITY: actual role/navigation and
+combined support/transport HTTP workflows plus desktop/phone/five-language
+captures. Visual approval, full gates, scoped commit and rollout remain pending.
+
+
+## S113 coordinated public actions — local candidate
+
+S118 FE-041/FE-053 restricts saved-list access in this shared stack to the current
+business's showroom/product screens only. Market/Featured/About have transport
+without a last-business cart fallback. Independent lists persist per business;
+transport's mounted session/intake and all private exclusions remain unchanged.
+
+GIVEN an eligible public route WHEN transport help is visible THEN show a compact
+Transport chat label, including on phone/short screens. One activation opens the
+existing paired origin/destination intake directly, or the recoverable existing
+conversation; no new menu or confirmation precedes it. No request/message is sent
+until the visitor explicitly starts/sends. Use one shared floating stack with
+FE-041 saved inquiry access above transport. Keep a single mounted web chat
+instance so arranging actions does not discard unsent intake drafts. Hide/inert
+background actions during modal composition. Existing account/setup/private
+exclusions, owner support and server-authoritative recovery remain unchanged.
+Focused component and actual browser captures are required; no hosted change.
+
+
+S113 recovery loading correction: GIVEN the shell already prefetched its guest
+session WHEN the visitor opens Transport chat THEN show the themed loading state
+while the fresh authoritative session GET is pending, without an error or Retry
+claim. Success reveals the paired intake/recovered chat. Only a completed failed
+GET shows the connection error and explicit Retry; retry returns to loading and
+preserves unsent intake fields. Closing/obsolete responses remain guarded.
+Focused actual-component deferred-fetch regression is required.
+
+S113 mapped evidence: `scripts/test-public-transport-launcher.ts`,
+`scripts/test-floating-inquiry-web.ts` (including held GET/failure/retry),
+`.local/workflow-audit-s113/focused-web-results.json` and actual local captures
+indexed by `.local/floating-actions-s113/combined-verified.json`. Owner visual
+approval, full gates and rollout remain pending.

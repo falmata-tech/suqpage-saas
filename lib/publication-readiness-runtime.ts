@@ -2,6 +2,7 @@ import { runtimeCatalogByBusinessId } from "./catalog-runtime";
 import { runtimeGet } from "./runtime-sql";
 import { publicationReadiness } from "./publication-readiness";
 import type { ShopPageContent } from "./owner-page-domain";
+import {isPublicProduct} from './offerings';
 
 export async function publicationLocationConfirmed(businessId:number) {
   return Boolean(await runtimeGet(`SELECT 1 FROM businesses b WHERE b.id=? AND (
@@ -12,5 +13,5 @@ export async function publicationLocationConfirmed(businessId:number) {
 export async function firstPublicationIssues(businessId:number, content:ShopPageContent) {
   const catalog = await runtimeCatalogByBusinessId(businessId,true);
   if (!catalog || catalog.business.status!=="draft") return [];
-  return publicationReadiness(content,catalog.products,await publicationLocationConfirmed(businessId)).filter(check=>!check.ready);
+  return publicationReadiness(content,catalog.products.filter(isPublicProduct),await publicationLocationConfirmed(businessId)).filter(check=>!check.ready);
 }

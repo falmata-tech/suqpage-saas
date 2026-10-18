@@ -7,8 +7,7 @@ import {
 import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 import { heroMediaIntegrationForComponent } from "@/lib/showroom-guidance";
 import {
-  availabilityLabel,
-  offeringKindLabels,
+  productSupplyLabel,
 } from "@/lib/offerings";
 import styles from "./bank.module.css";
 import type {
@@ -537,7 +536,7 @@ export function BankCatalogSection({
     >
       <div className={styles.catalogHeading}>
         <div>
-          <span className={styles.kicker}>{t("Products & capabilities")}</span>
+          <span className={styles.kicker}>{t("Products")}</span>
           <h2>{t("What")}{" "}{context.business.name} {" "}{t("offers")}</h2>
         </div>
         <CatalogControls
@@ -559,7 +558,7 @@ export function BankCatalogSection({
             </button>
             <div className={styles.productCopy}>
               <div>
-                <span>{offeringKindLabels[product.offeringKind]}</span>
+                <span>{t(productSupplyLabel(product.offeringKind, product.availability))}</span>
                 <h3>{product.name}</h3>
               </div>
               <p>{product.description}</p>
@@ -570,7 +569,7 @@ export function BankCatalogSection({
               ) : null}
               <div className={styles.productActions}>
                 <span data-availability={product.availability}>
-                  {availabilityLabel(product.offeringKind, product.availability)}
+                  {t(productSupplyLabel(product.offeringKind, product.availability))}
                 </span>
                 <button type="button" onClick={() => context.onAddProduct(product)}>
                   {t("Add to inquiry list")}</button>
@@ -736,7 +735,7 @@ export function BankFooterSection({
         ) : null}
       </div>
       <div className={styles.footerShowroom}>
-        <span>{t("Permanent Suqpage page")}</span>
+        <span>{t("Permanent MirtPage page")}</span>
         <strong>@{context.business.handle}</strong>
       </div>
       <div className={styles.footerContact}>

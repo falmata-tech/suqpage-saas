@@ -60,6 +60,7 @@ export function parseSignupInput(raw: Record<string, unknown>, identity: SignupI
   if (!isBusinessCategoryKey(businessCategory)) throw new SignupError("Choose the category that best describes your work.");
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(idempotencyKey)) throw new SignupError("The setup session is invalid. Refresh and try again.");
   if (!place) throw new SignupError("Choose your business city from the results.", 400, "city_required");
+  if (raw.countryCode !== undefined && raw.countryCode !== place.countryCode) throw new SignupError("Choose a city in the selected country.", 400, "country_mismatch");
   if (!consent) throw new SignupError("Agree to the Terms and Privacy Policy to continue.");
   let handle = generatedHandle(businessName, providerUserId);
   if (Object.hasOwn(raw, "handle")) {

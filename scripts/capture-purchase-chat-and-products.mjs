@@ -3,10 +3,10 @@ import {TRANSPORT_COPY} from '../lib/i18n/transport-copy.ts';
 import fs from 'node:fs';
 import { chromium, expect } from '@playwright/test';
 import { createUiText, languageNames } from '../lib/i18n/core.ts';
+if (process.argv.includes('--actual-tiles')) throw new Error('Automated reviews must use local tile fixtures. Run any real provider smoke check separately by hand.');
 
 // FE-019 / FE-030 / FE-049: local, read-only UI review. Never submit a chat.
 const out = process.env.SUQPAGE_CAPTURE_DIR || '.local/transport-purchase-review/entry';
-const actualTiles = process.argv.includes('--actual-tiles');
 fs.mkdirSync(out, { recursive: true });
 const browser = await chromium.launch();
 const records = [];
@@ -18,7 +18,7 @@ try {
     for (const [width, locale] of states) {
       const t = createUiText(locale === 'en' ? {} : JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`, 'utf8')));
       const context = await browser.newContext({ viewport: { width, height: width === 1440 ? 1000 : 844 } });
-      if (!actualTiles) await context.route('https://tile.openstreetmap.org/**', route => route.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC0lEQVR42mP8/x8AAwMCAO+aZwoAAAAASUVORK5CYII=', 'base64') }));
+      await context.route('https://tile.openstreetmap.org/**', route => route.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC0lEQVR42mP8/x8AAwMCAO+aZwoAAAAASUVORK5CYII=', 'base64') }));
       const page = await context.newPage();
       page.setDefaultTimeout(25000);
       page.setDefaultNavigationTimeout(60000);
@@ -34,7 +34,6 @@ try {
       }
       const map = page.locator('.leaflet-container');
       await expect.poll(async () => Number(await map.getAttribute('data-map-marker-count')), { timeout: 25000 }).toBeGreaterThan(0);
-      if (actualTiles) await expect.poll(() => map.locator('img.leaflet-tile-loaded').count(), { timeout: 25000 }).toBeGreaterThan(3);
       const opener = page.getByRole('button', { name: t('View products'), exact: true });
       await expect(opener).toBeVisible();
       await expect(opener.getByText(t('View products'), { exact: true })).toBeVisible();
@@ -48,19 +47,12 @@ try {
         assert.ok(boxes[i].x >= boxes[i - 1].x + boxes[i - 1].width - 1, 'No overlapping controls');
       }
       assert.ok(boxes[0].height >= 44 && boxes[0].width >= 44);
-      const launcherName = `${t(TRANSPORT_COPY.launcherTitle)} ${t(TRANSPORT_COPY.launcherSubtitle)}`;
+      const launcherName = native ? t(TRANSPORT_COPY.launcherTitle) : `${t(TRANSPORT_COPY.launcherTitle)} · ${t('Live chat')}`;
       const launcher = page.getByRole('button', { name: launcherName, exact: true });
       await expect(launcher).toBeVisible();
       await expect(launcher.getByText(t(TRANSPORT_COPY.launcherTitle), { exact: true })).toBeVisible();
-      await expect(launcher.getByText(t(TRANSPORT_COPY.launcherSubtitle), { exact: true })).toBeVisible();
-      const lines = [TRANSPORT_COPY.launcherTitle, TRANSPORT_COPY.launcherSubtitle].map(value => launcher.getByText(t(value), { exact: true }));
-      const lineBoxes = await Promise.all(lines.map(line => line.boundingBox()));
-      assert.ok(lineBoxes.every(Boolean));
-      assert.ok(lineBoxes[1].y >= lineBoxes[0].y + lineBoxes[0].height - 1, 'Supporting sentence stays below the heading');
-      const typography = await Promise.all(lines.map(line => line.evaluate(el => { const s = getComputedStyle(el); return { size: parseFloat(s.fontSize), weight: Number(s.fontWeight) }; })));
-      assert.ok(typography[0].size > typography[1].size && typography[0].weight > typography[1].weight, 'Primary heading is prominent; supporting chat invitation is smaller and lighter');
       const bounds = await launcher.boundingBox();
-      assert.ok(bounds && bounds.x >= 0 && bounds.x + bounds.width <= width + 1 && bounds.height >= 44, 'Launcher stays inside the phone');
+      assert.ok(bounds && bounds.x >= 0 && bounds.x + bounds.width <= width + 1 && bounds.height >= 48, 'Labeled launcher stays inside the phone');
       async function shot(state) {
         await page.evaluate(() => document.fonts.ready);
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
@@ -106,5 +98,5 @@ try {
       console.log(`PASS ${native ? 'mobile' : 'web'} ${width} ${locale}`);
     }
   }
-  fs.writeFileSync(out + (process.argv.includes('--native') ? '/native-verified.json' : process.argv.includes('--web') ? '/web-verified.json' : '/verified.json'), JSON.stringify({ records, screenshots: records.length * 3, tiles: actualTiles ? 'actual OSM tiles, actual application/catalog' : 'controlled fixture, actual application/catalog', native: 'browser preview; not installed APK', messagesSubmitted: 0 }, null, 2));
+  fs.writeFileSync(out + (process.argv.includes('--native') ? '/native-verified.json' : process.argv.includes('--web') ? '/web-verified.json' : '/verified.json'), JSON.stringify({ records, screenshots: records.length * 3, tiles: 'controlled fixture, actual application/catalog; provider availability not tested', native: 'browser preview; not installed APK', messagesSubmitted: 0 }, null, 2));
 } finally { await browser.close(); }

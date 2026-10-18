@@ -1,7 +1,7 @@
 const associations = require('../../public/.well-known/assetlinks.json');
 const publicPaths = [
   { path: '/' }, { path: '/market' }, { path: '/featured' }, { path: '/about' },
-  { path: '/login' }, { path: '/account' }, { pathPrefix: '/@' },
+  { path: '/login' }, { path: '/account' }, { path: '/transport-plan' }, { path: '/tracking' }, { pathPrefix: '/tracking/' }, { pathPrefix: '/@' },
 ];
 function androidAppLinks(packageName) {
   const identity = associations.find(a => a.target?.namespace === 'android_app' && a.target.package_name === packageName);

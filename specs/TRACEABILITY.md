@@ -3,6 +3,393 @@
 Update this table in the same change that completes or materially changes a spec.
 Evidence must be reproducible; avoid transient chat claims.
 
+S145 latest checkpoint (2026-10-18): the refined “A professional digital showroom
+for every business” introduction and customer-facing range/story/listed-availability
+body are implemented in shared web/About/mobile/SEO and new-app drafts. Six strings
+changed with zero unrelated locale-value changes; catalog/narrative/types,20
+localization and seven material cases pass. Actual headed Chrome passes27 checks/
+27 states across en/am/om desktop/phone web and Expo, including About keyboard/CTA
+navigation and current web metadata, with zero app/console/request/lifecycle errors.
+The owner explicitly approves the refined copy and full checks on2026-10-18;
+unchanged artwork approval remains valid. The complete76-group application check
+and full web release gate pass on source-bound isolated candidates. Full browser
+acceptance now passes20/20 with exit0 on snapshot
+9e8e8e04774ca23af878169c64e6704e60cca35a17df3e9c50d560abdb953f00; its
+application/dependency inputs match passing release14956738f3d2382334d7855721bd1caf39a7eac1890838949c8c1a672d9d864e.
+The first full run passed17/20. Proven
+Cancel/Preview selector and ordinary-scroll repairs retain assertions; actual
+installed Chrome independently verifies Send clearance/hit tests with all71
+public table fingerprints unchanged after exact cleanup. The next complete run
+passes16/20, including the repaired transport Join/reply/privacy/history journey.
+Its failures are the preview remaining Loading, retired native inquiry request
+Origin, duplicate product-card matching and duplicate workbench matching. The
+three request/locator repairs retain410/403 boundaries and exact active entity/
+workspace assertions. Controlled signup replay passes without explaining the
+original Loading failure; the next interrupted run records9 passes/1 strict
+Sign out locator failure/10 unobserved cases. The exact helper now selects the
+Account main Sign out form and preserves auth/private-route assertions. The
+final20-case run passes without skips or retries. All original failed/partial
+receipts remain unchanged. Thirteen final stream-closed errors remain unclassified:
+the synchronous test execution blocks asynchronous app-log forwarding, so their
+post-summary output cannot establish shutdown versus navigation occurrence.
+Private gates/acceptance-completion.json and durable-acceptance-20261018 contain
+raw artifacts, exact cleanup, all2238 frozen hashes and unchanged normal runtime
+identities; web/Expo are HTTP200 after completion. Chromium suite results and
+actual Google Chrome review results are distinguished.
+This is local verification, not a hosted or new-native release.
+Canonical outlined/raster parity has four asset/renderer tests, ten worker cases
+and nine actual Chrome states. The earlier fresh-phone headed Apply now completes
+with real API readback; its parent later fails a duplicate-image screenshot helper,
+retained without claiming a product repair or explaining the original stall.
+
+The full workflow-UI group initially passed343/362; proven stale test fixtures were
+fixed without dropping required assertions. Its repeat passes361/362, with one
+Chrome-launch timeout before map assertions. The unchanged isolated case passes
+on one controlled retry. Raw parents remain failed. Reviewed test-only discovery,
+explicit-Join/assignment, benchmark and gallery corrections preserve assertions
+and complete all76 command groups. DEP-045's public gazetteer artifact guard adds
+29 positive/negative cases while preserving every other private/source denial;
+the complete release passes93 traces/110 exact required references and54 browser
+chunks with no catalog snapshot. Provider HTTP/security checks pass1/1. Both web
+dependency audits report0 vulnerabilities. Protected source-bound receipts are under
+`.local/mirtpage-rebrand-s145/{gates,copy-refinement,copy-materials,actual-copy,parity}/`.
+BE-059/DEP-029 local finite origin guard adds version3 kind/phase-bound plans and
+refuses version2 before provider reads;62 injected-port/credential cases and scoped
+types pass. Independent peer review is closed and these cases pass in the
+completed application check. GoDaddy7/7
+records and Netlify exact site/account/domain beforeimages are verified, with an
+owner-approved domain connection plan. New apex/www aliases and the two exact
+DNS changes are saved/read back, with all other zone records and the current
+primary/deployment retained. Managed TLS/31 domain-stage checks now pass, including
+eight normal-HTTPS root/health probes and unchanged20 public asset paths. The
+new Firebase Android registration and separate Free Play Draft for com.mirtpage.app
+are verified in provider-domain-apply/verified.json and provider-registration/
+verified.json. Final public branding is MirtPage throughout; old identities are
+retained only for safe migration, compatibility or historical authority. No new build, commit, application
+deployment, canonical/Auth/mail/data cutover or store rollout is claimed.
+Hosted Auth separately stages only the exact new callback alongside the old:
+site_url stays https://suqpage.com and Google login disabled. Independent readback
+matches the approved patch across243 fields with241 non-target fields unchanged.
+Evidence: private auth-origin-staging/retry-2026-10-18T20-51-57-965Z/
+independent-readback-verified.json. New-primary Auth remains unapplied.
+
+S145 (2026-10-18, local implementation/focused evidence; visually approved, not deployed): FE-070,
+BE-059, DEP-049 and proposed ADR-0029 cover the complete MirtPage rebrand. Owner
+confirms current palette, mirtpage.com purchased through GoDaddy and a NEW com.mirtpage.app/Play
+app with fresh testing. Three read-only inventories distinguish visible branding
+from provider/protocol identities. The original two-panel M, canonical shared
+web/native presentation, unique unshadowed SVG/PWA/native artwork and active
+English/Amharic/Oromo narrative are implemented locally. The SuqpageBrand import
+shim preserves callers without exposing the old wordmark. Tenant logos, colors
+and content remain unchanged. Focused evidence: original static study 37 checks/
+27 states; brand asset tests 2 and renderer test 1 across six React/RNWeb contexts;
+PWA and scoped native/script types pass. Copy/localization 20 tests, generated
+catalog checks (1,776 keys per retained catalog), narrative and recovery pass;
+About/RNWeb covers ten controlled states. These fixtures are not live workflows
+or independent native-speaker certification. The identity guard's initial failure
+on a backend old-brand literal is retained; the subsequent nonpersisted-display
+tranche fixes it and the current guard passes. That tranche covers nine backend
+display files, four regression cases, ten append-only TSV rows and catalogs now
+at 1,786 keys. Existing hero/About text, codes/permissions, cookie/channel IDs,
+stored requester labels, defaults/migrations and sender/job semantics are unchanged.
+
+BE-059's independent push-worker prerequisite accepts only exact legacy/new titles
+in both workers and displays the validated incoming title: ten executable worker
+regressions plus the inherited platform regression pass. Shared sender titles,
+Android channel IDs, subscription data and provider settings stay unchanged;
+deployed old workers are not assumed updated. New tests are registered in the
+existing identity/attention gates. These original focused receipts did not prove
+a full gate; current source-bound results are recorded above. Protected receipts are
+under `.local/mirtpage-rebrand-s145/{design,foundation}/` and
+`.local/mirtpage-s145/{copy,worker-compat}/`, retaining initial failures.
+
+Actual headed Chrome public journeys complete 36 functional checks/36 states and
+18 real search readbacks. Owner completes 13 checks/30 states on desktop/phone
+web and Expo with ordinary local email-code sign-in and unchanged protected
+catalog/draft/location fingerprints. Admin, transport and support role slices
+record six completed checks/19 states across headed prefixes and explicitly
+labelled headless suffixes. The actual scoped staff denial is a documented HTTP
+200 streaming redirect: the response targets Dashboard, exposes no admin heading,
+and the browser lands on the staff's own queue. No guard was changed to pass it.
+
+Raw parents remain failed: public has 13 cancellations (12 matched to observed
+abort signals, one native cause unproven); owner has two expected Tracking 401
+console notices and individually classified startup aborts. Staff harness
+readiness/fixture failures are retained. The original fresh-phone headed Apply actionability
+stall cause remains unproven; the later independent fresh headed success and
+raw screenshot-helper failure are recorded above, not retroactively rewritten. Current role suffix hashes and
+protected rowsets are stable. The later backend locale delta preserves the
+captured public/owner wording and is recorded rather than rewriting their hashes.
+The consolidated private review is
+`.local/mirtpage-rebrand-s145/release-review.html`. All owned browsers/DB sessions
+closed; ordinary local runtime restored with saved settings unchanged. The owner
+explicitly approved this combined review on 2026-10-18, requiring identical
+logo/icon geometry and shades everywhere. Canonical artwork parity and the later
+source-bound application/release/browser results are recorded above. Commit,
+native build and deployment remain separate.
+
+New separate-app Play/promo JSON drafts and a seven-case pure validator are
+registered separately from retained old-app sources. English/Amharic are documented
+Play listing languages; Oromo is in-app/promotional, not an invented Console code.
+Actual new-app captures/exports/native-language review and upload remain pending.
+The owner-selected charcoal feature graphic has canonical en/am/om1024×500 RGB
+exports. Private launch teasers now have story1080×1920 and feed1080×1350 PNG/SVG
+derivatives plus six silent6-second MP4s. Dimensions, glyph coverage, canonical
+artwork/palette, safe areas, exact crop and video streams pass local validation;
+no accounts, posts, store upload or human-language certification are implied.
+The approved domain alias/DNS/TLS stage and additive Firebase/Play records are
+complete; data/canonical/runtime/Auth/mail and native release phases remain
+incomplete with their own backup/target/approval gates.
+Existing schema63 live/schema72 local and S141–S144 evidence stay separate.
+No customer records, credentials or released application changed in these stages;
+the exact provider alias/DNS/TLS and app-record changes are recorded above.
+
+S142 (2026-10-18, local focused/functional actual; visual/full/commit/rollout
+NOT complete): FE-019/FE-062/BE-018 map to compact staff headers, preserved bounded
+navigation, explicit phone Details/Back with retained textarea/read-observer
+disabling, removed company UI/queue summary, authenticated retired write actions
+and legacy plan-route redirect.16focused cases/types0 plus the one-message CSS
+geometry regression pass. Actual review found a stretched short bubble; scoped
+grid alignment fixes it without reducing transcript height or changing chat rules.
+
+Installed headed Chrome real local API/PG transport+owner-support/admin tasks
+complete12functional checks/19current states. New332first attempt saved only a
+private note while its RSC Join UI was pending; that note remains private and the
+case was resolved without rewriting messages. Corrected333auto-assign→Join→
+public reply→visitor Read, phone draft DOM retention/hidden-unread→Back/read,
+private-note isolation/unanswered clock and Details resolution pass.334owner
+support repeats these tasks; the final truthful read waited until its footer
+was actually above fixed navigation. Existing-case continuation confirms watermark
+and staff Read before Details resolution.332–334 are resolved; all exact transcripts
+and protected account/catalog data remain intact. Source hashes frozen, no page/
+console/APIHTTP/unexpected-write/lifecycle errors, owned Chrome closed.
+
+Strict browser network results remain unclean: a read POST had HTTP200/fetch
+fulfillment before a later body cancellation; its exact cause is unproven. Raw
+failed receipts and request telemetry remain, not recategorized as clean based
+on a hypothesis. `.local/staff-chat-s142/combined-review.json`/review.html map
+9check/15state prefix and3check/4state continuation, initial failures, focus/Auth/
+synthetic-map controls and current source hashes. Ordinary local runtime is
+restored with saved settings unchanged; web/Expo/Mailpit each200. No full gates,
+commit, new deployment or Android build.
+
+S143 (2026-10-18, implemented/focused/functional Chrome; NOT clean-network,
+visually approved, full-gated, committed or deployed): FE-065/FE-052/FE-049 map
+to compact web/native mode rows, removed Info entry/sheets, AboutAudience and
+native About selected panels with keyboard/selected semantics, unchanged visible
+web introduction/SEO.32focused cases/10rendered contexts, native/script types0,
+narrative validation pass. A real native fontScale2 label overflow was corrected
+with width/minWidth wrapping, without shrinking text. Actual headed Chrome
+web1440×1000/web390×844/Expo390×844 ×en/am/om completes36functional checks and
+36screens:50px mode rows/48px targets, About tabs/keyboard/CTAs, independent
+search and selection retained on return. Runtime/console/APIHTTP/unexpected
+writes/lifecycle errors0; source hashes frozen, synthetic tile interceptions
+only, browsers closed. The original strict run remains FAILED on15discovery
+GET net::ERR_ABORTED; cleanup sources correlate with route/scope transitions but
+per-request provenance was not recorded, so no clean-network result is claimed.
+`.local/market-about-s143/verified.json` and review.html map raw failed host/test
+attempts, successful functional evidence, exact correction and current limits.
+New test-about-audiences and corrected inherited workspace/CSS/VM assertions are
+registered; no assertion was relaxed to preserve the removed Info feature.
+
+S141 (2026-10-18, local implemented/focused/actual; visual/full/commit/rollout
+NOT complete): BE-058/FE-069/DEP-048/ADR-0028 map to nullable migration72,
+tracking recipient/session creation, standalone ShipmentEditor/actions and single
+visitor/owner/native Tracking entry. Five isolated tracking suites plus seven
+sequential schema-compatibility suites pass; local71→72 native backup, exact DDL,
+all-existing-row fingerprints and runtime-only ACLs pass. Staff8, historical7
+(superseded by S142 retirement), actual-source conversation1, entry18 and focused
+localization19 cases pass. Scoped types0;206specs and1730catalog entries validate.
+
+Actual installed headed Chrome web1440/390/320 and Expo8082 prove9journeys in12
+states: staff own Tracking menu creates2plans and Mailpit-accepted initial emails
+while verified_at is NULL/no OTP, later direct-link code unlocks both; Cancel
+preserves version1, Save produces2; other verified email denied; account logout/
+draft coexistence and single visitor/owner/native entry; compact admin Details/
+Back and old-route redirect; native real code/list/detail plus Amharic/Oromo and
+320px editor. Original no-submission SSR-typing and early native-count failures
+are retained and classified as driver readiness; continuation does not recreate
+shipments. Account/catalog fingerprints and relevant source hashes unchanged,
+page errors/unexpected writes/lifecycle0, synthetic tiles only, owned Chrome
+closed. `.local/tracking-s141/actual-verified.json` maps successful prefixes,
+continuation, raw failures and exact limits. This is local Mailpit acceptance,
+not provider inbox delivery or installed Android/push proof.
+
+S144 (2026-10-18, authorized one-time data cleanup COMPLETE; no code release):
+BE-018/BE-057/DEP-047. Independent live Netlify account/site/domain and Supabase
+project inventory finds schema63, no support_transport_plans table and zero
+transport_handoff/transport_plan_updated/transport_plan_link_replaced events:
+verified no-op, no hosted data/configuration write. Local schema72 has4old plans
+and9allowlisted events. A0600exact typed archive with SHA256/target-bound digest
+passed isolated restore→delete→restore, checks/outbound FKs and duplicate denial;
+its schema was rolled back/absent. Reviewed one-time exact-ID/hash cleanup took
+bounded deterministic NOWAIT locks and the support-work advisory lock, preserved
+70other-table/protected-event fingerprints in-transaction and after commit,
+changed no sequences and resumed only the owned worker. Receipts and independently
+pinned targets are protected in `.local/legacy-transport-s144/`; restore is separate
+and never automatic. Accounts, messages, chats, assignments and independent
+Tracking remain untouched. Earlier S137/S138 unchanged-history evidence describes
+those historical operations; it is superseded only for these explicitly deleted
+obsolete rows. UI retirement/full/visual gates remain separate.
+
+S139/S140 (2026-10-17, local implemented/focused/actual; visual/full/commit/
+rollout NOT complete): FE-021/FE-058/DEP-026 and ADR-0016 map to the shared
+`lib/map/map-tile-loader.ts`, browser web/Expo map adapters, root metadata/CSP,
+shared `map-clustering.ts`/`mapExposedGroup`, web/native current-group guards,
+active localized failure status and synthetic-only map automation.
+
+Before/after installed headed Chrome proves Tracking→Market inherited no-referrer
+is restored to the public origin while Tracking stays private. No OSM request
+was made by that probe. Loader15 and real-adapter2 regressions cover403PNG,
+cache/referrer policy, decode/network/timeout, rapid pending zoom beyond10s,
+same-camera Retry and late teardown. Shared20+UI17+installed Leaflet2 cover
+terminal previews without forced18 zoom and rejection of hidden/stale group keys.
+Fixture guard5, provider contract, root/native types,206specs and1725catalog
+messages pass. Exact focused receipts are under `.local/map-tiles-s139/` and
+`.local/map-groups-s140/focused/verified.json`; stale source assertions, transient
+in-flight type errors and the missing Expo fixture environment port are retained
+and classified, not suppressed by weaker acceptance criteria.
+
+Actual installed Google Chrome155 headed on real local app/API: main33checks/
+48states in11desktop/phone/Expo contexts plus phone-web return2checks/3states.
+English/Amharic/Afaan Oromo200→403PNG→Retry, working markers, no failed-pan
+request loop, all-fit exact-public-member previews and unchanged terminal camera
+pass. Real showroom→Back remains ready beyond11seconds on desktop, phone web
+and Expo. Main45console errors are exactly injected403responses; page/API errors,
+unexpected writes/lifecycle errors and escaped public tile requests are zero.
+Source hashes stay unchanged. Review `.local/map-tiles-s139/review.html`, main
+`actual/outcome.json` and `actual-phone-return/outcome.json` for exact scope.
+
+All automated basemaps are synthetic fixtures, not real OSM availability proof.
+The owner separately confirms ordinary-browser Retry and preview return now
+work; no address/provider change was needed. This is human availability feedback,
+not an OSM unblock acknowledgement or a guarantee for every network. The specific
+original screenshot enforcement cause remains unproven. The later delayed-hide report led
+to replacing image-only TileLayer cancellation with public async GridLayer;
+current zoom/return regressions pass. Existing ordinary user Chrome was inspected
+read-only without retries, navigation or new tile requests. No provider identity,
+host, paid service, native SDK, credentials, canonical data or database change.
+No physical Android/MapLibre/human language or live provider claim. Earlier S138
+and S129–S137/workspace/chat visual gates remain pending; servers stay ordinary.
+
+S138 (2026-10-17, implemented/focused/actual local evidence; NOT visually
+approved, committed or deployed): BE-058/FE-069/DEP-048 and ADR-0028 provide
+tracking-only verified recipients, independent multiple shipments, dedicated staff
+workspace, durable initial email and separate native/web sessions. Additive71
+backup/apply/readback preserves every prior public table; old plans remain private
+without inferred recipients or anonymous/participant publication.
+
+Mapped code: lib/tracking-contract.ts, tracking.ts, tracking-http.ts and runtime,
+tracking-email.ts/delivery/after; additive71; app/api/tracking and mobile adapter;
+app/dashboard/tracking plus Shipment components/navigation; TrackingPortal and
+public tracking pages; native tracking/client/links/buying; private legacy view.
+Test mappings are in the controlling specs. Eleven sequential isolated PostgreSQL
+suites plus current cooldown, immutable-email, expired-lease and24-row pagination
+supplements pass with public71 unchanged. Staff8/inherited7, portal6, native25,
+entry11, HTTP9, locale18 and provider/worker7 focused cases pass; types0,206specs
+and1724catalog entries validate. Counts describe separate test evidence, not a
+claim that expensive full gates have run.
+
+Actual installed Chrome HEADLESS web1440/390/320 and Expo8082 prove real
+Mailpit email/code, empty/two shipments, staff Submit/Edit/Cancel/Copy, recipient
+live update, owner-session/draft coexistence/logout, direct-link/other-recipient
+denial, support-only denial and manager scoped revocation; all prior account/
+business/catalog/chat/legacy-plan fingerprints stay unchanged. Protected review
+`.local/tracking-s138/review.html` and integrated verified.json retain13 journey
+checks, raw/settled screenshots, original failures, exact source deltas and limits.
+The initial capture remains failed only at its wrong /tracking reload expectation;
+successful prefix and corrected direct-locator continuation are explicitly mapped.
+One pre-transition editor screenshot is superseded by four settled editor states.
+Expected401s and navigation/focus request aborts are retained; there is no clean-
+network, physical Android, provider-delivery or native human language-review claim.
+AGENTS step8 visual approval and full/check/acceptance/release/commit/rollout remain
+open. Saved runtime settings are restored after local tests. Earlier reviews stay.
+
+S137 (BE-057/FE-068/DEP-047) historical local evidence remains in `.local/transport-plan-s137/`: protected
+69→70 backup/apply/ACL readback, eight isolated suites, staff/HTTP/native/participant
+and actual paired Chrome proof. S138 supersedes only its anonymous chat-bound
+publication. No legacy plan/chat row was deleted or auto-imported, and the owner-
+authored case327 remains unchanged. Neither historical feature is deployed here.
+
+S129–S136 (2026-10-17, local candidate; NOT deployed/approved): FE-041/053
+card Add/options/excerpts and optional category chips/affiliation; FE-065/021
+richer bounded mobile previews; BE-044 additive canonical category/city DTO;
+FE-049/052 en/am/om activation and meaning-first narrative/transport invitation;
+FE-063 quiet anonymous listing safety. Source changes are in the active checklist
+S129–S134, with explicit Ready recorded before each edit. Per-business selection,
+stock, tenant authority, map capacity and chat lifecycle remain controlled by the
+linked specs. No new schema, dependency, provider or editing permission.
+
+Focused evidence: `.local/product-cards-s129/native/receipt.json` (S129 initial30),
+`.local/product-cards-s129/web/verified.json` (web2),
+`.local/showroom-categories-s131/verified.json` (3 canonical projection cases,
+2 actual-source web workflows,1 rendered12-state case),
+`.local/discovery-previews-s130/native/receipt.json` (62 current/historical native
+and inherited cases,7 rendered layout states),
+`.local/listing-options-s134/native/receipt.json` (5 source safety cases),
+`.local/language-s132/verified.json` (active-boundary5 including proven SSR-readiness
+regression, localization18 at1617keys,
+email10, narrative/launch and strict types). These are controlled-port/component
+checks, not app/API/device proof. Earlier failed browser/fixture/type runs remain
+preserved and classified. Root's current pure integration22 cases and native
+typecheck pass; global web typecheck initially identified test-only never-array
+narrowing, corrected without weakening assertions; final global web check passes.
+The focused web landing/floating handoff9cases and latest return/language7cases
+also pass. `.local/ui-integration-s129-s134/cards-verified.json` binds3complete
+English real API/storage journeys plus24post-readiness-fix active-language card
+views; full error/raw failed receipts and source-delta limits are retained.
+Actual Chrome also proved Expo details→Back dropped category/query; FE-041 Ready
+precedes its bounded32-business/2h public-memory correction. Its35focused cases
+and current mobile/strict types pass; the2affected390/320actual return journeys
+now pass. No private preview/catalog/account data enters that cache. New pure
+`test-showroom-return-state.ts` is registered. Final local safety/copy/intake
+proof is under `.local/ui-integration-s129-s134/native-additions/`: S134 two real
+web/Expo preference/report-Cancel journeys10screens, S132/S13323checks41screens
+plus the preserved completed English prefix, and real loaded OSM desktop tiles.
+Oromo country-name fallback follows installed Chrome's unsupported locale data,
+explicitly distinguished from authored interface translation. No report/chat or
+merchant data was submitted. Inherited real PostgreSQL report security passes
+at unchanged protected local schema69.
+
+The actual private-owner journey uses ordinary local OTP/Mailpit, never Auth admin
+or a fake signed-in state. Its corrected320/390grid supplement proves full-width
+248px cards versus two153px columns with a12px gap. QA business/products/category/
+draft/publication fingerprints stay unchanged. Original visible early-close and
+one5s readiness failure remain failed with historical causes unproven; the bounded
+status-only retry passes. S135 now requires lifecycle events and fails unexpected
+closure/crash/deadline; final isolated headless cleanup is explicit. It does not
+claim the original headed-browser cause fixed.
+
+S129 measured-grid proof: `.local/product-cards-s129/measured-grid/receipt.json`
+(36focused plus six actual RNWeb geometries, native/script types0), current private
+`.local/product-cards-s129/owner-grid-retry-2026-10-18T01-10-31.265Z/grid-verified.json`
+and explicit response-only `variant-fixture/outcome.json` (two journeys4screens;
+no catalog write). S134 footer entry had two real layout defects: phone bottom
+obstruction and681–720px breakpoint gap. Ready preceded each correction;
+`.local/listing-options-s134/footer-clearance/corrected-verified.json` proves ten
+single/stacked dock states, true max scroll, five hit points and zero overlap.
+
+S136 FE-065/021/053 retains geographical intent across size-only Leaflet changes
+without private SDK fields or tile resets. Original actual0.936px and repeated
+installed-SDK drift remain preserved. `.local/map-camera-s136/verified.json`
+records7SDK/2actual-source adapter cases, separate raw SDK/persistence tests,
+strict web/native types0 and peer review. Current real API proof at
+`.local/ui-integration-s129-s134/native-additions/s136-current-proof.json` binds
+three ordinary full-showroom returns each on web1440/Expo390, original0.5px limit,
+independent raw SDK center, unchanged target/group/zoom and genuine pointer pan.
+Native pan's1ULP longitude representation is reconciled against the exact existing
+canonicalization function in a separate read-only sidecar; the failed harness
+receipt is unchanged and no tolerance was widened.
+
+Both final global typechecks and199spec/ADR validation pass. The combined review
+`.local/ui-integration-s129-s134/review.html` and `verified.json` retain source-delta
+limits and prior workspace/chat/map reviews. Actual Chrome here is installed
+headless, with explicit analytics/media controls; it does not establish provider
+video playback, installed Android/MapLibre, OS handoffs, TalkBack, push delivery or
+independent first-language endorsement. Full/acceptance/release/commit/rollout
+remain gated by explicit visual approval under AGENTS step8. No current commit,
+push, cloud/config/data mutation, new build or store artwork publication.
+
 S99.4 / FE-063 / BE-051 / DEP-044 (2026-10-10): owner-approved catalog prohibition
 is published in five-language Terms and staff report guidance.
 Typecheck, localization, real Prohibited goods / Abusive content report
@@ -1695,3 +2082,1389 @@ policy approval. Evidence: .local/play-s99/closed-v5-start/publication-verified.
 and console-setup/closed-v5-published-* plus publication-overview-verified.json.
 DEP-044 remains draft for those external testing/public gates; no build, credential,
 other app, invitation or extra provider mutation occurs.
+
+S100 / FE-052 / FE-049, October 15, local candidate: shared web/native Market and
+About, map guidance, account entry, metadata and prepared listing/campaign text
+lead with business showrooms without social-post clutter. Customer/owner sections
+cover collections/models/colors/styles, merchant-listed availability with direct
+confirmation, and producer capacity/timing in descriptions/questions. No new
+inventory, variants, production fields, API/database or provider write is added.
+Implementation: lib/storefront-copy.ts, app/login/page.tsx,
+apps/mobile/app/(tabs)/account.tsx, locales/interface.tsv and generated catalogs,
+docs/{play-store,marketing} source text. Evidence: npm run test:narrative,
+test:localization (ten tests; 1,414 messages per translated catalog), both
+typechecks, test-homepage-composition and 74 passing final capture-storefront-copy
+states. Captures/receipt: .local/showroom-narrative-s100/refined-screens/.
+Actual local catalog and markers are used; tiles alone are stubbed. A transient
+navigation load-event timeout is diagnosed with a 200/visible sign-in read;
+explicit content/font/image/map readiness and unchanged screenshot caret styles
+prevent test-induced hydration/resource waits. New visual approval/full gates,
+scoped commit, refreshed generated marketing media and web/Android rollout remain
+pending; deployed 3cfa577 web and Play v5 are unchanged. User-owned deno.lock is
+preserved. This is browser evidence, not physical-device or native-speaker approval.
+
+S100 same-day digital-lead refinement: the owner asks for "a business’s digital
+showroom" in the heading. Shared copy and prepared marketing sources are aligned;
+four contextual leads explicitly name an online page/showroom. Ten localization
+tests (including explicit online meaning), both typechecks, narrative/marketing
+claims and 21 refreshed Market/metadata browser states pass. Latest evidence:
+.local/showroom-narrative-s100/digital-lead/screens/copy-verification-all.json.
+Unchanged About/account states retain the initial 74-view receipt. This wording
+correction is not visual approval; full checks, commit and rollout remain pending.
+
+S101 / FE-049 / FE-052, October 15, researched local language revision: primary
+guides and observed language usage, limitations and writing decisions are in
+locales/README.md. 138 existing source rows plus one missing owner metric are
+revised; three native title-case status aliases fix English fallbacks. Generated
+catalogs each contain 1,418 messages. Shared OWNER_ACTIVITY_METRICS labels reach
+web/native owners; ShowroomApp/BusinessProfile translate fixed platform nouns
+before interpolation while preserving merchant values. Prepared four-language
+campaign and existing Amharic store text follow the same draft meaning.
+
+Focused evidence: test:localization (12), test:narrative (including source-copy
+alignment), both typechecks, test-homepage-composition, validate:specs (190) and
+diff whitespace pass. Actual local views: 74 shared-copy states in
+.local/language-research-s101/screens/copy-verification-all.json, 40 web states
+in journeys/web-evidence.json, 12 fully loaded native-owner states in
+journeys/native-owner-evidence.json, and 16 native public states in
+native-public/evidence.json. Browser errors/overflow assertions pass on final
+runs; typed contact text, inquiry selection/reload and literal merchant identity
+are checked. Tiles alone are stubbed. Existing local demo sessions are used;
+no business saves, customer requests or chat messages are submitted.
+
+Initial harness failures were development navigation/cache timing and hidden
+Expo stack selectors; premature loading-frame evidence is explicitly superseded
+by loaded form/inquiry captures. /dashboard's existing development redirect
+timing error matches the upstream report https://github.com/vercel/next.js/issues/86060;
+canonical /dashboard/profile is captured without suppressing errors or changing
+dependencies/redirects. This does not establish production redirect health.
+User visual approval, full gates, coherent scoped commit, regenerated promotional
+artwork and any web/Android publication remain separate and pending. No native
+device, independent first-language review or complete linguistic certification
+is inferred. Existing deno.lock remains untouched; Loadgistic is not modified.
+
+
+S102 locally implemented / in progress: FE-065 / BE-054 / DEP-045 / ADR-0027.
+Source: lib/market-search.ts, lib/discovery.ts, lib/spelling-search.ts,
+lib/public-discovery-cache.ts, app/api/discovery/route.ts, mobile router/projections
+and packages/contracts; components/DiscoveryWorkspace.tsx / MarketSearchControls
+and Expo Market/controls; countries/place catalog/lookup adapters, migration 64,
+signup/starter/owner adapters and country/city forms; safe demo seed inputs and
+inert external demo contact actions on web/native. Five-language catalogs are
+shared, not merchant translations. Country-label hydration and same-country
+reselection fixes are captured in actual setup screens.
+
+Focused evidence: scripts/test-independent-discovery.ts (real PostgreSQL SQL/wire,
+empty activation, exact/fuzzy scopes, public metadata, strict geography/type,
+source descriptions, canonical signup, world owner edits and tenant/version
+negative cases); existing place/signup/handle/starter/discovery/staff suites;
+scripts/test-mobile-app-links.ts (six tests); scripts/test-localization.ts
+(12 tests, 1,440 keys); both typechecks and 194-spec validation.
+tests/acceptance/discovery.spec.ts adds focused actual-browser typing,
+independent state, descriptions/brand links, filters, reload, empty clearing,
+error/retry and keyboard dismissal. Full-suite/build/acceptance release gates
+remain pending visual approval; these focused runs do not substitute for them.
+
+.local/discovery-s102/ contains the protected backup and local 67-demo
+contact/geography preservation receipt, private test-access directory and local
+staff/setup fixture receipts. Existing auth aliases, real businesses, products,
+inquiries and GPS were preserved during demo correction; new labeled local test
+identities are a separate operation. Local schema is 64; hosted schema/code and
+installed Android binaries are unchanged. Screens/evidence cover 24 English
+search states, 21 initial language/viewport states, 40 localized product/city
+picker states and ten signed-in setup states. These are browser/Expo-browser
+screens, not native-device or independent native-speaker certification.
+
+Migration 64 rehearsal also proves schema-63 upgrade, rollback on unexpected
+constraint names, retained custom checks, unchanged private users/GPS, canonical
+ET backfill only and idempotent replay. Blank/null exact coordinates are rejected.
+The final three focused browser tests pass, including filter Escape isolation.
+
+Remaining: actual layout approval,
+full gates, scoped review/commit and separately authorized web/Android rollout.
+City-data deployment tracing and mobile-bundle exclusion require release proof.
+Unrelated deno.lock and all prior pending S100/S101 work remain preserved.
+
+Final local account session receipt: .local/discovery-s102/account-session-evidence.json
+proves main admin, demo owner and two dedicated local agents can enter their web
+workspaces; owner mobile API is 200 and each staff/admin mobile API is 403. No
+messages, customer operations or outgoing email were part of that verification.
+
+S102 final publication safety check: lib/publication-readiness.ts retains legacy
+starter placeholders and reserved-domain/number recognition after safer new
+defaults. scripts/test-independent-discovery.ts covers old/new sample rejection
+and real contact admission; test:self-service still passes publication/live-save
+atomicity, foreign/stale/suspended denial and location/privacy workflows.
+
+
+### S103 — bounded browse, infinite products and paired discovery panels (local)
+
+FE-065 / BE-054 / DEP-045 extend pending S102. Code: `lib/market-search.ts`,
+`lib/discovery.ts`, `lib/use-market-feed.ts`, `lib/public-discovery-cache.ts`,
+`lib/mobile/router.ts`, `app/api/mobile/v1/[...path]/route.ts`,
+`components/DiscoveryWorkspace.tsx`, `components/IndependentMarket.module.css`,
+`apps/mobile/app/(tabs)/index.tsx`, and all four generated native-language catalogs.
+`test:independent-discovery` proves bounded default rows/counts, complete stable
+12-card paging and visibility exclusions. `test:discovery-pagination` preserves
+all six legacy query suites. Seven `tests/acceptance/discovery.spec.ts` scenarios
+pass locally for typing, scrolling/position, retry/races, hidden panels and
+centered click/drag switch behavior. Both typechecks, localization (1,444 keys) and 194-spec validation pass.
+`.local/discovery-s103/screens/evidence.json` records 29 web/Expo-browser states
+with no page errors. New states await visual approval, followed by full gates,
+scoped commit and separately authorized web/native rollout. No device/load-test
+or native-speaker certification is claimed; no production mutation occurred.
+
+
+### S104 — consistent public shell, standard owner dashboard and live chat (local)
+
+FE-036 / FE-026 / FE-056 / FE-053 / FE-049: public legal/Login/setup/receipt routes
+now share app/(public), with stable URLs, one main/header/navigation, grouped rail,
+About, authorized Inquiries and role-aware Login/Dashboard. app/navigation.css,
+PublicAppFrame/PublicMobileNavigation/PublicAppShell, DashboardShell,
+WorkspaceNavigation and native main-navigation/owner-profile implement matching
+owner overview, task cards, metrics, focused edit/save-return and one phone bar.
+lib/capabilities.ts maps existing roles to their existing homes, without grants.
+
+FE-019 / BE-018: SupportThreadRefresh and support/[id] retain slower closed-case
+updates so staff reopening reaches the owner without manual refresh. Real local
+HTTP audit scripts/capture-staff-chat-workflows.mjs completes all owner/visitor/
+support/transport flows, scoped roles, attachments, capacity, retry/history and
+privacy checks; .local/navigation-s104/final-chat/verified.json proves full scope
+and zero mocked successful replies. Only disposable local fixtures are removed.
+
+Focused evidence passes: both typechecks, localization 1,453 messages, 194-spec
+validation, PWA shell, OSM contract, staff navigation, all support suites, scoped
+attention/read-receipt suites, two navigation browser scenarios, and 57 public/
+authenticated web/Expo layout states. Receipts and gallery are protected under
+.local/navigation-s104/. Native physical devices, independent native-speaker
+review, full check/release/acceptance, scoped commit and publication remain
+pending actual visual approval; no hosted configuration/data or Android build
+was changed. Prior source-selector/schema fixtures and screenshot-caret mutation
+were corrected as test-infrastructure issues, without weakening runtime guards.
+
+
+## S105 — social-only business contact (local, review pending)
+
+| Spec | Implementation | Focused evidence | Status |
+|---|---|---|---|
+| FE-066 | ShowroomApp/social composer, product-inquiry, native inquiry, public/owner navigation and shared showroom copy | scripts/test-product-inquiry.ts; scripts/test-localization.ts; scripts/capture-social-contact-workflows.mjs: 32 actual local states; capture-storefront-copy: 74 locale/layout states | in progress; visual/full gates pending |
+| BE-055 | web inquiries 410 adapter and early native dispatch retirement; history/support handlers preserved | scripts/test-retired-business-inquiry.ts; scripts/test-mobile-api.ts history/security + test-launch-clarity.ts / test-self-service-publication.ts readiness/atomicity; real HTTP row/event-count regression | focused adapter/integration/browser checks pass; visual/full gates pending |
+
+
+## S106 — restore contact setup and automatic handoff (visual/full gates pending)
+
+FE-066 / BE-055 / FE-040 / BE-032: all eight original contact fields and public
+links/publication eligibility are restored; only the Suqpage business inbox is
+retired. The reported URL passes fresh online, connection-loss copy and reconnect
+checks. Local production renderers use the established publicContactLinks export.
+Auto-copy precedes account opening; manual copy is secondary. Visible demo
+choices stay disabled. Evidence: .local/contact-repair-s106/screens/evidence.json
+(32 five-language states), final-screens/evidence.json (18 targeted states including
+actual native-owner setup and selected-footer handoff), offline-evidence.json;
+product/adapter/clipboard, owner-page and first-publication tests, typechecks and
+localization/spec validation. No real external message, production write, full
+release gate, Android build or commit is claimed. S105 field/publication
+restrictions and their approval request are superseded by the owner's correction.
+
+## S107 — local role/workflow audit (in progress)
+
+FE_BASE route/root recovery (`app/error.tsx`, `app/global-error.tsx`,
+`components/RouteRecovery.tsx`) uses the installed Next retry contract and safe
+catalog-backed messages. `scripts/test-route-recovery.ts` and 15 focused
+component-browser locale/viewport states pass, including contrast. This evidence
+does not inject a failure into production or prove production runtime behavior.
+
+FE-056 uses the shared native CitySelector for saved city, invalidation and
+visible lookup/category retry. The web cover editor uses `lib/browser-json.ts`
+to bound transport and response-body decode without replaying a timed-out write.
+`scripts/test-owner-city-ui.ts` and `scripts/test-browser-json.ts` prove stale
+selection, exact-coordinate retention, response validation, abort and safe retry
+state contracts. FE-026 `scripts/test-workspace-context.ts` proves fixed role-home
+fallback, absent-context no-query behavior and canonical owner tenant scope.
+All six `npm run test:workflow-ui` tests pass. Actual post-fix support product
+routes return to the authorized support queue. FE-065 touch-target browser
+measurement and full owner persistence captures remain active.
+
+BE-054/FE-065 admin worldwide placement is corrected in the existing discovery
+adapter/form. `scripts/test-independent-discovery.ts` passes real isolated
+PostgreSQL tests for worldwide/inclusive/zero coordinates, malformed/range
+rejection, unchanged other tenant and stale owner-proposal denial. No migration
+or provider change is introduced.
+
+The role directory is verified; the protected S107 HTML guide contains exact
+local accounts, code retrieval and paired test instructions. Actual web and
+Expo-browser transport assertions complete with DB-confirmed exactly-once
+messages, assignment/capacity, private-note isolation, lost-ack retry, end,
+retained callback/history, resolve and reopen. The combined run remains FAIL
+because Next development performance instrumentation throws on redirected
+Dashboard/retired-health components. No exception filter or runtime patch was
+added. Owner/support, remaining screens and native audit are still in progress.
+
+Evidence is under `.local/workflow-audit-s107/`. Android debug compilation and
+installation succeed; system-wide emulator ANRs do not constitute an app pass.
+Earlier infrastructure/stale-harness failures remain recorded. No full check,
+release/acceptance gate, commit, production write or publication is claimed.
+
+S107 subsequent focused owner evidence: `scripts/test-owner-editor-failures.ts`
+proves rejected-save recovery, in-flight guards, sanitized errors and preservation
+of the installed Next redirect control flow. Actual web/Expo owner capture
+`owner-agent-final/verified.json` passes cover conflict/retention followed by real
+save/re-entry, private account updates, business/handle failed network saves then
+successful persistence, native-browser city failure/Retry/save and five locales.
+Cleanup removes only its two uploaded assets and disposable owner identities.
+Six actual compact-control layouts at 1440/390/320 and the real 20-second web
+cover timeout/retained-photo/reenabled Save state also pass. Screenshot geometry
+uses local renderers; OSM tiles are blocked and this does not prove native touch.
+
+FE-053/BE-044 storage and Auth corrections use
+`scripts/test-transport-storage-ui.ts` and `scripts/test-mobile-auth-fetch.ts`.
+Ten focused actual-component/installed-SDK port tests pass, with no external
+Auth request: five-language explicit recovery, unknown-session no-new-chat,
+stale unmount, request/body deadlines, cancellation/cleanup, successful OTP and
+refresh/status semantics. Actual Android OS workflows remain unverified after
+system-wide emulator ANRs; the emulator is stopped and its unused fixture removed.
+
+S107 final focused browser checkpoint: the role/context inventory completes 187
+states (168 web, 19 Expo browser), with zero horizontal overflow. Twenty-two
+320px states include contrast checking; the only unchanged contrast flag is the
+Suqpage logotype, covered by W3C SC 1.4.3's explicit logotype exception. Raw
+findings remain recorded. FE_BASE primary-heading semantics pass 15 actual
+five-language states; actual product-gallery keyboard focus/ArrowRight scrolling
+passes after the narrowly scoped accessibility correction. No global contrast
+rule or browser-error assertion was disabled.
+
+First-Publish current-source capture passes private web preview/readiness and
+five-language Expo readiness, missing-field navigation, stale re-review,
+failure-retained confirmation, actual publication and live projection. Read-only
+reconciliation proves zero remaining fixture Auth/users/businesses. Frozen
+owner-support completes both-way replies, exact-once staff writes, both-way
+decoded image attachments, foreign-owner case/file denial, reassignment denial,
+end/history and automatic reopen. Combined transport/support captures still fail
+only their strict Next development performance-error gate; the exceptions remain.
+
+Dedicated attention capture passes independently with zero browser exceptions:
+ten exact incoming read cursors across owner/visitor web and Expo, assignment
+versus actual join, hidden/covered unread, alert acknowledgement separate from
+transcript reads, seven exactly-once staff replies, opted-in sound dedup/mute,
+five-language alert layouts and retired-inquiry 410/no-row/no-alert. Its three
+cases, three users, one business, three provider identities and preferences are
+reconciled to zero. No hosted or physical OS notification delivery is claimed.
+
+Logout regression uses actual Runtime/Account/Settings plus the installed SDK.
+It fences stale Auth/owner requests, always clears private UI, shares concurrent
+attempts and retains provider-scoped failure/Retry until local cleanup succeeds.
+The deprecated custom processLock reproduced a secondary unhandled SDK promise;
+default installed-SDK coordination removes that error without suppressing it.
+Twenty actual five-language storage/logout states pass. Final focused aggregate
+`npm run test:workflow-ui` passes 23 tests; both final typechecks, auth-runtime,
+localization, narrative and 196-spec validation pass. Native device interaction,
+visual approval, full production-mode gates, scoped commit and rollout remain
+separate pending steps. The protected REVIEW.html and TEST-GUIDE.html are ready.
+
+
+## 2026-10-16 S108–S110 local workflow candidates — review pending
+
+BE-018/FE-019/FE-026 S108 routing is implemented and isolated-PostgreSQL tested
+by `scripts/test-support-routing.ts`, including workloads over 100, concurrent
+least-load/fair-tie assignment, paused ownership, queue/role admission, FIFO 100
+recovery, idempotency and exact alert history. Existing support, buying, transport,
+attention and staff boundaries/navigation regressions pass sequentially. Actual
+web/Expo paired reference/assignee/join and paused-assignee Save checks pass with
+zero errors and disposable-fixture cleanup. The reported older case is unchanged;
+its original conflicting display remains causally unproven. Actual-component
+stale-response/picker/workload tests cover reproduced defects independently.
+
+FE-026/BE-032 S109 has deliberate staff-create/edit screens and one authorized
+business context. `scripts/test-business-settings.ts` and
+`scripts/test-business-assistance.ts` verify fresh-role/version/audit atomicity,
+legacy-association revocation and rejection of scoped queue agents as new page
+editors. Actual component/action tests cover focused editors, retained failures,
+origin normalization, role denial and readable records. Real admin capture
+completes 36 states/seven save/conflict/Cancel workflows with cleanup; final 28
+read-only locale states have no overflow/accordions/runtime errors/writes. Owner
+Business details/private settings read/edit/cancel capture completes 50 states.
+Staff workload capture completes 20 states plus blocked failed Save, with retained
+values and no submitted data writes. Protected evidence is under the corresponding
+S109 directories within `.local/workflow-audit-s107/`.
+
+FE-065/FE-053 S109 web and Expo exploration each pass 40actual layout states in
+five languages. Products starts on the right and follows a leftward handle drag;
+a rightward map-handle drag returns. Keyboard/reduced-motion, focus, independent
+queries, loaded-list position and mounted map survive switches. Short-height
+launcher/zoom/handle checks pass without overlap. A reproduced web keyboard action
+was swallowed after a pointer drag; keyboard activation now bypasses only pointer
+click suppression and the actual pointer-then-keyboard regression passes. Native
+focused component tests pass2/2. Evidence is in
+`.local/workspace-design-s109/web/verified.json` and
+`.local/workflow-audit-s109/native-agent/right-origin/final-evidence.json`.
+
+FE-056 S110 compact Account hub and Your page submenu pass 4actual RSC tests,
+including correct canonical tenant reads, real metrics, exact five/four tasks,
+no private payload on the hub and staff/unlinked-owner rejection before data reads.
+Actual web capture completes 38states across320/390/1440 and five languages, real
+API metric comparison, all task/focused routes, saved-summary/Sign-out placement,
+48px targets, no errors/writes. Evidence is
+`.local/workflow-audit-s107/owner-account-s110/evidence.json`. Native Account
+component/privacy/logout/notification-opt-in regressions pass 11. Actual Expo
+Account capture completes 75read-only states across five languages with zero
+runtime/API/write failures. Ten supplemental preview/edit states wait for loaded
+owner content rather than capturing a loading placeholder. Evidence is
+`.local/workflow-audit-s107/native-account-s110/workflow-outcome.json` and
+`readiness-outcome.json`; installed Android is a separate gate.
+
+These are local focused passes. S100–S110 visual approval, expensive full/release
+gates, reviewed task-isolated commits and hosted/web/Android rollout remain pending.
+Actual Android device/MapLibre/OS notification UX remains unverified after the
+previously recorded system-wide emulator ANRs. No test suppresses those limits.
+
+
+## 2026-10-16 S111 local inactive-chat and public-help candidate
+
+BE-018/FE-019/DEP-043 additive migration65 adds only two nullable fields and an
+open-clock partial index. No legacy clock backfill occurs. The real isolated
+`scripts/test-support-inactivity.ts` suite passes threshold/window boundaries,
+waiting/notes/read/join exclusions, legacy preservation, unsupported owner-note
+no-write rejection, clear/reassign/reopen, exact-once event/alert/assignment
+release, token/ref/role/manual-resolution denial, resume/message/sweep races,
+limit 25, try-lock, work-start budget and audit/statement rollback. Two indexed
+participant branches are proved against 1500 not-yet-due owner clocks and 1500
+retained closed rows; computed deadlines order the bounded merge fairly. Actual
+same-session tests prove the five-second LOCAL idle-transaction protection is
+restored after both commit and rollback. Six existing/new support suites pass
+sequentially: inactivity, read receipts, live transport, buying, core support and
+S108 routing. Protected aggregate is
+`.local/workflow-audit-s107/chat-compat-s111-verified-results.json`; the later
+idle-lock final pass is recorded separately in that evidence directory.
+
+`scripts/test-chat-inactivity-ui.ts` and `scripts/test-support-thread-refresh.ts`
+pass actual React/web/native-adapter deadline/warning/retained-draft/resume/error
+and stale-response checks, hidden/closed cadence and single pending transition
+guards. A concurrent render had incorrectly cleared the refresh guard; committed
+effect synchronization and the real React/Suspense regression prove the fix.
+Workers have separate success/failure/target/time-budget tests; local imports do
+not start work and hosted/old/private targets are rejected before a sweep.
+
+The exact verified local public schema64→65 operation preserves every support
+table count and SUP-42EA05B3824C metadata; all new clocks stay null. The guarded
+local CLI --once completes with ended 0. Protected migration evidence is under
+`.local/workflow-audit-s111/migration/`. No hosted migration is performed.
+
+Actual paired web/Expo/owner workflows complete 47 locale states, real public
+staff replies, warnings, a locked exact-three-fixture maintenance run and
+same-reference authorized Resume with native drafts retained. History/alerts and
+cleanup are DB-confirmed. An initial final-row JSON guard failed on bigint
+string/number parser types after runtime initialization; the original failure is
+retained. Independent read-only reconciliation reproduces that type change and
+proves original-case metadata, null idle fields and all five support-table counts
+match the pre-capture migration receipt. No more sweep/restore is used to reconcile.
+Verified composite evidence is `.local/workflow-audit-s111/paired/verified.json`
+and `protected-verification.json`, with zero fixture rows remaining.
+
+FE-036/FE-053 public launcher placement passes route/actual-shell component tests.
+Actual completed segments verify 50 five-language web states,25 loaded Expo public
+routes and 4 short product/Market states,48px targets, navigation/action clearance,
+transport modal focus and unchanged social inquiry/manual-copy interaction. The
+original strict web RequestPage development-timing failure remains recorded; an
+isolated-context controlled web retry passes. Native locale/tablist/readiness
+harness corrections are preserved/classified, not silently rewritten as passes.
+Receipt: `.local/workflow-audit-s111/native-agent/final-evidence.json`.
+
+Visual approval, full production-mode/release gates and physical Android/MapLibre/
+OS verification remain outstanding. Focused browser/port evidence is not an APK
+or production claim. No commit, push, provider change or public release is made.
+
+Final S111 focused verification passes the serial workflow UI aggregate 58/58,
+both web/native typechecks, localization 12/12 (1507 messages in each non-English
+catalog), validation of 196 specs/ADRs, and PWA/narrative checks. The initial
+aggregate's unrelated owner-city native bundling adapter failure is retained;
+only the missing test adapters changed, with all city assertions preserved.
+Receipt: `.local/workflow-audit-s111/workflow-ui-verified.log`.
+
+The final owner-chat regression holds a stale closed GET across Resume and the
+new refresh loop: only its own current-generation response may select the slower
+closed cadence. The focused inactivity UI tests pass 3/3 after that correction.
+Eight settled English/Amharic web warning/ended states at phone/desktop widths
+verify themed 48px Resume/secondary actions, real Resume and protected cleanup;
+earlier transient/pre-theme captures remain preserved. Receipt:
+`.local/workflow-audit-s111/web-ready/workflow-outcome.json`.
+
+After fixture cleanup, the guarded recurring local maintenance command started
+successfully at a 60-second interval; its first sweep ended zero conversations.
+Web3102, Expo8082 and Mailpit54324 return HTTP200. Whitespace checks pass and the
+pre-existing deno.lock digest is unchanged. Final local receipt:
+`.local/workflow-audit-s111/final-local-review.json`. These focused results do not
+replace the still-pending visual approval and full release gates.
+
+
+## 2026-10-17 S112 product-only candidate — focused tested, visual review pending
+
+FE-067 / BE-056 / DEP-046 supersede active service-listing admission. Active
+product writes use standard_product or made_to_order; omitted valid legacy
+product modes survive, service conversion is explicit, and all public exact/fuzzy/
+by-ID/count/metadata/social selection paths exclude services. Historical rows,
+kinds, revisions and inquiry snapshots are retained. New typed projections,
+strict filter validation, independent custom filtering and bumped browse cache
+keys are covered by `scripts/test-product-only-catalog.ts` and compatible upkeep,
+service-history, independent-discovery and mobile-API suites. Five isolated suites
+pass; subsequent catalog-label and public service-only metadata regressions pass.
+Receipts: `.local/workflow-audit-s112/backend/compat-results.json`,
+`catalog-label-final-results.json` and `product-only-metadata-final.log`.
+
+The web owner editor no longer flattens made-to-order records during ordinary
+saves. `scripts/test-product-only-web.ts` passes actual React/browser supply
+selection, explicit retired-service conversion, toggle/keyboard/reset and scope
+separation tests. Native component tests cover corresponding payloads, preserved
+legacy modes, truthful statuses, preview exclusion, refreshed social selection,
+forged/stale options and checkbox keyboard activation. Actual installed Leaflet
+resize→unmount reproduced _leaflet_pos; listener teardown/current-instance guards
+pass `scripts/test-mobile-map-lifecycle.ts` without suppressing exceptions.
+
+The reviewed one-time LOCAL correction admits66 maintained demos plus the private
+review fixture only:106 product rows changed,50 normal catalog versions appended.
+The maintained264 products are163 standard/101 made to order; the private review
+fixture has2 standard/1 made and remains draft with no publication/catalog version.
+Exact before-images/digests, row/version locks, whitelisted fields, protected
+identity/contact/GPS/media/history/outside-tenant hashes and readonly replay prove
+preservation. Hero overrides were checked independently. Receipt:
+`.local/product-only-s112/applied.json`, `replay-final.log`, `public-api.json` and
+`public-showrooms.json`. No real-tenant text or hosted data is rewritten.
+
+All1546 messages are authored across en/am/om/so/ti; localization13/13, physical
+starter3/3, isolated starter/demo PostgreSQL, category art, narrative and prepared
+launch-copy limit checks pass. Native-only conditional labels had been incorrectly
+pruned as server-only; generation now scans native app/src and the regression
+proves client availability. Existing branding, interpolation, merchant literals,
+privacy and payload bounds pass. Human native-speaker review is not claimed.
+
+Actual public web verification has48 completed states, owner readonly8, and a
+separate10-state compact-filter layout pass at320/390 across five languages.
+The original web run43/45 ended with a60s Tigrinya About navigation timeout;
+strict fresh-context supplements completed missing About/invalid-link states,
+retaining the original failed receipt instead of claiming it passed. A readonly
+owner harness initially counted the disabled placeholder as a supply option;
+corrected assertions prove that placeholder plus exactly2 enabled choices.
+Receipts: `.local/product-only-s112/web-supplement/combined-verified.json`,
+`owner-readonly/combined-verified.json` and `filter-layout-web/outcome.json`.
+
+Real marked-demo owner saves change supply with stable ID, public mobile readback,
+return to original supply and reload. The initial raw-row equality assertion
+correctly halted after existing legacy photo/video references were materialized
+into media_json by normal FE-050 save behavior. Protected before-images and the
+failed attempt are retained; the remaining deliberate UI save proves all other
+fields and effective ordered gallery references identical. No raw-gallery restore
+occurred. The two normal owner saves append their usual two catalog versions and
+advance that demo business version twice; the protected correction itself appended50.
+Receipt: `.local/product-only-s112/owner-roundtrip/outcome.json` and
+`attempt-1/`. Gallery regression passes; its stale schema63 assertion was updated
+to the verified compatible schema65, preserving every gallery/security assertion.
+
+Native actual Expo completed public/owner/loaded-media segments and later compact
+filter supplements are recorded in `.local/product-only-s112/native-agent/`.
+Original keyboard, map and direct-History timeout evidence remains distinct from
+corrected passes. Normal Back to account is tested; synthetic History and physical
+Android MapLibre/OS behavior are not silently inferred from browser evidence.
+
+Visual approval and full check/release/acceptance gates remain pending together
+with S107–S111. No commit, push, binary, hosted configuration or deployment is made.
+
+S112 final aggregate `npm run test:workflow-ui` passes69/69, both web/native
+typechecks pass, localization13/13 and199 specs/ADRs validate. Final balanced
+phone filter layout passes10 actual web states and12 Expo states across all five
+languages: every complete label stays in its cell,48px targets,48px rows, and
+single-word native geography remains unbroken. Global Clear sits in Search, query
+clear remains separate, and a selected native checkbox retains a visible check.
+Earlier equal-width/tight-padding screenshots and negative receipts are preserved.
+Final refinement tests pass2 web and9 native; no criteria/backend contract changed.
+Receipts: `.local/product-only-s112/workflow-ui-verified.log`,
+`web-ui-layout-final.log`, `filter-layout-web/outcome.json` and
+`native-agent/filter-layout/capture.json`/`focused-final.log`.
+
+Final local review: `.local/product-only-s112/review.html`; testing accounts/steps:
+`.local/workflow-audit-s110/TEST-GUIDE.html`. Web3102, Expo8082 and Mailpit54324
+return200; the guarded local minute chat worker remains active. Whitespace passes,
+pre-existing deno.lock is unchanged and unrelated dirty work is preserved.
+No task commit exists because explicit visual approval/full gates remain pending.
+
+
+## S113 — counted floating selections and compact transport (local, review pending)
+
+FE-041/FE-036/FE-053: web PublicActionDock hosts portal-based current-showroom
+list access and the single persistent PublicSupportChat instance. Its navigation-
+session fallback points to the original handle; ShowroomApp waits for matching
+route/catalog hydration, revalidates canonical selections and uses identity-based
+quantity/removal. Direct composition never substitutes the saved group. Native
+PublicActionDock reuses root/Market placements and the existing session basket,
+with measured clearance and direct/group/private-route exclusions. Short Market
+stages use one centered row; other public screens keep a labeled stack.
+
+Mapped focused regressions: `scripts/test-floating-inquiry-web.ts` (six changed
+scenarios pass across four initial passing cases, a targeted query-focus retest
+and the deferred-fetch loading regression, with original failures retained), `scripts/test-mobile-public-action-dock.ts`,
+`test-mobile-market-layout.ts`, `test-public-transport-launcher.ts`, existing
+`test-product-inquiry.ts`/`test-browser-clipboard.ts`, and localization tests.
+Component ports and actual local web/Expo evidence remain distinct. Web final
+typecheck, narrative and 199 spec/ADR validation pass; native final typecheck passes.
+No API/DB/provider/dependency/signing change, automatic send, commit, deployment
+or new binary occurs. Explicit visual approval/full gates remain pending.
+Final local review: `.local/floating-actions-s113/review.html`. Combined capture
+receipt: `combined-verified.json` in that directory; 105 current unique states
+(25 English/80 other-language) cover desktop/320/390/short web and Expo browser.
+Two initial centered short-web showroom images are retained only as superseded;
+all seven original incomplete harness receipts remain explicitly failed. Captures
+use existing marked demos and real public API reads, intercept analytics204 and
+block application writes/external sends. Protected application hashes are unchanged;
+no fixture, customer inquiry or transport chat was created. Merchant content stays
+literal. Readiness states captured before the loading-only correction remain
+visually unchanged; its separately mapped deferred-fetch regression proves pending,
+failed and retried GETs with no premature form/error and all draft fields preserved.
+
+Web six-scenario receipt: `.local/workflow-audit-s113/focused-web-results.json`;
+loading proof: `transport-refresh-loading-verified.log` there. Native final row
+proof: `.local/public-actions-s113/native-agent/short-market-refinement.json`.
+Localization14/14 and 1548 keys pass. Web final type/spec logs are under the S113
+review directory; native typecheck and narrative pass. Task whitespace passes and
+pre-existing deno.lock retains SHA256 5af7ac053eac531ecf35eb82bb8d1a8996a1e8c811af9bd74a3e4222cb226f76.
+No staged change/commit/full gate/remote mutation/new binary is claimed; earlier
+pending visual approvals remain outstanding.
+
+## 2026-10-17 S114 — account-owned transport (local, review pending)
+
+BE-018/FE-019/FE-053/FE-056 add Account → Transport chat on web/phone/native,
+with the same paired visitor form/chat presentation and separate authenticated
+application adapters. Transport sits after Products on the compact Account hub;
+technical Support remains separate. Canonical private contact defaults are editable,
+routes start blank, and account history recovers the same case across sessions.
+No visitor token is adopted or read by the owner flow. Existing Transport staff
+receive both kinds of request, with original route/contact summary and callback.
+
+`scripts/test-owner-transport.ts` proves current tenant/role authorization, strict
+commands/body/origin/ref guards, idempotent intake and changed/cross-kind conflict,
+owner/history scope, private notes/attachments/carrier exclusion (including direct
+owner domain lists), canonical reply visibility, same-business client display,
+read/attention, unresolved End versus staff resolution, automatic-end Resume and
+retained old-mobile adapter compatibility. Existing routing/inactivity suites also
+pass. Isolated fixtures are cleaned; unknown/pre-existing test schemas are retained.
+Protected receipts/logs: `.local/owner-transport-s114/backend-results.json`.
+
+`test-owner-transport-workspace.ts`, `test-mobile-owner-transport.ts` and Account
+hub tests exercise real React/SSR/native-controller code with explicitly controlled
+I/O/lifecycle ports: paired fields, canonical defaults, failed-draft/key retention,
+edited retries, pending/unmount/account fences, exact case recovery/history,
+legacy notification redirect and staff contact summary. Shared visitor assignment,
+idle, recovery storage and public placement regressions retain passing evidence.
+The queued-close/open-intent regression covers rapid reopen, stale recovery and
+ordinary Escape. Long Somali labels revealed a paired-input alignment defect;
+shared CSS now aligns inputs without truncating native labels.
+
+Final read-only actual app captures pass **60 states / ten navigation workflows**
+across all five languages, desktop/320/390/short web and Expo browser, with zero
+runtime/console/API/guest-channel/unexpected-write errors and protected application
+hashes unchanged. `.local/owner-transport-s114/combined-verified.json` preserves
+historical failed attempts separately. Six contextual phrases are native-authored;
+localization15/15, all1554-message catalogs, final web/native typechecks and
+199-spec validation have passing evidence. Review: `.local/owner-transport-s114/review.html`.
+
+Actual paired owner/staff/Expo workflows verify automatic assignment and join,
+public replies and visible reads both ways, cross-session recovery, unresolved
+owner End, distinct staff resolution, histories, reload and empty new intake.
+`paired/verified.json` explicitly derives verified application evidence from the
+raw guarded run: its sole final failure was one blocked local Next development
+source-map lookup, classified from installed Next middleware and screenshot caret
+injection evidence. The raw failed exit is not relabeled as a full harness pass;
+no unexpected application write/error was ignored. Eight screenshots and four
+functional groups passed; each labelled attempt removed only its exact case/audit
+rows, with zero remaining fixtures and unchanged unrelated support/catalog/staff.
+
+Outgoing push/Telegram was disabled only in a temporary local server process for
+these fixture exchanges; saved environment/provider files and production were
+unchanged. Normal web and guarded maintenance processes were restored afterward.
+Existing browser tabs briefly reported restart-time timeout diagnostics; subsequent
+attention requests recovered normally. This is not a production-mode readiness
+claim. Installed Android/OS delivery, visual approval (including earlier candidates),
+full/release/acceptance gates, a scoped commit and deployment remain outstanding.
+No new schema/provider/dependency/signing/binary or remote Git action is claimed;
+pre-existing `deno.lock` retains its recorded digest and no files are staged.
+
+## 2026-10-17 S115 — structured business management (local review pending)
+
+FE-026/FE-056/FE-053 replace remaining omnibus management with named tasks.
+Admin business context retains permission-filtered Overview/Your page/Products/
+Business details/Location & visibility/Access. Overview is concise saved activity;
+Categories is a Products subtask with read-first rows and selected Add/Edit or
+removal confirmation. Identity/live/sharing each has its own saved/editor state.
+Access owns sign-in, staff assistance and status; scoped sponsors retain business
+context. FE-019 moves staff Assignment history to a protected read-only route.
+Per-actor/business list return origins and active parents remain bounded.
+
+Owner Your page groups eight concrete tasks; About/video/contacts/color/team and
+cover/address open focused controls. All eight social/public contacts, complete
+page content and version fences survive unrelated edits. Task switches preserve
+work; Cancel offers Keep editing/Discard. Readiness opens the real missing task;
+Preview retains publication/restore. Native Save/Cancel share a wrapping row with
+quiet Back/Preview navigation. Duplicate headings/handle controls and private
+account summary/edit overlap are corrected without changing authority.
+
+BE-032 focused settings merge only allowed section fields from the locked
+canonical row under the version/audit transaction. BE-044 adds native consent
+projection/action using the existing owner-only service. BE-033 closes current
+Support/Transport category access through retained assignments/stale principal
+snapshots, rechecking queue scope under the existing transaction lock.
+
+Evidence: 52 combined focused tests pass in
+`.local/workspace-structure-s115/focused-post-polish.log`; the subsequent actual
+component/effect return-origin regression makes53 unique cases (workspace file3/3).
+Tests: `test-business-record-ui.ts`, `test-business-workspace-ui.ts`,
+`test-business-settings-ui.ts`, `test-admin-editor-actions.ts`,
+`test-focused-edit-form.ts`, `test-owner-focused-tasks.ts`, owner/native hub,
+editor/settings failures and `test-staff-navigation.ts`. These run actual components/
+actions through controlled I/O ports; they do not impersonate provider delivery.
+`test-business-settings.ts`, `test-mobile-api.ts` and
+`test-standard-page-postgres.ts --category-security` pass real isolated PostgreSQL
+preservation/authority/version/race/audit and API checks; schemas are cleaned.
+Web/native TypeScript,199-spec validation and localization16/16 pass; catalogs
+contain1568 keys. A contextual Oromo identity label and Owner sign-in wording
+avoid ambiguous menu meanings. Human first-language review is not claimed.
+
+Actual local evidence is `.local/workspace-structure-s115/combined-verified.json`:
+**156 current states /15 navigation groups**, admin/owner web and Expo browser in
+all five languages, desktop/320/390. There are zero runtime/console/API/application-
+write errors and unchanged protected application data. Saved/edit/cancel tasks,
+unsaved confirmation, preview, private settings and staff history are covered.
+Final Account-header and lower-menu scroll geometry are independently verified.
+The combined index retains61 superseded states and original failed attempts;
+an initial native pointer-events warning was fixed, while later exact-name and
+Oromo-nav selector ambiguities were classified as harness failures. Completed
+groups from a preserved failed raw run are supplemented explicitly, never relabeled
+as a raw pass. Final health persists12-table metadata fingerprints and web/Expo/
+Mailpit HTTP200; capture browsers/pools are closed. Local maintenance resumed
+after the quiet read-only pass, with its first sweep ending zero cases.
+
+Review: `.local/workspace-structure-s115/review.html`; exact test accounts/routes:
+`.local/workflow-audit-s110/TEST-GUIDE.html`. Master §§5,13,15,18–19,21–22, specs,
+checklist and guide describe the verified local candidate. HEAD remains038a143;
+the existing dirty baseline and deno.lock digest are preserved. No schema/provider/
+dependency/signing/new binary, staged commit, push or deployment is claimed.
+Explicit visual approval (including earlier candidates), full/release/acceptance
+gates, a scoped commit and separately authorized web/Android rollout remain pending.
+Expo browser proof is not installed Android/MapLibre/OS-delivery verification.
+
+## 2026-10-17 S116 — persistent request ownership and backlog reconciliation
+
+Operations/documentation and test-harness preparation, not a new product feature.
+Three agent audits reconcile owner/admin management, support/transport/security/
+release, and public discovery/localization/marketing against existing evidence.
+The transition checklist now begins with the current work board, stable agent
+ownership, first remaining dependencies and separate implementation/test/approval/
+deployment states. Dated old `CURRENT` entries remain historical; completed
+Firebase/signing/closed publication are not repeated as new work. Existing
+S107–S115 visual/full gates and current-source Android/OS limits remain explicit.
+
+Current operator guidance, the protected test guide and Play READINESS distinguish
+the S115 local candidate from released baselines. Play availability/eligibility
+are last recorded outcomes, not fresh enrollment proof. FE-065/BE-054/DEP-045
+current clauses reflect later product-only/social-contact decisions, with old
+history retained. Master §§8/9 remove obsolete business-send/alert instructions,
+preserve legacy private records/social copying and retain support/transport;
+§24 records request retention and root integration responsibility. Matching promo
+artwork, exact hosted demo corrections and actual installed-device workflows
+remain genuinely unfinished work with explicit owners.
+
+The four bounded acceptance/capture journeys now enter read→Edit→Save→return,
+Account settings sign-out and focused page contacts/video tasks. Historical video
+compatibility and role/media/privacy/persistence assertions are preserved; there
+is no default management-contact accordion selector. New DB-readback assertions
+protect all eight saved/cleared contacts across an unrelated About edit.
+`workflow-retention-s116/harness-static-verified.json` records four syntax checks,
+ten static journey checks,26 retained assertions and32 passing focused owner
+tests. Root TypeScript passes; Playwright collection lists20 tests across three
+files without executing them.199-spec validation and static narrative/launch
+material checks pass, with the existing Node module-type warning unsuppressed.
+Scoped whitespace and operator-link checks pass.
+
+No browser/DB/provider/production/build/signing/commit/push action was performed
+for S116. Static journey collection is not a passed full acceptance or live save
+workflow. The dirty baseline and all earlier requests remain preserved. Current
+visual approval, full/release/acceptance, reviewed rollout and Android/OS/marketing/
+hosted-demo work remain open; the process request did not grant UI approval.
+
+### 2026-10-17 — S117 selected Market panel and safe return navigation
+
+FE-065/FE-053, L1 defect. The current local candidate remembers Businesses/map
+or Products and both independent search/filter scopes on ordinary Back/Market
+returns. Explicit URL/history intent wins; deliberate map/reset actions remain
+explicit. A dedicated bounded browser-session/native-memory snapshot cannot be
+overwritten by Featured's separate source-return key. No result/account payload,
+API, database, provider, dependency or language-copy change was introduced.
+
+Implementation: `lib/market-workspace.ts`, `components/DiscoveryWorkspace.tsx`,
+native `src/market-session.ts`, `app/(tabs)/index.tsx`, About's explicit map action
+and the shared monotonic intent helper in `incoming-link.ts`/`+native-intent.tsx`.
+Market's Android Back handler is focus-scoped. Expo's own route/history authority
+replaces the competing raw popstate listener; URL persistence cannot overwrite
+an outgoing page during an asynchronous return. Existing source showroom and
+Featured navigation remain separate. Web Clear filters is an explicit reset.
+
+Actual navigation exposed two Leaflet lifecycle races rather than a panel-state
+failure: retained resize/move callbacks and the SDK's untracked 250ms zoom
+completion after destruction. `MarketplaceMap.tsx` and `MarketMap.web.tsx` cancel
+owned work/detach listeners and finish an active owned zoom before removal. Narrow
+typed compatibility with installed Leaflet 1.9.4 is covered by actual SDK/CSS
+regressions; there is no global patch, swallowed exception or animation disable.
+Native Android MapLibre, marker appearance, clustering and map providers are
+unchanged. Mounted pan/zoom/resize/Reset/selection and replacement isolation pass.
+
+Focused evidence: `.local/market-return-s117/focused-tests.log` records 27/27
+passing cases in `test-market-workspace.ts` (3), `test-market-workspace-ui.ts` (5),
+`test-mobile-market-layout.ts` (8), `test-mobile-app-links.ts` (6),
+`test-web-map-lifecycle.ts` (3) and `test-mobile-map-lifecycle.ts` (2). Web/native
+TypeScript checks pass. Pure/storage tests include canonical bounded criteria,
+expiry, malformed/denied storage and default Businesses; actual components cover
+restore-before-write, independent queries, route reuse/remount, explicit/legacy
+links, metadata, queued navigation and blurred Back cleanup. New regressions are
+wired into the existing workflow gate. The app-link correction preserves legacy
+product-filter compatibility while asserting the product-only/custom-order
+contract; security/signing assertions remain intact.
+
+Actual local evidence: `market-return-s117/combined-verified.json` separates the
+26 web navigation assertions in a retained strict failed run from five clean
+post-fix map-departure checks. Source hashes prove only the map component changed
+between them. The final current-source Expo run passes 16 groups, including both
+panels, product/showroom browser/header Back, About/Featured→Market, Featured
+source return, repeated explicit map actions and ordinary return after a manual
+choice. Final receipts have zero runtime/console/API errors and no unexpected
+application writes. Six selected review images include two corrected Expo states
+using the installed SDK stylesheet. External tiles/media remain controlled;
+normal GET rate/cache bookkeeping is permitted, not a business/catalog/chat/auth
+mutation. The initial hydration/dev-overlay harness limits and all actual map/
+explicit-intent failures remain recorded, not relabeled as successful runs.
+Phone-web Market navigation uses keyboard focus/Enter where the Next development
+indicator overlaps its pointer target; no app control is hidden or force-clicked.
+
+The current master §§5/10/19/22 and exploration statement, controlling specs and
+work board reflect these verified local outcomes. Prior dirty changes and the
+unrelated `deno.lock` checksum remain preserved. No commit, push, hosted write,
+production build/deployment or Android artifact was created. Full gates remain
+behind the inherited visual approval; installed Android/MapLibre/hardware Back,
+OS notifications, exact hosted demo operations and marketing/release work remain
+separate open workstreams. Expo browser is not native device proof.
+
+### 2026-10-17 — S118 working demo contacts, business-local lists and staff tasks
+
+FE-066/FE-041/FE-053/FE-026 with BE-055/DEP-045. The latest contact instruction
+uses the owner's number for SMS/WhatsApp/Telegram on every marked demo, with
+ordinary official TikTok/Instagram/Facebook example profiles and example.com.
+Only the three messaging methods appear in the inquiry composer; localized
+automatic product copying remains, and profile browsing does not copy a message.
+Server projections freshly derive per-method demo approval from effective public
+contacts and a nonsecret operator setting; stale or forged client metadata cannot
+enable an unrelated fake destination. Private contacts and real businesses remain
+outside the exception. Public business inbox submission remains retired, while
+transport and business-owner support remain intact.
+
+Implementation maps to `lib/demo-inquiry-policy.ts`, business contact/profile
+projection modules, `lib/product-inquiry.ts`, web ShowroomApp/BusinessProfile,
+native inquiry/ShowroomContent/link-policy and typed public contracts. Six new
+interface strings are authored in all four non-English catalogs and generated
+manifests. Telegram explicit phone links are narrowly parsed without widening
+invite/unknown-host handling. No new integration/dependency is added.
+
+The web floating list has no last-shop fallback. Native `inquiry-baskets.ts`,
+`inquiry-basket-storage.ts` and `use-business-inquiry.ts` provide independently
+persisted reference lists by API origin and business ID, at most20 items and a
+bounded64KiB record. Current catalog products/options rehydrate counts/messages;
+foreign/stale selections are pruned. Coalesced reads cannot be overwritten by
+early writes, serialized writes preserve the last durable value, and read/write
+errors retain usable selections with Retry. Existing Expo document storage is
+used on devices and localStorage in the Expo browser. Direct single-product
+inquiries leave stored lists unchanged. Root/product/showroom/safety components
+use that store; the old runtime basket is a one-release migration bridge only.
+
+Admin refinements use Carbon shell/table and Ant navigation primary guidance
+linked in FE-026. Business facts link to contextual tasks; the active business
+tab reveals itself within its own nav. Staff has peer Accounts/Workload tasks,
+and Manage opens one focused editor with bounded filtered-list Save/Cancel
+returns. Roles, queue scope, canonical records and version fences are preserved.
+
+Focused verification: `.local/contact-workspace-s118/focused-tests.log` records
+92/92 passing cases across18 declared test files, including new
+`test-business-inquiry-baskets.ts`, `test-demo-inquiry-policy.ts` and
+`test-contact-handoff-native-ui.ts`, plus actual web/native component tests,
+retained market/logout/private-route tests and five admin test modules. Tests
+cover cross-business/environment isolation, filesystem-shaped temporary ports,
+read/write/race/size failures, fresh authority, copy/open failures and no-copy
+profile taps. Three deprecated React Native pointerEvents props exposed by
+actual captures were moved to styles;26 targeted cases and final web/native
+TypeScript checks pass. Localization17/17 covers1574 keys per non-English
+catalog;199-spec validation passes. Existing Node module-type warnings are retained.
+
+Actual local evidence: `business-inquiry-s118/actual/attempt-2/outcome.json`
+records three passing surfaces (1440 web,390 web,390 Expo), six screenshots,
+A=2/B=1 lists surviving navigation/reload, quantity edits, direct-item isolation,
+hidden Market/Featured carts and enabled messaging/profile links. Eleven source
+hashes remain stable. There are zero runtime/console/API/unexpected request
+errors and no application mutations. The separate expected-network receipt
+classifies31 raw navigation cancellations of intercepted analytics POSTs;32
+attempts were fulfilled as no-op204 and never forwarded. External media and
+clipboard/openers are controlled; SMS OS delivery is not launched. Original
+attempt-1 errors are retained, not relabeled as passing evidence.
+
+`admin-workspace-s118/verified/outcome.json` records12 desktop/phone states and
+three actual navigation journeys in English/Amharic, zero runtime/console/API
+errors or app writes, unchanged protected application data and12 stable source
+hashes. Existing local admin sign-in uses normal authorized Auth; no fixture is
+created and cookies/credentials stay in memory. The initial ambiguous-selector
+failure is preserved separately. No management Save was exercised here; focused
+action/security tests cover that boundary.
+
+One-time local demo corrections are protected under `contact-workspace-s118/`:
+phone plan digest `e24cec6e5f00ba7820f4094fa30c751605770ba8b2ac53dab6d85fe152d04d01`
+and profile plan digest
+`8e7bb7f9372636e66914cbdb5a40a24d5f6f6e357857e533e69d684565291057`.
+Each verified exact127.0.0.1:54322 target admits67 marked demos, updates67 existing
+drafts and appends66 current publication/catalog versions without rewriting
+immutable history or first-publishing the private reviewer. Rollback rehearsals,
+protected before-images, exact readback and actual no-op replay pass. The phone
+operation changes only three approved public contacts; the later operation changes
+the four example profile/site fields while preserving that phone correction.
+All real/non-admitted/private records and login aliases remain unchanged. A
+local-only nonsecret setting is added with an exact protected configuration backup;
+normal web/worker restart and fresh public projection checks succeed. Hosted
+outlines are prepared only and grant no mutation authority.
+
+Current review: `.local/contact-workspace-s118/review.html`; the private local
+test guide includes A/B list and messaging/profile journeys. The older
+`capture-social-contact-workflows.mjs` still contains a pre-S115 owner-editor
+journey and is not counted as a passed current acceptance run; its broader
+fixture/Auth execution remains a separate harness follow-up before full gates.
+Master/spec/checklist state matches these local outcomes. Existing dirty work,
+HEAD and unrelated deno.lock are preserved. No commit/push, hosted mutation,
+production deployment or new Android artifact was created. Explicit visual
+approval, full/release/acceptance gates and all retained current-device/OS/marketing/
+hosted/release workstreams remain open. Temporary filesystem ports and Expo
+browser captures do not establish installed Android persistence or OS handoffs.
+
+### 2026-10-17 — S119 actual chat reliability and staff task priority
+
+BE-018/BE-050/FE-019/FE-026/FE-062/FE-053/DEP-043. Read-only diagnostics found
+fresh local requests already autoassigned and old waiting work not rerouted by
+GETs; there was no initially due inactivity clock. Concrete defects were native
+latest-footer-only observation, async focus/overlay races, web visual viewport
+coordinates, cached staff rejoin acknowledgements, and opener-only classification
+of same-business colleague replies. Staff detail also put a blank company edit
+form and duplicate summary before messages; closed cases could say Waiting.
+Ready scenarios were recorded before each coordinated source change.
+
+Implementation maps to web ChatReadObserver, native ChatReadSentinel transcript
+provider/overlay generation/buying/owner-inbox, durable support sender-side SQL,
+owner-transport projection and nullable migration66. Fresh role/tenant checks
+derive every new message's side; old messages are not backfilled or reclassified
+from mutable roles. Staff read identity includes the saved assignment epoch.
+The new `support-staff-state.ts`, support routes/actions and bounded manager
+recovery command distinguish lifecycle states, add Transport Waiting and retain
+manual holds. Availability-save behavior and immediate uncapped new routing
+remain compatible. Company editing is read-first with explicit Add/Edit/Cancel;
+conversation/reply is first in DOM and main desktop column, context follows on
+phones. Existing private authority/version/navigation boundaries remain.
+
+Focused evidence is linked from `read-receipts-s119/native-agent/`,
+`chat-routing-s119/` and `inactivity-s119/`:20 receipt/controller cases, six final
+staff SSR/action/mounted-editor cases, ten supervised-startup/entry cases,
+isolated PostgreSQL receipt/owner-adapter/routing/recovery/inactivity suites and
+native full-install/idempotence. Final root web/mobile typechecks pass;
+localization17/17 covers1577 keys per four non-English catalogs. New UI, recovery
+and supervisor tests are registered in the existing workflow/support gates;
+the stale native-install version assertion is updated to the verified66.
+The existing Node module-type warning is not suppressed. No full check/release/
+acceptance/container/remoteCI gate runs before visual approval.
+
+Actual Google Chrome local intake, assigned staff replies, participant follow-up
+and both read cursors are real UI/API/SQL, not fulfilled application responses.
+The existing worker closes one labelled case after only its deadline is moved
+to8seconds before the30minute threshold. Read-only reconciliation proves one
+automatic-end event, released active assignment, retained historical assignee/
+messages and unresolved status. `chat-reliability-s119/worker-actual-verified.json`
+retains the original strict harness failure: it incorrectly expected historical
+assigned_user_id=NULL. Earlier focus-emulation and commit-timing harness failures
+are separately retained/classified. Chrome focus is explicitly controlled;
+neither actual OS focus nor a real30-minute elapsed wait is claimed.
+
+Actual Expo390 transport also completes assigned→joined, two real staff replies,
+older-visible/newer-offscreen read, subsequent newest read, participant Sent→Read
+and explicit ending. Its reconciliation records nine hashed screenshots and
+durable message sides/cursors. The original strict run remains failed on one
+blocked Next dev `__nextjs_original-stack-frames` diagnostic POST; no application
+API failure/runtime exception occurred. Earlier429/shared test bucket and
+fixture-name/CRLF/parse failures remain retained. A reserved local QA IP bucket
+does not disable or reset rate limiting. Tokens/cookies are not serialized.
+Installed Android, MapLibre, real keyboard/background/push remain unverified.
+
+`chat-reliability-s119/workspace-final/outcome.json` passes12 current actual
+Google Chrome desktop/phone English/Amharic states: Waiting, chat-first detail,
+company Edit/Cancel and automatic-end detail. Runtime/API errors, app writes and
+blocked writes are zero; the inspected customer case is unchanged. Source hashes
+remain stable during this capture. Exact own diagnostic cases are backed up and
+removed with unchanged-other-record checks; three ended QA cases remain for review.
+No customer conversation was changed. Local migration66 protection, rehearsal,
+readback and no-op replay are in `chat-reliability-s119/migration66/`.
+
+The explicit `dev:with-worker` supervisor reuses target/schema/service guards,
+reports child failure and stops only owned siblings; ordinary web-only/worker
+commands remain. Root actually starts this local command successfully, with
+worker count output and Next ready3102. External push is disabled only in QA
+processes and the saved configuration is preserved/restored; Expo remains8082.
+No provider/configuration/hosted/signing/build/Git publication occurs. Current
+master/spec/checklist/operations describe local verification, not deployment.
+Concrete review and combined receipts are under `.local/chat-reliability-s119/`.
+Visual approval, full gates, scoped commit and coordinated hosted schema/API/web/
+new Android release plus all retained earlier workstreams remain open.
+
+Actual installed Google Chrome owner support adds Account→Support creation,
+assignment and both-direction replies/read cursors, followed by ordinary owner
+Close and staff closed-state readback. The initial hidden desktop-link selector
+failure remains preserved; a bounded continuation reuses the same labelled case
+without new fixtures. `read-receipts-s119/owner-live/continuation-321/verified.json`
+passes with six screenshots and zero runtime/API/unexpected-write errors. All
+three labelled review cases are closed; no actual owner24-hour elapsed wait is
+claimed. The final supervisor restores ordinary local startup after process-only
+push isolation, with the saved configuration checksum unchanged.
+
+### 2026-10-17 — S120 mandatory actual browser user journeys
+
+The owner explicitly requires actual Chrome user-style testing for future UI/UX,
+layout, navigation, admin/staff/owner/visitor work, including affected Expo8082.
+AGENTS.md step8 and `docs/operations/BROWSER-WORKFLOW-REVIEW.md` now make this
+recurring policy explicit. FE_BASE and master §22 link the procedure. The guide
+requires real entry/click/type/Back/Save/Cancel/reload/error/permission journeys,
+authoritative scoped API/persistence checks, role/platform coverage and honest
+source/screenshot/error/control receipts. Component mocks/screenshots alone are
+not completion. Existing visual approval/full gates, private fixture/credential
+boundaries and native-device verification remain; no extra provider or release
+permission is introduced. S119 actual Chrome/admin and Expo evidence demonstrates
+the workflow and its declared focus/strict-harness limits. Local links, whitespace
+and spec validation cover this documentation-only policy update.
+
+
+### 2026-10-17 — S121 automatic recovery of ordinary waiting chats
+
+BE-018/FE-019/FE-026/FE-053/DEP-043. The owner rejects the earlier manual queue
+recovery dependency and implicit case-hold interpretation. Ready scenarios and
+ordered checklist precede implementation. Waiting now always re-enters automatic
+routing; existing receiving settings/queue scope define eligibility. New-request
+and availability commands keep their immediate uncapped behavior.
+
+`lib/support.ts` adds the internal bounded `sweepWaitingSupportAssignments`:
+shared support-work try-lock, current role/queue/availability, oldest eligible
+candidates before100limit, at most25 assignments/3second work-start budget and
+LOCAL statement1s/idle5s/lock50ms limits. Reuse atomic assignment/events/attention
+with null system actor and automatic reason. No migration, dependency, fabricated
+manager, GET/polling mutation, heartbeat, implicit hold or per-agent cap.
+The local immediate/minute worker and existing Netlify minute worker invoke it
+separately from inactivity, preserve independent failures and hosted20second
+start-budget checks. Staff bulk recovery/hold UI is removed; per-case handoff and
+availability remain. Native technical OwnerChat now shows its saved reference and
+assigned-before-joined name using existing localized keys.
+
+Focused evidence: `test-support-automatic-routing.ts`, updated recovery
+compatibility and inherited uncapped routing SQL suites pass; twelve worker/
+controller cases, six staff UI/action/editor cases and the actual-controller
+native owner lifecycle regression pass. Both typechecks,17localization cases and
+199spec/ADR links pass. The generated server message manifest is rebuilt for
+removed server copy; no new translation keys. Backend/worker receipts are
+`.local/automatic-routing-s121/backend-results.json` and `worker-results.json`.
+Original synthetic bigint fixture failures and one local SQL read timeout are
+preserved, classified and followed by bounded corrected/controlled passing runs.
+An isolated10,000-row mixed backlog candidate plan executes5.438ms under1s;
+it scans/sorts and does not establish production-scale/index-backed FIFO.
+
+The actual supervisor loads the corrected worker and its initial tick routes all
+five existing waiting cases, with no assignment UI action. Independent protected
+before/readback at `.local/queue-recovery-s121/root/verified.json` replays eligible
+workload/tie-break decisions, checks exactly one automatic assignment/event each,
+null actor, unchanged transcripts/read metadata/prior history/unrelated cases and
+saved provider settings. Later ticks route0/end0. No case is reopened or falsely
+joined. Test-only push overrides are process-scoped; ordinary saved web/worker
+startup is restored after test browsers close; Expo8082 remains separate.
+
+Actual installed Google Chrome admin108, assigned transport staff346 queue and
+Expo owner2/case1 current-state journeys pass at desktop/phone, with real local
+API reads and no application writes: `native-agent/reconnect/review-receipt.json`
+under `.local/queue-recovery-s121/`. Owner polling GETs complete337/504ms at a
+5.334second start gap. One deliberately aborted scheduled read then recovers
+through the real endpoint in10.708seconds without Retry/navigation/commands:
+`native-agent/recovery/review-receipt.json`. Same case references/messages/
+assignments/null join state remain. Focus and external media are controlled;
+this is Expo browser evidence, not installed Android or OS notifications.
+
+The initial observer coordination timeout and subsequent strict25second mobile
+assertion across the intentional web cold restart remain failed. Their error
+screen and receipts are preserved; separate reconnect/recovery checks are not
+retroactive passes. The focused hook uses bounded20second requests and automatic
+10/20/30second failure backoff; no source retry bug was demonstrated. These
+limits are explicit in `.local/queue-recovery-s121/review.html`.
+
+Current status is implemented and focused-tested locally, not visually approved
+or deployed. Existing S119/S120 and earlier outstanding work remain preserved.
+Explicit visual approval precedes full check/release/acceptance, scoped commit
+and separately authorized hosted/web/native rollout. No full/container/remoteCI
+gate, commit, provider mutation, hosted migration/deployment or Android build is
+performed by S121.
+
+### 2026-10-17 — S122 wider dashboard and owner workspace audit
+
+FE-026/FE-047/FE-053/FE-056, BE-032/BE-054: implemented and focused-tested
+locally; visual/full/release gates remain pending. The earlier S119/S121 chat
+work does not complete or replace this workspace audit.
+
+Actual installed Chrome audits cover38 admin/staff states,38 owner-web states
+and33 Expo states. They verify saved-record task navigation, business context,
+the compact Account/Your page hubs and authoritative visit metrics. They expose
+missing product Cancel/return context, web availability/visibility parity, native
+global Back draft loss, and legacy admin geography/Access-parent issues.
+
+The correction keeps existing workspace structure. Product Add/Edit and
+Save/Cancel preserve bounded Products origins; owner breadcrumbs lead to Account.
+Web focused actions retain failed drafts, redact unknown errors and keep tenant,
+version, idempotency and omitted-metadata authority. The shared web exit guard
+reads actual controls, including unsubmitted media/options. Native uses installed
+Expo removal prevention and an app-owned focused-editor boundary, with acknowledged
+snapshot/revision and unmount fences. Product parents are Products; semantic task
+headings and48px header targets reuse existing localized text.
+
+Admin geography resolves Country/City server-side, preserves custom worldwide
+pins and legacy unknown geography, validates explicitly supplied coordinates,
+and merges omitted metadata within the business transaction. The form precedes
+the summary on phones; Staff assistance returns to Access. A real private-QA
+admin Save revealed reviewed proposal history masking applied owner geography.
+The new effective read projection is used by both clients. Unrelated owner
+name/logo saves preserve the exact applied pin/profile/proposal/classifications;
+admin geography advances the owner content-version fence. Pending proposals and
+reviewed history remain distinct. No schema, provider or dependency is added.
+
+Mapped focused evidence:
+
+- `test-product-workspace-navigation.ts` + `test-product-edit-action.ts`:3cases;
+  `test-product-editor-workflow.ts`:5 real-React browser cases; inherited
+  `test-product-only-web.ts`:2 and `test-owner-editor-failures.ts`:3cases.
+- `test-product-upkeep.ts`: real isolated PostgreSQL owner listing-state writes,
+  omitted staff metadata, duplicate/stale/foreign denial and media boundaries.
+- `test-admin-geography-ui.ts` and existing editor/team/settings adapters:
+  14cases, with a final2-case rerun proving reviewed notices are hidden and
+  pending proposal context remains. `test-admin-geography.ts`: canonical
+  geography/pin/privacy/omission/atomic-rejection regression.
+- `test-owner-effective-location.ts`: isolated PostgreSQL admin-to-owner
+  projection, exact name/logo retention, pre-admin stale-form rejection, fresh
+  role/tenant/version checks, pending/legacy compatibility and deliberate changes.
+  Inherited `test-independent-discovery.ts` passes against the final runtime.
+- `test-mobile-owner-edit-navigation.ts`:14cases using actual React and the
+  installed navigation removal hook; focused controller adapters retain42cases.
+  Tests include duplicate/busy/retry, repeated draft snapshots, queued input/save
+  acknowledgement races and late acknowledgement after forced unmount.
+- Both typechecks,17localization cases/1577keys,199spec/ADR links and scoped
+  whitespace checks pass. New focused tests are registered in existing gates.
+
+Normal local email/signup UI creates one private unpublished QA workspace. A
+26-state desktop/phone journey verifies product create/edit/list-origin,
+availability/visibility, dirty Keep/Discard and an intentionally interrupted
+save followed by retained-input retry; admin invalid-city rollback and real
+canonical Save/reopen keep the custom pin. A final11-state web supplement proves
+effective owner geography and an actual name-only Save/reopen preserve complete
+profile/proposal/products, with current admin screens. Existing records remain
+unchanged. Expo actual API/database journeys separately verify About/header and
+footer protection, Product Cancel/Save parent and stored metadata, normal
+reauthentication/readback, and Business name-only retention. Only the new private
+QA tenant is written; no publication or social message is sent.
+
+Strict harness failures are retained: initial hydration/body-encoding guards,
+the old signup destination expectation, initial native push-capability preflight,
+and two stale native heading/auth-landing assertions. No failed receipt is relabelled
+passed; exact checkpoint continuations verify their remaining tasks without
+repeating successful writes. A focused regression also caught invalid explicit
+undefined coordinates during iteration; production validation was corrected.
+Original VM/fixture failures are classified separately from product defects.
+
+Protected source hashes, before-images, readback and exact per-journey limits are
+under `.local/workspace-audit-s122/`; `review.html` links current visuals and
+`TEST-GUIDE.html` the private role/account procedures. Saved provider settings are
+not edited; temporary process-only push suppression keeps QA saves quiet. Expo
+Chrome is not physical Android, OS notification or process-termination evidence.
+No full check/release/acceptance/container/remoteCI, commit, hosted mutation,
+deployment or new Android build is claimed. Earlier workstreams stay open.
+
+
+## S125 — explicit Join, response work and customer-idle facts (2026-10-17)
+
+BE-018/050, FE-019/053/062 and DEP-043 remain in_progress. Schema67/68 preserve
+message/event/contact/read history, distinguish manual assignment acceptance,
+store unanswered clocks, allow closed-only staff resolution in either queue and
+add immutable idle-ending facts. Isolated migration/response/evidence suites and
+protected actual local backup/rollback/apply/no-op receipts pass under
+`.local/chat-standard-s125/migration67/` and `migration68/`. No hosted migration.
+
+Current code: support-response-contract, support-idle-evidence, support-client-state,
+support/support-navigation/support-staff-state, attention contract/enqueue/delivery,
+web Join/action/thread/list, web/native customer/history projections and existing
+local/Netlify minute workers. Public assignment names/alerts are withheld until
+explicit current-assignment Join; read receipts never join. Private proof uses
+persisted timestamps and read status at ending, not current or provider delivery.
+
+Tests: test-support-response-migration, test-support-resolution-migration,
+test-support-response, test-support-idle-evidence, strengthened read/idle/security
+fixtures; test-client-chat-state-ui (9) plus13 inherited client cases;
+test-support-join-action and expanded staff/navigation cases;3 worker-controller
+cases; both typechecks and17localization checks/1595keys. Passing segments and
+original infrastructure/fixture failures remain in the private agent receipts.
+Baseline compatibility continuation and final full gates remain separate.
+
+Actual installed Chrome web passes6checks/13screens at1440/390 against one new
+labelled case324: real intake/assignment, visible read without Join, manager
+inspection, deliberate Join/one customer event, public reply and visible read,
+committed participant follow-up, actual minute-worker escalation and inactivity
+ending, saved unread-at-ending proof and explicit resolution with full history.
+Only that new QA case's clocks/message timestamps are accelerated together;
+real30minutes/OS delivery are not claimed. External media and focus are controlled.
+Original failed scope-parser and optimistic-commit harness attempts322/323 are
+preserved and classified, not relabeled passed. See
+`.local/chat-standard-s125/web-commit-barrier/outcome.json`.
+
+Actual installed Chrome Expo390 verifies15states for a visitor transport request
+and private QA owner Support, with8canonical read/state checks: neutral assignment,
+visible read without Join, explicit Join, both reply/read directions, native
+Amharic state, participant End, staff resolve and native history. The strict first
+network receipt remains failed/mixed for two staff-read POST net::ERR_ABORTED
+cancellations; request timing did not prove their cause. Expected cursors and
+terminal states are verified, with zero runtime/console/API/unexpected-write
+errors. No weakened assertion or new-case retry. See
+`.local/chat-states-s125/native/live-review-receipt.json`. Browser focus/media are
+controlled; no installed Android/OS delivery claim. Visual/full/release/acceptance/
+commit/hosted/new-Android gates remain open.
+
+
+## S126 — fair assignment grace and private admin email (2026-10-17)
+
+BE-018/050 and DEP-043 remain in_progress. Migration69 adds an assignment-scoped
+notification marker and private email outbox, with no historical email jobs.
+Protected loopback backup/rollback/apply/readback/no-op and history preservation
+pass at `.local/chat-email-s126/migration69/verified.json`; no hosted mutation.
+Current source: support-assignment-response, shared response SQL, support overdue
+sweep/current epoch events, fresh attention feed/push guards, typed escalation
+email port/dispatcher and existing bounded local/Netlify workers. ADR-0026 records
+the narrow existing-provider decision. No new dependency or provider credential.
+
+Focused mapping: test-support-assignment-response-migration and
+test-support-assignment-response pass assignment/message race, same-assignee
+no-op, stale recipients, atomic jobs/rollback, mixed old-writer recovery and
+candidate-limit fairness. Existing S125 response/idle-proof regressions also pass.
+Email adapter10/10 and isolated dispatcher11/11 pass generic native-language
+content, stable idempotency, leases/fencing/retry/expiry, fresh current-assignment
+and manager authority, answer/end/reassign/role-change suppression, HTTP bounds,
+loopback and effective-DSN-target rejection. Independent pure-parser review closes
+the target-override finding. Worker tests3/3, both typechecks, localization17/17
+(1597keys) and199spec/ADR validation pass. The first integrated web typecheck's
+union-narrowing error is corrected; the retained final typecheck exits0. Receipts:
+`.local/support-response-s126-backend-receipt.json`,
+`.local/chat-escalation-s126/email/verified.json` and `.local/chat-email-s126/`.
+The full support chain now includes `npm run test:support-escalation`; broad
+compatibility/full/release checks remain gated rather than claimed passed.
+
+Actual installed Chrome1440/390 plus real minute worker/Mailpit confirms six
+checks over the same labelled QA322: actual admin reassignment grants a fresh
+window; only its exact new assignment clock is accelerated; unchanged original
+customer wait/transcript; current staff/admin in-app overdue; six canonical
+manager emails accepted once over three runs (two per run); a later run sends no
+duplicate; Join does not clear overdue; actual public reply does; staff resolution
+retains history. Six emails contain no customer identity/phone/message/route.
+The original85second all-manager completion harness failed because it was shorter
+than the intentional batch budget. One bounded same-case continuation succeeds,
+without another assignment, clock shift or source change. Original failure and
+classification remain at `.local/chat-email-s126/browser/outcome.json` and
+`browser-budget-classification.json`; final six-check/five-screen receipt is
+`browser-bounded/outcome.json` (plus two initial grace screenshots). Zero final
+runtime/console/API/unexpected-write errors. Local inbox acceptance is not Resend
+inbox/OS/device evidence. Pending deliveries were checked/quarantined only for
+labelled QA322–326; all history remains. Current review links S122 dashboard work
+and S125 web/Expo evidence; visual approval/full/release/commit/hosted/new-binary
+gates remain open.
+
+
+## S127 — normal clusters and all-fit final previews (2026-10-17)
+
+FE-021/053/058, BE-023 and FE-048/BE-041 remain in_progress: local implementation,
+focused tests and actual browser workflows pass; visual/full/release/commit and
+rollout gates are open. S122/S125/S126 work and separate review gates are retained.
+
+Current `lib/map/map-clustering.ts` builds compact3km terminal neighborhoods and
+weighted normal Supercluster hierarchy over current public IDs. Only solitary
+shops use glyphs; forced one-card groups stay circles. Any counted circle below
+normalized18/native raw17 zooms; only a current final group at maximum opens all
+members. Screen capacity up to6desktop/3phone reduces for height/font/safe-area;
+no lines, scrolling or pager.800m visual displacement and public200scope remain
+independent. Current67public rows are unchanged:7glyphs,25phone or19desktop final
+groups. No database/provider/dependency/coordinate/hosted mutation.
+
+Source: MarketplaceMap, DiscoveryWorkspace/map-group-view, MapPreviewDialog,
+short Market/Dock CSS; native map-markers/model, MarketMap(.web), MapGroupPicker,
+Market screen, public map-return-session and Leaflet resize lifecycle. All five
+catalogs carry authored singular/plural zoom/open actions (1606interface keys).
+
+Focused evidence:19shared contracts/330partition oracles,6web admission cases,
+9native group cases,3installed-SDK arithmetic cases and1short-web CSS case pass
+(38contracts/20node subtests). Current native groups9/9, Market/layout15/15 and
+real installed-Chrome/Leaflet lifecycle4/4 pass. Both typechecks,17localization
+cases/1606keys and199spec validation pass. Permanent test paths include
+scripts/test-map-clustering.ts, test-map-group-picker-web.ts,
+test-mobile-map-groups.ts, test-leaflet-resize-center.ts,
+test-web-market-short-layout.ts, test-mobile-market-layout.ts and
+ test-mobile-map-lifecycle.ts; registered focused/workflow gates retain them.
+Receipts: `.local/map-groups-s127/neighborhood-3km/verified.json`,
+`hierarchy-web-verified.json`, `final-focused.log`,
+`.local/map-grouping-s127/native-receipt.json`, and final container/toolbar logs.
+
+Actual installed Google Chrome real-app/API coverage completes29checks/59states:
+web1440/390(allfive languages)/320; real six-shop desktop; Expo390(allfive
+languages)/320/844landscape. All current members fit:6desktop,3phone,4landscape.
+Ordinary outer zoom→maximum modal→detail/full shop→Back, current membership/focus/
+camera, disabled18zoom/overzoom, real search/clear IDs and pointer gestures pass.
+No runtime/console/API/request errors or application writes. All owned browsers
+close. Source-bound receipt: `.local/map-groups-s127/actual/final-platform-verified.json`.
+The earlier mixed web receipt remains FAILED for a subsequent Expo defect; its
+completed13webchecks/27states bind to unchanged web/shared/catalog hashes. Final
+Expo runs every mobile journey on its final source, with an internal hash guard.
+The extra verified desktop6receipt supplies3checks/5states. No injected state,
+forced clicks or mocked successful application/API response is accepted.
+
+Browser-discovered real defects have before/fix regressions: latest marker
+callback after zoom commit; owned container ResizeObserver and initialcoalesced
+frame after0→visible flex layout; explicitright:auto instead ofundefined which
+RNWeb skipped, retaining a full-width invisible toolbar over map targets. Current
+lifecycle tests prove first click, automatic valid-size recovery, current markers,
+camera≤0.5px, zero-size fences, disconnect and no late unmount callbacks. Installed
+RNWeb style resolution and actual landscape clicks prove toolbar clearance.
+The short-web map also matches its actual visible viewport and reachable dock.
+Original failures/diagnostics and the insufficient readiness-only hypothesis,
+rounded-camera measurement and navigation-gesture classifications are retained;
+none is relabelled as an unconditional passing run.
+
+Controlled dense supplement:5sizes/20screens,214center/edge activations, every
+200member traversed on desktop/phone, final capacities6/3/3/4/1, no lines/pager/
+inner/outer scroll. Explicit test shops/tiles/Next ports; not real API/database or
+physical-device evidence. Final3km source yields exact same dense identities and
+geometry at capacities1..6/zooms1/6/14/18. Receipt under
+`.local/map-groups-s127/hierarchy-density-fixture/2026-10-17T20-59-23.260Z/`.
+
+Concrete current review: `.local/map-groups-s127/review.html`, linking S122 owner/
+admin review, S125/S126 chat review and private test guide. Web3102, Expo8082 and
+Mailpit54324 are reachable. Visual approval under AGENTS step8 is the next gate.
+No current full/acceptance/release gates, commit, hosted rollout or Android build.
+Expo Chrome is not installed MapLibre/Android, TalkBack or OS push evidence;
+controlled external media/analytics do not establish provider playback.
+
+
+## S128 — compact Market toolbar and safe showroom return (2026-10-17)
+
+FE-065/FE-053/FE-021 and FE_BASE remain **in_progress**. The local candidate is
+implemented, focused-tested and exercised in installed Google Chrome. Explicit
+visual approval, expensive full/release/acceptance gates, task-scoped commit and
+rollout remain pending. S122 workspace, S125/S126 chat and S127 map reviews are
+retained. No hosted, database, provider, credential, signing or Android-build
+operation occurred in S128.
+
+The public Market removes its separate visible title row, retaining a localized
+programmatic heading and one centered Businesses/Products row with the existing
+Info action. The accepted narrative remains in Info/About. Search and labeled
+Category/Country/City filters share one row at measured content width35rem on
+web or760px native at ordinary text scale. Phones/enlarged text retain wrapping
+rows; Products retains Made to order. Labels, selected counts,48px targets and
+useful search width remain. Sources: public page/landing CSS, MarketIntroduction,
+DiscoveryWorkspace/IndependentMarket CSS, native Market/MarketSearchControls.
+No new interface copy or global navigation behavior is introduced.
+
+Focused acceptance mapping: web `test-market-workspace-ui.ts`8actual-source
+React cases; `test-map-group-picker-web.ts`6current-membership/focus cases;
+`test-web-market-short-layout.ts`40layout states,2enlarged fixture samples and
+10populated actual-React578/606px states across all five languages. Native
+`test-mobile-market-layout.ts`18, `test-mobile-map-groups.ts`9 and
+`test-product-only-native-ui.ts`7 pass (34total), including installed RNWeb View
+idle/loading/error rendering. Shared resize/web lifecycle tests pass10cases:
+7actual React/SDK lifecycle cases plus3pure installed-SDK arithmetic oracles,
+including96vectors,20repeated returns and zero-size behavior. Final application,
+mobile and focused-script typechecks pass. Catalog completeness is17tests /
+1606keys per non-English catalog; no copy changed. Specification validation and
+scoped whitespace results are retained with the local review.
+
+Actual installed Google Chrome155.0.8059.81 covers80source-bound layout states:
+web and Expo, Businesses/Products, English/Amharic/Afaan Oromo/Somali/Tigrinya,
+1440×1000/390×844/320×480/844×390. Checks include the programmatic heading,
+centered choices,48px targets and edge hits, visible words/counts, measured inline
+rows, useful input width, no horizontal overflow, no Expo LogBox and clear map
+pointer space. Three actual150%rem Amharic-product samples cover web1440/844/320;
+native font-scale wrapping is controlled component evidence, not OS scaling.
+
+Measured Businesses map top / extra visible height:
+
+| Surface | Before → after top | Extra map |
+| --- | --- | --- |
+| Desktop web1440 |414.5→195px|219.5px|
+| Phone web390 |283→227px|56px|
+| Small web320 |235→227px|8px|
+| Landscape web844 |261→195px|66px|
+| Wide Expo1440 |280→169px|111px|
+| Phone Expo390 |280→224px|56px|
+| Small Expo320 |232→224px|8px|
+| Landscape Expo844 |232→169px|63px|
+
+Four English/Amharic real control journeys across web/Expo verify typing without
+Enter, independent scopes, two categories, Country then City, counts, Made to
+order, URL reload, clearing and preserved map zoom. There are40authoritative
+local public API JSON readbacks. Two English full map journeys zoom normal outer
+circles to maximum18, open a fitting two-shop group, preview a shop, visit its full
+showroom, return through browser Back and close/return to the group. Stored SDK
+camera matches the visible camera and returns within0.1projected pixel on each
+axis (the original≤0.5px threshold remains). Workflow coverage is16captured
+states, separate from the all-five-language layout matrix. All final runtime,
+console, application-request and API errors and unexpected writes are empty.
+Real public67-business APIs are used; analytics is explicitly204 and external
+media is controlled. No fake successful app response, forced click or injected
+application state is accepted. All owned browsers close; web3102/Expo8082 remain
+running.
+
+Browser findings retain original failed evidence, diagnoses and regressions:
+
+- Real844px web toolbar content was578px, below the earlier37rem fixture
+  assumption. The measured-width breakpoint is35rem, with a populated578px
+  regression; no label/target/budget assertion was weakened.
+- A newly introduced idle empty-string status child produced Expo's Unexpected
+  text node warning. An exact Boolean guard fixes it; actual RNWeb rendering and
+  final browser LogBox assertions verify idle/loading/error behavior.
+- The combined filter/reload/clear→showroom→Back journey exposed a pre-existing
+  cached-scope loading bug. The controller now tags projection data with its
+  canonical key, resets obsolete pending/error state and fences aborted results.
+  It preserves valid saved context until authoritative current rows settle.
+- A subsequent passive SDK/storage trace identified an initial world-view callback
+  before restored selection committed. A projection-scoped commit fence prevents
+  stale callbacks replacing valid group/selection/camera; the exact child-effect
+  regression fails before the fix and passes afterward.
+- A54px loading-row resize shifted the web camera26.936projected pixels. Both
+  Leaflet adapters now use the existing unchanged pure correction in
+  `lib/map/leaflet-resize.ts`; the native path re-exports it. Intermediate resize
+  callbacks cannot persist a drifted view; live-instance and zero-size/cleanup
+  guards remain. Actual SDK and full real browser returns meet original precision.
+- The first Expo Amharic hard-reload harness incorrectly expected persisted
+  locale. Its existing web secure adapter stores values only in memory; native
+  uses SecureStore. The controlled retry observes English, selects Amharic through
+  the actual picker and verifies all original URL/filter assertions. No storage
+  behavior changed. The first failed result remains failed.
+
+Evidence root `.local/market-toolbar-s128/`: `verified.json`, `review.html`,
+`before/outcome.json`, `after-web/outcome.json`, `after-expo/outcome.json`,
+`after/outcome.json`, `workflows-verified/outcome.json`, `enlarged/outcome.json`,
+`web/verified.json`, `web-resize-agent-receipt.json`, and
+`expo-reload-classification.json`. Source hashes in final layout/workflow receipts
+match the final implementation. Protected original failures and canceled capture
+attempts remain there; none is relabelled as an unconditional pass.
+
+The review links earlier workspace/chat/map reviews and the private role-testing
+guide. Expo Chrome is Leaflet-preview evidence, separate from installed Android,
+MapLibre, TalkBack, system keyboard/font settings, notifications and provider
+video playback. No deployment or new APK is claimed. Next dependency: owner
+visual approval under AGENTS step8, then the existing full/release/acceptance
+workflow and reviewed task isolation.

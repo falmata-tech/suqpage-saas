@@ -77,6 +77,7 @@ export async function getDashboardAttention(
     supportReplies: await count(`
       SELECT COUNT(*) total FROM support_conversations c
       WHERE c.business_id=? AND c.status!='closed'
+        ${client?"AND c.assistance_category NOT IN ('shipment_observation','buying_assistance')":''}
         AND EXISTS(
           SELECT 1 FROM support_messages m
           WHERE m.conversation_id=c.id

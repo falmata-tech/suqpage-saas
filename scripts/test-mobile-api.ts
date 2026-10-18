@@ -1,3 +1,4 @@
+import { createPublicInquiry } from "../lib/inquiries";
 import {findPlaceSuggestions} from '../lib/place-catalog';
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
@@ -64,6 +65,18 @@ async function main() {
     assert.equal(home.shop.id, a.businessId);
     assert.ok(home.shop.products.length > 0);
     assert.equal(home.shop.status, "draft");
+    assert.equal(home.draft.assistanceEnabled,false);
+    const beforeConsent=JSON.stringify(home.draft.content);
+    r=await call('owner/page',{action:'assistance',version:home.draft.version,enabled:true,content:home.draft.content});assert.equal(r.status,400);
+    r=await call('owner/page',{action:'assistance',version:home.draft.version,enabled:'true'});assert.equal(r.status,400);
+    r=await call('owner/page',{action:'assistance',version:home.draft.version,enabled:true,businessId:b.businessId});assert.equal(r.status,400);
+    r=await call('owner/page',{action:'assistance',version:home.draft.version,enabled:true});assert.equal(r.status,200);
+    const enabledConsent=await r.json();assert.equal(enabledConsent.assistanceEnabled,true);assert.equal(JSON.stringify(enabledConsent.content),beforeConsent);
+    r=await call('owner/page',{action:'assistance',version:home.draft.version,enabled:false});assert.equal(r.status,409);
+    r=await call('owner/home');assert.equal((await r.json()).draft.assistanceEnabled,true);
+    r=await call('owner/page',{action:'assistance',version:enabledConsent.version,enabled:false});assert.equal(r.status,200);
+    const disabledConsent=await r.json();assert.equal(disabledConsent.assistanceEnabled,false);assert.equal(JSON.stringify(disabledConsent.content),beforeConsent);
+    home.draft.version=disabledConsent.version;
     r=await call('owner/video-link',{url:'https://youtu.be/aqz-KE-bpKQ'},false);assert.equal(r.status,401);
     for(const [url,ref] of [
       ['https://youtu.be/aqz-KE-bpKQ','youtube:aqz-KE-bpKQ'],
@@ -169,17 +182,17 @@ async function main() {
     const {getMediaObjectStore}=await import("../lib/media-storage");await getMediaObjectStore().remove("support",[stored.storage_key]);
 
     const createKey = crypto.randomUUID();
-    async function createOffering() {
+    async function createOffering(kind = "made_to_order") {
       const form = new FormData();
       form.set(
         "details",
         JSON.stringify({
-          name: "Native repair service",
-          description: "Repair work booked by inquiry.",
+          name: "Native custom shelf",
+          description: "A shelf made after the measurements are agreed.",
           priceMinor: 5000,
           expectedContentVersion: home.shop.version,
           idempotencyKey: createKey,
-          offeringKind: "service",
+          offeringKind: kind,
           isPublished: true,
           media: [],
         }),
@@ -194,6 +207,8 @@ async function main() {
         { identity: port, invalidate() {} },
       );
     }
+    r = await createOffering("service");
+    assert.equal(r.status,400,"An installed older client cannot create a retired service");
     r = await createOffering();
     assert.equal(r.status, 200);
     const offering = await r.json();
@@ -208,7 +223,7 @@ async function main() {
             .prepare(
               "SELECT COUNT(*) n FROM products WHERE business_id=? AND name=?",
             )
-            .get(a.businessId, "Native repair service")
+            .get(a.businessId, "Native custom shelf")
         ).n,
       ),
       1,
@@ -217,7 +232,7 @@ async function main() {
     const currentHome = await (await call("owner/home")).json();
     const hidden = new FormData();
     hidden.set("details", JSON.stringify({ name: "Hidden owner item", description: "Kept for owner editing.",
-      priceMinor: null, offeringKind: "service", availability: "unavailable", isPublished: false,
+      priceMinor: null, offeringKind: "made_to_order", availability: "unavailable", isPublished: false,
       expectedContentVersion: currentHome.shop.version, idempotencyKey: crypto.randomUUID() }));
     r = await handleMobileRequest(new Request(`https://suqpage.com/api/mobile/v1/owner/products/${ownId}`, {
       method: "POST", headers: { authorization: `Bearer ${token}` }, body: hidden,
@@ -276,8 +291,10 @@ async function main() {
       },
       false,
     );
-    assert.equal(r.status, 200);
-    const inquiry = await r.json();
+    assert.equal(r.status, 410);
+    assert.equal((await r.json()).code, "inquiry_retired");
+    // History fixture is created internally; public clients cannot create it.
+    const inquiry = await createPublicInquiry({businessId:a.businessId,customerName:"Historical visitor",contactMethod:"phone",contact:"+251911222335",idempotencyKey:inquiryKey,items:[{productId:offering.productId,quantity:"",options:{}}]}, "history-fixture");
     assert.ok(inquiry.inquiryId);
     r = await call("owner/inquiries");
     assert.equal(r.status, 200);

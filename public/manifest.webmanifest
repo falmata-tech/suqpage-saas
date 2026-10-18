@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Suqpage",
-  "short_name": "Suqpage",
-  "description": "Discover shops and products near you, and contact sellers directly.",
+  "name": "MirtPage",
+  "short_name": "MirtPage",
+  "description": "Explore business digital showrooms. Browse products and listed availability, then message the business directly.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -12,13 +12,13 @@
   "dir": "ltr",
   "categories": ["business", "shopping"],
   "icons": [
-    { "src": "/pwa/suqpage-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/pwa/suqpage-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/pwa/suqpage-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/pwa/mirtpage-panels-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/mirtpage-panels-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/mirtpage-panels-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Explore shops", "short_name": "Market", "url": "/", "icons": [{ "src": "/pwa/suqpage-icon-192.png", "sizes": "192x192" }] },
-    { "name": "Daily Featured", "short_name": "Featured", "url": "/featured", "icons": [{ "src": "/pwa/suqpage-icon-192.png", "sizes": "192x192" }] },
-    { "name": "Your account", "short_name": "Account", "url": "/login", "icons": [{ "src": "/pwa/suqpage-icon-192.png", "sizes": "192x192" }] }
+    { "name": "Explore shops", "short_name": "Market", "url": "/", "icons": [{"src": "/pwa/mirtpage-panels-icon-192.png", "sizes": "192x192"}] },
+    { "name": "Daily Featured", "short_name": "Featured", "url": "/featured", "icons": [{"src": "/pwa/mirtpage-panels-icon-192.png", "sizes": "192x192"}] },
+    { "name": "Your account", "short_name": "Account", "url": "/login", "icons": [{"src": "/pwa/mirtpage-panels-icon-192.png", "sizes": "192x192"}] }
   ]
 }

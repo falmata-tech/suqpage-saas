@@ -3,18 +3,26 @@ import fs from "node:fs/promises";
 import { chromium, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
 const base = "http://127.0.0.1:3101";
 const output = "/tmp/suqpage-redesign-review";
 await fs.mkdir(output, { recursive: true });
 const browser = await chromium.launch();
 const errors = [];
 try {
-  const context = await browser.newContext();
+  const context = await browser.newContext({serviceWorkers: 'block'});
   const page = await context.newPage();
+
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
   // Third-party playback is outside this local layout/accessibility check.
   await page.route("https://www.youtube-nocookie.com/embed/**", (route) => route.fulfill({ body: '<html><body style="margin:0;display:grid;place-items:center;height:100vh;background:#202428;color:white;font:16px sans-serif">Video player · test fixture</body></html>', contentType: "text/html" }));
+  mapTileFixtures.push(await installMapTileFixture(context));
   const routes = [["market", "/?industry=all"], ["featured", "/featured"], ["about", "/about"],
     ["login", "/login"], ["textiles", "/@selam-weave"], ["electronics", "/@demo-abay-electrical-assembly"], ["home", "/@entoto-ceramics"], ["sensor", "/@demo-nile-sensor-studio?ref=discovery"]];
   for (const width of [1440, 390, 320]) {
@@ -99,4 +107,5 @@ try {
   }
   assert.deepEqual(errors, [], "No browser application errors");
   console.log(`Suqpage desktop/390/320 screenshots: ${output}`);
-} finally { await browser.close(); }
+} finally { await browser.close();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests(); }

@@ -100,7 +100,7 @@ export default function YouTubeVideo({
     return (
       <View style={{ gap: 5 }}>
         <View style={{height:Math.max(200,height),backgroundColor:'#202428',overflow:'hidden'}}>
-          {tikTok&&poster?<View pointerEvents="none" style={[StyleSheet.absoluteFill,{opacity:.45}]}><Photo refPath={poster} height={Math.max(200,height)} privateImage={privateImage} blurRadius={12}/></View>:null}
+          {tikTok&&poster?<View style={[StyleSheet.absoluteFill,{pointerEvents:'none',opacity:.45}]}><Photo refPath={poster} height={Math.max(200,height)} privateImage={privateImage} blurRadius={12}/></View>:null}
           <View style={{height:Math.max(200,height),width:tikTok?Math.max(200,height)*9/16:'100%',maxWidth:'100%',alignSelf:'center'}}><Frame
           key={video + attempt}
           id={id}
@@ -125,7 +125,7 @@ export default function YouTubeVideo({
         refPath={poster || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
         height={height}
       />}
-      {posterTint ? <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: posterTint, opacity: .08 }]} /> : null}
+      {posterTint ? <View style={[StyleSheet.absoluteFill, { pointerEvents:'none',backgroundColor: posterTint, opacity: .08 }]} /> : null}
       <View style={p.overlay}>
         <View style={p.circle}>
           <Icon name="play" color="white" size={28} />

@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
 import sharp from 'sharp';
 import { postgresRuntimeServices,closePostgresRuntimeForTests } from '../lib/postgres-runtime-services';
 import { createPostgresPublicClientWorkspace } from '../lib/signup-postgres';
-import { runtimeCatalogByBusinessId } from '../lib/catalog-runtime';
+import { runtimeCatalogByBusinessId,runtimeUserById } from '../lib/catalog-runtime';
 import { initialBusinessProfile } from '../lib/business-profile';
 import { ownerPagePort } from '../lib/owner-page-runtime';
 import { startOwnerPage,saveOwnerPage,readOwnerPage,setOwnerPageAssistance } from '../lib/owner-page-service';
@@ -17,13 +17,63 @@ import { changePagePublication } from '../lib/owner-page-publication';
 import { pagePublicationPort } from '../lib/owner-page-publication-runtime';
 import { executeBasicProductUpkeep } from '../lib/product-upkeep';
 import { postgresProductUpkeepPort } from '../lib/product-upkeep-postgres';
-import { changeProductCategory } from '../lib/product-categories';
+import { changeProductCategory,type CategoryChange } from '../lib/product-categories';
 import { setBusinessAssignment } from '../lib/business-assistance';
 import { stageTenantProductImage,readTenantProductImage } from '../lib/tenant-product-media';
 import { migratePostgresDatabase } from '../lib/postgres-migrations';
 import type { SessionUser } from '../lib/types';
 import type { StagedImage } from '../lib/media';
+import {getDb,closeDbForTests} from './testing/postgres-fixture';
+
+async function categorySecurity(){
+ const db=await getDb();
+ try{
+  const businessId=Number((await db.prepare("INSERT INTO businesses(handle,name,design_key) VALUES('category-security','Category security fixture','composition')").run()).insertedId);
+  const foreignId=Number((await db.prepare("INSERT INTO businesses(handle,name,design_key) VALUES('category-security-foreign','Foreign category fixture','composition')").run()).insertedId);
+  async function account(name:string,role:SessionUser['access_role'],tenant:number|null=null,scope?:'all'|'support'|'transport'){
+   const id=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id) VALUES(?,'unused',?,'admin',?)").run(name+'@example.test',name,tenant)).insertedId);
+   await db.prepare('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)').run(id,role);
+   if(scope)await db.prepare('INSERT INTO support_agent_settings(user_id,enabled,updated_by_user_id,updated_at,queue_scope) VALUES(?,1,?,1,?)').run(id,id,scope);
+   return (await runtimeUserById(id))!;
+  }
+  const admin=await account('Admin','platform_admin'),owner=await account('Owner','client',businessId),foreign=await account('Foreign owner','client',foreignId);
+  const generic=await account('Generic editor','team_member'),genericAll=await account('Generic all editor','team_member',null,'all'),support=await account('Support agent','team_member',null,'support'),transport=await account('Transport agent','team_member',null,'transport');
+  // Deliberately reproduce historical associations only inside this disposable schema.
+  for(const staff of [generic,genericAll,support,transport])await db.prepare('INSERT INTO staff_business_assignments(user_id,business_id,assigned_by_user_id,active) VALUES(?,?,?,1)').run(staff.id,businessId,admin.id);
+  await changeProductCategory(owner,{kind:'create',businessId,name:'Owner category',slug:'owner-category'});
+  const category=await db.prepare('SELECT id FROM categories WHERE business_id=?').get(businessId);
+  const foreignCategory=Number((await db.prepare("INSERT INTO categories(business_id,name,slug,sort_order,is_active) VALUES(?,'Foreign category','foreign-category',0,1)").run(foreignId)).insertedId);
+  const productId=Number((await db.prepare("INSERT INTO products(business_id,category_id,name,slug) VALUES(?,?,'Fixture product','fixture-product')").run(businessId,category.id)).insertedId);
+  const commands:CategoryChange[]=[{kind:'create',businessId,name:'Denied create',slug:'denied-create'},{kind:'update',businessId,id:category.id,name:'Denied update',slug:'denied-update',active:false},{kind:'delete',businessId,id:category.id}];
+  const snapshot=async()=>({categories:await db.prepare('SELECT id,business_id,name,slug,sort_order,is_active FROM categories ORDER BY id').all(),products:await db.prepare('SELECT id,business_id,category_id FROM products ORDER BY id').all(),versions:await db.prepare('SELECT id,content_version FROM businesses ORDER BY id').all(),audits:await db.prepare('SELECT id,business_id,action FROM audit_logs ORDER BY id').all()});
+  async function denied(actor:SessionUser){const before=await snapshot();for(const command of commands)await assert.rejects(()=>changeProductCategory(actor,command),/access/);assert.deepEqual(await snapshot(),before,'Denied category commands preserve rows, product relations, versions and audit history');}
+  await denied(foreign);
+  for(const agent of [support,transport]){
+   await denied(agent);
+   await denied({...agent,staff_queue_scope:'all'});
+   await denied({...agent,access_role:'platform_admin'});
+  }
+  const beforeForeign=await snapshot();for(const kind of ['update','delete'] as const)await assert.rejects(()=>changeProductCategory(owner,{kind,businessId,id:foreignCategory,name:'Foreign mutation',slug:'foreign-mutation'}),/not found/);assert.deepEqual(await snapshot(),beforeForeign);
+  for(const actor of [generic,genericAll]){
+   await changeProductCategory(actor,{kind:'create',businessId,name:'Assigned '+actor.id,slug:'assigned-'+actor.id});
+   await changeProductCategory(actor,{kind:'update',businessId,id:category.id,name:'Assigned update',slug:'owner-category',active:true});
+   const assignedCategory=await db.prepare('SELECT id FROM categories WHERE business_id=? AND slug=?').get(businessId,'assigned-'+actor.id);
+   await changeProductCategory(actor,{kind:'delete',businessId,id:assignedCategory.id});
+  }
+  await db.prepare('UPDATE staff_business_assignments SET active=0 WHERE user_id=? AND business_id=?').run(generic.id,businessId);await denied(generic);
+  await db.prepare("UPDATE user_access_profiles SET access_role='client' WHERE user_id=?").run(genericAll.id);await denied(genericAll);
+  const beforeAudit=await snapshot();
+  await db.exec("CREATE FUNCTION reject_category_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'fixture category audit unavailable'; END $$; CREATE TRIGGER reject_category_audit BEFORE INSERT ON audit_logs FOR EACH ROW EXECUTE FUNCTION reject_category_audit()");
+  await assert.rejects(()=>changeProductCategory(owner,{kind:'update',businessId,id:category.id,name:'Audit rollback',slug:'owner-category',active:false}),/fixture category audit unavailable/);assert.deepEqual(await snapshot(),beforeAudit);
+  await db.exec('DROP TRIGGER reject_category_audit ON audit_logs; DROP FUNCTION reject_category_audit()');
+  await changeProductCategory(owner,{kind:'delete',businessId,id:category.id});
+  assert.equal((await db.prepare('SELECT category_id FROM products WHERE id=?').get(productId)).category_id,null,'Authorized deletion preserves the product without its category');
+  assert.equal((await db.prepare('SELECT name FROM categories WHERE id=?').get(foreignCategory)).name,'Foreign category');
+  console.log('PASS isolated category security: current/stale support and transport roles, retained assignments, generic staff, owner/foreign/revoked boundaries, all commands, audit rollback and product preservation.');
+ }finally{await closeDbForTests();}
+}
 async function main(){
+ if(process.argv.includes('--category-security'))return categorySecurity();
  const target=new URL(process.env.SUQPAGE_POSTGRES_URL||'');assert.ok(['localhost','127.0.0.1'].includes(target.hostname)&&target.port==='54322');assert.equal(process.env.SUQPAGE_DATABASE_DRIVER,'postgres');
  process.env.SUQPAGE_OWNER_EDITOR_ENABLED='1';const {runner}=postgresRuntimeServices();const rollback=new Error('ROLLBACK_STANDARD_PAGE_TEST');let staged:StagedImage|null=null;
  try{await runner.transaction(async()=>{

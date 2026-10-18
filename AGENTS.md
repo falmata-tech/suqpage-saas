@@ -36,10 +36,17 @@ silently change product behavior to match convenient code.
    showroom identity.
 7. Add tests that prove every changed acceptance criterion. Security and data
    integrity fixes require regression tests.
-8. For visual work, run focused tests and capture the affected desktop/phone
-   states first. Give the user the live local URL or focused screenshots and
-   wait for explicit visual approval before running expensive full-suite,
-   release, container, or remote CI gates. Security, data-integrity, and
+8. For UI, UX, layout, or navigation work, run focused tests and exercise the
+   affected tasks in actual Google Chrome using the mandatory
+   [browser workflow review](docs/operations/BROWSER-WORKFLOW-REVIEW.md).
+   Cover the affected visitor, owner, staff and admin roles on desktop/phone web
+   and the affected Expo mobile preview at localhost:8082. Click, type, navigate,
+   save/cancel and verify authoritative local API/database outcomes where
+   applicable; screenshots or mocked success alone are not workflow evidence.
+   Capture the affected desktop/phone states first. Give the user the live local
+   URL or focused screenshots and wait for explicit visual approval before
+   running expensive full-suite, release, container, or remote CI gates.
+   Security, data-integrity, and
    non-visual emergency fixes may proceed directly when delay would add risk.
 9. After visual approval, run `npm run check`; use `npm run release` for
    release-affecting changes and `npm run test:acceptance` for user workflows.

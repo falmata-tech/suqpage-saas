@@ -2,7 +2,7 @@
 id: BE-047
 title: Canonical business city in signup transaction
 status: in_progress
-related: [BE-049, FE-059, BE-031, BE-038, BE-041, FE-051, BE-044, DEP-042]
+related: [BE-049, FE-059, BE-031, BE-038, BE-041, FE-051, BE-044, DEP-042, FE-065, BE-054]
 owners: [backend, security]
 last_updated: 2026-10-07
 change_level: L2
@@ -25,7 +25,9 @@ anchor within the existing account/business/identity transaction. City and regio
 are factual chosen values, not editable sample defaults. Area mode remains
 approximate and never claims a street address. Existing starter initialization
 for non-signup internal/test paths may retain its explicit existing default;
-public signup always supplies a validated city. No schema migration.
+public signup always supplies a validated city. S102 / BE-054 adds countryCode, the offline world catalog and additive migration
+64. New UI requires country/city; legacy canonical place IDs derive their country,
+and a supplied mismatch is rejected before writes. Existing anchors are retained.
 
 ## Scenarios
 

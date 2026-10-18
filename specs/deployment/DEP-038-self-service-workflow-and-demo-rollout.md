@@ -2,7 +2,7 @@
 id: DEP-038
 title: Self-service workflow and demo rollout
 status: done
-related: [FE-048, BE-041, DEP-037]
+related: [FE-048, BE-041, DEP-037, DEP-046]
 owners: [product, backend, operations]
 last_updated: 2026-09-21
 change_level: L3

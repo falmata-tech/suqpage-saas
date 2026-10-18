@@ -20,6 +20,7 @@ import {
   productMedia,
 } from "../product-media";
 import type { StagedImage } from "../media";
+import {isPublicProduct} from '../offerings';
 export async function ownerHome(actor: SessionUser & { business_id: number }) {
   const [catalog, draft, publication, contacts] = await Promise.all([
     runtimeCatalogByBusinessId(actor.business_id, true),
@@ -36,10 +37,10 @@ export async function ownerHome(actor: SessionUser & { business_id: number }) {
       email: actor.email,
       phone: contacts?.account_phone || "",
     },
-    shop: shopDto(catalog, content),
+    shop: shopDto(catalog, content, true),
     exampleVideoRef: await runtimeCategoryExampleVideo(actor.business_id),
-    activity:{visitsTotal:insights.totalVisitors,visits30Days:insights.last30Days,newInquiries:Number(attention.customerInquiries||0),products:catalog.products.filter(p=>Boolean(p.is_published)).length},
-    draft: draft ? { version: draft.version, content } : null,
+    activity:{visitsTotal:insights.totalVisitors,visits30Days:insights.last30Days,newInquiries:Number(attention.customerInquiries||0),products:catalog.products.filter(p=>Boolean(p.is_published)&&isPublicProduct(p)).length},
+    draft: draft ? { version: draft.version, content, assistanceEnabled: draft.assistanceEnabled } : null,
     publicationRevision: publication?.revision || 0,
     issues:
       catalog.business.status === "active"

@@ -38,14 +38,14 @@ export async function initializeBusinessStarter(runner: PostgresTransactionRunne
     await runner.query(`UPDATE businesses SET tagline=?,description=?,logo_path=?,favicon_path=?,hero_title=?,hero_subtitle=?,hero_image_path=?,
       process_video_ref=?,public_email=?,public_phone=?,whatsapp=?,telegram=?,tiktok=?,site_title=?,site_description=?,
       contact_email=CASE WHEN contact_email='' THEN ? ELSE contact_email END,live_platform='youtube',live_url=? WHERE id=?`, [
-      'Sample products, services and custom work', sample.page.about, `${STARTER_IMAGE_ROOT}/logo.png`, `${STARTER_IMAGE_ROOT}/logo.png`,
+      'Sample collection and made-to-order products', sample.page.about, `${STARTER_IMAGE_ROOT}/logo.png`, `${STARTER_IMAGE_ROOT}/logo.png`,
       business.name, 'Explore our work and tell us what you need.', sample.page.heroImage, sample.videoRef,
       starterContacts.email!, starterContacts.phone!, starterContacts.whatsapp!, starterContacts.telegram!, starterContacts.tiktok!,
-      business.name, 'Sample business page. Discover our products, services and custom work, then get in touch to discuss your needs.',
+      business.name, 'Sample business page. Browse our collection and made-to-order products, then ask us about the details.',
       input.notificationEmail, sample.page.videoUrl, input.businessId,
     ]);
     const collection = await runner.query<{ id: number }>(`INSERT INTO collections(business_id,name,slug,description)
-      VALUES(?,'Sample collection','sample-collection','Example products, services and custom work. Replace these items with your own.') RETURNING id`, [input.businessId]);
+      VALUES(?,'Sample collection','sample-collection','Example products, including items made to order. Replace these items with your own.') RETURNING id`, [input.businessId]);
     const collectionId = collection.rows[0].id;
     const category = await runner.query<{ id: number }>(`INSERT INTO categories(business_id,collection_id,name,slug)
       VALUES(?,?,'Sample offerings','sample-offerings') RETURNING id`, [input.businessId, collectionId]);
@@ -67,15 +67,15 @@ export async function initializeBusinessStarter(runner: PostgresTransactionRunne
     await runner.query(`INSERT INTO owner_page_drafts(business_id,version,content_json,assistance_enabled,updated_by,updated_at) VALUES(?,1,?,0,?,?)`,
       [input.businessId, JSON.stringify({ ...sample.page, ...(accentColor ? { accentColor } : {}) }), input.actorUserId, now]);
     await runner.query("INSERT INTO owner_page_events(business_id,version,actor_user_id,kind,created_at) VALUES(?,1,?,'created',?)", [input.businessId, input.actorUserId, now]);
-    await runner.query(`INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,latitude,longitude,place_id,place_latitude,place_longitude,reviewed_version,updated_at)
-      VALUES(?,1,?,?,?,'area',NULL,NULL,?,?,?,0,?)`, [input.businessId, input.category, place.name, place.region, place.id, place.latitude, place.longitude, now]);
+    await runner.query(`INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,latitude,longitude,place_id,place_latitude,place_longitude,country_code,reviewed_version,updated_at)
+      VALUES(?,1,?,?,?,'area',NULL,NULL,?,?,?,?,0,?)`, [input.businessId, input.category, place.name, place.region, place.id, place.latitude, place.longitude, place.countryCode, now]);
     if(input.placeId) {
       // New public signup supplied a server-known city. Map placement remains an
       // approximate area; the private sample does not become public automatically.
       for(const category of normalizeDiscoveryCategories(input.category))
         await runner.query('INSERT INTO business_industries(business_id,industry_key) VALUES(?,?)',[input.businessId,category]);
-      await runner.query(`INSERT INTO business_discovery_profiles(business_id,city,zone,region,latitude,longitude,approved_at,updated_at)
-        VALUES(?,?,?,?,?,?,?,?)`,[input.businessId,place.name,place.name,place.region,Math.round(place.latitude*10)/10,Math.round(place.longitude*10)/10,now,now]);
+      await runner.query(`INSERT INTO business_discovery_profiles(business_id,city,zone,region,latitude,longitude,approved_at,updated_at,country_code,city_id)
+        VALUES(?,?,?,?,?,?,?,?,?,?)`,[input.businessId,place.name,place.name,place.region,Math.round(place.latitude*10)/10,Math.round(place.longitude*10)/10,now,now,place.countryCode,place.id]);
       await runner.query('UPDATE owner_location_proposals SET reviewed_version=version WHERE business_id=?',[input.businessId]);
     }
     return true;

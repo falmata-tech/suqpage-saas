@@ -19,7 +19,7 @@ import {
 } from "../../src/ui";
 export default function Account() {
   const {next}=useLocalSearchParams<{next?:string}>();
-  const { session, ready, t, ownerRequest, signOut, authIssue, authRetryAvailable, retryAuth, clearAuthIssue } = useApp();
+  const { session, ready, t, ownerRequest, signOut, authIssue, logoutIssue, logoutPending, authRetryAvailable, retryAuth, clearAuthIssue } = useApp();
   const openLink = useOpenLink();
   const [email, setEmail] = useState(""),
     [code, setCode] = useState(""),
@@ -41,6 +41,7 @@ export default function Account() {
       : await ownerRequest<OwnerHome>("owner/home");
   }, [session?.user.id], true);
   async function login() {
+    if (logoutIssue || logoutPending) return;
     setBusy(true);
     setError("");
     clearAuthIssue();
@@ -75,6 +76,12 @@ export default function Account() {
       setBusy(false);
     }
   }
+  async function leaveSession() {
+    setBusy(true);
+    try { await signOut(); }
+    catch { /* The provider keeps the safe logout error and Retry after this screen changes. */ }
+    finally { setBusy(false); }
+  }
   if (!ready)
     return (
       <Screen>
@@ -85,18 +92,21 @@ export default function Account() {
     <Screen>
       {!session ? (
         <>
-          <Copy big>{t("Your business. Easy to find and browse.")}</Copy>
-          {next==='inquiries' && <Copy muted>{t("Sign in to view your business inquiries.")}</Copy>}
+          <Copy big heading>{t("Your business. Your digital showroom.")}</Copy>
           <Copy muted>
             {t(
-              "Give your social media customers an organized store to browse, find on the map and contact directly. Sign in to create your page or manage inquiries.",
+              "Create a showroom for what you sell, make or grow. Already have one? Sign in to manage your page.",
             )}
           </Copy>
           <Status error={authIssue} />
           {authIssue === "Staff accounts sign in on the website." && <Button secondary label={t("Open website")} onPress={()=>void openLink(API+"/dashboard/admin")}/>}
-          {authRetryAvailable ? <Card>
+          {logoutIssue || logoutPending ? <Card>
+            <Copy big>{t("Sign out")}</Copy>
+            <Status loading={logoutPending}/>
+            {logoutIssue && <Button label={t("Retry")} disabled={busy} onPress={() => void leaveSession()}/>}
+          </Card> : authRetryAvailable ? <Card>
             <Button label={t("Retry")} onPress={retryAuth}/>
-            <Button secondary label={t("Change email")} onPress={()=>{clearAuthIssue();setSent(false);setCode("");setPassword('');setPasswordMode(false);void signOut();}}/>
+            <Button secondary label={t("Change email")} onPress={()=>{clearAuthIssue();setSent(false);setCode("");setPassword('');setPasswordMode(false);void leaveSession();}}/>
           </Card> : <Card>
             <Copy big>{t("Continue with email")}</Copy>
             <Field
@@ -161,22 +171,12 @@ export default function Account() {
               onPress={() => void openLink(API + "/dashboard")}
             />
           )}
-          <Button
-            secondary
-            label={t("Delete account")}
-            onPress={() => router.push("/account-deletion")}
-          />
-          <Button
-            secondary
-            label={t("Sign out")}
-            onPress={() => {setPassword('');setPasswordMode(false);setSent(false);setCode('');setEmail('');void signOut();}}
-          />
         </>
       )}
-      <Button secondary label={t("About Suqpage")} onPress={()=>router.navigate("/about")}/>
+      {!session&&<><Button secondary label={t("About MirtPage")} onPress={()=>router.navigate("/about")}/>
       <Button secondary label={t('Blocked businesses')} onPress={()=>router.push('/blocked-businesses')}/>
       <Button secondary label={t("Privacy")} onPress={()=>void openLink(API+"/privacy")}/>
-      <Button secondary label={t("Terms")} onPress={()=>void openLink(API+"/terms")}/>
+      <Button secondary label={t("Terms")} onPress={()=>void openLink(API+"/terms")}/></>}
     </Screen>
   );
 }

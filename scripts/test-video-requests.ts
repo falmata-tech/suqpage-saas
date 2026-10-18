@@ -13,6 +13,7 @@ import {runtimeCatalogByBusinessId} from '../lib/catalog-runtime';
 import {starterPage,STARTER_VIDEO_REF,STARTER_VIDEO_URL} from '../lib/business-starter';
 import {curatedManifestForLegacyDesign} from '../lib/showroom-manifests';
 import type {SessionUser} from '../lib/types';
+import {joinAssignedSupportConversation} from './testing/support-join';
 async function main(){
  const db=await getDb();process.env.SUQPAGE_PRODUCT_UPKEEP_ENABLED='1';process.env.SUQPAGE_TELEGRAM_BOT_TOKEN='';process.env.SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID='';delete process.env.SUQPAGE_YOUTUBE_CHANNEL_URL;
  try{
@@ -34,17 +35,20 @@ async function main(){
  await assert.rejects(()=>reviewVideoRequest(owner,request.id,approve));await assert.rejects(()=>reviewVideoRequest(other,request.id,approve));await assert.rejects(()=>getVideoRequest(foreign,request.id));
  await assert.rejects(()=>reviewVideoRequest(staff,request.id,{...approve,youtubeUrl:'https://example.com/not-youtube'}));
  assert.equal((await getVideoRequest(owner,request.id))?.status,'pending');
+ await joinAssignedSupportConversation(staff,request.id);
  const decisions=await Promise.all([reviewVideoRequest(staff,request.id,approve),reviewVideoRequest(staff,request.id,approve)]);assert.equal(decisions.filter(r=>r.duplicate).length,1);
  product=await db.prepare('SELECT * FROM products WHERE id=?').get(created.productId);assert.equal(product.video_ref,'youtube:aqz-KE-bpKQ');assert.equal(product.description,'Original description');assert.equal(JSON.parse(String(product.media_json)).length,1);
  assert.equal((await getVideoRequest(owner,request.id))?.status,'approved');assert.equal((await getSupportConversation(owner,request.id)).messages.filter(m=>m.body.includes('Your product video is ready.')).length,1);
  const second=await createVideoRequest(owner,{...input,idempotencyKey:crypto.randomUUID()});
  await db.prepare('UPDATE products SET video_ref=?,media_json=? WHERE id=?').run(STARTER_VIDEO_REF,JSON.stringify([{kind:'video',ref:STARTER_VIDEO_REF}]),created.productId);
  await assert.rejects(()=>reviewVideoRequest(staff,second.id,approve),/video changed/);
+ await joinAssignedSupportConversation(staff,second.id);
  await reviewVideoRequest(staff,second.id,{decision:'declined',reply:'Please send the correct product video.'});assert.equal((await getVideoRequest(owner,second.id))?.status,'declined');
  const draft=await ownerPagePort.create(a,owner.id,{...starterPage,about:'Unpublished owner text'});
  await db.prepare("INSERT INTO owner_page_publications(business_id,revision,draft_version,content_json,action,published_by,published_at) VALUES(?,1,1,?,'publish',?,?)").run(a,JSON.stringify({...starterPage,about:'Existing public text'}),owner.id,Date.now());
  await ownerPagePort.commit(owner,draft,{kind:'content',content:{...draft.content,videoUrl:approve.youtubeUrl}});
  const header=await createVideoRequest(owner,{target:'header',sourceUrl:'https://example.com/header',idempotencyKey:crypto.randomUUID()});
+ await joinAssignedSupportConversation(staff,header.id);
  await reviewVideoRequest(staff,header.id,approve);
  const saved=await ownerPagePort.read(a);assert.equal(saved?.content.about,'Unpublished owner text');assert.equal(saved?.content.videoUrl,approve.youtubeUrl);
  const pub=JSON.parse(String((await db.prepare('SELECT content_json FROM owner_page_publications WHERE business_id=? ORDER BY revision DESC LIMIT 1').get(a)).content_json));assert.equal(pub.about,'Existing public text');assert.equal(pub.videoUrl,approve.youtubeUrl);
@@ -57,6 +61,7 @@ async function main(){
  const tikTokRequest=await createVideoRequest(owner,{...input,sourceUrl:tikTokUrl,idempotencyKey:crypto.randomUUID()});
  const tikTokApprove={decision:'approved',videoUrl:tikTokUrl,reply:'Your TikTok product video is ready.'};
  await assert.rejects(()=>reviewVideoRequest(foreign,tikTokRequest.id,tikTokApprove));await assert.rejects(()=>reviewVideoRequest(other,tikTokRequest.id,tikTokApprove));
+ await joinAssignedSupportConversation(staff,tikTokRequest.id);
  await reviewVideoRequest(staff,tikTokRequest.id,tikTokApprove);assert.equal((await reviewVideoRequest(staff,tikTokRequest.id,tikTokApprove)).duplicate,true);
  product=await db.prepare('SELECT * FROM products WHERE id=?').get(created.productId);assert.equal(product.video_ref,tikTokRef);assert.equal(product.description,'Original description');
  const catalog=(await runtimeCatalogByBusinessId(a,true))!,snapshot=catalogToRevisionSnapshotV4(catalog);

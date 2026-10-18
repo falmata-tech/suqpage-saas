@@ -6,6 +6,7 @@ import { platformAssetRewrites } from "../lib/platform-assets";
 import { postgresRuntimeConfig } from "../lib/postgres-runtime";
 import { trustedOriginPolicy } from "../lib/trusted-origins";
 import { migratePostgresDatabase } from "../lib/postgres-migrations";
+import { PLATFORM_BRAND } from "../lib/brand";
 import { getDb, closeDbForTests } from "./testing/postgres-fixture";
 
 class Store implements BrowserStateStore {
@@ -15,6 +16,9 @@ class Store implements BrowserStateStore {
   removeItem(key: string) { this.values.delete(key); }
 }
 async function main() {
+// FE-070 presentation identity does not rename persisted/provider namespaces.
+assert.equal(PLATFORM_BRAND.name, "MirtPage", "The current public platform identity is MirtPage");
+assert.equal(PLATFORM_BRAND.wordmark.leading + PLATFORM_BRAND.wordmark.trailing, PLATFORM_BRAND.name, "The visible wordmark retains the canonical name and case");
 const legacyEnvironment = { MIRTPAGE_DATABASE_DRIVER:"postgres", MIRTPAGE_POSTGRES_URL:"postgresql://fixture:fixture@127.0.0.1:54322/postgres", MIRTPAGE_AUTH_DRIVER:"supabase", MIRTPAGE_EMAIL_OTP_ENABLED:"1", NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED:"false", MIRTPAGE_SERVER_ACTION_ORIGINS:"old-proxy.example.test" };
 const normalized = platformEnvironment(legacyEnvironment);
 assert.equal(normalized.SUQPAGE_POSTGRES_URL,legacyEnvironment.MIRTPAGE_POSTGRES_URL);
@@ -37,7 +41,7 @@ assert.equal(readPlatformState({getItem:()=>{throw Error("blocked");},setItem(){
 let removed=false;assert.equal(readPlatformState({getItem:key=>key.startsWith("mirtpage")?"saved":null,setItem(){throw Error("quota");},removeItem(){removed=true;}},"suqpage-cart:shop-one"),"saved");assert.equal(removed,false);
 for(const suffix of ["discovery-navigation:v2","last-marketplace-url:v1"]){store.setItem("mirtpage:"+suffix,"/search");assert.equal(readPlatformState(store,"suqpage:"+suffix),"/search");}
 for(const route of platformAssetRewrites){assert.ok(fs.existsSync("public"+route.destination));assert.ok(!route.source.includes(".."));}
-// Canonical namespace audit of active production source, with bounded adapters.
+// Audit unreviewed previous brands in active source, with bounded compatibility adapters.
 const compatibilityFiles = new Set([
   'lib/platform-environment.mjs', 'lib/platform-state.ts', 'lib/platform-assets.ts',
   'components/PwaRegistration.tsx', 'lib/postgres-migrations.ts',
@@ -49,7 +53,7 @@ function auditDirectory(directory: string) {
     if (!/\.(?:tsx?|mjs)$/.test(file) || compatibilityFiles.has(file)) continue;
     const source = fs.readFileSync(file, 'utf8');
     const reviewed = file === 'lib/config.ts' ? source.replaceAll('mirtpage-media', 'retained-bucket') : source;
-    assert.doesNotMatch(reviewed, /mirtpage|africmade|africpage/i, `Unexpected old platform name in ${file}`);
+    assert.doesNotMatch(reviewed, /africmade|africpage/i, `Unexpected unreviewed previous platform name in ${file}`);
   }
 }
 for (const directory of ['app', 'components', 'lib']) auditDirectory(directory);

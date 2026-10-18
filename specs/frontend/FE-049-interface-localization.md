@@ -2,15 +2,156 @@
 id: FE-049
 title: Five-language interface
 status: in_progress
-related: [FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062, DEP-044]
+related: [FE-069, FE-066, FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062, DEP-044, FE-065, FE-067, FE-063, FE-068]
 owners: [product, frontend]
-last_updated: 2026-10-12
+last_updated: 2026-10-15
 change_level: L2
 ---
 
 # FE-049 — Five-language interface
 
+## S132 — three active languages and clearer meaning (ready; supersedes selection)
+
+Newest owner direction enables only English, Amharic and Afaan Oromo for now.
+Somali/Tigrinya catalogs and stored language identifiers remain compatibility
+data, not selectable languages; Afar was never enabled. No catalog or persisted
+customer value is deleted. FE-052 controls the revised inclusive showroom story;
+FE-065 controls the compact visible web introduction. Master §§3/10/18/19/22
+are affected. This is L2 preference compatibility plus L1 copy/layout work.
+
+1. GIVEN web/native language choices THEN offer only en/am/om. A restored cookie
+   or device preference naming inactive so/ti, Afar or unknown input falls back
+   to English. Retain the known Locale union and all generated compatibility
+   catalogs; explicit enabledLocales separates live availability from retention.
+   Public request rendering, native restoration/change and alert presentation
+   normalize consistently without rewriting saved records or credentials.
+2. GIVEN primary public/owner UI and About/Market copy THEN rewrite Amharic/Oromo
+   to explain the task/idea in ordinary local wording. Explain a digital showroom
+   as an organized internet page for a business's products; do not invent a
+   borrowed technical noun or restrict the audience to online resellers. Review
+   discovery/filter/collection, product/stock/custom order, external inquiry,
+   account/setup/page publication, and support/transport vocabulary consistently.
+   Keep action labels brief while explanatory sentences may expand when needed.
+3. GIVEN merchant names, descriptions, options, categories, destinations and form
+   values THEN language changes preserve them literally, together with selections,
+   filters, permissions and chat state. No translated text becomes a machine key.
+4. GIVEN research and verification THEN record primary-source usage/guidance and
+   adaptations honestly; no claim of independent native-speaker review. Validate
+   active selector/fallback boundaries and retained catalogs, token preservation,
+   dynamic action labels, actual Chrome locale switching after usable hydration,
+   no English fallback in revised active UI, mobile/desktop wrapping and metadata.
+
+S132 verified defect refinement (Ready before correction): actual Chrome shows
+the enabled server-rendered Language select before its onChange handler attaches.
+An ordinary Amharic selection can trigger hydration, reset to English and send an
+English-cookie refresh. This is not an Add-label or cookie-origin defect. GIVEN
+the initial server/hydration boundary THEN keep the selector disabled until its
+first client effect commits, as well as during an in-progress refresh. WHEN it
+becomes enabled THEN the first ordinary selection must set the intended locale
+and refresh text/metadata while preserving product selections. Add an actual-
+source SSR/commit regression and repeat the actual UI switch. No extra timer,
+forced locale cookie, framework workaround or provider/storage change.
+
+Ready: enabled vs retained locale policy, fallback, copy audiences, source-of-truth
+TSV/generator, merchant/privacy invariants and bounded tests/rollback are known.
+Plan: record baseline → native-authored shared narrative and key-journey wording
++ enabled locale boundaries → focused semantic/compatibility/types checks →
+actual Chrome web/Expo/role-appropriate review → explicit visual approval before
+full/commit/rollout. No new provider/dependency/schema or hosted change. Existing
+catalogs and keys stay available for a code rollback; no automatic re-enabling.
+
+S133 transport invitation/intake extends this same authored vocabulary under
+FE-052; chat assignment, Join, receipts, alerts and inactivity behavior are not
+changed by this copy task. Earlier S129–S131 card/category/preview work is retained.
+
+S100 / FE-052, October 15: the current local candidate centers business digital
+showrooms near and far, organized offerings and direct questions. Rewrite each
+locale for that browsing context; avoid literal English "step into" metaphors
+and preserve concise task labels, merchant content and brand typography. Shared
+Market/About/map/account copy must reach both clients without English fallback.
+Prior release evidence does not prove this candidate's layout or publication.
+
+October 15 refined local evidence: all 1,414 messages in each catalog and ten
+localization tests pass, including explicit/shared client coverage and literal
+merchant content. Both typechecks, narrative/marketing claims and 74 actual local
+web/Expo-browser views pass. Near/far showrooms, social-post browsing, ranges,
+merchant-listed availability and production questions/descriptions use contextual
+wording in all five languages. FE-052 S100 and TRACEABILITY record the scope;
+.local/showroom-narrative-s100/refined-screens/ contains captures/receipt. Layout
+approval, full gates, publication, device and human linguistic review are separate.
+
+Later October 15 lead refinement: each locale explicitly identifies an online
+showroom/page; English names a "digital showroom". The shared-copy localization
+regression checks that meaning in all five languages. Ten localization tests,
+both typechecks and 21 refreshed Market/metadata browser views pass; the prior
+74-state receipt remains for unchanged About/account layouts. Latest captures:
+.local/showroom-narrative-s100/digital-lead/screens/. Visual approval remains pending.
+
 ## Problem and scope
+
+### S101 — researched meaning-first wording (in progress, L1)
+
+The owner rejects the previous literal-feeling translations and requests research
+and clearer UI/value wording on both clients. Retain the accepted English idea;
+each non-English locale may expand/reorder an explanation to convey the same
+purpose. An online showroom may be explained as a business's internet page where
+its offerings are organized, instead of inventing a literal technical noun.
+
+GIVEN a public or owner workflow WHEN a locale is selected THEN primary labels,
+instructions and statuses name the actual task clearly and use consistent terms
+for products/services, account vs public page, item inquiries vs support chat,
+private preview vs publication and transport assistance. Short controls may use
+concise task wording while existing help/body text supplies the explanation.
+GIVEN value-proposition/About copy WHEN read THEN the visitor understands organized
+offerings, availability confirmation and direct questions without social-post
+searching; owners understand sharing their online page and describing their range
+and production details. No exact stock, capacity verification or checkout promise.
+
+S101 screen review also finds English platform words inside localized inquiry
+headings and an untranslated dynamic owner metric. GIVEN platform-owned nouns
+or labels are interpolated WHEN a locale is selected THEN translate those fixed
+UI words before interpolation, on both clients. Merchant names, quantities and
+other user values remain literal. Include dynamic label arrays in coverage and
+browser assertions; literal t() coverage alone cannot detect these omissions.
+
+GIVEN research WHEN applied THEN record primary-source links, actual guidance and
+the adaptation chosen. Reference material is evidence of terminology/usage, not
+proof that this app's phrasing was independently reviewed by a native speaker.
+Do not claim automatic dictionary/key coverage establishes linguistic quality.
+GIVEN language changes WHEN forms, inquiry selections or merchant data exist THEN
+values, permissions and behavior stay unchanged. No provider, schema, SDK or
+managed translation service. Keep brands, destinations and interpolation literal.
+
+Readiness: English intent, audiences, existing shared catalogs/aliases, five
+languages, test fixtures and rollback are known. Audit catalog terms and public/
+owner/staff uses; prioritize the key journeys without erasing remaining findings.
+Verify semantic invariants/interpolation, both typechecks and actual local public,
+owner/product/inquiry and mobile browser layouts. Fresh visual approval precedes
+full checks and scoped commit. S100's previous views do not prove new wording.
+Master sections 3/18/19/22 are affected; rollback restores text/catalogs only.
+
+S101 focused evidence: 138 existing source rows rewritten and one missing metric
+added (405 changed/new translation values), plus three explicit capitalized
+inquiry-status aliases. Each translated catalog now has 1,418 keys. Twelve
+localization regressions, narrative/category/marketing checks, both typechecks,
+homepage composition, whitespace and 190-spec validation pass. Browser receipts
+under .local/language-research-s101/ prove 74 Market/About/account views, 40 web
+product/inquiry/owner/staff views, 12 loaded native-owner views and 16 native
+product/inquiry/contact/transport views. Merchant text, selected products, reloads
+and typed contact text are preserved; no business form saves or messages sent.
+Map tiles alone are stubbed; Expo browser is not native-device evidence.
+
+The review exposed and fixed untranslated interpolated offering/count/quantity
+labels, the dynamic owner metric and title-case native inquiry statuses. Tests
+protect those distinctions. Screenshot selectors explicitly exclude retained
+hidden Expo screens and await actual forms/inquiry content, not loading bars.
+The web review uses canonical /dashboard/profile: the redirect through /dashboard
+hit an existing development timing error matching Next.js issue 86060. No error
+filter, performance monkeypatch, dependency upgrade or app redirect change was
+made. The final canonical-route error assertion passes. Initial local navigation
+timeouts coincided with dev cache compaction and are not release evidence.
+Visual approval, full gates, scoped commit and rollout remain pending; no
+independent first-language review or complete language-quality claim is made.
 
 Visitors and owners need plain, readable interface text in English, Amharic,
 Afaan Oromo, Somali and Tigrinya. Cover public discovery, Featured, About, legal,
@@ -233,3 +374,23 @@ No Google review, closed activation, opt-in, physical-device or campaign publica
 is inferred. Source/receipt evidence: .local/play-s99/narrative-s9910/source-gates.json,
 console-setup/s9910-final-two-locale-console-read.json and
 store-presentation/proximity-v1/provider-readback/verification.json.
+
+
+## S105 social-contact revision
+
+FE-066 / BE-055 supersede new customer messages to business inboxes. Only
+configured social accounts receive visitor handoffs; chosen products and the
+simple message follow the active UI language. Retained private history stays
+scoped. Public transport chat and authenticated owner support remain unchanged.
+Local implementation and review evidence are tracked in checklist S105.
+
+
+## S112 native client-message coverage correction
+
+GIVEN a product/supply label used only by native app/src WHEN catalogs are built
+THEN client-message pruning retains its authored translation in every language.
+The generator scans native sources alongside app/components/lib; technical
+coverage does not certify native-speaker fluency. `scripts/test-localization.ts`
+checks active supply choices, honest unavailable statuses and native conditional
+Add product/Edit product labels in clientMessages. Existing branding, literal
+merchant data, interpolation, server-message privacy and payload bounds remain.

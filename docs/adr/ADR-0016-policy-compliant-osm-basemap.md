@@ -32,6 +32,32 @@ OpenStreetMap attribution links remain inside the map at every supported
 viewport. The Privacy notice discloses that the visitor's browser contacts the
 tile provider.
 
+The S139 browser correction checks HTTP status before assigning tile pixels.
+Leaflet's ordinary image loader can display a decodable403 policy notice as a
+normal tile. A shared browser adapter now makes one direct CORS request per
+visible tile with default HTTP caching, omitted credentials and
+`strict-origin-when-cross-origin`, then uses a short-lived object URL only for a
+successful response. It does not use a proxy, separate status probe, custom
+identity, cache-buster or automatic retry. Exact-host CSP permits this request;
+decode/fetch timeouts, unload and map disposal release owned work and URLs.
+On failure only raster is removed; the existing camera, business markers and
+previews remain available with an explicit retry. Native MapLibre is unchanged.
+
+Public root metadata explicitly reinstates the public referrer policy when
+returning from private Tracking in the same document. Tracking retains its own
+no-referrer metadata/headers. An origin-only map request never discloses a
+tracking locator, account value, page path or search query.
+
+Automated map reviews must intercept public tiles with declared local synthetic
+fixtures before any provider request. They do not prove live provider playback.
+Do not run headless pan/zoom loops against the community servers or continue
+real requests through browser routing that disables HTTP caching. A normal
+human browser smoke check is separate. See the
+[browser workflow](../operations/BROWSER-WORKFLOW-REVIEW.md) and the primary
+[OSM tile policy](https://operations.osmfoundation.org/policies/tiles/).
+The [HTML metadata processing rule](https://html.spec.whatwg.org/multipage/semantics.html#meta-referrer)
+explains why removing private referrer metadata does not restore public policy.
+
 Supabase remains authoritative for showroom coordinates, industries, search,
 place filters, nearby groups, and eligibility. OpenStreetMap is a visual
 basemap only: no geocoding, routing, catalog search, account data, or private

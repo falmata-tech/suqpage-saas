@@ -1,6 +1,6 @@
 import { Attachment, pickSupportFile, supportReplyForm, type PickedSupportFile } from "./support-files";
 import { inquiryContactLinks } from "../../../lib/inquiry-contact-links";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { View, AppState } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
@@ -8,7 +8,9 @@ import type { Page, Inquiry, Conversation, Message } from "@suqpage/contracts";
 import { useApp, useLoad } from "./runtime";
 import { Copy, Card, Field, Button, Chip, Status, s, openLink } from "./ui";
 import { useAction, ActionStatus } from "./owner-forms";
-import ChatReadSentinel from './ChatReadSentinel';
+import ChatReadSentinel,{ChatReadTranscript} from './ChatReadSentinel';
+import { supportIdlePresentation } from '../../../lib/support-idle-contract';
+import {clientChatPresentation,type ClientChatSnapshot} from '../../../lib/support-client-state';
 export function Inquiries({focusId}:{focusId?:string}={}) {
   const { t, ownerRequest } = useApp(),
     action = useAction();
@@ -24,7 +26,8 @@ export function Inquiries({focusId}:{focusId?:string}={}) {
   );
   return (
     <>
-      <Copy big>{t("Customer inquiries")}</Copy>
+      <Copy big>{t("Inquiry history")}</Copy>
+      <Copy muted>{t("Saved inquiries from before social-only contact.")}</Copy>
       {Boolean(focus)&&<Button secondary label={t('All inquiries')} onPress={()=>setFocus('')}/>}
       <View style={s.wrap}>
         {["", "new", "contacted", "confirmed", "closed", "cancelled"].map(
@@ -113,7 +116,7 @@ export function SupportList() {
   );
   return (
     <>
-      <Copy big>{t("Support")}</Copy>
+      <Copy big heading>{t("Support")}</Copy>
       <Card>
         <Field label={t("Subject")} value={subject} onChangeText={setSubject} />
         <Field
@@ -149,13 +152,7 @@ export function SupportList() {
         <Card key={c.id}>
           <Copy>{c.subject}</Copy>
           <Copy muted>
-            {t(
-              c.status === "closed"
-                ? "Closed"
-                : c.status === "waiting"
-                  ? "Waiting"
-                  : "Open",
-            )}
+            {t(clientChatPresentation(c).statusKey)}
           </Copy>
           <Button
             secondary
@@ -187,60 +184,81 @@ export function SupportList() {
   );
 }
 export function OwnerChat({ id }: { id: string }) {
-  const { t, ownerRequest, locale } = useApp(),
+  const { t, ownerRequest, locale,session } = useApp(),
     action = useAction();
   const [attachment,setAttachment]=useState<PickedSupportFile|null>(null);
   const [message, setMessage] = useState(""),
     [key, setKey] = useState(() => Crypto.randomUUID());
   type Thread = {
-    conversation: { subject: string; status: string; agentJoined?:boolean; assignedUserName?:string|null; publicRef?:string };
+    conversation: ClientChatSnapshot & { subject: string; assistanceCategory?:string; publicRef?:string;idleWarningAt?:number|null;idleEndsAt?:number|null;idleEndedAt?:number|null };
     messages: Message[];
   };
-  const load = useLoad(() => ownerRequest<Thread>("owner/support/" + id), [id]);
+  const [data,setData]=useState<Thread|null>(null),[loading,setLoading]=useState(true),[loadError,setLoadError]=useState(''),[revision,setRevision]=useState(0);
+  const current=useRef(data);current.current=data;
+  const version=useRef(0),focused=useRef(false),reading=useRef(false),commandBusy=useRef(false);
+  const reload=()=>{setLoading(true);setRevision(value=>value+1);};
+  const load={data,loading,error:loadError,reload};
+  const idle=data?supportIdlePresentation(data.conversation,Date.now()):{warning:false,autoEnded:false};
+  const presentation=data?clientChatPresentation(data.conversation):null;
+  useEffect(()=>{current.current=null;setData(null);setMessage('');setAttachment(null);setLoadError('');setLoading(true);},[id]);
   useFocusEffect(
     useCallback(() => {
+      focused.current=true;
       let stopped = false;
       let timer: ReturnType<typeof setTimeout>;
-      let failures = 0;
+      let failures = 0,settled=false;
       async function poll() {
-        if (
-          AppState.currentState === "active" ||
-          AppState.currentState === null
-        )
+        if(stopped)return;
+        const generation=version.current,expectedRef=current.current?.conversation.publicRef;
+        if (!reading.current&&!commandBusy.current&&(AppState.currentState === "active" || AppState.currentState === null)&&(typeof document==='undefined'||!document.hidden)) {
+          reading.current=true;
           try {
             const value = await ownerRequest<Thread>("owner/support/" + id);
-            if (!stopped) {
-              load.setData(value);
+            if (!stopped&&generation===version.current) {
+              if(value.conversation.assistanceCategory==='shipment_observation'){current.current=null;setData(null);setLoading(false);router.replace({pathname:'/owner/[section]',params:{section:'transport',id,returnTo:'profile'}});return;}
+              if(expectedRef&&value.conversation.publicRef!==expectedRef)throw Error('Support could not be updated.');
+              current.current=value;setData(value);setLoadError('');setLoading(false);
+              settled=true;
               failures = 0;
             }
-          } catch {
-            failures++;
-          }
+          } catch(error) {
+            if(!stopped&&generation===version.current){failures++;setLoading(false);setLoadError(error instanceof Error?error.message:'Please try again.');}
+          }finally{reading.current=false;}
+        }
         if (!stopped)
-          timer = setTimeout(poll, Math.min(30000, 5000 * 2 ** failures));
+          timer = setTimeout(poll, settled&&current.current?.conversation.status==='closed'?30000:Math.min(30000, 5000 * 2 ** Math.min(failures,3)));
       }
-      timer = setTimeout(poll, 5000);
+      void poll();
       return () => {
         stopped = true;
+        focused.current=false;version.current++;
         clearTimeout(timer);
       };
-    }, [id]),
+    }, [id,ownerRequest,revision]),
   );
+  function runCommand(work:()=>Promise<void>,after?:()=>void){
+    if(commandBusy.current||loading||!data)return;
+    commandBusy.current=true;const generation=++version.current;
+    void action.run(async()=>{
+      try{await work();if(!focused.current||generation!==version.current)return false;after?.();}
+      catch(error){if(focused.current&&generation===version.current)throw error;return false;}
+      finally{commandBusy.current=false;if(focused.current&&generation===version.current)reload();}
+    },'');
+  }
   return (
     <>
       <Status {...load} retry={load.reload} />
       {load.data && (
         <>
-          <Copy big>{load.data.conversation.subject}</Copy>
+          <Copy big heading>{load.data.conversation.subject}</Copy>
           <Copy muted>
-            {t(
-              load.data.conversation.status === "closed"
-                ? "Chat ended"
-                : load.data.conversation.agentJoined ? 'An agent joined your chat' : load.data.conversation.status === "waiting"
-                  ? "Waiting for our team"
-                  : "Live chat",
-            )}
+            {t(presentation!.statusKey)}
           </Copy>
+          {presentation?.joined?<Copy muted>{t(presentation.joined.key,presentation.joined.values)}</Copy>:null}
+          {load.data.conversation.publicRef?<Copy muted>{load.data.conversation.publicRef}</Copy>:null}
+          {!loading&&idle.warning?<Copy>{t('This chat will end soon. Send a message to keep it open.')}</Copy>:null}
+          {idle.autoEnded?<Copy>{t('This chat ended because we did not hear back. Your messages are saved.')}</Copy>:null}
+          <ChatReadTranscript identity={`${session?.user.id??''}:${id}:${load.data.conversation.publicRef??''}`} active={!loading&&!loadError} onRead={async messageId=>{if(!focused.current||current.current?.conversation.publicRef!==load.data?.conversation.publicRef)return;await ownerRequest('owner/support/'+id,{action:'read',messageId,publicRef:load.data?.conversation.publicRef});}}>
           {load.data.messages.map((m) => (
             <Card key={m.id}>
               <Copy muted>
@@ -254,21 +272,21 @@ export function OwnerChat({ id }: { id: string }) {
               <Copy>{m.body}</Copy>
               {m.attachment&&<Attachment conversationId={id} file={m.attachment}/>}
               {m.sender==='owner'?<Copy muted>{t(m.read?'Read':'Sent')}</Copy>:null}
-              {m.sender==='staff'&&m.id===load.data?.messages.filter(item=>item.sender==='staff').at(-1)?.id?<ChatReadSentinel messageId={m.id} onRead={async messageId=>{await ownerRequest('owner/support/'+id,{action:'read',messageId,publicRef:load.data?.conversation.publicRef});}}/>:null}
+              {m.sender==='staff'?<ChatReadSentinel messageId={m.id}/>:null}
             </Card>
           ))}
+          </ChatReadTranscript>
           <ActionStatus state={action} />
           {load.data.conversation.status === "closed" ? (
             <Button
-              label={t("Reopen")}
-              disabled={action.busy}
+              label={t(idle.autoEnded?(action.busy?'Resuming…':'Resume chat'):"Reopen")}
+              disabled={action.busy||loading}
               onPress={() =>
-                void action.run(async () => {
+                runCommand(async () => {
                   await ownerRequest("owner/support/" + id, {
                     action: "reopen",
                   });
-                  load.reload();
-                }, "")
+                })
               }
             />
           ) : (
@@ -278,34 +296,34 @@ export function OwnerChat({ id }: { id: string }) {
                 multiline
                 value={message}
                 onChangeText={setMessage}
+                editable={!action.busy&&!loading}
               />
               {attachment&&<><Copy>{attachment.name}</Copy><Button secondary label={t("Remove")} onPress={()=>setAttachment(null)}/></>}
               <Button secondary disabled={action.busy} label={t("Attach file")} onPress={()=>void action.run(async()=>{const file=await pickSupportFile();if(file)setAttachment(file);},"")}/>
               <Button
-                disabled={action.busy || !message.trim()}
+                disabled={action.busy || loading || !message.trim()}
                 label={t("Send reply")}
                 onPress={() =>
-                  void action.run(async () => {
+                  runCommand(async () => {
                     if(attachment){await ownerRequest(`owner/support/${id}/attachments`,undefined,await supportReplyForm(attachment,message,key));}
                     else await ownerRequest("owner/support/" + id, {action:"message",message,idempotencyKey:key});
+                  },()=>{
                     setAttachment(null);
                     setMessage("");
                     setKey(Crypto.randomUUID());
-                    load.reload();
-                  }, "")
+                  })
                 }
               />
               <Button
                 secondary
-                disabled={action.busy}
+                disabled={action.busy||loading}
                 label={t("End chat")}
                 onPress={() =>
-                  void action.run(async () => {
+                  runCommand(async () => {
                     await ownerRequest("owner/support/" + id, {
                       action: "close",
                     });
-                    load.reload();
-                  }, "")
+                  })
                 }
               />
             </>

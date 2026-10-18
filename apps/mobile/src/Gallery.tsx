@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { View, ScrollView, Pressable, useWindowDimensions } from "react-native";
+import { View, ScrollView, Pressable, Platform, useWindowDimensions } from "react-native";
 import type { Media } from "@suqpage/contracts";
 import YouTubeVideo from "./YouTubeVideo";
 import { Photo, Button, Copy, Icon, colors, s } from "./ui";
@@ -24,6 +24,8 @@ export default function Gallery({
     <View style={{ gap: 10 }}>
       <ScrollView
         ref={scroll}
+        testID="offering-gallery"
+        focusable={Platform.OS === "web" ? true : undefined}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}

@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {chromium,expect} from '@playwright/test';
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
 const base=process.env.SUQPAGE_TEST_BASE_URL||'http://127.0.0.1:3102';
 const hosted=!['localhost','127.0.0.1'].includes(new URL(base).hostname);
 // Hosted navigation includes CDN/network latency. Local interaction limits stay short.
@@ -10,7 +16,9 @@ fs.mkdirSync(out,{recursive:true,mode:0o700});
 const browser=await chromium.launch();
 try {
  for(const width of [1440,390,320]) {
-  const page=await browser.newPage({viewport:{width,height:width===1440?1000:width===390?844:740}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const page=await browser.newPage({serviceWorkers: 'block',viewport:{width,height:width===1440?1000:width===390?844:740}});
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
   page.setDefaultNavigationTimeout(hosted?60_000:30_000);
   await page.goto(base+'/',{waitUntil:'domcontentloaded'});
   const panel=page.locator('#discovery-search-panel'),map=page.locator('.discovery-map');
@@ -89,9 +97,11 @@ try {
   assert.deepEqual(errors,[]);await page.close();
  }
  for(const locale of ['am','om','so','ti']) for(const width of [1440,390,320]) {
-  const context=await browser.newContext({viewport:{width,height:width===1440?1000:width===390?844:740}});
+  const context=await browser.newContext({serviceWorkers: 'block',viewport:{width,height:width===1440?1000:width===390?844:740}});
   await context.addCookies([{name:'suqpage-language',value:locale,url:base}]);
-  const page=await context.newPage();await page.goto(base+'/?view=search',{waitUntil:'domcontentloaded'});
+  const page=await context.newPage();
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
+  await page.goto(base+'/?view=search',{waitUntil:'domcontentloaded'});
   await expect(page.locator('html')).toHaveAttribute('lang',locale);
   const panel=page.locator('#discovery-search-panel');await expect(panel).toBeVisible();await expect.poll(()=>panel.evaluate(el=>getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
   await expect(panel.locator('.discovery-product-results .discovery-product-link').first()).toBeVisible();
@@ -112,4 +122,5 @@ try {
   await context.close();
  }
  console.log('PASS desktop/390/320, five locales: two or more fully visible cards, compact filters, footer paging, no clipped controls, retained filters/pages, focus/Escape, stable map and reduced motion.');
-}finally{await browser.close();}
+}finally{await browser.close();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests();}

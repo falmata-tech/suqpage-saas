@@ -7,8 +7,9 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import {
-  applyAuthPlan, digest, expectedAuthReadback, prepareAuthPlan, PRODUCTION_AUTH, supabaseAuthPort, validatePatch,
-  type AuthConfig, type AuthConfigPort,
+  applyAuthPlan, AUTH_ORIGIN_POLICIES, digest, expectedAuthReadback, prepareAuthOriginPlan, prepareAuthPlan,
+  PRODUCTION_AUTH, supabaseAuthPort, validatePatch,
+  type AuthConfig, type AuthConfigPort, type AuthOriginPhase,
 } from "./production-auth-config";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -84,15 +85,20 @@ test("plans bind credential source and login, and reject old unbound plans befor
     assert.equal(plan.credentialSource, "env");
     const file = path.join(f.directory, `${plan.id}.json`);
     const saved = JSON.parse(fs.readFileSync(file, "utf8"));
-    assert.equal(saved.version, 2);
+    assert.equal(saved.version, 3);
+    assert.equal(saved.kind, "legacy-settings");
+    assert.equal(saved.sourcePhase, null);
+    assert.equal(saved.targetPhase, null);
     assert.ok(!fs.readFileSync(file, "utf8").includes("fixture-credential"));
     const denied = { ...f.port, async project() { throw Error("Must reject before provider read"); } };
     for (const credential of [{ source: "cli" as const, fingerprint: f.port.credential.fingerprint },
       { source: "env" as const, fingerprint: digest("other-login") }]) {
       await assert.rejects(applyAuthPlan({ ...f, ...plan, port: { ...denied, credential } }), /Credential/);
     }
-    fs.writeFileSync(file, JSON.stringify({ ...saved, version: 1 }));
-    await assert.rejects(applyAuthPlan({ ...f, ...plan, port: denied }), /Invalid plan/);
+    for (const version of [1, 2]) {
+      fs.writeFileSync(file, JSON.stringify({ ...saved, version }));
+      await assert.rejects(applyAuthPlan({ ...f, ...plan, port: denied }), /Invalid plan/);
+    }
     assert.equal(f.writes.length, 0);
     assert.ok(!fs.existsSync(`${file}.attempt`));
   } finally { f.dispose(); }
@@ -100,8 +106,7 @@ test("plans bind credential source and login, and reject old unbound plans befor
 
 test("explicit target and safe exact patch are required", async () => {
   assert.throws(() => validatePatch("another-project", { mailer_otp_length: 6 }, template), /project/);
-  validatePatch(project, { site_url: PRODUCTION_AUTH.origin, uri_allow_list: `${PRODUCTION_AUTH.origin}/auth/callback`,
-    mailer_otp_length: 6, mailer_otp_exp: 600, smtp_max_frequency: 60, mailer_autoconfirm: false,
+  validatePatch(project, { mailer_otp_length: 6, mailer_otp_exp: 600, smtp_max_frequency: 60, mailer_autoconfirm: false,
     mailer_subjects_confirmation: "Your Suqpage sign-in code", mailer_subjects_magic_link: "Your Suqpage sign-in code",
     mailer_templates_confirmation_content: template, mailer_templates_magic_link_content: template }, template);
   const f = fixture();
@@ -329,4 +334,212 @@ test("customization metadata is immutable and malformed metadata cannot admit a 
       assert.equal(fs.existsSync(path.join(f.directory, `${plan.id}.json.attempt`)), false);
     } finally { f.dispose(); }
   }
+});
+
+const transitions: readonly [AuthOriginPhase, AuthOriginPhase][] = [
+  ["legacy", "dual-old-primary"], ["dual-old-primary", "dual-new-primary"], ["dual-new-primary", "dual-old-primary"],
+];
+function originFixture(sourcePhase: AuthOriginPhase = "legacy") {
+  const f = fixture();
+  Object.assign(f.config(), AUTH_ORIGIN_POLICIES[sourcePhase]);
+  return { ...f, originPlan(targetPhase: unknown = "dual-old-primary") {
+    return prepareAuthOriginPlan({ ...f, sourcePhase, targetPhase });
+  } };
+}
+
+for (const [sourcePhase, targetPhase] of transitions) {
+  test(`origin transition ${sourcePhase} to ${targetPhase} binds the exact two fields and preserves the complete provider state`, async () => {
+    const f = originFixture(sourcePhase);
+    try {
+      const before = structuredClone(f.config());
+      const plan = await f.originPlan(targetPhase);
+      const file = path.join(f.directory, `${plan.id}.json`);
+      const saved = JSON.parse(fs.readFileSync(file, "utf8"));
+      assert.equal(saved.version, 3);
+      assert.equal(saved.kind, "origin-transition");
+      assert.equal(saved.sourcePhase, sourcePhase);
+      assert.equal(saved.targetPhase, targetPhase);
+      assert.deepEqual(saved.before, before);
+      assert.deepEqual(saved.patch, AUTH_ORIGIN_POLICIES[targetPhase]);
+      assert.equal(plan.approval, digest(saved));
+      assert.equal(plan.sourcePhase, sourcePhase);
+      assert.equal(plan.targetPhase, targetPhase);
+      assert.equal(plan.origin, AUTH_ORIGIN_POLICIES[targetPhase].site_url);
+      assert.equal(fs.statSync(file).mode & 0o777, 0o600);
+      assert.equal(f.writes.length, 0);
+      assert.doesNotMatch(JSON.stringify(plan), /test-only|production-client/);
+      await f.apply(plan);
+      assert.deepEqual(f.writes, [AUTH_ORIGIN_POLICIES[targetPhase]]);
+      assert.deepEqual(f.config(), { ...before, ...AUTH_ORIGIN_POLICIES[targetPhase] });
+      assert.ok(fs.existsSync(`${file}.verified`));
+      await assert.rejects(f.apply(plan), /already attempted/);
+    } finally { f.dispose(); }
+  });
+}
+
+test("origin policy tuples are exact and no phase can retire the legacy callback", () => {
+  assert.deepEqual(AUTH_ORIGIN_POLICIES, {
+    legacy: { site_url: "https://suqpage.com", uri_allow_list: "https://suqpage.com/auth/callback" },
+    "dual-old-primary": { site_url: "https://suqpage.com", uri_allow_list: "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback" },
+    "dual-new-primary": { site_url: "https://mirtpage.com", uri_allow_list: "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback" },
+  });
+  assert.ok(Object.isFrozen(AUTH_ORIGIN_POLICIES));
+  for (const policy of Object.values(AUTH_ORIGIN_POLICIES)) {
+    assert.ok(Object.isFrozen(policy));
+    assert.ok(policy.uri_allow_list.split(",").includes("https://suqpage.com/auth/callback"));
+    for (const patch of [policy, { site_url: policy.site_url }, { uri_allow_list: policy.uri_allow_list },
+      { ...policy, mailer_otp_length: 6 }]) {
+      assert.throws(() => validatePatch(project, patch, template), /forbidden/);
+    }
+  }
+});
+
+test("unsupported origin phases, skipped steps, no-ops and callback retirement reject before any provider call", async () => {
+  const f = fixture();
+  try {
+    let calls = 0;
+    f.port.project = async () => { calls++; throw Error("Provider must not be called"); };
+    f.port.read = async () => { calls++; throw Error("Provider must not be called"); };
+    for (const sourcePhase of Object.keys(AUTH_ORIGIN_POLICIES)) {
+      for (const targetPhase of Object.keys(AUTH_ORIGIN_POLICIES)) {
+        if (transitions.some(([source, target]) => source === sourcePhase && target === targetPhase)) continue;
+        await assert.rejects(prepareAuthOriginPlan({ ...f, sourcePhase, targetPhase }), /phase transition/);
+      }
+    }
+    for (const phase of [undefined, null, [], {}, "__proto__", "toString", "new-only", "https://mirtpage.com",
+      "https://www.mirtpage.com", "https://mirtpage.com:443", "http://mirtpage.com", "https://mirtpage.com/?q=1"]) {
+      await assert.rejects(prepareAuthOriginPlan({ ...f, sourcePhase: "legacy", targetPhase: phase }), /phase/);
+      await assert.rejects(prepareAuthOriginPlan({ ...f, sourcePhase: phase, targetPhase: "dual-old-primary" }), /phase/);
+    }
+    await assert.rejects(prepareAuthOriginPlan({ ...f, project: "other", sourcePhase: "legacy", targetPhase: "dual-old-primary" }), /project/);
+    assert.equal(calls, 0);
+    assert.equal(f.writes.length, 0);
+    assert.deepEqual(fs.readdirSync(f.directory), []);
+  } finally { f.dispose(); }
+});
+
+test("source phase must exactly match the complete current origin tuple before a plan is created", async () => {
+  for (const mismatch of [
+    { uri_allow_list: undefined },
+    { site_url: "https://www.suqpage.com" },
+    { uri_allow_list: "https://suqpage.com/auth/callback,https://preview.example.test/auth/callback" },
+    { ...AUTH_ORIGIN_POLICIES["dual-new-primary"] },
+    { uri_allow_list: "https://mirtpage.com/auth/callback,https://suqpage.com/auth/callback" },
+  ]) {
+    const f = originFixture();
+    try {
+      Object.assign(f.config(), mismatch);
+      await assert.rejects(f.originPlan(), /exact source phase/);
+      assert.equal(f.writes.length, 0);
+      assert.deepEqual(fs.readdirSync(f.directory), []);
+    } finally { f.dispose(); }
+  }
+});
+
+test("origin plan kind, phases and mixed or malformed patches cannot be laundered with a new approval digest", async () => {
+  const f = originFixture();
+  try {
+    const plan = await f.originPlan();
+    const file = path.join(f.directory, `${plan.id}.json`);
+    const original = JSON.parse(fs.readFileSync(file, "utf8"));
+    let calls = 0;
+    f.port.project = async () => { calls++; throw Error("Provider must not be called"); };
+    f.port.read = async () => { calls++; throw Error("Provider must not be called"); };
+    const corruptions = [
+      { version: 2 }, { kind: "unknown" }, { sourcePhase: "dual-old-primary" }, { targetPhase: "dual-new-primary" },
+      { kind: "legacy-settings", sourcePhase: null, targetPhase: null },
+      { sourcePhase: "dual-new-primary", targetPhase: "dual-old-primary" },
+      ...[
+        { site_url: "https://suqpage.com" }, { uri_allow_list: AUTH_ORIGIN_POLICIES["dual-old-primary"].uri_allow_list },
+        { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], smtp_pass: "smuggled-secret" },
+        { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], mailer_otp_length: 6 },
+        { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], mailer_subjects_magic_link: "Your Suqpage sign-in code" },
+        { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], external_google_enabled: true },
+        { site_url: "https://suqpage.com", uri_allow_list: "https://mirtpage.com/auth/callback,https://suqpage.com/auth/callback" },
+        { site_url: "https://mirtpage.com", uri_allow_list: "https://mirtpage.com/auth/callback" },
+        { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], site_url: "https://suqpage.com/" },
+        { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], uri_allow_list: `${AUTH_ORIGIN_POLICIES["dual-old-primary"].uri_allow_list},https://*.mirtpage.com/**` },
+      ].map(patch => ({ patch })),
+    ];
+    for (const corruption of corruptions) {
+      const edited = { ...original, ...corruption };
+      fs.writeFileSync(file, JSON.stringify(edited));
+      await assert.rejects(f.apply({ ...plan, approval: digest(edited) }), /plan|phase|policy|forbidden/);
+    }
+    assert.equal(calls, 0);
+    assert.equal(f.writes.length, 0);
+    assert.equal(fs.existsSync(`${file}.attempt`), false);
+  } finally { f.dispose(); }
+});
+
+test("origin transitions retain credential, freshness, digest, drift and exclusive attempt fences", async () => {
+  const f = originFixture();
+  try {
+    const plan = await f.originPlan();
+    await assert.rejects(f.apply(plan, { approval: "0".repeat(64) }), /digest/);
+    await assert.rejects(f.apply(plan, { now: now + 600_001 }), /expired/);
+    await assert.rejects(f.apply(plan, { now: now - 1 }), /future/);
+    const port = { ...f.port, credential: { source: "env" as const, fingerprint: digest("different-login") },
+      async project() { throw Error("Must reject before provider read"); } };
+    await assert.rejects(applyAuthPlan({ ...f, ...plan, port }), /Credential/);
+    f.config().smtp_pass = "changed-in-dashboard";
+    await assert.rejects(f.apply(plan), /changed after review/);
+    f.config().smtp_pass = fixtureConfig().smtp_pass;
+    assert.equal(f.writes.length, 0);
+    const results = await Promise.allSettled([f.apply(plan), f.apply(plan)]);
+    assert.equal(results.filter(result => result.status === "fulfilled").length, 1);
+    assert.equal(f.writes.length, 1);
+  } finally { f.dispose(); }
+});
+
+test("origin transition ambiguous writes and unrelated readback drift stop without retry or automatic restore", async () => {
+  for (const failure of ["timeout", "unrelated-drift"] as const) {
+    const f = originFixture();
+    try {
+      const plan = await f.originPlan();
+      const original = f.port.patch;
+      let attempts = 0;
+      f.port.patch = async patch => {
+        attempts++;
+        if (failure === "timeout") throw Error("ambiguous timeout");
+        await original(patch);
+        f.config().external_google_secret = "unrelated-provider-change";
+      };
+      await assert.rejects(f.apply(plan), failure === "timeout" ? /timeout/ : /readback/);
+      await assert.rejects(f.apply(plan), /already attempted/);
+      assert.equal(attempts, 1);
+      assert.equal(fs.existsSync(path.join(f.directory, `${plan.id}.json.verified`)), false);
+    } finally { f.dispose(); }
+  }
+});
+
+test("CLI finite phase selection refuses partial, mixed, arbitrary or apply-time phase input before credentials", () => {
+  const f = fixture();
+  try {
+    const patch = path.join(f.directory, "patch.json");
+    fs.writeFileSync(patch, JSON.stringify({ mailer_otp_length: 6 }), { mode: 0o600 });
+    for (const args of [
+      ["plan", "--from-phase", "legacy"], ["plan", "--to-phase", "dual-old-primary"],
+      ["plan", "--from-phase=", "--to-phase=", "--patch", patch],
+      ["plan", "--from-phase", "legacy", "--to-phase", "dual-new-primary"],
+      ["plan", "--from-phase", "legacy", "--to-phase", "https://mirtpage.com"],
+      ["plan", "--from-phase", "legacy", "--to-phase", "dual-old-primary", "--patch", patch],
+      ...["--patch=", "--plan=", "--approve="].map(option =>
+        ["plan", "--from-phase", "legacy", "--to-phase", "dual-old-primary", option]),
+      ...["--plan=", "--approve="].map(option => ["plan", "--patch", patch, option]),
+      ["apply", "--plan", "a".repeat(24), "--approve", "b".repeat(64), "--from-phase", "legacy", "--to-phase", "dual-old-primary"],
+      ...["--patch=", "--from-phase=", "--to-phase="].map(option =>
+        ["apply", "--plan", "a".repeat(24), "--approve", "b".repeat(64), option]),
+      ["apply", "--plan=", "--approve", "b".repeat(64)],
+      ["apply", "--plan", "a".repeat(24), "--approve="],
+    ]) {
+      const result = spawnSync(process.execPath, ["--import", path.join(root, "node_modules/tsx/dist/loader.mjs"),
+        path.join(root, "scripts/production-auth-config.ts"), ...args, "--project", project], {
+        cwd: f.directory, env: { PATH: process.env.PATH, NODE_ENV: "test" }, encoding: "utf8", timeout: 10_000,
+      });
+      assert.equal(result.status, 1);
+      assert.doesNotMatch(`${result.stdout}${result.stderr}`, /SUPABASE_ACCESS_TOKEN|Provider request/);
+      assert.match(result.stderr, /arguments|phase/);
+    }
+  } finally { f.dispose(); }
 });

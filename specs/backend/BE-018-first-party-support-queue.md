@@ -2,13 +2,374 @@
 id: BE-018
 title: First-party customer support queue
 status: in_progress
-related: [BE-046, BE-044, ADR-0023, FE-019, FE-026, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039, BE-050]
+related: [BE-046, BE-044, ADR-0023, FE-019, FE-026, FE-056, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039, BE-050, DEP-043, FE-036, FE-053, BE-057]
 owners: [backend, security, customer-support]
-last_updated: 2026-10-07
+last_updated: 2026-10-17
 change_level: L3
 ---
 
 # BE-018 - First-party customer support queue
+
+## S142/S144 retirement of conversation company handoffs (ready UI; cleanup planned)
+
+Latest owner direction removes the old Transport company add/edit feature. No
+current staff action may append/update a transport_handoff event; authenticate
+stale actions and deny safely without mutation. Remove current form/queue summary
+and obsolete case-plan navigation. New providers belong to independent Tracking
+plans, not chat company records. General support/transport messages, notes,
+assignment, join, read receipts, SLA/idle clocks and active chats remain intact.
+Focused regression proves retired action does not reach its mutation port and
+existing reply/authorization behavior remains. S144 separately authorizes cleanup
+of old conversation-bound plan records and company-handoff events in local AND
+live environments after exact inventory/target verification and protected backup;
+new Tracking data, accounts and active chats are explicitly outside that deletion.
+
+## S126 — fair assignment deadlines and admin escalation emails (ready)
+
+Newest owner steering adds operational email alongside the existing in-app alert;
+this is not account email editing. Keep S125 explicit Join and inactivity proof.
+GIVEN assigned work has an unanswered participant cycle WHEN ten minutes pass
+after the later of the oldest unanswered message or current assignment time THEN
+show Overdue and alert current authorized assignee/managers. Join/read/note events
+do not count as replies. Reassignment grants the next staff member their own
+response window without rewriting the original customer wait or history.
+Unassigned queue work retains a ten-minute queue-overdue alert, without an email
+blaming an unassigned staff member. No public timing promise or numerical cap.
+
+GIVEN an assigned cycle first becomes overdue for the current assignment THEN
+atomically persist one per-admin/operations-manager email job alongside the
+internal attention event. Deduplicate by conversation/message/current assignment/
+recipient; retries preserve provider idempotency. Staff alerts remain in-app;
+admin emails contain only queue/reference, assigned staff identity and an
+app-authorized dashboard link, never customer name/contact/message/route details.
+Recipients and target are canonical, freshly role-checked at dispatch. Old cycles
+receive no catch-up email flood. New assignment cycles can escalate independently.
+
+GIVEN the customer is answered, chat ends/resolves, assignment changes or recipient
+loses authority before delivery THEN ignore stale jobs. Bounded leases, attempts,
+24-hour job expiry, generic failure categories and recoverable missing config
+preserve safe behavior. Use a typed email port and the existing Resend provider
+with a stable idempotency key; never write provider credentials/configuration.
+Actual local preview uses the already installed, verified loopback Mailpit only;
+no external test emails. Local inbox capture proves dev delivery, not Resend inbox
+arrival. Provider acceptance is not a human-read claim.
+
+Additive migration69 records assignment-scoped escalation markers and a private
+email outbox tied to existing attention events. Preserve all rows/history and
+suppress previously notified/legacy cycles; rehearse rollback/no-op and protect
+local before-images. No hosted mutation is authorized. Email dispatch is bounded
+and independently failed within existing local/hosted minute workers; no new
+schedule/dependency. Keep notification/maintenance budgets and sanitized logs.
+
+Tests cover assignment/next-reply boundaries, one-per-cycle/assignment races,
+recipient/tenant/privacy/role changes, answer/end/reassign suppression, provider
+idempotency/retry/expiry/config failures, migration preservation and worker bounds.
+Actual Chrome staff/admin + real local Mailpit readback supplements S125 paired
+web/Expo journeys. Focused checks precede explicit visual approval/full gates;
+unchanged native Join/receipt behavior remains under S125 evidence.
+
+Focused verification maps to `scripts/test-support-assignment-response-migration.ts`
+(schema69/backfill/no-op), `scripts/test-support-assignment-response.ts` (assignment
+fairness, atomic manager jobs, old-writer recovery and bounded candidates),
+`scripts/test-support-escalation-email.ts` (localized private content, provider
+bounds, effective-target rejection), `scripts/test-support-escalation-email-delivery.ts`
+(fresh authority, leases, deduplication, retries and stale suppression), and the
+local/scheduled worker tests (isolation, order and execution budget). The named
+`npm run test:support-escalation` chain is included in `test:support`; full gates
+remain subject to the current visual-approval requirement.
+
+
+## S125 — unanswered work and explicit staff joining (ready)
+
+This owner-approved contract supersedes earlier read-triggered joining and
+customer-facing assignment wording. Automatic routing remains internal.
+
+GIVEN a participant starts an unanswered message cycle WHEN ten minutes pass
+without a public staff reply THEN the unresolved request becomes Overdue for
+staff, after first showing Needs staff reply. Additional participant messages,
+assignment, Join, reads and private notes do not reset the oldest unanswered
+message. Only a public staff reply clears that cycle. No public response-time
+promise or automatic resolution is introduced. Reopen alone starts no new clock;
+the next participant message does. Existing guest25/30minute and owner23/24hour
+warning/end windows begin only after a public staff reply and remain unchanged.
+
+GIVEN a newly overdue cycle WHEN bounded maintenance runs THEN create one durable
+reply_overdue alert for its current authorized assignee and managers, including
+manager escalation for unassigned work. Recheck current cycle/status/access at
+feed and dispatch; suppress stale answered/ended cycles. Keep pending work when
+there are no authorized recipients. Historical unambiguous unanswered cycles
+retain their original start but are marked already notified to avoid catch-up
+push floods; ambiguous legacy authors never manufacture participant authority.
+
+GIVEN an internally assigned chat WHEN the assigned staff member explicitly
+clicks Join chat with current conversation/version/assignment identity THEN save
+one joined event for that assignment and announce the join to the customer.
+Opening/reading, Claim, autoassignment and reassignment never join. Require this
+explicit current-assignment join before a staff public reply; private notes remain
+available under existing permissions. Deny wrong agents, managers inspecting
+another assignee, ended cases and stale assignment epochs; repeated same Join is
+idempotent. Existing automatic joins do not count as explicit acceptance and
+historical messages/events/read cursors remain unchanged.
+
+GIVEN authorized staff clicks Mark resolved in either queue THEN resolve the
+request and end its session. Participant End chat and inactivity ending leave
+it unresolved for follow-up. Keep full history/contact and existing access rules.
+
+Implementation: additive migration67, domain response/join contracts, existing
+minute workers and typed web/native projections. Focused isolated PostgreSQL
+coverage must prove clocks, backfill/no-op, concurrency, authorization,
+idempotency, recipient privacy and stale alerts; actual Chrome/Expo covers the
+Join→reply→read/end flows. Local backup/apply/readback precedes runtime activation;
+hosted migration and rollout remain separately gated. Related BE-050, FE-019,
+FE-053, FE-062 and DEP-043 define matching presentation/delivery.
+
+### S125 customer-inactivity evidence and schema68 (ready)
+
+Newest owner steering: an inactivity ending must retain proof that the system
+was awaiting the customer, without inventing delivery/read certainty or judging
+reply quality. GIVEN an actual due customer-idle transition WHEN it commits THEN
+atomically append an immutable idle_ended event with versioned structured facts:
+reason participant_no_reply, endedAt, waitingSince, policy window, last public
+staff reply ID/sentAt, latest participant message ID/sentAt, and whether the last
+public reply was confirmed read at ending. Never treat push acceptance, assignment
+or Join as proof of reading. Keep the existing closed event and unresolved status.
+Reopen/resolve must preserve this evidence; historical endings without evidence
+remain unknown, never fabricated. An old due clock without a verifiable original
+reply still follows the existing ending policy, but receives no fabricated audit
+event. New durable-side public replies must produce complete evidence. Only authorized staff may read this record.
+
+The existing migration59 resolution CHECK restricts resolution to transport;
+therefore add migration68 after immutable67 to permit resolved_at only when
+status=closed in either queue. Widen only the support-event enum for idle_ended
+and add a bounded latest-evidence index. Preserve all rows/events/messages and
+rehearse local rollback/no-op before activation. Cover false/true read evidence,
+nonpublic notes, exact-once ending, transactional rollback, resume/resolve history,
+wrong tenant/role and customer redaction. BE-050 read authority remains unchanged.
+
+## S121 — ordinary waiting work routes automatically (ready)
+
+The newest owner correction supersedes S119's manual-recovery dependency and
+implicit hold interpretation. Waiting means queued for automatic assignment;
+moving a case back to Waiting is not a hidden pause. Agent receives-new-chats
+settings and matching queue scope remain the explicit eligibility controls.
+
+GIVEN ordinary waiting unassigned chats and eligible receiving staff WHEN the
+existing maintenance worker runs THEN assign oldest eligible work automatically,
+using current open workload, longest since saved assignment and user ID tie-break.
+Use the same support-work transaction lock and atomic assignment/events/attention
+as immediate creation. Never manufacture a manager identity for scheduled work.
+New requests and availability changes retain immediate routing; a durable sweep
+recovers older waiting work after restarts or interrupted availability handling.
+No button, inbox visit, polling write, heartbeat or client timer is required.
+
+GIVEN paused, disabled, wrong-role or wrong-queue staff THEN leave unmatched work
+waiting; a long prefix from an unavailable queue must not starve another queue.
+GIVEN closed/assigned cases THEN do not reopen, shuffle or duplicate them. Preserve
+transcripts, contacts and explicit per-case assignment overrides. Ordinary manual
+unassignment re-enters automatic waiting, not a separate held state. No agent cap
+is introduced and no data migration/backfill is needed.
+
+GIVEN concurrent creation/routing/availability/claim or repeated worker ticks THEN
+save each assignment and its alerts once. An internal bounded sweep obtains the
+existing try-lock, considers at most100 eligible FIFO candidates and starts at
+most25 transitions within a3second monotonic budget. Apply LOCAL statement≤1s,
+idle transaction5s and lock50ms limits; verify rollback/timeout restoration.
+Skip a busy lock, retain remaining queue for later ticks and log only counts.
+This per-sweep bound is not a per-agent capacity limit. DEP-043 wires existing
+minute workers with independent routing/inactivity failure handling. FE-019/026
+remove misleading manual bulk recovery/hold guidance; per-case staff controls stay.
+
+Definition of Ready: behavior, queue/role boundaries, no hidden hold, bounded
+transaction/observability, local worker proof and rollout are explicit. Master
+§§13,15,19,22 and operations guidance are affected. Focused isolated PostgreSQL
+tests cover fairness/old waiting/unassignment, ineligible prefixes, races/exact
+once, lock/batch/budget/failure preservation. Actual Chrome and affected Expo
+flows must observe waiting→assigned without a staff action; do not fulfill fake
+application responses. Local waiting assignments may change through the actual
+authorized worker under protected before/readback evidence. Hosted work remains
+separate from this local correction and prior visual/full gates remain open.
+
+### S121 local evidence — release gates pending
+
+`scripts/test-support-automatic-routing.ts` proves old/manual waiting pickup,
+FIFO/workload fairness, wrong-role/paused/queue exclusion, unavailable prefixes,
+concurrent exact-once history/alerts, no synthetic actor, batch/time/lock limits,
+rollback and LOCAL timeout restoration. Updated recovery compatibility and
+inherited uncapped routing suites also pass. Receipts are
+`.local/automatic-routing-s121/backend-results.json`; initial fixture/timeout
+failures remain retained. The actual supervised worker routes all5 pre-existing
+local cases once; `.local/queue-recovery-s121/root/verified.json` independently
+replays the workload choice and verifies unchanged transcripts, prior history,
+other cases and saved provider settings. No schema/provider/hosted change.
+
+The isolated10,000-row mixed backlog probe returns100 candidates under the1s
+statement limit (5.438ms execution). Its plan scans/sorts; this is bounded local
+evidence, not an index-backed FIFO or production-scale guarantee. Measure the
+hosted workload/plan before proposing an index or changing worker bounds.
+
+## S119 — explicit scoped waiting-work recovery (ready)
+
+Historical S119 behavior below is superseded by S121: ordinary waiting work no
+longer depends on the manual command, and manual unassignment is not a hold.
+
+GIVEN a fresh operations-authorized account WHEN explicitly requesting waiting
+chat recovery for support or transport THEN use the existing support-work
+transaction lock, eligible queue/availability and least-load/fairness contracts
+and route at most100 oldest eligible waiting cases. Return routed and remaining
+counts for the requested queue. Reject an invalid queue or stale/non-manager
+role before assignments/notifications. Concurrent commands and retries must not
+duplicate assignment history or attention; assigned/closed cases remain intact.
+
+GIVEN a manager explicitly moved a case to the waiting queue WHEN this new
+recovery command runs THEN retain that deliberate hold, using the latest saved
+assignment decision (reassigned detail waiting), until an authorized per-case
+assignment/claim changes it. Existing availability-save/new-agent recovery keeps
+its established S108 behavior; the explicit new queue command opts into hold
+preservation. No GET, poll, worker, schema or provider change is introduced.
+Read-only views never trigger recovery. UI/operations are FE-019/FE-026.
+
+Focused isolated PostgreSQL tests cover queue scope, held versus never-assigned
+waiting records, paused/wrong-role staff, current manager role, parallel recovery,
+batch bounds and exact-once history/attention. Actual SSR/action tests cover the
+manager-only POST and bounded return/feedback. Shared preview customer cases and
+hosted state are outside fixture mutation scope.
+
+S119 focused local verification (2026-10-17): fresh actual Chrome requests routed
+immediately to eligible staff. Older waiting work was not silently reassigned by
+reading an inbox; the explicit manager recovery command addresses that operational
+gap while preserving deliberate holds. A read-only preflight found no due idle
+clock, so an old unanswered request was not evidence of failed maintenance.
+For labelled QA case317, actual staff/visitor back-and-forth started and cleared
+the saved reply clock. Only this fixture's clock was then moved to eight seconds
+before the existing30-minute deadline. The running real worker ended it, released
+its active assignment, retained its last-assignee identity and four-message
+history, and left it unresolved. This proves the accelerated boundary and actual
+worker path, not30 minutes of naturally elapsed waiting. The original harness
+failure expecting a null historical assignee remains preserved; the verified
+contract requires released active assignment, not erased assignee history.
+Evidence: `.local/chat-reliability-s119/worker-actual-verified.json` and its linked
+actual Chrome receipt; `.local/inactivity-s119/isolated-results.json` records the
+passing guest/owner threshold, clock-reset/exclusion, exact-once, race, bounded
+query/lock and worker tests.
+
+The backed-up, rollback-rehearsed local migration65→66 added only nullable
+message sender-side data for BE-050 receipt accuracy, with no backfill or history
+rewrite; it did not change idle eligibility. Rehearsal, preservation and no-op
+replay are verified under `.local/chat-reliability-s119/migration66/`. No hosted
+migration or customer-case recovery was performed. Both spec status and rollout
+remain in_progress: current visual approval, full/release/acceptance gates,
+installed-device proof and separately reviewed hosted migration/API/web/native
+rollout are pending.
+
+## S111 — server-authoritative inactive-chat ending (ready)
+
+Newest request adds automatic ending of unattended live sessions, without
+resolving the underlying support/transport request or deleting follow-up history.
+Master §§5/12/13/15/17/19/22 affected; FE-019, FE-036, FE-053, FE-056 and DEP-043
+cover clients, access and rollout. This is L2 persistence plus L3 scheduled-work
+code; local focused verification only until the existing visual/full-gate steps.
+
+Product policy (not a universal vendor default): guest transport warns after
+25 minutes and ends after 30 minutes waiting for the visitor. Business-owner
+Support and account-owned Transport warn after23 hours and end after24 hours
+waiting for the owner. These clocks start only after a new public staff reply;
+unanswered customer work does not automatically end.
+
+GIVEN an open assigned conversation WHEN an authorized staff member sends a new
+public reply THEN persist an awaiting-participant clock in the same message
+transaction. Participant messages clear it. Internal notes, reads, assignment and
+join events never start/extend it; reassignment/reopen clears it pending a new
+reply. Waiting/unanswered participant requests never automatically end.
+Idempotent retry never advances a clock. Existing cases start with no clock;
+ambiguous legacy notes are not retroactively treated as staff replies. The existing
+owner-support UI offers replies, not private notes; reject an explicit note audience
+on a non-transport owner conversation rather than accepting it as a visible reply.
+Transport retains its existing private-note contract. Do not rewrite historical
+messages whose original audience cannot be recovered. Add a no-write regression
+for this unsupported-audience admission boundary.
+
+GIVEN a due clock WHEN scheduled maintenance obtains the existing support-work
+transaction lock THEN recheck eligibility and close at most 25 cases per sweep,
+release current assignments, preserve assigned identity/contact/transcript and
+resolved_at=NULL, and append one distinguishable automatic-end event plus the
+existing durable participant closed alert. Concurrent messages, resume, manual
+resolution and duplicate sweeps remain atomic and exactly once. Skip a busy lock;
+use bounded statement/transaction work and count-only sanitized observability.
+Never fetch private bodies/contacts into worker logs.
+Apply statement and idle-in-transaction limits with SET LOCAL inside the sweep
+transaction: statements are limited to at most one second and an interrupted
+worker's idle transaction is terminated after five seconds, releasing its locks.
+Commit and rollback restore the connection's previous limits. The three-second
+monotonic budget controls starting further case transitions; it is not a hard
+whole-transaction deadline. Test the actual local setting and restoration.
+
+Use additive nullable conversation clock/end-reason fields and a partial index
+for open due clocks; no backfill closes existing work. PostgreSQL remains the
+only application store. A pure shared contract owns windows/deadline projection;
+server/database and UI adapters consume it. No browser timeout, heartbeat writes,
+new provider, socket infrastructure or unbounded per-chat job fan-out.
+
+GIVEN an auto-ended unresolved public case with its valid original seven-day token
+and exact publicRef WHEN the visitor explicitly resumes THEN reuse the same case,
+apply normal least-loaded routing or waiting queue, reset idle/join state and
+record/enqueue reopen once. No new intake or duplicate request is required.
+Expired/foreign tokens and mismatched refs are denied; manually ended or resolved
+cases cannot use this automatic-end-only resume path. Owner resume reuses its
+existing tenant-authorized reopen contract. A draft remains intact if closure
+races a send. All close/resolve/reassign/reopen paths maintain the new fields.
+
+Focused tests: isolated PostgreSQL threshold edges, guest/owner windows, no reply
+and notes/read/join exclusions, old-case preservation, clear/restart clocks,
+reassignment, idempotency, parallel sweep/message/resume, assignment/history/alert
+counts, permission/ref/session denial, limit25 and indexed candidate EXPLAIN.
+Test scheduled failure isolation and no GET side effects. No live customer case
+or hosted migration is part of this local audit.
+
+
+Mapped focused regression: `scripts/test-support-inactivity.ts` (actual isolated PostgreSQL and web/native route adapters), plus `scripts/test-support-routing.ts`, `scripts/test-support.ts`, `scripts/test-live-transport.ts`, `scripts/test-buying-assistance.ts` and `scripts/test-chat-read-receipts.ts`. Protected actual workflow evidence: `.local/workflow-audit-s111/paired/verified.json`; migration evidence: `.local/workflow-audit-s111/migration/`. Full gates/rollout remain separate.
+
+## S108 — unlimited balanced assignment and consistent case identity
+
+Supersedes all prior per-agent capacity contracts in BE-018, FE-019 and FE-026.
+This L2 change is local until reviewed rollout. No migration or provider change.
+The legacy database limit column remains inert for non-destructive compatibility;
+it must not affect routing, claiming, manual assignment or reopening.
+
+- GIVEN enabled staff receiving the matching support/transport queue WHEN new
+  work needs an assignee THEN choose the fewest open conversations, then the
+  longest since their last saved assignment (never assigned first), then user ID.
+  Serialize selection and assignment in the existing transaction lock. Closed
+  cases do not contribute; assignment events and notifications remain exact-once.
+- GIVEN staff already have 100 or more open conversations WHEN another request
+  arrives or is claimed/reassigned/reopened THEN no numerical cap blocks it.
+  Disabled, wrong-queue, nonstaff and unauthorized identities remain ineligible.
+- GIVEN an agent pauses receiving new chats WHEN they retain open cases THEN
+  preserve ownership, replies, notes and history; exclude them from new routing.
+  Reject queue-scope changes that strand incompatible open work.
+- GIVEN waiting work and a newly enabled matching agent WHEN availability is
+  saved THEN route up to 100 waiting cases oldest first, balancing each saved
+  assignment. This is a bounded command batch, never a per-agent limit; expose
+  routed/remaining counts so outstanding waiting work is visible.
+  Existing assigned/closed cases and explicitly unassigned cases are not silently
+  shuffled by reads. If nobody eligible receives chats, keep work waiting.
+- GIVEN visitor and staff inspect the same public reference WHEN saved assignment
+  changes THEN both views project the same record. A delayed request must not
+  overwrite newer state or a different recovered session. Reject stale-reference
+  writes; do not expose another session's transcript. Assignment is not joining.
+
+Ready: owner explicitly removes caps and requests researched balancing. Reuse
+queue skills and deliberate receives-new-chats availability; no inferred online
+presence, predictive scores, SLAs, language skills or new role fields. Research:
+Intercom balanced assignment and Zendesk omnichannel queue/routing documentation.
+Tests: isolated PostgreSQL >100 auto/manual/claim/reopen, workload/tie/concurrency,
+paused/foreign-role/queue, FIFO availability recovery, idempotency/notifications;
+actual component delayed-response/session/state checks and paired local browser
+case-reference/assignment/selection checks. Existing customer cases are read-only. Capture scripts that create staff or save
+receiving availability require a dedicated local server plus fixture schema;
+reject the shared preview before Auth/fixture/queue writes.
+Rollback restores code only; legacy settings and history stay intact. Specs,
+master staff/support sections, operations guide and focused tests precede visual
+review; full gates remain pending the existing S107 visual approval.
 
 ## S87/S88 — real workflow audit and scoped agent creation
 
@@ -719,3 +1080,74 @@ are removed; controlled map tiles and isolated API fixtures are documented in
 scripts. Evidence: .local/multiple-location-review/ and .local/live-transport-review/.
 Both typechecks and localization checks pass. Owner visual/native-speaker review,
 physical device tests, build/full release gates and deployment remain pending.
+
+
+## S104 local live-workflow audit
+
+Retain canonical support/transport routing, public/private visibility, scoped
+assignment, capacity, idempotency and chat history. FE-019 adds automatic visible
+owner-browser recovery when staff reopens a closed support conversation; existing
+read endpoints/permissions remain authoritative. Verify both queue workflows
+against actual local servers as well as isolated regression fixtures. No new
+provider, migration, hosted write or general guest-support intake is introduced.
+Disposable audit visitors use distinct benchmark-range address hints on local
+requests, preserving real rate limits and actual handlers; no canned success
+responses or reset of customer/production quotas is allowed.
+
+
+## S114 account-owned transport arrangements — locally verified, full gates pending
+
+Classification: feature with privacy/data-integrity corrections (L2); existing
+PostgreSQL support tables and adapters suffice, with no schema/provider change.
+Business owners may initiate the same text-only transport intake/live chat as
+visitors from a separate Account destination. FE-019/FE-053/FE-056 govern UI.
+Master §§5,12–13,15–19,21–22 and public/private transport placement are affected.
+
+- GIVEN an authenticated current client linked to a business WHEN creating an
+  owner transport request THEN derive business/opener only from fresh authorized
+  account data, fix category to shipment_observation and participant kind client,
+  validate name/phone/From/To/optional goods/idempotency and persist atomically.
+  Route with existing unlimited transport least-load/fairness policy. No guest
+  capability, browser recovery cookie, caller business/category or attachment is
+  accepted as authority. Never associate a visitor conversation by phone/email.
+- GIVEN a repeated key WHEN tenant/kind/intake matches THEN return the original
+  case without duplicate messages/assignment/attention. Changed content, another
+  tenant, or reuse across technical support/transport must conflict before writes.
+- GIVEN owners A/B or support-only staff WHEN reading/mutating transport A THEN
+  enforce tenant/queue scope and exact canonical ID/publicRef on commands.
+  Owner lists/history contain only their business's shipment_observation requests;
+  technical Support lists/counts explicitly exclude transport/buying categories.
+- GIVEN private staff notes, carrier handoff or note attachments WHEN the owner
+  reads via new or retained support/mobile adapters THEN disclose no private body,
+  attachment/reference, carrier contact or private-note-derived unread/receipt.
+  Owner messages are public replies to agents; reject owner note audience and
+  transport attachments. Staff private notes remain supported. Historical audience
+  is not rewritten or inferred from a user's changed current role.
+- GIVEN owner End chat THEN close the live session unresolved, retain messages,
+  intake/contact/history and release workload. Staff Mark resolved is distinct.
+  Repeated close must preserve a closed reason/resolution. Existing authorized
+  automatic-end Resume reuses the same case; retain the authenticated-owner
+  23h-warning/24h-ending policy, rather than borrowing guest token/30min rules.
+- GIVEN creation/assignment/join/reply/read/end/resume WHEN appropriate THEN reuse
+  durable owner/staff attention and read-receipt contracts, with owner notification
+  navigation opening the transport view. Older owner-support adapters remain
+  securely readable; no new mandatory notification screen enum is introduced.
+
+API plan: authenticated web /api/owner-transport and mobile owner/transport use
+the same application handler. GET chooses an explicit authorized conversation,
+the newest active one, an explicit new intake or bounded history. POST admits
+only start/message/read/close/resume; ID/ref validation precedes side effects.
+Return a portable typed receipt plus private editable contact defaults; route
+fields start empty. Names/phones never travel in URLs/public-shell props.
+No local/shared customer fixtures or production writes are part of implementation.
+
+Ready: users/scope/failures/privacy/access/locales are explicit; checklist S114
+orders work. Add isolated PostgreSQL/API regression coverage for scope, replay,
+notes/attachments, routing, receipts/attention, unresolved end/resolve/resume and
+old-adapter behavior; reuse existing idle/routing tests. Focused UI evidence and
+visual approval precede full gates. Rollback retains records and the private-note,
+fresh-owner and unresolved-ending guards; an older UI must not require reverting
+those protections. Existing owner-support adapters remain compatible with older
+native builds. No destructive data/schema operation, guest-session migration or
+new provider is needed. New native distribution depends on the authenticated
+owner-transport API being deployed first.

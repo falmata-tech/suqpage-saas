@@ -1,0 +1,5 @@
+.artwork { display: inline-flex; flex: none; }
+.normal { display: block; }
+.reverse { display: none; }
+:global(.landing-footer:not(.landing-footer-light)) .normal { display: none; }
+:global(.landing-footer:not(.landing-footer-light)) .reverse { display: block; }

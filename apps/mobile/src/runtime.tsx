@@ -4,24 +4,26 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from "react";
 import { useFocusEffect } from "expo-router";
 import { AppState, Platform } from "react-native";
 import { endLocalSession } from "./session-lifecycle";
+import { boundedAuthFetch } from "./auth-fetch";
 import * as SecureStore from "expo-secure-store";
-import { createClient, processLock, type Session } from "@supabase/supabase-js";
+import { createClient, type Session } from "@supabase/supabase-js";
 import {
   apiOrigin,
   type Locale,
   type Shop,
   type Offering,
 } from "@suqpage/contracts";
-import { createUiText, languageNames, locales } from "../../../lib/i18n/core";
+import { createUiText, languageNames, locales, enabledLocales, parseLocale } from "../../../lib/i18n/core";
 import am from "../../../lib/i18n/messages/am.json";
 import om from "../../../lib/i18n/messages/om.json";
 import so from "../../../lib/i18n/messages/so.json";
 import ti from "../../../lib/i18n/messages/ti.json";
-export { languageNames, locales };
+export { languageNames, locales, enabledLocales };
 export const API = apiOrigin(
   process.env.EXPO_PUBLIC_API_ORIGIN || "https://suqpage.com",
 );
@@ -45,13 +47,13 @@ const authUrl = process.env.EXPO_PUBLIC_SUPABASE_URL,
 export const auth =
   authUrl && authKey
     ? createClient(authUrl, authKey, {
+        global: { fetch: boundedAuthFetch() },
         auth: {
           storage: secure,
           storageKey: "suqpage-owner-session",
           persistSession: true,
           autoRefreshToken: true,
           detectSessionInUrl: false,
-          lock: processLock,
         },
       })
     : null;
@@ -117,12 +119,16 @@ type Runtime = {
   session: Session | null;
   ready: boolean;
   authIssue: string;
+  logoutIssue: boolean;
+  logoutPending: boolean;
   authRetryAvailable: boolean;
   retryAuth: () => void;
   clearAuthIssue: () => void;
   locale: Locale;
   setLocale: (v: Locale) => void;
   t: ReturnType<typeof createUiText>;
+  // One-release migration bridge for already-open clients. Public screens use
+  // useBusinessInquiry; they never write a new single-business basket here.
   basket: { shop: Shop; items: BasketItem[] } | null;
   setBasket: React.Dispatch<React.SetStateAction<Runtime["basket"]>>;
   signOut: () => Promise<void>;
@@ -137,29 +143,33 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null),
     [candidate, setCandidate] = useState<Session | null>(null),
     [authIssue, setAuthIssue] = useState(""),
+    [logoutState, setLogoutState] = useState<"pending" | "failed" | null>(null),
     [validationRevision, setValidationRevision] = useState(0),
     [ready, setReady] = useState(!auth),
     [locale, setLanguage] = useState<Locale>("en"),
     [basket, setBasket] = useState<Runtime["basket"]>(null);
+  const logoutFence = useRef(false), logoutTask = useRef<Promise<void> | null>(null);
   useEffect(() => {
     let active = true;
     secure.getItem("suqpage-language").then((v) => {
-      if (active && locales.includes(v as Locale)) setLanguage(v as Locale);
+      if (active) setLanguage(parseLocale(v));
     }).catch(() => {});
     auth?.auth.getSession().then(({ data }) => {
-      if (active) {
+      if (active && !logoutFence.current) {
         setCandidate(data.session);
         setReady(!data.session);
       }
     }).catch(() => { if(active){setSession(null);setReady(true);} });
     const sub = auth?.auth.onAuthStateChange((_e, s) => {
       // Never await Auth or API work inside this callback: Supabase holds its lock.
+      if (logoutFence.current) return;
       setCandidate(s);
       if (!s) setSession(null);
       setReady(!s);
     });
     const app = AppState.addEventListener("change", (s) => {
       if (s === "active") {
+        if (logoutFence.current) return;
         auth?.auth.startAutoRefresh();
         setValidationRevision(v => v + 1);
       }
@@ -171,12 +181,18 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
       app.remove();
     };
   }, []);
-  const signOut = useCallback(() =>
-    endLocalSession({
+  const signOut = useCallback((preserveAuthIssue = false) => {
+    if (logoutTask.current) return logoutTask.current;
+    logoutFence.current = true;
+    setSession(null);setCandidate(null);setBasket(null);setReady(true);
+    setLogoutState("pending");if (!preserveAuthIssue) setAuthIssue("");
+    auth?.auth.stopAutoRefresh();
+    const task = endLocalSession({
       signOut: async () => {
         const current=await auth?.auth.getSession();
         if(current?.data.session)try{await request('owner/attention',{token:current.data.session.access_token,body:{action:'unsubscribe'}});}catch{/* Local sign-out still clears private state if offline. Generic push may await revocation. */}
-        return auth?.auth.signOut({scope:'local'});
+        const result = await auth?.auth.signOut({scope:'local'});
+        if (result?.error) throw result.error;
       },
       clearPrivateState: () => {
         setSession(null);
@@ -184,7 +200,18 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
         setBasket(null);
       },
       removeStoredSession: () => secure.removeItem("suqpage-owner-session"),
-    }), []);
+    }).then(() => {
+      logoutFence.current = false;
+      setLogoutState(null);if (!preserveAuthIssue) setAuthIssue("");
+      auth?.auth.startAutoRefresh();
+    }).catch(() => {
+      setLogoutState("failed");
+      setAuthIssue("Unable to connect. Please try again.");
+      throw new ApiFailure("Unable to connect. Please try again.", 0);
+    }).finally(() => {logoutTask.current = null;});
+    logoutTask.current = task;
+    return task;
+  }, []);
   useEffect(() => {
     if (!candidate) return;
     let current = true;
@@ -192,32 +219,34 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
     setReady(false);
     request("session", {token: candidate.access_token, signal: controller.signal})
       .then(() => {
-        if (current) {setSession(candidate);setAuthIssue("");}
+        if (current && !logoutFence.current) {setSession(candidate);setAuthIssue("");}
       })
       .catch(async error => {
-        if (!current) return;
+        if (!current || logoutFence.current) return;
         setSession(null);
         const denied = error instanceof ApiFailure && (error.status === 401 ||
           error.code === "staff_web_only" || error.code === "owner_only");
         setAuthIssue(error instanceof ApiFailure && error.status === 403
           ? "Staff accounts sign in on the website."
-          : denied ? "Sign in to Suqpage." : "Unable to connect. Please try again.");
-        if (denied) await signOut().catch(() => {});
+          : denied ? "Sign in to MirtPage." : "Unable to connect. Please try again.");
+        if (denied) await signOut(true).catch(() => {});
       })
       .finally(() => {if (current) setReady(true);});
     return () => {current = false;controller.abort();};
   }, [candidate, validationRevision, signOut]);
   const ownerRequest = useCallback(
     async <T,>(path: string, body?: unknown, form?: FormData) => {
+      if (logoutFence.current) throw new ApiFailure("Sign in to MirtPage.", 401);
       if (!auth) throw new ApiFailure("Sign-in is not configured.", 503);
       const { data } = await auth.auth.getSession();
-      if (!data.session) throw new ApiFailure("Sign in to Suqpage.", 401);
+      if (logoutFence.current) throw new ApiFailure("Sign in to MirtPage.", 401);
+      if (!data.session) throw new ApiFailure("Sign in to MirtPage.", 401);
       try {
         return await request<T>(path, { body, form, token: data.session.access_token });
       } catch (error) {
         if (error instanceof ApiFailure && (error.code === "staff_web_only" || error.code === "owner_only")) {
           setAuthIssue("Staff accounts sign in on the website.");
-          await signOut().catch(() => {});
+          await signOut(true).catch(() => {});
         }
         throw error;
       }
@@ -231,13 +260,16 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
         session,
         ready,
         authIssue,
+        logoutIssue: logoutState === "failed",
+        logoutPending: logoutState === "pending",
         authRetryAvailable: Boolean(candidate && authIssue),
         retryAuth: () => setValidationRevision(v => v + 1),
-        clearAuthIssue: () => setAuthIssue(""),
+        clearAuthIssue: () => {if (!logoutFence.current) setAuthIssue("");},
         locale,
         setLocale: (v) => {
-          setLanguage(v);
-          void secure.setItem("suqpage-language", v).catch(() => {});
+          const next = parseLocale(v);
+          setLanguage(next);
+          void secure.setItem("suqpage-language", next).catch(() => {});
         },
         t: createUiText({ en: {}, am, om, so, ti }[locale]),
         basket,

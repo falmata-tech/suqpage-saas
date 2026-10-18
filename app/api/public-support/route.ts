@@ -9,6 +9,7 @@ import {
   createPublicSupportConversation,
   postPublicSupportMessage,
   closePublicSupportConversation,
+  resumePublicSupportConversation,
   getPublicSupportConversation,
   publicSupportSessionIsUsable,
   PUBLIC_SUPPORT_COOKIE,
@@ -100,16 +101,17 @@ export async function POST(request: NextRequest) {
     const ipHash = hashPrivateValue(requestIpFromHeaders(request.headers));
     const { token, cookieName, channel } = await publicSupportSession(request.cookies, request.nextUrl.searchParams.get("channel"));
     if (body.attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
-    if (body.action === "message" || body.action === "close" || body.action === 'read') {
+    if (body.action === "message" || body.action === "close" || body.action === 'read' || body.action === 'resume') {
       const current = await channelConversation(token, channel);
       if (body.publicRef !== current.publicRef) throw new SupportError("Request could not be accepted.", "conversation_changed");
       if (body.action === 'read') await acknowledgePublicRead(token, { messageId: body.messageId, publicRef: body.publicRef });
       else if (body.action === "close") await closePublicSupportConversation(token);
+      else if (body.action === 'resume') await resumePublicSupportConversation(token,body.publicRef);
       else await postPublicSupportMessage(token, { message: body.message, idempotencyKey: body.idempotencyKey }, ipHash);
       if(body.action!=='read')scheduleAttentionDelivery();
       return privateJson({ conversation: await channelConversation(token, channel) });
     }
-    if (body.action !== "start" || body.category !== (channel === "transport" ? "shipment_observation" : "buying_assistance")) throw new SupportError("Choose how Suqpage can help.", "invalid_channel");
+    if (body.action !== "start" || body.category !== (channel === "transport" ? "shipment_observation" : "buying_assistance")) throw new SupportError("Choose how MirtPage can help.", "invalid_channel");
     const created = await createPublicSupportConversation({
       category: body.category,
       name: body.name,

@@ -9,14 +9,12 @@ import { OwnerPageError, isPageOwner } from "@/lib/owner-page-domain";
 import { ownerPageEditorEnabled, ownerPagePort } from "@/lib/owner-page-runtime";
 import { readOwnerPage } from "@/lib/owner-page-service";
 import { pagePublicationPort } from "@/lib/owner-page-publication-runtime";
-import HandleSettingsForm from "@/components/HandleSettingsForm";
-import { readHandleSettings } from "@/lib/business-handle-runtime";
-import { saveBusinessHandleAction } from "@/app/dashboard/business/handle-actions";
 import { getUiText } from "@/lib/i18n/server";
+import {ownerPageTask} from '@/lib/owner-page-tasks';
 
 export const dynamic = "force-dynamic";
 
-export default async function PageEditor({ searchParams }: { searchParams: Promise<{ business?: string; view?: string; error?: string; saved?: string; returnTo?: string }> }) {
+export default async function PageEditor({ searchParams }: { searchParams: Promise<{ business?: string; view?: string; task?: string; error?: string; saved?: string; returnTo?: string }> }) {
   if (!ownerPageEditorEnabled()) notFound();
   const user = await requireUser();
   const query = await searchParams;
@@ -31,9 +29,9 @@ export default async function PageEditor({ searchParams }: { searchParams: Promi
   const owner = isPageOwner(user, business.id);
   const t = await getUiText();
   return <DashboardShell user={user} business={business}>
-    {query.returnTo==='profile' && <a className="btn secondary" href="/dashboard/profile">{t("Back to profile")}</a>}
+    {query.returnTo==='profile' && <a className="btn secondary" href="/dashboard/profile">{t("Back to account")}</a>}
     {query.error ? <p className="error" role="alert">{t(query.error)}</p> : null}
     {query.saved === 'handle' ? <p className="notice" role="status">{t('Business details saved.')}</p> : null}
-    <OwnerPageEditor returnToProfile={owner && query.returnTo==='profile'} handleEditor={owner && query.returnTo!=='profile' ? <HandleSettingsForm key={business.content_version} settings={await readHandleSettings(user,business.id)} businessId={business.id} action={saveBusinessHandleAction} returnTo="page"/> : null} locationConfirmed={await publicationLocationConfirmed(business.id)} initialPreview={query.view === "preview" || (owner && business.status === 'draft' && query.view !== 'edit')} catalog={catalog} initialDraft={draft} initialPublication={publication} owner={owner} />
+    <OwnerPageEditor key={business.id} returnTo={owner?(query.returnTo==='profile'?'profile':'showroom'):undefined} initialTask={ownerPageTask(query.task)} locationConfirmed={await publicationLocationConfirmed(business.id)} initialPreview={query.task==='color'||query.view === "preview" || (owner && business.status === 'draft' && query.view !== 'edit'&&!query.task)} catalog={catalog} initialDraft={draft} initialPublication={publication} owner={owner} />
   </DashboardShell>;
 }

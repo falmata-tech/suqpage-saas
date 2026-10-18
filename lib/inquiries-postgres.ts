@@ -50,7 +50,7 @@ export async function createPostgresPublicInquiry(
     const productId = Number(raw.productId);
     if (!Number.isInteger(productId)) throw new InquiryError("Invalid offering.");
     const product = (await runner.query<{ name: string; availability: string; offering_kind: string; quantity_mode: string }>(
-      "SELECT name,availability,offering_kind,quantity_mode FROM products WHERE id=? AND business_id=? AND is_published=1",
+      "SELECT name,availability,offering_kind,quantity_mode FROM products WHERE id=? AND business_id=? AND is_published=1 AND offering_kind<>'service'",
       [productId, businessId],
     )).rows[0];
     if (!product || !["available", "limited"].includes(product.availability)) throw new InquiryError("A selected offering is not available.");

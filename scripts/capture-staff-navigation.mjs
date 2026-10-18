@@ -10,10 +10,16 @@ import {createUiText} from '../lib/i18n/core.ts';
 // Disposable, labelled navigation fixtures; every action and screen uses real HTTP/SQL.
 // Creation does not emit waiting-work alerts to existing teams. No customer rows change.
 process.loadEnvFile('.local/supabase-runtime.env');
-const base='http://127.0.0.1:3102',out='.local/staff-navigation-review/actual';
+const base=process.env.SUQPAGE_TEST_WEB_BASE_URL||'http://127.0.0.1:3102',out='.local/staff-navigation-review/actual';
 assert.equal(new URL(process.env.SUQPAGE_POSTGRES_URL).hostname,'127.0.0.1');
 assert.equal(new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin,'http://127.0.0.1:54321');
 const pool=new pg.Pool({connectionString:process.env.SUQPAGE_POSTGRES_URL});
+// Availability/new-staff commands now intentionally drain waiting work. Run only
+// against a separately booted fixture server/schema, never the shared preview.
+assert.ok(['127.0.0.1','localhost'].includes(new URL(base).hostname)&&new URL(base).port!=='3102','Use a dedicated local fixture server, not the shared preview.');
+const fixtureSchema=(await pool.query('SELECT current_schema() name')).rows[0].name;
+assert.ok(/^suqpage_[a-z0-9_]+$/.test(fixtureSchema),'Use a dedicated Suqpage fixture schema before creating staff or saving receiving availability.');
+
 const auth=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUQPAGE_SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 const key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const browser=await chromium.launch(),expect=browserExpect.configure({timeout:22000});
@@ -88,7 +94,7 @@ try{
  await a.p.goto(base+'/dashboard?business='+business);assert.deepEqual(await a.p.locator('.sidebar .workspace-nav a').evaluateAll(nodes=>nodes.filter(n=>n.href.includes('/dashboard/admin')||n.href.includes('queue=')).map(n=>n.getAttribute('href'))),[...global,...(await a.p.locator('.sidebar .workspace-nav a').evaluateAll(nodes=>nodes.filter(n=>n.href.includes('/dashboard/admin/businesses/')||/\/dashboard\/admin\/discovery\/\d+/.test(n.href)).map(n=>n.getAttribute('href'))))]);
  await expect(a.p.locator('.sidebar .workspace-brand')).toHaveAttribute('href','/dashboard/admin');checks.push('Opening a business retains the admin menu and stable overview destination.');
  await a.p.goto(base+'/dashboard/admin/staff?q='+suffix);await expect(a.p.locator('.data-table tbody tr')).toHaveCount(2);await a.p.getByRole('link',{name:'Manage',exact:true}).first().click();await expect(a.p.getByRole('heading',{name:'Workload & availability',exact:true})).toBeVisible();await active(a.p,'/dashboard/admin/staff');
- const settingsOrigin=new URL(a.p.url()).searchParams.get('q');await a.p.locator('input[name=maxOpenConversations]').fill('4');await a.p.getByRole('button',{name:'Save',exact:true}).click();await expect(a.p.getByText('Support agent settings saved.',{exact:true})).toBeVisible();assert.equal(new URL(a.p.url()).searchParams.get('q'),settingsOrigin);await active(a.p,'/dashboard/admin/staff');await expect(a.p.locator('.workspace-breadcrumbs a')).toHaveAttribute('href','/dashboard/admin/staff');checks.push('Staff → Manage → workload settings → Save preserves the selected agent and keeps Staff active.');
+ const settingsOrigin=new URL(a.p.url()).searchParams.get('q');await expect(a.p.locator('input[name=maxOpenConversations]')).toHaveCount(0);await a.p.getByRole('button',{name:'Save',exact:true}).click();await expect(a.p.getByText('Support agent settings saved.',{exact:true})).toBeVisible();assert.equal(new URL(a.p.url()).searchParams.get('q'),settingsOrigin);await active(a.p,'/dashboard/admin/staff');await expect(a.p.locator('.workspace-breadcrumbs a')).toHaveAttribute('href','/dashboard/admin/staff');checks.push('Staff → Manage → workload settings → Save preserves the selected agent and keeps Staff active.');
  console.log('QA real staff actions and return paths passed');
  for(const locale of ['en','am','om','so','ti']){
   const t=locale==='en'?v=>v:createUiText(JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,'utf8')));

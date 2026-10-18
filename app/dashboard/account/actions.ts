@@ -9,11 +9,14 @@ import type {OwnerEditResult} from '@/lib/owner-edit-contract';
 
 export async function saveProfileAccountAction(form:FormData):Promise<OwnerEditResult>{
   const actor=await requireUser({allowTemporaryPassword:true});
-  if([...form.keys()].some(k=>!['name','accountPhone'].includes(k)&&!k.startsWith('$ACTION_')))return {error:'Unsupported fields.'};
+  if([...form.keys()].some(k=>!['name','accountPhone','returnTo'].includes(k)&&!k.startsWith('$ACTION_'))||form.has('returnTo')&&!['account','profile'].includes(String(form.get('returnTo'))))return {error:'Unsupported fields.'};
   try{await saveAccountProfile(accountContactPort,actor,{name:form.get('name'),phone:form.get('accountPhone')});}
-  catch(error){return {error:error instanceof Error?error.message:'Please try again.'};}
+  catch(error){
+    const expected=new Set(['Enter your name, up to 80 characters.','Enter a valid account phone with its country code.','Enter your account phone with + and its country code.','Sign in to update your account contacts.','Your account was not found.']);
+    return {error:error instanceof Error&&expected.has(error.message)?error.message:'Unable to connect. Please try again.'};
+  }
   revalidatePath('/dashboard/account');revalidatePath('/dashboard/profile');
-  redirect('/dashboard/profile?saved=account');
+  redirect(form.get('returnTo')==='account'?'/dashboard/account?contact=saved':'/dashboard/profile?saved=account');
 }
 
 export async function saveAccountPhoneAction(form: FormData) {

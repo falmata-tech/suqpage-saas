@@ -1,14 +1,43 @@
 ---
 id: FE-047
 title: Five-field offering editor
-status: done
-related: [FE-050, FE-048, FE-041, BE-040, DEP-037]
+status: in_progress
+related: [FE-050, FE-048, FE-041, BE-040, DEP-037, FE-067, FE-026, FE-053, FE-056, BE-032]
 owners: [product, backend, operations]
-last_updated: 2026-09-21
+last_updated: 2026-10-17
 change_level: L2
 ---
 
 # FE-047 — Five-field offering editor
+
+## S122 — complete owner product upkeep parity (implemented locally; review pending)
+
+The broader workspace audit confirms web owners cannot change availability or
+listed/hidden status while the current native owner API and UI already support
+both through `updateListingState`. This supersedes the earlier five-input-only
+restriction for these two existing owner controls, not staff-only categories,
+options, service notes or other saved metadata. Use existing product-only supply
+types, availability and visibility labels; keep the simple content editor.
+
+GIVEN an owner explicitly changes availability/listed status in the focused web
+editor WHEN the existing tenant/version/idempotency-fenced save succeeds THEN
+persist those two fields using the existing server command flag, preserve every
+unsubmitted staff metadata value and return to the bounded Products origin.
+Legacy callers omitting the controls retain the prior preserve-metadata behavior.
+Foreign, stale and revoked writes remain denied. No new API/schema/provider.
+
+GIVEN Add/Edit THEN offer explicit Save/Cancel and unsaved Keep/Discard; validation,
+network and version failures retain input, and pending duplicate submits are
+blocked. Unknown errors must not expose internal database/provider text. Native
+parity and safe app exits are FE-053/FE-056; task/list navigation is FE-026.
+Add focused component/action and real PostgreSQL preservation/security tests;
+actual desktop/phone/Expo read/edit/cancel/recovery precedes visual/full gates.
+
+S122 local verification: scripts/test-product-edit-action.ts, scripts/test-product-editor-workflow.ts, scripts/test-product-upkeep.ts and actual private-QA create/edit/readback/recovery pass. Current source, protected
+readback and scoped harness failures are recorded in TRACEABILITY.md and
+`.local/workspace-audit-s122/`. Both typechecks, localization and spec validation
+pass. Visual approval, full/release/acceptance gates, commit and rollout remain
+pending; this is not physical Android or complete-application certification.
 
 ## Problem, scope and contracts
 

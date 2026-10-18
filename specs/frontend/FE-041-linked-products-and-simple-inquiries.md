@@ -2,13 +2,231 @@
 id: FE-041
 title: Linked product pages and simple single or grouped inquiries
 status: in_progress
-related: [FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042, FE-049]
+related: [FE-066, FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042, FE-049, FE-053, BE-044]
 owners: [product, frontend, security]
-last_updated: 2026-09-23
+last_updated: 2026-10-17
 change_level: L2
 ---
 
 # FE-041 — Linked products, simpler inquiries and search beside the map
+
+## S131 — optional, visible showroom collections (ready)
+
+Here “collection” means the merchant's existing product categories, not the
+retained legacy collection tables or global Market business industries. This L2
+cross-platform presentation/projection change keeps category creation and product
+assignment permissions unchanged. FE-053 and BE-044 govern additive native wire
+parity; FE-066 and S129/S118 keep details, Add and per-business lists authoritative.
+
+1. GIVEN active tenant-local categories containing visible products WHEN the
+   showroom grid opens THEN show a styled, wrapping single-select chip group
+   labelled Product category: All and literal merchant category names with product
+   counts. Use the current showroom accent, a clear selected state, keyboard/
+   screen-reader selection and at least48px hit areas. Long names wrap without
+   clipping; no horizontal-only hidden choices or oversized modal is required.
+2. GIVEN a category and search text WHEN either changes THEN apply both criteria
+   to the same canonical visible products. Counts describe the category's visible
+   catalog membership, not a server request or inventory quantity. All resets
+   only category selection; clearing search preserves the category. Details/Back
+   and Add preserve the current selection and inquiry list. If a refreshed catalog
+   removes the selected category, fall back to All rather than an empty stale ID.
+   Actual-Chrome defect refinement, Ready before correction: Expo remounts the
+   showroom on details→Back, so component-only query/category state is insufficient.
+   Retain bounded public search/category return criteria in app memory, scoped
+   by canonical API origin and business ID, at most32 businesses with two-hour
+   expiry. Save no product/catalog snapshot, private preview, customer content,
+   identity or credentials. Apply matching criteria atomically on business
+   changes and validate category IDs against the latest visible category set.
+   Use the existing bounded public-search text limit for cacheable query input;
+   never replay a different shop's state or overwrite a restored state during
+   the initial mount effect. Regress actual remount, A/B isolation, private
+   preview exclusion, expiry/eviction, stale category removal and details/Back.
+3. GIVEN a visible product belongs to a currently active category in that same
+   catalog THEN show its literal category name as a small, readable card label.
+   Unassigned, inactive and foreign category IDs do not invent an affiliation.
+   Categories with no visible products do not become empty browsing choices.
+4. GIVEN a showroom has no usable categories THEN show its ordinary search and
+   flat product grid, with no category requirement, blank selector or fabricated
+   collection. Signup, saving, publication, product management and old app clients
+   remain compatible; do not make categories compulsory or revive legacy groups.
+5. GIVEN native public/private preview projections THEN add only optional typed
+   category list/identity fields derived from the existing scoped Catalog. Never
+   trust a hydrated name from an inactive/foreign category, infer from Market rows,
+   expose private products through counts, or fetch once per card. No schema,
+   new endpoint, dependency, new permission or provider is needed.
+
+Ready: user intent, users/non-goals, optionality, active tenant authority, backward
+compatibility, counts/filter semantics, accessibility and five-language reuse are
+explicit. Master §§7/8/18/19 are affected. Reuse translated All/Product category
+and existing result labels; merchant names are never machine-translated. Plan:
+record baseline → additive projection + styled web/native chips/affiliation →
+focused canonical/filter/optional tests → actual Chrome real catalog journeys
+and separately labelled fixture edge cases → visual approval → inherited full,
+commit and separately authorized rollout gates. UI rollback leaves category data
+and saved inquiry lists untouched. No owner editor expansion is included.
+
+Test mapping: actual-source web/native card tests cover search intersection,
+counts, empty/inactive/foreign/unassigned categories, deletion refresh, literal
+names, selection, accessible48px targets and unchanged Add/details. Projection
+tests cover canonical tenant category identity and backward-compatible omission.
+Actual Chrome covers desktop/phone web and Expo390/320/landscape, enabled en/am/om
+under the later FE-049 S132 direction, category→search→Add→details→Back and a
+flat-grid shop. Retained inactive catalogs remain separately validated. No catalog or
+account writes are necessary. Response-only fixtures are recorded separately
+from real API/database evidence. S128–S130 and earlier unfinished tasks remain.
+
+## S129 — add from native showroom cards (local implementation; review pending)
+
+The owner requests parity with the existing web showroom grid: see a short
+product description and add to the inquiry list without first visiting details.
+This changes shared native/Expo showroom cards, not Market search cards, checkout,
+external contacts or transport. FE-053 governs native parity; FE-066 and the S118
+canonical, per-business persistence and maximum20 rules remain authoritative.
+
+1. GIVEN a visible published product in a native showroom WHEN its card renders
+   in a narrow public or private-preview container THEN size the grid from that
+   container's measured width, including its12px gap. Use two columns only when
+   both cards fit at least150px; otherwise use one full-width card. Enlarged text
+   keeps the existing full-width fallback. A card must not remain half-width on
+   its own row with an empty right half. This refinement is Ready before correction
+   after the actual320px private-preview screenshot proved percentage widths plus
+   the fixed gap wrap every card. Regress narrow private/public measured containers
+   and retain description/Add/stock/preview semantics.
+   Show name, up to two description lines, supply state, existing price and
+   separate details and48px Add to inquiry list actions. Details retains full
+   description/media. Use the business's current accent and existing labels in
+   all five languages; long labels wrap, no nested interactive controls or overflow.
+   The existing web phone grid also retains its two-line excerpt instead of
+   hiding descriptions; its established Add/options route is otherwise unchanged.
+   Card accessibility action names use the same translated Add/Added wording as
+   their visible label, followed by the literal product name.
+2. GIVEN an eligible available/limited product with no required option choices
+   WHEN Add is pressed THEN add that canonical item once and remain on the grid.
+   Sole-value groups may use their canonical single value. The existing floating
+   current-business inquiry count updates; repeated activation cannot duplicate.
+   After an item is saved its card shows Added to inquiry list. Other businesses'
+   lists and direct-single inquiries remain unchanged, including after reload.
+3. GIVEN a product has multiple size/color/etc values WHEN Add is pressed THEN
+   open the existing bounded Sheet with its canonical option Chips and explicit
+   Add; no product-detail route or arbitrary variant default is required. Missing
+   or invalid choices cannot add. Cancel leaves lists unchanged; a successful Add
+   returns to the same grid. A maximum-list limit encountered inside the picker
+   shows its feedback inside that active picker, not hidden behind it.
+   Options remain literal merchant text. Empty/invalid
+   option groups cannot enter a saved list.
+4. GIVEN unavailable/coming-soon, unpublished/retired, preview-only or not-yet-
+   loaded selection state WHEN cards are used THEN do not create selections.
+   Show stock/disabled state honestly, retain preview details, and preserve the
+   existing storage-error/retry feedback. Revalidate current public product,
+   options, duplicates and maximum20 at the action boundary before mutation.
+5. Verify actual-source component behavior and existing storage/availability
+   regressions. In installed Chrome compare web desktop/phone and Expo390/320/844,
+   including all five language labels, real public catalog reads, inline Add→count
+   →list→Back/reload, details, required options where real data supplies them,
+   availability, per-business isolation and an unobstructed floating dock. Record
+   controlled fixtures separately; no catalog/account/customer/backend writes or
+   real social messages. Expo Chrome is not installed Android/OS verification.
+
+Ready: scope, users, option interaction, stock/canonical/tenant/privacy invariants,
+existing storage/UI/provider ports, localization, targeted tests and rollback are
+explicit. Master §§8/18/19 are affected. Plan: record baseline → small native card/
+option-sheet change → focused tests and real Chrome journeys → concrete visual
+review → existing approval/full/commit/rollout gates. No dependency/API/schema
+change; reverting only UI restores detail-first cards and preserves saved lists.
+S128 and earlier workspace/chat/map reviews remain pending, not replaced.
+
+S129 focused test mapping:
+
+| Acceptance | Evidence |
+| --- | --- |
+| 1: native excerpt, separate target, accent/wrapping and translated names | `scripts/test-native-showroom-cards.ts` actual source/native presentation ports |
+| 1: web phone excerpt, long/empty text and translated Add/Added accessibility | `scripts/test-showroom-card-excerpt.ts` actual React renderer/compiled CSS, controlled catalog/callback ports at320/390/844/1440 |
+| 2–4: no-options/sole/multiple choices, stock, preview, hydration, duplicate/cap and storage failure | `scripts/test-native-showroom-cards.ts`, `scripts/test-business-inquiry-baskets.ts` actual canonical store with controlled storage |
+| 2–4: unchanged handoff/dock/public eligibility | `scripts/test-contact-handoff-native-ui.ts`, `scripts/test-mobile-public-action-dock.ts`, `scripts/test-product-only-native-ui.ts` |
+| 5: real catalog Add/list/details/reload and public/preview safety | Installed Chrome evidence under `.local/product-cards-s129/`, recorded in traceability; response-only option fixtures labelled separately |
+
+Both new focused scripts are registered in the existing `test:workflow-ui` gate.
+S131 adds `test-showroom-category-projection.ts`, `test-showroom-categories-web.ts`
+and `test-showroom-return-state.ts`; the extended native card suite regresses
+actual component remount, public/preview and business/origin isolation. The later
+FE-049 S132 direction limits new visible-language review to en/am/om while
+preserving the four non-English compatibility catalogs.
+Actual visual approval, full gates and rollout remain separate. Native/controlled
+component evidence does not establish installed Android or OS storage/handoffs.
+
+## S118 — separate saved lists inside each business (ready)
+
+The latest owner correction supersedes S113's global last-business list launcher
+and native single-basket restriction. L1 web UI/L2 native local persistence; existing
+canonical product/options authority and maximum20 selections per business remain.
+FE-066 governs external contact, FE-053 native parity and DEP-045 demo safety.
+
+- GIVEN business A has two selections and B has one WHEN each showroom or its
+  product detail is opened THEN a reachable floating action shows respectively2
+  or1, opens only that business's list and does not merge/clear the other list.
+  Empty shops show no inquiry action. Never show a last-business fallback on
+  Market/Featured/About/account or inside another empty showroom. Transport keeps
+  its appropriate separate place and neither action obscures content/navigation.
+- GIVEN a visitor adds/removes/changes/clears A's list THEN B remains unchanged,
+  including after navigation and local app/browser restart. Persist only bounded
+  canonical item IDs, option selections and optional quantity, scoped by business
+  and runtime environment; no cached catalog snapshots or customer/private data.
+  Use existing local storage capabilities, no package/provider/database addition.
+- GIVEN retained local data WHEN a page/list loads THEN rehydrate from that
+  business's fresh public catalog; prune unavailable/removed/foreign products,
+  invalid options and duplicates before count or handoff. Loading must not save
+  an empty default over an unread list. A late read/write from A cannot change B.
+- GIVEN storage is malformed, denied or fails WHEN browsing THEN fail safely,
+  preserve current in-memory selections and show concise honest recovery feedback;
+  do not claim durable saving. Keep failed-write state retryable, do not corrupt
+  another business's file/key or interfere with account credentials/logout.
+- GIVEN direct inquiry about one product WHEN opened THEN only that product is
+  prepared; it does not add to, replace, remove or substitute any stored list.
+  All selections are canonical and no action creates a Suqpage business inbox row.
+
+Ready: audiences, persistence scope/failure/privacy, existing file/browser storage,
+product authority, route targets and testing are known. Reuse current native
+storage dependencies; avoid SecureStore for large nonsecret public selection
+lists. Web's existing per-handle lists must remain compatible. Native existing
+in-session selections must not be silently lost during the transition. Test pure
+store races/failures plus actual components and local paired-A/B navigation/
+restart/count/direct-inquiry behavior. Capture desktop/phone/Expo and five-language
+labels before inherited visual/full gates; current Android binary is separate.
+
+### S118 local verification — visual approval pending
+
+The implemented dock exposes the current business's saved count only on its
+showroom/product screens. Existing web per-handle storage remains compatible;
+native/Expo lists persist separately by canonical API origin and business ID.
+Only bounded product references, options and quantities are stored. Fresh catalog
+rehydration and independent direct-product inquiry preserve canonical authority.
+
+Mapped focused regressions are `scripts/test-business-inquiry-baskets.ts`,
+`test-floating-inquiry-web.ts`, `test-mobile-public-action-dock.ts`,
+`test-product-only-native-ui.ts` and `test-public-transport-launcher.ts`. They cover
+A/B isolation, reload, unavailable/foreign selections, initial-read/add races,
+late reads, serialized writes, denied reads, failed-write retry, bounded UTF-8
+storage and direct-single isolation. Native filesystem checks use actual temporary
+Node files through SDK-shaped ports; they do not establish installed Android
+filesystem behavior. The shared S118 focused set passed 92 cases; after the narrow
+supported-pointer-events correction, 26 relevant cases passed again. Final web
+and native typechecks passed; the repeated cases are not additional unique tests.
+
+Actual anonymous local web 1440/390 and Expo 390 journeys passed all three surfaces
+with six screenshots, including an Amharic composer:
+`.local/business-inquiry-s118/actual/attempt-2/outcome.json`. A's two selections and
+B's one survived switching and reload; Market/Featured showed no inquiry action
+while retaining transport, and direct inquiry left both lists unchanged. Fresh
+public catalog GETs supplied authority. Clipboard/openers were isolated; no
+external message, SMS protocol launch or application mutation occurred. Eleven
+source hashes stayed stable and no runtime, console or API error occurred.
+
+The raw receipt retains 31 navigation-cancelled analytics POST records. The
+companion `expected-network-verified.json` verifies that all are intercepted
+`/api/analytics/visit` POSTs, never forwarded; no public API GET failed and no
+unexpected request failed. The first strict-failure receipt remains unchanged.
+This is local implementation/test evidence, not visual approval, full/release
+gate completion, an installed Android test, a new binary or deployment.
 
 ## Current release evidence — 2026-09-14
 
@@ -244,3 +462,75 @@ candidate. Owners add/remove/reorder up to eight photos and four YouTube links.
 The linked product view uses thumbnails, arrows and horizontal scrolling; an
 explicit play action starts the selected video. Save/reload retains the order
 and existing records expand without backfill. DEP-039 gates hosted rollout.
+
+
+## S105 social-contact revision
+
+FE-066 / BE-055 supersede new customer messages to business inboxes. Only
+configured social accounts receive visitor handoffs; chosen products and the
+simple message follow the active UI language. Retained private history stays
+scoped. Public transport chat and authenticated owner support remain unchanged.
+Local implementation and review evidence are tracked in checklist S105.
+
+
+## S113 floating saved inquiry list — ready, local implementation in progress
+
+Historical S113 decisions below are superseded by S118 for global visibility and
+native single-business/session-only storage. Current contract is the S118 section
+above: a persistent independent list per business, floating only in its own
+showroom/product context. Retain S113 direct-product, authority and transport
+regressions that do not conflict with this explicit owner correction.
+
+The owner requests persistent, compact access to selections across desktop web,
+phone web and the native app, coordinated with transport chat. FE-066 supersedes
+I3/I4 platform-send behavior above; configured social handoffs and manual copy stay.
+
+- GIVEN no saved selection WHEN browsing THEN no empty floating inquiry action
+  appears. Direct product inquiry opens only that product and never creates a list.
+- GIVEN one or more eligible saved selections WHEN browsing a public screen THEN
+  show a labeled floating Inquiry list action with the saved selection count.
+  Duplicate selections do not increment it; removal/clear updates it immediately.
+  The action opens the existing list composer, without another intermediate screen.
+- GIVEN a saved web list WHEN navigating to another supported public page THEN
+  retain its navigation-session count and link to its original showroom. Opening
+  it restores canonical current selections before composing; an empty other shop
+  never relabels or deletes that group. Same-handle hard reload retains existing
+  per-handle storage; global-summary hard-reload persistence is not introduced.
+- GIVEN a direct product composer and a separate saved list WHEN changing quantity,
+  copying or closing the direct inquiry THEN the saved group/count remains intact.
+  Modal background actions are inert; the native direct screen may navigate to the
+  separately identified saved group. Hide redundant list access on its own composer.
+- GIVEN a different web showroom WHEN its local saved references are restoring
+  THEN no previous-shop selection/count/contact action is exposed as the new shop.
+  Canonical current products/options remain authority. Web persistence stays
+  per-handle; native selection lifetime stays navigation-session only. Native
+  cross-shop access opens the saved basket's business, never the current other shop.
+- GIVEN preview/private/account screens THEN no new public floating commerce action
+  appears. Preserve existing preview simulation, tenant guards and social handoffs.
+- GIVEN a supported phone, short viewport or interface language WHEN the dock is
+  visible THEN both actions have readable labels, at least 48px targets, visible
+  focus/count and safe-area/bottom-navigation clearance, without covering map
+  handles or final page actions. Inquiry sits above Transport chat in one stack;
+  short Market stages use one centered row, with a recognizable list icon/count
+  and the full accessible list name beside the visibly labeled Transport chat.
+
+GIVEN a public URL for showroom A changes while B is still mounted WHEN the
+open-list command arrives THEN B cannot consume it or compose B’s group; A must
+mount and restore its own canonical references first. Modal close restores a
+connected focusable opener, or a visible current list/catalog control after
+navigation or clearing the final item.
+
+Ready: UI-only, existing cart/basket and transport ports suffice; no API, schema,
+provider, dependency, durable native storage or release change. Related FE-036,
+FE-049, FE-053, FE-066 apply. Master §§8–9,13,18–19 and local reachability statement
+are affected. Ordered checklist S113 governs implementation. Focused actual React
+regressions and local desktop/phone/Expo five-language captures precede visual
+approval/full gates. Rollback restores UI with saved data unchanged.
+
+S113 focused evidence: six actual web-component scenarios in
+`scripts/test-floating-inquiry-web.ts`, native dock/Market/root tests and existing
+selection/clipboard contracts pass; 105 current local web/Expo states across five
+languages are indexed by `.local/floating-actions-s113/combined-verified.json`.
+Review is `review.html` there. Focused runs preserve original failures and targeted
+fix retests. Visual approval/full gates/commit/release and Android-device checks
+remain pending; no new contact submission or external send occurred.

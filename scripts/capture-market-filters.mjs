@@ -2,6 +2,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { chromium, expect } from '@playwright/test';
 
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
 const base = process.env.SUQPAGE_TEST_BASE_URL || 'http://127.0.0.1:3102';
 assert.ok(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
 const dir = '.local/market-filters-review';
@@ -30,9 +36,10 @@ async function settleMedia(page) {
 
 try {
   for (const width of [320, 390, 1440]) for (const locale of ['en', 'am', 'om', 'so', 'ti']) {
-    const context = await browser.newContext({ viewport: { width, height: 844 }, reducedMotion: 'reduce' });
+    const context = await browser.newContext({serviceWorkers: 'block', viewport: { width, height: 844 }, reducedMotion: 'reduce' });
     await context.addCookies([{ name: 'suqpage-language', value: locale, url: base }]);
     const page = await context.newPage();
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`${base}/?view=search`, { waitUntil: 'domcontentloaded' });
@@ -99,7 +106,7 @@ try {
     await expect(businesses).not.toBeChecked();
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     assert.deepEqual(errors, []);
-    evidence.push({ width, locale, filters: true, pagination: true, history: true });
+    evidence.push({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false, width, locale, filters: true, pagination: true, history: true });
     console.log(`PASS ${width}px ${locale}: type filters, paging and history`);
     if (locale === 'en' && width !== 320) {
       await page.goto(`${base}/about`, { waitUntil: 'domcontentloaded' });
@@ -110,8 +117,9 @@ try {
     await context.close();
   }
   // Scope is retained on a type change, including a query that has no matches.
-  const context = await browser.newContext({ viewport: { width: 844, height: 390 }, reducedMotion: 'reduce' });
+  const context = await browser.newContext({serviceWorkers: 'block', viewport: { width: 844, height: 390 }, reducedMotion: 'reduce' });
   const page = await context.newPage();
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
   await page.goto(`${base}/?view=search&industry=beauty-wellness&q=lotion`, { waitUntil: 'domcontentloaded' });
   const panel = page.locator('#discovery-search-panel');
   const place = panel.locator('select');
@@ -135,8 +143,9 @@ try {
   }
   await settleMedia(page);
   await page.screenshot({ path: `${dir}/landscape.png` });
-  evidence.push({ width: 844, height: 390, scopePreserved: true, resultsReachable: true });
+  evidence.push({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false, width: 844, height: 390, scopePreserved: true, resultsReachable: true });
   await context.close();
   fs.writeFileSync(`${dir}/verified.json`, JSON.stringify(evidence, null, 2));
   console.log('PASS: 15 locale/viewport combinations plus landscape; types, server pagination, history, filter reachability and scope.');
-} finally { await browser.close(); }
+} finally { await browser.close();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests(); }

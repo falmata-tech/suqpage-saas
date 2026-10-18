@@ -1,10 +1,10 @@
 ---
 id: FE-048
 title: Self-service owner workspace
-status: done
-related: [BE-041, DEP-038, FE-047, FE-042]
+status: in_progress
+related: [BE-041, DEP-038, FE-047, FE-042, FE-021]
 owners: [product, backend, operations]
-last_updated: 2026-09-21
+last_updated: 2026-10-17
 change_level: L3
 ---
 
@@ -49,10 +49,15 @@ while public map/search stay responsive and predictable on phones.
 - Search keeps all-word matching, Unicode/literal correctness, accurate backend
   paging and private-content exclusion. Remove unnecessary count-query sorting/
   hydration and measure representative data before expanding infrastructure.
-- Map cluster clicks zoom forward; individual selection centers without zooming
-  back out and opens the selected business. Pagination keeps map position. Test
-  same-location groups, result/map navigation, keyboard use, mobile overflow and
-  filter controls. Keep attribution and bounded map fallback.
+- FE-021 S127 controls screen-sized fixed nearby groups: up to6 desktop/3 phone,
+  reduced for available height/font scale. All current eligible members appear
+  together without list scrolling or Next/Previous. Only isolated businesses
+  retain shop icons; forced capacity1/odd-capacity2 singletons remain counted
+  circles. Outer clusters merge on zoom-out and click to zoom in; final groups stop
+  splitting and open the all-fit modal only at maximum18/native raw17. Screen-capacity/data changes may rebuild them.
+  Bounded badge spacing adds no connecting lines. Current-row validation and
+  preview/Back/full-page return retain valid group/camera/focus. Prior global3/
+  leader/paged receipts are superseded; current visual/full/release gates stay open.
 
 ## Scenarios and test plan
 
@@ -68,9 +73,10 @@ while public map/search stay responsive and predictable on phones.
    are absent, live support/security/inquiries remain accessible and scoped.
 5. GIVEN admitted demos WHEN corrected THEN simpler fields and descriptions are
    complete, IDs/media/inquiries/non-demo data remain, and fresh seeds agree.
-6. GIVEN paginated mixed-language search/map interactions WHEN typing, filtering,
-   paging and selecting markers THEN results stay scoped/bounded, clusters expand,
-   selected pages match and no map reset/overflow occurs.
+6. GIVEN mixed-language search/map interactions WHEN typing, filtering, paging
+   and selecting markers THEN current eligible results stay scoped/bounded,
+   counted circles zoom in until maximum18, then final groups open all cards together, the selected page/focus returns
+   after preview or full-business navigation, and no map reset/overflow occurs.
 
 Focused integration: scripts/test-self-service-publication.ts, existing owner-page,
 place, product upkeep and discovery/pagination regressions. Browser captures cover
@@ -95,10 +101,14 @@ City/general-area shops use stable business-ID-based display offsets within 1.5 
 of their public city anchor, so identical default coordinates do not share one
 point. Exact storefront and unclassified legacy positions are unchanged. Offsets
 never replace saved city/GPS coordinates or imply street addresses. Search/filter/
-pagination do not change an individual shop's offset. General-area shops use zoom
-clustering rather than the exact-location Nearby group at detailed zoom, revealing
-separate shop markers. Mark these positions as approximate. Tests cover distinct
-same-city points, bounded distance, stable filtered subsets and untouched GPS.
+pagination do not change an individual shop's offset. Apply the display offset
+once before FE-021 S127 screen-sized fixed grouping. Dense display points remain
+counted groups through normalized zoom18/native raw17. Only points with no other
+eligible shop within3km become individual markers; forced one-card partitions
+stay numbered circles. Screen-admitted final groups never rewrite source
+coordinates or use the retained legacy six-member/800-meter payload as visual
+authority. Mark area positions as approximate. Tests cover distinct same-city
+points, bounded display offset, stable filtered subsets and untouched GPS.
 
 ## Focused local evidence — 2026-09-20
 

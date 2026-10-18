@@ -2,13 +2,62 @@
 id: FE-062
 title: Inquiry and chat alerts with truthful read receipts
 status: in_progress
-related: [BE-050, DEP-043, ADR-0026, FE-019, FE-026, FE-049, FE-053]
+related: [FE-069, FE-066, BE-050, DEP-043, ADR-0026, FE-019, FE-026, FE-049, FE-053, FE-068]
 owners: [frontend, customer-support]
-last_updated: 2026-10-07
+last_updated: 2026-10-17
 change_level: L3
 ---
 
 # FE-062 — Inquiry and chat alerts with truthful read receipts
+
+S142 FE-019 compact staff workspace adds an explicit phone Details view. Its chat
+DOM/draft may remain mounted but hidden; read observers must be inactive in that
+mode. Merely switching Details→Conversation cannot acknowledge off-screen or
+unread messages without existing focus/visibility/footer checks. Assignment,
+join, notifications, read epochs and deadline/idle semantics do not change.
+
+## S125 — customer Join alerts and private overdue attention (ready)
+
+Assignment/reassignment alerts remain internal staff attention. Customer web and
+native feeds never announce an agent until the assigned staff member explicitly
+clicks Join chat; viewing/reading/Claim is insufficient. Old queued assignment
+alerts are suppressed for customers. Joined alerts remain idempotent per current
+assignment and obey existing privacy/permission/mute/subscription behavior.
+
+Staff receives localized generic reply_overdue attention once per unanswered
+cycle under BE-018/050, without customer details in OS copy. Render localized
+Needs staff reply, Overdue, Waiting for customer and Join chat on staff screens;
+customer wording is Waiting for our team / Waiting for your reply / joined /
+Chat ended / Resolved. All five supported languages use understandable phrasing.
+Focused catalog/component/security tests and real Chrome/Expo tasks precede
+visual approval; OS push and hosted rollout are not implied by browser evidence.
+
+## S119 — visible footers and authoritative receipt epochs (ready)
+
+BE-050 S119 controls sender-side authority and negative receipt permissions.
+GIVEN a focused transcript with several incoming replies WHEN an older footer is
+visible and the newest is offscreen THEN acknowledge the highest visible footer,
+not the newest fetched message. Respect the offset visual viewport, clipped
+scroll ancestors, modal coverage and fixed navigation. A hidden or unfocused
+window never acknowledges a message. Reassignment/reopen resets the staff
+observer using the saved assignment epoch, preserving visible-read accuracy.
+Reading no longer establishes a join; explicit acceptance follows S125.
+
+Focused regressions exercise actual observation code with controlled geometry,
+focus, async completion and assignment epochs; server regressions reject foreign,
+self, private-note and stale-assignee acknowledgements. Actual local browser
+verification remains distinct from these controlled ports and Android device
+proof. Master §§13,15,19,22 are affected; no full release or hosted write is part
+of this defect correction.
+
+Focused implementation evidence: `scripts/test-visible-chat-reads.ts` executes
+actual React observers with controlled viewport/lifecycle/measurement ports;
+`test-chat-read-receipts.ts` and `test-owner-transport.ts` exercise isolated real
+PostgreSQL authority, privacy, durable sender-side projection and additive66
+history preservation. The shared focused component set passes20/20 and both
+isolated persistence scripts pass. Web/native typechecks and the existing pure
+keyboard/viewport regression pass. S119's actual local Chrome evidence is
+recorded separately by the parent audit; no device or deployment claim follows.
 
 ## Problem and outcome
 
@@ -36,7 +85,7 @@ from server and preserve drafts. End chat releases capacity; hide preserves it.
 
 Sent/Read on outgoing messages uses confirmed BE-050 receipts only. Active, focused
 visible transcript content acknowledges its last seen message; hidden/background
-fetches do not. Show assigned agent separately from an actual first join; never
+fetches do not. Keep assignment internal and announce only explicit Join; never
 claim current online presence or a guaranteed response time. No typing animation.
 
 ## Scenarios
@@ -102,3 +151,12 @@ S93 regression: remove Keyboard.metrics entirely, rather than relying on a platf
 branch surviving development refresh. scripts/test-chat-read-viewport.ts and fresh
 capture-notification-workflows.mjs prove reply rendering/read bounds in web preview;
 mobile typecheck passes. Physical Android keyboard/OS push remains its device gate.
+
+
+## S105 social-contact revision
+
+FE-066 / BE-055 supersede new customer messages to business inboxes. Only
+configured social accounts receive visitor handoffs; chosen products and the
+simple message follow the active UI language. Retained private history stays
+scoped. Public transport chat and authenticated owner support remain unchanged.
+Local implementation and review evidence are tracked in checklist S105.

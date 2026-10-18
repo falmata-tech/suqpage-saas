@@ -11,6 +11,7 @@ import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtim
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import { parseOfferingHighlightsJson } from "./offering-presentation";
 import type { Product, SessionUser } from "./types";
+import { isPublicProduct } from "./offerings";
 
 type StoredCommand = {
   payload_hash: string;
@@ -144,6 +145,10 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
         ? await runtimeGet<Product & { highlights_json: string }>("SELECT * FROM products WHERE id=? AND business_id=?", [command.productId, command.businessId])
         : null;
       if (command.kind === "update" && !existing) throw new ProductUpkeepError("Product not found.", 404, "not_found");
+      if (command.preserveOfferingKind) {
+        if (!existing || !isPublicProduct(existing)) throw new ProductUpkeepError("Choose Ready to ship or Made to order for this product.", 400, "invalid_product_kind");
+        command = { ...command, offeringKind: existing.offering_kind };
+      }
       if (command.preserveMetadata) {
         // Resolve under the tenant/version lock; never trust a hidden browser snapshot.
         command = { ...command, optionGroups: undefined, isPublished: command.updateListingState ? command.isPublished : undefined,

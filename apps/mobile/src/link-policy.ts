@@ -27,8 +27,9 @@ export function planLink(input: string, appOrigin?: string): LinkPlan {
   if (!url.port && ["t.me", "telegram.me"].includes(url.hostname)) {
     const username = url.pathname.slice(1).replace(/\/$/, "");
     const reserved = ["share", "joinchat", "addstickers", "addemoji", "proxy", "socks", "login", "confirmphone", "setlanguage", "addtheme", "addstyle", "auction", "auth", "call", "nft", "web", "a", "k", "z", "invoice", "boost", "giftcode", "contact", "addlist", "m", "c", "s"];
-    if (/^[a-z][a-z0-9_]{4,31}$/i.test(username) && !reserved.includes(username.toLowerCase()) && [...url.searchParams.keys()].every(key => ["text", "profile"].includes(key))) {
-      const params = new URLSearchParams({ domain: username });
+    const phone = /^\+[1-9]\d{7,14}$/.test(username) ? username.slice(1) : null;
+    if ((phone || /^[a-z][a-z0-9_]{4,31}$/i.test(username) && !reserved.includes(username.toLowerCase())) && [...url.searchParams.keys()].every(key => ["text", "profile"].includes(key))) {
+      const params = new URLSearchParams(phone ? { phone } : { domain: username });
       if (url.searchParams.has("text")) params.set("text", url.searchParams.get("text")!);
       if (url.searchParams.has("profile")) params.set("profile", "");
       plan.appUrl = `tg://resolve?${params}`;

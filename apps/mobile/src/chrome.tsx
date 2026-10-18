@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {registerOverlay} from './overlay-visibility';
+import {registerOverlay,overlayIsOpen} from './overlay-visibility';
 import {useTransportUnread} from './use-transport-unread';
-import {TRANSPORT_COPY} from "../../../lib/i18n/transport-copy";
 import {
   View,
   Text,
@@ -13,9 +12,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { SvgXml } from "react-native-svg";
-import { useApp, languageNames, locales, API } from "./runtime";
+import { useApp, languageNames, enabledLocales, API } from "./runtime";
 import { Brand, Icon, colors, useOpenLink } from "./ui";
 import { categoryArt } from "./category-art";
+import {useOwnerNavigation} from './owner-edit-navigation';
+import {TRANSPORT_COPY} from '../../../lib/i18n/transport-copy';
 export function CategoryArt({
   name,
   size = 32,
@@ -36,11 +37,13 @@ export function IconButton({
   icon,
   onPress,
   disabled = false,
+  touchSize = 44,
 }: {
   label: string;
   icon: string;
   onPress: () => void;
   disabled?: boolean;
+  touchSize?: number;
 }) {
   return (
     <Pressable
@@ -48,7 +51,7 @@ export function IconButton({
       accessibilityLabel={label}
       disabled={disabled}
       onPress={onPress}
-      style={[c.iconButton, disabled && { opacity: 0.35 }]}
+      style={[c.iconButton, {width:touchSize,height:touchSize}, disabled && { opacity: 0.35 }]}
     >
       <Icon name={icon} />
     </Pressable>
@@ -110,7 +113,7 @@ export function LanguageOptions() {
   const { locale, setLocale } = useApp();
   return (
     <View style={{ gap: 4 }}>
-      {locales.map((l) => (
+      {enabledLocales.map((l) => (
         <Pressable
           key={l}
           accessibilityRole="radio"
@@ -127,6 +130,7 @@ export function LanguageOptions() {
 }
 export function AppHeader({ back = false }: { back?: boolean }) {
   const { t, locale } = useApp();
+  const navigate=useOwnerNavigation();
   const [language, setLanguage] = useState(false);
   const { top } = useSafeAreaInsets();
   return (
@@ -136,10 +140,10 @@ export function AppHeader({ back = false }: { back?: boolean }) {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t("Back")}
-            onPress={() =>
+            onPress={() => navigate(() =>
               router.canGoBack() ? router.back() : router.replace("/")
-            }
-            style={{ padding: 8 }}
+            )}
+            style={{ minWidth:48,minHeight:48,alignItems:'center',justifyContent:'center' }}
           >
             <Icon name="back" size={21} />
           </Pressable>
@@ -218,19 +222,18 @@ export function BuyingLauncher({ compact = false }: { compact?: boolean }) {
   const unread=useTransportUnread();
   return (
     <Pressable
+      testID="public-transport-launcher"
       accessibilityRole="button"
-      accessibilityLabel={`${t(TRANSPORT_COPY.launcherTitle)} ${t(TRANSPORT_COPY.launcherSubtitle)}`}
-      onPress={() => router.push("/buying")}
-      style={[c.buying, compact && { padding: 12 }]}
+      accessibilityLabel={`${t(TRANSPORT_COPY.launcherTitle)} · ${t(TRANSPORT_COPY.launcherSubtitle)}`}
+      onPress={() => {if(!overlayIsOpen())router.push("/buying");}}
+      style={[c.buying, compact && { padding: 8 },unread>0&&{paddingRight:26}]}
     >
-      <Icon name="chat" color="white" size={22} />
+      <Icon name="chat" color="white" size={compact?18:20} />
       {unread>0&&<Text accessibilityElementsHidden style={{position:'absolute',right:4,top:3,backgroundColor:'white',color:colors.brand,borderRadius:12,minWidth:20,paddingHorizontal:5,fontSize:12,fontWeight:'700',textAlign:'center'}}>{unread>99?'99+':unread}</Text>}
-      {!compact && (
-        <View style={{ flexShrink: 1, minWidth: 0, gap: 2 }}>
-          <Text style={c.buyingText}>{t(TRANSPORT_COPY.launcherTitle)}</Text>
-          <Text style={c.buyingSmall}>{t(TRANSPORT_COPY.launcherSubtitle)}</Text>
-        </View>
-      )}
+      <View style={{flex:1,minWidth:0,gap:3}}>
+        <Text style={[c.buyingText,{lineHeight:17},compact&&{fontSize:12}]}>{t(TRANSPORT_COPY.launcherTitle)}</Text>
+        <Text style={[c.buyingSmall,{lineHeight:16}]}>{t(TRANSPORT_COPY.launcherSubtitle)}</Text>
+      </View>
     </Pressable>
   );
 }
@@ -253,7 +256,7 @@ export const c = StyleSheet.create({
     borderColor: colors.line,
     borderRadius: 6,
     maxWidth: 126,
-    minHeight: 40,
+    minHeight: 48,
   },
   iconButton: {
     width: 44,
@@ -307,6 +310,8 @@ export const c = StyleSheet.create({
   },
   buying: {
     maxWidth: 280,
+    minWidth: 48,
+    minHeight: 48,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,

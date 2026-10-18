@@ -2,7 +2,7 @@
 id: BE-001
 title: Tenant-scoped canonical inquiry workflow
 status: done
-related: [FE-052, FE-041, FE-001, DEP-001, BE-009, BE-011, BE-014, BE-017, BE-033, BE-050]
+related: [BE-055, FE-052, FE-041, FE-001, DEP-001, BE-009, BE-011, BE-014, BE-017, BE-033, BE-050]
 owners: [backend, security]
 last_updated: 2026-08-01
 change_level: L2
@@ -104,3 +104,12 @@ Call and SMS; email remains available for retained email inquiries. Opening a
 contact link does not imply message delivery. Local regression evidence is in
 `scripts/test-launch-clarity.ts` and `scripts/test-workflow-wiring-audit.ts`;
 publication remains pending FE-052 visual/release gates.
+
+
+## S105 social-contact revision
+
+FE-066 / BE-055 supersede new customer messages to business inboxes. Only
+configured social accounts receive visitor handoffs; chosen products and the
+simple message follow the active UI language. Retained private history stays
+scoped. Public transport chat and authenticated owner support remain unchanged.
+Local implementation and review evidence are tracked in checklist S105.

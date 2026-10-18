@@ -1,13 +1,17 @@
-import React, { useState, useMemo } from "react";
-import { View } from "react-native";
+import {copyBrowserText,openCopiedBrowserLink} from "../../../lib/browser-clipboard";
+import React, { useState, useMemo, useEffect } from "react";
+import { View, Platform } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import * as Clipboard from "expo-clipboard";
-import * as Crypto from "expo-crypto";
+import { buildSocialInquiryMessage, inquiryHandoffs,selectionKey } from "../../../lib/product-inquiry";
+import {canOpenPublicContact} from '../../../lib/demo-inquiry-policy';
 import type { Shop } from "@suqpage/contracts";
 import { inquiryOptions } from "../src/inquiry-options";
 import { useApp, useLoad, request, API, type BasketItem } from "../src/runtime";
 import {useBlockedBusinesses} from '../src/blocked-businesses';
 import {CatalogSafety} from '../src/CatalogSafety';
+import {inquiryCatalogProduct,restoreCatalogSelections} from '../src/catalog-products';
+import {useBusinessInquiry} from '../src/use-business-inquiry';
 import {
   Screen,
   Copy,
@@ -25,47 +29,54 @@ export default function Inquiry() {
       id?: string;
       options?: string;
     }>(),
-    { t, basket, setBasket } = useApp();
+    { t } = useApp();
+  const targetHandle=handle;
   const load = useLoad(
     async () =>
-      handle
-        ? request<Shop>("shops/" + encodeURIComponent(handle))
-        : basket?.shop || null,
-    [handle, basket?.shop.id],
+      targetHandle
+        ? request<Shop>("shops/" + encodeURIComponent(targetHandle))
+        : null,
+    [targetHandle],
   );
-  const [name, setName] = useState(""),
-    [phone, setPhone] = useState(""),
-    [note, setNote] = useState(""),
-    [onPlatform, setPlatform] = useState(false),
+  const [note, setNote] = useState(""),
+    [showNote, setShowNote] = useState(false),
     [error, setError] = useState(""),
-    [sent, setSent] = useState(false),
-    [busy, setBusy] = useState(false),
-    [key] = useState(() => Crypto.randomUUID());
-  const shop = load.data;
+    [copyFeedback, setCopyFeedback] = useState(""),
+    [busy, setBusy] = useState(false);
+  const shop = load.loading||load.error?null:load.data;
+  const inquiry=useBusinessInquiry(shop);
   const items = useMemo<BasketItem[]>(() => {
     if (id) {
-      const p = shop?.products.find((p) => p.id === Number(id));
+      const p = shop?.products.find((p) => p.id === Number(id)&&inquiryCatalogProduct(p));
       const parsed = inquiryOptions(options);
-      return p ? [{ product: p, quantity: "", options: parsed }] : [];
+      return shop&&p ? restoreCatalogSelections(shop,[{ product: p, quantity: "", options: parsed }]) : [];
     }
-    return basket?.items || [];
-  }, [id, shop, options, basket]);
-  const summary = shop
-    ? [
-        `Hello ${shop.name},`,
-        ...items.map(
-          (i) =>
-            `${i.product.name}${i.quantity ? " · " + i.quantity : ""}${Object.entries(
-              i.options,
-            )
-              .map(([k, v]) => ` · ${k}: ${v}`)
-              .join("")}\n${API}/@${shop.handle}?product=${i.product.id}`,
-        ),
-        note,
-      ]
-        .filter(Boolean)
-        .join("\n\n")
-    : "";
+    return inquiry.items;
+  }, [id, shop, options, inquiry.items]);
+  const summary = shop ? [buildSocialInquiryMessage(shop, items.map(item => ({
+    id: item.product.id, name: item.product.name, quantity: item.quantity,
+    options: item.options, service: item.product.kind === "service",
+  })), API, t), note.trim()].filter(Boolean).join("\n\n") : "";
+  const handoffs = shop ? inquiryHandoffs(shop.contacts, summary) : [];
+  async function copyMessage() {
+    try {
+      return Platform.OS === "web" ? await copyBrowserText(summary) : await Clipboard.setStringAsync(summary);
+    } catch { return false; }
+  }
+  const [fallback, setFallback] = useState<{href:string;label:string} | null>(null);
+  useEffect(() => { setError(""); setCopyFeedback(""); setFallback(null); }, [summary]);
+  async function handoff(link: ReturnType<typeof inquiryHandoffs>[number]) {
+    if (!shop || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, link.kind)) return;
+    setFallback(null);
+    let copied: boolean, opened: boolean;
+    if (Platform.OS === "web") ({copied,opened} = await openCopiedBrowserLink(summary,link.href,link.external));
+    else {
+      copied = await copyMessage();
+      try { await openLink(link.href); opened=true; } catch { opened=false; }
+    }
+    setCopyFeedback(t(copied ? "Message copied. Paste it in the conversation if needed." : "Select and copy your message"));
+    if (!opened) { setFallback(link); setError(t("Could not open the social app. Use the link below.")); }
+  }
   async function run(fn: () => Promise<unknown>) {
     setBusy(true);
     setError("");
@@ -81,7 +92,8 @@ export default function Inquiry() {
   return (
     <Screen>
       <Status {...load} retry={load.reload} />
-      {shop && items.length > 0 && !sent ? (
+      <Status error={inquiry.error} retry={inquiry.retry}/>
+      {shop && items.length > 0 ? (
         <>
           <Copy big>{shop.name}</Copy>
           {items.map((i, index) => (
@@ -93,146 +105,40 @@ export default function Inquiry() {
                     label={t("Add quantity (optional)")}
                     value={i.quantity}
                     onChangeText={(quantity) =>
-                      setBasket((b) =>
-                        b
-                          ? {
-                              ...b,
-                              items: b.items.map((item, j) =>
-                                index === j ? { ...item, quantity } : item,
-                              ),
-                            }
-                          : b,
-                      )
+                      inquiry.setItems(items=>items.map(item=>selectionKey(item.product.id,item.options)===selectionKey(i.product.id,i.options)?{...item,quantity}:item))
                     }
                   />
                   <Button
                     secondary
                     label={t("Remove")}
                     onPress={() =>
-                      setBasket((b) =>
-                        b
-                          ? {
-                              ...b,
-                              items: b.items.filter((_, j) => index !== j),
-                            }
-                          : b,
-                      )
+                      inquiry.setItems(items=>items.filter(item=>selectionKey(item.product.id,item.options)!==selectionKey(i.product.id,i.options)))
                     }
                   />
                 </>
               )}
             </Card>
           ))}
-          <Field
-            label={t("Your message")}
-            value={note}
-            onChangeText={setNote}
-            multiline
-          />
-          <Copy>{t("Send inquiry")}</Copy>
-          {Boolean(shop.contacts.whatsapp) && (
-            <Button
-              label="WhatsApp"
-              disabled={busy}
-              onPress={() =>
-                void run(() =>
-                  openLink(
-                    `https://wa.me/${shop.contacts.whatsapp!.replace(/\D/g, "")}?text=${encodeURIComponent(summary)}`,
-                  ),
-                )
-              }
-            />
-          )}
+          <Button secondary label={t("Add a note (optional)")} onPress={() => setShowNote(value => !value)}/>
+          {showNote && <Field label={t("Your message")} value={note} onChangeText={setNote} multiline/>}
+          <Copy>{t("Message the business")}</Copy>
+          <Copy muted>{t("Your message and selected products are copied before the conversation opens. Paste them if needed.")}</Copy>
           <View style={s.wrap}>
-            {Boolean(shop.contacts.telegram) && (
-              <Button
-                secondary
-                label="Telegram"
-                onPress={() =>
-                  void run(() =>
-                    openLink(
-                      `https://t.me/${shop.contacts.telegram!.replace(/^.*t.me\//, "").replace(/^@/, "")}?text=${encodeURIComponent(summary)}`,
-                    ),
-                  )
-                }
-              />
-            )}
-            <Button
-              secondary
-              label={t("Copy inquiry")}
-              onPress={() =>
-                void run(async () => {
-                  await Clipboard.setStringAsync(summary);
-                  setError(t("Copied"));
-                })
-              }
-            />
-            {Boolean(shop.contacts.phone) && (
-              <Button
-                secondary
-                label="SMS"
-                onPress={() =>
-                  void run(() =>
-                    openLink(
-                      `sms:${shop.contacts.phone}?body=${encodeURIComponent(summary)}`,
-                    ),
-                  )
-                }
-              />
-            )}
+            {handoffs.map(link => <Button key={link.kind} label={link.label} disabled={busy || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, link.kind)}
+              onPress={() => void run(() => handoff(link))} />)}
           </View>
-          <Button
-            secondary
-            label={t("Send inquiry on Suqpage")}
-            onPress={() => setPlatform(true)}
-          />
-          {onPlatform && (
-            <Card>
-              <Field label={t("Name")} value={name} onChangeText={setName} />
-              <Field
-                label={t("Phone")}
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-              />
-              <Button
-                disabled={busy || !name.trim() || !phone.trim()}
-                label={t("Send inquiry")}
-                onPress={() =>
-                  void run(async () => {
-                    await request("inquiries", {
-                      body: {
-                        businessId: shop.id,
-                        customerName: name,
-                        contact: phone,
-                        contactMethod: "phone",
-                        note,
-                        idempotencyKey: key,
-                        items: items.map((i) => ({
-                          productId: i.product.id,
-                          quantity: i.quantity,
-                          options: i.options,
-                        })),
-                      },
-                    });
-                    setSent(true);
-                    if (!id) setBasket(null);
-                  })
-                }
-              />
-            </Card>
-          )}
-          <Status error={error} />
+          <View style={{alignItems:"flex-end"}}><Button secondary disabled={busy} label={t("Copy message")} onPress={() => void run(async () => {
+              setCopyFeedback(t(await copyMessage() ? "Message copied. Paste it in the conversation if needed." : "Select and copy your message"));
+            })} />
+          </View>
+          {!handoffs.length && <Copy muted>{t("No social contact is available here. You can still copy the message.")}</Copy>}
+          <Card><Copy>{t("Your message")}</Copy><Copy selectable>{summary}</Copy></Card>
+          {Boolean(copyFeedback) && <Copy>{copyFeedback}</Copy>}
+          {Boolean(error) && <Copy>{error}</Copy>}
+          {fallback && <Button secondary label={fallback.label + " ↗"} onPress={() => void run(() => openLink(fallback.href))}/>}
         </>
-      ) : sent ? (
-        <Card>
-          <Copy big>{t("Inquiry sent")}</Copy>
-          <Copy>
-            {t("The business can contact you using your phone number.")}
-          </Copy>
-        </Card>
       ) : (
-        !load.loading && <Copy>{t("Your inquiry list is empty.")}</Copy>
+        !load.loading&&!load.error&&inquiry.ready&&!inquiry.error && <Copy>{t("Your inquiry list is empty.")}</Copy>
       )}
     </Screen>
   );

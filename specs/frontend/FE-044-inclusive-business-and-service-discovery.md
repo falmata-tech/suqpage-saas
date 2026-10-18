@@ -2,13 +2,23 @@
 id: FE-044
 title: Inclusive business and service discovery
 status: done
-related: [BE-037, DEP-034, FE-039, FE-040, FE-041]
+related: [BE-037, DEP-034, FE-039, FE-040, FE-041, FE-067]
 owners: [product, frontend]
 last_updated: 2026-09-21
 change_level: L3
 ---
 
 # FE-044 — Businesses, products and services
+
+## S112 superseding local contract
+
+FE-067 / BE-056 / DEP-046 supersede active service-listing admission and its
+product/service UI for the local candidate. The scenarios and release evidence
+below describe the historical rollout; stored kinds, rows and inquiry/revision
+history remain readable, but new service writes and public service discovery are
+retired in the candidate. Do not apply destructive constraint/data removal.
+Visual approval, full gates and a separate rollout remain pending.
+
 
 ## Problem and scope
 

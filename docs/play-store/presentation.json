@@ -3,9 +3,9 @@
   "locales": {
     "en-US": {
       "feature": [
-        "Products you loved",
-        "on social media.",
-        "Businesses nearby."
+        "Digital showrooms.",
+        "Products in one place.",
+        "Ask the business directly."
       ],
       "screens": [
         {
@@ -18,16 +18,16 @@
         {
           "id": "02-store",
           "headline": [
-            "Browse their store."
+            "Explore their showroom."
           ],
-          "alt": "A business storefront with its cover, logo, products and services"
+          "alt": "A business showroom with its cover, logo, products and collections"
         },
         {
           "id": "03-search",
           "headline": [
             "Find your next pick."
           ],
-          "alt": "Product and service search results showing the business behind each item"
+          "alt": "Product search results with a Made to order filter and the business behind each product"
         },
         {
           "id": "04-product",
@@ -41,7 +41,7 @@
           "headline": [
             "Your language."
           ],
-          "alt": "SuqPage Market in Amharic, one of the app’s five interface languages"
+          "alt": "SuqPage Market in Amharic, one of the app’s three active interface languages"
         },
         {
           "id": "06-transport",
@@ -54,32 +54,31 @@
     },
     "am": {
       "feature": [
-        "በማኅበራዊ ሚዲያ",
-        "የወደዱት ምርት።",
-        "ቅርብዎ ያለ ንግድ።"
+        "ምርቶቹን ይወቁ።",
+        "በአንድ የኢንተርኔት ገጽ።",
+        "ንግዱን በቀጥታ ያነጋግሩ።"
       ],
       "screens": [
         {
           "id": "01-map",
           "headline": [
-            "ቅርብዎ ማን አለ?"
+            "ንግዶችን በካርታ ያግኙ።"
           ],
           "alt": "የንግዶችን ቦታ የሚያሳይ ካርታ፣ ፍለጋ እና የምድብና የአካባቢ ማጣሪያ"
         },
         {
           "id": "02-store",
           "headline": [
-            "ምርቶቹን ይመልከቱ።"
+            "ምርቶቻቸውን አንድ ላይ ይመልከቱ።"
           ],
-          "alt": "የንግዱ ገጽ፣ ሽፋን፣ አርማ፣ ምርቶችና አገልግሎቶች"
+          "alt": "የንግዱ ገጽ፣ ዋና ፎቶ፣ አርማ፣ ምርቶችና ዓይነቶች"
         },
         {
           "id": "03-search",
           "headline": [
-            "የወደዱትን",
-            "ይምረጡ።"
+            "የሚፈልጉትን ይምረጡ።"
           ],
-          "alt": "የምርትና የአገልግሎት የፍለጋ ውጤቶች ከንግዶቹ ስም ጋር"
+          "alt": "የምርት ፍለጋ ውጤቶች፣ በትዕዛዝ የሚሠሩ ምርቶች ማጣሪያና የንግዶቹ ስም"
         },
         {
           "id": "04-product",
@@ -105,5 +104,7 @@
       ]
     }
   },
-  "narrative": "See how close the businesses selling products you’ve loved on social media are to you. Browse their products, styles and services in organized online stores, then contact them directly without digging through old posts."
+  "narrative": "Discover businesses through their digital showrooms.",
+  "sourceState": "S112 product-only local source candidate; existing published graphics/provider receipts remain unchanged.",
+  "reviewNotes": "S132/S133 active text candidate: English, Amharic and Afaan Oromo. Somali/Tigrinya copy is retained as inactive draft compatibility. Existing generated promotional media is STALE relative to these words and must be rebuilt/reviewed before use. No provider publication or promotional media regeneration."
 }

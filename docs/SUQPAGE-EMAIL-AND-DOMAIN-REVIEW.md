@@ -73,7 +73,10 @@ legacy account. Successful empty placeholders follow the CLI behavior; denial,
 timeout and invalid nonempty values stop. No file/profile/env fallback occurs.
 The default env mode still accepts `SUPABASE_ACCESS_TOKEN` privately; do not combine
 it with CLI selection or put management credentials into application runtime.
-Version-2 plans bind credential source and fingerprint without retaining token bytes.
+Current S145 version-3 plans bind credential source/fingerprint and operation kind
+without retaining token bytes. Historical version-2 plans must be replanned;
+origin changes now use the finite BE-059 phase selection rather than these old
+domain-patch inputs.
 Review the exact
 returned target, changed fields and digest before guarded apply. Plan the domain
 patch separately when DNS/TLS is ready. Hosted Google disablement is an explicitly

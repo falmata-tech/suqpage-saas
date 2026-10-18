@@ -1,1 +1,23 @@
-.actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;padding:20px 16px;border-top:1px solid #e2e7e8;background:#fff;font-size:13px;color:#566a70}.actions button,.actions a{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:6px 10px;border:0;background:transparent;color:inherit;text-decoration:underline;cursor:pointer}.blocked{padding:64px 20px;text-align:center}.notice{padding:12px 20px;text-align:center}.dialog{width:min(480px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;border:1px solid #dbe2e5;border-radius:18px;padding:24px;color:#22292b}.dialog::backdrop{background:#22292b66}.dialog form{display:grid;gap:14px}.dialog label{font-weight:650}.dialog select,.dialog textarea{width:100%;padding:12px;border:1px solid #bbc9ce;border-radius:10px;background:#fff;font:inherit;color:inherit}.heading{display:flex;align-items:center;justify-content:space-between;gap:10px}.heading h2{margin:0}.heading button{border:0;background:transparent;min-width:44px;min-height:44px;color:inherit}
+.actions{display:flex;justify-content:center;padding:12px 16px;padding-bottom:max(12px,var(--public-action-clearance,72px));background:#fff;font-size:13px;color:#566a70}
+.actions>button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:48px;min-height:48px;max-width:100%;padding:10px 14px;border:1px solid #e2e7e8;border-radius:12px;background:#fff;color:inherit;font:inherit;cursor:pointer;overflow-wrap:anywhere}
+.actions>button:hover{background:#f3f6f6;border-color:#a9bbbf}
+.blocked{padding:64px 20px;text-align:center}.blocked>button{min-height:48px}
+.notice{padding:12px 20px;text-align:center}
+.dialog{box-sizing:border-box;width:min(480px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;border:1px solid #dbe2e5;border-radius:18px;padding:24px;color:#22292b}
+.dialog::backdrop{background:#22292b66}
+.dialog form,.options{display:grid;gap:14px}
+.dialog label{font-weight:650}
+.dialog select,.dialog textarea{box-sizing:border-box;min-width:0;width:100%;padding:12px;border:1px solid #bbc9ce;border-radius:10px;background:#fff;font:inherit;color:inherit}
+.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.heading h2{margin:8px 0;min-width:0;overflow-wrap:anywhere}
+.heading button{flex:none;border:0;background:transparent;min-width:48px;min-height:48px;color:inherit;cursor:pointer}
+.businessName{margin:0 0 20px;overflow-wrap:anywhere;color:#566a70}
+.options>button,.options>a,.cancel{box-sizing:border-box;display:flex;align-items:center;gap:10px;min-height:48px;max-width:100%;padding:10px 12px;border:1px solid #dbe2e5;border-radius:10px;background:#fff;color:#22292b;font:inherit;text-decoration:none;overflow-wrap:anywhere;cursor:pointer;text-align:left}
+.dialog form>button{min-height:48px}
+.options>button svg{flex:none}.options>button:hover,.options>a:hover,.cancel:hover{background:#f3f6f6}
+.options>.cancel,.dialog .cancel{justify-content:center;text-align:center;border-color:transparent;color:#566a70}
+.dialog button:disabled{cursor:default;opacity:.5}
+.actions>button:focus-visible,.dialog :is(button,a,select,textarea):focus-visible{outline:3px solid #2459cc;outline-offset:3px}
+@media(max-width:420px){.dialog{padding:16px}}
+/* The dock moves above mobile navigation before the shell gains its own reserve. */
+@media(min-width:681px) and (max-width:720px){.actions{padding-bottom:calc(var(--public-action-clearance,72px) + 64px + env(safe-area-inset-bottom))}}

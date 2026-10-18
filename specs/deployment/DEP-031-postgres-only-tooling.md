@@ -2,7 +2,7 @@
 id: DEP-031
 title: Native PostgreSQL setup tests and operations
 status: done
-related: [DEP-032, BE-035, DEP-030, DEP-027, ADR-0020]
+related: [DEP-032, BE-035, DEP-030, DEP-027, ADR-0020, DEP-047]
 owners: [operations, security]
 last_updated: 2026-09-21
 change_level: L3

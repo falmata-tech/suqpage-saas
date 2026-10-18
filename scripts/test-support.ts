@@ -3,17 +3,18 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type { SessionUser } from "../lib/types";
+import {joinAssignedSupportConversation,postAssignedSupportReply} from './testing/support-join';
 const publicSupportRouteSource = fs.readFileSync(path.join(process.cwd(), "app/api/public-support/route.ts"), "utf8");
 const publicAttachmentRouteSource = fs.readFileSync(path.join(process.cwd(), "app/api/public-support/attachments/[attachmentId]/route.ts"), "utf8");
 const authenticatedAttachmentRouteSource = fs.readFileSync(path.join(process.cwd(), "app/api/support/[conversationId]/attachments/[attachmentId]/route.ts"), "utf8");
 const publicSupportUiSource = fs.readFileSync(path.join(process.cwd(), "components/PublicSupportChat.tsx"), "utf8");
-const supportRefreshSource = fs.readFileSync(path.join(process.cwd(), "components/SupportThreadRefresh.tsx"), "utf8");
 assert.doesNotMatch(publicSupportRouteSource, /stageSupportAttachment/, "Public API cannot upload attachments; buying replies and closure are covered by channel tests");
 assert.match(publicAttachmentRouteSource, /status: 404/, "Public files remain inaccessible");
 assert.doesNotMatch(publicAttachmentRouteSource, /readSupportAttachment/, "Retired file endpoint never reads storage");
 assert.ok(authenticatedAttachmentRouteSource.indexOf("await getSupportAttachment") < authenticatedAttachmentRouteSource.indexOf("await readSupportAttachment"), "tenant/staff authorization precedes private storage reads");
 assert.doesNotMatch(publicSupportUiSource, /setInterval|Ask for help|public-support-thread/, "Public launcher cannot reopen general guest support; buying chat is a scoped component");
-assert.match(supportRefreshSource, /if \(!document\.hidden\) router\.refresh\(\)/, "staff support pauses route refresh while its browser document is hidden");
+// FE-019 S111 hidden/pending/cadence behavior is exercised through actual React
+// transitions in scripts/test-support-thread-refresh.ts, rather than source syntax.
 async function main() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-support-"));
     process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");
@@ -67,35 +68,40 @@ async function main() {
     assert.equal((await getDashboardAttention(clientA, businessA)).supportReplies, 0, "a client does not see their own opening messages as unread replies");
     assert.equal((await getSupportConversation(operations, first.id)).conversation.assignedUserId, agentOneId);
     assert.equal((await getSupportConversation(operations, second.id)).conversation.assignedUserId, agentTwoId);
-    assert.equal((await getSupportConversation(operations, third.id)).conversation.assignedUserId, agentTwoId);
-    assert.equal((await getSupportConversation(operations, fourth.id)).conversation.status, "waiting");
-    await assert.rejects(() => updateSupportAgentSetting(operations, {
+    assert.equal((await getSupportConversation(operations, third.id)).conversation.assignedUserId, agentOneId);
+    assert.equal((await getSupportConversation(operations, fourth.id)).conversation.assignedUserId, agentTwoId);
+    await updateSupportAgentSetting(operations, {
         userId: agentTwoId,
         enabled: true,
         maxOpenConversations: 1,
-    }), SupportError);
-    await assert.rejects(() => updateSupportAgentSetting(operations, {
+    });
+    await updateSupportAgentSetting(operations, {
         userId: agentOneId,
         enabled: false,
         maxOpenConversations: 1,
-    }), SupportError);
+    });
+    assert.equal((await getSupportConversation(agentOne, first.id)).conversation.assignedUserId, agentOneId, "Pausing reception preserves existing work");
     await assert.rejects(() => getSupportConversation(clientA, second.id), SupportError);
     await assert.rejects(() => postSupportMessage(clientA, second.id, {
         message: "This cross-tenant reply must not be saved.",
         idempotencyKey: "support-denied-0001",
     }), SupportError);
+    await reassignSupportConversation(operations, fourth.id, null);
     await assert.rejects(() => claimSupportConversation(agentOne, fourth.id), SupportError);
-    await assert.rejects(() => claimSupportConversation(agentTwo, fourth.id), SupportError);
+    await claimSupportConversation(agentTwo, fourth.id);
+    await joinAssignedSupportConversation(operations,first.id);
     await postSupportMessage(agentOne, first.id, {
         message: "We are reviewing this request.",
         idempotencyKey: "support-reply-0001",
     });
     await closeSupportConversation(agentOne, first.id);
+    await updateSupportAgentSetting(operations, {userId:agentOneId,enabled:true});
+    await reassignSupportConversation(operations, fourth.id, null);
     await claimSupportConversation(agentOne, fourth.id);
     assert.equal((await getSupportConversation(clientB, fourth.id)).conversation.status, "open");
     await closeSupportConversation(agentOne, fourth.id);
     await reopenSupportConversation(clientB, fourth.id);
-    assert.equal((await getSupportConversation(operations, fourth.id)).conversation.assignedUserId, agentOneId);
+    assert.equal((await getSupportConversation(operations, fourth.id)).conversation.assignedUserId, agentTwoId);
     await reassignSupportConversation(operations, fourth.id, null);
     assert.equal((await getSupportConversation(operations, fourth.id)).conversation.status, "waiting");
     const fifth = await create(clientA, 5);
@@ -108,14 +114,13 @@ async function main() {
     assert.deepEqual(await getSupportAgentSummary(operations), {
         totalAgents: 3,
         enabledAgents: 2,
-        availableAgents: 0,
-        fullAgents: 2,
+        availableAgents: 2,
         openAssignments: 3,
         waitingConversations: 1,
     });
     assert.equal((await db.prepare("SELECT COUNT(*) total FROM support_assignments").get() as {
         total: number;
-    }).total, 6);
+    }).total, 8);
     assert.ok((await db.prepare("SELECT COUNT(*) total FROM support_events").get() as {
         total: number;
     }).total >= 16);
@@ -196,7 +201,7 @@ async function main() {
         total: number;
     }).total), 1, "an idempotent retry does not create a second attachment row");
     await assert.rejects(() => stageSupportAttachment(new File(["not a real file"], "deceptive.pdf", { type: "application/pdf" })), /Only valid JPEG, PNG, WebP, and PDF/);
-    await postSupportMessage(operations, visitor.id, {
+    await postAssignedSupportReply(operations, visitor.id, {
         message: "A team member will review the request.",
         idempotencyKey: "public-support-staff-0001",
     }, visitorNow + 4);
@@ -216,7 +221,7 @@ async function main() {
     assert.equal((await db.prepare("SELECT COUNT(*) total FROM pg_constraint WHERE connamespace=current_schema()::regnamespace AND NOT convalidated").get()).total, 0);
     await closeDbForTests();
     fs.rmSync(root, { recursive: true, force: true });
-    console.log("Support tenant scope, visitor contact validation, anonymous token isolation, least-loaded assignment, capacity, messaging, expiry, close, reopen, and reassignment passed.");
+    console.log("Support tenant scope, visitor contact validation, anonymous token isolation, balanced unlimited assignment, pause/claim, messaging, expiry, close, reopen, and reassignment passed.");
 }
 main().catch((error) => {
     console.error(error);

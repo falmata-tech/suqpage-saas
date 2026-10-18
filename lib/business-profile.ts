@@ -2,6 +2,8 @@ import { STARTER_VIDEO_URL } from "./business-starter";
 import type { Catalog } from "./types";
 import { ownerPageImageKey, type ShopPageContent } from "./owner-page-domain";
 import { controlledYouTubeWatchUrl } from "./youtube-provider";
+import { legacyPublicContacts, type PublicContacts } from "./business-profile-contacts";
+import { approvedDemoContactMethods } from "./demo-inquiry-policy";
 
 export function publicPageContent(businessId: number, content: ShopPageContent): ShopPageContent {
   const key = ownerPageImageKey(businessId, content.heroImage);
@@ -22,6 +24,8 @@ export function businessProfileDescription(content: Pick<ShopPageContent, "about
   return content.about || content.introduction;
 }
 
-export function publicBusinessCatalog(catalog: Catalog): Catalog {
-  return { ...catalog, business: { ...catalog.business, contact_email: "" } };
+export function publicBusinessCatalog(catalog: Catalog, contacts?: PublicContacts, configuredDemoPhone?: string): Catalog {
+  return { ...catalog, business: { ...catalog.business, contact_email: "",
+    approvedDemoContactMethods: approvedDemoContactMethods(catalog.business.is_demo, contacts ?? legacyPublicContacts(catalog.business), configuredDemoPhone),
+  } };
 }

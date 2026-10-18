@@ -2,13 +2,299 @@
 id: FE-053
 title: Native visitor and business-owner app
 status: in_progress
-related: [FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062, FE-063, FE-064]
+related: [FE-066, FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062, FE-063, FE-064, FE-065, DEP-043, BE-018, FE-067, FE-041, FE-047, BE-050, BE-023, FE-068]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-07
+last_updated: 2026-10-17
 change_level: L3
 ---
 
 # FE-053 — Native visitor and business-owner app
+
+## S130/S131 — richer previews and optional showroom categories (ready)
+
+FE-065 S130 controls public product-city projection, richer bounded map rows and
+locale-aware selected-business details. FE-041 S131 controls styled optional
+category chips, literal product affiliation and native/web filtering parity.
+BE-044 governs the additive optional DTO fields. Keep S129 card Add/options,
+S118 saved lists, S127 modal capacity and S128 compact Market controls unchanged.
+No signup/category requirement or new owner editing permission is introduced.
+Actual-source focus tests and real Chrome Expo/web workflows precede inherited
+explicit visual approval/full/commit/rollout gates; no Android claim is implied.
+
+## S129 — direct inquiry-list actions on showroom cards (local implementation)
+
+FE-041 S129 controls native/Expo card parity: a two-line merchant description,
+separate details and48px Add/Added actions, canonical required-options Sheet,
+stock/preview/loading guards and unchanged per-business saved-list/dock authority.
+No navigation to details is needed to add; full detail remains available. Reuse
+existing five-language actions and current shop accents. No new persistence,
+backend, catalog, public contact or transport changes. Focused actual-source and
+installed-Chrome web/Expo evidence precede the existing visual/full/release gates.
+
+S129 focused verification: six actual-source card cases plus24inherited
+canonical basket/contact/dock/product-only cases pass (30total). Mobile and
+strict-script typechecks pass. Options defaults are only canonical sole values;
+Cancel and maximum-list feedback stay inside the current picker. The same
+existing per-business store and floating dock are used. Actual Chrome evidence,
+source hashes and limitations are consolidated in FE-041 and traceability before
+the still-pending visual/full/commit/rollout gates.
+
+## S128 — compact Market toolbar (locally implemented; review pending)
+
+FE-065 S128 governs the new top-area layout: no duplicate visual Market title
+row, retained non-layout localized heading, centered48px Businesses/Products and
+About/info actions. Search plus all labeled filters share one row at sufficient
+content width, including844px landscape; phones/enlarged text use clear wrapping
+rows. Search, counts, clears, scope memory, map/panels and S127 group behavior
+remain authoritative. Verify actual viewport gain, all languages, keyboard and
+real local API journeys before visual approval; no global header/nav redesign.
+
+S128 focused evidence: `test-mobile-market-layout.ts` (18 cases, including
+actual RNWeb idle/loading/error rendering), `test-mobile-map-groups.ts` (9) and
+`test-product-only-native-ui.ts` (7) pass, with mobile/strict script typechecks.
+The existing pure Leaflet resize helper moves unchanged to `lib/map/leaflet-resize.ts`;
+the native import path re-exports it. Installed SDK arithmetic and web lifecycle
+regressions cover parity, zero-size and loading-row resize. Actual Chrome layout
+and real API journey evidence is consolidated in FE-065 and traceability; this is
+Expo-preview evidence, separate from installed Android/MapLibre. Browser hard
+reload returns to English under the existing in-memory web adapter; test URL/filter
+restoration, then select the target language again through the actual UI. No
+native storage or global navigation change. Visual/full/commit/rollout gates stay open.
+
+## S127 — screen-sized fixed groups (ready; latest owner direction)
+
+FE-021 S127 controls the shared modal capacity (up to6 desktop/3 phone, reduced
+for height/font scale), compact nearby partitions and current-member validation.
+Every final circle at maximum opens all members at once: no list scrolling, Next/Previous or
+connecting lines. Normal outer clusters merge on zoom-out and click to zoom in; only final
+all-fit groups stop splitting and open the modal ONLY at maximum normalized18
+(native raw17). Any counted circle below maximum zooms instead; restored state
+below maximum cannot expose the modal. Screen-capacity or eligible
+data/filter changes may repartition final groups. Preserve existing coordinates/provider/API cap, current-row authority,
+short-stage48px controls, focus/camera return and native-authored labels. Native
+and Expo use the same capacity policy with their actual safe-area dimensions.
+Do not use legacy server nearbyGroups as current visual membership authority.
+GIVEN a Leaflet marker root rendered before its SDK zoom callback commits parent
+state WHEN that final marker is activated at maximum zoom THEN dispatch through
+the latest current onGroup/onSelect callback, not the captured pre-maximum
+callback. Ordinary zoom→final click opens on the first activation without a
+language/filter rerender. Keep current member/maximum guards and no extra render
+loop. Regression must replace the callback after marker construction and prove
+only the fresh callback runs.
+Current implementation/testing is in progress; earlier global-three/leader/paging
+evidence is superseded, not approval. Full/visual/release/rollout gates stay open.
+
+GIVEN Expo Leaflet initializes before its flex container reaches its actual size
+WHEN the container becomes visible or changes size without a window resize or
+height-prop change THEN invalidate only the owned SDK viewport using the existing
+center-preserving resize contract and redraw current markers. Observe actual
+container dimensions; coalesce work, ignore zero-size/hidden layouts, disconnect
+and cancel on unmount. An initial valid layout must not require the user to
+resize the browser. Prove0→visible layout without a window event, current markers,
+camera bounds and cleanup with real React/Leaflet; actual844×390 must start and
+complete the ordinary group journey. No grouping/copy/style/data change.
+
+GIVEN compact map controls switch from a right-aligned column to a left-aligned
+row WHEN React Native Web resolves the styles THEN explicitly clear the inherited
+right inset with auto; undefined must not leave a full-width invisible toolbar.
+Only the visible control row occupies the hit area; the remaining map accepts
+normal cluster activation and panning. Verify installed RNWeb style resolution
+and actual844×390 toolbar geometry/background hits, preserving48px buttons and
+normal portrait layout. No color, cluster style or backend change.
+
+## S125 — customer waiting and explicit staff acceptance (ready)
+
+The newest owner instruction supersedes assigned-before-joined presentation.
+GIVEN a visitor or owner request has only internal assignment WHEN the native
+transport/support or history view renders THEN show Waiting for our team and no
+assigned agent announcement. Only BE-018 explicit Join permits the joined name.
+Needs-reply/Overdue are internal; customers receive no deadline promise. A public
+staff reply uses Waiting for your reply. Ended and Resolved remain distinct;
+preserve reference, drafts, visible-message reads, idle warning/resume and history.
+Cover web owner projections and Expo8082 actual paired journeys with BE-018/050,
+FE-019/062 and DEP-043; native-device/OS delivery remains separate evidence.
+
+## S122 — native owner workspace safe navigation (implemented locally; review pending)
+
+Actual Expo/Chrome audit confirms global header Back loses a typed About draft,
+despite the local Cancel dialog; Product Edit has no Cancel and its parent goes
+to Account while Save goes to Products. Product titles lack accessible headings.
+GIVEN a dirty focused owner editor WHEN header/stack/back/app navigation would
+leave it THEN retain the editor until Keep editing/Discard is chosen. Use the
+installed Expo Router navigation lifecycle for removal and app-owned persistent
+navigation for retained screens; do not replace browser history handling. Cancel
+and successful Save return to their coherent task parent. Pending saves cannot
+start another command or silently discard input. Unchanged exits need no prompt.
+Product edit/add return to Products; owner hub/page/contact/support/transport
+remain distinct. Existing title text becomes a semantic heading, not a new visual
+heading stack. No new dependency, data store, route authority or capability.
+
+FE-056/FE-026 govern shared task behavior. Focused actual native controllers and
+real Expo390/320 navigation/re-entry/Keep/Discard checks must prove these cases;
+installed Android/OS termination behavior remains separate. Do not claim the OS
+cannot terminate a process or that closing a browser tab preserves local drafts.
+
+S122 local verification: scripts/test-mobile-owner-edit-navigation.ts (14 cases), inherited native controller regressions and actual Expo header/footer/Save/re-entry journeys pass. Current source, protected
+readback and scoped harness failures are recorded in TRACEABILITY.md and
+`.local/workspace-audit-s122/`. Both typechecks, localization and spec validation
+pass. Visual approval, full/release/acceptance gates, commit and rollout remain
+pending; this is not physical Android or complete-application certification.
+
+## S121 — observe automatic queue pickup (ready)
+
+BE-018/FE-019 S121 automatically routes eligible waiting cases without a client
+write. Existing visitor and authenticated owner chat polling must observe the
+same reference changing from Waiting to Assigned to the saved agent, without
+claiming the agent has joined. Technical owner support uses the same existing
+localized assigned-before-joined wording as visitor/owner transport. Preserve
+drafts, receipts, role denial and the actual focused/hidden polling boundaries.
+Prove the affected flow in actual Chrome at localhost8082 against real APIs;
+browser evidence does not establish installed Android behavior.
+
+S121 local evidence: the existing registered owner-transport test file now also
+mounts the actual technical OwnerChat controller through explicit lifecycle
+ports. Waiting/assigned/joined/ended snapshots preserve the same reference and
+emit no commands. Native typecheck passes. Actual Chrome at8082 signs in an
+existing owner, navigates Account→Support→its existing case and verifies the
+saved assignment/ref through real focused GETs. A single deliberate network abort
+recovers without Retry in10.708s. See
+`.local/queue-recovery-s121/native-agent/reconnect/review-receipt.json` and
+`recovery/review-receipt.json`. Original restart-observer failures are retained;
+these separate passing flows are not a retroactive pass for them. Native source
+hashes are frozen; no installed-device or OS delivery proof is claimed.
+
+## S119 — batched native visible-read confirmation (ready)
+
+BE-050/FE-062 S119 applies to visitor transport, authenticated owner transport and
+technical support. Each transcript observes every incoming footer through one
+focused measurement batch and timer, coalescing a batch to its highest actually
+visible ID. A newer offscreen reply must not prevent reading an older visible
+reply. Own messages and fetched-but-unseen replies never advance peer receipts.
+
+GIVEN an asynchronous native measurement WHEN app/router/browser focus, overlay
+generation or conversation/account identity changes before completion THEN drop
+that batch, including a background→foreground round trip. Failed acknowledgements
+retry while visible; successful ones remain deduplicated within their identity.
+Preserve keyboard events, safe-area/navigation bounds and viewport offsets.
+Assigned-before-joined transport status follows FE-019 without claiming presence.
+Controlled native-adapter regressions do not prove installed Android behavior.
+
+Mapped focused evidence: `scripts/test-visible-chat-reads.ts` and
+`test-mobile-owner-transport.ts`, with inherited assignment, inactivity and
+storage regressions, pass20/20 under actual React or explicit native lifecycle
+ports. `test-chat-read-viewport.ts` and native/web typechecks pass. All incoming
+footers in both transport and technical-support renderers share one transcript
+observer. Actual browser and installed Android verification remain distinct.
+
+## S118 — per-business inquiry selection parity (ready)
+
+FE-041 S118 supersedes native's one-business-only app-memory basket. Each business
+has an independently persisted bounded reference list, rehydrated from its fresh
+public catalog. Float its count only on its showroom/product pages; no global
+Market/Featured list action or cross-business clearing. Ordinary account security
+and logout do not become catalog authority. Direct one-product inquiries stay
+independent. FE-066 S118 enables only server-approved owner phone destinations
+for demo SMS/WhatsApp/Telegram and exact approved public profile/site examples.
+Residual fake destinations remain inert; real social handoffs remain unchanged.
+Ready and failure/test/privacy bounds are specified in FE-041/FE-066. Expo browser
+and installed-device verification remain distinct; no backend/schema/provider.
+
+### S118 local verification — visual approval pending
+
+Native/Expo now lazily loads each business's independent inquiry list from
+existing document-file/browser storage, namespaced by canonical API origin and
+business ID. The dock is limited to the current showroom/product route. Saved
+references are rehydrated from that business's fresh public catalog; direct
+one-product inquiries do not alter stored lists. A one-shot bridge preserves
+matching legacy in-session selections. No account credential storage, backend,
+schema, provider or dependency was added.
+
+`scripts/test-business-inquiry-baskets.ts` covers bounded references, API-origin
+isolation, malformed/foreign selections, initial-read and write races, read/write
+failure recovery and temporary-file adapter behavior. Actual-source hook, dock,
+product, inquiry and root regressions are in `test-mobile-public-action-dock.ts`,
+`test-product-only-native-ui.ts` and `test-public-transport-launcher.ts`. The shared
+S118 focused set passed 92 cases; the post-pointer-events focused rerun passed 26
+relevant cases, without counting those repeated cases as new unique tests. Final
+web and native typechecks passed. The narrow compatibility correction preserves
+the existing overlay and active-pane interaction behavior.
+
+`.local/business-inquiry-s118/actual/attempt-2/outcome.json` records three passing
+anonymous local surfaces and six screenshots: web 1440/390 and Expo 390, including
+Amharic. Two-business counts, quantity changes, return/reload, direct-single
+isolation, absent Market/Featured inquiry chrome and retained transport passed
+with stable source hashes and no runtime, console or API error or application
+mutation. Clipboard/openers were controlled and SMS was not launched. The
+`expected-network-verified.json` companion classifies all 31 raw failed-request
+records as navigation-cancelled, intercepted analytics POSTs; none reached the
+application, no public GET failed and no unexpected request failed. The original
+strict-failure receipt is retained.
+
+These checks do not prove installed Android storage, native MapLibre or OS
+protocol behavior. Visual approval, full/acceptance/release gates, a rebuilt
+Android binary and deployment remain separate pending steps.
+
+## S117 — selected Market panel on return (locally verified)
+
+FE-065 S117 applies to native and Expo browser. Ordinary Market navigation and
+detail Back retain the last selected panel and independent criteria within the
+app session; explicit incoming view/search links override memory. Market's Android
+Back handler runs only while that screen is focused, and browser URL updates
+preserve navigation metadata. New sessions default to Businesses. No private
+data, catalog payload, device storage dependency or backend change is introduced.
+Expo's router owns browser Back/Forward; its intermediate navigation events do
+not independently restore stale state. Repeated explicit map actions carry a new
+navigation intent, while detail Back preserves a later manual panel choice.
+The Expo browser Leaflet adapter also safely ends its owned active animation on
+departure; native Android MapLibre is unchanged. Eight actual-source Market/
+About controller tests, six app-link/security tests and two installed-SDK browser
+map tests pass within the shared 27-case focused set. Local current Expo journeys
+and captures are mapped in S117 TRACEABILITY. Existing approval/full gates and
+installed Android proof remain separate.
+
+## S115 — native focused owner workspaces (ready)
+
+FE-056 S115's grouped Your page tasks and focused About/video/contacts/color/team
+editing apply natively. Preserve Account's six tasks, one scroll root, private
+settings, separate transport/support, preview/publication and saved API/version
+contracts. Each task has a bounded route/view, prefilled relevant fields and
+Save/Cancel/Back to its originating section. No accordion/omnibus editor substitutes
+for task navigation. All social contacts survive unrelated saves; phone/desktop
+preview and natural five-language labels remain distinct from Android device proof.
+
+Mapped local evidence: `scripts/test-owner-focused-tasks.ts`,
+`test-mobile-account-hub.ts`, `test-owner-editor-failures.ts` and
+`test-mobile-api.ts`, with actual Expo read/Edit/Cancel/Keep/Discard navigation
+and five-language screenshots indexed in S115 TRACEABILITY. Optional native
+Field label visibility and action label wrapping preserve accessible names;
+supported pointer-events styling leaves preview overlays non-interactive without
+the React Native Web deprecation warning. Full gates/device/rollout remain pending.
+
+## S111 — native transport reachability and inactivity (ready)
+
+FE-036 S111 defines one public transport launcher across native visitor routes
+with account/owner/chat exclusions. Preserve the Market's already verified
+handle/zoom-safe placement; other public routes use the shared native root overlay
+above the bottom navigation/safe area. Do not duplicate the Market launcher.
+FE-019/BE-018 govern server deadlines, warning/reason/explicit resume, retained
+drafts and slower closed polling. Keep AppState, focus, request deadline and
+stale-case protections. Account → Support remains its own private destination.
+Actual Expo layout/HTTP checks supplement component regressions; physical
+Android/MapLibre/OS notification verification remains separately outstanding.
+
+
+Mapped focused regressions: `scripts/test-public-transport-launcher.ts`, `scripts/test-chat-inactivity-ui.ts` and `scripts/test-mobile-market-layout.ts`. Actual Expo public placement and paired chat receipts are `.local/workflow-audit-s111/native-agent/final-evidence.json` and `.local/workflow-audit-s111/paired/verified.json`. Installed Android/MapLibre/OS behavior is a separate outstanding gate.
+
+## S109 — spacious native Market (ready)
+
+FE-065 S109 governs compact native exploration: active search/filter controls,
+48px switch/toggle targets, a restrained alternate-pane edge, finger-following
+handle-only gestures, reduced motion and preserved map/list state. The accepted
+marketing narrative stays available in an intentional About/intro disclosure.
+Use React Native layout/PanResponder/Animated and existing sheets; do not embed
+web dashboard UI or add a gesture provider merely to restyle this page. Staff and
+admin still cannot log into native. Local browser evidence and actual Android
+verification remain distinct. No auth/API/database behavior changes.
 
 ## Problem
 
@@ -188,12 +474,16 @@ mobile typecheck and focused phone captures before further release gates.
 
 S50 map marker parity (owner request, 2026-10-05): native and mobile browser maps
 must match the web map's storefront glyphs with business names, selected color,
-numbered zoom clusters and nearby-business groups. Featured/live badges use only
-server-projected public state. Cluster taps zoom to expansion; nearby groups list
-their current businesses; business taps focus without zooming out and open the
-existing preview above the result drawer. Filtering removes stale selections.
-Render only markers in the current viewport, reuse the existing Supercluster
-dependency/radius/zoom thresholds, and preserve canonical coordinate offsets.
+numbered groups and current public identity. Featured/live badges use only
+server-projected public state. FE-021 S127 supersedes the original thresholds:
+at maximum18 counted final groups open every admitted card without paging;
+below maximum their click zooms instead. their cards use
+current eligible businesses. Member selection opens the existing preview while
+preserving the map. Filtering removes stale selections; full-page navigation
+releases Market modals and valid return restores the selected group/card.
+Render visible markers from the shared fixed screen-capacity index. Bounds and
+normalized zoom drive normal outer aggregation; terminal members never subdivide.
+Preserve public offsets once and keep true centroid anchors for displaced badges.
 Use fixture tiles for automated gestures and capture phone states. No Google SDK,
 new provider, application data cache or change to the web map's behavior.
 
@@ -636,3 +926,117 @@ S86 applies FE-021's isolated-shop hitbox correction: transparent parts of the
 glyph touch frame, visible-name interaction and unchanged glyph/name/anchor
 positions. Counted markers are untouched. Capture actual local city icon taps,
 normal/selected states and browser pointer errors; native-device evidence separate.
+
+
+## S104 navigation and standard owner dashboard — in progress
+
+FE-036/FE-056 apply to native presentation: About is a main destination, account
+entry is Login while signed out and Dashboard after owner sign-in. Inquiries
+remain authenticated-only. One bottom navigation persists around owner workflows;
+Dashboard exposes real overview metrics and grouped business/page/product/support/
+account actions. Existing focused editors, save/return, private initial preview,
+transport chat, embedded media and web-only staff management remain unchanged.
+Focused Expo-browser/type checks do not claim physical-device evidence.
+
+
+## S105 social-contact revision
+
+FE-066 / BE-055 supersede new customer messages to business inboxes. Only
+configured social accounts receive visitor handoffs; chosen products and the
+simple message follow the active UI language. Retained private history stays
+scoped. Public transport chat and authenticated owner support remain unchanged.
+Local implementation and review evidence are tracked in checklist S105.
+
+## S107 transport recovery-storage failure
+
+GIVEN the transport screen cannot read its device recovery storage WHEN that
+read fails THEN stop the loading indicator and show the localized connection
+error with an explicit Try again action. Keep the intake and new-chat action
+hidden until a successful read establishes whether a saved conversation exists.
+Never delete unknown recovery data or silently start a replacement conversation.
+WHEN Retry succeeds THEN restore the saved token and existing conversation, or
+show the intake if storage confirms no saved token. A result arriving after the
+screen unmounts or an obsolete attempt must not change the current screen.
+
+Reuse existing connection-error and retry translations; transport API, token
+scope, expiry and idempotency remain unchanged. Focused actual-component tests in
+`scripts/test-transport-storage-ui.ts` cover failure, pending retry, empty/saved
+recovery, no unexpected mutation and stale completion. Actual Expo-browser error
+and recovery captures are separate from the native emulator limit; full gates
+and visual approval remain pending under the S107 checklist.
+
+S107 Auth loading correction: the existing provider's client HTTP requests have
+a 20-second deadline covering response-body decoding, as defined in BE-044.
+A stalled Auth connection must reach the existing localized error and release
+the pending action without losing the entered email/code. Preserve normal SDK
+session/refresh semantics; no implicit OTP resend or permission change is added.
+Focused installed-SDK port tests are `scripts/test-mobile-auth-fetch.ts`; actual
+browser/native workflow evidence is reported separately.
+
+S107 logout recovery: while local sign-out is pending or failed, Account shows
+its sign-out state and a localized Retry after failure, with no new email/code
+form. Private UI clears immediately; a Settings sign-out returns to Account so
+the provider-scoped failure remains visible. An SDK error result and failed
+device deletion both reach this state rather than an unhandled rejection or
+silent success. Retry confirms cleanup before restoring normal login. Reuse
+existing Sign out/Retry/connection-error language; see BE-044 and
+`scripts/test-mobile-logout-ui.ts` for the negative-path acceptance tests.
+
+
+## S112 focused native map lifecycle correction
+
+GIVEN the Expo browser map has a delayed resize/move callback WHEN navigation
+unmounts that map THEN the callback cannot read/render its destroyed instance.
+Detach listeners before teardown and reject stale instance work; do not suppress
+exceptions globally. Mounted resize/pan/current-marker behavior remains usable.
+The actual installed Leaflet resize→unmount stack reproduced during S112 product
+review; the narrow lifecycle correction remains in this authorized local audit.
+Focused actual-React/installed-Leaflet regression and browser navigation captures
+are required; this does not claim installed Android MapLibre verification.
+
+S112 mapped regression: `scripts/test-mobile-map-lifecycle.ts`.
+
+
+## S113 native floating public actions — local candidate
+
+S118 supersedes the global saved-basket launcher and one-business/session-only
+lifetime below. Only the matching showroom/product displays its independent
+persisted list; other public/private screens do not. Direct-product and transport
+isolation, labels/targets and canonical rehydration requirements remain.
+
+FE-041's saved inquiry action and count share a compact stack with a visibly labeled
+Transport chat action on public native routes. Reuse the root public placement and
+Market's handle-safe placement rather than duplicate launchers. One transport tap
+opens /buying intake or the saved conversation. List access opens /inquiry for the
+saved basket's shop; direct-product inquiry does not alter that basket. Hide the
+list action on the saved-group composer, keep it distinct on direct-item screens.
+Reserve measured stack height and safe-area/navigation clearance; short Market
+stages center a single bounded row with list icon/count and labeled transport to
+clear side handles and preserve map space. The list retains its full accessible
+name; other screens keep both visible labels. No native restart-storage
+claim, account/private action, new API or OS notification behavior is introduced.
+Verify actual component/Expo-browser behavior; installed Android remains separate.
+
+S113 focused evidence: `scripts/test-mobile-public-action-dock.ts`,
+`test-mobile-market-layout.ts` and `test-public-transport-launcher.ts`; final native
+row/type receipt `.local/public-actions-s113/native-agent/short-market-refinement.json`.
+Actual five-language Expo-browser states are indexed separately by
+`.local/floating-actions-s113/combined-verified.json`; no installed-device claim.
+
+
+## S114 private owner transport — locally verified, visual/full gates pending
+
+Account adds Transport chat beside technical Support. The guarded owner transport
+screen reuses the visitor transport presentation/controller with a separate
+authenticated owner adapter, private contact defaults, account history and Back to
+account. It never reads/writes the guest suqpage-transport secure-storage key or
+uses a guest token, including after logout/account change. Unauthorized/no-business
+accounts use existing Account/setup flow. Owner account identity fences pending
+requests so a previous user's completions cannot populate the next account.
+
+Keep one Screen/scroll root and the existing paired route/contact layout; no global
+public floating dock appears inside owner screens. Native owner attention opens
+the canonical owner transport view; old generic owner-chat destinations classify
+the authorized conversation before routing. BE-018/FE-019 S114 governs lifecycle
+and private-note filtering. Five-language actual Expo captures remain separate
+from installed Android evidence; no new binary or provider change is implied.

@@ -55,7 +55,7 @@ export default function FeaturedScreen() {
         <Text style={f.eyebrow}>
           {current && t(current.industryLabel)} · {program?.date}
         </Text>
-        <Copy big>{t("Daily Featured")}</Copy>
+        <Copy big heading>{t("Daily Featured")}</Copy>
         {program && (
           <View style={f.broadcast}>
             <Icon name="star" size={18} color={colors.brand} />

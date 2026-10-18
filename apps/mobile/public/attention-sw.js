@@ -2,8 +2,8 @@ self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
 self.addEventListener('push',event=>{
   let p;try{p=event.data.json();}catch{return;}
-  if(!p||p.title!=='Suqpage'||typeof p.body!=='string'||p.body.length>300||!Number.isSafeInteger(p.notificationId))return;
-  event.waitUntil(self.registration.showNotification('Suqpage',{body:p.body,tag:'suqpage-alert-'+p.notificationId,renotify:false,silent:Boolean(p.silent),data:{destination:p.destination}}));
+  if(!p||!['Suqpage','MirtPage'].includes(p.title)||typeof p.body!=='string'||p.body.length>300||!Number.isSafeInteger(p.notificationId))return;
+  event.waitUntil(self.registration.showNotification(p.title,{body:p.body,tag:'suqpage-alert-'+p.notificationId,renotify:false,silent:Boolean(p.silent),data:{destination:p.destination}}));
 });
 self.addEventListener('notificationclick',event=>{
   event.notification.close();const d=event.notification.data?.destination;let path;

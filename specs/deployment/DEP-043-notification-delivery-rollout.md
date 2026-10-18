@@ -2,13 +2,224 @@
 id: DEP-043
 title: Verified notification delivery rollout
 status: in_progress
-related: [BE-050, FE-062, ADR-0026, DEP-042, DEP-044]
+related: [DEP-048, BE-050, FE-062, ADR-0026, DEP-042, DEP-044, BE-018, FE-019, FE-036, FE-053, DEP-047]
 owners: [operations, security]
-last_updated: 2026-10-09
+last_updated: 2026-10-17
 change_level: L3
 ---
 
 # DEP-043 — Verified notification delivery rollout
+
+## S126 — fair assignment deadlines and admin escalation emails (ready)
+
+Newest owner steering adds operational email alongside the existing in-app alert;
+this is not account email editing. Keep S125 explicit Join and inactivity proof.
+GIVEN assigned work has an unanswered participant cycle WHEN ten minutes pass
+after the later of the oldest unanswered message or current assignment time THEN
+show Overdue and alert current authorized assignee/managers. Join/read/note events
+do not count as replies. Reassignment grants the next staff member their own
+response window without rewriting the original customer wait or history.
+Unassigned queue work retains a ten-minute queue-overdue alert, without an email
+blaming an unassigned staff member. No public timing promise or numerical cap.
+
+GIVEN an assigned cycle first becomes overdue for the current assignment THEN
+atomically persist one per-admin/operations-manager email job alongside the
+internal attention event. Deduplicate by conversation/message/current assignment/
+recipient; retries preserve provider idempotency. Staff alerts remain in-app;
+admin emails contain only queue/reference, assigned staff identity and an
+app-authorized dashboard link, never customer name/contact/message/route details.
+Recipients and target are canonical, freshly role-checked at dispatch. Old cycles
+receive no catch-up email flood. New assignment cycles can escalate independently.
+
+GIVEN the customer is answered, chat ends/resolves, assignment changes or recipient
+loses authority before delivery THEN ignore stale jobs. Bounded leases, attempts,
+24-hour job expiry, generic failure categories and recoverable missing config
+preserve safe behavior. Use a typed email port and the existing Resend provider
+with a stable idempotency key; never write provider credentials/configuration.
+Actual local preview uses the already installed, verified loopback Mailpit only;
+no external test emails. Local inbox capture proves dev delivery, not Resend inbox
+arrival. Provider acceptance is not a human-read claim.
+
+Additive migration69 records assignment-scoped escalation markers and a private
+email outbox tied to existing attention events. Preserve all rows/history and
+suppress previously notified/legacy cycles; rehearse rollback/no-op and protect
+local before-images. No hosted mutation is authorized. Email dispatch is bounded
+and independently failed within existing local/hosted minute workers; no new
+schedule/dependency. Keep notification/maintenance budgets and sanitized logs.
+
+Tests cover assignment/next-reply boundaries, one-per-cycle/assignment races,
+recipient/tenant/privacy/role changes, answer/end/reassign suppression, provider
+idempotency/retry/expiry/config failures, migration preservation and worker bounds.
+Actual Chrome staff/admin + real local Mailpit readback supplements S125 paired
+web/Expo journeys. Focused checks precede explicit visual approval/full gates;
+unchanged native Join/receipt behavior remains under S125 evidence.
+
+Focused verification maps to `scripts/test-support-assignment-response-migration.ts`
+(schema69/backfill/no-op), `scripts/test-support-assignment-response.ts` (assignment
+fairness, atomic manager jobs, old-writer recovery and bounded candidates),
+`scripts/test-support-escalation-email.ts` (localized private content, provider
+bounds, effective-target rejection), `scripts/test-support-escalation-email-delivery.ts`
+(fresh authority, leases, deduplication, retries and stale suppression), and the
+local/scheduled worker tests (isolation, order and execution budget). The named
+`npm run test:support-escalation` chain is included in `test:support`; full gates
+remain subject to the current visual-approval requirement.
+
+
+## S125 — bounded response escalation and explicit acceptance rollout (ready)
+
+Additive schema67 stores unanswered-cycle anchors and explicit assignment Join
+identity without modifying historical message bodies, read cursors or events.
+Backfill only certain participant cycles and suppress historical alert replay.
+Protect local before-images, apply sequentially, verify preservation and no-op
+replay before enabling runtime that uses the new fields. No hosted apply is
+approved by local implementation.
+
+Existing local and hosted minute workers run bounded reply-overdue maintenance
+with independent failure handling after existing dispatch/receipt/routing/idle
+work and within the existing maintenance-start budget. Use support-work try-lock,
+short transaction limits, bounded batches and sanitized counts. No per-chat timer,
+new provider or extra schedule. Delivery rechecks stale-cycle authorization.
+Local actual QA uses process-only push suppression, restores ordinary launchers
+and proves saved settings unchanged. Explicit Join changes require coordinated
+schema/API/web/native rollout; older clients cannot implicitly join by reading.
+Tests cover limits, contention, failure isolation, schema guards and unchanged
+provider configuration. BE-018/050 and FE-019/053/062 govern the feature.
+
+### S125 additive schema68 checkpoint (ready)
+
+Isolated runtime verification exposed the retained transport-only resolution
+CHECK before any technical-support resolution write. Keep already applied67
+immutable. Add68 with a closed-only all-queue resolution invariant, idle_ended
+event enum member and partial latest-evidence index under BE-018. Protect local
+before-images, rehearse rollback, apply sequentially and verify history/no-op.
+Runtime audit evidence is written only in the existing due-ending transaction;
+no new timer/provider or historical evidence backfill. Hosted schema67/68 remains
+separately reviewed, backed up and coordinated with API/web/native release.
+
+## S121 — recurring automatic waiting assignment (ready)
+
+GIVEN local supervised startup or the existing minute hosted worker WHEN an
+invocation has maintenance budget THEN call BE-018's bounded internal automatic
+waiting assignment as well as inactivity maintenance. Local startup runs its
+first tick immediately; subsequent ticks retain60second cadence. New arrivals
+remain immediately assigned in their normal command. Hosted scheduling does not
+require a visitor browser to stay open. No new provider or hosted configuration.
+
+GIVEN routing or inactivity fails THEN report its sanitized category and still
+attempt the other task when budget permits. Preserve notification dispatch/
+receipt failure isolation and the existing20second hosted maintenance-start
+budget; recheck before starting the second maintenance command. Busy/remaining
+work stays durable for later ticks. Logs contain counts, not bodies/contacts.
+Keep local target/schema and import/owned-process guards. Existing saved provider
+settings and minute schedule remain unchanged. Tests cover both tasks, either
+failure, busy/budget skips and ordinary supervisor behavior. Verify the actual
+local worker assigns pre-existing eligible waiting cases without clicking a UI
+command, with exact before/readback records. This is not hosted deployment.
+
+S121 local verification:12 focused worker/controller/supervisor cases pass,
+covering immediate/60second sequential local ticks, either/both command failures,
+sanitized counts, busy-lock handling, import/target guards and hosted20second
+split-task start budgets. `.local/automatic-routing-s121/worker-results.json`
+retains exact source hashes. The actual supervised local startup reports
+routed5/ended0; later ticks report routed0/ended0. Protected independent before/
+readback proves exact-once fair assignments without staff action and unchanged
+messages, prior history, other conversations and saved provider settings:
+`.local/queue-recovery-s121/root/verified.json`. Test-only external-push overrides
+are process-scoped; ordinary supervised settings are restored after browsers
+close. No new schema, credential, hosted setting, schedule or deployment.
+
+## S119 — explicit supervised local startup (ready)
+
+GIVEN local web testing needs recurring chat maintenance WHEN an operator selects
+`npm run dev:with-worker -- --port 3102` THEN supervise the existing local Next
+launcher and guarded local chat worker together, forwarding web arguments only
+to the existing launcher. Reuse their target/schema checks; no new dependency,
+provider setup, hosted target, migration or notification dispatch is introduced.
+Importing the supervisor or worker must not start either child, including when
+an unrelated importing command uses `--run` or `--once`; only the exact worker
+entry file admits those existing direct flags. Ordinary `dev`, `dev:local`
+and the separate worker command retain their existing behavior for protected
+captures. The supervised command does not start Expo; use its existing command.
+
+GIVEN either owned child fails to spawn or exits unexpectedly, including exit0,
+THEN report a sanitized named-child failure, stop its owned sibling gracefully,
+wait for owned children to close and finish nonzero. Do not silently leave a
+working web server without maintenance or claim healthy startup before the
+worker's existing target/schema checks. On SIGINT/SIGTERM forward graceful
+shutdown once to owned running children, wait for closure, remove controller
+listeners and finish successfully unless a prior failure occurred. Never
+discover, signal, replace or restart an independently started process; the
+existing support-work lock still protects concurrent worker transitions.
+
+Focused tests use controlled child-process/signal ports and actual event
+lifecycles to prove import safety, arguments, both-child startup, unexpected
+exit0/nonzero/spawn failure, sibling shutdown, signal deduplication and listener
+cleanup. No real development process, database or maintenance sweep is launched
+by these controller regressions. `scripts/test-local-worker-supervisor.mjs`
+records this focused infrastructure evidence; shared UI approval/release gates
+remain separate.
+
+S119 focused local evidence (2026-10-17): supervisor and direct-worker lifecycle
+tests pass10/10, with separate isolated inactivity and scheduled-worker checks
+passing. Evidence is `.local/inactivity-s119/supervisor-verified.json` and
+`.local/inactivity-s119/isolated-results.json`. A subsequent actual operator
+startup of `npm run dev:with-worker -- --port 3102` also passed: the guarded worker
+reported started and `ended:0, skippedBusy:false`, and Next reported ready on3102.
+The web/worker remain supervised together; Expo remains separately on8082. This
+actual startup supplements the earlier controller-only receipt and does not
+establish external notification or installed Android delivery.
+
+The real running maintenance worker closed labelled Chrome QA case317 at its
+explicitly accelerated guest deadline, retained history/last-assignee identity,
+released the active assignment and left the request unresolved. See
+`.local/chat-reliability-s119/worker-actual-verified.json`; do not report this as a
+naturally elapsed30-minute test. The policy remains guest30 minutes and owner
+Support/Transport24 hours after a public staff reply; unanswered customer work
+does not auto-end. S121 supersedes the earlier manual waiting-work recovery with
+its separate automatic routing command in the same minute worker. Neither
+GET/polling nor the inactivity sweep itself assigns work.
+
+Local migration66 for BE-050 nullable sender-side receipt metadata was backed up,
+rollback-rehearsed, applied and replay-verified with history/protected data intact
+and no backfill: `.local/chat-reliability-s119/migration66/`. The supervisor does
+not run migrations. No hosted migration, provider/configuration change or web/
+native publication occurred. Status remains in_progress; current visual review,
+full/release/acceptance gates, installed-device proof and independently reviewed
+hosted migration/API/web/native rollout remain pending.
+
+## S111 — bounded chat maintenance in the existing worker (ready)
+
+Reuse the existing minute-scheduled Netlify attention worker, without a new
+provider/credential, public maintenance HTTP endpoint or per-session job.
+BE-018 S111 maintenance uses a nonblocking support-work lock, index-filtered due
+clocks, at most25 transitions and bounded database time. Failure is sanitized and
+independent of attention dispatch/receipt work; notification work still runs.
+Tests exercise success/failure/skip paths and query/index usage.
+Maintenance uses transaction-local statement and five-second idle-in-transaction
+limits, so an interrupted function cannot retain an idle support-work lock
+indefinitely. These settings must reset after commit/rollback and must not alter
+the pooled connection's ordinary application defaults. The three-second work-start
+budget is distinct from a hard transaction deadline; never claim strict completion
+within that budget. Focused PostgreSQL evidence verifies LOCAL scope and reset.
+
+Apply the additive nullable-field/partial-index migration to an isolated local
+fixture first, verify backwards-compatible old cases and tests, then local preview.
+No old case is auto-ended merely because of the migration. Hosted rollout requires
+its exact migration/backup/rollback plan and all existing approval/release gates.
+Disable/revert the maintenance worker/client feature on rollback while retaining
+additive fields/events/history; do not erase state or broadly restore a database.
+Netlify schedules run on published deploys, not ordinary Next dev. A separately
+started local worker command is recurring development tooling: require explicit
+--run/--once, PostgreSQL driver, loopback54322 PostgreSQL and loopback54321 local
+Auth, non-production environment and verified public schema containing migration65 before
+any sweep. It runs one sweep at a time each minute, handles signals gracefully
+and logs only counts/safe categories. It does not migrate, configure providers,
+load notification secrets or run automatically when imported. Test target/version
+rejection before writes. Local paired captures still restrict maintenance to their
+own due fixtures under the support lock; never close unrelated waiting cases.
+
+
+Mapped focused regressions: `scripts/test-scheduled-attention-worker.ts`, `scripts/test-local-chat-worker.ts` and `scripts/test-support-inactivity.ts`. They verify failure isolation, late deferral, import/target/schema guards, pool cleanup, count-only logs, try-lock/index/batch/timeout behavior and transactional rollback. Protected local apply/once evidence is `.local/workflow-audit-s111/migration/`; no hosted rollout is implied.
 
 ## Problem and scope
 

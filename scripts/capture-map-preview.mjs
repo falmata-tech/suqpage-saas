@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {chromium, expect} from '@playwright/test';
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
 const base = process.env.SUQPAGE_TEST_BASE_URL || 'http://127.0.0.1:3102';
 assert.ok(['localhost','127.0.0.1'].includes(new URL(base).hostname));
 const dir = '.local/map-preview-review';fs.mkdirSync(dir,{recursive:true});
@@ -19,9 +25,11 @@ async function assertModal(page) {
 }
 try {
  for(const [width,height,locale] of [[1440,900,'en'],[390,844,'en'],[320,568,'en'],[844,390,'en'],...[ 'am','om','so','ti'].map(locale=>[320,568,locale])].filter(([w,,l])=>!process.argv.includes('--pointer-only')||(l==='en'&&[390,1440].includes(w)))) {
-  const context=await browser.newContext({viewport:{width,height},reducedMotion:'reduce'});
+  const context=await browser.newContext({serviceWorkers: 'block',viewport:{width,height},reducedMotion:'reduce'});
   await context.addCookies([{name:'suqpage-language',value:locale,url:base}]);
-  const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const page=await context.newPage();
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'/?view=search&type=businesses&q=Aloe',{waitUntil:'domcontentloaded'});
   const result=page.locator('.discovery-business-results > button').first();await expect(result).toBeEnabled({timeout:30000});
   await expect(page.locator('#discovery-search')).toBeEnabled();
@@ -63,7 +71,8 @@ try {
    await hit.click();await assertModal(page);await page.keyboard.press('Escape');
    await expect(page.locator('.discovery-workbench')).toHaveAttribute('data-panel-open','true');
   }
-  assert.deepEqual(errors,[]);records.push({width,height,locale});await context.close();
+  assert.deepEqual(errors,[]);records.push({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false,width,height,locale});await context.close();
  }
  fs.writeFileSync(`${dir}/${process.argv.includes("--pointer-only")?"pointer":"verified"}.json`,JSON.stringify(records,null,2));console.log(`PASS ${records.length} preview states: drawer overlap, results, markers, focus, dismissal, long content and resizing.`);
-}finally{await browser.close();}
+}finally{await browser.close();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests();}

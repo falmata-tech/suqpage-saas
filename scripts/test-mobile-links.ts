@@ -15,6 +15,9 @@ test('FE-053 exact social hosts preserve phone, username and Unicode draft text 
  const app=new URL(wa.appUrl!);assert.equal(app.protocol,'whatsapp:');assert.equal(app.searchParams.get('phone'),'251911111111');assert.equal(app.searchParams.get('text'),text);assert.equal(app.searchParams.has('redirect'),false);
  const tg=planLink('https://t.me/alhayabrand?text='+encodeURIComponent(text));
  assert.equal(new URL(tg.appUrl!).searchParams.get('domain'),'alhayabrand');assert.equal(new URL(tg.appUrl!).searchParams.get('text'),text);
+ const phone=planLink('https://t.me/+447700900123?text='+encodeURIComponent(text));
+ assert.equal(new URL(phone.appUrl!).searchParams.get('phone'),'447700900123');assert.equal(new URL(phone.appUrl!).searchParams.get('text'),text);assert.equal(new URL(phone.appUrl!).searchParams.has('domain'),false);
+ for(const url of ['https://t.me/+invite_hash','https://t.me/+0123456789','https://t.me/+123','https://t.me/+447700900123?start=campaign','https://t.me/+447700900123/extra','https://t.me:444/+447700900123'])assert.equal(planLink(url).appUrl,undefined,url);
  for(const url of ['https://wa.me.evil.test/251911111111','https://t.me.evil.test/alhayabrand','https://wa.me/invalid','https://t.me/share/url?url=https://example.com','https://t.me/joinchat/abcdef','https://t.me/proxy?server=bad','https://t.me/alhayabrand/123','https://t.me:444/alhayabrand','https://t.me/myhelperbot?start=campaign','https://t.me/auction?slug=123'])assert.equal(planLink(url).appUrl,undefined,url);
 });
 function ports(native=true,failApp=false,failBrowser=false){

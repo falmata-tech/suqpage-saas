@@ -8,7 +8,7 @@ export type PublicSupportChannel = 'help' | 'transport' | 'buying';
 export function supportChannel(value: string | null): PublicSupportChannel | null {
   if (value === null) return null; // Retained API compatibility.
   if (value === 'help' || value === 'transport' || value === 'buying') return value;
-  throw new SupportError('Choose how Suqpage can help.', 'invalid_channel');
+  throw new SupportError('Choose how MirtPage can help.', 'invalid_channel');
 }
 export function matchesSupportChannel(category: string, channel: PublicSupportChannel | null) {
   return channel === null || (channel === 'buying' ? category === 'buying_assistance' : channel === 'transport' ? category === 'shipment_observation' : category !== 'buying_assistance' && category !== 'shipment_observation');

@@ -2,13 +2,218 @@
 id: FE-021
 title: Geographic Showroom map and Daily Featured Showrooms
 status: in_progress
-related: [FE-053, FE-058, FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, BE-019, BE-020, BE-021, BE-023, BE-029, DEP-016, DEP-017, DEP-024, DEP-026, ADR-0011, ADR-0016]
+related: [FE-053, FE-058, FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, FE-048, BE-019, BE-020, BE-021, BE-023, BE-029, BE-041, DEP-016, DEP-017, DEP-024, DEP-026, ADR-0011, ADR-0016, FE-065]
 owners: [product, frontend, design]
-last_updated: 2026-10-07
+last_updated: 2026-10-17
 change_level: L3
 ---
 
 # FE-021 - Geographic Showroom map and Daily Featured Showrooms
+
+## S140 — preview separated final groups without more zoom (ready; latest correction)
+
+Supersedes earlier maximum18-only preview guards; it does not change the zoom
+ceiling, grouping membership or outer hierarchy. GIVEN an outer aggregate WHEN
+clicked THEN zoom toward its normal expansion until groups separate. GIVEN a
+terminal group already represented at the current camera WHEN clicked THEN open
+all its admitted cards immediately without moving or zooming the camera. This
+applies to web, Expo and native. No street-detail jump is required merely to
+unlock a preview. GIVEN a saved terminal key enclosed inside a current aggregate
+WHEN restoring or opening it THEN reject that hidden subgroup until its terminal
+representation is current. Preserve exact public scope/member/capacity validation,
+isolated singles, no-scroll previews and focus/Back behavior.
+
+Ready: all UI guards and shared policy identified; pure diagnosis at normalized13
+shows separate three-member groups wrongly forced to18. Test shared terminal/
+aggregate distinction, current-group validation and platform preview/camera
+behavior. Pair actual review with S139 synthetic tiles; no public automation,
+data write or native build. Rollback is UI/policy only. Master §§5/10/19/22 need
+verified reconciliation; visual/full/rollout gates remain open.
+
+## S139 — blocked basemap correction (ready; local candidate)
+
+Defect: a public provider can return a decodable403 image, which Leaflet's image
+load event alone cannot distinguish from a valid tile. Private Tracking metadata
+can also leave an inherited no-referrer policy on SPA return to Market. The
+specific provider enforcement reason in the user's screenshot is not proven.
+Scope is the browser basemap adapter, including Expo web; no new provider,
+native SDK change, clustering rewrite, account or database write.
+
+GIVEN public Market opens directly or after private Tracking WHEN visible tiles
+load THEN each makes one direct request to the configured exact URL using normal
+HTTP caching, the browser's own identity and an origin-only cross-origin referrer.
+Private Tracking retains its own no-referrer policy. Never include path/query,
+tracking locators, account details or search text in a tile referrer or URL.
+
+GIVEN a visible tile fails HTTP status, CORS or image decoding WHEN loading it
+THEN do not display its body as a successful basemap; remove only the owned
+raster layer, cancel owned pending requests and release object URLs. Keep camera,
+markers, previews and controls available on the neutral surface, with a concise
+localized status and Retry map. Panning while failed does not restart raster
+requests. A deliberate retry recreates only raster using the same URL/default
+cache; another failure stays degraded. Unmounted/obsolete loaders cannot update
+the current map. No proxy, cache-busting, identity rotation or automatic fallback.
+
+GIVEN normal zooming or preview→showroom→Back while tiles are pending WHEN the
+SDK replaces obsolete tiles THEN cancellation does not become a basemap failure.
+Use the public asynchronous GridLayer extension and immutable tile coordinates;
+do not combine a fetch loader with TileLayer's image-only abort routine, which
+can overwrite decoding callbacks. Verify rapid zoom with held/released responses
+and return navigation past the decode timeout, preserving camera and controls.
+Internal diagnostics distinguish HTTP status, network/CORS, decode and timeout
+without retaining request URLs, response bodies, identity or search text. The
+visitor sees the same concise status; diagnostics are not additional UI copy.
+
+Ready: privacy, lifecycle, accessibility and en/am/om copy evaluated; existing
+FE-058/DEP-026/ADR-0016 cross-links apply. Focused browser/loader regressions use
+local cross-origin fixtures for200/403-PNG/CORS/abort/cache and actual local
+Market→Tracking→Market plus Expo workflows. Automated pan/zoom must intercept
+public tiles before sending; actual provider playback requires a separate normal
+human browser check. Rollback reverts only this adapter/UI; no data rollback.
+Master §§5/10/15/19/22 require verified reconciliation; full/visual/rollout gates
+remain open. Planned test: `scripts/test-map-tile-loader.ts` and focused actual
+review under `.local/map-tiles-s139/` (provider traffic is not automated).
+
+Local evidence: `scripts/test-map-tile-loader.ts`15 cases and
+`scripts/test-map-tile-ui.ts`2 real-adapter cases pass; fixture guard5 and public/
+private metadata probe pass. `actual/outcome.json` plus phone-return supplement
+prove35 real-app checks/51 captured states across desktop/phone web and Expo,
+with controlled tiles and source hashes. Pending zoom and showroom-return stay
+healthy beyond10seconds. Owner separately confirms the normal browser map works
+after Retry/preview return; this is not a provider-unblock acknowledgement.
+S140 evidence: shared20, UI17, installed-SDK2 plus the same real-app preview
+journeys; terminal cameras stay unchanged. Root/native types,206specs and1725
+catalog messages pass. Visual/full/commit/deployment gates remain open.
+
+## S130 — richer native group previews (ready)
+
+FE-065 S130 adds useful literal description/city within current S127 row and font
+budgets, preserving the same capacity, normalized maximum zoom and all-at-once
+non-scrolling modal. Full current public business detail remains in the existing
+preview, with locale-aware country names. Regress short/enlarged rows and actual
+Chrome selection→showroom→Back; no clustering or location-data rewrite is included.
+
+## S127 — screen-sized nearby groups (ready; latest owner direction)
+
+The newest owner instructions supersede the global three-shop cap, connecting
+lines and paged pickers. A final circle at maximum opens ALL its shops together, with no inner
+scroll, Previous or Next. Larger screens can hold more; phones hold fewer.
+Zoom-out aggregates normally merge nearby final groups; final group membership never splits. L1 frontend refinement; no API, database,
+saved-coordinate, provider or chat change. Retain failed/superseded evidence.
+
+GIVEN the available modal rectangle and current font scale WHEN sizing the map
+and picker THEN derive one shared capacity: at most six cards in two columns on
+large screens (available width at least600), at most three in one column on
+phones, reduced further when height/font size requires. Use readable108px normal
+rows or84px compact rows with shared header/padding allowances. Extremely short
+or enlarged layouts may require one card. Every admitted member must fit at once;
+never page or scroll the shop list. The index and picker must use the same capacity.
+All new actions/counts have authored native-language labels in all five languages.
+
+GIVEN the current eligible public map projection WHEN data/filter scope or screen
+capacity changes THEN form deterministic3-kilometer connected neighborhoods from
+existing public display coordinates and stable nearest-spatial/ID order. Partition
+into chunks2..capacity, using only isolated singles except when capacity1, or an
+odd neighborhood at capacity2, makes a one-card group unavoidable. Such a member
+of a non-isolated neighborhood remains a counted circle, not an isolated-shop icon.
+For compactness first find the smallest possible largest within-group Haversine
+diameter, then allow the greater of that value and3kilometers as a comfort budget;
+among valid partitions prefer fewer groups, then smaller total diameter and stable
+larger-first ties. This lets genuinely close shops use a desktop's larger capacity
+while extra small groups avoid remote branch-jump remainders. It is a connected
+neighborhood contract, not a universal pairwise3-kilometer guarantee. Do not mutate
+coordinates or reapply area offsets. Existing public scope stays bounded to200.
+The nearby-area threshold is3kilometers: an individual shop icon is permitted
+ONLY if no other eligible current-scope shop is within that distance. If a peer
+exists, the shop must belong to a numbered final group, including forced one-card
+accessibility partitions. The previous800m threshold incorrectly treated many
+ordinary city neighbors as isolated; the separate display-offset bound stays800m.
+
+GIVEN screen-admitted final groups WHEN zooming out THEN normal hierarchical
+clustering merges nearby final groups and isolated shops into larger outer
+circles. Their number is the total businesses, not the number of subgroups.
+Clicking an outer aggregate zooms toward its expansion level; it NEVER opens a
+large shop modal. As zoom increases, outer circles separate into their children.
+Only at the maximum supported zoom (normalized18, native raw17) do final
+nearby groups stop splitting and clicking opens every admitted member together.
+If a final group is already visible below that level, its click zooms to18
+instead of opening the modal. Any numbered circle below maximum is a zoom action. Final group IDs never subdivide with zoom.
+Use the existing Supercluster dependency over final groups as weighted points,
+not raw shops; source maxZoom17 yields final leaves by normalized18. No new
+provider/dependency. Every zoom represents each eligible ID exactly once.
+
+Screen-capacity or actual eligible-data/filter changes may recompute final groups;
+saved state must match an exact current final group. Outer aggregate IDs/keys never
+authorize a modal; restored final-group state below maximum cannot open one. Leaflet maximum18 and MapLibre raw17 retain matched scale;
+source capability19 stays separate. Current public scope remains200 and legacy
+server nearbyGroups remains older-client compatibility only. Counted-circle labels below maximum
+state Zoom in; final circles at maximum state View businesses in all five languages.
+
+GIVEN coincident circles WHEN rendered THEN use bounded deterministic circle
+spacing for the full current scope before viewport filtering, capped at800meters
+from each true public centroid. At broad zoom, ordinary outer clustering handles the nearby groups; never
+visually move circles to another town or country. Only final leaf circles need
+small bounded spacing, without changing final membership. Skip impossible spacing
+searches and retain true anchors at wrapped/polar edges. Show plain numbered
+circles ONLY: no connecting lines, centroid dots or extra geometry. Preserve the
+orange/white design and48px targets. At broad zoom aggregate circles replace overlapping nearby leaves; final
+all-fit groups remain the terminal level rather than splitting into shop icons.
+
+GIVEN a final circle at maximum zoom WHEN clicked THEN open only its current
+members, all at once; below maximum its click zooms instead.
+GIVEN SDK zoom completion updates parent state after rendering marker roots WHEN
+the final circle is activated THEN use the latest current callback and current
+maximum-level authority, never an earlier render’s pre-maximum callback. Test
+ordinary zoom then terminal activation without an intervening language/filter
+change; no extra click or map pan should be required.
+Selecting a card opens the existing business detail preview; Back returns to that
+same still-valid group and Close returns to the unchanged map. Opening the full
+shop and returning preserves valid group/selection/focus/camera. A capacity change
+revalidates or clears the group; no hidden/off-route modal or stale membership.
+
+GIVEN short Market stages WHEN controls render THEN full48px zoom/reset, transport
+and panel-handle targets stay unobstructed. Below viewport height600 omit only the
+duplicate Market title/info strip; brand/About remain. Actual Chrome must click
+all affected controls at320×480 and844×390 without force or writes. Web short-height layouts must reclaim the duplicate Market
+strip, use a horizontal map control row and a compact transport dock clear of the
+panel handle; narrow the inactive content peek if necessary while retaining the
+reachable switch. Keep normal-height desktop/390×844 layout unchanged. Actual
+320×480 exposed a132px stage crowded by tools/dock/peek. The scoped correction
+now verifies a180px visible/actual map, horizontal controls and compact dock,
+with normal-height layout unchanged; final current-source journeys remain gated.
+
+Ready: screen capacity, compactness/group invariants, no-scroll/no-pager admission,
+plain-circle UI, current membership/privacy, zoom/resize distinction, localization,
+short-stage geometry, tests and local-only rollback are explicit before edits.
+Focused tests cover capacities1..6, compact partitions/branching worlds, exactly-once
+IDs, isolated/forced single distinction, stable terminal order, normal outer merge/expansion/counts, current scope,
+wrapped bounds, bounded spacing and all-fit layouts. Actual installed Chrome web
+and Expo must verify desktop>3 when available, phone-fitting groups, no lines,
+no paging/scroll, detail/return and real API filter/clear. Labelled dense fixtures
+supplement current local catalog; installed native/OS behavior remains separate.
+Visual/full/acceptance/release/commit/hosted/new-Android gates remain pending.
+
+Shared policy: `lib/map/map-clustering.ts`. Primary spacing precedent:
+[Overlapping Marker Spiderfier](https://github.com/jawj/OverlappingMarkerSpiderfier-Leaflet).
+Only bounded spacing is reused, without connecting legs or a new dependency.
+
+GIVEN Expo Leaflet initializes before its flex container reaches its actual size
+WHEN the container becomes visible or changes size without a window resize or
+height-prop change THEN invalidate only the owned SDK viewport using the existing
+center-preserving resize contract and redraw current markers. Observe actual
+container dimensions; coalesce work, ignore zero-size/hidden layouts, disconnect
+and cancel on unmount. An initial valid layout must not require the user to
+resize the browser. Prove0→visible layout without a window event, current markers,
+camera bounds and cleanup with real React/Leaflet; actual844×390 must start and
+complete the ordinary group journey. No grouping/copy/style/data change.
+
+GIVEN compact map controls switch from a right-aligned column to a left-aligned
+row WHEN React Native Web resolves the styles THEN explicitly clear the inherited
+right inset with auto; undefined must not leave a full-width invisible toolbar.
+Only the visible control row occupies the hit area; the remaining map accepts
+normal cluster activation and panning. Verify installed RNWeb style resolution
+and actual844×390 toolbar geometry/background hits, preserving48px buttons and
+normal portrait layout. No color, cluster style or backend change.
 
 ## Problem and outcome
 
@@ -17,11 +222,11 @@ geographic discovery feel artificial. Visitors also need a second, explicitly
 curated way to browse the same businesses without confusing a scheduled
 showroom presentation with the physical map.
 
-The outcome is an application-first marketplace where the map clusters nearby
-businesses until neighborhood zoom resolves isolated businesses into individual
-storefront badges and bounded nearby groups into counted markers. Activating a
-nearby group opens at most six image-led cards over the unchanged map, with no
-simulated venue, pagination, or route change. A separate weekly
+The outcome is an application-first marketplace where only geographically
+isolated businesses use individual shop icons. Normal outer circles merge nearby
+final groups when zoomed out and click to zoom in. An already-separated final circle
+opens its screen-admitted members together over the unchanged map. Its terminal
+members never subdivide; every card fits without scrolling or a pager. A separate weekly
 country-wide program presents one industry as Daily Featured Showrooms on every
 day of the week in a calm, bounded media-card gallery.
 
@@ -30,13 +235,12 @@ day of the week in a calm, bounded media-card gallery.
 ### In scope
 
 - Individual business markers at reviewed WGS84 coordinates.
-- Numbered, zoom-dependent clusters and click/tap-to-expand behavior.
-- Counted neighborhood-zoom groups for same-city businesses within 800 meters,
-  balanced into groups of no more than six while preserving source coordinates.
-- One floating nearby-showroom inspector with fixed-readable image cards over
-  the active map and no venue, pagination, internal scrolling, or route
-  navigation. Selecting a card replaces the list inside that same inspector;
-  it never stacks a second popup over the nearby list.
+- Screen-sized final groups, with click/tap at maximum opening all members.
+- Normal outer aggregation of screen-admitted final groups; only isolated
+  businesses retain shop icons; forced one-card groups remain numbered circles.
+- One modal business picker with readable image cards, no pagination
+  or internal list scrolling and no route navigation. Selecting a card replaces
+  its list with the existing detail; Back restores the selected card in that final group.
 - A policy-compliant OpenStreetMap Standard basemap requested directly by the
   visitor's browser for the visible viewport through one provider registry.
 - A combined eligible map that loads immediately behind a required initial
@@ -71,8 +275,8 @@ day of the week in a calm, bounded media-card gallery.
 - Claiming a physical map venue, Daily Featured building, street navigation, routing,
   turn-by-turn directions, or authoritative boundaries.
 - Placing virtual Daily Featured floors over the geographic map.
-- Grouping businesses across different reviewed cities or beyond the bounded
-  proximity radius.
+- Treating display groups as authoritative physical neighborhoods, exact
+  business distances or city boundaries.
 - Geocoding, routing, tile proxying, prefetching, bulk downloads, offline tile
   packages, or service-worker caching of third-party map tiles.
 - Hiding a published active showroom because a manual renewal date elapsed.
@@ -86,20 +290,18 @@ day of the week in a calm, bounded media-card gallery.
   active public, application, URL, analytics, style, and persistence contracts
   use Daily Featured language.
 
-- **Geographic Showroom marker:** one eligible business at its reviewed coordinates.
+- **Geographic Showroom marker:** one eligible business at its public display coordinates.
   It uses a compact fixed-size map-pin silhouette containing a familiar upright
-  storefront and a short Showroom label. Its visible silhouette remains smaller
+  storefront and a short merchant name. Its visible silhouette remains smaller
   than the numbered cluster core and has no decorative halo, while a transparent
-  44px interaction target preserves phone usability. Every individual marker and
-  numbered cluster uses the same accessible Suqpage teal family; industry never
-  recolors geographic markers. It distinguishes one showroom
+  44px interaction target preserves phone usability. Appearance follows the
+  accepted S85 shop-marker refinements below; S127 preserves existing
+  counted-marker and status styling. It distinguishes one showroom
   from an aggregate and does not load booth photography into the map renderer.
-- **Cluster:** a zoom-dependent aggregate of two or more nearby markers. Its
-  number is the exact number of represented businesses.
-- **Nearby group:** a terminal same-city proximity aggregate containing two to
-  six eligible businesses. Its count is exact, its marker represents the group
-  without rewriting member coordinates, and its floating viewer keeps every
-  represented showroom immediately reachable.
+- **Cluster / map group:** a fixed screen-capacity partition of one connected
+  3-kilometer neighborhood in the current eligible projection. Sorted public IDs
+  identify it; its final members never subdivide; outer aggregates merge these groups on zoom-out. Only isolated
+  one-business neighborhoods use an individual storefront marker.
 - **Weekly industry Daily Featured:** a virtual, country-wide presentation of one stable
   industry assigned to each day of the week. All seven days use the same Daily Featured
   floor, eligibility, preview, and booth-reference rules.
@@ -111,11 +313,14 @@ day of the week in a calm, bounded media-card gallery.
   labeled **Featured now** across any visible map or card representation. That
   presentation temporarily replaces its merchant **Live** badge without changing
   the tenant's saved live setting; all other valid live businesses remain labeled.
-- Every business remains at its reviewed latitude and longitude. Same-city
-  businesses within 800 meters may resolve into deterministic balanced groups
-  of at most six at neighborhood zoom.
-- Activating a cluster zooms to the level where its children separate. At the
-  maximum supported zoom, individual markers remain reachable.
+- Saved business coordinates remain authoritative; existing city-area display
+  offsets remain visual-only. Fixed groups follow S127 connected neighborhoods and
+  screen-sized compact partitions through every supported zoom. Legacy server nearbyGroups remain a compatible
+  response and no longer decide current visual membership.
+- Activating a counted circle below maximum zooms toward its expansion level.
+  Only maximum18 final circles open every current member together without
+  pagination. Final membership stays intact while outer clusters merge on zoom-out;
+  only isolated businesses retain individual shop icons.
 - A location option represents businesses near that named place, not a claim
   that every result lies inside an authoritative city boundary.
 - Every Daily Featured business occupies one stable card position in one
@@ -198,20 +403,20 @@ day of the week in a calm, bounded media-card gallery.
   pannable without trapping page scrolling outside its stage.
 - The map command area avoids duplicate filter rows and keeps the map within the
   first painted mobile and desktop viewport.
-- A terminal nearby cluster opens a lightweight viewer over the live map rather
-  than replacing it with simulated architecture. The viewer contains at most six
-  fixed-readable, image-led showroom cards, uses three columns where space permits
-  and two on phones, and requires no pagination, zoom, or internal scroll.
-- Nearby grouping is restricted to the same reviewed city and an 800-meter
-  radius. Larger cohorts split into balanced groups of at most six with separate
-  map markers. Map grouping never rewrites a showroom's reviewed coordinates.
+- Every numbered group opens one image-led picker above the live map. All
+  screen-admitted cards appear together without list scrolling or pager controls.
+  Individual detail may scroll. Back preserves the selected card; Close preserves
+  the map. Resize revalidates the group against the new all-fit capacity.
+- Final membership is fixed geographically within the current screen capacity;
+  ordinary outer clusters merge final groups as the visitor zooms out. Larger neighborhoods partition into screen-sized circles; bounded
+  badge spacing separates coincident circles without lines or changing GPS data.
 - Daily Featured uses width-responsive CSS-grid columns, dimensioned lazy media,
   and no simulated architecture, transform loop, or React rerender for scroll frames.
-- Nearby showroom cards stay in a bounded floating map panel with no ornamental
-  venue, floor, hall, or platform. The panel is centered within the map's safe
-  area, remains clear of map attribution and persistent support controls, and
-  uses mutually exclusive **nearby list** and **showroom detail** states. The
-  detail state provides **Back to nearby** and **Open showroom** actions; Close
+- Group cards stay in a bounded modal picker with no ornamental
+  venue, floor, hall, or platform. The panel fits the available viewport safe
+  area while the unchanged map remains visible behind its backdrop, and
+  uses mutually exclusive **business list** and **showroom detail** states. The
+  detail state provides **Back to businesses** and an action to open the page; Close
   and Escape dismiss either state without losing map position. Daily Featured
   references advance left-to-right and then top-to-bottom through its responsive
   card grid without changing schedule, sponsor placement, or walkthrough behavior.
@@ -236,20 +441,18 @@ day of the week in a calm, bounded media-card gallery.
   for the active viewport. It uses provider/browser caching, zero retained tile
   buffer, idle updates, no zoom-animation tile refresh, and no retina duplicate
   requests. Suqpage never proxies or preloads those tiles.
-- Geographic zoom commits cluster, nearby-group, and individual-marker
-  reconciliation only after movement settles. Supercluster receives the
-  committed Leaflet bounds and a small viewport buffer; off-screen businesses
+- Geographic zoom commits cluster and individual-marker
+  reconciliation only after movement settles. The shared hierarchy uses
+  committed zoom for normal outer merging/expansion and bounds for visibility; off-screen businesses
   remain searchable but do not create marker DOM nodes.
-- At terminal neighborhood zoom, a bounded nearby-group marker opens its
-  six-card viewer instead of demanding building-level zoom. Leaflet's basemap
+- At its current camera, a separated final counted marker opens every admitted card
+  together without pagination or further zoom. Leaflet's basemap
   supplies road and place labels; Suqpage does not mount duplicate local labels.
-- Selecting an individual map page opens a non-modal floating inspector centered
-  and bounded inside the map canvas. It never crosses into the desktop command
-  rail, dims or blurs the wider application, or makes the background inert. A
-  restrained low-opacity dismissible scrim is limited to the map so selection is
-  unmistakable while its geographic context remains visible. Phones keep the
-  inspector compact and centered within the available map. Daily Featured may
-  use its own workspace-bounded preview. Close, scrim click, and Escape return
+- Selecting an individual map page opens a compact accessible modal preview.
+  Selecting a business within a group replaces the list inside the same modal,
+  with no second popup. The unchanged map remains visible behind a restrained
+  backdrop while focus stays within the active preview. Daily Featured may
+  use its own preview. Close, scrim click, and Escape return
   focus without losing the visitor's map, filter, or program state.
 - The desktop industry menu is no wider than its trigger. Labels wrap within
   that width, and the menu remains inside the map command surface at narrower
@@ -261,18 +464,21 @@ day of the week in a calm, bounded media-card gallery.
 ## Scenarios
 
 ```gherkin
-Scenario: Nearby businesses separate as the map zooms
-  GIVEN several eligible businesses are close at the country zoom
-  WHEN the visitor activates their numbered cluster
-  THEN the map zooms to the cluster expansion level
-  AND smaller clusters, a bounded nearby-group marker, or individual businesses replace it
-  AND no business is moved to a city-host coordinate
+Scenario: An outer circle zooms in until a final group can preview
+  GIVEN nearby final groups are merged into an outer circle below maximum zoom
+  WHEN the visitor activates it
+  THEN the map zooms toward its expansion level without opening a shop modal
+  AND every public business remains represented exactly once
+  AND at maximum18 a final group's activation opens all its screen-admitted cards
+  AND the final modal activation leaves map center/zoom unchanged
+  AND dense final groups never split into individual shop icons
+  AND saved business coordinates remain unchanged
 
 Scenario: Large marketplace map remains viewport bounded
-  GIVEN the eligible cluster index contains thousands of reviewed showrooms
+  GIVEN thousands of eligible showrooms exist and the map projection contains at most 200 scoped businesses
   WHEN a visitor pans or zooms on a constrained phone
   THEN Leaflet moves its existing tile and overlay panes during the gesture
-  AND cluster, marker, and nearby-group reconciliation occurs after the gesture ends
+  AND cluster and marker reconciliation occurs after the gesture ends
   AND only the bounded visible viewport contributes showroom marker nodes
   AND map labels come from visible provider tiles rather than duplicate local DOM nodes
 
@@ -284,21 +490,21 @@ Scenario: Browser loads the detailed basemap within provider policy
   AND Suqpage does not proxy, prefetch, bulk-download, or service-worker-cache those tiles
   AND showroom search and place filtering continue to use the Supabase catalog
 
-Scenario: Visitor opens a nearby showroom group
-  GIVEN two or more eligible businesses in one city are grouped within the bounded proximity radius
-  AND the visitor has expanded their geographic cluster to neighborhood zoom
-  WHEN the visitor activates the nearby-group marker
-  THEN a floating viewer opens over the unchanged map without route navigation
-  AND no more than six image-led showroom cards render in readable columns
-  AND no venue, internal scroll, page selector, or deeper map zoom is required
-  AND closing the viewer returns focus without losing map state
+Scenario: Visitor opens a final counted group at maximum zoom
+  GIVEN a screen-admitted final group is visible at normalized18
+  WHEN the visitor activates its counted marker
+  THEN a modal picker opens over the unchanged map without route navigation
+  AND every current member renders together without paging or inner list scroll
+  AND no Previous/Next/range controls or connecting lines exist
+  AND closing returns focus without losing map state
+  AND the same numbered circle below maximum would zoom instead of opening
 
-Scenario: Visitor inspects one showroom from a nearby group
-  GIVEN the nearby showroom inspector lists two to six businesses
+Scenario: Visitor inspects one showroom from a counted group
+  GIVEN the picker shows all members of a current final group
   WHEN the visitor selects one showroom
   THEN that showroom's detail replaces the list inside the same inspector
   AND no second popup, scrim, or obscured nearby panel remains on screen
-  AND Back to nearby restores the same group list
+  AND Back to businesses restores the selected business's card and focus
   AND the support launcher does not overlap the active inspector
 
 Scenario: Isolated business remains independently discoverable
@@ -336,10 +542,10 @@ Scenario: Visitor keeps the combined marketplace
   THEN the chooser closes without filtering the de-duplicated combined map
   AND cross-listed businesses still appear only once
 
-Scenario: Selected-industry map opens a nearby group directly
-  GIVEN one nearby group contains eligible businesses in the selected industry
+Scenario: Selected-industry map opens a counted group directly
+  GIVEN one fixed nearby group contains eligible businesses in the selected industry
   WHEN the visitor opens its marker
-  THEN every grouped showroom card renders without a second industry choice
+  THEN every member is visible together in the final-group picker without another industry choice
   AND closing preserves the selected industry and map transform
   AND the viewer exposes no scheduled row or booth numbers
 
@@ -368,6 +574,7 @@ Scenario: Visitor returns from a showroom
   THEN the explicit public workspace that launched the showroom is restored before any older browser-history destination
   AND its authoritative URL filters are restored
   AND the prior non-geolocation map transform, nearby-group viewer, and selected business preview are restored when still valid
+  AND the group page containing the selected business is restored from current eligible public references
   AND no visitor coordinate is read from storage
 
 Scenario: Today's featured program preserves a readable bounded floor
@@ -378,12 +585,13 @@ Scenario: Today's featured program preserves a readable bounded floor
   AND large and phone screens use readable columns and ordinary vertical floor scrolling when needed
   AND no hall, page selector, or hidden overflow record exists
 
-Scenario: A dense area splits into readable nearby groups
-  GIVEN one city area contains more than six eligible businesses within the proximity radius
-  WHEN the terminal map markers render on desktop or phone
-  THEN the cohort splits into deterministic balanced groups of at most six
-  AND each marker opens one fixed-readable card viewer without pagination or internal scrolling
-  AND the visitor never needs to zoom or pan sideways to read a storefront
+Scenario: A dense area uses several small fixed groups
+  GIVEN sixteen nearby eligible businesses belong to one connected neighborhood
+  WHEN any supported map zoom renders
+  THEN deterministic groups each respect current capacity and every ID occurs once
+  AND zooming out can aggregate groups while final member IDs stay unchanged
+  AND only a final circle at maximum opens its admitted members together
+  AND collision display offsets never rewrite coordinates or combine those groups
 
 Scenario: Visitor previews another program date
   GIVEN the visitor selects a date that is not today
@@ -452,13 +660,13 @@ Scenario: Basemap tiles fail
   stated in the public Privacy notice; no search, account, or showroom record is
   included in a tile URL.
 - Accessibility and responsive behavior: keyboard markers/clusters/gateways,
-  labeled non-modal preview regions with close and Escape behavior, accessible controls, reduced motion, touch
+  labeled modal previews with focus containment, close and Escape behavior, accessible controls, reduced motion, touch
   targets, and bounded previews.
 - Localization and merchant-entered values: long place/business names truncate
   or wrap without changing marker/control geometry.
-- Performance and limits: indexed marker projection, deterministic 800-meter
-  same-city grouping, move-end Supercluster rendering, visible browser tiles,
-  at most six nearby cards with no pagination or internal scroll, and one
+- Performance and limits: bounded 200-business public projection, shared
+  normal hierarchy ending in screen-capacity final groups at normalized18, move-end rendering,
+  visible browser tiles, all screen-admitted cards without internal list scroll, and one
   vertically scrolling Daily Featured layer with lazy dimensioned media.
 - Failure recovery and idempotency: basemap tiles fail independently; Daily
   Featured and directly addressed permanent Showrooms do not depend on tile availability.
@@ -473,8 +681,17 @@ attribute `directory` and `expo` showroom entries.
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
-| Eligibility, bounded nearby groups, weekly schedule, Daily Featured redaction, and card references | integration | `scripts/test-discovery.ts` |
-| Cluster expansion, nearby viewer, close restoration, marker preview | browser | `tests/acceptance/app.spec.ts` |
+| Eligibility, legacy nearbyGroups compatibility, weekly schedule, Daily Featured redaction, and card references | integration | `scripts/test-discovery.ts` |
+| Shared screen distance, terminal grouping, bounded membership and adaptive capacity | focused | `scripts/test-map-clustering.ts` |
+| Current final membership, all-fit list, preview/back and focus restoration | focused | `scripts/test-map-group-picker-web.ts` |
+| Native SDK bounds, picker/Market lifecycle and current public references | focused | `scripts/test-mobile-map-groups.ts`, `scripts/test-mobile-market-layout.ts` |
+| Real Leaflet marker focus after reprojection | browser | `scripts/test-web-map-lifecycle.ts` |
+| Fresh marker callbacks, flex0→visible recovery, camera and owned cleanup | focused/browser | `scripts/test-mobile-map-lifecycle.ts` |
+| Compact row bounds and real RNWeb inherited-inset resolution | focused | `scripts/test-mobile-market-layout.ts`, `scripts/test-web-market-short-layout.ts` |
+| S128 keyed scope settlement, committed restoration and obsolete response fencing | focused | `scripts/test-market-workspace-ui.ts`; current data must settle and the restored group/selection/camera commit before SDK callbacks persist view |
+| S128/S136 size-only changes preserve the raw SDK camera within half a projected pixel and retain geographical intent without compounded quantization | focused/browser | `scripts/test-web-map-lifecycle.ts`, `scripts/test-mobile-map-lifecycle.ts`, `scripts/test-leaflet-resize-center.ts`; shared weak map-instance intent, independent raw SDK/persisted-view assertions, fractional parity/remount, pan/zoom takeover, zero-size and disposal guards; FE-065 S136 controls Ready and actual-return proof |
+| S128 combined search/filter/reload/clear → final group → full showroom → Back | browser | `.local/market-toolbar-s128/workflows-verified/outcome.json`; actual local API outcomes and full-precision SDK camera readback; visual/full gates pending |
+| Group activation, all-fit list, preview and full-page return | browser | Actual installed Chrome/Expo29checks/59states; `.local/map-groups-s127/actual/final-platform-verified.json`; visual approval pending |
 | Desktop/390px/320px map, nearby viewer, and Daily Featured layout | visual/browser | `scripts/capture-discovery-visuals.mjs` |
 | Exact tile provider, attribution, CSP, no proxy/prefetch/cache | contract | `scripts/test-discovery-geography.mjs` |
 | Basemap failure and Daily Featured recovery | browser | `tests/acceptance/app.spec.ts` |
@@ -576,7 +793,7 @@ rollout gates stay distinct and follow visual approval. Master §§4/10/19/22 af
 Local evidence (2026-10-07): both types, homepage composition and spec validation
 pass. capture-map-marker-contrast.mjs covers thin white shop/roof contours,
 orange-fill and normal/selected label contrast, real selection/preview/no zoom-out
-and cluster keyboard expansion. Current white-edge 1440/390/320 web/Expo and
+and the then-current cluster keyboard expansion. Current white-edge 1440/390/320 web/Expo and
 actual OSM desktop/phone views are in .local/map-marker-white-edge-review/.
 Normal/selected name contrast is 4.83/5.24:1 and orange-fill-to-cream is 3.09:1;
 the white outline is not claimed to contrast 3:1 against cream. Original cluster/

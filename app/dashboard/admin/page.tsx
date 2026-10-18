@@ -82,7 +82,7 @@ export default async function AdminOverview({
       <div className="dashboard-head admin-overview-head">
         <div>
           <span className="eyebrow">{t("Platform overview")}</span>
-          <h1>{t("Suqpage administration")}</h1>
+          <h1>{t("MirtPage administration")}</h1>
         </div>
         <Link className="btn brand" href="/dashboard/clients/new">{t("Add business")}</Link>
       </div>

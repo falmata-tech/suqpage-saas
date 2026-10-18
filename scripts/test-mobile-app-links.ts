@@ -53,8 +53,35 @@ test('DEP-042 Android claims only registered signing identities and exact public
  assert.equal(policy.certificateSha256,registry[1].target.sha256_cert_fingerprints[0].replaceAll(':',''));
  for(const packageName of ['com.suqpage.app.preview','com.suqpage.app']){
   const [filter]=androidAppLinks(packageName);assert.equal(filter.autoVerify,true);
-  for(const item of filter.data){assert.equal(item.scheme,'https');assert.equal(item.host,'suqpage.com');assert.ok(item.pathPrefix==='/@'||['/','/market','/featured','/about','/login','/account'].includes(item.path));}
+  for(const item of filter.data){assert.equal(item.scheme,'https');assert.equal(item.host,'suqpage.com');assert.ok(['/@','/tracking/'].includes(item.pathPrefix)||['/','/market','/featured','/about','/login','/account','/transport-plan','/tracking'].includes(item.path));}
  }
  assert.deepEqual(androidAppLinks('evil.package'),[]);
  assert.doesNotMatch(JSON.stringify(registry),/password|privateKey|access_token|secret/i);
+});
+
+test('FE-069 tracking AppLinks are locators only; legacy capabilities are dropped on cold/warm opens',()=>{
+ const cap='a'.repeat(64),reference='SHP-'+'A'.repeat(20);
+ for(const initial of [true,false]){
+  assert.equal(redirectSystemPath({path:'https://suqpage.com/tracking',initial}),'/tracking');
+  assert.equal(redirectSystemPath({path:'https://suqpage.com/tracking/'+reference,initial}),'/tracking?reference='+reference);
+  assert.equal(redirectSystemPath({path:'https://suqpage.com/transport-plan#'+cap,initial}),'/tracking');
+ }
+ assert.equal(incomingSuqpagePath('/tracking/'+reference),'/tracking?reference='+reference);
+ for(const fragment of ['', '#'+cap, '#malformed&session=secret'])assert.equal(incomingSuqpagePath('https://suqpage.com/transport-plan'+fragment),'/tracking');
+ for(const path of [
+  'suqpage://tracking','suqpage:///tracking/'+reference,
+  'https://evil.test/tracking/'+reference,'https://suqpage.com.evil.test/tracking',
+  'http://suqpage.com/tracking','https://suqpage.com:8443/tracking',
+  'https://user@suqpage.com/tracking','https://suqpage.com/tracking?email=private',
+  'https://suqpage.com/tracking#'+cap,'https://suqpage.com/tracking/',
+  'https://suqpage.com/%74racking','https://suqpage.com/tracking/'+reference.toLowerCase(),
+  'https://suqpage.com/tracking/'+reference+'/extra','https://suqpage.com/tracking/'+reference+'?token='+cap,
+  'https://suqpage.com/transport-plan?key='+cap,
+ ])assert.equal(incomingSuqpagePath(path),'/',path);
+});
+
+test('FE-065 independent country/city searches survive incoming app links',()=>{
+ const input='https://suqpage.com/?view=search&b.q=Studio&b.country=ET&b.city=ET%3Aplace-553e667e63bb8da0&p.q=Grass&p.country=KE&p.offeringType=products&p.madeToOrder=true&p.page=2';
+ const path=incomingSuqpagePath(input),p=new URL(path,'https://suqpage.com').searchParams;
+ assert.equal(p.get('b.q'),'Studio');assert.equal(p.get('p.q'),'Grass');assert.equal(p.get('b.country'),'ET');assert.equal(p.get('p.country'),'KE');assert.equal(p.get('b.city'),'ET:place-553e667e63bb8da0');assert.equal(p.has('p.offeringType'),false);assert.equal(p.get('p.madeToOrder'),'true');assert.equal(p.get('p.page'),'2');assert.equal(p.get('view'),'search');
 });

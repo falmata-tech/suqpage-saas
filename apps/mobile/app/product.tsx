@@ -9,10 +9,13 @@ import type { Shop } from "@suqpage/contracts";
 import { useApp, useLoad, request } from "../src/runtime";
 import { Screen, Copy, LinkedText, Card, Button, Chip, Status, s } from "../src/ui";
 import Gallery from "../src/Gallery";
+import ProductSupply from '../src/ProductSupply';
+import {visibleCatalogProduct} from '../src/catalog-products';
 import {CatalogSafety} from '../src/CatalogSafety';
+import {useBusinessInquiry} from '../src/use-business-inquiry';
 export default function Product() {
   const { handle, id } = useLocalSearchParams<{ handle: string; id: string }>(),
-    { t, basket, setBasket } = useApp();
+    { t } = useApp();
   const load = useLoad(
     () => request<Shop>("shops/" + encodeURIComponent(handle)),
     [handle],
@@ -20,11 +23,12 @@ export default function Product() {
   const [options, setOptions] = useState<Record<string, string>>({}),
     [notice, setNotice] = useState("");
   const shop = load.data,
-    product = shop?.products.find((p) => p.id === Number(id));
+    product = shop?.products.find((p) => p.id === Number(id)&&visibleCatalogProduct(p));
   const ready =
     product &&
     ["available", "limited"].includes(product.availability) &&
     product.options.every((o) => options[o.name]);
+  const inquiry=useBusinessInquiry(shop);
   function inquire(single: boolean) {
     if (!shop || !product) return;
     const item = { product, quantity: "", options };
@@ -39,15 +43,8 @@ export default function Product() {
       });
       return;
     }
-    if (basket && basket.shop.id !== shop.id && basket.items.length) {
-      setNotice(
-        t(
-          "Your inquiry list contains items from another business. Send or clear that list first.",
-        ),
-      );
-      return;
-    }
-    const remaining = (basket?.items || []).filter(
+    if(!inquiry.ready)return;
+    const remaining = inquiry.items.filter(
       (i) =>
         selectionKey(i.product.id, i.options) !==
         selectionKey(product.id, options),
@@ -56,20 +53,19 @@ export default function Product() {
       setNotice(t("Use up to 20 items per inquiry."));
       return;
     }
-    setBasket({
-      shop,
-      items: [...remaining, item],
-    });
+    inquiry.setItems(()=>[...remaining,item]);
     setNotice(t("Added to inquiry list"));
   }
   return (
     <Screen>
       <Status {...load} retry={load.reload} />
+      <Status error={inquiry.error} retry={inquiry.retry}/>
       {shop && product ? (
         <CatalogSafety business={shop} productId={product.id}>
           <Gallery media={product.media} />
           <Copy big>{product.name}</Copy>
           <Copy muted>{shop.name}</Copy>
+          <ProductSupply kind={product.kind} availability={product.availability}/>
           {product.priceMinor !== null && (
             <Copy big>{(product.priceMinor / 100).toLocaleString()} ETB</Copy>
           )}
@@ -97,21 +93,13 @@ export default function Product() {
           />
           <Button
             accentColor={shop.accentColor}
-            disabled={!ready}
+            disabled={!ready||!inquiry.ready}
             secondary
             label={t("Add to inquiry list")}
             icon="plus"
             onPress={() => inquire(false)}
           />
           {Boolean(notice) && <Copy>{notice}</Copy>}
-          {basket && basket.items.length > 0 && (
-            <Button
-            accentColor={shop.accentColor}
-              secondary
-              label={t("View inquiry list") + ` (${basket.items.length})`}
-              onPress={() => router.push("/inquiry")}
-            />
-          )}
         </CatalogSafety>
       ) : (
         shop && <Copy>{t("Currently unavailable")}</Copy>

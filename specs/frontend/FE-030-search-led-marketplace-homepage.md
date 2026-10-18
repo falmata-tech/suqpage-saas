@@ -2,7 +2,7 @@
 id: FE-030
 title: Search-led marketplace homepage
 status: in_progress
-related: [FE-058, FE-052, FE-041, FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023, FE-042]
+related: [FE-058, FE-052, FE-041, FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023, FE-042, FE-065]
 owners: [product, frontend, design]
 last_updated: 2026-10-07
 change_level: L2
@@ -763,3 +763,13 @@ The compact open-drawer control keeps the complete accessible question,
 reassurance and Live Chat label; expanded entries must not overlap the toolbar,
 attribution or product results. Search/filter/pagination behavior is unchanged.
 Verify using scripts/capture-purchase-chat-and-products.mjs before visual review.
+
+
+## S103 bounded browse and paired panels — local candidate
+
+FE-065 supersedes empty S102 starts and older drawer placement. Both scopes open
+with bounded results; a centered labeled switch and opposing edge handles select
+sliding map/product panels. Product scrolling appends server pages; previous/next
+buttons are retired for the independent UI. Independent filters, descriptions,
+brand links, marker/cluster styling and transport behavior remain unchanged.
+Focused browser evidence precedes explicit visual approval and full gates.

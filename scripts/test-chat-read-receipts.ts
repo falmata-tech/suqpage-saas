@@ -10,6 +10,7 @@ import {
 } from '../lib/support';
 import { migratePostgresDatabase } from '../lib/postgres-migrations';
 import { confirmedMessageId } from '../lib/chat-read-contract';
+import { joinAssignedSupportConversation } from './testing/support-join';
 
 async function main() {
   delete process.env.SUQPAGE_TELEGRAM_BOT_TOKEN; delete process.env.SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID;
@@ -22,7 +23,7 @@ async function main() {
       await db.prepare('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)').run(id,role);
       return {id,email,name,role:role==='client'?'owner':'admin',access_role:role,business_id:bid,must_change_password:0};
     }
-    const owner = await user('owner-read','client',business), other = await user('other-read','client'), manager = await user('manager-read','platform_admin'), agent = await user('agent-read','team_member'), alternate = await user('alternate-read','team_member');
+    const owner = await user('owner-read','client',business), colleague=await user('colleague-read','client',business), other = await user('other-read','client'), manager = await user('manager-read','platform_admin'), agent = await user('agent-read','team_member'), alternate = await user('alternate-read','team_member');
     await updateSupportAgentSetting(manager,{userId:agent.id,enabled:true,queueScope:'all',maxOpenConversations:8});
     await updateSupportAgentSetting(manager,{userId:alternate.id,enabled:true,queueScope:'all',maxOpenConversations:8});
     const c = await createSupportConversation(owner,{subject:'Visible receipt fixture',message:'Owner opening message',idempotencyKey:crypto.randomUUID()});
@@ -38,9 +39,22 @@ async function main() {
     await assert.rejects(()=>acknowledgeSupportRead(manager,c.id,{messageId:opening}),SupportError);
     await assert.rejects(()=>acknowledgeSupportRead(other,c.id,{messageId:opening}),SupportError);
     for(const id of [0,-1,1.2,'1',true,null,Number.MAX_SAFE_INTEGER+1]) assert.throws(()=>confirmedMessageId(id));
-    const receipt = await acknowledgeSupportRead(assignedAgent,c.id,{messageId:opening}); assert.equal(receipt.joined,true);
+    const receipt = await acknowledgeSupportRead(assignedAgent,c.id,{messageId:opening}); assert.equal(receipt.joined,false);
     assert.equal((await getSupportConversation(owner,c.id)).messages[0].read,true);
+    assert.equal((await getSupportConversation(owner,c.id)).conversation.agentJoined,false,'Read and explicit acceptance are separate');
+    await joinAssignedSupportConversation(manager,c.id);
     assert.equal((await getSupportConversation(owner,c.id)).conversation.agentJoined,true);
+    const participantReply=await postSupportMessage(colleague,c.id,{message:'Same-business colleague reply',idempotencyKey:crypto.randomUUID()});
+    assert.equal((await db.prepare('SELECT sender_side FROM support_messages WHERE id=?').get(participantReply.id)).sender_side,'participant');
+    assert.equal((await getSupportConversation(assignedAgent,c.id)).conversation.unread,true,'Colleague reply is incoming staff work');
+    await assert.rejects(()=>acknowledgeSupportRead(colleague,c.id,{messageId:participantReply.id}),SupportError,'A colleague cannot read their own participant-side message');
+    await acknowledgeSupportRead(assignedAgent,c.id,{messageId:participantReply.id});
+    assert.equal((await getSupportConversation(owner,c.id)).messages.find(m=>m.id===participantReply.id)?.read,true);
+    await db.prepare("UPDATE user_access_profiles SET access_role='team_member' WHERE user_id=?").run(colleague.id);
+    const retainedParticipant=(await getSupportConversation(owner,c.id)).messages.find(m=>m.id===participantReply.id)!;
+    assert.equal(retainedParticipant.senderRole,'client');assert.equal(retainedParticipant.read,true,'Role changes cannot reinterpret recorded participant authority');
+    await assert.rejects(()=>postSupportMessage(colleague,c.id,{message:'Stale client sender',idempotencyKey:crypto.randomUUID()}),SupportError);
+    await db.prepare("UPDATE user_access_profiles SET access_role='client' WHERE user_id=?").run(colleague.id);
     await acknowledgeSupportRead(assignedAgent,c.id,{messageId:opening});
     assert.equal((await db.prepare("SELECT COUNT(*) total FROM support_events WHERE conversation_id=? AND event_type='joined'").get(c.id)).total,1);
     const reply = await postSupportMessage(assignedAgent,c.id,{message:'A reply to the owner',idempotencyKey:crypto.randomUUID()});
@@ -49,10 +63,20 @@ async function main() {
     await assert.rejects(()=>acknowledgeSupportRead(owner,c.id,{messageId:opening}),SupportError);
     await acknowledgeSupportRead(owner,c.id,{messageId:reply.id});
     assert.equal((await getSupportConversation(assignedAgent,c.id)).messages.at(-1)?.read,true);
+    assert.equal((await db.prepare('SELECT sender_side FROM support_messages WHERE id=?').get(reply.id)).sender_side,'staff');
+    await db.prepare("UPDATE user_access_profiles SET access_role='client' WHERE user_id=?").run(assignedAgent.id);
+    const retainedStaff=(await getSupportConversation(owner,c.id)).messages.find(m=>m.id===reply.id)!;
+    assert.notEqual(retainedStaff.senderRole,'client');assert.equal(retainedStaff.read,true,'A former staff reply stays staff-side');
+    await assert.rejects(()=>postSupportMessage(assignedAgent,c.id,{message:'Stale staff sender',idempotencyKey:crypto.randomUUID()}),SupportError);
+    await db.prepare("UPDATE user_access_profiles SET access_role='team_member' WHERE user_id=?").run(assignedAgent.id);
+    const previousEpoch=(await getSupportConversation(owner,c.id)).conversation.readEpoch;
     await reassignSupportConversation(manager,c.id,replacement.id);
     assert.equal((await getSupportConversation(owner,c.id)).conversation.agentJoined,false);
     await assert.rejects(()=>acknowledgeSupportRead(assignedAgent,c.id,{messageId:opening}),SupportError);
     await acknowledgeSupportRead(replacement,c.id,{messageId:opening});
+    assert.equal((await getSupportConversation(owner,c.id)).conversation.agentJoined,false);
+    await joinAssignedSupportConversation(manager,c.id);
+    assert.notEqual((await getSupportConversation(owner,c.id)).conversation.readEpoch,previousEpoch,'Assignment identity changes independently of message IDs');
     assert.equal((await db.prepare("SELECT COUNT(*) total FROM support_events WHERE conversation_id=? AND event_type='joined'").get(c.id)).total,2);
     // Guest receipts use the same explicit contract and cannot see private notes.
     const guest = await createPublicSupportConversation({category:'shipment_observation',origin:'Addis Ababa',destination:'Adama',name:'LOCAL QA receipt',phone:'+251911112233',idempotencyKey:crypto.randomUUID()},'receipt-fixture');
@@ -61,6 +85,8 @@ async function main() {
     await getPublicSupportConversation(guest.token); await getSupportConversation(guestAgent,guest.id);
     assert.equal((await getPublicSupportConversation(guest.token)).messages[0].read,false);
     await acknowledgeSupportRead(guestAgent,guest.id,{messageId:guestInitial});
+    assert.equal((await getPublicSupportConversation(guest.token)).agentJoined,false);
+    await joinAssignedSupportConversation(manager,guest.id);
     assert.equal((await getPublicSupportConversation(guest.token)).agentJoined,true);
     const privateNote = await postSupportMessage(guestAgent,guest.id,{audience:'note',message:'Private carrier details',idempotencyKey:crypto.randomUUID()});
     const publicReply = await postSupportMessage(guestAgent,guest.id,{audience:'reply',message:'Public reply',idempotencyKey:crypto.randomUUID()});
@@ -83,9 +109,16 @@ async function main() {
     assert.equal((await getPublicSupportConversation(guest.token)).agentJoined,false);
     const stable = await db.prepare('SELECT * FROM support_conversations WHERE id=?').get(guest.id);
     const schema = (await db.prepare('SELECT current_schema() name').get()).name as string;
+    const historicalMessages=await db.prepare('SELECT id,conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at,visitor_visible FROM support_messages ORDER BY id').all();
+    // Reconstruct schema65 in this isolated fixture, then prove additive66 does
+    // not infer mutable roles or rewrite any retained transcript bytes.
+    await db.exec('ALTER TABLE support_messages DROP COLUMN sender_side; DELETE FROM schema_migrations WHERE version=66');
+    assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[66]);
+    assert.deepEqual(await db.prepare('SELECT id,conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at,visitor_visible FROM support_messages ORDER BY id').all(),historicalMessages);
+    assert.equal((await db.prepare('SELECT COUNT(*) total FROM support_messages WHERE sender_side IS NOT NULL').get()).total,0,'Migration leaves historical sides unknown');
     assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);
     assert.deepEqual(await db.prepare('SELECT * FROM support_conversations WHERE id=?').get(guest.id),stable);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,63);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,72);
     console.log('PASS real PostgreSQL confirmed reads/joins, read-only GET, owner/guest privacy, stale/foreign/self/private/expired denial, reassignment/reopen, monotonic and migration preservation.');
   } finally { await closeDbForTests(); }
 }

@@ -1,4 +1,5 @@
 import { demoPublicContacts } from './demo-public-contacts';
+import {findPlaceSuggestions} from '../lib/place-catalog';
 import { initialBusinessProfile } from '../lib/business-profile';
 import { parseShopPageContent } from '../lib/owner-page-domain';
 import { findKnownPlaceByName } from "../lib/place-catalog";
@@ -698,11 +699,19 @@ async function runPostgresFixture() {
     await db.exec("UPDATE users SET account_phone='+447700900' || lpad((id+100)::text,3,'0') WHERE email LIKE '%@mirtpage.local' OR email LIKE '%@demo.mirtpage.local'");
     for (const [handle, businessId] of seeded) {
         const business = await db.prepare("SELECT * FROM businesses WHERE id=?").get(businessId) as Business;
+        const location=await db.prepare('SELECT city,region,latitude,longitude FROM business_discovery_profiles WHERE business_id=?').get(businessId) as {city:string;region:string;latitude:number;longitude:number}|undefined;
+        if(location){
+          const key=(value:string)=>value.toLocaleLowerCase();
+          const candidates=findPlaceSuggestions(location.city,'ET').filter(p=>[p.name,p.localName,...(p.aliases||[])].some(name=>key(name)===key(location.city)));
+          const place=candidates.sort((a,b)=>Math.hypot(a.latitude-location.latitude,a.longitude-location.longitude)-Math.hypot(b.latitude-location.latitude,b.longitude-location.longitude))[0];
+          if(!place||Math.hypot(place.latitude-location.latitude,place.longitude-location.longitude)>1.5)throw Error('Demo city needs review before installing fixtures.');
+          await db.prepare("UPDATE business_discovery_profiles SET country_code='ET',city_id=? WHERE business_id=?").run(place.id,businessId);
+        }
         const catalog: Catalog = { business, collections: [], categories: [], products: [] };
         const contacts = demoPublicContacts(business.public_email || `hello+${handle}@example.test`, business.public_phone || '+447700900123');
         const content = JSON.stringify(parseShopPageContent({...initialBusinessProfile(catalog), introduction:'', contacts}));
         const ownerId = clientUsersByHandle.get(handle)!;
-        await db.prepare("UPDATE businesses SET whatsapp=?,telegram=?,tiktok=? WHERE id=?").run(contacts.whatsapp!.replace(/^\+/,''),contacts.telegram,contacts.tiktok,businessId);
+        await db.prepare("UPDATE businesses SET public_email=?,public_phone=?,whatsapp=?,telegram=?,tiktok=? WHERE id=?").run(contacts.email,contacts.phone,contacts.whatsapp!.replace(/^\+/,''),contacts.telegram,contacts.tiktok,businessId);
         await db.prepare("INSERT INTO owner_page_drafts(business_id,version,content_json,assistance_enabled,updated_by,updated_at) VALUES(?,1,?,0,?,?)").run(businessId,content,ownerId,seededAt);
         await db.prepare("INSERT INTO owner_page_publications(business_id,revision,draft_version,content_json,action,published_by,published_at) VALUES(?,1,1,?,'publish',?,?)").run(businessId,content,ownerId,seededAt);
     }

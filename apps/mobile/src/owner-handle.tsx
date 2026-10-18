@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { router } from "expo-router";
 import { parseBusinessHandle } from "../../../lib/business-handle";
 import { useApp, useLoad, request } from "./runtime";
 import { Card, Field, Copy, Button, Status } from "./ui";
+import {useOwnerEditGuard} from './owner-edit-navigation';
+import OwnerEditConfirmation from './OwnerEditConfirmation';
 
 type Check = { handle: string; kind: "checking" | "available" | "taken" | "error" };
 export function HandleInput({ value, onChange, onReady, currentHandle = "", refreshKey = 0 }: {
@@ -40,28 +42,33 @@ export function HandleInput({ value, onChange, onReady, currentHandle = "", refr
   </>;
 }
 
-export function HandleEditor({ initialHandle, onSaved }: { initialHandle: string; onSaved: () => void }) {
+export function HandleEditor({ initialHandle, onSaved,onCancel }: { initialHandle: string; onSaved: () => void;onCancel?:()=>void }) {
   const { t, ownerRequest } = useApp();
   const [handle, setHandle] = useState(initialHandle), [ready, setReady] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState("");
+  const flight=useRef(false);
+  const guard=useOwnerEditGuard({dirty:handle!==initialHandle,signature:handle,busy,isBusy:()=>flight.current,discard:()=>setHandle(initialHandle)});
   const settings = useLoad(() => ownerRequest<{handle: string; contentVersion: number; nextChangeAt: number}>("owner/handle"));
   const locked = Boolean(settings.data && settings.data.nextChangeAt > Date.now());
   return <Card>
-    <Copy big>{t("Page address")}</Copy>
+    <Copy big heading>{t("Page address")}</Copy>
     <Status {...settings} retry={settings.reload} />
     {locked ? <>
       <Copy>{"suqpage.com/@" + (settings.data?.handle || initialHandle)}</Copy>
       <Copy muted>{t("You can change your handle once every 30 days. Contact support for help.")}</Copy>
       <Button secondary label={t("Contact support")} onPress={() => router.push({pathname: "/owner/[section]", params: {section: "support"}})} />
     </> : <>
-      <HandleInput value={handle} onChange={setHandle} onReady={setReady} currentHandle={settings.data?.handle || initialHandle} />
+      <HandleInput value={handle} onChange={value=>{guard.changed();setHandle(value);}} onReady={setReady} currentHandle={settings.data?.handle || initialHandle} />
       <Copy muted>{t("You can change your handle once every 30 days.")}</Copy>
       <Status error={error} />
       <Button label={t("Save handle")} disabled={busy || !ready || !settings.data || handle.trim().replace(/^@/, "").toLowerCase() === settings.data.handle} onPress={() => void (async () => {
+        if(flight.current)return;flight.current=true;const checkpoint=guard.checkpoint();
         setBusy(true); setError("");
-        try { await ownerRequest("owner/handle", {handle, expectedVersion: settings.data!.contentVersion}); settings.reload(); onSaved(); }
+        try { await ownerRequest("owner/handle", {handle, expectedVersion: settings.data!.contentVersion}); settings.reload(); guard.complete(onSaved,handle,checkpoint); }
         catch (e) { setError(e instanceof Error ? e.message : "Please try again."); }
-        finally { setBusy(false); }
+        finally { flight.current=false;setBusy(false); }
       })()} />
     </>}
+    {onCancel&&<Button secondary disabled={busy} label={t('Cancel')} onPress={()=>guard.requestLeave(onCancel)}/>}
+    <OwnerEditConfirmation guard={guard}/>
   </Card>;
 }

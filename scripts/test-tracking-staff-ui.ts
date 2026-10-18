@@ -1,0 +1,154 @@
+import assert from 'node:assert/strict';
+import {after,test} from 'node:test';
+import vm from 'node:vm';
+import {createRequire} from 'node:module';
+import {build} from 'esbuild';
+import {renderToStaticMarkup} from 'react-dom/server';
+import type {ReactElement} from 'react';
+import {chromium,type Browser,type Page} from 'playwright';
+import * as contract from '../lib/tracking-contract';
+import type {StaffTrackingShipment} from '../lib/tracking-contract';
+import type {OwnerEditResult} from '../lib/owner-edit-contract';
+import {canUseStaffTracking,trackingStaffHref,trackingStaffView} from '../app/dashboard/tracking/navigation';
+
+const require=createRequire(import.meta.url);
+const shipment:StaffTrackingShipment={id:21,reference:'SHP-0123456789ABCDEF0123',label:'Two boxes',version:3,recipientEmail:'recipient+test@example.test',revokedAt:null,deliveryState:'accepted',sharePath:'/tracking/SHP-0123456789ABCDEF0123',createdAt:1,updatedAt:2,legs:[{id:'00000000-0000-4000-8000-000000000001',providerName:'Literal provider',origin:'Place A',destination:'Place B',method:'truck'}]};
+const view={q:'saved search',cursor:'123'},back=trackingStaffHref(view,shipment.id);
+
+test('FE-069 staff navigation keeps bounded search/keyset origins and excludes owners/support scope',()=>{
+ assert.deepEqual(trackingStaffView({q:' saved search ',cursor:'123',url:'https://other.invalid'}),view);assert.deepEqual(trackingStaffView({cursor:'01'}),{});assert.deepEqual(trackingStaffView({cursor:'9'.repeat(21)}),{});
+ assert.equal(back,'/dashboard/tracking/21?q=saved+search&cursor=123');assert.equal(trackingStaffHref(view,21,{edit:true}),back+'&edit=1');assert.throws(()=>trackingStaffHref({},0));
+ const actor={id:1,email:'fixture@example.test',name:'Fixture',role:'admin' as const,access_role:'team_member' as const,business_id:null,must_change_password:0};
+ assert.equal(canUseStaffTracking({...actor,staff_queue_scope:'transport'}),true);assert.equal(canUseStaffTracking({...actor,staff_queue_scope:'all'}),true);assert.equal(canUseStaffTracking({...actor,staff_queue_scope:'support'}),false);assert.equal(canUseStaffTracking({...actor,access_role:'client'}),false);assert.equal(canUseStaffTracking({...actor,access_role:'platform_admin'}),true);
+});
+
+async function actionFixture(){
+ const state={actor:{id:9,access_role:'team_member',staff_queue_scope:'transport'},calls:[]as Array<{kind:string;actor:unknown;input:unknown}>,error:null as Error|null,revalidated:[]as string[],scheduled:0};
+ const call=async(kind:string,actor:unknown,input:unknown)=>{state.calls.push({kind,actor,input});if(state.error)throw state.error;return shipment;};
+ const ports:Record<string,unknown>={
+  'next/navigation':{redirect:(url:string)=>{throw Object.assign(Error('redirect'),{url});}},'next/cache':{revalidatePath:(path:string)=>state.revalidated.push(path)},
+  '@/lib/auth':{requireUser:async()=>state.actor},'@/lib/tracking-contract':contract,
+  '@/lib/tracking-after':{scheduleTrackingEmailDelivery:()=>{state.scheduled++;}},
+  '@/lib/tracking':{submitTrackingShipment:(actor:unknown,input:unknown)=>call('create',actor,input),updateTrackingShipment:(actor:unknown,input:unknown)=>call('update',actor,input),revokeTrackingShipment:(actor:unknown,input:unknown)=>call('revoke',actor,input)},
+ };
+ const output=await build({entryPoints:['app/dashboard/tracking/actions.ts'],bundle:true,write:false,format:'cjs',platform:'node',packages:'external',plugins:[{name:'tracking-actions-ports',setup(b){b.onResolve({filter:/^(?:next\/(?:navigation|cache)|@\/lib\/(?:auth|tracking(?:-contract|-after)?))$/},a=>({path:a.path,external:true}));}}]});
+ type Action=(form:FormData)=>Promise<OwnerEditResult>;
+ const module={exports:{}as{submitShipmentAction:Action;updateShipmentAction:Action;revokeShipmentAction:Action}};
+ vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,require:(name:string)=>ports[name]||require(name),FormData,Number,JSON,Set,URLSearchParams});
+ const form=(kind:'create'|'update'|'revoke'='create')=>{
+  const data=new FormData();for(const[key,value]of Object.entries({expectedVersion:kind==='create'?'0':'3',nav_q:view.q,nav_cursor:view.cursor}))data.set(key,value);
+  if(kind==='create'){data.set('recipientEmail',' Recipient+Test@Example.test ');data.set('idempotencyKey','tracking-staff-fixture-key');}else{data.set('shipmentId','21');data.set('reference',shipment.reference);}
+  if(kind!=='revoke'){data.set('label','Two boxes');data.set('legs',JSON.stringify(shipment.legs.map(leg=>({...leg,id:kind==='create'?null:leg.id}))));}return data;
+ };
+ return{state,actions:module.exports,form};
+}
+
+test('BE-058 actual staff actions preserve drafts and idempotency, enforce immutable recipient input and redact unknown errors',async()=>{
+ const{state,actions,form}=await actionFixture();const data=form(),before=[...data.entries()];state.error=new contract.TrackingError('Transport access is required.','forbidden');
+ assert.deepEqual(JSON.parse(JSON.stringify(await actions.submitShipmentAction(data))),{error:state.error.message});assert.deepEqual([...data.entries()],before);assert.deepEqual(state.revalidated,[]);assert.equal(state.scheduled,0);
+ state.error=Error('private database credentials');assert.deepEqual(JSON.parse(JSON.stringify(await actions.submitShipmentAction(data))),{error:'Unable to connect. Please try again.'});state.error=null;
+ await assert.rejects(actions.submitShipmentAction(data),error=>(error as{url?:string}).url===back+'&created=1');
+ const created=state.calls.at(-1)!;assert.equal(created.kind,'create');assert.equal(created.actor,state.actor);const input=created.input as contract.TrackingSubmit;assert.equal(input.recipientEmail,'recipient+test@example.test');assert.equal(input.idempotencyKey,'tracking-staff-fixture-key');assert.equal(input.legs[0].id,null);assert.ok(!('conversationId'in input));
+ await assert.rejects(actions.updateShipmentAction(form('update')),error=>(error as{url?:string}).url===back+'&saved=1');await assert.rejects(actions.revokeShipmentAction(form('revoke')),error=>(error as{url?:string}).url===back+'&revoked=1');
+ assert.equal(state.scheduled,1,'Only a successful explicit Submit schedules the queued initial email; ordinary Edit/Revoke do not send');
+ const count=state.calls.length;for(const invalid of[()=>{const f=form('update');f.set('recipientEmail','other@example.test');return f;},()=>{const f=form('update');f.append('shipmentId','22');return f;},()=>{const f=form('update');f.set('legs','{');return f;},()=>{const f=form('update');f.set('returnTo','https://foreign.invalid');return f;}])assert.ok((await actions.updateShipmentAction(invalid()))?.error);assert.equal(state.calls.length,count);
+ const submitted=state.calls.length;for(const [key,value] of [['recipientEmail','invalid'],['conversationId','71'],['publicRef','SUP-PRIVATE'],['code','123456']]){const invalid=form();invalid.set(key,value);assert.ok((await actions.submitShipmentAction(invalid))?.error);}assert.equal(state.calls.length,submitted,'Invalid email and chat/OTP fields never reach Submit');
+ assert.ok(state.calls.every(call=>call.kind!=='check'&&!JSON.stringify(call.input).includes('nav_')));
+});
+
+async function routeFixture(entry:string){
+ const state={actor:{id:9,access_role:'team_member',staff_queue_scope:'transport',business_id:null},reads:[]as string[],error:null as Error|null,shipment:{...shipment},shipments:[{...shipment,firstOrigin:'Place A',lastDestination:'Place B',legCount:1}],nextCursor:'120' as string|null};
+ const output=await build({entryPoints:[entry],bundle:true,write:false,format:'cjs',platform:'node',external:['react','react/jsx-runtime'],plugins:[{name:'tracking-page-ports',setup(b){
+  b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({contents:'export default {};'}));
+  b.onResolve({filter:/^(?:next\/(?:navigation|link)$|@\/lib\/(?:auth|i18n\/server|tracking)$|@\/components\/)/},a=>({path:a.path,namespace:'ports'}));
+  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:a.path==='next/navigation'?`export const redirect=url=>{throw Object.assign(Error('redirect'),{url});},notFound=()=>{throw Object.assign(Error('not found'),{code:'not_found'});};`:a.path==='next/link'?`import React from'react';export default props=><a {...props}/>;`:a.path==='@/lib/auth'?`export const requireUser=async()=>state.actor;`:a.path==='@/lib/i18n/server'?`export const getUiText=async()=>key=>key;`:a.path==='@/lib/tracking'?`export const listStaffTrackingShipments=async()=>{state.reads.push('list');if(state.error)throw state.error;return{shipments:state.shipments,nextCursor:state.nextCursor};},readStaffTrackingShipment=async()=>{state.reads.push('detail');if(state.error)throw state.error;return state.shipment;};`:a.path.endsWith('DashboardShell')?`import React from'react';export default props=><main>{props.children}</main>;`:a.path.endsWith('ShipmentEditor')?`import React from'react';export default props=><section data-editor data-new={!props.shipment} data-cancel={props.cancelHref}/>;`:a.path.endsWith('ShipmentStaffActions')?`import React from'react';export default props=><section data-actions data-manager={props.canRevoke}/>;`:`import React from'react';export default props=><section data-read>{props.plan.legs[0].providerName}</section>;`}));
+  b.onResolve({filter:/^@\/lib\/tracking-contract$/},a=>({path:a.path,external:true}));
+ }}]});
+ const module={exports:{}as{default:(props:{params:Promise<{id:string}>;searchParams:Promise<Record<string,string>>})=>Promise<ReactElement>}};
+ vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,require:(name:string)=>name==='@/lib/tracking-contract'?contract:require(name),state,URLSearchParams,Number});
+ return{state,render:async(query:Record<string,string>={},id='21')=>renderToStaticMarkup(await module.exports.default({params:Promise.resolve({id}),searchParams:Promise.resolve({...view,...query})}))};
+}
+
+test('FE-069 actual staff pages are read-first, reject support/owner before reads and preserve canonical delivery/revocation state',async()=>{
+ for(const entry of['app/dashboard/tracking/page.tsx','app/dashboard/tracking/new/page.tsx','app/dashboard/tracking/[id]/page.tsx']){
+  const{state,render}=await routeFixture(entry);for(const role of['client','team_member']){state.actor.access_role=role;state.actor.staff_queue_scope='support';await assert.rejects(render(),error=>(error as{url?:string}).url==='/dashboard');}assert.deepEqual(state.reads,[]);
+  state.actor.access_role='team_member';state.actor.staff_queue_scope='transport';let html=await render();assert.ok(!html.includes('Six-digit code'),'Staff never see or enter recipient codes');
+  state.error=Error('read failed');await assert.rejects(render(),/read failed/,'Infrastructure failure must not become an empty successful list');state.error=null;
+  if(entry==='app/dashboard/tracking/page.tsx'){assert.match(html,/Create and manage shipment plans/);assert.match(html,/href="\/dashboard\/tracking\/new\?q=saved\+search&amp;cursor=123"/);assert.doesNotMatch(html,/verify.*before you submit|Check email verification|conversationId/);}
+  if(entry.endsWith('[id]/page.tsx')){assert.match(html,/data-read/);assert.doesNotMatch(html,/data-editor/);assert.match(html,/Email accepted for sending/);html=await render({edit:'1'});assert.match(html,/data-editor/);assert.doesNotMatch(html,/data-read/);state.shipment.revokedAt=5;state.shipment.deliveryState='cancelled';html=await render({edit:'1'});assert.doesNotMatch(html,/data-editor/);assert.match(html,/Shipment access revoked/);assert.match(html,/Email cancelled/);}
+ }
+});
+
+test('FE-069 actual dashboard navigation exposes Tracking only to transport/all staff and managers, including existing phone navigation',async()=>{
+ const output=await build({entryPoints:['components/DashboardShell.tsx'],bundle:true,write:false,format:'cjs',platform:'node',jsx:'automatic',external:['react','react/jsx-runtime','lucide-react'],plugins:[{name:'tracking-navigation-ports',setup(b){
+  b.onResolve({filter:/^@\/components\/WorkspaceNavigation$/},()=>({path:process.cwd()+'/components/WorkspaceNavigation.tsx'}));
+  b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({contents:'export default {};'}));
+  b.onResolve({filter:/^(?:next\/(?:link|navigation)$|@\/app\/actions$|@\/lib\/(?:i18n\/(?:ui|server)|config|owner-page-runtime|owner-page-service|owner-page-domain)$|@\/components\/|\.\/(?:AttentionAlerts|BusinessWorkspaceNavigation)$)/},a=>({path:a.path,namespace:'ports'}));
+  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:a.path==='next/link'?`import React from'react';export default props=><a {...props}/>;`:a.path==='next/navigation'?`export const usePathname=()=>'/dashboard/tracking',useSearchParams=()=>new URLSearchParams();`:a.path==='@/app/actions'?`export const logoutAction=async()=>{};`:a.path==='@/lib/i18n/ui'?`export const useUiText=()=>key=>key;`:a.path==='@/lib/i18n/server'?`export const getUiText=async()=>key=>key;`:a.path==='@/lib/config'?`export const authDriver=()=> 'supabase';`:a.path==='@/lib/owner-page-runtime'?`export const ownerPageEditorEnabled=()=>false,ownerPagePort={};`:a.path==='@/lib/owner-page-service'?`export const readOwnerPage=async()=>{};`:a.path==='@/lib/owner-page-domain'?`export class OwnerPageError extends Error{}`:a.path.endsWith('NavigationPendingIndicator')?`import React from'react';export default()=>null;export const NavigationPendingProvider=props=><>{props.children}</>,NavigationPendingMain=props=><main>{props.children}</main>;`:`export default()=>null;`}));
+ }}]});
+ const module={exports:{}as{default:(props:{user:import('../lib/types').SessionUser;business:null;children:ReactElement|null})=>Promise<ReactElement>}};vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,require,URLSearchParams});
+ const assertStandalone=(html:string)=>{const menus=html.match(/<nav class="workspace-nav"[^>]*>[\s\S]*?<\/nav>/g)||[];assert.ok(menus.length>0);for(const menu of menus){assert.equal((menu.match(/href="\/dashboard\/tracking"/g)||[]).length,1,'Tracking has one dedicated desktop/full-menu entry');for(const group of menu.match(/<div class="workspace-nav-group">[\s\S]*?<\/div>/g)||[])if(group.includes('>Chats</span>'))assert.doesNotMatch(group,/\/dashboard\/tracking/,'Tracking is separate from chat navigation');}assert.doesNotMatch(html,/\/dashboard\/tracking\?[^"]*(?:conversationId|publicRef)/);};
+ const actor={id:9,email:'fixture@example.test',name:'Fixture',role:'admin' as const,access_role:'team_member' as const,business_id:null,must_change_password:0};
+ for(const role of['transport','all','support']as const){const html=renderToStaticMarkup(await module.exports.default({user:{...actor,staff_queue_scope:role},business:null,children:null}));if(role==='support')assert.doesNotMatch(html,/href="\/dashboard\/tracking"/);else{assertStandalone(html);assert.match(html,/workspace-mobile-tabs[\s\S]*href="\/dashboard\/tracking"/);}}
+ for(const access_role of['platform_admin','operations_manager','client']as const){const html=renderToStaticMarkup(await module.exports.default({user:{...actor,access_role},business:null,children:null}));if(access_role==='client')assert.doesNotMatch(html,/href="\/dashboard\/tracking"/);else assertStandalone(html);}
+});
+
+type Fixture={calls:Array<{kind:string;data:Record<string,string>|string}>;routes:string[];copied:string[];mount:(kind:'create'|'edit'|'actions',manager?:boolean)=>void;rerender:(kind:'create'|'edit'|'actions',value:StaffTrackingShipment|null,nonce?:string)=>void;settle:(index:number,result:unknown)=>void};
+let browser:Browser|undefined;after(async()=>{await browser?.close();});
+async function boot(){
+ browser??=await chromium.launch({headless:true,timeout:20000});const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage(),errors:string[]=[];page.setDefaultTimeout(5000);page.on('pageerror',error=>errors.push(error.message));
+ await page.route('http://localhost:45679/**',route=>route.fulfill({contentType:'text/html',body:'<div id="root"></div>'}));await page.goto('http://localhost:45679/dashboard/tracking/new');
+ await page.addScriptTag({content:`window.fixture={calls:[],routes:[],copied:[]};const replies=new Map();window.fixture.settle=(index,result)=>{const resolve=replies.get(index);if(!resolve)throw Error('Missing pending action');replies.delete(index);resolve(result);};window.fixture.invoke=(kind,data)=>new Promise(resolve=>{const index=window.fixture.calls.push({kind,data:typeof data==='string'?data:Object.fromEntries(data)})-1;replies.set(index,resolve);});Object.defineProperty(navigator,'clipboard',{value:{writeText:async value=>window.fixture.copied.push(value)}});`});
+ const output=await build({stdin:{loader:'tsx',resolveDir:process.cwd(),contents:`import React from'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';import{NextIntlClientProvider}from'next-intl';import Editor from'./components/ShipmentEditor';import Actions from'./components/ShipmentStaffActions';import styles from'./components/ShipmentStaff.module.css';const shipment=${JSON.stringify(shipment)},root=createRoot(document.getElementById('root'));let serial=0;const render=(kind,manager=true,value=shipment,nonce='tracking-fixture-submit-key')=>flushSync(()=>root.render(<NextIntlClientProvider locale='en' timeZone='Africa/Addis_Ababa' messages={{}}><main className={styles.workspace} key={serial}>{kind==='actions'?<Actions shipment={value||shipment} navigation={${JSON.stringify(view)}} canRevoke={manager}/>:<Editor shipment={kind==='edit'?value:null} idempotencyKey={nonce} navigation={${JSON.stringify(view)}} cancelHref=${JSON.stringify(back)}/>}</main></NextIntlClientProvider>));window.fixture.mount=(kind,manager=true)=>{serial++;render(kind,manager);};window.fixture.rerender=(kind,value,nonce)=>render(kind,true,value,nonce);`},bundle:true,write:false,format:'iife',platform:'browser',outdir:'/virtual',plugins:[{name:'tracking-browser-ports',setup(b){
+  b.onResolve({filter:/^react(?:\/jsx(?:-dev)?-runtime)?$/},a=>({path:require.resolve(a.path)}));
+  b.onResolve({filter:/^(?:next\/navigation|@\/app\/(?:dashboard\/tracking\/actions|dashboard\/support\/\[id\]\/plan\/actions))$/},a=>({path:a.path,namespace:'ports'}));
+  b.onLoad({filter:/.*/,namespace:'ports'},a=>({contents:a.path==='next/navigation'?`export const useRouter=()=>({push:href=>window.fixture.routes.push(href)}),unstable_rethrow=error=>{if(error?.digest)throw error;};`:a.path.includes('support')?`export const saveTransportPlanAction=data=>window.fixture.invoke('legacy',data);`:`export const submitShipmentAction=data=>window.fixture.invoke('create',data),updateShipmentAction=data=>window.fixture.invoke('update',data),revokeShipmentAction=data=>window.fixture.invoke('revoke',data);`}));
+ }}]});
+ await page.addStyleTag({content:'*{box-sizing:border-box}body{margin:0;padding:16px;font:16px Arial;color:#202428}.btn{border:1px solid #bac9ca;border-radius:8px;background:white}.brand{background:#b83200;color:white}'+output.outputFiles.find(f=>f.path.endsWith('.css'))!.text});await page.addScriptTag({content:output.outputFiles.find(f=>f.path.endsWith('.js'))!.text});
+ return{page,mount:(kind:'create'|'edit'|'actions',manager=true)=>page.evaluate(({kind,manager})=>(window as unknown as{fixture:Fixture}).fixture.mount(kind,manager),{kind,manager}),close:async()=>{await context.close();assert.deepEqual(errors,[]);}};
+}
+async function calls(page:Page){return page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.calls);}
+async function settle(page:Page,index:number,result:unknown){await page.evaluate(({index,result})=>(window as unknown as{fixture:Fixture}).fixture.settle(index,result),{index,result});}
+
+test('FE-069 S141 actual shipment editor submits a valid new email without verification lookup and retains retry drafts/key',{timeout:60000},async()=>{
+ const{page,mount,close}=await boot();try{
+  await mount('create');const email=page.getByRole('textbox',{name:'Recipient email',exact:true});
+  assert.equal(await page.getByRole('button',{name:/Check email verification|Verify email|Send code/}).count(),0);assert.equal(await page.locator('input[name=code]').count(),0);
+  await page.getByText('Enter the recipient’s email. They will verify it in Tracking to view this shipment.',{exact:true}).waitFor();
+  await email.fill('invalid');await page.getByRole('textbox',{name:'Shipment label (optional)',exact:true}).fill('Retained shipment');await page.getByLabel('Provider name',{exact:true}).fill('Provider A');await page.getByLabel('Transport method',{exact:true}).selectOption('van');await page.getByLabel('From',{exact:true}).fill('Origin');await page.getByLabel('To',{exact:true}).fill('Destination');
+  await page.getByRole('button',{name:'Submit shipment',exact:true}).click();assert.equal(await email.evaluate(node=>(node as HTMLInputElement).validity.typeMismatch),true);assert.deepEqual(await calls(page),[],'Native email validation prevents malformed submission');
+  await email.fill('never-verified@example.test');await page.getByRole('button',{name:'Submit shipment',exact:true}).click();const sent=(await calls(page))[0];assert.equal(sent.kind,'create');const data=sent.data as Record<string,string>;assert.equal(data.recipientEmail,'never-verified@example.test');assert.equal(data.idempotencyKey,'tracking-fixture-submit-key');assert.equal(JSON.parse(data.legs)[0].id,null);assert.ok(!('conversationId'in data)&&!('publicRef'in data)&&!('code'in data));
+  await page.locator('form').first().evaluate(form=>(form as HTMLFormElement).requestSubmit());assert.equal((await calls(page)).length,1);await settle(page,0,{error:'Unable to connect. Please try again.'});await page.getByRole('alert').waitFor();assert.equal(await email.inputValue(),'never-verified@example.test');assert.equal(await page.getByLabel('Provider name',{exact:true}).inputValue(),'Provider A');
+  await page.getByRole('button',{name:'Submit shipment',exact:true}).click();assert.deepEqual((await calls(page))[1].data,data);await settle(page,1,{error:'Unable to connect. Please try again.'});await page.getByRole('alert').waitFor();await page.getByRole('button',{name:'Cancel',exact:true}).click();await page.getByRole('dialog',{name:'Unsaved changes'}).waitFor();await page.getByRole('button',{name:'Keep editing'}).click();assert.equal(await email.inputValue(),'never-verified@example.test');
+  await mount('edit');assert.equal(await page.locator('input[name=recipientEmail]').count(),0,'Recipient is immutable on edit');await page.getByRole('button',{name:'Save changes',exact:true}).click();const edited=(await calls(page))[2];assert.equal(edited.kind,'update');assert.equal((edited.data as Record<string,string>).shipmentId,'21');assert.equal((edited.data as Record<string,string>).reference,shipment.reference);assert.equal((edited.data as Record<string,string>).expectedVersion,'3');assert.ok(!('recipientEmail'in(edited.data as Record<string,string>)));await settle(page,2,{error:'This shipment changed. Reload before saving.'});await page.getByRole('alert').waitFor();
+ }finally{await close();}
+});
+
+test('FE-069 actual shipment controls copy nonsecret locator and require manager confirmation for one fenced revoke',{timeout:60000},async()=>{
+ const{page,mount,close}=await boot();try{
+  await mount('actions',false);assert.equal(await page.getByRole('button',{name:'Revoke shipment access',exact:true}).count(),0);await page.getByRole('button',{name:'Copy tracking link',exact:true}).click();assert.deepEqual(await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.copied),['http://localhost:45679'+shipment.sharePath]);await page.getByRole('status').getByText('Copied',{exact:true}).waitFor();assert.deepEqual(await calls(page),[]);
+  for(const sharePath of['/tracking#'+shipment.reference,'https://foreign.test/tracking/'+shipment.reference,'//foreign.test/tracking/'+shipment.reference,shipment.sharePath+'?email=private@example.test',shipment.sharePath+'#untrusted']){
+   await page.evaluate(value=>(window as unknown as{fixture:Fixture}).fixture.rerender('actions',value),{...shipment,sharePath});await page.getByRole('button',{name:'Copy tracking link',exact:true}).click();assert.deepEqual(await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.copied),['http://localhost:45679'+shipment.sharePath],'Only the exact canonical shipment locator can be copied');assert.equal(await page.getByRole('status').count(),0);
+  }
+  await mount('actions');await page.getByRole('button',{name:'Revoke shipment access',exact:true}).click();await page.getByRole('dialog',{name:'Revoke shipment access?',exact:true}).waitFor();assert.deepEqual(await calls(page),[]);await page.getByRole('button',{name:'Cancel',exact:true}).click();assert.equal(await page.getByRole('button',{name:'Revoke shipment access',exact:true}).evaluate(node=>node===document.activeElement),true);
+  await page.getByRole('button',{name:'Revoke shipment access',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Revoke shipment access',exact:true}).click();assert.equal((await calls(page)).length,1);assert.equal((await calls(page))[0].kind,'revoke');assert.equal(((await calls(page))[0].data as Record<string,string>).expectedVersion,'3');await page.locator('dialog form').evaluate(form=>(form as HTMLFormElement).requestSubmit());assert.equal((await calls(page)).length,1);await page.keyboard.press('Escape');assert.equal(await page.getByRole('dialog').isVisible(),true);await settle(page,0,{error:'This shipment changed. Reload before saving.'});await page.getByRole('alert').waitFor();assert.equal(await page.getByRole('dialog').isVisible(),true);
+ }finally{await close();}
+});
+
+test('FE-069 actual shipment form retains48px labelled controls and balanced desktop/phone route fields',{timeout:60000},async()=>{
+ const{page,mount,close}=await boot();try{
+  await mount('create');for(const width of[1440,390,320]){await page.setViewportSize({width,height:844});const from=await page.getByLabel('From',{exact:true}).boundingBox(),to=await page.getByLabel('To',{exact:true}).boundingBox();assert.ok(from&&to);if(width>600)assert.ok(Math.abs(from.y-to.y)<1);else assert.ok(to.y>from.y+from.height);const boxes=await page.locator('input:not([type=hidden]),select,button').evaluateAll(nodes=>nodes.filter(node=>node.getClientRects().length).map(node=>{const r=node.getBoundingClientRect();return{height:r.height,left:r.left,right:r.right};}));assert.ok(boxes.every(box=>box.height>=48&&box.left>=0&&box.right<=width),JSON.stringify({width,boxes}));assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);}
+ }finally{await close();}
+});
+
+test('BE-058 actual same-mounted prop refresh cannot rebase a retained draft/version/key or move it across shipment identities',{timeout:60000},async()=>{
+ const{page,mount,close}=await boot();try{
+  const rerender=(kind:'create'|'edit'|'actions',value:StaffTrackingShipment|null,nonce?:string)=>page.evaluate(({kind,value,nonce})=>(window as unknown as{fixture:Fixture}).fixture.rerender(kind,value,nonce),{kind,value,nonce});
+  await mount('create');await page.getByRole('textbox',{name:'Shipment label (optional)',exact:true}).fill('Unsaved create draft');await rerender('create',null,'different-server-render-key');assert.equal(await page.locator('input[name=idempotencyKey]').inputValue(),'tracking-fixture-submit-key');assert.equal(await page.getByRole('textbox',{name:'Shipment label (optional)',exact:true}).inputValue(),'Unsaved create draft');
+  await mount('edit');await page.getByLabel('Provider name',{exact:true}).fill('Retained old-version draft');const newer={...shipment,version:4,legs:shipment.legs.map(leg=>({...leg,providerName:'Concurrent winning name'}))};await rerender('edit',newer);assert.equal(await page.getByLabel('Provider name',{exact:true}).inputValue(),'Retained old-version draft');assert.equal(await page.locator('input[name=expectedVersion]').inputValue(),'3');
+  await page.getByRole('button',{name:'Save changes',exact:true}).click();assert.equal(((await calls(page))[0].data as Record<string,string>).expectedVersion,'3');await settle(page,0,{error:'This shipment changed. Reload before saving.'});await page.getByRole('alert').waitFor();
+  const other={...newer,id:22,reference:'SHP-FFFFFFFFFFFFFFFFFFFF',version:8};await rerender('edit',other);assert.equal(await page.getByLabel('Provider name',{exact:true}).inputValue(),'Concurrent winning name');assert.equal(await page.locator('input[name=expectedVersion]').inputValue(),'8');assert.equal(await page.locator('input[name=shipmentId]').inputValue(),'22');assert.equal(await page.locator('input[name=reference]').inputValue(),other.reference);
+  await mount('actions');await page.getByRole('button',{name:'Revoke shipment access',exact:true}).click();await rerender('actions',newer);await page.getByRole('dialog').getByRole('button',{name:'Revoke shipment access',exact:true}).click();assert.equal(((await calls(page))[1].data as Record<string,string>).expectedVersion,'3','Open confirmation retains its original version');await settle(page,1,{error:'This shipment changed. Reload before saving.'});await page.getByRole('alert').waitFor();await page.getByRole('button',{name:'Cancel',exact:true}).click();await page.getByRole('button',{name:'Revoke shipment access',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Revoke shipment access',exact:true}).click();assert.equal(((await calls(page))[2].data as Record<string,string>).expectedVersion,'4','Deliberate review and reopening can use the current version');await settle(page,2,{error:'Unable to connect. Please try again.'});await page.getByRole('alert').waitFor();
+  await rerender('actions',other);assert.equal(await page.getByRole('dialog').isVisible(),false,'Another shipment never inherits an old open confirmation');
+ }finally{await close();}
+});

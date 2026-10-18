@@ -26,6 +26,8 @@ export type Offering = {
   availability: string;
   quantityMode: string;
   options: Array<{ name: string; values: string[] }>;
+  categoryId?: number | null;
+  categoryName?: string;
 };
 export type Shop = {
   id: number;
@@ -38,11 +40,15 @@ export type Shop = {
   accentColor?: string;
   contacts: Contacts;
   products: Offering[];
+  categories?: Array<{ id: number; name: string }>;
   version: number;
   status: string;
   isDemo: boolean;
+  approvedDemoContactMethods?: Array<"phone" | "whatsapp" | "telegram" | "website" | "tiktok" | "instagram" | "facebook">;
 };
 export type MapShop = {
+  countryCode?:string;
+  cityId?:string;
   id: number;
   handle: string;
   name: string;
@@ -59,6 +65,8 @@ export type MapShop = {
 };
 export type NearbyGroup = { key: string; city: string; latitude: number; longitude: number; showroomIds: number[] };
 export type SearchItem = {
+  offeringKind?: string;
+  availability?: string;
   kind: "product" | "business";
   id: number;
   name: string;
@@ -66,13 +74,16 @@ export type SearchItem = {
   image: string;
   handle: string;
   businessName: string;
+  city?: string;
+  region?: string;
 };
 export type Market = {
   items: SearchItem[];
   showrooms: MapShop[];
   nearbyGroups?: NearbyGroup[];
   categories: Array<{ key: string; label: string }>;
-  places: Array<{ key: string; label: string }>;
+  places: Array<{ key: string; label: string; countryCode?:string }>;
+  countries?:Array<{code:string;count:number}>;
   page: number;
   pages: number;
   total: number;
@@ -106,7 +117,7 @@ export type OwnerHome = {
   activity?: {visitsTotal:number;visits30Days:number;newInquiries:number;products:number};
   user: { name: string; email: string; phone: string };
   shop: Shop;
-  draft: { version: number; content: Profile } | null;
+  draft: { version: number; content: Profile; assistanceEnabled?: boolean } | null;
   publicationRevision: number;
   issues: Array<{ label: string }>;
 };
@@ -125,12 +136,31 @@ export type Page<T> = {
   pages: number;
   total: number;
 };
+export type TransportMethod = 'air' | 'truck' | 'van' | 'car' | 'motorcycle';
+export type TransportPlanLeg = {
+  id: string;
+  providerName: string;
+  origin: string;
+  destination: string;
+  method: TransportMethod;
+};
+export type TransportPlan = { version: number; legs: TransportPlanLeg[] };
+
 export type Conversation = {
   id: number;
   subject: string;
   status: string;
   publicRef: string;
   lastMessageAt: number;
+  resolvedAt?: number | null;
+  agentJoined?: boolean;
+  replyState?: 'needs_reply' | 'overdue' | 'waiting_customer' | null;
+  staffReplyDueAt?: number | null;
+  idleWarningAt?: number | null;
+  idleEndsAt?: number | null;
+  idleEndedAt?: number | null;
+  transportPlan?: TransportPlan;
+  transportPlanLink?: string;
 };
 export type SupportAttachment = { id:number; originalName:string; mimeType:string; byteSize:number };
 export type Message = {
@@ -147,6 +177,14 @@ export type Buying = {
   status: string;
   assignedUserName: string | null;
   agentJoined?: boolean;
+  resolvedAt?: number | null;
+  replyState?: 'needs_reply' | 'overdue' | 'waiting_customer' | null;
+  staffReplyDueAt?: number | null;
+  idleWarningAt?: number | null;
+  idleEndsAt?: number | null;
+  idleEndedAt?: number | null;
+  transportPlan?: TransportPlan;
+  transportPlanLink?: string;
   messages: Array<Message & { sender: "visitor" | "staff" }>;
 };
 export type ApiError = { error: string; code?: string };

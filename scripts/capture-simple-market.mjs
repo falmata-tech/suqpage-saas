@@ -3,14 +3,22 @@ import fs from 'node:fs';
 import { chromium, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
 const base='http://127.0.0.1:3102', out='.local/simple-market-review';
 fs.mkdirSync(out,{recursive:true,mode:0o700});
 const browser=await chromium.launch();
 const evidence=[];
 try {
   for(const width of [1440,390,320]) {
-    const context=await browser.newContext({viewport:{width,height:900}});
-    const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    const context=await browser.newContext({serviceWorkers: 'block',viewport:{width,height:900}});
+    const page=await context.newPage();
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
     await page.goto(`${base}/?industry=all&type=businesses`);
     const map=page.locator('.discovery-map');
     await expect.poll(async()=>Number(await map.getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
@@ -45,9 +53,10 @@ try {
     const scan=await new AxeBuilder({page}).include('#discover').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
     assert.deepEqual(scan.violations,[]);
     assert.deepEqual(errors,[]);
-    evidence.push({width,clusterZoom:true,selectionCenters:true,paginationPreservesMap:true,search:true,accessibility:true});
+    evidence.push({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false,width,clusterZoom:true,selectionCenters:true,paginationPreservesMap:true,search:true,accessibility:true});
     await context.close();
   }
   fs.writeFileSync(`${out}/evidence.json`,JSON.stringify(evidence,null,2));
   console.log('PASS desktop/390/320 map clustering, shop selection, paginated map continuity, word search, mobile filters, accessibility and overflow.');
-} finally {await browser.close();}
+} finally {await browser.close();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests();}

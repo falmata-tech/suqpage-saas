@@ -16,5 +16,5 @@ export default async function BusinessAccessPage({
   if (!Number.isInteger(businessId)) notFound();
   const business = await runtimeBusinessById(businessId);
   if (!business) notFound();
-  redirect(`/dashboard/settings?business=${business.id}#owner-sign-in`);
+  redirect(`/dashboard/access?business=${business.id}`);
 }

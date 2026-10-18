@@ -1,15 +1,22 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {chromium,expect} from '@playwright/test';
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
 const base=process.env.SUQPAGE_TEST_BASE_URL || 'http://127.0.0.1:3102',dir='.local/launch-clarity-review';
 assert.ok(['127.0.0.1','localhost'].includes(new URL(base).hostname),'Local browser evidence only');
 fs.mkdirSync(dir,{recursive:true});
 const browser=await chromium.launch();const records=[];
 try {
  for(const width of [390,320,1440])for(const locale of ['en','am','om','so','ti']) {
-  const context=await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce'});
+  const context=await browser.newContext({serviceWorkers: 'block',viewport:{width,height:844},reducedMotion:'reduce'});
   await context.addCookies([{name:'suqpage-language',value:locale,url:base}]);
-  const page=await context.newPage(); const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const page=await context.newPage();
+  mapTileFixtures.push(await installMapTileFixture(page.context())); const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto(base,{waitUntil:"domcontentloaded"});
   const opener=page.locator('button.discovery-panel-opener');await expect(opener).toBeVisible();
   await expect(opener.locator('.lucide-arrow-right')).toBeVisible();
@@ -53,7 +60,8 @@ try {
    if(route.startsWith('/@')) await expect(page.locator('[class*="LaunchClarity"][class*="notice"]')).toHaveCount(0);
    await page.screenshot({path:`${dir}/${route.startsWith('/@')?'shop':route.slice(1)}-${width}-${locale}.png`});
   }
-  assert.deepEqual(errors,[]);records.push({width,locale,resultsHeight:space});await context.close();
+  assert.deepEqual(errors,[]);records.push({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false,width,locale,resultsHeight:space});await context.close();
  }
  fs.writeFileSync(`${dir}/${process.argv.includes('--panel-only') ? 'panel' : 'public'}-verified.json`,JSON.stringify(records,null,2));console.log(`PASS 15 viewport/locale combinations: ${process.argv.includes('--panel-only') ? 'panel opener, filters, search, results, collapse, focus and retained query' : 'panel search and public routes'}.`);
-} finally {await browser.close();}
+} finally {await browser.close();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests();}

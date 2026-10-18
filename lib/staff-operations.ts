@@ -5,6 +5,8 @@ import type { AccessRole, Business, SessionUser } from "./types";
 import {hasCapability} from "./capabilities";
 import { authDriver } from "./config";
 import { finalizeSupabaseIdentity, provisionSupabaseEmailIdentity, removePendingSupabaseIdentity } from "./supabase-auth";
+import { routeWaitingSupportConversations } from "./support";
+import {audit} from './security';
 
 export type StaffRole = Extract<AccessRole, "team_member" | "operations_manager">;
 export type StaffAccount = {
@@ -74,22 +76,25 @@ export async function createStaffAccount(raw: { name:unknown; email:unknown; pas
   }
   try {
     const result = await runtimeTransaction(async () => {
+      if(!await runtimeGet("SELECT user_id FROM user_access_profiles WHERE user_id=? AND access_role='platform_admin' FOR SHARE",[actor.id]))throw new StaffOperationError('Platform administrator access required.');
       const inserted = await runtimeGet<{ id: number }>(`
         INSERT INTO users(email,password_hash,name,role,business_id,must_change_password,created_at)
         VALUES(?,?,?,'admin',NULL,?,CURRENT_TIMESTAMP) RETURNING id
       `, [email, passwordHash, name, managed ? 0 : 1]);
       const userId = Number(inserted!.id);
       await runtimeRun("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)", [userId, accessRole]);
-      await runtimeRun("INSERT INTO support_agent_settings(user_id,enabled,max_open_conversations,updated_by_user_id,updated_at,queue_scope) VALUES(?,1,3,?,?,?)",[userId,actor.id,Date.now(),queueScope]);
+      await runtimeRun("INSERT INTO support_agent_settings(user_id,enabled,updated_by_user_id,updated_at,queue_scope) VALUES(?,1,?,?,?)",[userId,actor.id,Date.now(),queueScope]);
       if (providerUserId) await runtimeRun("INSERT INTO auth_identity_links(user_id,provider,provider_user_id,email_at_link,created_at) VALUES(?,'supabase',?,?,?)", [userId, providerUserId, email, Date.now()]);
-      return { userId, accessRole, queueScope };
+      const routing = await routeWaitingSupportConversations(actor);
+      await audit('staff.account_created',{userId:actor.id,detail:{targetUserId:userId,accessRole,queueScope}});
+      return { userId, accessRole, queueScope, routing };
     });
     if (providerUserId) await finalizeSupabaseIdentity(providerUserId, result.userId).catch(() => undefined);
     return result;
   } catch (error) {
     if (providerUserId) await removePendingSupabaseIdentity(providerUserId).catch(() => false);
     if (error instanceof StaffOperationError) throw error;
-    throw new StaffOperationError("That staff email is already in use.");
+    throw new StaffOperationError(error&&typeof error==='object'&&'code' in error&&error.code==='23505'?"That staff email is already in use.":"Could not create staff account.");
   }
 }
 
