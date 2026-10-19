@@ -18,6 +18,12 @@ provider/protocol identities or a verified transition require them. This does no
 authorize deleting business data or replacing credentials. Backend/email/default
 phases and the new Android/Play release remain pending under FE-070/BE-059/DEP-049;
 current deployed application facts below are unchanged.
+The local shipment and overdue-staff email adapters can select a guarded Gmail
+SMTP sender as an alternative to Resend, using a server-only Gmail app password
+entered separately for the website. Supabase Auth's existing Gmail SMTP setting
+does not provide that password to the application. Until the new website has its
+own configured credentials and a real send is verified, these application emails
+remain deferred; Auth sign-in mail remains a separate service.
 The owner approved the combined local visuals on 2026-10-18 and requires the
 same approved M geometry and exact logo colors across web, native and exported
 assets. Full release gates and hosted changes remain separate. The owner also
@@ -1197,6 +1203,10 @@ and stops when the selected media changes. The first photo stays the cover for
 search/cards; legacy single-photo/video products need no backfill. Extra photos
 follow existing tenant/public access and snapshot-retention rules. This gallery
 was deployed on schema 50. Historical support reviews were deployed on schema 58.
+In the new release candidate, arrow, keyboard and thumbnail choices settle the
+visible slide immediately so a rapid reverse cannot leave a different thumbnail
+selected; direct touch scrolling still uses the horizontal snap track. This
+interaction correction is local until the source-matched release gates pass.
 The direct-video implementation has passing persistence/security and inline
 web/Expo captures, plus actual Android TikTok/Facebook/Instagram player checks.
 Approved web publication and full gates pass. The canonical APK and physical-phone

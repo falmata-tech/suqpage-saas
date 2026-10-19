@@ -263,9 +263,17 @@ Auth test sessions may be created to inspect an authenticated editor.
 ## Disposable browser-stack readiness — 2026-10-19
 
 Browser acceptance uses its own project ID, database volume, and ports. On a
-slow development host, Supabase Storage may become healthy after the CLI's
+host where another project owns the default browser-test port family, an
+explicit `SUQPAGE_BROWSER_SUPABASE_API_PORT` selects a different unprivileged
+loopback family for this disposable project. All six Supabase ports move
+together; invalid ports are rejected before startup. Readiness still verifies
+the exact disposable project label and the selected API port. This changes
+neither application timeouts nor another project's services.
+
+On a slow development host, Supabase Storage may become healthy after the CLI's
 fixed initial health deadline. The harness may start this disposable project
-with `--ignore-health-check` only if it independently waits at most five minutes
+with `--ignore-health-check` under a separate five-minute CLI startup bound,
+only if it independently waits at most five more minutes
 before fixture setup, build, or Playwright and verifies all six exact
 project-labelled services: database, gateway, Auth, REST, Storage, and mail
 catcher. Each must be running; every service with a Docker health check must
@@ -282,12 +290,25 @@ Scenario: Slow disposable Storage becomes healthy
   WHEN Storage initializes after the Supabase CLI's initial health deadline
   THEN fixture setup starts only after all six project services and both loopback endpoints are ready
 
+Scenario: Docker makes the CLI startup slow
+  GIVEN the disposable Supabase CLI startup exceeds ninety seconds on a busy host
+  WHEN the start command completes within five minutes
+  THEN the harness still performs the independent five-minute service and endpoint readiness check
+  AND it does not treat CLI completion as provider readiness
+
 Scenario: Disposable stack never becomes ready
   GIVEN a required service is missing, stopped, unhealthy, or belongs to another project
   OR the Auth/API or Storage status endpoint fails
   WHEN the five-minute readiness deadline expires
   THEN browser acceptance fails before fixture setup, build, or Playwright
   AND cleanup stops only its disposable project without printing provider credentials
+
+Scenario: Another project uses the default browser-test ports
+  GIVEN a different local project occupies the default browser-test port family
+  WHEN the operator selects a free unprivileged loopback API port
+  THEN the six disposable ports move together before Supabase starts
+  AND readiness checks the selected port and the exact disposable project label
+  AND malformed or privileged port overrides fail before startup
 ```
 
 The focused readiness test covers delayed success, wrong/missing/unhealthy

@@ -7062,6 +7062,18 @@ neither a hosted Auth configuration change nor an enabled customer workflow.
 
 ### S146 — disposable browser acceptance startup (DEP-027; release gate)
 
+- [x] Keep browser acceptance isolated when another project's local Supabase
+  owns its default ports. An explicit unprivileged API-port override moves the
+  whole disposable port family and preserves project-label/endpoint checks;
+  invalid values fail before startup. The default family is unchanged. Focused
+  port tests must pass before the source-matched release and acceptance gates.
+- [ ] Keep the disposable CLI startup and provider readiness as separate bounded
+  stages: allow up to five minutes for `supabase start --ignore-health-check`,
+  then require the existing six-service and two-endpoint readiness check within
+  its own five-minute limit. The combined Gmail/gallery release attempt passed
+  compilation and trace checks but the old 90-second CLI bound exited 130
+  before any provider assertion. Focused timeout tests and new source-matched
+  release/browser checks are pending; do not count that attempt as a pass.
 - [x] Classify the isolated acceptance failure as infrastructure: Supabase
   Storage needed about 177 seconds to become healthy, exceeding the CLI's
   initial health deadline; no application assertion failed. Preserve the
@@ -7086,3 +7098,49 @@ neither a hosted Auth configuration change nor an enabled customer workflow.
   retired per-business Staff assistance editor; FE-072 intentionally redirects
   that URL to the Staff directory. Assert the redirect and directory heading,
   then exercise the long owner workflow and full browser suite again.
+
+### S146 — GitHub product-gallery navigation correction (FE-050; release gate)
+
+- [x] Diagnose draft MirtPage PR #36 browser failure against the exact CI
+  assertion and track measurements. The first slide was visible at scrollLeft 0,
+  but Photo 2 remained selected after immediate keyboard navigation and return.
+- [x] Keep arrow, keyboard and thumbnail selection synchronized with the visible
+  slide even when the visitor reverses direction before movement completes.
+  Preserve touch swiping, snap layout, video unmounting and reduced-motion
+  behavior; add position/state assertions to the existing actual-Chrome workflow.
+  Actual component plus repository CSS pass keyboard, rapid reverse, arrows,
+  thumbnails, selected/inert state and no-error checks in Chrome at 1440/390/320;
+  captures are in `.local/github-pr36-gallery-review/harness/`.
+- [x] Owner approved the desktop/phone gallery interaction review and full
+  release checks after the actual Chrome 1440/390/320 exercise.
+- [ ] Rerun source-matched browser acceptance and release checks. Push a focused correction only after
+  the relevant checks pass; confirm every GitHub job on the new head commit.
+  The full local acceptance runner could not start because an unrelated
+  Loadgistic Docker test occupied its port 56322. One ignored port-isolated
+  retry stopped before app assertions (`supabase start` exited 130); no external
+  database, provider or production setting was changed.
+
+### S146 — Gmail shipment and staff email option (BE-018/050/058, DEP-043/048)
+
+- [x] Keep the existing durable shipment and overdue-staff outboxes, Resend
+  adapter and local Mailpit path. Add an explicitly selected Gmail SMTP adapter
+  with server-only credentials, fixed TLS endpoint, sender bound to the Gmail
+  account, bounded timeouts, no secret logs and deterministic Message-ID.
+  ADR-0031 records that SMTP acceptance is not inbox delivery and a rare
+  duplicate can follow an ambiguous send despite the existing bounded retry.
+- [x] Test valid, invalid, missing-credential, provider-failure and localized
+  message cases with injected SMTP; preserve the existing Resend/Mailpit cases.
+  Nineteen focused mail tests, strict TypeScript, 218-spec validation and
+  Netlify-readiness checks pass. The pinned Nodemailer version adds no audit
+  advisory; the pre-existing twenty high build-tool advisories remain separate.
+- [ ] Run source-matched full release and browser checks on the combined Gmail
+  and gallery candidate; commit/push with task-scoped staging and verify PR CI.
+- [x] On the exact production Netlify site, set only server-side production
+  `MIRTPAGE_TRANSACTIONAL_EMAIL_PROVIDER=gmail-smtp`,
+  `MIRTPAGE_SMTP_USER` and `MIRTPAGE_SMTP_APP_PASSWORD` from the owner's same
+  Gmail account, without reading or copying masked Supabase Auth SMTP secrets.
+  Metadata-only readback confirms all three production values are present on
+  the verified `africmade` site, the app password is secret-scoped, and no
+  nonproduction context has a value. No credential bytes were logged.
+- [ ] Redeploy and prove a labelled tracking code, shipment detail and overdue
+  staff alert reach the intended inbox before calling hosted email live.

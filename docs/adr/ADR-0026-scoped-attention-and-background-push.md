@@ -4,7 +4,7 @@ title: Scoped attention events and bounded background push
 status: accepted
 date: 2026-10-07
 deciders: [product, engineering]
-related: [FE-062, BE-050, BE-018, DEP-043, ADR-0023]
+related: [FE-062, BE-050, BE-018, DEP-043, ADR-0023, ADR-0031]
 ---
 
 # ADR-0026 — Scoped attention events and bounded background push
@@ -66,6 +66,10 @@ Primary contract: https://docs.expo.dev/push-notifications/sending-notifications
 
 
 ## Assigned-chat escalation email extension (S126)
+
+ADR-0031 later adds an explicit low-volume Gmail SMTP option for this same
+transactional outbox. The Resend decision below remains the original baseline;
+no provider migration is implied until separate hosted verification.
 
 Reuse the existing Resend email provider through a narrow typed port. Add a
 private PostgreSQL email outbox attached to the existing overdue attention event;

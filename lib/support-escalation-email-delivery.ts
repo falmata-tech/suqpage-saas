@@ -3,6 +3,7 @@ import {parseLocale} from './i18n/core';
 import {supportAssignmentReplyDueAt,supportReplyOverdueSource} from './support-assignment-response';
 import {
   sendSupportEscalationEmail,supportEscalationEmailOrigin,supportEscalationEmailReadiness,
+  selectedHostedEmailMode,
   type SupportEscalationEmail,type SupportEscalationEmailMode,type SupportEscalationEmailPort,type SupportEscalationEmailResult,
 } from './support-escalation-email';
 
@@ -36,7 +37,7 @@ export function supportEscalationEmailPayload(row:EmailRow,now:number,origin:str
 }
 
 /** Leases bound fan-out; provider idempotency covers uncertain accepted retries. */
-export async function dispatchSupportEscalationEmails({now=Date.now(),send,limit=2,mode='resend',context}:{now?:number;send?:SupportEscalationEmailPort;limit?:number;mode?:SupportEscalationEmailMode;context?:{origin:string}}={}){
+export async function dispatchSupportEscalationEmails({now=Date.now(),send,limit=2,mode=selectedHostedEmailMode(),context}:{now?:number;send?:SupportEscalationEmailPort;limit?:number;mode?:SupportEscalationEmailMode;context?:{origin:string}}={}){
   if(!Number.isSafeInteger(now)||now<0)throw Error('Invalid email dispatch time.');
   const started=performance.now(),currentTime=()=>now+Math.max(0,Math.floor(performance.now()-started));
   // The substitute port can supply its own bounded rendering context in tests.

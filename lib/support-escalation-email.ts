@@ -4,8 +4,9 @@ import am from './i18n/messages/am.json';
 import om from './i18n/messages/om.json';
 import so from './i18n/messages/so.json';
 import ti from './i18n/messages/ti.json';
+import {gmailSmtpConfiguration,sendGmailSmtpEmail,type GmailSmtpFactory,type TransactionalEmailResult} from './gmail-smtp-email';
 
-export type SupportEscalationEmailMode = 'resend' | 'local-mailpit';
+export type SupportEscalationEmailMode = 'resend' | 'gmail-smtp' | 'local-mailpit' | 'disabled';
 export type SupportEscalationEmail = {
   notificationId:number;
   recipientEmail:string;
@@ -15,13 +16,14 @@ export type SupportEscalationEmail = {
   dashboardUrl:string;
   language:Locale;
 };
-export type SupportEscalationEmailResult =
-  | {state:'accepted'}
-  | {state:'deferred';category:'missing_configuration'}
-  | {state:'failed';category:'invalid_message'|'provider_rejected'|'provider_failure';retryable:boolean};
+export type SupportEscalationEmailResult = TransactionalEmailResult;
 /** Acceptance is provider/local-inbox acceptance, never delivery or a human read. */
 export type SupportEscalationEmailPort = (email:SupportEscalationEmail)=>Promise<SupportEscalationEmailResult>;
 type Environment=Record<string,string|undefined>;
+export function selectedHostedEmailMode(env:Environment=platformEnvironment()):SupportEscalationEmailMode{
+  const selected=env.MIRTPAGE_TRANSACTIONAL_EMAIL_PROVIDER;
+  return !selected||selected==='resend'?'resend':selected==='gmail-smtp'?'gmail-smtp':'disabled';
+}
 const address=(value:string)=>value.length<=254&&/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(value);
 const positive=(value:number)=>Number.isSafeInteger(value)&&value>0;
 const loopback=(raw:string|undefined,protocols:string[],port:string)=>{
@@ -64,6 +66,11 @@ function configuration(mode:SupportEscalationEmailMode,env:Environment){
   const origin=supportEscalationEmailOrigin(mode,env);
   if(!origin)return null;
   if(mode==='local-mailpit')return {origin,from:'alerts@suqpage.test',key:null};
+  if(mode==='gmail-smtp'){
+    const smtp=gmailSmtpConfiguration(env);
+    return smtp?{origin,from:smtp.user,key:null}:null;
+  }
+  if(mode==='disabled')return null;
   const raw=env.NOTIFICATION_FROM_EMAIL||'',from=raw.includes('<')?/^[^<>\r\n]*<([^<>\r\n]+)>$/.exec(raw)?.[1]:raw;
   return env.RESEND_API_KEY&&from&&address(from)?{origin,from,key:env.RESEND_API_KEY}:null;
 }
@@ -84,8 +91,8 @@ export function supportEscalationEmailContent(email:SupportEscalationEmail){
 }
 
 /** Existing Resend configuration or fixed development Mailpit; no configuration writes. */
-export async function sendSupportEscalationEmail(email:SupportEscalationEmail,options:{mode?:SupportEscalationEmailMode;send?:typeof fetch;env?:Environment}={}):Promise<SupportEscalationEmailResult>{
-  const mode=options.mode??'resend',config=configuration(mode,options.env??platformEnvironment());
+export async function sendSupportEscalationEmail(email:SupportEscalationEmail,options:{mode?:SupportEscalationEmailMode;send?:typeof fetch;env?:Environment;smtpCreateTransport?:GmailSmtpFactory}={}):Promise<SupportEscalationEmailResult>{
+  const env=options.env??platformEnvironment(),mode=options.mode??selectedHostedEmailMode(env),config=configuration(mode,env);
   if(!config)return {state:'deferred',category:'missing_configuration'};
   let url:URL;
   try{url=new URL(email.dashboardUrl);}catch{return {state:'failed',category:'invalid_message',retryable:false};}
@@ -95,6 +102,7 @@ export async function sendSupportEscalationEmail(email:SupportEscalationEmail,op
     !/^\/dashboard\/support\/[1-9]\d*$/.test(url.pathname)||url.username||url.password||url.hash)
     return {state:'failed',category:'invalid_message',retryable:false};
   const key=supportEscalationEmailKey(email.notificationId),content=supportEscalationEmailContent(email);
+  if(mode==='gmail-smtp')return sendGmailSmtpEmail({recipientEmail:email.recipientEmail,subject:content.subject,text:content.text,deliveryKey:key},{env,createTransport:options.smtpCreateTransport});
   const endpoint=mode==='local-mailpit'?'http://127.0.0.1:54324/api/v1/send':'https://api.resend.com/emails';
   const headers:Record<string,string>={'Content-Type':'application/json'};
   if(config.key){headers.Authorization=`Bearer ${config.key}`;headers['Idempotency-Key']=key;}

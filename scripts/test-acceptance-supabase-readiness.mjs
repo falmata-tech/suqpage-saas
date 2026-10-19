@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  browserServices, browserServicesReady, inspectBrowserServices, probeBrowserEndpoints,
+  browserCliStartTimeoutMs, browserServices, browserServicesReady, browserSupabasePorts, remapBrowserSupabaseConfigPorts, inspectBrowserServices, probeBrowserEndpoints,
   waitForBrowserSupabaseReady,
 } from "./acceptance-supabase-readiness.mjs";
 
@@ -10,6 +10,29 @@ const apiPort = 56321;
 const healthyServices = () => Object.fromEntries(browserServices.map((name) => [
   name, { label: projectId, status: "running", health: name === "rest" ? "none" : "healthy" },
 ]));
+
+test("DEP-027 CLI startup has its own five-minute bound before independent readiness", () => {
+  assert.equal(browserCliStartTimeoutMs, 300_000);
+});
+
+test("DEP-027 disposable Supabase port override stays in one valid loopback family", () => {
+  assert.deepEqual(browserSupabasePorts({}), {
+    api: 56321, db: 56322, shadow: 56320, smtp: 56324, pooler: 56329, analytics: 56327,
+  });
+  assert.deepEqual(browserSupabasePorts({ SUQPAGE_BROWSER_SUPABASE_API_PORT: "54321" }), {
+    api: 54321, db: 54322, shadow: 54320, smtp: 54324, pooler: 54329, analytics: 54327,
+  });
+  for (const value of ["", "54321x", "443", "65530", "56321.5", "-1"]) {
+    assert.throws(() => browserSupabasePorts({ SUQPAGE_BROWSER_SUPABASE_API_PORT: value }), /valid unprivileged/);
+  }
+});
+
+test("DEP-027 config remap is one pass even when a destination equals an original port", () => {
+  const ports = browserSupabasePorts({ SUQPAGE_BROWSER_SUPABASE_API_PORT: "54322" });
+  const source = "api=54321 db=54322 shadow=54320 smtp=54324 pooler=54329 analytics=54327";
+  assert.equal(remapBrowserSupabaseConfigPorts(source, ports),
+    "api=54322 db=54323 shadow=54321 smtp=54325 pooler=54330 analytics=54328");
+});
 
 test("DEP-027 Docker inspection is scoped to six disposable project containers", () => {
   const expected = browserServices.map((service) => `supabase_${service}_${projectId}`);
@@ -106,4 +129,9 @@ test("DEP-027 rejects non-disposable projects and ports before probing", async (
       probe: () => { throw Error("probed unrelated stack"); },
     }), /disposable Supabase project and API port/);
   }
+  await waitForBrowserSupabaseReady({
+    projectId, apiPort: 54321,
+    environment: { SUQPAGE_BROWSER_SUPABASE_API_PORT: "54321" },
+    inspect: () => healthyServices(), probe: () => true,
+  });
 });

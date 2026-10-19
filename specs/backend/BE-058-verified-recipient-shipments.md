@@ -2,13 +2,26 @@
 id: BE-058
 title: Email-verified recipients and independent shipment plans
 status: in_progress
-related: [BE-057, BE-044, FE-049, FE-053, FE-069, DEP-048]
+related: [BE-057, BE-044, FE-049, FE-053, FE-069, DEP-048, ADR-0031]
 owners: [backend, security, operations]
 last_updated: 2026-10-18
 change_level: L3
 ---
 
 # BE-058 — Verified recipient shipments
+
+## Transactional Gmail option (ready; ADR-0031)
+
+The independent code and initial-details jobs retain their saved locale/snapshot,
+purpose, expiry, fresh eligibility checks and bounded leases/retries. Hosted
+dispatch may explicitly select TLS Gmail SMTP using a server-only app password;
+local previews remain isolated in Mailpit and the existing Resend route remains
+available. A missing/invalid hosted Gmail setting defers the job without sending
+through Resend. A verified SMTP acceptance is not inbox delivery or proof of
+verification. A stable Message-ID does not prevent every duplicate after an
+ambiguous timeout, so no exactly-once claim is made. Test no local fallback,
+invalid recipients/headers/configuration, permanent versus temporary SMTP errors,
+stable identity and unchanged recipient authorization. DEP-048 owns hosted rollout.
 
 ## S145 follow-on — provider tracking details (backend locally verified; UI/rollout pending)
 

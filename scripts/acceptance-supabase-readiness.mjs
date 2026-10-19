@@ -1,10 +1,31 @@
 import { spawnSync } from "node:child_process";
 
 export const browserServices = ["db", "kong", "auth", "rest", "storage", "inbucket"];
+export const browserCliStartTimeoutMs = 300_000;
 const healthCheckedServices = new Set(["db", "kong", "auth", "storage", "inbucket"]);
 
-function assertBrowserTarget(projectId, apiPort) {
-  if (!/^suqpage-browser-[0-9]+$/.test(projectId) || apiPort !== 56321) {
+/** Select only an unprivileged loopback port family for the disposable project. */
+export function browserSupabasePorts(environment = process.env) {
+  const raw = environment.SUQPAGE_BROWSER_SUPABASE_API_PORT;
+  const api = raw === undefined ? 56321 : /^\d{4,5}$/.test(raw) ? Number(raw) : NaN;
+  if (!Number.isInteger(api) || api < 1025 || api > 65527) {
+    throw new Error("Browser acceptance requires a valid unprivileged local Supabase API port.");
+  }
+  return { api, db: api + 1, shadow: api - 1, smtp: api + 3, pooler: api + 8, analytics: api + 6 };
+}
+
+/** One pass prevents a selected port from being rewritten as another source port. */
+export function remapBrowserSupabaseConfigPorts(config, ports) {
+  const sourcePorts = {
+    54321: ports.api, 54322: ports.db, 54320: ports.shadow,
+    54324: ports.smtp, 54329: ports.pooler, 54327: ports.analytics,
+  };
+  return config.replace(/\b(?:54321|54322|54320|54324|54329|54327)\b/g,
+    (sourcePort) => String(sourcePorts[sourcePort]));
+}
+
+function assertBrowserTarget(projectId, apiPort, environment) {
+  if (!/^suqpage-browser-[0-9]+$/.test(projectId) || apiPort !== browserSupabasePorts(environment).api) {
     throw new Error("Browser acceptance requires its disposable Supabase project and API port.");
   }
 }
@@ -53,9 +74,9 @@ export async function probeBrowserEndpoints(apiPort, request = fetch) {
 export async function waitForBrowserSupabaseReady({
   projectId, apiPort, inspect = inspectBrowserServices, probe = probeBrowserEndpoints,
   now = Date.now, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
-  timeoutMs = 300_000, pollMs = 2_000,
+  timeoutMs = 300_000, pollMs = 2_000, environment = process.env,
 }) {
-  assertBrowserTarget(projectId, apiPort);
+  assertBrowserTarget(projectId, apiPort, environment);
   const deadline = now() + timeoutMs;
   while (now() < deadline) {
     if (browserServicesReady(projectId, await inspect(projectId)) && await probe(apiPort)) {

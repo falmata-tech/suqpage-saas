@@ -583,6 +583,7 @@ specs before a material behavior change.
 
 | DEP-027 dev-resource hostname correction | `lib/trusted-origins.ts`, `next.config.ts`, `package.json` | `scripts/test-dev-resource-origins.mjs`, `test:local-supabase-readiness`, actual installed Chrome | Next.js 16 HMR guard accepts exact `127.0.0.1` and denies an unknown host with 403; Server Action hosts and mutation origins remain port/exact-origin scoped. Local `127.0.0.1:3102` editor hydrates after restart with one HMR socket, enabled About/language controls, zero console errors or app POSTs; `.local/dev-origin-s146/receipt.json`. Focused readiness, typecheck, 217-spec validation and whitespace pass; no hosted change. |
 | DEP-027 disposable browser readiness correction | `scripts/acceptance-runner.mjs`, `scripts/acceptance-supabase-readiness.mjs`, `package.json` | `scripts/test-acceptance-supabase-readiness.mjs`, `test:local-supabase-readiness`, source-matched isolated browser acceptance pending | CLI initial health bypass is followed by a five-minute fail-closed wait for six exact project-labelled containers and real Auth/API plus Storage status success. Focused six-case, local-readiness and 217-spec gates pass; the previous slow-Storage infrastructure failure remains recorded. No browser-journey or hosted release claim yet. |
+| DEP-027 disposable browser port isolation | `scripts/acceptance-runner.mjs`, `scripts/acceptance-supabase-readiness.mjs` | `scripts/test-acceptance-supabase-readiness.mjs`, source-matched isolated browser acceptance pending | An explicit unprivileged loopback API-port override moves all six disposable Supabase ports together; readiness still requires the exact project label and selected endpoint. One-pass remapping is tested against a destination that overlaps an original port. Focused readiness 9/9, 218-spec validation and independent actual-config review pass; full browser/release gates remain pending. |
 | DEP-027 disposable email capacity and visible capture | `scripts/acceptance-runner.mjs`, `scripts/capture-launch-wiring.mjs` | `test:local-supabase-readiness`, source-matched isolated browser acceptance pending | First full run after Storage startup reached 20 cases: 18 passed; the third independent sign-in exceeded only the disposable project's two-email hourly limit and a capture matched hidden duplicate markup. The isolated browser project now allows six local test emails, while hosted/developer limits stay unchanged; the capture still requires visible published text. Full rerun pending. |
 | FE-072 retired staff-assistance capture | `scripts/capture-launch-wiring.mjs` | source-matched isolated owner acceptance pending | Follow-up full browser run passed 19/20; its long capture still expected the removed per-business Staff assistance heading. The accepted flow redirects that URL to the Staff directory, which the assertion now verifies. No product route or permission changed. |
 
@@ -3819,3 +3820,39 @@ separate under DEP-042/DEP-044/DEP-049. Focused `test-workflow.mjs`,
 `test-web-install.cjs`, `test:mobile:release-safety` (3/3) and `validate:specs`
 (217 specs/ADRs) pass locally. No remote CI result, new AAB, Play action or
 production deployment is claimed from this source change.
+
+## S146 MirtPage PR #36 gallery navigation correction — FE-050
+
+GitHub run `39293516050` on `bee0c444` passed core, container, dependency and
+PostgreSQL but failed the browser job (19/20). Its FE-050 assertion found the
+track at scrollLeft 0 with Photo 2 still active and Photo 1 inert after rapid
+keyboard navigation and reverse. `components/showroom/ProductMediaGallery.tsx`
+now settles programmatic control navigation immediately; touch scrolling and
+snap remain. `scripts/capture-launch-wiring.mjs` checks the visible slide and
+selected thumbnail together at 390/320. An ignored direct actual-component
+Chrome harness with the repository CSS passes the affected keyboard, reverse,
+arrow and thumbnail paths at 1440/390/320 with no page errors; captures are in
+`.local/github-pr36-gallery-review/harness/`. Typecheck and 218-spec validation
+pass. The full disposable acceptance runner stopped before app assertions twice:
+its fixed port is occupied by an unrelated Loadgistic Docker test, then one
+port-isolated retry stopped while starting Supabase. The owner approved the
+reviewed gallery behavior and full checks. Source-matched full gates and a fresh
+terminal remote CI run remain pending; no
+deployment is claimed from the focused proof.
+
+## S146 optional Gmail transactional sender — BE-018/050/058, DEP-043/048, ADR-0031
+
+`lib/gmail-smtp-email.ts` supplies the fixed TLS Gmail SMTP port for the existing
+tracking and overdue-staff outboxes; their adapters and dispatchers choose it
+only when `MIRTPAGE_TRANSACTIONAL_EMAIL_PROVIDER=gmail-smtp` is configured.
+The SMTP sender is the configured Gmail user and the password stays server-side.
+Existing Resend and local Mailpit modes remain. The new
+`scripts/test-gmail-smtp-email.ts` plus existing tracking/escalation adapter
+tests pass 19 focused cases, including missing configuration, invalid input,
+provider rejection and absence of `NOTIFICATION_FROM_EMAIL` in Gmail mode.
+Typecheck, 218-spec validation and Netlify readiness pass; Nodemailer 10.1.7
+adds no new audit advisory. Metadata-only readback confirms the three Gmail
+settings are present in the verified Netlify site's production context, with
+the app password secret-scoped and no nonproduction value. This does not verify
+the password bytes, a real Gmail send, or hosted email delivery; those remain
+pending deployment and a labelled delivery test.

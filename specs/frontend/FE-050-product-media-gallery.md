@@ -4,7 +4,7 @@ title: Product media gallery
 status: in_progress
 related: [FE-061, BE-049, FE-060, BE-048, FE-041, FE-047, BE-042, DEP-039, FE-057, BE-046]
 owners: [product, frontend, backend, operations]
-last_updated: 2026-10-08
+last_updated: 2026-10-19
 change_level: L3
 ---
 
@@ -47,6 +47,10 @@ five-entry gallery count.
   catalog reads, version snapshots and revision conversion.
 - GIVEN a gallery WHEN using thumbnails, arrows, keyboard or swipe THEN the
   selected media and thumbnail agree, with only the active video able to play.
+- GIVEN a visitor selects another media item with an arrow, keyboard or thumbnail
+  and immediately reverses direction or swipes WHEN the initial movement has not
+  finished THEN the visible slide, selected thumbnail and interactive media agree;
+  an interrupted programmatic movement cannot leave the prior slide inert.
 - GIVEN hidden/draft/foreign products WHEN their extra image URL is requested
   THEN existing tenant/public permission rules also protect gallery images.
 - GIVEN stale versions, invalid/oversized files, unowned references, invalid video
@@ -78,6 +82,15 @@ Browser coverage passes: `scripts/capture-launch-wiring.mjs`, including
 1440/390/320, focused Axe, editor reload/reorder/remove, repeat save without
 reupload, viewer arrows/thumbnails/keyboard/scroll/video switching, publication
 and inquiry delivery to the local inbox. Captures inspected and visually approved; deployment verified below.
+
+GitHub PR #36 exposed an interrupted keyboard-navigation race in the 2026-10-19
+MirtPage release candidate: the track had returned to the first slide while the
+second thumbnail remained selected. Control-driven selection now settles
+immediately. The actual component and repository CSS pass keyboard, rapid
+reverse, arrow and thumbnail position/selection checks in Chrome at 1440/390/320;
+`scripts/capture-launch-wiring.mjs` also asserts visible position in the full
+workflow. This candidate remains in progress until the source-matched browser
+and release gates pass again.
 
 ## Release evidence — 2026-09-23
 

@@ -2,13 +2,23 @@
 id: BE-050
 title: Scoped notification events and confirmed chat reads
 status: in_progress
-related: [BE-055, FE-062, DEP-043, ADR-0026, BE-001, BE-018, BE-044, FE-019, FE-053, BE-057]
+related: [BE-055, FE-062, DEP-043, ADR-0026, BE-001, BE-018, BE-044, FE-019, FE-053, BE-057, ADR-0031]
 owners: [backend, security]
 last_updated: 2026-10-17
 change_level: L3
 ---
 
 # BE-050 — Scoped notification events and confirmed chat reads
+
+## Transactional Gmail option (ready; ADR-0031)
+
+The existing overdue attention and private email outbox are unchanged. Hosted
+dispatch may explicitly select Gmail SMTP for the same narrowly scoped manager
+email; an absent or invalid setting defers rather than falls back to another
+external provider. Resend and guarded local Mailpit modes remain. Gmail SMTP
+cannot promise exactly-once delivery after an ambiguous acceptance timeout, so
+retain bounded leases, attempts, stable Message-ID and generic outcomes. Neither
+the app nor logs expose the Gmail app password. DEP-043 owns activation evidence.
 
 ## S126 — fair assignment deadlines and admin escalation emails (ready)
 

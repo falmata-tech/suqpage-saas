@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { browserSupabasePorts } from "./acceptance-supabase-readiness.mjs";
 const config = fs.readFileSync("supabase/config.toml", "utf8");
 const example = fs.readFileSync(".env.example", "utf8");
 const nativeSetup = fs.readFileSync("scripts/setup.ts", "utf8");
@@ -57,7 +58,13 @@ assert.match(localDev, /"54322"/);
 assert.match(localDev, /"54321"/);
 assert.match(acceptance, /suqpage-browser-/);
 assert.ok(acceptance.includes('.replaceAll("supabase_inbucket_mirtpage", `supabase_inbucket_${browserSupabaseProjectId}`)'), "Browser fixtures use their isolated mail catcher");
-assert.match(acceptance, /api: 56321, db: 56322/);
+assert.match(acceptance, /browserSupabasePorts\(\)/);
+assert.deepEqual(browserSupabasePorts({}), {
+    api: 56321, db: 56322, shadow: 56320, smtp: 56324, pooler: 56329, analytics: 56327,
+});
+assert.deepEqual(browserSupabasePorts({ SUQPAGE_BROWSER_SUPABASE_API_PORT: "54321" }), {
+    api: 54321, db: 54322, shadow: 54320, smtp: 54324, pooler: 54329, analytics: 54327,
+});
 assert.match(acceptance, /"--ignore-health-check"/);
 assert.match(acceptance, /await waitForBrowserSupabaseReady\([\s\S]*?supabase", \["status"/);
 assert.match(acceptance, /\.replace\(\/\^email_sent = 2\$\/m, "email_sent = 6"\)/);

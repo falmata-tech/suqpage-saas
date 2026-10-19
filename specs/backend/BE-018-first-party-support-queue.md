@@ -2,13 +2,26 @@
 id: BE-018
 title: First-party customer support queue
 status: in_progress
-related: [BE-046, BE-044, ADR-0023, FE-019, FE-026, FE-056, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039, BE-050, DEP-043, FE-036, FE-053, BE-057]
+related: [BE-046, BE-044, ADR-0023, FE-019, FE-026, FE-056, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039, BE-050, DEP-043, FE-036, FE-053, BE-057, ADR-0031]
 owners: [backend, security, customer-support]
 last_updated: 2026-10-17
 change_level: L3
 ---
 
 # BE-018 - First-party customer support queue
+
+## Transactional Gmail option (ready; ADR-0031)
+
+The existing private overdue-alert outbox and authorization checks remain the
+authority. An explicitly selected hosted Gmail SMTP adapter may send its existing
+minimal manager email through the owner's Gmail account. Missing/malformed
+server-only settings defer the job; local preview still selects Mailpit and can
+never send to Gmail. A verified TLS SMTP acceptance records provider acceptance,
+not recipient delivery. Gmail has no provider idempotency key: a timeout after
+acceptance can yield a duplicate on bounded retry. The stable job identity and
+Message-ID must be retained. The Resend mode remains available. Negative tests
+cover invalid targets, headers, authentication, transient failures and no secret
+logging; DEP-043 owns the separately verified hosted activation.
 
 ## S142/S144 retirement of conversation company handoffs (ready UI; cleanup planned)
 

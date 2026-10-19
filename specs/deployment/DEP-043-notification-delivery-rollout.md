@@ -2,13 +2,26 @@
 id: DEP-043
 title: Verified notification delivery rollout
 status: in_progress
-related: [DEP-048, BE-050, FE-062, ADR-0026, DEP-042, DEP-044, BE-018, FE-019, FE-036, FE-053, DEP-047]
+related: [DEP-048, BE-050, FE-062, ADR-0026, DEP-042, DEP-044, BE-018, FE-019, FE-036, FE-053, DEP-047, ADR-0031]
 owners: [operations, security]
 last_updated: 2026-10-17
 change_level: L3
 ---
 
 # DEP-043 — Verified notification delivery rollout
+
+## Gmail SMTP manager-email source option (ready; ADR-0031)
+
+The owner selects the existing Gmail account instead of opening Resend for
+initial low-volume transactional mail. Code may add an explicit `gmail-smtp`
+mode to the existing private overdue-alert outbox. Netlify alone holds the
+production-context SMTP username/app password; Supabase Auth SMTP stays unchanged.
+The From address must equal the Gmail username. No silent fallback to Resend or
+Gmail from a local preview. Require real TLS and bounded provider timeout,
+generic errors, a stable Message-ID and no secret output. If the mode is selected
+without valid settings, leave jobs pending and report only configuration state.
+Hosted readiness requires separately reviewed secret entry, redeployment and a
+labelled real Gmail-to-inbox acceptance check; local Mailpit is insufficient.
 
 ## Ready: compatible browser wire and canonical display
 

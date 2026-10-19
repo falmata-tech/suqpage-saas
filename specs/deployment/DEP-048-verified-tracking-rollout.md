@@ -2,13 +2,27 @@
 id: DEP-048
 title: Safe verified-recipient tracking migration and delivery rollout
 status: in_progress
-related: [BE-058, FE-049, FE-053, FE-069, DEP-047, DEP-029, DEP-043]
+related: [BE-058, FE-049, FE-053, FE-069, DEP-047, DEP-029, DEP-043, ADR-0031]
 owners: [operations, security, backend]
 last_updated: 2026-10-18
 change_level: L3
 ---
 
 # DEP-048 — Verified tracking rollout
+
+## Gmail SMTP tracking-email source option (ready; ADR-0031)
+
+Shipment-code and initial-details jobs may use an explicitly selected hosted
+Gmail SMTP adapter, preserving their independent recipient authorization,
+locale, snapshot, lease, expiry and bounded retry rules. Supabase Auth's already
+configured Gmail SMTP does not send these application messages. The app uses a
+separate production-context, server-only Gmail credential entered directly into
+Netlify; its From address equals that Gmail account. Missing configuration
+defers jobs. Local Mailpit cannot fall through to external mail, and the Resend
+mode is retained. Gmail's stable Message-ID helps threading but does not offer
+provider idempotency; an ambiguous send can be retried and duplicated. A real
+recipient send/receive check, artifact secret scan and worker verification are
+required before claiming hosted mail delivery; local acceptance proves none.
 
 ## S145 follow-on — additive75 provider tracking fields (isolated implementation verified)
 

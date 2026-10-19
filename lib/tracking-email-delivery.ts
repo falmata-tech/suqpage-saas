@@ -2,8 +2,9 @@ import {postgresRuntimeServices} from './postgres-runtime-services';
 import {trackingChallengeSendable,trackingCode,type TrackingChallengeRow} from './tracking';
 import {TrackingError,parseTrackingShipment,type TrackingLocale} from './tracking-contract';
 import {sendTrackingEmail,trackingEmailReadiness,type TrackingEmail,type TrackingEmailMode,type TrackingEmailPort,type TrackingEmailResult} from './tracking-email';
+import {selectedHostedEmailMode} from './support-escalation-email';
 type Lease={id:number;kind:'code'|'initial';challenge_id:string|null;shipment_id:number|null;attempts:number;lease_until:number;expires_at:number};
-export async function dispatchTrackingEmails({now=Date.now(),limit=2,mode='resend',send}:{now?:number;limit?:number;mode?:TrackingEmailMode;send?:TrackingEmailPort}={}){
+export async function dispatchTrackingEmails({now=Date.now(),limit=2,mode=selectedHostedEmailMode(),send}:{now?:number;limit?:number;mode?:TrackingEmailMode;send?:TrackingEmailPort}={}){
  if(!Number.isSafeInteger(now)||now<0)throw Error('Invalid tracking dispatch time');
  const results={processed:0,accepted:0,ignored:0,failed:0,pending:0,superseded:0,configured:Boolean(send)||trackingEmailReadiness(mode).ready};
  const runner=postgresRuntimeServices().runner,batch=Math.max(1,Math.min(2,Number.isSafeInteger(limit)?limit:2)),started=performance.now(),at=()=>now+Math.max(0,Math.floor(performance.now()-started));

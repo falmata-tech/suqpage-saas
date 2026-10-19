@@ -3,7 +3,7 @@ import fs from "node:fs";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
-import { waitForBrowserSupabaseReady } from "./acceptance-supabase-readiness.mjs";
+import { browserCliStartTimeoutMs, browserSupabasePorts, remapBrowserSupabaseConfigPorts, waitForBrowserSupabaseReady } from "./acceptance-supabase-readiness.mjs";
 
 const port = await new Promise((resolve, reject) => {
   const server = net.createServer();
@@ -24,7 +24,7 @@ const credentialsPath = path.join(root, "credentials.txt");
 const supabaseProjectRoot = path.join(root, "supabase-browser-project");
 const supabaseConfigRoot = path.join(supabaseProjectRoot, "supabase");
 const browserSupabaseProjectId = `suqpage-browser-${process.pid}`;
-const browserSupabasePorts = { api: 56321, db: 56322, shadow: 56320, smtp: 56324, pooler: 56329, analytics: 56327 };
+const browserPorts = browserSupabasePorts();
 const env = {
   ...process.env,
   NODE_ENV: "production",
@@ -42,7 +42,7 @@ const env = {
   PORT: String(port),
     SUQPAGE_TEST_BASE_URL: baseURL,
     SUQPAGE_TEST_CREDENTIALS: credentialsPath,
-    SUQPAGE_TEST_MAILPIT_URL: `http://127.0.0.1:${browserSupabasePorts.smtp}`,
+    SUQPAGE_TEST_MAILPIT_URL: `http://127.0.0.1:${browserPorts.smtp}`,
   SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: "1",
   SUQPAGE_SERVER_ACTION_ORIGINS: baseURL,
   SUQPAGE_NEXT_DIST_DIR: distDir,
@@ -70,18 +70,12 @@ function required(values, name) {
 function prepareBrowserSupabaseProject() {
   fs.mkdirSync(supabaseConfigRoot, { recursive: true });
   let config = fs.readFileSync(path.join(process.cwd(), "supabase/config.toml"), "utf8");
-  config = config
+  config = remapBrowserSupabaseConfigPorts(config, browserPorts)
     .replace(/^project_id = ".*"$/m, `project_id = "${browserSupabaseProjectId}"`)
     // Three independent sign-ins run in one disposable browser suite. Keep the
     // developer and hosted Auth limits unchanged.
     .replace(/^email_sent = 2$/m, "email_sent = 6")
     .replaceAll("supabase_inbucket_mirtpage", `supabase_inbucket_${browserSupabaseProjectId}`)
-    .replaceAll("54321", String(browserSupabasePorts.api))
-    .replaceAll("54322", String(browserSupabasePorts.db))
-    .replaceAll("54320", String(browserSupabasePorts.shadow))
-    .replaceAll("54324", String(browserSupabasePorts.smtp))
-    .replaceAll("54329", String(browserSupabasePorts.pooler))
-    .replaceAll("54327", String(browserSupabasePorts.analytics))
     .replace(/^site_url = .*$/m, `site_url = "${baseURL}"`)
     .replace(/^additional_redirect_urls = .*$/m, `additional_redirect_urls = ["${baseURL}", "${baseURL}/auth/callback"]`);
   if (!/^email_sent = 6$/m.test(config)) throw new Error("Disposable browser email limit was not configured.");
@@ -121,12 +115,12 @@ async function stop() {
 try {
   prepareBrowserSupabaseProject();
   browserSupabaseAttempted = true;
-  run("supabase", ["start", "--workdir", supabaseProjectRoot, "--ignore-health-check"], { capture: true, timeout: 90_000 });
-  await waitForBrowserSupabaseReady({ projectId: browserSupabaseProjectId, apiPort: browserSupabasePorts.api });
+  run("supabase", ["start", "--workdir", supabaseProjectRoot, "--ignore-health-check"], { capture: true, timeout: browserCliStartTimeoutMs });
+  await waitForBrowserSupabaseReady({ projectId: browserSupabaseProjectId, apiPort: browserPorts.api });
   const provider = parseEnvironment(run("supabase", ["status", "--workdir", supabaseProjectRoot, "-o", "env"], { capture: true }));
   const apiUrl = required(provider, "API_URL");
   const databaseUrl = required(provider, "DB_URL");
-  if (new URL(apiUrl).port !== String(browserSupabasePorts.api) || new URL(databaseUrl).port !== String(browserSupabasePorts.db)) {
+  if (new URL(apiUrl).port !== String(browserPorts.api) || new URL(databaseUrl).port !== String(browserPorts.db)) {
     throw new Error("Browser acceptance started on an unexpected Supabase port family.");
   }
   fs.writeFileSync(tsconfigPath, `${JSON.stringify({

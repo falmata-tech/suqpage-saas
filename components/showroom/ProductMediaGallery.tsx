@@ -16,7 +16,10 @@ export default function ProductMediaGallery({items,name}:{items:ProductMedia[];n
   function select(index:number) {
     if(index<0||index>=items.length)return;
     setPlaying(null);setActive(index);
-    track.current?.scrollTo({left:index*track.current.clientWidth,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+    // Settle control-driven navigation immediately. A pending smooth scroll can
+    // be cancelled before its first scroll event, leaving the visible slide and
+    // selected thumbnail out of sync when the visitor reverses direction.
+    track.current?.scrollTo({left:index*track.current.clientWidth,behavior:'instant'});
     thumbs.current?.children[index]?.scrollIntoView({block:'nearest',inline:'nearest'});
   }
   if(!items.length)return <div className={styles.stage}><div className={styles.placeholder}><ImageOff size={32} aria-hidden="true" /><span>{t('No photo yet')}</span></div></div>;

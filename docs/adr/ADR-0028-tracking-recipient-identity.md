@@ -4,7 +4,7 @@ title: Tracking-only verified recipients and independent shipments
 status: accepted
 date: 2026-10-17
 deciders: [product, architecture, security]
-related: [BE-058, FE-069, DEP-048, BE-057]
+related: [BE-058, FE-069, DEP-048, BE-057, ADR-0031]
 ---
 
 # ADR-0028 — Separate tracking identity from chats and accounts
@@ -28,6 +28,10 @@ sends outside transactions using leases, retries and idempotency. Provider
 acceptance does not establish delivery. Email includes the recipient-verification
 link and safe plan details. Anonymous legacy APIs retire; legacy rows remain
 private without inferred recipient or automatic migration.
+
+ADR-0031 adds an explicitly selected Gmail SMTP mode for the same hosted
+transactional jobs. It preserves the outbox but cannot provide Resend's provider
+idempotency key; bounded retries after ambiguous acceptance can duplicate mail.
 
 S141 (2026-10-18) clarifies that verification gates recipient reads, not staff creation.
 Authorized staff can create an independent plan before that email has visited
