@@ -3,6 +3,7 @@ import fs from "node:fs";
 import manifest from "../supabase/templates/manifest.json";
 import { notifyNewInquiry } from "../lib/notifications";
 import type { Business } from "../lib/types";
+import { PLATFORM_BRAND } from "../lib/brand";
 
 async function main() {
 const config = fs.readFileSync("supabase/config.toml", "utf8");
@@ -10,9 +11,11 @@ assert.equal(manifest.length, 13);
 assert.equal(new Set(manifest.map(entry => entry.key)).size, 13);
 for (const entry of manifest) {
   const html = fs.readFileSync(`supabase/templates/${entry.file}`, "utf8");
-  assert.match(html, /Suqpage/);
-  assert.doesNotMatch(html + entry.subject, /africmade|africpage|mirtpage|<script/i);
-  assert.match(entry.subject, /Suqpage/);
+  assert.match(html, /MirtPage/);
+  assert.doesNotMatch(html + entry.subject, /africmade|africpage|suqpage|<script/i);
+  assert.match(entry.subject, /MirtPage/);
+  assert.ok(html.includes(`src="{{ .SiteURL }}${PLATFORM_BRAND.assets.emailWordmark}" alt="MirtPage" width="220" height="48"`));
+  assert.equal((html.match(/<img\b/g) || []).length, 1, 'One canonical wordmark without external tracking images.');
   const notification = entry.key.endsWith("_notification");
   const section = `auth.email.${notification ? "notification" : "template"}.${entry.key.replace(/_notification$/, "")}`;
   const content = config.split(`[${section}]`)[1]?.split("\n[")[0];
@@ -24,12 +27,20 @@ for (const entry of manifest) {
     assert.match(html, /\{\{ \.Token \}\}/);
     assert.doesNotMatch(html, /ConfirmationURL/);
   }
-  if (["invite", "email_change"].includes(entry.key)) assert.match(html, /\{\{ \.ConfirmationURL \}\}/);
+  if (entry.key === "invite") assert.match(html, /\{\{ \.ConfirmationURL \}\}/);
+  if (entry.key === "email_change") {
+    assert.match(html, /\{\{ \.Token \}\}/, "Each mailbox must receive a code for the owner-verified email change.");
+    assert.doesNotMatch(html, /ConfirmationURL/, "Email change must not fall back to a one-click confirmation link.");
+  }
   if (entry.key === "recovery") {
     assert.match(html, /\{\{ \.SiteURL \}\}\/login/);
     assert.doesNotMatch(html, /ConfirmationURL|Reset password/);
   }
 }
+const smtp = config.split('\n[auth.email.smtp]\n')[1]?.split('\n[')[0];
+assert.ok(smtp?.includes('sender_name = "MirtPage"'));
+assert.ok(smtp.includes('user = "suqpage-local"') && smtp.includes('admin_email = "no-reply@suqpage.test"'), 'Display-only branding preserves local SMTP technical identities.');
+assert.ok(fs.existsSync('public' + PLATFORM_BRAND.assets.emailWordmark));
 const before = { key: process.env.RESEND_API_KEY, from: process.env.NOTIFICATION_FROM_EMAIL };
 try {
   process.env.RESEND_API_KEY = "fixture-not-a-provider-key";

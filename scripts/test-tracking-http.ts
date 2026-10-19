@@ -4,7 +4,7 @@ import {createTrackingHttpHandler,TRACKING_COOKIE,type TrackingHttpPorts} from '
 import {TrackingError,type TrackingShipment} from '../lib/tracking-contract';
 
 const token='a'.repeat(64),reference='SHP-'+'B'.repeat(20),expiresAt=Date.now()+604800000;
-const shipment:TrackingShipment={reference,label:'Test route',version:2,legs:[{id:'11111111-1111-4111-8111-111111111111',providerName:'QA provider',method:'van',origin:'A',destination:'B'}]};
+const shipment:TrackingShipment={reference,label:'Test route',version:2,legs:[{id:'11111111-1111-4111-8111-111111111111',providerName:'QA provider',method:'van',origin:'A',destination:'B',trackingUrl:'',trackingCode:''}]};
 function fixture(overrides:Partial<TrackingHttpPorts>={}){
  const calls:{token?:unknown;read?:unknown[];requested?:unknown;verified?:unknown}={};
  const ports:TrackingHttpPorts={requestCode:async input=>{calls.requested=input;return{challengeId:'c'.repeat(32),resendAfter:60};},verifyCode:async input=>{calls.verified=input;return{token,expiresAt};},session:async value=>{calls.token=value;if(value!==token)throw new TrackingError('Verify your email to open your shipments.','unauthenticated');return{expiresAt};},list:async value=>{calls.token=value;return{shipments:[],nextCursor:null};},read:async(...args)=>{calls.read=args;return{kind:'shipment',shipment,etag:'"v2"'};},logout:async value=>{calls.token=value;},ipKey:()=> 'private-ip-key',sameOrigin:req=>{if(req.headers.get('origin')!=='https://suqpage.com')throw new Error('Invalid request origin.');},...overrides};

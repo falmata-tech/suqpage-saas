@@ -75,9 +75,8 @@ test('FE-065 web map keeps live pan/resize/selection but detaches delayed moveen
   await page.waitForTimeout(260);assert.deepEqual(errors,[],'No delayed SDK event may read a destroyed pane');
   assert.equal(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.maps[0].listens('moveend')),false,'Owned render/commit listener is detached');
   await mount(page,{...shop,id:23,name:'Remounted shop'});await page.waitForFunction(()=>(window as unknown as {fixture:Probe}).fixture.maps[1]?._loaded);
-  const before=await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.views.length);
-  await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.maps[0].fire('moveend'));
-  assert.equal(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.views.length),before,'An old instance cannot commit into the replacement');
+  const [before,after]=await page.evaluate(()=>{const f=(window as unknown as {fixture:Probe}).fixture,before=f.views.length;f.maps[0].fire('moveend');return[before,f.views.length];});
+  assert.equal(after,before,'An old instance cannot commit into the replacement');
   await page.getByRole('button',{name:/^Remounted shop,/}).click();assert.deepEqual(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.selected),[21,22,23]);
   await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.unmount());await page.waitForTimeout(260);
   assert.equal(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.lateInvalidates),0);assert.deepEqual(errors,[]);

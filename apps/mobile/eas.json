@@ -6,14 +6,14 @@
       "environment": "preview",
       "autoIncrement": true,
       "android": { "buildType": "apk" },
-      "env": { "SUQPAGE_MOBILE_BUILD_PROFILE": "preview", "SUQPAGE_MOBILE_DATA_TARGET": "production" }
+      "env": { "SUQPAGE_MOBILE_BUILD_PROFILE": "preview", "SUQPAGE_MOBILE_DATA_TARGET": "mirtpage-production", "EXPO_PUBLIC_API_ORIGIN": "https://mirtpage.com", "EXPO_PUBLIC_SUPABASE_URL": "https://sjeiiqxgscuqajpgddcc.supabase.co" }
     },
     "production": {
       "environment": "production",
       "autoIncrement": true,
       "android": { "buildType": "app-bundle" },
-      "env": { "SUQPAGE_MOBILE_BUILD_PROFILE": "production", "SUQPAGE_MOBILE_DATA_TARGET": "production" }
+      "env": { "SUQPAGE_MOBILE_BUILD_PROFILE": "production", "SUQPAGE_MOBILE_DATA_TARGET": "mirtpage-production", "EXPO_PUBLIC_API_ORIGIN": "https://mirtpage.com", "EXPO_PUBLIC_SUPABASE_URL": "https://sjeiiqxgscuqajpgddcc.supabase.co" }
     }
   },
-  "submit": { "production": { "android": { "track": "internal", "releaseStatus": "draft" } } }
+  "submit": { "production": { "android": { "track": "internal", "releaseStatus": "draft", "serviceAccountKeyPath": "../../.local/mirtpage-play-submit/credentials.json" } } }
 }

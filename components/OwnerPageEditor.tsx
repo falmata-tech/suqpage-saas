@@ -22,7 +22,7 @@ import {browserJson} from '@/lib/browser-json';
 
 export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner, initialPreview = false, locationConfirmed = false, returnToProfile = false, initialTask = 'about', returnTo }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean; initialPreview?: boolean; locationConfirmed?: boolean; handleEditor?: ReactNode; returnToProfile?: boolean; initialTask?: OwnerPageTask; returnTo?: 'profile'|'showroom' }) {
   const t = useUiText(), router=useRouter();
-  const scopedInitialTask=!owner&&initialTask==='team'?'about':ownerPageTask(initialTask);
+  const scopedInitialTask=ownerPageTask(initialTask);
   const [draft, setDraft] = useState(initialDraft);
   const [publication, setPublication] = useState(initialPublication);
   const [confirmation, setConfirmation] = useState<"publish" | "restore" | null>(null);
@@ -33,7 +33,6 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
   const [colorOpen, setColorOpen] = useState(false);
   const [mode, setMode] = useState<"edit" | "preview">(initialPreview ? "preview" : "edit");
   const [task,setTask]=useState<OwnerPageTask>(scopedInitialTask);
-  const [assistance,setAssistance]=useState(Boolean(initialDraft?.assistanceEnabled));
   const [leaving,setLeaving]=useState(false);
   const operation=useRef(false);
   const returnHref=owner?ownerPageReturn(returnTo || (returnToProfile?'profile':'showroom')):`/dashboard?business=${catalog.business.id}`;
@@ -45,8 +44,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
   const [error, setError] = useState("");
   const deferred = useDeferredValue(content);
   const dirty = JSON.stringify(draft?.content || initialBusinessProfile(catalog)) !== JSON.stringify(content);
-  const assistanceDirty=assistance!==Boolean(draft?.assistanceEnabled);
-  const unsaved=dirty||assistanceDirty;
+  const unsaved=dirty;
   const matchesPublication = Boolean(publication?.content && JSON.stringify(publication.content) === JSON.stringify(draft?.content));
   const [activePage, setActivePage] = useState(catalog.business.status === "active");
   const preview = useMemo(() => {
@@ -82,36 +80,18 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
   }
   function returnToSection(){if(operation.current||uploading)return;if(unsaved)setLeaving(true);else router.push(returnHref);}
 
-  async function command(action: "save" | "assistance", enabled?: boolean) {
+  async function command() {
     if (operation.current || uploading) return;
     operation.current=true;
     setBusy(true); setError("");
     try {
-      let currentDraft=draft;
-      // Task changes keep one working profile. Save it before permission changes,
-      // so switching to Team editing cannot discard edits from another task.
-      if(action==='assistance'&&(dirty||!currentDraft)){
-        const {ok,body:profile}=await browserJson(`/api/page-drafts/${catalog.business.id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(currentDraft?{action:'save',version:currentDraft.version,content}:{action:'start',content})});
-        if(!ok)throw Error(typeof profile.error==='string'?profile.error:'The draft could not be saved.');
-        currentDraft=profile as unknown as OwnerPageDraft;
-        setDraft(currentDraft);setContent(currentDraft.content);
-      }
-      const body = action === "save"
-        ? currentDraft ? { action, version: currentDraft.version, content } : { action: "start", content }
-        : { action, version: currentDraft?.version, enabled };
+      const body = draft ? { action:'save', version: draft.version, content } : { action: "start", content };
       const {ok,body:result}=await browserJson(`/api/page-drafts/${catalog.business.id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       if (!ok) throw new Error(typeof result.error==='string'?result.error:"The draft could not be saved.");
       const saved=result as unknown as OwnerPageDraft & {publication?:PagePublication};
-      let finalDraft=saved;
-      if(action==='save'&&assistanceDirty){
-        const {ok,body:permissions}=await browserJson(`/api/page-drafts/${catalog.business.id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'assistance',version:saved.version,enabled:assistance})});
-        if(!ok){setDraft(saved);setContent(saved.content);throw Error(typeof permissions.error==='string'?permissions.error:'The draft could not be saved.');}
-        finalDraft=permissions as unknown as OwnerPageDraft;
-      }
-      setDraft(finalDraft);
+      setDraft(saved);
       if (saved.publication) setPublication(saved.publication);
-      if (action !== "assistance") setContent(saved.content);
-      setAssistance(Boolean(finalDraft.assistanceEnabled));
+      setContent(saved.content);
       if(returnTo||returnToProfile){router.push(`${returnHref}?saved=page`);router.refresh();}
     } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not connect. Your edits are still here."); }
     finally { operation.current=false;setBusy(false); }
@@ -161,7 +141,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
         <button type="button" disabled={busy||uploading} aria-pressed={mode === "preview"} onClick={() => setMode("preview")}><Eye size={17} />{t("Preview")}</button>
       </div>
       {mode === 'edit' || task==='color' || unsaved ? <button type="button" className={styles.save} disabled={!ready || busy || uploading || Boolean(preview.error) || Boolean(draft && !unsaved && (!activePage || matchesPublication))}
-        onClick={() => command(task==='team'?'assistance':'save',assistance)}>
+        onClick={command}>
         {busy ? <LoaderCircle size={18} /> : <Save size={18} />}
         {t("Save")}</button> : null}
     </header>
@@ -188,7 +168,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
     {error ? <p role="alert" className={styles.error}>{t(error)}</p> : null}
     <div className={styles.taskLayout}>
       {!(owner&&returnTo) && <nav className={styles.taskNavigation} aria-label={t('Your page')}>
-        {OWNER_PAGE_TASKS.filter(item=>owner||item.key!=='team').map(item=><button type="button" key={item.key} aria-current={task===item.key?'page':undefined} disabled={busy||uploading} onClick={()=>selectTask(item.key)}>{t(item.label)}</button>)}
+        {OWNER_PAGE_TASKS.map(item=><button type="button" key={item.key} aria-current={task===item.key?'page':undefined} disabled={busy||uploading} onClick={()=>selectTask(item.key)}>{t(item.label)}</button>)}
       </nav>}
       <div className={styles.workspace} data-mode={mode} data-task={task}>
       {mode==='edit' && <div className={styles.fields}>
@@ -243,10 +223,6 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
           </fieldset>)}
         </div>}
         {preview.error ? <p role="alert" className={styles.error}>{t(preview.error)}</p> : null}
-        {task==='team' && owner ? <div className={styles.assistance}>
-          <label><input type="checkbox" checked={assistance} disabled={!ready || busy || uploading || !draft} onChange={(e) => setAssistance(e.target.checked)} />{t("Allow team editing")}</label>
-          <p>{t("The team can prepare changes. Your Save applies them to your live page.")}</p>
-        </div> : null}
       </div>}
       {(mode==='preview'||task==='color') && <div className={styles.preview} aria-label={t("Page preview")}>
         <div className={styles.previewLabel}><Eye size={16} />{t("Private preview")}<button type="button" aria-expanded={colorOpen} onClick={() => setColorOpen(!colorOpen)}><Palette size={16} />{t("Page color")}</button></div>

@@ -7,12 +7,18 @@ import { Suspense } from "react";
 import DiscoveryWorkspace from "@/components/DiscoveryWorkspace";
 import { MarketWorkspaceLoading } from "@/components/PublicWorkspaceLoading";
 import { getIndependentPublicMarketplace } from "@/lib/public-discovery-cache";
+import { BRAND_SOCIAL_IMAGE, publicSeoImageUrl, publicSeoUrl, safeJsonLd } from "@/lib/public-seo";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   const t = await getUiText();
   const title = t(MARKET_STOREFRONT_COPY.title), description = t(MARKET_STOREFRONT_COPY.description);
-  return { title, description, openGraph: { title, description, siteName: "MirtPage" }, twitter: { title, description } };
+  const url = publicSeoUrl("/");
+  const image = publicSeoImageUrl(BRAND_SOCIAL_IMAGE);
+  return { title, description, alternates: { canonical: url },
+    openGraph: { title, description, url, siteName: "MirtPage", images: image ? [image] : [] },
+    twitter: { card: "summary_large_image", title, description, images: image ? [image] : [] } };
 }
 
 type MarketSearchParams = Promise<Record<string,string|string[]|undefined>>;
@@ -55,6 +61,10 @@ export default async function MarketPage({ searchParams }: {
 }) {
   const t = await getUiText();
   return <div className="public-experience public-market-experience">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({
+        "@context": "https://schema.org", "@type": "WebSite", name: "MirtPage",
+        url: publicSeoUrl("/"), description: t(MARKET_STOREFRONT_COPY.description),
+      }) }} />
       <header className="market-landing-introduction">
         <h1>{t(MARKET_STOREFRONT_COPY.title)}</h1>
         <p>{t(MARKET_STOREFRONT_COPY.description)}</p>

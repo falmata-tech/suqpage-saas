@@ -18,7 +18,7 @@ type Effect = { deps: unknown[]; cleanup?: () => void };
 
 // Actual source components with controlled native/data ports. These checks do not
 // claim Android, API, database, MapLibre or OS gesture integration coverage.
-const bundled = build({ entryPoints: ["apps/mobile/app/(tabs)/index.tsx", "apps/mobile/app/(tabs)/about.tsx", "apps/mobile/src/MarketSearchControls.tsx"], outdir: "/tmp/suqpage-market-components", bundle: true, write: false, platform: "node", format: "cjs", plugins: [{
+const bundled = build({ entryPoints: ["apps/mobile/app/(tabs)/index.tsx", "apps/mobile/app/(tabs)/about.tsx", "apps/mobile/src/MarketSearchControls.tsx"], outdir: "/tmp/suqpage-market-components", bundle: true, write: false, platform: "node", format: "cjs", define: {"process.env.EXPO_PUBLIC_API_ORIGIN": '"https://mirtpage.com"'}, plugins: [{
   name: "market-component-ports",
   setup(b) {
     b.onResolve({ filter: /^(react(?:\/jsx-runtime)?|react-native|react-native-safe-area-context|expo-router)$/ }, args => ({ path: args.path, namespace: "ports" }));

@@ -10,6 +10,7 @@ import {CatalogSafetyError,excludedBusinessIds} from '../catalog-safety';
 import {submitListingReport} from '../listing-reports';
 import {listingReportPort} from '../listing-reports-postgres';
 import { reviewMode, reviewPassword } from '../reviewer-access-http';
+import { mobileOwnerEmailChange } from './owner-email';
 import { ReviewerAccessError } from '../reviewer-access';
 import { saveNativeBusiness } from "./business";
 import { nativeSupportAttachment, nativeSupportReply } from "./support-attachments";
@@ -58,7 +59,6 @@ import {
 import { saveOwnerPageAndPublication } from "../owner-page-save-runtime";
 import { changePagePublication } from "../owner-page-publication";
 import { ownerPagePort } from "../owner-page-runtime";
-import { setOwnerPageAssistance } from "../owner-page-service";
 import { OwnerPageError } from "../owner-page-domain";
 import { ProductUpkeepError } from "../product-upkeep-domain";
 import { accountContactPort } from "../account-contact-runtime";
@@ -323,6 +323,7 @@ async function dispatch(
     });
   }
   if (path[0] !== "owner") throw new MobileError("Not found.", 404);
+  if (path[1] === 'email-change') return mobileOwnerEmailChange(request, path, identityPort);
   const actor = await nativeOwner(request, identityPort),
     bid = actor.business_id,
     route = path.slice(1).join("/");
@@ -503,8 +504,7 @@ async function dispatch(
   }
   if (route === "page") {
     if (b.action === "assistance") {
-      allowFields(b, ["action", "version", "enabled"]);
-      return setOwnerPageAssistance(ownerPagePort, actor, bid, b.version, b.enabled);
+      throw new MobileError("This page action is no longer available.", 410);
     }
     allowFields(b, ["action", "version", "content"]);
     if (b.action !== "start" && b.action !== "save")

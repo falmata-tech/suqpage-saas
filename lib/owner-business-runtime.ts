@@ -5,6 +5,7 @@ import { parseOwnerBusinessChange, type OwnerLocation } from './owner-business-d
 import type { SessionUser } from './types';
 import {normalizeDiscoveryCategories} from './discovery-contract';
 import type {KnownPlace} from './place-search';
+import { currentBusinessAuthority } from './staff-business-authority';
 export type LocationProposal = { business_id:number; version:number; category_key:string; city:string; region:string; country_code:string; location_mode:OwnerLocation['mode']; latitude:number|null; longitude:number|null; place_id:string|null; place_latitude:number|null; place_longitude:number|null; reviewed_version:number };
 export type OwnerBusinessLocation = {city:string;region:string;country_code:string;place_id:string|null;location_mode:OwnerLocation['mode'];latitude:number|null;longitude:number|null};
 type AppliedLocation = {city:string;region:string;country_code:string;city_id:string;latitude:number|null;longitude:number|null;approved_at:number;is_excluded:number};
@@ -41,11 +42,11 @@ function sameLocation(location:OwnerBusinessLocation|null,category:string,comman
   location.country_code===command.countryCode&&location.place_id===command.placeId&&location.location_mode===command.mode&&
   location.latitude===command.latitude&&location.longitude===command.longitude);
 }
-async function assertOwner(actor:SessionUser,businessId:number){
- if(actor.access_role!=='client'||actor.business_id!==businessId||!Number.isSafeInteger(businessId)||businessId<1||!await runtimeGet("SELECT 1 FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=? AND u.business_id=? AND p.access_role='client'",[actor.id,businessId]))throw new OwnerPageError('Only the owner can update these business details.',403);
+async function assertBusinessEditor(actor:SessionUser,businessId:number,lock=false){
+ if(!await currentBusinessAuthority(actor,businessId,lock))throw new OwnerPageError('Business details are not available for this account.',403);
 }
 export async function readOwnerBusiness(actor:SessionUser,businessId:number):Promise<OwnerBusinessSetup>{
- await assertOwner(actor,businessId);
+ await assertBusinessEditor(actor,businessId);
  const business=await runtimeGet<{name:string;logo_path:string;content_version:number}>('SELECT name,logo_path,content_version FROM businesses WHERE id=?',[businessId]);
  if(!business)throw new OwnerPageError('Business not found.',404);
  const state=await ownerLocationState(businessId);
@@ -54,10 +55,10 @@ export async function readOwnerBusiness(actor:SessionUser,businessId:number):Pro
 }
 export async function saveOwnerBusiness(actor:SessionUser,businessId:number,raw:Record<string,unknown>,logoRef?:string){
  const command=parseOwnerBusinessChange(raw, findKnownPlace);
- await assertOwner(actor,businessId);
+ await assertBusinessEditor(actor,businessId);
  if(logoRef!==undefined&&!new RegExp(`^/media/product-private-${businessId}-[a-f0-9-]{36}\\.(png|jpg|webp)$`).test(logoRef)&&logoRef!=='')throw new OwnerPageError('Invalid business logo.');
  return runtimeTransaction(async()=>{
-  await assertOwner(actor,businessId);
+  await assertBusinessEditor(actor,businessId,true);
   const changed=await runtimeRun('UPDATE businesses SET name=?,content_version=content_version+1 WHERE id=? AND content_version=?',[command.name,businessId,command.expectedVersion]);
   if(changed.changes!==1)throw new OwnerPageError('Business details changed. Reload before saving.',409);
   const {proposal,location,category}=await ownerLocationState(businessId);
@@ -69,7 +70,8 @@ export async function saveOwnerBusiness(actor:SessionUser,businessId:number,raw:
     ON CONFLICT(business_id) DO UPDATE SET version=excluded.version,category_key=excluded.category_key,city=excluded.city,region=excluded.region,location_mode=excluded.location_mode,latitude=excluded.latitude,longitude=excluded.longitude,place_id=excluded.place_id,place_latitude=excluded.place_latitude,place_longitude=excluded.place_longitude,country_code=excluded.country_code,updated_at=excluded.updated_at`,[businessId,(proposal?.version||0)+1,loc.category,loc.city,loc.region,loc.mode,loc.latitude,loc.longitude,loc.placeId,loc.placeLatitude,loc.placeLongitude,loc.countryCode,Date.now()]);
    await applyLocation(businessId, loc);
   }
-  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'business.owner_details_updated',?,'')",[actor.id,businessId,JSON.stringify({locationSubmitted:Boolean(loc),contentVersion:command.expectedVersion+1})]);
+  const action=actor.access_role==='client'?'business.owner_details_updated':actor.access_role==='platform_admin'?'business.admin_details_updated':'business.staff_details_updated';
+  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,?,?,'')",[actor.id,businessId,action,JSON.stringify({locationSubmitted:Boolean(loc),contentVersion:command.expectedVersion+1})]);
   return {contentVersion:command.expectedVersion+1};
  });
 }

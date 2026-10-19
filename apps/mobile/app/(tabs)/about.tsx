@@ -5,6 +5,7 @@ import { ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } from "../../../../lib/st
 import { Screen, Button, Icon, colors, useOpenLink } from "../../src/ui";
 import { useApp } from "../../src/runtime";
 import { createMarketNavigationIntent } from "../../src/incoming-link";
+import { legalPageUrl } from "../../src/public-origin";
 
 export default function About() {
   const { t } = useApp(),openLink=useOpenLink();
@@ -26,7 +27,7 @@ export default function About() {
       </View>)}</View>
       {section.id === "customers" && <View style={s.mapNote}><Text style={s.benefitTitle}>{t(CUSTOMER_MAP_COPY.title)}</Text><Text style={s.body}>{t(CUSTOMER_MAP_COPY.description)}</Text><Button secondary icon="map" label={t("Explore the map")} onPress={() => router.navigate(`/?view=map&_intent=${createMarketNavigationIntent()}`)} /></View>}
     </View>
-    <View style={{flexDirection:'row',flexWrap:'wrap',gap:10}}><Button secondary label={t('Privacy')} onPress={()=>void openLink('https://suqpage.com/privacy')}/><Button secondary label={t('Terms')} onPress={()=>void openLink('https://suqpage.com/terms')}/></View>
+    <View style={{flexDirection:'row',flexWrap:'wrap',gap:10}}><Button secondary label={t('Privacy')} onPress={()=>void openLink(legalPageUrl('privacy'))}/><Button secondary label={t('Terms')} onPress={()=>void openLink(legalPageUrl('terms'))}/></View>
   </ScrollView></Screen>;
 }
 const s = StyleSheet.create({

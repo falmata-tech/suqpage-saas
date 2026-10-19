@@ -125,15 +125,31 @@ Do not treat Suqpage as a generic website builder or a conventional ecommerce pl
 
 The central principle is:
 
-> **Suqpage provides one consistent business profile and discovery experience.
-> Each business owns its content, offerings and identity; private staff assistance
-> requires revocable consent. Inquiries are not checkout or paid orders.**
+> **MirtPage provides one consistent business showroom and discovery experience.
+> Each business owns its content, products and identity; an administrator controls
+> platform staff access to business management. Product questions go through the
+> business's listed contact methods, while transport and support chat remain here.**
 
 When a user gives an explicit instruction that conflicts with an older preference in this file, follow the newest explicit instruction, but preserve security, tenant isolation, and data integrity.
 
 ---
 
 ## 2. Product identity
+
+Local S145 native source now defaults to MirtPage/com.mirtpage.app in development,
+preview and production. No future Suqpage source-build fallback remains. Existing
+EAS IDs/current slug, protocol keys and unbuilt iOS fields are infrastructure;
+new iOS workers are denied. This does not claim a new binary or released app.
+Local native public pages, legal links and social-video WebView now share the
+validated configured API origin, defaulting to `https://mirtpage.com` only when
+the development override is absent. Invalid configured origins fail closed;
+hosted builds still require their exact separately qualified data target. Expo
+browser legal-link navigation is verified locally, while an installed Android
+referrer and external-provider playback remain unverified.
+The native YouTube WebView's missing-package synthetic origin is
+`https://com.mirtpage.app`; actual configured app IDs still take precedence and
+its provider navigation and bridge protocol are unchanged. This is local source
+evidence, not an Android playback claim.
 
 ### Current experience (FE-040–FE-042, BE-032/BE-033, DEP-030)
 
@@ -397,8 +413,9 @@ in category controls, Featured, business setup/admin and About. Market categorie
 expand on request with keyboard selection and an All categories option; setup forms
 retain native selects.
 There is no separate Introduction field or custom layout selector. Account contacts
-are edited separately from the public contact values. Owners and consented staff
-use the same standard page editor; owner consent governs staff assistance.
+are edited separately from the public contact values. Owners and platform staff
+authorized by an administrator use the same standard page editor; the administrator
+can revoke a staff member's business-management access.
 
 Chat assignment is internal routing. Only the assigned staff member's explicit
 Join chat announces an agent to a customer; reading or claiming is not joining.
@@ -1000,6 +1017,12 @@ price, canonical selling unit and feature chips. Capacity, minimum order, lead t
 and internal offering-kind labels stay out of this public view. Single-value option
 groups need no selector; their canonical defaults remain part of the inquiry.
 
+The local FE-053 native product-detail candidate shows a localized, bounded
+“No photo yet” state when a published product has no media, while retaining the
+existing gallery for products with media. Actual-component tests and an
+installed-Chrome Expo phone review pass with a labelled response-only demo
+fixture; owner visual approval and full release checks remain pending.
+
 The local S129 FE-041/FE-053 implementation gives native showroom cards short
 descriptions, separate details/Add actions and a bounded required-options picker
 without leaving the grid. Web phone excerpts remain visible. Canonical stock,
@@ -1336,6 +1359,19 @@ accessible labels while visible names wrap within the compact marker width.
 
 ## 11. Passwordless account entry and business onboarding
 
+Local Auth presentation source (BE-059/DEP-029/DEP-049/FE-070) now uses MirtPage
+for the sender display, thirteen subjects and thirteen HTML-content fields.
+The twelve layouts use the canonical220×48 outlined wordmark PNG, byte-identical
+to the existing mobile wordmark. Code/link/recovery behavior, actual sender
+addresses, credentials, provider/origin settings and seven disabled notices are
+unchanged. Auth remains English-only; no request locale is invented. The guarded
+exact27-field allowlist rejects old-brand saved plans before provider reads;
+65 injected-port tests pass. Actual Google Chrome verifies24 static desktop/
+phone email states. This is source/presentation evidence, not a running Auth
+reload, real email/OTP verification or hosted configuration apply. The owner
+explicitly approves the combined email visuals and full checks on2026-10-18;
+24 Auth and18 plain-mail actual Chrome states support that review.
+
 FE-064/BE-052 deploys an owner-authorized, server-bound password
 exception for one ordinary marked demo owner used by store reviewers. Normal users
 retain email codes. Exact immutable UUID/email, current client/demo/tenant authority
@@ -1479,6 +1515,17 @@ window, but application code must not read or mutate them.
 
 ## 13. User roles and standard page workspaces
 
+Planned S145 follow-on (FE-069/BE-058/DEP-048; Ready proposal awaiting review):
+rename active Tracking/Transport plan presentation to Shipment tracking. Staff
+may optionally store each provider's HTTPS tracking link and literal code on an
+independent shipment leg; verified recipients can open/copy them. This remains
+an arranged-route organizer, with no automatic movement/status integration.
+Missing legacy fields remain empty and old rows/history are not rewritten.
+Affected architecture/data/language/UX/testing sections15/17/18/19/22 will be
+reconciled only after implementation and source-bound evidence. Existing mail
+approvals remain valid for their source; changed initial-mail wording requires
+a new stable retry boundary, and new UI needs its own visual approval.
+
 The locally verified Tracking workspace gives fresh transport/all-scoped staff and managers a separate list, read-first detail and explicit New/Edit/Save/Cancel tasks. Support-only staff and business owners have no editing authority. Visitors and business owners enter Tracking from transport chat, verify their email themselves and see their own multiple plans without creating or replacing a business account.
 
 The local S142 workspace removes the obsolete per-conversation Transport plan
@@ -1575,8 +1622,9 @@ focus. These S118 refinements are locally verified and await visual/release gate
 Categories belong under Products; category rows are read first, and Add/Edit or
 removal confirmation opens just the selected task. Business details separates
 identity/notification, live presentation and sharing into focused read/edit tasks.
-Access contains owner sign-in/recovery, staff assistance and established-page
-suspension/restoration. Contextual sponsor editing keeps that business selected.
+Access contains owner sign-in/recovery and established-page
+suspension/restoration. Staff business-management access belongs in the
+administrator's Staff workspace. Contextual sponsor editing keeps that business selected.
 Legacy social values are preserved. Staff tables omit retired page-review
 counts, and status guidance distinguishes staff drafts from owner live Save.
 Location & visibility uses canonical Country/City selection without requiring
@@ -1663,11 +1711,12 @@ Hosted retirement still requires the web and migration rollout.
 ### Operations managers and team members
 
 Operations managers can open business workspaces, create invitations, maintain
-products with a service note, assist with consented page drafts, operate inquiries,
-manage support assignments. Business staff assignment
-remains an administrator action. Team members only see actively assigned businesses;
-page editing also requires current owner consent. Staff Save never publishes on
-behalf of the owner. Support-agent settings enable Business support, Transport dispatch or All requests
+products with a service note, and manage support assignments. Eligible staff with
+an administrator-controlled Manage businesses grant can edit any business page,
+including publication under the ordinary readiness and version checks. The
+administrator can revoke or restore that grant per staff member; chat queue access
+remains separate. Staff cannot access an owner's private sign-in identity.
+Support-agent settings enable Business support, Transport dispatch or All requests
 and choose whether staff receive new chats. The local S108 candidate automatically
 assigns matching work to the enabled agent with the fewest open conversations;
 equal workloads rotate by least-recent saved assignment, with never-assigned
@@ -1696,6 +1745,33 @@ staff cannot reply, add notes, close or route a waiting request before
 claiming it. Visitor messages contribute to the staff unread count.
 No live role uses custom service-request assignments, revision projects or page
 approval queues.
+
+### S146 — staff business management staged locally; hosted rollout pending
+
+FE-072/BE-060 and ADR-0030 replace the owner-facing Team editing switch and
+administrator per-business staff assignments in the local schema77 preview.
+The additive migration backfilled all 14 eligible local staff with an explicit
+all-business Manage businesses grant. An administrator can revoke or restore it
+per person. Authorized staff can manage business showrooms, products,
+categories, public profiles, locations, handles and publication through the
+existing validation and audit rules; chat assignment and availability remain
+separate. Historical owner-consent and assignment records remain stored but are
+not the new local authority. Local focused tests and installed-Chrome web
+journeys pass. Expo Tracking and partial owner UI navigation were exercised;
+the longer owner run route-fulfilled a successful OTP-send response after the
+local email quota was exhausted, so a complete no-mock Expo owner journey
+remains pending despite real local token verification. Owner visual approval,
+full gates and hosted migration/app
+rollout remain open. The **deployed site** continues to use its prior authority
+until that separately reviewed cutover, so the older rules above still describe
+deployed business editing.
+
+Private account contacts, staff administration and the owner's sign-in email
+remain outside the business grant. FE-073/BE-061/DEP-050 now have local source,
+schema and a passing Supabase Auth/Mailpit two-code proof for an owner-only email
+change; staff and administrators have no bypass. Initiation stays disabled while
+the UI review, hosted Auth verification and release gates are pending. The
+deployed sign-in email remains read-only.
 
 ### Public customer
 
@@ -1758,6 +1834,23 @@ operational disable switch, not a route back to the retired workflow.
 ---
 
 ## 15. Current technical architecture
+
+The local default Android configuration selects only the real MirtPage Firebase
+registration/file, pinned project/number/package/appID and downloaded byte hash.
+Worker validation rejects missing/old/private/oversized/symlink sources and does
+not permit disabling notifications to bypass identity. Actual installed Expo
+configuration and its Android scheme plugin resolve only the mirtpage custom
+scheme across all three profiles, with the retained EAS UUID. The approved M
+supplies a deterministic white-alpha96px notification glyph and canonical orange
+tint; channel IDs and existing delivery protocols are unchanged. No customized
+OS splash or device-delivery result is claimed.
+The local native public-origin adapter validates one environment-derived value
+for API requests, About legal destinations, external-link policy and social-video
+WebView base/referrer. The native player still admits only its exact own root and
+reviewed provider embed paths; development HTTP is limited to the existing
+approved local-address rule. Internal video bridge messages and persisted session
+keys remain compatibility identifiers. This source behavior is not a hosted
+origin switch or proof of third-party video availability.
 
 The local web/Expo basemap adapter uses the existing exact OSM provider through
 a shared typed, bounded browser loader. The exact host is allowed by connect-src;
@@ -2280,7 +2373,11 @@ new public submissions:
   origins, explicitly configured origins, localhost, and the current
   Codespaces HTTPS forwarding hosts; production admits only request/canonical
   and explicitly configured origins. Never expand trust from a forwarded-host
-  header, hostname lookalike, or wildcard.
+  header, hostname lookalike, or wildcard. Next.js development resources use a
+  separate hostname-only projection of those validated origins so the LAN-bound
+  local preview can hydrate at its exact loopback hostname. Server Actions keep
+  host-and-port entries and mutation APIs keep full origins; the dev-resource
+  projection does not authorize a new mutation origin.
 - Do not log full customer contact information unnecessarily.
 - Keep `.env`, database files, credential files, uploads, and backups out of Git and distributable ZIPs.
 - Maintain privacy and terms pages when customer data is collected.
@@ -2301,6 +2398,38 @@ Individual 44px shop hitboxes do not intercept neighboring shops; counted marker
 styles and behavior stay original. Production demo coordinates remain unchanged.
 
 ## 17. Data, migrations, and deployment boundary
+
+The local app-mail display tranche (BE-059/DEP-049) stopped only the reviewed
+ordinary web/worker supervisor after exact birth/argument/source checks. All
+five old processes and3102 listener were gone; two stable stopped-state snapshots
+proved both app-mail outboxes had zero pending/sending rows and non-null leases.
+Only then did Tracking/escalation From names/subjects and optional Telegram's
+authored prefix become MirtPage. Active en/am/om Tracking subjects are localized.
+Sender addresses, origins, settings, provider/Message-ID keys and retained jobs
+were preserved. The identical supervisor command restarted once promptly; web
+health and unchanged Expo8082 are HTTP200. The first health verifier used the
+wrong IPv4 address for unchanged Expo; corrected localhost verification passes
+without another start. This local boundary does not qualify hosted retry safety.
+
+Local notification source separates compatibility from display: validated browser
+subscriptions retain Suqpage as the wire token needed by old installed workers;
+both new workers display literal MirtPage after the existing dual-title guard.
+Expo payloads use MirtPage. All channel/tag/subscription/receipt/permission/quiet/
+internal-tap contracts remain unchanged. Old installed browser workers can keep
+their old display until normal update; no fleet upgrade or OS delivery is claimed.
+
+The local native default-identity tranche pins the independently verified,
+owner-accepted expected MirtPage Play signer. This is not a compiled artifact
+measurement or EAS credential-slot proof. Its initial approved hosted targets
+are empty: builds fail until the exact new candidate runtime is qualified.
+An additive public MirtPage association is prepared with old entries unchanged;
+new autoVerify claims additionally require that qualified target and contain only
+the exact new apex. Verify served metadata before an Android build and actual
+OS association/signature afterward. Submission requires a distinct protected
+MirtPage key file; no old app-scoped credential fallback or upload is admitted.
+Focused config/Firebase/link/artwork/artifact tests and strict types pass locally.
+Combined full gates, provider bindings, native build and store rollout remain
+separate; DEP-049 records their exact phases.
 
 Local schema72 permits an unverified tracking recipient without fabricating a
 verification timestamp. A protected native backup and migration readback preserve
@@ -2442,8 +2571,9 @@ only site URL plus callbacks: legacy → dual-old-primary → dual-new-primary,
 with a separately reviewed reverse primary transition. Both dual policies retain
 the old callback; legacy settings patches cannot change either origin field.
 Old version-2 plans are refused before provider reads and must be replanned.
-The focused injected-port/credential suite passes62 tests; hosted transition and
-full integration gates remain pending under BE-059/DEP-049. Management tokens
+The focused injected-port/credential suite passes65 tests, including exact current
+MirtPage mail and legacy-plan rejection; further hosted transition and full current-source
+integration gates remain pending under BE-059/DEP-049. Management tokens
 never enter plan files.
 Hosted configuration pushes and raw-command workarounds are prohibited, including
 during incident recovery. Google/SMTP credential changes are separate authorized
@@ -3153,7 +3283,12 @@ phone result, production access or public release is claimed.
 Web releases use a clean root/shared-contract installation guarded against Expo
 and native tooling; the selected full audit includes build dependencies at the
 existing severity. Normal monorepo/mobile installs retain the guarded compatibility
-adapter and unchanged full native audit. S61 verifies the web check chain, all 11
+adapter and unchanged full native audit. The current local CI candidate makes
+required web core/dependency jobs use this selected web release/audit boundary;
+pure Android artifact-safety tests remain in core. The full locked-workspace
+moderate audit still fails closed for each new AAB; any advisory exception needs
+fresh exact owner approval for that artifact. A passing web PR does not approve
+an Android build. S61 verifies the web check chain, all 11
 isolated acceptance workflows, release stages, private backup/migration rehearsal
 and exact Linux artifact. The owner approved S62's one-artifact Expo internal-testing exception for the two
 documented tooling advisories, then renewed one additional internal APK for the
@@ -3763,3 +3898,78 @@ interface languages; business names remain unchanged. Actual Chrome workflow and
 controlled density evidence are recorded separately in TRACEABILITY. Visual
 approval, full gates, commit and coordinated web/Android rollout remain pending.
 No database migration, dependency, provider, coordinate or chat change is needed.
+
+
+S145 local support-default and release-readiness behavior is focused-test
+verified (BE-059/DEP-049; sections13,15,17 and22). Migration73 changes only future
+support defaults, and the general-support writer explicitly uses MirtPage client;
+old conversation labels, tenant names, delivery jobs and every existing row stay
+unchanged. A non-null text column with the exact reviewed Suqpage/MirtPage default
+is required. Only the same genuinely fresh empty-schema install may admit the
+immutable baseline47's absent default; a versioned NULL/custom default stops for
+review. Retired subscription defaults/history remain inactive and unchanged;
+transport is the only revenue. Release preflight recognizes
+exactly the full1..74 native ledger or the proven copied1..26+31..74 ledger.
+Historical27–30 are retired data-only patches; none is replayed or backfilled.
+Partial groups, other holes (including64), duplicate/noninteger and unknown/future
+IDs fail, retaining Auth/account/configuration checks. Focused correction tests
+and independent peer review pass. Mail readiness and fresh source approval
+precede the held combined gates. Deployment must explicitly run this preflight
+after migration; Netlify builds and liveness health remain database-readiness-free.
+All18 applicable isolated PostgreSQL/runtime/security/migration/brand scripts
+pass together at endpoint74, with scoped strict types. The stale positive
+runtime fixtures were corrected to the
+current made-to-order and explicit-assignee-Join contracts, preserving negative,
+version and duplicate checks. Earlier failed receipts remain. Ordinary local72
+and hosted63 are unchanged by this preparation; mail/runtime/provider cutover,
+full combined-candidate gates and publication remain separate.
+
+
+The S145 reference-data74 correction is locally verified (BE-059/DEP-049; sections5,13,15,17
+and22). Current business selection has seven categories, but the copied legacy
+reference table lacks farms. Migration74 inserts only missing canonical
+keys and normalizes the seven known positions, preserving existing labels/icons/
+active flags, unknown references and all tenant/product assignments. Inactive
+known keys or unexpected metadata stop for review. Endpoint74 retains exactly
+the two proven full/legacy ledger histories; no historical marker backfill.
+Real isolated signup/owner/integrity/rollback/replay tests and independent peer
+review pass, including a reconstructed six-key legacy63→74 upgrade. This is
+fixture evidence, not a production-backup rehearsal. Ordinary local72 and
+hosted63 remain unchanged; full gates and approved backup/rollout remain separate.
+
+Planned S145 follow-on (BE-058/FE-069/DEP-048; sections5,12,13,16,17,18,19 and22)
+names the active feature Shipment tracking and adds optional provider tracking
+links/codes per ordered leg. These remain staff-authored details inside the
+email-verified recipient portal, without carrier fetches, embedded pages, scans,
+status/ETA/custody claims or automatic code insertion into URLs. Tracking-only
+types normalize missing historical fields without changing old rows, keys or
+idempotent Submit results. Additive75 widens only existing JSONB/audit
+size checks for bounded links/codes; all prior authority/data rules remain.
+Initial-email wording changes separately require a fresh stopped/zero/in-flight
+mail fence; new provider links/codes stay portal-only. The exact Ready contracts
+were accepted; Tracking-only parsing/equality and additive75 are implemented with
+all21 focused isolated/pure scripts, final pure precision coverage and scoped
+strict types passing. Old stored JSON/key replay, recipient/role/304 denials,
+pending/leased snapshots and migration row/ACL/rollback/refusal outcomes are proved.
+Source peer, ordinary-local backup/apply, real browser/visual evidence and a new
+combined full-gate source freeze remain pending. The completed mail tranche and
+schema74 evidence remain intact for their earlier source; neither is permission
+to migrate or publish this follow-on.
+
+S145 local mail/notification presentation now has focused Auth65 and renderer14
+cases, both durable-delivery regressions, localization24, worker11 and actual
+isolated PostgreSQL notification dispatch proof. The original shared Expo-token
+owner/visitor binding remains tested alongside an added browser subscription;
+old browser wire compatibility is exercised against immutable published worker
+bytes. Native map User-Agent is MirtPage with the same exact HTTPS host/header
+boundary; all11 map cases and mobile strict types pass. The unreachable on-behalf
+compatibility adapter and retained event history remain unchanged.
+
+Actual installed Google Chrome passes42 email presentation/navigation states:
+12 Auth templates×phone/desktop and9 plain-text app messages×phone/desktop.
+The owner explicitly approves the combined visuals/full checks on2026-10-18.
+No real email, local Auth reload, OTP redemption, OS push or hosted activation is
+claimed. The local web/worker M6 boundary and original failed IPv4 Expo verifier
+are retained separately; one ordinary supervisor restart restored HTTP200 and
+the correct unchanged localhost8082 check passes. Current full combined-source
+gates and separately reviewed hosted/native rollout remain the next dependencies.

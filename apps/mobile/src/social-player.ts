@@ -1,12 +1,15 @@
 import {productVideoEmbedUrl,productVideo} from '../../../lib/video/product-video';
+import {apiOrigin} from '@suqpage/contracts';
 import type {PlayerEvent} from './youtube-player';
 
 export function socialPlayerNavigation(input:string,origin:string):boolean {
   if(input==='about:blank')return true;
   try {
+    if(apiOrigin(origin)!==origin)return false;
     const url=new URL(input);
+    if(url.origin===origin&&url.pathname==='/'&&!url.username&&!url.password&&!url.search&&!url.hash)return true;
     return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&
-      ((url.origin==='https://www.instagram.com'&&/^\/(?:reel|p)\/[A-Za-z0-9_-]{5,20}\/embed\/?$/.test(url.pathname))||(url.origin===origin&&url.pathname==='/')||(url.origin==='https://www.tiktok.com'&&/^\/player\/v1\/[1-9]\d{16,19}$/.test(url.pathname))||(url.origin==='https://www.facebook.com'&&url.pathname==='/plugins/video.php'&&(/^https:\/\/www.facebook.com\/watch\/\?v=[1-9]\d{4,24}$/.test(url.searchParams.get('href')||''))));
+      ((url.origin==='https://www.instagram.com'&&/^\/(?:reel|p)\/[A-Za-z0-9_-]{5,20}\/embed\/?$/.test(url.pathname))||(url.origin==='https://www.tiktok.com'&&/^\/player\/v1\/[1-9]\d{16,19}$/.test(url.pathname))||(url.origin==='https://www.facebook.com'&&url.pathname==='/plugins/video.php'&&(/^https:\/\/www.facebook.com\/watch\/\?v=[1-9]\d{4,24}$/.test(url.searchParams.get('href')||''))));
   }catch{return false;}
 }
 export function socialPlayerEvent(raw:unknown):PlayerEvent|null {

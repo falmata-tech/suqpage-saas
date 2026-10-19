@@ -19,6 +19,6 @@ try {
  const port=run('docker',['port',container,'5432/tcp'],process.env,true).match(/:(\d+)$/)?.[1];
  if(!port)throw new Error('Disposable PostgreSQL port is missing.');
  const env={...process.env,SUQPAGE_DATABASE_DRIVER:'postgres',SUQPAGE_TEST_POSTGRES_URL:`postgresql://postgres:${password}@127.0.0.1:${port}/postgres`};
- for(const script of ['test-native-postgres.ts','test-postgres-runtime.ts','test-launch-wiring.ts','test-security.ts','test-product-upkeep.ts','test-discovery-pagination.ts','test-account-contacts.ts','test-media-reconciliation.ts'])run(process.execPath,['--import','tsx',`scripts/${script}`],env);
+ for(const script of ['test-native-postgres.ts','test-mirtpage-support-defaults.ts','test-release-preflight.ts','test-taxonomy-reference-migration.ts','test-tracking-provider-fields.ts','test-tracking-provider-migration.ts','test-postgres-runtime.ts','test-launch-wiring.ts','test-security.ts','test-product-upkeep.ts','test-discovery-pagination.ts','test-account-contacts.ts','test-media-reconciliation.ts'])run(process.execPath,['--import','tsx',`scripts/${script}`],env);
  console.log('Native PostgreSQL installation, constraints, transactions and workflow gates passed.');
 }finally{spawnSync('docker',['stop',container],{stdio:'ignore'});}

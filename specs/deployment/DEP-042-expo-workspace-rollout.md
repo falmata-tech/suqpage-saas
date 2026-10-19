@@ -10,6 +10,30 @@ change_level: L3
 
 # DEP-042 — Expo workspace rollout
 
+## Web CI and Android admission boundary
+
+Required web pull-request `core` and `dependency` jobs use the established clean
+root/shared-contract installation and `release:web` with the unchanged moderate
+audit threshold, including web build dependencies. The core job also retains
+pure Android artifact-safety regressions; browser, container, operations and
+PostgreSQL checks remain required. The web result does not admit an AAB. Before
+each new MirtPage AAB, run the full locked-workspace
+`npm audit --omit=dev --audit-level=moderate` without suppressing failure and
+review its exact source, lockfile, advisories and artifact scope. Any exception
+requires a new explicit owner approval for that one AAB under DEP-044/DEP-049;
+previous Suqpage build exceptions are consumed.
+
+## Ready: MirtPage successor default
+
+DEP-049 now controls the independently Ready local successor: the owner retires
+Suqpage as a future source-build default. Development, preview and production
+become MirtPage/com.mirtpage.app while retaining the existing EAS UUID/current
+infrastructure slug, remote versions and distribution patterns. No duplicate
+legacy/default profile family is introduced. Empty approved hosted targets block
+workers until new-host runtime qualification; iOS workers remain denied. Existing
+Suqpage releases and earlier S96/S97 evidence below are historical authorities,
+not the final public identity. New builds still require their own exact gates.
+
 S50 dependency recheck (2026-10-05): audit reports GHSA-vcvr-r3jv-pc5j against
 Next 16.3.4; raise only Next to its patched 16.3.6 release and verify runtime,
 type/build and audit evidence before rollout. App source currently has no next/og

@@ -48,10 +48,10 @@ async function main(){
   const oldAlert=(await db.prepare("INSERT INTO attention_notifications(source_key,recipient_key,user_id,conversation_id,kind,created_at) VALUES(?,?,?,?,'reply_overdue',?)").run(`support-reply-overdue:${cases[0].id}:${cases[0].message}`,`user:${user}`,user,cases[0].id,t)).insertedId;
   const snapshot=async()=>({cases:await db.prepare("SELECT to_jsonb(c)-'overdue_notified_assignment_id' value FROM support_conversations c ORDER BY id").all(),messages:await db.prepare('SELECT * FROM support_messages ORDER BY id').all(),assignments:await db.prepare('SELECT * FROM support_assignments ORDER BY id').all(),events:await db.prepare('SELECT * FROM support_events ORDER BY id').all(),attention:await db.prepare('SELECT * FROM attention_notifications ORDER BY id').all()});
   const before=await snapshot(),sentinel=Error('Fixture69 rollback');
-  await assert.rejects(()=>db.runner.transaction(async()=>{assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[69,70,71,72]);throw sentinel;}),error=>error===sentinel);
-  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,68);
+  await assert.rejects(()=>db.runner.transaction(async()=>{assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[69,70,71,72,73,74,75]);throw sentinel;}),error=>error===sentinel);
+  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version,68);
   assert.equal((await db.prepare("SELECT to_regclass('attention_email_deliveries') value").get()).value,null);assert.deepEqual(await snapshot(),before);
-  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[69,70,71,72]);assert.deepEqual(await snapshot(),before);
+  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[69,70,71,72,73,74,75]);assert.deepEqual(await snapshot(),before);
   for(const c of cases)assert.equal((await db.prepare('SELECT overdue_notified_assignment_id value FROM support_conversations WHERE id=?').get(c.id)).value,c.marked?c.assignment:null);
   assert.equal((await db.prepare('SELECT COUNT(*) n FROM attention_email_deliveries').get()).n,0,'Legacy notifications create no catch-up email jobs');
   const after=await db.prepare('SELECT * FROM support_conversations ORDER BY id').all();assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);assert.deepEqual(await db.prepare('SELECT * FROM support_conversations ORDER BY id').all(),after);

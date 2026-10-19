@@ -23,21 +23,21 @@ const catalog: Catalog = { collections: [], categories: [], products: [], busine
 
 function fake() {
   let current: OwnerPageDraft | null = null;
-  let assigned = true;
+  let granted = true;
   const events: string[] = [];
   const port: OwnerPagePort = {
     read: async () => current ? structuredClone(current) : null,
-    assigned: async () => assigned,
+    authorized: async (actor, businessId) => canEditOwnerPage(actor, businessId, false, granted),
     hasImage: async (_businessId, ref) => ref === "/uploads/seed/test.jpg",
-    create: async (businessId, updatedBy, value) => current ||= { businessId, version: 1, content: value, assistanceEnabled: false, updatedBy, updatedAt: 1 },
+    create: async (businessId, actor, value) => current ||= { businessId, version: 1, content: value, assistanceEnabled: false, updatedBy: actor.id, updatedAt: 1 },
     commit: async (actor, before, change) => {
-      if (!current || current.version !== before.version || !canEditOwnerPage(actor, before.businessId, current.assistanceEnabled, assigned)) return null;
+      if (!current || current.version !== before.version || !canEditOwnerPage(actor, before.businessId, current.assistanceEnabled, granted)) return null;
       current = { ...current, version: current.version + 1, updatedBy: actor.id,
-        ...(change.kind === "content" ? { content: change.content } : { assistanceEnabled: change.enabled }) };
+        content: change.content };
       events.push(change.kind); return structuredClone(current);
     },
   };
-  return { port, events, unassign: () => { assigned = false; } };
+  return { port, events, revoke: () => { granted = false; } };
 }
 const denied = (status: number) => (error: unknown) => error instanceof OwnerPageError && error.status === status;
 
@@ -59,24 +59,23 @@ function fakePublications() {
   return { port, history, deactivate: () => { active = false; } };
 }
 
-test("publication uses saved content; staff edits remain private until the owner publishes", async () => {
+test("granted staff may edit and publish saved showroom content", async () => {
   const { port } = fake(); const publications = fakePublications();
   await startOwnerPage(port, owner, 1, content);
   const published = await changePagePublication(port, publications.port, owner, 1, { action: "publish", version: 1, revision: 0 });
   assert.deepEqual(published.content, content);
-  const consent = await setOwnerPageAssistance(port, owner, 1, 1, true);
-  const edited = await saveOwnerPage(port, staff, 1, consent.version, { ...content, about: "Staff changes" });
+  const edited = await saveOwnerPage(port, staff, 1, 1, { ...content, about: "Staff changes" });
   assert.equal(publications.history[0].content?.about, "");
-  const next = await changePagePublication(port, publications.port, owner, 1, { action: "publish", version: edited.version, revision: 1 });
+  const next = await changePagePublication(port, publications.port, staff, 1, { action: "publish", version: edited.version, revision: 1 });
   assert.equal(next.content?.about, "Staff changes");
-  assert.equal(next.publishedBy, owner.id);
+  assert.equal(next.publishedBy, staff.id);
 });
 
-test("publication and restore deny nonowners, invalid versions and inactive businesses", async () => {
+test("publication and restore deny foreign owners, revoked staff, invalid versions and inactive businesses", async () => {
   const { port } = fake(); const publications = fakePublications();
   await startOwnerPage(port, owner, 1, content);
   for (const action of ["publish", "restore"] as const) {
-    for (const actor of [staff, admin, { ...owner, business_id: 2 }]) {
+    for (const actor of [{ ...owner, business_id: 2 }]) {
       await assert.rejects(changePagePublication(port, publications.port, actor, 1, { action, version: 1, revision: 0 }), denied(403));
     }
     for (const revision of [-1, 1.5, "0", null]) await assert.rejects(changePagePublication(port, publications.port, owner, 1, { action, version: 1, revision }), denied(409));
@@ -132,7 +131,7 @@ function fakeMedia() {
 }
 const uploadImage = () => sharp({ create: { width: 24, height: 16, channels: 3, background: "#b93604" } }).png().toBuffer();
 
-test("private cover upload sanitizes bytes, stays tenant-bound and supports owners before first draft save", async () => {
+test("private cover upload sanitizes bytes, stays tenant-bound and supports granted staff", async () => {
   const { port } = fake();
   const { store, objects, reads } = fakeMedia();
   const ref = await uploadOwnerPageImage(port, store, owner, 1, { bytes: await uploadImage(), claimedType: "image/png" });
@@ -145,8 +144,8 @@ test("private cover upload sanitizes bytes, stays tenant-bound and supports owne
   assert.equal((await sharp(stored.bytes).metadata()).width, 24);
   const beforeDenied = reads();
   await assert.rejects(readOwnerPageImage(port, store, { ...owner, business_id: 2 }, 1, ref), denied(403));
-  await assert.rejects(readOwnerPageImage(port, store, staff, 1, ref), denied(403));
-  assert.equal(reads(), beforeDenied, "Unauthorized reads do not reach storage");
+  assert.ok((await readOwnerPageImage(port, store, staff, 1, ref)).bytes.length > 0);
+  assert.equal(reads(), beforeDenied + 1, "Only the granted staff read reaches storage");
   await assert.rejects(readOwnerPageImage(port, store, owner, 1, ref.replace(key, `page-1-00000000-0000-4000-8000-000000000000.png`)), denied(404));
 });
 test("invalid images and excessive sizes never enter private storage", async () => {
@@ -159,17 +158,17 @@ test("invalid images and excessive sizes never enter private storage", async () 
   assert.equal(objects.size, 0);
 });
 test("revocation during upload discards staged bytes; later reads recheck staff permission", async () => {
-  const { port } = fake();
+  const { port, revoke } = fake();
   const { store, objects } = fakeMedia();
   await startOwnerPage(port, owner, 1, content);
-  await setOwnerPageAssistance(port, owner, 1, 1, true);
   const ref = await uploadOwnerPageImage(port, store, staff, 1, { bytes: await uploadImage(), claimedType: "image/png" });
-  await setOwnerPageAssistance(port, owner, 1, 2, false);
+  revoke();
   await assert.rejects(readOwnerPageImage(port, store, staff, 1, ref), denied(403));
-  await setOwnerPageAssistance(port, owner, 1, 3, true);
+  const next = fake();
+  await startOwnerPage(next.port, owner, 1, content);
   const put = store.put;
-  store.put = async (...args) => { await put(...args); await setOwnerPageAssistance(port, owner, 1, 4, false); };
-  await assert.rejects(uploadOwnerPageImage(port, store, staff, 1, { bytes: await uploadImage(), claimedType: "image/png" }), denied(403));
+  store.put = async (...args) => { await put(...args); next.revoke(); };
+  await assert.rejects(uploadOwnerPageImage(next.port, store, staff, 1, { bytes: await uploadImage(), claimedType: "image/png" }), denied(403));
   assert.equal(objects.size, 1, "Only the earlier owner's retained image remains");
 });
 test("multipart input is bounded even without an honest content length", async () => {
@@ -189,72 +188,68 @@ test("strict bounded profile fields and safe cover choices", () => {
     assert.throws(() => parseShopPageContent(invalid), OwnerPageError);
   }
 });
-test("all staff roles need consent, team also needs assignment, clients remain tenant-bound", () => {
+test("staff business grants replace owner consent and assignment; clients remain tenant-bound", () => {
   assert.equal(canEditOwnerPage(owner, 1, false, false), true);
   assert.equal(canEditOwnerPage(owner, 2, true, true), false);
   for (const actor of [staff, admin, { ...admin, access_role: "operations_manager" as const }]) {
-    assert.equal(canEditOwnerPage(actor, 1, false, true), false);
+    assert.equal(canEditOwnerPage(actor, 1, false, true), true);
     assert.equal(canEditOwnerPage(actor, 1, true, true), true);
   }
   assert.equal(canEditOwnerPage(staff, 1, true, false), false);
 });
-test("owner starts one private draft; no read leaks or staff self-grants", async () => {
+test("owner or granted staff starts one private draft; no read leaks or self-grants", async () => {
   const { port } = fake();
-  await assert.rejects(startOwnerPage(port, admin, 1, content), denied(403));
-  const first = await startOwnerPage(port, owner, 1, content);
+  const first = await startOwnerPage(port, admin, 1, content);
   assert.equal(first.assistanceEnabled, false);
   assert.deepEqual(await startOwnerPage(port, owner, 1, content), first);
   await assert.rejects(startOwnerPage(port, owner, 1, { ...content, introduction: "Replacement" }), denied(409));
   await assert.rejects(startOwnerPage(port, owner, 1, { ...content, heroImage: "/media/foreign.jpg" }), denied(400));
   await assert.rejects(readOwnerPage(port, owner, 2), denied(403));
-  await assert.rejects(readOwnerPage(port, staff, 1), denied(403));
-  await assert.rejects(setOwnerPageAssistance(port, admin, 1, 1, true), denied(403));
+  assert.ok(await readOwnerPage(port, staff, 1));
+  await assert.rejects(setOwnerPageAssistance(port, admin, 1, 1, true), denied(410));
 });
-test("foreign clients and unassigned staff are denied before a draft query", async () => {
-  const { port, unassign } = fake();
+test("foreign clients and revoked staff are denied before a draft query", async () => {
+  const { port, revoke } = fake();
   let reads = 0;
   port.read = async () => { reads++; return null; };
   await assert.rejects(readOwnerPage(port, owner, 2), denied(403));
-  unassign();
+  revoke();
   await assert.rejects(readOwnerPage(port, staff, 1), denied(403));
   assert.equal(reads, 0);
 });
 test("competing first saves do not overwrite an unseen draft", async () => {
   const { port } = fake();
   const create = port.create;
-  port.create = async (businessId, actorId, value) => {
-    await create(businessId, actorId, { ...value, introduction: "Saved in another tab" });
-    return create(businessId, actorId, value);
+  port.create = async (businessId, actor, value) => {
+    await create(businessId, actor, { ...value, introduction: "Saved in another tab" });
+    return create(businessId, actor, value);
   };
   await assert.rejects(startOwnerPage(port, owner, 1, content), denied(409));
   assert.equal((await readOwnerPage(port, owner, 1))?.content.introduction, "Saved in another tab");
 });
-test("consent, attributed staff saves, stale versions, media scope and immediate revocation", async () => {
-  const { port, events, unassign } = fake();
+test("attributed staff saves, stale versions, media scope and immediate revocation", async () => {
+  const { port, events, revoke } = fake();
   await startOwnerPage(port, owner, 1, content);
-  const allowed = await setOwnerPageAssistance(port, owner, 1, 1, true);
-  const edited = await saveOwnerPage(port, staff, 1, allowed.version, { ...content, about: "Our shop" });
+  const edited = await saveOwnerPage(port, staff, 1, 1, { ...content, about: "Our shop" });
   assert.equal(edited.updatedBy, staff.id);
-  await assert.rejects(saveOwnerPage(port, owner, 1, allowed.version, content), denied(409));
+  await assert.rejects(saveOwnerPage(port, owner, 1, 1, content), denied(409));
   await assert.rejects(saveOwnerPage(port, owner, 1, edited.version, { ...content, heroImage: "/media/another-tenant.jpg" }), denied(400));
-  unassign();
+  revoke();
   await assert.rejects(readOwnerPage(port, staff, 1), denied(403));
-  const revoked = await setOwnerPageAssistance(port, owner, 1, edited.version, false);
-  assert.equal(revoked.content.about, "Our shop");
-  await assert.rejects(saveOwnerPage(port, admin, 1, edited.version, content), denied(403));
-  assert.deepEqual(events, ["consent", "content", "consent"]);
+  await assert.rejects(saveOwnerPage(port, staff, 1, edited.version, content), denied(403));
+  await saveOwnerPage(port, admin, 1, edited.version, content);
+  assert.deepEqual(events, ["content", "content"]);
 });
-test("an in-flight save cannot bypass a later consent or version change", async () => {
-  const { port } = fake();
+test("an in-flight save cannot bypass a later grant revocation", async () => {
+  const { port, revoke } = fake();
   await startOwnerPage(port, owner, 1, content);
-  await setOwnerPageAssistance(port, owner, 1, 1, true);
   const originalHasImage = port.hasImage;
   port.hasImage = async () => {
-    await setOwnerPageAssistance(port, owner, 1, 2, false);
+    revoke();
     return originalHasImage(1, "/uploads/seed/test.jpg");
   };
-  await assert.rejects(saveOwnerPage(port, admin, 1, 2, { ...content, heroImage: "/uploads/seed/test.jpg" }), denied(409));
-  assert.equal((await readOwnerPage(port, owner, 1))?.assistanceEnabled, false);
+  await assert.rejects(saveOwnerPage(port, staff, 1, 1, { ...content, heroImage: "/uploads/seed/test.jpg" }), denied(409));
+  assert.equal((await readOwnerPage(port, owner, 1))?.version, 1);
 });
 test("one business profile reads existing information without generating designs or changing canonical data", () => {
   const before = JSON.stringify(catalog);

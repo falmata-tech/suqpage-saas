@@ -12,6 +12,7 @@ import {
   saveFeaturedProgramDay,
 } from "@/lib/featured-program-settings";
 import { createStaffAccount, StaffOperationError } from "@/lib/staff-operations";
+import { currentBusinessAuthority } from "@/lib/staff-business-authority";
 import { scheduleAttentionDelivery } from "@/lib/attention-after";
 import { audit, cleanText } from "@/lib/security";
 import { stageUploadedImage, type StagedImage } from "@/lib/media";
@@ -34,21 +35,31 @@ export async function createStaffAccountAction(formData: FormData): Promise<impo
 
 export async function updateDiscoveryProfileAction(formData: FormData):Promise<import('@/lib/owner-edit-contract').OwnerEditResult> {
   const user = await requireUser();
-  if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
-  const businessId = Number.parseInt(String(formData.get("businessId") || ""), 10);
+  const rawBusinessId = String(formData.get("businessId") || "");
+  const businessId = /^[1-9]\d{0,9}$/.test(rawBusinessId) ? Number(rawBusinessId) : 0;
+  const authority = await currentBusinessAuthority(user, businessId);
+  if (authority !== 'administrator' && authority !== 'staff') throw new Error('Business management access required.');
+  if (authority === 'staff' && (formData.has('sponsored') || formData.has('sponsorPosition'))) throw new Error('Platform administrator access required.');
   let staged: StagedImage | null = null;
   try {
     staged = await stageUploadedImage(formData.get("boothImage"), "booth");
-    const result = await updateDiscoveryProfile({
-      businessId,
-      proposalVersion:formData.get("proposalVersion"),
-      ...(formData.has('industryKeys')||formData.get('industriesPresent')==='1'?{industryKeys:formData.getAll("industryKeys")} : {}),
-      ...(staged ? {boothImagePath:staged.imageRef} : {}),
-      ...Object.fromEntries(['city','zone','region','countryCode','placeId','latitude','longitude','fallbackStyle','productionScale'].filter(key=>formData.has(key)).map(key=>[key,formData.get(key)])),
-      ...(formData.has('sponsorPosition') ? {sponsored:formData.get("sponsored") === "on",sponsorPosition:formData.get('sponsorPosition')} : {}),
-      ...(formData.has('excluded')||formData.get('visibilityPresent')==='1'?{excluded:formData.get("excluded") === "on"} : {}),
+    await runtimeTransaction(async () => {
+      // Hold the current grant through the write and audit. Revocation takes an
+      // exclusive lock on this same row, so a stale editor cannot save later.
+      const current = await currentBusinessAuthority(user, businessId, true);
+      if (current !== 'administrator' && current !== 'staff') throw new DiscoveryAdminError('Business management access changed. Reload before saving.');
+      if (current === 'staff' && (formData.has('sponsored') || formData.has('sponsorPosition'))) throw new DiscoveryAdminError('Platform administrator access required.');
+      const result = await updateDiscoveryProfile({
+        businessId,
+        proposalVersion:formData.get("proposalVersion"),
+        ...(formData.has('industryKeys')||formData.get('industriesPresent')==='1'?{industryKeys:formData.getAll("industryKeys")} : {}),
+        ...(staged ? {boothImagePath:staged.imageRef} : {}),
+        ...Object.fromEntries(['city','zone','region','countryCode','placeId','latitude','longitude','fallbackStyle','productionScale'].filter(key=>formData.has(key)).map(key=>[key,formData.get(key)])),
+        ...(formData.has('sponsorPosition') ? {sponsored:formData.get("sponsored") === "on",sponsorPosition:formData.get('sponsorPosition')} : {}),
+        ...(formData.has('excluded')||formData.get('visibilityPresent')==='1'?{excluded:formData.get("excluded") === "on"} : {}),
+      });
+      await audit("discovery.profile_updated", { userId:user.id, businessId:result.businessId, detail:{ businessId:result.businessId } });
     });
-    await audit("discovery.profile_updated", { userId:user.id, businessId:result.businessId, detail:{ businessId:result.businessId } });
   } catch (error) {
     await staged?.discard();
     const message = error instanceof DiscoveryAdminError ? error.message : "Could not save the discovery profile.";

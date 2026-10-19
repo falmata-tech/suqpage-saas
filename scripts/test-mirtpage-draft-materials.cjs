@@ -30,7 +30,7 @@ function validate(set){
  for(const draft of [l,p,c]){assert.equal(draft.brand,'MirtPage');assert.equal(draft.packageName,'com.mirtpage.app');}
  assert.equal(l.defaultLanguage,'en-US');assert.equal(l.supportEmail,'marketvision.tech@gmail.com');assert.equal(c.publicSupportEmail,l.supportEmail);
  assert.equal(l.website,'https://mirtpage.com');assert.equal(l.privacyPolicyUrl,l.website+'/privacy');assert.equal(l.accountDeletionUrl,l.website+'/account-deletion');
- assert.equal(l.domainStatus,'dns_and_https_verification_pending');assert.equal(c.domainStatus,l.domainStatus);
+ assert.equal(l.domainStatus,'dns_https_aliases_verified_old_primary_and_deployment_retained');assert.equal(c.domainStatus,l.domainStatus);
  assert.deepEqual(l.activeInterfaceLocales,['en','am','om']);assert.deepEqual(c.activeLocales,l.activeInterfaceLocales);
  assert.deepEqual(Object.keys(l.listings),['en-US','am']);assert.deepEqual(Object.keys(l.promotionalOnlyLocales),['om']);
  for(const [locale,entry]of Object.entries(l.listings)){copy(entry,locale);assert.equal(entry.consoleLanguageStatus,'documented_supported');assert.equal(entry.interfaceLocale,locale==='en-US'?'en':'am');}
@@ -66,7 +66,13 @@ function validate(set){
  assert.match(c.captions.en.visitor,/without digging through social posts/);
  assert.match(c.captions.am.visitor,/ልጥፎችን ሳይፈትሹ/);
  assert.match(c.captions.om.visitor,/Maxxansa miidiyaa hawaasaa.*osoo hin barbaadin/);
- const english=l.listings['en-US'].fullDescription;for(const idea of ['digital showroom','brand','story','collections','retailers','workshops','factories','farms','suppliers','social','ready to ship','made to order','Availability','email','shipment plans'])assert.ok(english.includes(idea),'Narrative: '+idea);
+ const english=l.listings['en-US'].fullDescription;for(const idea of ['digital showroom','brand','story','collections','retailers','workshops','factories','farms','suppliers','social','ready to ship','made to order','Availability','email','Shipment tracking'])assert.ok(english.includes(idea),'Narrative: '+idea);
+ for(const [locale,entry] of [['en',l.listings['en-US']],['am',l.listings.am],['om',l.promotionalOnlyLocales.om]]){
+  const texts=[entry.fullDescription,c.captions[locale].transport,p.screens.find(screen=>screen.id==='06-transport').alt[locale]];
+  const activeName={en:'Shipment tracking',am:'የጭነት ክትትል',om:'Hordoffii feʼumsaa'}[locale];
+  for(const text of texts)assert.ok(text.includes(activeName),locale+' uses active tracking name');
+  assert.doesNotMatch(texts.join('\n'),/shipment plans?|የጭነት ዕቅድ|karoora fe['’ʼ]umsaa/i,locale+' retired plan wording');
+ }
  assert.deepEqual(l.featureClaims.map(claim=>claim.id),['digital-showrooms','map-and-product-search','listed-availability','external-social-handoff','transport-chat','independent-email-tracking']);
  for(const claim of l.featureClaims){assert.ok(claim.evidence.length);for(const file of claim.evidence)assert.ok(fs.existsSync(file),'Evidence file '+file);}
  const authorityHash=crypto.createHash('sha256').update(fs.readFileSync('lib/storefront-copy.ts')).digest('hex');

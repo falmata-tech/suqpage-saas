@@ -38,6 +38,7 @@ test('BE-032 actual settings action retains expected errors, cleans staged media
   let failure:Error|null=new BusinessSettingsError('Business details changed. Reload before saving.');
   const actions=await actionModule('app/actions.ts',{
     'next/navigation':navigation,'next/cache':{revalidatePath:()=>{}},'@/lib/auth':{requireUser:async()=>actor},'@/lib/capabilities':{canManageBusiness,hasCapability},'@/lib/security':security,
+    '@/lib/staff-business-authority':{currentBusinessAuthority:async()=> 'administrator'},
     '@/lib/catalog-runtime':{runtimeBusinessById:async()=>({id:7,handle:'qa-record',logo_path:'/media/old-logo.png',favicon_path:'/media/old-icon.png'})},
     '@/lib/media':{stageUploadedImage:async(_file:unknown,prefix:string)=>({imageRef:'/media/new-'+prefix+'.png',discard:async()=>{discarded.push(prefix);}})},
     '@/lib/business-settings-runtime':{BusinessSettingsError,saveBusinessSettings:async(_actor:unknown,_businessId:number,input:Record<string,unknown>)=>{writes.push(input);if(failure)throw failure;}},
@@ -53,6 +54,7 @@ test('BE-032 focused settings actions admit only their own fields before media a
   const writes:Record<string,unknown>[]=[],staged:string[]=[];
   const actions=await actionModule('app/actions.ts',{
     'next/navigation':navigation,'next/cache':{revalidatePath:()=>{}},'@/lib/auth':{requireUser:async()=>actor},'@/lib/capabilities':{canManageBusiness,hasCapability},'@/lib/security':security,
+    '@/lib/staff-business-authority':{currentBusinessAuthority:async()=> 'administrator'},
     '@/lib/catalog-runtime':{runtimeBusinessById:async()=>({id:7,handle:'qa-record',logo_path:'/media/old-logo.png',favicon_path:'/media/old-icon.png'})},
     '@/lib/media':{stageUploadedImage:async(file:unknown,prefix:string)=>{staged.push(prefix);return file?{imageRef:'/media/new-'+prefix+'.png',discard:async()=>{}}:null;}},
     '@/lib/business-settings-runtime':{BusinessSettingsError,saveBusinessSettings:async(_actor:unknown,_id:number,input:Record<string,unknown>)=>{writes.push(input);}},
@@ -101,6 +103,8 @@ test('FE-026 actual location action delegates omitted fields to locked canonical
   const writes:Record<string,unknown>[]=[];let failure=false;
   const actions=await actionModule('app/staff-actions.ts',{
     'next/navigation':navigation,'next/cache':{revalidatePath:()=>{}},'@/lib/auth':{requireUser:async()=>actor},'@/lib/capabilities':{hasCapability},'@/lib/security':security,
+    '@/lib/staff-business-authority':{currentBusinessAuthority:async()=> 'administrator'},
+    '@/lib/runtime-sql':{runtimeTransaction:async(work:()=>Promise<unknown>)=>work()},
     '@/lib/media':{stageUploadedImage:async()=>null},
     '@/lib/discovery-admin':{DiscoveryAdminError,getDiscoveryProfileAdminView:async()=>({sponsored:true,sponsorPosition:4,boothImagePath:'/seed/retained.png'}),updateDiscoveryProfile:async(input:Record<string,unknown>)=>{writes.push(input);if(failure)throw new DiscoveryAdminError('City is required.');return {businessId:7};}},
   });
@@ -115,14 +119,37 @@ test('FE-026 actual location action delegates omitted fields to locked canonical
   failure=true;assert.deepEqual(JSON.parse(JSON.stringify(await actions.updateDiscoveryProfileAction(form))),{error:'City is required.'});
 });
 
-test('BE-054 admin location action denies non-admin roles before upload or geography persistence',async()=>{
+test('BE-054/BE-060 location action denies owners and ungranted staff before upload or geography persistence',async()=>{
   const scopedActor={...actor,access_role:'client'};let staged=0,writes=0;
   const actions=await actionModule('app/staff-actions.ts',{
     'next/navigation':navigation,'next/cache':{revalidatePath:()=>{}},'@/lib/auth':{requireUser:async()=>scopedActor},'@/lib/capabilities':{hasCapability},'@/lib/security':security,
+    '@/lib/staff-business-authority':{currentBusinessAuthority:async()=>null},
+    '@/lib/runtime-sql':{runtimeTransaction:async(work:()=>Promise<unknown>)=>work()},
     '@/lib/media':{stageUploadedImage:async()=>{staged++;return null;}},
     '@/lib/discovery-admin':{DiscoveryAdminError,updateDiscoveryProfile:async()=>{writes++;return{businessId:7};}},
   });
   const form=new FormData();form.set('businessId','7');form.set('countryCode','KE');form.set('placeId','forged');
-  for(const role of ['client','team_member','operations_manager']){scopedActor.access_role=role;await assert.rejects(actions.updateDiscoveryProfileAction(form),/Platform administrator access required/);}
+  for(const role of ['client','team_member','operations_manager']){scopedActor.access_role=role;await assert.rejects(actions.updateDiscoveryProfileAction(form),/Business management access required/);}
   assert.equal(staged,0);assert.equal(writes,0);
+});
+
+test('BE-060 granted staff can save visibility, but forged sponsorship and revoke-before-save fail closed',async()=>{
+  const scopedActor={...actor,access_role:'team_member'};
+  let revoked=false,staged=0,writes=0,discarded=0,lockedReads=0;
+  const actions=await actionModule('app/staff-actions.ts',{
+    'next/navigation':navigation,'next/cache':{revalidatePath:()=>{}},'@/lib/auth':{requireUser:async()=>scopedActor},'@/lib/capabilities':{hasCapability},'@/lib/security':security,
+    '@/lib/staff-business-authority':{currentBusinessAuthority:async(_actor:unknown,_businessId:number,lock:boolean)=>{if(lock)lockedReads++;return revoked&&lock?null:'staff';}},
+    '@/lib/runtime-sql':{runtimeTransaction:async(work:()=>Promise<unknown>)=>work()},
+    '@/lib/media':{stageUploadedImage:async()=>{staged++;return {imageRef:'/media/booth-test.png',discard:async()=>{discarded++;}};}},
+    '@/lib/discovery-admin':{DiscoveryAdminError,updateDiscoveryProfile:async(input:Record<string,unknown>)=>{writes++;assert.equal(input.excluded,true);assert.equal(input.placeId,'nairobi');assert.equal(input.countryCode,'KE');assert.equal(input.latitude,'-1.28');assert.equal(input.longitude,'36.81');assert.ok(!('sponsored' in input));assert.ok(!('sponsorPosition' in input));return {businessId:7};}},
+  });
+  const form=new FormData();form.set('businessId','7');form.set('visibilityPresent','1');form.set('excluded','on');form.set('placeId','nairobi');form.set('countryCode','KE');form.set('latitude','-1.28');form.set('longitude','36.81');
+  await assert.rejects(actions.updateDiscoveryProfileAction(form),(error:unknown)=>(error as {url?:string}).url==='/dashboard/admin/discovery/7?saved=profile');
+  assert.equal(writes,1);assert.equal(lockedReads,1);
+  form.set('sponsorPosition','2');await assert.rejects(actions.updateDiscoveryProfileAction(form),/Platform administrator access required/);
+  assert.equal(staged,1);assert.equal(writes,1,'A posted sponsor control never reaches the staff write');
+  form.delete('sponsorPosition');revoked=true;
+  assert.deepEqual(JSON.parse(JSON.stringify(await actions.updateDiscoveryProfileAction(form))),{error:'Business management access changed. Reload before saving.'});
+  assert.equal(writes,1,'A grant revoked after initial authorization is checked again under the transaction lock');
+  assert.equal(discarded,1,'Staged media is discarded after a revoked edit');
 });

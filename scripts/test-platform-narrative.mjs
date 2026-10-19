@@ -21,9 +21,14 @@ const privacy = read("app/(public)/privacy/page.tsx");
 const terms = read("app/(public)/terms/page.tsx");
 assert.doesNotMatch(privacy + terms, /page project|private project|design is imported/i);
 assert.match(privacy, /account email and phone remain private/);
-assert.match(privacy, /grant or revoke staff assistance/);
-assert.match(terms, /publish it when ready/);
-assert.match(terms, /owner saves update the live page without staff approval/);
+assert.match(privacy, /staff authorized by an administrator can manage business pages/);
+assert.match(privacy, /Staff cannot change an owner's private sign-in email/);
+assert.match(privacy, /You send it in the external app; MirtPage does not receive that message/);
+assert.match(privacy, /new messages are no longer accepted there/);
+assert.match(terms, /Business owners can add products, prepare and publish their showroom/);
+assert.match(terms, /Platform staff authorized by an administrator may help manage business pages/);
+assert.match(terms, /Transport assistance connects you with our team/);
+assert.doesNotMatch(privacy + terms, /grant or revoke staff assistance|owner saves update the live page without staff approval|product inquiries, and support conversations|Transport and delivery assistance/i);
 const storefrontCopy = read("lib/storefront-copy.ts");
 const publicNarrative = [storefrontCopy, home, publicFrame, discovery, about, signup, signupForm, login, metadata, support, businessPage].join("\n");
 const activeApplicationFiles = ["app", "components"]
@@ -137,11 +142,16 @@ assert.match(inquiryMessage, /I'd like to ask about:/);
 assert.match(inquiryMessage, /Are these available, and how can I order/);
 assert.match(inquiryMessage, /productHref\(business.handle, item.id\)/);
 assert.doesNotMatch(businessPage, /Showroom reference|online showroom/i);
-for (const file of fs.readdirSync("public/landing/showroom-booths").filter((name) => name.endsWith(".svg"))) {
+const demoBoothFiles = fs.readdirSync("public/landing/showroom-booths").filter((name) => name.endsWith(".svg"));
+assert.equal(demoBoothFiles.length, 58, 'all generated demo booths remain present');
+for (const file of demoBoothFiles) {
   const asset = read(`public/landing/showroom-booths/${file}`);
-  assert.match(asset, /SUQPAGE/, `${file} retains its historical illustration identity until replacement media is reviewed`);
-  assert.doesNotMatch(asset, /MIRTPAGE SHOWROOM/, `${file} has not been falsely relabelled as new MirtPage illustration evidence`);
+  assert.match(asset, /font-size="40"[^>]*>MirtPage<\/text>/, `${file} shows a card-readable MirtPage facade label`);
+  assert.doesNotMatch(asset, /SUQPAGE/i, `${file} does not display the previous platform name`);
 }
+const boothGenerator = read('scripts/materialize-demo-client-portfolio.ts');
+assert.match(boothGenerator, />MirtPage<\/text>/, 'demo regeneration emits the current facade label');
+assert.doesNotMatch(boothGenerator, />SUQPAGE(?: PAGE)?<\/text>/, 'demo regeneration cannot restore the old facade label');
 
 for (const weakPhrase of [
   /for the way you need to buy/i,
@@ -168,4 +178,4 @@ for (const overclaim of [
   assert.doesNotMatch(publicNarrative, overclaim, `Public narrative contains prohibited overclaim: ${overclaim}`);
 }
 
-console.log("FE-070 MirtPage inclusive product showrooms, merchant declarations and social-contact narrative passed; retained illustration assets are not new brand evidence.");
+console.log("FE-070 MirtPage showroom narrative and all 58 illustrative demo booth labels passed.");

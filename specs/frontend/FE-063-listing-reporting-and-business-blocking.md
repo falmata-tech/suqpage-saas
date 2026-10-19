@@ -56,6 +56,23 @@ open/report/cancel/block/unblock/failure tests plus inherited report security â†
 actual Chrome web/Expo journey with isolated visitor preferences â†’ visual approval
 before full/commit/rollout. No schema/provider/dependency or hosted write.
 
+### S146 Account placement refinement (ready)
+
+GIVEN an anonymous mobile visitor on Login or a signed-in business owner in
+Account settings WHEN viewing account tasks THEN do not show a prominent
+Blocked businesses destination there. Blocking is an anonymous browsing
+preference, not an account or business-management task. GIVEN a visitor on a
+public listing WHEN opening Listing options THEN retain Report, Block business,
+and access to the existing blocked-list management screen. Existing device
+preferences, catalog exclusions, direct-link recovery, reports and staff
+moderation remain unchanged. Google Play's public-UGC reporting/blocking
+requirements still apply. The web Account already has no such destination.
+
+Ready: the native Listing options sheet already links to blocked-list management,
+and web/native report and block behavior is tested. Change only the two native
+Account entry points; prove the Account tasks omit them while contextual
+management stays reachable. No data migration, permission or API change.
+
 ## Problem and scope
 
 Public merchant catalogs need usable safety controls before Google Play review.

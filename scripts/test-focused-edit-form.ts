@@ -9,7 +9,7 @@ const nodes=(node:unknown):Element[]=>!node||typeof node!=='object'?[]:[node as 
 const text=(node:unknown):string=>node===null||node===undefined?'':typeof node!=='object'?String(node):[(node as Element).props.children].flat().map(text).join('');
 class FormValues extends FormData{constructor(input?:{values:Record<string,string>}){super();for(const [key,value]of Object.entries(input?.values||{}))this.set(key,value);}}
 
-test('FE-026 focused edits retain fields, fence duplicate submits, announce recovery and preserve redirects',async()=>{
+test('FE-026/FE-072 focused edits support early native save, fence duplicates, and preserve recovery',async()=>{
   const state={values:[] as unknown[],refs:[] as {current:unknown}[],cursor:0,refCursor:0};
   const result=await build({entryPoints:['components/FocusedEditForm.tsx'],bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'form-ports',setup(b){
     b.onResolve({filter:/^next\/navigation$/},()=>({path:path.resolve('node_modules/next/dist/client/components/unstable-rethrow.browser.js')}));
@@ -20,6 +20,15 @@ test('FE-026 focused edits retain fields, fence duplicate submits, announce reco
   let resolve:(result:unknown)=>void=()=>{},reject:(error:Error)=>void=()=>{},calls=0;
   const action=async(form:FormData)=>{calls++;assert.equal(form.get('name'),'Retained user name');return new Promise((yes,no)=>{resolve=yes;reject=no;});};
   const render=()=>{state.cursor=0;state.refCursor=0;return module.exports.default({action,cancelHref:'/dashboard/settings?business=7',children:{type:'input',props:{name:'name',defaultValue:'Retained user name'}}});};
+  // A save made before hydration must have the same server action as its native
+  // form target. Calling that target here bypasses the client onSubmit handler.
+  let earlyCalls=0;
+  state.cursor=0;state.refCursor=0;
+  const earlyAction=async(form:FormData)=>{earlyCalls++;assert.equal(form.get('name'),'Retained user name');return {error:'Retry after loading.'};};
+  const earlyForm=module.exports.default({action:earlyAction,cancelHref:'/dashboard/settings?business=7',children:{type:'input',props:{name:'name',defaultValue:'Retained user name'}}});
+  assert.equal(earlyForm.props.action,earlyAction,'native form submit must target the authenticated server action');
+  await (earlyForm.props.action as (form:FormData)=>Promise<unknown>)(new FormValues({values:{name:'Retained user name'}}));
+  assert.equal(earlyCalls,1);
   const form={values:{name:'Retained user name'}};
   const submit=(root:Element)=>(root.props.onSubmit as(event:unknown)=>Promise<void>)({preventDefault(){},currentTarget:form});
   const pending=submit(render());assert.equal(render().props['aria-busy'],true);assert.equal(nodes(render()).find(node=>node.type==='button')!.props.disabled,true);

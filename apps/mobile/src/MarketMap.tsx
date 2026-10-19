@@ -12,7 +12,7 @@ import {MAP_NATIVE_MAX_ZOOM,MAP_GROUP_DEFAULT_CAPACITY} from '../../../lib/map/m
 
 // Public tile requests only: never attach Supabase tokens or application cookies.
 TransformRequestManager.addHeader({id: 'suqpage-osm-client', match: '^https://tile\\.openstreetmap\\.org/',
-  name: 'User-Agent', value: 'Suqpage/0.1 (+https://suqpage.com)'});
+  name: 'User-Agent', value: 'MirtPage/0.1 (+https://mirtpage.com)'});
 
 export default forwardRef<MapControls, MapProps>(function MarketMap({shops,groupCapacity=MAP_GROUP_DEFAULT_CAPACITY, groups = [], selectedId, onGroup, onSelect, onZoomChange,onViewChange,initialView, height = 500}, ref) {
   const camera = useRef<CameraRef>(null);

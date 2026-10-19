@@ -13,7 +13,7 @@ import DashboardShell from "@/components/DashboardShell";
 import FocusedEditForm from '@/components/FocusedEditForm';
 import recordStyles from '@/components/BusinessRecordFacts.module.css';
 import { requireUser } from "@/lib/auth";
-import { hasCapability } from "@/lib/capabilities";
+import { currentBusinessAuthority } from "@/lib/staff-business-authority";
 import { DISCOVERY_INDUSTRIES } from "@/lib/discovery";
 import { getDiscoveryProfileAdminView } from "@/lib/discovery-admin";
 import { runtimeBusinessById } from "@/lib/catalog-runtime";
@@ -27,9 +27,12 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
   const t = await getUiText();
   const locale = await getLocale();
   const user = await requireUser();
-  if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
-  const businessId = Number.parseInt((await params).businessId, 10);
-  if (!Number.isInteger(businessId)) notFound();
+  const rawBusinessId = (await params).businessId;
+  if (!/^[1-9]\d{0,9}$/.test(rawBusinessId)) notFound();
+  const businessId = Number(rawBusinessId);
+  const authority = await currentBusinessAuthority(user, businessId);
+  if (authority !== 'administrator' && authority !== 'staff') redirect('/dashboard');
+  const isAdministrator = authority === 'administrator';
   const profile = await getDiscoveryProfileAdminView(businessId);
   if (!profile) notFound();
   const business = (await runtimeBusinessById(businessId)) || null;
@@ -43,7 +46,7 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
 
   return <DashboardShell user={user} business={business}>
     <div className="dashboard-head standard-page-heading">
-      <div><h1>{t("Location & visibility")}</h1><p>{t("Manage how {business} appears in search, maps and sponsors.", {business: profile.businessName})}</p></div>
+      <div><h1>{t("Location & visibility")}</h1>{isAdministrator?<p>{t("Manage how {business} appears in search, maps and sponsors.", {business: profile.businessName})}</p>:null}</div>
       <div className="inline-actions">{query.edit!=='profile'&&<Link className="btn brand" href={`/dashboard/admin/discovery/${businessId}?edit=profile`}>{t('Edit')}</Link>}<Link className="btn secondary" href={`/preview/@${profile.handle}`} target="_blank">{t("Open page")}</Link></div>
     </div>
     {query.error ? <p className="error">{t(query.error)}</p> : null}
@@ -75,7 +78,7 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
               <div className="field"><label htmlFor="profile-latitude">{t("Latitude")}</label><input id="profile-latitude" name="latitude" type="number" min="-90" max="90" step="any" defaultValue={pending?(proposal.location_mode === "storefront"?proposal.latitude??"":proposal.place_latitude??""):profile.latitude??""} required /></div>
               <div className="field"><label htmlFor="profile-longitude">{t("Longitude")}</label><input id="profile-longitude" name="longitude" type="number" min="-180" max="180" step="any" defaultValue={pending?(proposal.location_mode === "storefront"?proposal.longitude??"":proposal.place_longitude??""):profile.longitude??""} required /></div>
               <div className="field full"><label htmlFor="profile-fallback">{t("Booth fallback style")}</label><select id="profile-fallback" name="fallbackStyle" defaultValue={profile.fallbackStyle}>{["workshop", "botanical", "textile", "food", "home", "technical"].map((style) => <option key={style}>{style}</option>)}</select></div>
-              <div className="field full"><Link className="small-btn" href={`/dashboard/admin/sponsors?business=${profile.businessId}`}>{t('Manage sponsors')}</Link></div>
+              {isAdministrator?<div className="field full"><Link className="small-btn" href={`/dashboard/admin/sponsors?business=${profile.businessId}`}>{t('Manage sponsors')}</Link></div>:null}
             </div>
           </section>
         </FocusedEditForm>
@@ -83,8 +86,8 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
       <section className="panel">
         <h2>{t("Visibility summary")}</h2>
         <p><span className={`badge ${profile.excluded ? "cancelled" : profile.approved ? "active" : "limited"}`}>{profile.excluded ? t("excluded") : profile.approved ? t("discoverable") : t("incomplete")}</span></p>
-        <dl className={recordStyles.facts}><dt>{t("Industries")}</dt><dd>{profile.industryKeys.map((key) => t(industryLabels.get(key) || key)).join(", ") || t("Not assigned")}</dd><dt>{t("Country")}</dt><dd>{countryName(profile.countryCode,locale)||t("Not set")}</dd><dt>{t("Origin")}</dt><dd>{[profile.city, profile.zone, profile.region].filter(Boolean).join(", ") || t("Not set")}</dd><dt>{t("Sponsored")}</dt><dd>{profile.sponsored ? t("Yes · position {value1}", { value1: profile.sponsorPosition }) : t("No")}</dd></dl>
-        {query.edit!=='profile'&&<><dl className={recordStyles.facts}><dt>{t('Production scale')}</dt><dd>{t(profile.productionScale==='growing_factory'?'Growing factory':'Workshop / producer')}</dd><dt>{t('Latitude')}</dt><dd>{profile.latitude??t('Not set')}</dd><dt>{t('Longitude')}</dt><dd>{profile.longitude??t('Not set')}</dd></dl>{profile.boothImagePath&&<img src={profile.boothImagePath} alt={t('{value1} booth',{value1:profile.businessName})} width={240} style={{maxWidth:'100%'}}/>}<p><Link href={`/dashboard/admin/sponsors?business=${profile.businessId}`}>{t('Manage sponsors')}</Link></p></>}
+        <dl className={recordStyles.facts}><dt>{t("Industries")}</dt><dd>{profile.industryKeys.map((key) => t(industryLabels.get(key) || key)).join(", ") || t("Not assigned")}</dd><dt>{t("Country")}</dt><dd>{countryName(profile.countryCode,locale)||t("Not set")}</dd><dt>{t("Origin")}</dt><dd>{[profile.city, profile.zone, profile.region].filter(Boolean).join(", ") || t("Not set")}</dd>{isAdministrator?<><dt>{t("Sponsored")}</dt><dd>{profile.sponsored ? t("Yes · position {value1}", { value1: profile.sponsorPosition }) : t("No")}</dd></>:null}</dl>
+        {query.edit!=='profile'&&<><dl className={recordStyles.facts}><dt>{t('Production scale')}</dt><dd>{t(profile.productionScale==='growing_factory'?'Growing factory':'Workshop / producer')}</dd><dt>{t('Latitude')}</dt><dd>{profile.latitude??t('Not set')}</dd><dt>{t('Longitude')}</dt><dd>{profile.longitude??t('Not set')}</dd></dl>{profile.boothImagePath&&<img src={profile.boothImagePath} alt={t('{value1} booth',{value1:profile.businessName})} width={240} style={{maxWidth:'100%'}}/>}{isAdministrator?<p><Link href={`/dashboard/admin/sponsors?business=${profile.businessId}`}>{t('Manage sponsors')}</Link></p>:null}</>}
       </section>
     </div>
   </DashboardShell>;

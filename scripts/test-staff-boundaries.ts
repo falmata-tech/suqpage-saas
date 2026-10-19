@@ -3,7 +3,8 @@ import crypto from 'node:crypto';
 import type {SessionUser} from '../lib/types';
 import {getDb,closeDbForTests} from './testing/postgres-fixture';
 import {runtimeUserById} from '../lib/catalog-runtime';
-import {createStaffAccount,listTeamMembers} from '../lib/staff-operations';
+import {createStaffAccount,listTeamMembers,setStaffBusinessGrant} from '../lib/staff-operations';
+import {currentBusinessAuthority} from '../lib/staff-business-authority';
 import {hasCapability,canViewBusiness,canMaintainBasicProducts} from '../lib/capabilities';
 import {listStaffPage,listTeamMemberChoices} from '../lib/scalable-queries';
 import {handleMobileRequest} from '../lib/mobile/router';
@@ -27,8 +28,9 @@ try {
   const principal=(await runtimeUserById(staff.userId))!;
   assert.equal(principal.staff_queue_scope,settings.queue_scope);
   for(const capability of ['platform:admin','operations:manage','basic-product:maintain','design-bank:view','client:workspace'] as const) assert.equal(hasCapability(principal,capability),false);
-  assert.equal(canViewBusiness(principal,1,true),false);
-  assert.equal(canMaintainBasicProducts(principal,1,true),false);
+  assert.equal(canViewBusiness(principal,1,true),true);
+  assert.equal(canMaintainBasicProducts(principal,1,true),true);
+  assert.equal((await db.prepare('SELECT enabled FROM staff_business_grants WHERE user_id=?').get(staff.userId)).enabled,1);
   assert.ok(!(await listTeamMembers()).some(u=>u.id===staff.userId));
   assert.ok(!(await listTeamMemberChoices('',staff.userId)).some(u=>u.id===staff.userId));
   const page=await listStaffPage({role});assert.equal(page.items.length,1);assert.equal(page.items[0].id,staff.userId);
@@ -38,14 +40,19 @@ try {
  const content={template:'profile-v1' as const,coverStyle:'overlay' as const,introduction:'Initial',about:'Initial',heroImage:'',videoUrl:''};
  const business=await db.prepare("INSERT INTO businesses(handle,name,design_key) VALUES('staff-scope-page','Staff scope page','composition')").run();
  await db.prepare('INSERT INTO owner_page_drafts(business_id,version,content_json,assistance_enabled,updated_by,updated_at) VALUES(?,1,?,1,?,?)').run(business.insertedId,JSON.stringify(content),admin.id,Date.now());
- const draft=(await ownerPagePort.read(business.insertedId))!;
  for(const staff of created){
-  await db.prepare('INSERT INTO staff_business_assignments(user_id,business_id,assigned_by_user_id,active) VALUES(?,?,?,1)').run(staff.id,business.insertedId,admin.id);
-  assert.equal(canEditOwnerPage(staff,business.insertedId,true,true),false);
-  await assert.rejects(()=>readOwnerPage(ownerPagePort,staff,business.insertedId),/Page access/);
-  assert.equal(await ownerPagePort.commit({...staff,staff_queue_scope:null},draft,{kind:'content',content:{...content,about:'Must not save'}}),null,'A stale generic-team principal cannot bypass current queue scope at commit');
-  assert.deepEqual(await ownerPagePort.read(business.insertedId),draft);
+  assert.equal(canEditOwnerPage(staff,business.insertedId,false,true),true);
+  assert.equal(await currentBusinessAuthority(staff,business.insertedId),'staff');
+  assert.ok(await readOwnerPage(ownerPagePort,staff,business.insertedId));
+  const draft=(await ownerPagePort.read(business.insertedId))!;
+  assert.ok(await ownerPagePort.commit(staff,draft,{kind:'content',content:{...content,about:staff.name}}));
  }
+ const first=created[0];
+ await setStaffBusinessGrant(admin,first.id,false,1);
+ assert.equal(await currentBusinessAuthority(first,business.insertedId),null);
+ await assert.rejects(()=>readOwnerPage(ownerPagePort,first,business.insertedId),/Page access/);
+ assert.equal(await ownerPagePort.commit(first,(await ownerPagePort.read(business.insertedId))!,{kind:'content',content}),null,'A revoked staff member cannot save using a stale page snapshot');
+ assert.equal(await currentBusinessAuthority(created[1],business.insertedId),'staff');
  const before=await db.prepare('SELECT COUNT(*) n FROM users').get();
  for(const role of ['team_member','operations_manager','platform_admin','client','garbage']) await assert.rejects(()=>createStaffAccount({name:'Denied',email:'denied@example.test',password:'StaffFixture123',accessRole:role},admin));
  await assert.rejects(()=>createStaffAccount({name:'Denied',email:'denied@example.test',password:'StaffFixture123',accessRole:'support_agent'},{...created[0],access_role:'platform_admin'}),/administrator access/);
@@ -71,7 +78,7 @@ try {
  await db.prepare('DELETE FROM user_access_profiles WHERE user_id=?').run(owner);
  assert.equal(await runtimeUserById(owner),undefined,'A missing access profile must never inherit legacy administrator authority');
  assert.equal((await call()).status,401);
- console.log('PASS admin-created support/transport roles, current principal scope, legacy-business exclusion, forged actor denial and all private mobile boundaries.');
+ console.log('PASS admin-created support/transport staff manage businesses until revoked; forged actor denial and all private mobile boundaries.');
 } finally {await closeDbForTests();}
 
 }

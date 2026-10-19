@@ -8,6 +8,7 @@ import { PostgresSessionRepository } from "../lib/postgres-session-repository";
 import { createPostgresPublicInquiry } from "../lib/inquiries-postgres";
 import { createPostgresPublicClientWorkspace } from "../lib/signup-postgres";
 import { PostgresRequestRepository } from "../lib/postgres-request-repository";
+import { postAssignedSupportReply } from "./testing/support-join";
 
 async function main() {
   const db = await getDb();
@@ -312,9 +313,9 @@ async function main() {
         expectedContentVersion: upkeepTarget.content_version,
         idempotencyKey: upkeepKey,
         name: "PostgreSQL Runtime Offering",
-        description: "A production capability created during the disposable PostgreSQL runtime rehearsal.",
+        description: "A made-to-order product created during the disposable PostgreSQL runtime rehearsal.",
         availability: "available",
-        offeringKind: "manufacturing_capability",
+        offeringKind: "made_to_order",
         quantityMode: "optional",
         capacitySummary: "Capacity discussed with each buyer",
         minimumOrderSummary: "Flexible trial order",
@@ -336,6 +337,18 @@ async function main() {
         business_id: upkeepTarget.business_id,
         must_change_password: upkeepTarget.must_change_password,
       };
+      const beforeRejectedUpkeep = (await runner.query<{ total: number }>(
+        "SELECT COUNT(*)::integer total FROM products WHERE business_id=?", [upkeepTarget.business_id],
+      )).rows[0].total;
+      for (const retiredKind of ["service", "manufacturing_capability"]) {
+        await assert.rejects(
+          () => executeBasicProductUpkeep(runtimeProductUpkeepPort(), upkeepUser, { ...upkeepCommand, offeringKind: retiredKind }, null),
+          error => error instanceof Error && "code" in error && error.code === "invalid_product_kind",
+        );
+      }
+      assert.equal((await runner.query<{ total: number }>(
+        "SELECT COUNT(*)::integer total FROM products WHERE business_id=?", [upkeepTarget.business_id],
+      )).rows[0].total, beforeRejectedUpkeep, "Retired kinds cannot mutate the tenant's products.");
       const upkeep = await executeBasicProductUpkeep(runtimeProductUpkeepPort(), upkeepUser, upkeepCommand, null);
       assert.equal(upkeep.contentVersion, upkeepTarget.content_version + 1);
       assert.equal((await executeBasicProductUpkeep(runtimeProductUpkeepPort(), upkeepUser, upkeepCommand, null)).duplicate, true);
@@ -396,9 +409,10 @@ async function main() {
       });
       assert.ok(assignableRequest, "Expected a business-scoped request for assignment rehearsal.");
       await assert.rejects(()=>assignRequestToTeamMember(assignableRequest.id,staff.userId,operationsUser.id), /valid team member/);
-      // Retained generic staff assignments are a separate legacy permission.
+      // Service-request assignment remains separate from global business management.
       const legacyStaff=(await runner.query<{id:number}>("INSERT INTO users(email,password_hash,name,role) VALUES(?,'unused','Legacy generic staff','admin') RETURNING id",[`legacy-staff-${staffUnique}@example.test`])).rows[0];
       await runner.query("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'team_member')",[legacyStaff.id]);
+      await runner.query("INSERT INTO staff_business_grants(user_id,enabled,version,updated_at) VALUES(?,1,1,?)",[legacyStaff.id,Date.now()]);
       const assignment = await assignRequestToTeamMember(assignableRequest.id, legacyStaff.id, operationsUser.id);
       assert.equal(assignment.assignedUserId, legacyStaff.id);
       assert.ok((await listAssignedBusinesses(legacyStaff.id)).some((business) => business.id === assignableRequest.business_id));
@@ -516,10 +530,16 @@ async function main() {
         true,
         "Automatic support assignment must select an enabled agent.",
       );
-      await postSupportMessage(operationsUser, supportConversation.id, {
+      const reply = {
         message: "The PostgreSQL support queue is responding.",
         idempotencyKey: `postgres-support-reply-${Date.now()}`,
-      });
+      };
+      await assert.rejects(
+        () => postSupportMessage(operationsUser, supportConversation.id, reply),
+        error => error instanceof Error && "code" in error && error.code === "join_required",
+        "Reading or internal assignment never substitutes for an explicit Join.",
+      );
+      await postAssignedSupportReply(operationsUser, supportConversation.id, reply);
       assert.ok((await getSupportConversation(supportClient, supportConversation.id)).messages.length >= 2);
       await closeSupportConversation(operationsUser, supportConversation.id);
       await reopenSupportConversation(supportClient, supportConversation.id);

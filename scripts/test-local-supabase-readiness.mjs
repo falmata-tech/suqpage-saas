@@ -58,6 +58,9 @@ assert.match(localDev, /"54321"/);
 assert.match(acceptance, /suqpage-browser-/);
 assert.ok(acceptance.includes('.replaceAll("supabase_inbucket_mirtpage", `supabase_inbucket_${browserSupabaseProjectId}`)'), "Browser fixtures use their isolated mail catcher");
 assert.match(acceptance, /api: 56321, db: 56322/);
+assert.match(acceptance, /"--ignore-health-check"/);
+assert.match(acceptance, /await waitForBrowserSupabaseReady\([\s\S]*?supabase", \["status"/);
+assert.match(acceptance, /\.replace\(\/\^email_sent = 2\$\/m, "email_sent = 6"\)/);
 for (const driver of ["SUQPAGE_DATABASE_DRIVER", "SUQPAGE_AUTH_DRIVER", "SUQPAGE_MEDIA_DRIVER"]) {
     assert.match(acceptance, new RegExp(`${driver}: "${driver === "SUQPAGE_DATABASE_DRIVER" ? "postgres" : "supabase"}"`));
 }

@@ -1,15 +1,13 @@
 import type {SessionUser} from './types';
 import {parseBusinessHandle, nextHandleChangeAt} from './business-handle';
 import {runtimeGet, runtimeRun, runtimeTransaction} from './runtime-sql';
+import { currentBusinessAuthority } from './staff-business-authority';
 
 export type HandleSettings = {handle:string; contentVersion:number; nextChangeAt:number};
-async function authorize(actor:SessionUser,businessId:number) {
-  const user=await runtimeGet<{business_id:number|null;access_role:string}>(
-    'SELECT u.business_id,p.access_role FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=?',[actor.id]);
-  const admin=actor.access_role==='platform_admin' && user?.access_role==='platform_admin';
-  const owner=actor.access_role==='client' && actor.business_id===businessId && user?.access_role==='client' && user.business_id===businessId;
-  if(!Number.isSafeInteger(businessId)||businessId<1||(!admin&&!owner))throw new Error('You cannot change this page handle.');
-  return {admin};
+async function authorize(actor:SessionUser,businessId:number,lock=false) {
+  const authority=await currentBusinessAuthority(actor,businessId,lock);
+  if(!authority)throw new Error('You cannot change this page handle.');
+  return {admin:authority==='administrator'};
 }
 export async function readHandleSettings(actor:SessionUser,businessId:number):Promise<HandleSettings> {
   await authorize(actor,businessId);
@@ -26,7 +24,7 @@ export async function changeBusinessHandle(actor:SessionUser,businessId:number,r
   if(admin&&(reason.length<5||reason.length>300))throw new Error('Add a support reason using 5–300 characters.');
   try {
     return await runtimeTransaction(async()=>{
-      await authorize(actor,businessId);
+      await authorize(actor,businessId,true);
       const row=await runtimeGet<{handle:string;content_version:number;handle_changed_at:number}>('SELECT handle,content_version,handle_changed_at FROM businesses WHERE id=? FOR UPDATE',[businessId]);
       if(!row)throw new Error('Business not found.');
       if(row.handle===handle)return {oldHandle:handle,handle};

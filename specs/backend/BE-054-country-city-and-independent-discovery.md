@@ -2,7 +2,7 @@
 id: BE-054
 title: Country-city authority and independent discovery scopes
 status: in_progress
-related: [BE-032, FE-059, FE-065, DEP-045, BE-023, BE-040, BE-044, BE-047, BE-038, ADR-0027, BE-056, FE-026]
+related: [BE-032, FE-059, FE-065, DEP-045, BE-023, BE-040, BE-044, BE-047, BE-038, ADR-0027, BE-056, FE-026, FE-071]
 owners: [backend, security]
 last_updated: 2026-10-17
 change_level: L3

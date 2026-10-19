@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { View, ScrollView, Pressable, Platform, useWindowDimensions } from "react-native";
+import { View, ScrollView, Pressable, Platform, Text, useWindowDimensions } from "react-native";
 import type { Media } from "@suqpage/contracts";
 import YouTubeVideo from "./YouTubeVideo";
 import { Photo, Button, Copy, Icon, colors, s } from "./ui";
@@ -20,6 +20,30 @@ export default function Gallery({
     setIndex(i);
     scroll.current?.scrollTo({ x: i * w, animated: true });
   };
+  if (!media.length) return (
+    <View
+      testID="offering-gallery-empty"
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={t("No photo yet")}
+      style={{
+        minHeight: 270,
+        borderWidth: 1,
+        borderColor: colors.line,
+        borderRadius: 16,
+        backgroundColor: colors.soft,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+        padding: 20,
+      }}
+    >
+      <Icon name="package" size={32} color={colors.muted} />
+      <Text style={{ color: colors.muted, fontSize: 15, fontWeight: "600" }}>
+        {t("No photo yet")}
+      </Text>
+    </View>
+  );
   return (
     <View style={{ gap: 10 }}>
       <ScrollView

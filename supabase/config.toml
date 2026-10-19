@@ -111,7 +111,7 @@ port = 54324
 # smtp_port = 54325
 # pop3_port = 54326
 # admin_email = "admin@email.com"
-# sender_name = "Suqpage"
+# sender_name = "MirtPage"
 
 [storage]
 enabled = true
@@ -229,7 +229,7 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
@@ -248,7 +248,7 @@ port = 1025
 user = "suqpage-local"
 pass = "local-mail-catcher"
 admin_email = "no-reply@suqpage.test"
-sender_name = "Suqpage"
+sender_name = "MirtPage"
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
@@ -258,65 +258,65 @@ sender_name = "Suqpage"
 # user = "apikey"
 # pass = "env(SENDGRID_API_KEY)"
 # admin_email = "admin@email.com"
-# sender_name = "Suqpage"
+# sender_name = "MirtPage"
 
 [auth.email.template.magic_link]
-subject = "Your Suqpage sign-in code"
+subject = "Your MirtPage sign-in code"
 content_path = "./supabase/templates/magic-link.html"
 
 [auth.email.template.confirmation]
-subject = "Your Suqpage sign-in code"
+subject = "Your MirtPage sign-in code"
 content_path = "./supabase/templates/magic-link.html"
 
 [auth.email.template.invite]
-subject = "You are invited to Suqpage"
+subject = "You are invited to MirtPage"
 content_path = "./supabase/templates/invite.html"
 
 [auth.email.template.recovery]
-subject = "Your Suqpage account access"
+subject = "Your MirtPage account access"
 content_path = "./supabase/templates/recovery.html"
 
 [auth.email.template.email_change]
-subject = "Confirm your Suqpage email change"
+subject = "Confirm your MirtPage email change"
 content_path = "./supabase/templates/email-change.html"
 
 [auth.email.template.reauthentication]
-subject = "Your Suqpage verification code"
+subject = "Your MirtPage verification code"
 content_path = "./supabase/templates/reauthentication.html"
 
 [auth.email.notification.password_changed]
 enabled = false
-subject = "Your Suqpage password changed"
+subject = "Your MirtPage password changed"
 content_path = "./supabase/templates/password-changed-notification.html"
 
 [auth.email.notification.email_changed]
 enabled = false
-subject = "Your Suqpage email changed"
+subject = "Your MirtPage email changed"
 content_path = "./supabase/templates/email-changed-notification.html"
 
 [auth.email.notification.phone_changed]
 enabled = false
-subject = "Your Suqpage phone changed"
+subject = "Your MirtPage phone changed"
 content_path = "./supabase/templates/phone-changed-notification.html"
 
 [auth.email.notification.identity_linked]
 enabled = false
-subject = "Your Suqpage sign-in method changed"
+subject = "Your MirtPage sign-in method changed"
 content_path = "./supabase/templates/identity-linked-notification.html"
 
 [auth.email.notification.identity_unlinked]
 enabled = false
-subject = "Your Suqpage sign-in method changed"
+subject = "Your MirtPage sign-in method changed"
 content_path = "./supabase/templates/identity-unlinked-notification.html"
 
 [auth.email.notification.mfa_factor_enrolled]
 enabled = false
-subject = "Your Suqpage verification method changed"
+subject = "Your MirtPage verification method changed"
 content_path = "./supabase/templates/mfa-factor-enrolled-notification.html"
 
 [auth.email.notification.mfa_factor_unenrolled]
 enabled = false
-subject = "Your Suqpage verification method changed"
+subject = "Your MirtPage verification method changed"
 content_path = "./supabase/templates/mfa-factor-unenrolled-notification.html"
 
 [auth.sms]

@@ -18,7 +18,9 @@ export default function FocusedEditForm({action,children,cancelHref,submitLabel=
 }) {
   const t=useUiText(),[busy,setBusy]=useState(false),[error,setError]=useState("");
   const pending=useRef(false);
-  return <form className={className} aria-busy={busy} onSubmit={async event=>{
+  // The server action also provides a safe POST target before hydration. Its
+  // return value is handled by the client submit path once JavaScript is ready.
+  return <form action={action as unknown as (formData:FormData)=>Promise<void>} className={className} aria-busy={busy} onSubmit={async event=>{
     event.preventDefault();if(pending.current||disabled)return;
     const form=new FormData(event.currentTarget);
     pending.current=true;setBusy(true);setError("");

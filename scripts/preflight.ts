@@ -7,25 +7,31 @@ import {
   mediaStorageDriver,
 } from "../lib/config";
 import { closePostgresRuntimeForTests } from "../lib/postgres-runtime-services";
-import { runtimeGet } from "../lib/runtime-sql";
+import { runtimeAll, runtimeGet } from "../lib/runtime-sql";
+import { isSupportedPostgresMigrationLedger, LATEST_POSTGRES_MIGRATION_VERSION } from "../lib/postgres-schema-version";
 
-export async function preflight() {
+export async function preflight(read: { get: typeof runtimeGet; all: typeof runtimeAll } = { get: runtimeGet, all: runtimeAll }) {
   assertProductionConfiguration();
 
   const driver = databaseDriver();
-  const migration = await runtimeGet<{ version: number }>("SELECT version FROM schema_migrations WHERE version=63");
-  if (!migration) throw new Error("PostgreSQL migration 63 is required before this release can serve traffic.");
+  const migrations = await read.all<{ version: unknown }>(
+    "SELECT version FROM schema_migrations ORDER BY version LIMIT ?",
+    [LATEST_POSTGRES_MIGRATION_VERSION + 1],
+  );
+  if (!isSupportedPostgresMigrationLedger(migrations.map(row => row.version))) {
+    throw new Error(`PostgreSQL migrations must match a complete reviewed ledger through ${LATEST_POSTGRES_MIGRATION_VERSION} before this release can serve traffic.`);
+  }
 
   if (authDriver() === "supabase") {
-    const identityMigration = await runtimeGet<{ version: number }>(
+    const identityMigration = await read.get<{ version: number }>(
       "SELECT version FROM schema_migrations WHERE version=37",
     );
     if (!identityMigration) throw new Error("Database migration 37 is required before Supabase Auth can serve traffic.");
-    const onboardingMigration = await runtimeGet<{ version: number }>(
+    const onboardingMigration = await read.get<{ version: number }>(
       "SELECT version FROM schema_migrations WHERE version=38",
     );
     if (!onboardingMigration) throw new Error("Database migration 38 is required before business onboarding can serve traffic.");
-    const unlinked = await runtimeGet<{ total: number }>(`
+    const unlinked = await read.get<{ total: number }>(`
       SELECT COUNT(*) total FROM users u
       LEFT JOIN auth_identity_links link ON link.user_id=u.id AND link.provider='supabase'
       WHERE link.user_id IS NULL
@@ -35,14 +41,14 @@ export async function preflight() {
     }
   }
 
-  const admins = await runtimeGet<{ total: number }>(
+  const admins = await read.get<{ total: number }>(
     "SELECT COUNT(*) total FROM users WHERE role='admin'",
   );
   if (!admins?.total) {
     throw new Error("At least one administrator account is required.");
   }
 
-  const temporary = await runtimeGet<{ total: number }>(
+  const temporary = await read.get<{ total: number }>(
     "SELECT COUNT(*) total FROM users WHERE must_change_password=1",
   );
   console.log(`Preflight passed. Database provider: ${driver}`);

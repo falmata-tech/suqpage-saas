@@ -2,7 +2,7 @@
 self.addEventListener('push',event=>{
   let p;try{p=event.data.json();}catch{return;}
   if(!p||!['Suqpage','MirtPage'].includes(p.title)||typeof p.body!=='string'||p.body.length>300||!Number.isSafeInteger(p.notificationId))return;
-  event.waitUntil(self.registration.showNotification(p.title,{body:p.body,icon:'/pwa/mirtpage-panels-icon-192.png',badge:'/pwa/mirtpage-panels-badge-96.png',tag:'suqpage-alert-'+p.notificationId,renotify:false,silent:Boolean(p.silent),data:{destination:p.destination,notificationId:p.notificationId}}));
+  event.waitUntil(self.registration.showNotification('MirtPage',{body:p.body,icon:'/pwa/mirtpage-panels-icon-192.png',badge:'/pwa/mirtpage-panels-badge-96.png',tag:'suqpage-alert-'+p.notificationId,renotify:false,silent:Boolean(p.silent),data:{destination:p.destination,notificationId:p.notificationId}}));
 });
 self.addEventListener('notificationclick',event=>{
   event.notification.close();const d=event.notification.data?.destination;

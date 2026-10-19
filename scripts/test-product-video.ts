@@ -60,5 +60,10 @@ test('FE-057: message contracts and native HTML block arbitrary navigation/injec
   assert.ok(socialPlayerNavigation(productVideoEmbedUrl(ref),origin));assert.ok(socialPlayerNavigation('about:blank',origin));
   for(const value of [url,'tiktok://video/'+id,'intent://tiktok','https://www.tiktok.com.evil.test/player/v1/'+id,'https://x:y@www.tiktok.com/player/v1/'+id,'https://example.com/','https://suqpage.com/account'])assert.equal(socialPlayerNavigation(value,origin),false);
   const html=socialPlayerHtml(ref,origin);assert.match(html,/e.source!==frame.contentWindow/);assert.match(html,/x-tiktok-player/);assert.doesNotMatch(html,/x-social-player/);assert.match(html,/https:\/\/www.tiktok.com/);assert.doesNotMatch(html,/allow-popups|embed\.js|access_token|localStorage/);
+  for(const base of ['https://mirtpage.com','https://preview.mirtpage.com','http://127.0.0.1:3102']){
+    assert.equal(socialPlayerNavigation(base+'/',base),true,'The configured native WebView base may load');
+    assert.equal(socialPlayerNavigation(productVideoEmbedUrl(ref),base),true,'The controlled provider embed may load');
+    for(const blocked of [base+'/account',base+'/?code=secret',base.replace('://','://user:pass@')+'/', 'https://evil.test/'])assert.equal(socialPlayerNavigation(blocked,base),false,blocked);
+  }
   assert.throws(()=>socialPlayerHtml('tiktok:</script>',origin));assert.throws(()=>socialPlayerHtml(ref,'javascript:alert(1)'));assert.throws(()=>socialPlayerHtml(ref,'https://suqpage.com/path'));
 });

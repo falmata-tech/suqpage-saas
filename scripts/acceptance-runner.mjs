@@ -3,6 +3,7 @@ import fs from "node:fs";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
+import { waitForBrowserSupabaseReady } from "./acceptance-supabase-readiness.mjs";
 
 const port = await new Promise((resolve, reject) => {
   const server = net.createServer();
@@ -71,6 +72,9 @@ function prepareBrowserSupabaseProject() {
   let config = fs.readFileSync(path.join(process.cwd(), "supabase/config.toml"), "utf8");
   config = config
     .replace(/^project_id = ".*"$/m, `project_id = "${browserSupabaseProjectId}"`)
+    // Three independent sign-ins run in one disposable browser suite. Keep the
+    // developer and hosted Auth limits unchanged.
+    .replace(/^email_sent = 2$/m, "email_sent = 6")
     .replaceAll("supabase_inbucket_mirtpage", `supabase_inbucket_${browserSupabaseProjectId}`)
     .replaceAll("54321", String(browserSupabasePorts.api))
     .replaceAll("54322", String(browserSupabasePorts.db))
@@ -80,6 +84,7 @@ function prepareBrowserSupabaseProject() {
     .replaceAll("54327", String(browserSupabasePorts.analytics))
     .replace(/^site_url = .*$/m, `site_url = "${baseURL}"`)
     .replace(/^additional_redirect_urls = .*$/m, `additional_redirect_urls = ["${baseURL}", "${baseURL}/auth/callback"]`);
+  if (!/^email_sent = 6$/m.test(config)) throw new Error("Disposable browser email limit was not configured.");
   fs.writeFileSync(path.join(supabaseConfigRoot, "config.toml"), config, { flag: "wx" });
   fs.copyFileSync(path.join(process.cwd(), "supabase/seed.sql"), path.join(supabaseConfigRoot, "seed.sql"));
   fs.cpSync(
@@ -89,14 +94,15 @@ function prepareBrowserSupabaseProject() {
   );
 }
 
-function run(command, args, { capture = false, allowFailure = false, environment = env } = {}) {
+function run(command, args, { capture = false, allowFailure = false, environment = env, timeout } = {}) {
   const result = spawnSync(command, args, {
     cwd: process.cwd(),
     env: environment,
+    ...(timeout ? { timeout } : {}),
     ...(capture ? { encoding: "utf8" } : { stdio: "inherit" }),
   });
   if (!allowFailure && result.status !== 0) {
-    if (capture && result.stderr) process.stderr.write(result.stderr);
+    // Captured CLI output can contain provider credentials; keep failures sanitized.
     throw new Error(`${command} exited with ${result.status}`);
   }
   return capture ? result.stdout : "";
@@ -115,7 +121,8 @@ async function stop() {
 try {
   prepareBrowserSupabaseProject();
   browserSupabaseAttempted = true;
-  run("supabase", ["start", "--workdir", supabaseProjectRoot], { capture: true });
+  run("supabase", ["start", "--workdir", supabaseProjectRoot, "--ignore-health-check"], { capture: true, timeout: 90_000 });
+  await waitForBrowserSupabaseReady({ projectId: browserSupabaseProjectId, apiPort: browserSupabasePorts.api });
   const provider = parseEnvironment(run("supabase", ["status", "--workdir", supabaseProjectRoot, "-o", "env"], { capture: true }));
   const apiUrl = required(provider, "API_URL");
   const databaseUrl = required(provider, "DB_URL");

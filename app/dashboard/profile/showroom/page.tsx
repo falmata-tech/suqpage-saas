@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {redirect} from 'next/navigation';
-import {ArrowLeft,ArrowRight,Eye,Image,Link2,PenLine,Store,Video,Palette,ContactRound,Users} from 'lucide-react';
+import {ArrowLeft,ArrowRight,Eye,Image,Link2,PenLine,Store,Video,Palette,ContactRound} from 'lucide-react';
 import DashboardShell from '@/components/DashboardShell';
 import {requireUser} from '@/lib/auth';
 import {runtimeBusinessById} from '@/lib/catalog-runtime';
@@ -26,7 +26,7 @@ export default async function ShowroomManagementPage({searchParams}:{searchParam
   {[
    {label:'Page content',items:[{href:'/dashboard/page-editor?view=edit&task=about&returnTo=showroom',label:'About the business',icon:PenLine},{href:'/dashboard/profile/cover?returnTo=showroom',label:'Cover photo',icon:Image},{href:'/dashboard/page-editor?view=edit&task=video&returnTo=showroom',label:'Business video',icon:Video}]},
    {label:'Appearance',items:[{href:'/dashboard/page-editor?view=preview&task=color&returnTo=showroom',label:'Page color',icon:Palette}]},
-   {label:'Sharing and access',items:[{href:'/dashboard/page-editor?view=edit&task=contacts&returnTo=showroom',label:'Public contact details',icon:ContactRound},{href:'/dashboard/profile/handle?returnTo=showroom',label:'Page address',icon:Link2},{href:'/dashboard/page-editor?view=edit&task=team&returnTo=showroom',label:'Allow team editing',icon:Users}]},
+   {label:'Sharing and access',items:[{href:'/dashboard/page-editor?view=edit&task=contacts&returnTo=showroom',label:'Public contact details',icon:ContactRound},{href:'/dashboard/profile/handle?returnTo=showroom',label:'Page address',icon:Link2}]},
   ].map(group=><section key={group.label} className={styles.taskGroup} aria-label={t(group.label)}><h2>{t(group.label)}</h2><div className={styles.management}>{group.items.map(({href,label,icon:Icon})=><Link key={href} href={href}><Icon aria-hidden="true"/><span><strong>{t(label)}</strong></span><ArrowRight aria-hidden="true"/></Link>)}</div></section>)}
  </DashboardShell>;
 }

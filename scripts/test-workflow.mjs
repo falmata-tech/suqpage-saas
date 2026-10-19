@@ -30,8 +30,12 @@ const postgres = job("postgres");
 
 assert.match(workflow, /workflow_dispatch:/, "GitHub Actions must support an operator-triggered run");
 assert.match(core, /node-version: 24\.18\.1/, "Core CI must use the supported Node baseline");
-assert.match(core, /- run: npm run release/, "Core CI must invoke the canonical release contract");
+const webInstall = "SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@suqpage/contracts --include-workspace-root";
+const webAudit = "npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate";
+assert.ok(core.includes(`- run: ${webInstall}`), "Core CI must install only web and shared contracts from the lockfile");
+assert.match(core, /- run: npm run release:web\n/, "Core CI must invoke the complete selected web release contract");
 assert.match(core, /- run: npm run test:operations/, "Core CI must retain independent recovery evidence");
+assert.match(core, /- run: npm run test:mobile:release-safety/, "Core CI must retain pure Android artifact safety checks");
 assert(!core.includes("- run: npm run build"), "Core CI must not drift into a partial duplicate of the release script");
 assert(!core.includes("- run: npm run check"), "Core CI must not drift into a partial duplicate of the release script");
 
@@ -40,7 +44,10 @@ assert.match(browser, /- run: npm run test:acceptance/, "Browser CI must run Chr
 assert.match(container, /node-version: 24\.18\.1/, "Container CI must use the supported Node baseline");
 assert.match(container, /- run: npm run test:container/, "Container CI must exercise the production image");
 assert.match(dependency, /node-version: 24\.18\.1/, "Dependency CI must use the supported Node baseline");
-assert.match(dependency, /npm audit --omit=dev --audit-level=moderate/, "Dependency CI must reject production advisories");
+assert.ok(dependency.includes(`- run: ${webInstall}`), "Dependency CI must audit a clean web and shared-contract installation");
+assert.match(dependency, /- run: node scripts\/check-web-install\.cjs/, "Dependency CI must reject native build tools in the web installation");
+assert.ok(dependency.includes(`- run: ${webAudit}`), "Dependency CI must audit all selected web/build dependencies at the moderate threshold");
+assert.doesNotMatch(core + dependency, /npm audit --omit=dev/, "Web PR jobs must not substitute the native toolchain audit for web admission");
 assert.match(postgres, /node-version: 24\.18\.1/, "PostgreSQL CI must use the supported Node baseline");
 assert.match(postgres, /- run: npm run test:postgres-readiness/, "PostgreSQL CI must run the disposable migration rehearsal");
 
@@ -57,6 +64,10 @@ for (const [action, tag] of [
 }
 
 assert.equal(packageJson.scripts.release, "bash scripts/release.sh");
+assert.equal(packageJson.scripts["release:web"], "SUQPAGE_RELEASE_TARGET=web bash scripts/release.sh");
+assert.match(releaseScript, /node scripts\/check-web-install\.cjs/, "Web release must reject an installation containing native tools");
+assert.match(releaseScript, /npm audit --workspace=@suqpage\/contracts --include-workspace-root --audit-level=moderate/, "Web release must audit selected build dependencies");
+assert.match(releaseScript, /npm audit --omit=dev --audit-level=moderate/, "Android admission must retain the full monorepo audit without a waiver");
 assert.equal(packageJson.scripts["test:container"], "node scripts/test-container.mjs");
 assert.equal(packageJson.scripts["test:trace"], "node scripts/test-build-trace.mjs");
 assert.equal(packageJson.scripts["test:bank"], "tsx scripts/test-showroom-bank.ts");

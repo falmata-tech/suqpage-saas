@@ -7,7 +7,7 @@ export const runtime='nodejs';
 export const dynamic='force-dynamic';
 
 const handler=createTransportPlanHttpHandler({
- read:async()=>{throw new TransportPlanError('Transport plan was not found.','not_found');},
+ read:async()=>{throw new TransportPlanError('Shipment tracking was not found.','not_found');},
  allow:async request=>(await consumeRuntimeRateLimit('transport-plan:'+hashPrivateValue(requestIpFromHeaders(request.headers)),600,60_000)).allowed,
 });
 

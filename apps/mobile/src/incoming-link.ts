@@ -23,13 +23,13 @@ export function marketLinkState(input: MarketLinkInput) {
 export function incomingSuqpagePath(input: string): string {
   try {
     if (!input || input.length > 16384 || /[\u0000-\u001f\u007f\\]/u.test(input)) return '/';
-    let url = new URL(input, 'https://suqpage.com');
-    if (url.username || url.password) return '/';
-    const canonicalSource=url.protocol==='https:'&&url.hostname==='suqpage.com'&&!url.port;
-    if (url.protocol === 'suqpage:') {
+    let url = new URL(input, 'https://mirtpage.com');
+    if (url.username || url.password || url.port) return '/';
+    const canonicalSource=url.protocol==='https:'&&['mirtpage.com','suqpage.com'].includes(url.hostname);
+    if (url.protocol === 'mirtpage:' || url.protocol === 'suqpage:') {
       const path = `${url.hostname ? '/' + url.hostname : ''}${url.pathname}` || '/';
-      url = new URL(path + url.search, 'https://suqpage.com');
-    } else if (url.protocol !== 'https:' || url.hostname !== 'suqpage.com' || url.port) return '/';
+      url = new URL(path + url.search, 'https://mirtpage.com');
+    } else if (!canonicalSource) return '/';
     const path = decodeURIComponent(url.pathname).replace(/\/$/, '') || '/';
     if(path==='/transport-plan'){
       return canonicalSource&&url.pathname==='/transport-plan'&&!url.search?'/tracking':'/';

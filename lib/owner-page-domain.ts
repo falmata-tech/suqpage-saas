@@ -1,7 +1,6 @@
 import { parseAccentColor } from "./storefront-accent";
 import { parsePublicContacts, type PublicContacts } from "./business-profile-contacts";
 import type { SessionUser } from "./types";
-import { isQueueAgent } from "./capabilities";
 import { productVideoWatchUrl, normalizeProductVideoUrl } from "./video/product-video";
 
 export type ShopPageContent = {
@@ -92,9 +91,8 @@ export function readSavedPageContent(input: unknown): ShopPageContent {
 export function isPageOwner(actor: SessionUser, businessId: number): boolean {
   return actor.access_role === "client" && actor.business_id === businessId;
 }
-export function canEditOwnerPage(actor: SessionUser, businessId: number, consent: boolean, assigned: boolean): boolean {
-  if (isQueueAgent(actor)) return false;
+export function canEditOwnerPage(actor: SessionUser, businessId: number, _consent: boolean, granted: boolean): boolean {
   if (isPageOwner(actor, businessId)) return true;
-  return consent && (actor.access_role === "platform_admin" || actor.access_role === "operations_manager"
-    || (actor.access_role === "team_member" && assigned));
+  return actor.access_role === "platform_admin" ||
+    ((actor.access_role === "operations_manager" || actor.access_role === "team_member") && granted);
 }

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {createTrackingClient,createTrackingStore,createTrackingDetailLive,TrackingFailure,type TrackingDetailState,type TrackingShipmentDetail} from '../apps/mobile/src/tracking-client';
 const token='a'.repeat(64),reference='SHP-'+'A'.repeat(20),other='SHP-'+'B'.repeat(20);
-const shipment=(version=1,ref=reference):TrackingShipmentDetail=>({reference:ref,label:'Literal shipment',version,legs:[{id:'00000000-0000-4000-8000-000000000001',providerName:'Literal provider',origin:'Literal A',destination:'Literal B',method:'truck'}]});
+const shipment=(version=1,ref=reference):TrackingShipmentDetail=>({reference:ref,label:'Literal shipment',version,legs:[{id:'00000000-0000-4000-8000-000000000001',providerName:'Literal provider',origin:'Literal A',destination:'Literal B',method:'truck',trackingUrl:'',trackingCode:''}]});
 const session=()=>({token,expiresAt:Date.now()+60_000});
 function deferred<T>(){let resolve!:(value:T)=>void;const promise=new Promise<T>(yes=>{resolve=yes;});return{promise,resolve};}
 const settle=async()=>{for(let i=0;i<3;i++)await new Promise<void>(resolve=>setImmediate(resolve));};

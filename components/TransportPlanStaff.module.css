@@ -20,6 +20,8 @@
 .legActions button { border:1px solid #c6d1d1; background:#fff; color:inherit; border-radius:8px; font-size:.9rem; }
 .legActions button:disabled { opacity:.45; cursor:default; }
 .pair { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:end; gap:16px; }
+.providerTracking{display:grid;gap:12px;border-top:1px solid #e3e9e9;padding-top:16px;min-width:0}
+.providerTracking>p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.5}
 .editor label { display:grid; gap:8px; min-width:0; font-weight:650; }
 .editor input,.editor select,.linkActions input { min-width:0; width:100%; min-height:48px; padding:10px 12px; border:1px solid #bac9ca; border-radius:8px; background:#fff; color:inherit; font:inherit; }
 .visibility { margin:0; max-width:70ch; color:var(--muted); line-height:1.5; }

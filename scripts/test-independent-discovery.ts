@@ -95,7 +95,7 @@ async function main() {
   const owner=(await getUserById(created.userId))!,before=await readOwnerBusiness(owner,created.businessId);
   const cape=findPlaceSuggestions('Cape Town','ZA')[0];assert.equal(cape.countryCode,'ZA');
   const change={name:'Owner world shop',expectedVersion:before.business.content_version,locationVersion:before.proposal!.version,category:'fashion-textiles',countryCode:'ZA',placeId:cape.id,mode:'storefront',latitude:-33.9249,longitude:18.4241};
-  await assert.rejects(()=>saveOwnerBusiness({...owner,business_id:et},created.businessId,change),/Only the owner/);
+  await assert.rejects(()=>saveOwnerBusiness({...owner,business_id:et},created.businessId,change),/Business details are not available/);
   await assert.rejects(()=>saveOwnerBusiness(owner,created.businessId,{...change,countryCode:'KE'}),/selected country/);
   for(const countryCode of ['',0,null])await assert.rejects(()=>saveOwnerBusiness(owner,created.businessId,{...change,countryCode}),/selected country/);
   for(const latitude of ['',null,undefined,Number.NaN,Infinity])await assert.rejects(()=>saveOwnerBusiness(owner,created.businessId,{...change,latitude}),/valid public storefront coordinates/);

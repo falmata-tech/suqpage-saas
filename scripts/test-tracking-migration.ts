@@ -7,7 +7,7 @@ async function main(){
  try{
   const schema=(await db.prepare('SELECT current_schema() value').get()).value as string;assert.match(schema,/^suqpage_test_[a-f0-9]{32}$/);
   const tables=['tracking_email_deliveries','tracking_events','tracking_shipments','tracking_sessions','tracking_challenges','tracking_recipients'];
-  for(const table of tables)assert.equal((await db.prepare(`SELECT COUNT(*) n FROM ${table}`).get()).n,0);for(const table of tables)await db.exec(`DROP TABLE ${table}`);await db.exec('DELETE FROM schema_migrations WHERE version IN (71,72)');
+  for(const table of tables)assert.equal((await db.prepare(`SELECT COUNT(*) n FROM ${table}`).get()).n,0);for(const table of tables)await db.exec(`DROP TABLE ${table}`);await db.exec('DELETE FROM schema_migrations WHERE version IN (71,72,73,74,75)');
   const user=(await db.prepare("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES('legacy-tracking@example.test','unused','Legacy test','admin',0)").run()).insertedId;
   const cid=(await db.prepare("INSERT INTO support_conversations(public_ref,participant_kind,visitor_token_hash,visitor_session_expires_at,assistance_category,requester_label,visitor_phone,subject,status,created_at,updated_at,last_message_at) VALUES('SUP-S138-LEGACY','visitor',?,1800000000000,'shipment_observation','Private legacy requester','+447700900999','Private legacy goods','closed',1,2,3)").run(crypto.randomUUID())).insertedId;
   const legs=[{id:crypto.randomUUID(),providerName:'Retained provider',origin:'Retained origin',destination:'Retained destination',method:'truck'}];
@@ -16,9 +16,9 @@ async function main(){
   const oldTables=(await db.prepare("SELECT tablename FROM pg_tables WHERE schemaname=current_schema() AND tablename<>'schema_migrations' ORDER BY tablename").all()).map(r=>String(r.tablename));
   const snapshot=async()=>{const result:Record<string,unknown>={};for(const table of oldTables){assert.match(table,/^[a-z_]+$/);result[table]=await db.prepare(`SELECT COUNT(*)::int count,md5(COALESCE(string_agg(h,'' ORDER BY h),'')) digest FROM(SELECT md5(to_jsonb(t)::text) h FROM ${table} t) rows`).get();}return result;};
   const before=await snapshot(),sentinel=Error('Rollback71');
-  await assert.rejects(()=>db.runner.transaction(async()=>{assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[71,72]);throw sentinel;}),e=>e===sentinel);
-  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,70);assert.equal((await db.prepare("SELECT to_regclass('tracking_shipments') value").get()).value,null);assert.deepEqual(await snapshot(),before);
-  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[71,72]);assert.deepEqual(await snapshot(),before);assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);
+  await assert.rejects(()=>db.runner.transaction(async()=>{assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[71,72,73,74,75]);throw sentinel;}),e=>e===sentinel);
+  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version,70);assert.equal((await db.prepare("SELECT to_regclass('tracking_shipments') value").get()).value,null);assert.deepEqual(await snapshot(),before);
+  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[71,72,73,74,75]);assert.deepEqual(await snapshot(),before);assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);
   for(const table of tables){
    assert.equal((await db.prepare(`SELECT COUNT(*) n FROM ${table}`).get()).n,0,'No inferred recipients, import, identity or mail backfill');
    assert.equal((await db.prepare('SELECT relrowsecurity value FROM pg_class WHERE oid=?::regclass').get(table)).value,true);

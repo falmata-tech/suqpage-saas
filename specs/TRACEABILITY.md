@@ -3,6 +3,38 @@
 Update this table in the same change that completes or materially changes a spec.
 Evidence must be reproducible; avoid transient chat claims.
 
+S146 active-language account-copy brand parity (FE-070/FE-049, local only):
+two reachable Amharic/Afaan Oromo account-deletion and Expo staff-access notices
+now name MirtPage in `locales/interface.tsv` and generated client catalogs.
+`scripts/test-localization.ts` checks both active keys and the no-old-brand
+boundary; focused localization passes 22 frontend/four backend cases, and spec
+validation passes 217. Installed Chrome passes five account-deletion web/Expo
+phone/desktop states with zero browser errors; receipt/screenshots are under
+`.local/account-brand-s146/`. A real local admin sign-in received
+`403 staff_web_only` and rendered the Amharic notice, but the only screenshot
+retained the language sheet. Local Auth rate-limited subsequent attempts,
+including a second existing identity. Settled staff-denial captures in both
+languages and visual approval remain open. No hosted configuration, provider,
+full release gate, application deployment or native build changed.
+
+S146 native public-origin correction (FE-070/DEP-049):
+`apps/mobile/src/public-origin.ts` now supplies the validated configured origin
+to native API, About legal actions, external links and social-video WebView.
+`social-player.ts` admits the exact local development root while retaining
+reviewed provider-only navigation and hostile-link denials. `npm run
+test:mobile:links` passes8 cases including actual compiled About/WebView
+adapters across default/local/staging/invalid origin; product-video passes4,
+mobile strict types and `test:mobile:build` pass. Actual installed Chrome on
+Expo8082 passes Market→About→Privacy/Terms→return/tab switch with4 checks,
+zero app errors/failed local requests and6 controlled map tiles. Receipt and
+screenshots: `.local/s146-mobile-origin-review/`. Native Android/referrer and
+third-party playback remain unverified; no deployment is claimed.
+The actual compiled `YouTubeFrame` adapter now passes four focused cases via
+`node --import tsx scripts/test-mobile-video.ts`: missing package uses
+`com.mirtpage.app`, configured new/old package and Expo Go origins remain intact,
+and non-provider navigation is denied. The npm `tsx` launcher is blocked at
+sandbox IPC creation (`EPERM`) before tests. Mobile/root types pass.
+
 S145 latest checkpoint (2026-10-18): the refined “A professional digital showroom
 for every business” introduction and customer-facing range/story/listed-availability
 body are implemented in shared web/About/mobile/SEO and new-app drafts. Six strings
@@ -548,6 +580,11 @@ specs before a material behavior change.
 | FE-046 / BE-039 / DEP-036 | Complete new-business starters | lib/business-starter.ts, lib/business-starter-postgres.ts, signup/invitations, original starter PNGs | scripts/test-business-starters.ts, scripts/capture-business-starters.ts; signup/invitation/location regressions | Focused tests/typecheck pass; 18 captures and three accessibility scans; owner approval/full gates and monitored deployment verified; docs/SUQPAGE-RELEASE-2026-09-21.md |
 
 | DEP-027 dev-command correction | `package.json`, `scripts/start-local-dev.mjs` | `scripts/test-local-dev-launcher.mjs`, `test:local-supabase-readiness` | Runtime loading/CLI precedence/origin/negative guards pass; retained local schema update awaits backup tooling |
+
+| DEP-027 dev-resource hostname correction | `lib/trusted-origins.ts`, `next.config.ts`, `package.json` | `scripts/test-dev-resource-origins.mjs`, `test:local-supabase-readiness`, actual installed Chrome | Next.js 16 HMR guard accepts exact `127.0.0.1` and denies an unknown host with 403; Server Action hosts and mutation origins remain port/exact-origin scoped. Local `127.0.0.1:3102` editor hydrates after restart with one HMR socket, enabled About/language controls, zero console errors or app POSTs; `.local/dev-origin-s146/receipt.json`. Focused readiness, typecheck, 217-spec validation and whitespace pass; no hosted change. |
+| DEP-027 disposable browser readiness correction | `scripts/acceptance-runner.mjs`, `scripts/acceptance-supabase-readiness.mjs`, `package.json` | `scripts/test-acceptance-supabase-readiness.mjs`, `test:local-supabase-readiness`, source-matched isolated browser acceptance pending | CLI initial health bypass is followed by a five-minute fail-closed wait for six exact project-labelled containers and real Auth/API plus Storage status success. Focused six-case, local-readiness and 217-spec gates pass; the previous slow-Storage infrastructure failure remains recorded. No browser-journey or hosted release claim yet. |
+| DEP-027 disposable email capacity and visible capture | `scripts/acceptance-runner.mjs`, `scripts/capture-launch-wiring.mjs` | `test:local-supabase-readiness`, source-matched isolated browser acceptance pending | First full run after Storage startup reached 20 cases: 18 passed; the third independent sign-in exceeded only the disposable project's two-email hourly limit and a capture matched hidden duplicate markup. The isolated browser project now allows six local test emails, while hosted/developer limits stay unchanged; the capture still requires visible published text. Full rerun pending. |
+| FE-072 retired staff-assistance capture | `scripts/capture-launch-wiring.mjs` | source-matched isolated owner acceptance pending | Follow-up full browser run passed 19/20; its long capture still expected the removed per-business Staff assistance heading. The accepted flow redirects that URL to the Staff directory, which the assertion now verifies. No product route or permission changed. |
 
 | DEP-031 archive correction; DEP-034/035/036 local update | scripts/postgres-archive.ts, scripts/restore.ts; migrations 46/47 | test-archive-validation.ts, test-operations.mjs; retained backup/restore and rollback-only feature verification | Local schema 47; 56 restored table fingerprints, 3,401 preserved application rows; docs/SUQPAGE-LOCAL-SCHEMA-47.md; hosted gates pending |
 
@@ -3468,3 +3505,317 @@ MapLibre, TalkBack, system keyboard/font settings, notifications and provider
 video playback. No deployment or new APK is claimed. Next dependency: owner
 visual approval under AGENTS step8, then the existing full/release/acceptance
 workflow and reviewed task isolation.
+
+
+## S145 local MirtPage native default identity
+
+FE-053/FE-070, BE-059, DEP-042/DEP-043/DEP-049: local source after base99333795
+uses MirtPage/com.mirtpage.app in the normal development/preview/production
+profiles. The real new Firebase client/appID/raw hash is selected exclusively;
+old static/env fallback and disabling alerts cannot bypass identity. The
+owner-accepted provider-advertised signer is an expected public pin, not actual
+new APK/AAB or EAS credential-slot proof. Approved hosted targets remain empty,
+so no premature worker build or new-host autoVerify claim is admitted. The new
+public association is additive with both historical entries unchanged, ready
+for a future web deployment before Android qualification. Submission requires
+a distinct protected absent MirtPage file source; old app-scoped credentials
+are not a fallback. No credential or key material enters source.
+
+Focused evidence: scripts/test-mobile-build-config.cjs and
+scripts/test-attention-platform.cjs pass actual-source/injected-policy positive
+and negative guards; real source policy remains unqualified. Sixteen tests in
+test-mobile-app-links.ts/test-mobile-links.ts/test-android-release-safety.ts
+retain public navigation, social handoff, Tracking/capability and signed-artifact
+security contracts. Three focused test-platform-brand.ts cases prove canonical
+M assets and96px white-alpha notification pixels; generator --check, platform
+identity, strict mobile types and scoped strict script types pass. Actual
+installed @expo/config and Android scheme plugin inspect all three profiles:
+MirtPage/new package, retained EAS UUID, no top-level old scheme or file fallback,
+only mirtpage Android scheme. The real protected downloaded two-client Firebase
+file passes exact byte/client validation without mutation or key output.
+
+Private native-default-identity-source receipts record current hashes and
+limitations. No Chrome/provider/EAS/prebuild/native build, upload or full gate
+was performed in this tranche. Combined full gates, actual hosted target and
+EAS/file/signing/FCM/submission qualification, served links, binary/device/OS
+proof and new Play closed test remain separate.
+
+
+### S145 local support defaults and complete-ledger preflight
+
+BE-059/DEP-049 now have a focused-test verified local tranche, not a completed
+hosted rebrand. `lib/postgres-migrations.ts` appends73/74; its entire historical
+prefix through72 and `lib/postgres-baseline.json` are unchanged. The new default and
+`lib/support.ts` general-support literal become MirtPage client without row
+rewrites, billing changes or sender/origin changes. Known text/NOTNULL defaults
+are checked first; custom/versioned NULL defaults refuse. The baseline47 NULL
+exception applies only inside a genuinely empty first install. Source version
+74 is centralized in `lib/postgres-schema-version.ts`; `scripts/preflight.ts`
+validates exactly the two proven full/retained histories before existing
+Auth/account reads; missing64 or any nonhistorical hole still fails. Build/health remain
+separate; the deployment sequence must explicitly invoke preflight.
+
+Actual isolated PostgreSQL evidence: `scripts/test-mirtpage-support-defaults.ts`
+passes rollback/replay, all-table existing-row fingerprints including a leased
+tracking-mail job, exact column-default-only metadata, RLS/ACL preservation,
+untouched inactive subscription default/trigger absence, default insert, actual
+support writer, duplicate and forged-tenant denial. `scripts/test-release-preflight.ts`
+passes complete-ledger admission, stale63 and missing64 with74 present, real
+runtime and injected read-order checks, administrator/Auth/configuration and
+warning preservation, and database-free Netlify configuration. These tests and
+the taxonomy74 regression below are
+registered in `scripts/test-postgres-readiness.mjs`.
+
+Fifteen inherited scripts pass: native PostgreSQL install, PostgreSQL runtime,
+security, platform naming, support response/resolution/assignment migrations,
+transport-plan migration, tracking migration/recipient migration, product gallery,
+owner transport, unverified tracking recipient, chat read receipts and backend
+brand presentation. Current-version expectations and legitimate rewind tails
+include74; all existing preservation/tenant/history assertions remain. The
+runtime fixture now supplies an admitted made-to-order product and explicitly
+checks retired-kind denial, then joins/replies as the actual assignee after
+asserting join_required. No product admission or Join guard was relaxed.
+Scoped strict TypeScript and spec/whitespace validation pass. Independent peer
+review binds the four production files and three new regressions.
+
+Private evidence: `.local/mirtpage-rebrand-s145/support-default-preflight/`
+contains repaired/focused-tests.json (new tests/native),
+remaining-after-fixture-repairs/focused-tests.json (14 passes), bounded failure
+classification, task file fingerprints and exact owned paths. Initial failures
+are retained: sandbox EPERM before schema creation; guard missing the legitimate
+fresh-baseline NULL case; stale manufacturing-capability and missing-Join positive
+runtime fixtures. The raw parents are not overwritten. No ordinary local72 or
+hosted63 migration, provider action, full/container gate, mail change, Git
+stage/commit or publication was performed. Earlier source-bound full76/release/
+20 acceptance results do not certify this newer combined candidate.
+
+
+The historical-ledger correction under BE-059/DEP-049 is focused-test verified:
+`lib/postgres-schema-version.ts` validates exactly ordered1..74 or1..26+31..74.
+`preflight.ts` reads at most latest+1 scalar rows using the existing PostgreSQL
+adapter (no bigint-array parser and no integer cast that rounds fractional drift).
+Partial27–30 groups, other holes, duplicates, nonintegers and unknown/future IDs
+are rejected before Auth/admin reads. Historical research proves27–30 are
+retired data-only patches; no marker writes or old data replay were added.
+
+`scripts/test-release-preflight.ts` passes real isolated full/retained ledgers,
+all14 proper nonempty partial groups, stale63, hole64 despite74, required hole1,
+zero/future markers, actual fractional NUMERIC drift, and unchanged Auth/admin/
+configuration/warning guards. A separate empty owned fixture constructs physical
+63 using real migrations through63; only setup's future existence probes are
+substituted, without future markers. Restoring the unmodified reader then proves
+the exact observed59-entry legacy63 history upgrades via actual64–74 DDL,
+retains its account, preserves missing27–30, passes readiness and replays as a
+no-op. This is fixture evidence, not a production backup/restore rehearsal.
+The unchanged support-default73 rollback/history/leased-job/tenant regression
+also passes. Strict scoped types pass. Private ledger-correction receipts retain
+source/test fingerprints; the previous contiguous-only snapshot50a9efa is
+historical and full-gate admission remains blocked for mail-bootstrap readiness
+and fresh source approval. Reference-data74 and independent peer review now pass.
+
+The reference-data74 correction freezes the reviewed seven insertion tuples in
+`lib/postgres-migrations.ts`, validates the exact table/PK/active-check metadata
+and refuses inactive known references. It inserts only missing canonical keys and
+changes only their seven known sort positions. Existing labels/icons/active,
+unknown reference rows and tenant/product/industry/sponsor assignments remain
+unchanged. `scripts/test-taxonomy-reference-migration.ts` proves the six-key
+legacy row/order delta, all-other-table fingerprints and RLS/ACL preservation,
+fresh no-op, transaction rollback, replay and inactive/metadata refusal. A real
+farm signup fails with the underlying missing-reference FK before74, then the
+same real signup and authorized owner category edit succeed after74; a foreign
+owner edit remains denied. The preflight test separately reconstructs six-key
+physical63 and runs the unmodified64–74 migrations without marker backfill.
+
+Current private evidence is
+`.local/mirtpage-rebrand-s145/support-default-preflight/taxonomy74-focused/`:
+`focused-tests.json` records all18 applicable isolated scripts passing once
+against endpoint74, finished2026-10-18T22:10:36Z. Scoped strict types pass.
+`production-cutover-readiness/migration74-ledger-peer-review.json` independently
+binds the seven production/test hashes and reports no material finding (digest
+86c9bcaafb0c915415c89584469c3831969b6ebf4a0e78e26a5bd79292d91d96).
+Earlier failures and superseded73-only/contiguous-ledger evidence remain retained.
+No ordinary local72 or hosted63 migration, full/container gate, provider write,
+mail-envelope change or Git action belongs to this tranche. The reconstructed
+fixtures do not replace an actual protected production-backup restore/rehearsal.
+The final combined source needs its own approved full gates after mail readiness.
+
+## S145 local Auth, app-mail and compatible notification presentation
+
+BE-059/DEP-029/DEP-049/FE-070 were Ready before source edits; the exact27 Auth
+fields now use MirtPage with the canonical SiteURL-relative220×48 PNG. It equals
+the existing mobile wordmark bytes and preserves all prior derivatives. Auth
+guard65 cases include exact current values and legacy-plan rejection before
+provider reads. Template/placeholder/disabled-notice tests preserve code/link/
+recovery semantics, addresses/credentials, OTP/provider/origin and7disabled
+notices. Auth remains English-only; no new request-locale claim.
+
+The separately authorized M6 local boundary rechecked exact supervisor birth/
+args/source/cwd, stopped only its owned process tree and proved3102 free plus
+two stable zero pending/sending/non-null-lease snapshots in both app-mail queues.
+No old jobs were deleted/reset/terminalized. Expo and runtime settings stayed
+unchanged. Tracking/escalation From names/subjects and optional Telegram prefix
+then changed to MirtPage, preserving real addresses, origins, stable provider/
+Message-ID identities, snapshots and retry/lease/authority guards. Active en/am/om
+Tracking subjects are localized. The exact ordinary supervisor command restarted
+once promptly, before isolated tests. HTTP200 is verified for web health and
+unchanged localhost8082. Preserve the first wrong127.0.0.1:8082 verifier failure
+as a harness-address mismatch; no second start or inferred product outage.
+
+Focused renderer/provider/target14 cases, escalation outbox11 cases and Tracking
+outbox concurrency/lease/rotation/revocation regressions pass on random local
+schemas with substitute sends. Localization20+backend4 pass. Notification
+worker11 cases execute the actual new workers plus immutable3cfa577 historical
+bytes; both new displayed titles are MirtPage while the browser wire stays
+compatible. Real isolated PostgreSQL dispatch proves web/Expo-specific wire
+titles and preserves original shared Expo-token owner/visitor isolation plus
+privacy/revocation/retry/backlog guards. Native OSM User-Agent changes only its
+public presentation; executed host/header/privacy coverage passes all11 map
+cases and mobile strict types. The unreachable on-behalf adapter is unchanged.
+
+Private evidence: `.local/mirtpage-rebrand-s145/auth-mail-source/` contains
+protected beforeimages, stopped-boundary-proof.json, ordinary-restart-verified.json,
+original restart-health-classification.json, final-focused.json and verified.json.
+`chrome-review.json` proves24 Auth states; `chrome-app-mail-review.json` proves18
+exact substitute-adapter plain-text states in actual installed headed Google
+Chrome155, phone/desktop with index→message→Back, no overflow/errors and untouched
+user tabs. Static previews send no email and do not prove runtime Auth/OTP or OS
+delivery. Owner explicitly approves `combined-review.html` and full checks on
+2026-10-18, async call_f4b4e2d16ffe48698f92c4e78814ae59.
+
+Preserve the initial added-browser fixture failure caused by cleared VAPID config;
+the corrected fixture initializes valid keys only at guarded subscription
+admission and retains all production checks. Earlier Auth/asset/native evidence
+remains bound to its source. Final combined check/release/acceptance and exact
+hosted backup/bootstrap/template/native operations remain separate; no provider
+mail, local Auth restart, hosted mutation or Git write belongs to this tranche.
+
+## S145 public search discovery (FE-071; local verification in progress)
+
+FE-071 maps to `lib/public-seo.ts`, `lib/public-seo-runtime.ts`, the public
+showroom/Market/About/Featured metadata and product links, and the bounded
+`app/robots.ts` and `app/sitemap.xml`/`app/sitemaps` routes. Focused contracts
+are `scripts/test-public-seo.ts` and `scripts/test-public-seo-http.ts`. The
+source serves crawlable, canonical public showroom and product URLs from the
+configured origin while excluding draft, suspended, demo and private material.
+The focused local database and HTTP checks have passed; combined browser,
+release and deployment evidence is still pending. Cookie-only language choices
+do not constitute separate indexable language URLs or `hreflang` variants.
+The focused S146 soft-404 correction maps to `proxy.ts`,
+`lib/showroom-not-found.ts` and `scripts/test-public-seo-http.ts`. One indexed
+status read before a direct showroom document streams returns a branded
+English/Amharic/Afaan Oromo 404/noindex for unknown and draft handles. Direct
+local HTTP and installed Chrome desktop/phone return-navigation checks pass;
+`.local/showroom-404-s146/review.md` records the scope and earlier harness
+failure. Stale/foreign product query semantics are unchanged. The new 404
+layout, combined gates and hosted behavior are not yet approved or verified.
+
+## S146 staff business authority — FE-072 / BE-060 (local proof; release pending)
+
+FE-072 maps the local owner/staff/admin navigation and focused editors to the
+owner page, dashboard Staff/Businesses tasks and Expo owner Profile. BE-060 maps
+the explicit revocable staff grant and server-side business authority to local
+migration76; ADR-0030 records the decision to retire owner consent and
+per-business staff assignment as authority. The guarded local 75→77 apply
+backfilled 14 enabled grants and independently preserved existing rows/schema,
+ledger and private ACLs; see `.local/mirtpage-rebrand-s145/local75-to77/attempt-20261019T024300Z/verified.json`.
+Focused staff navigation, staff-boundary and business-team UI tests pass. Actual
+installed Chrome proved an administrator's early focused Save uses POST without
+URL form fields, revoke/restore changed grant versions 1→2→3, staff business
+access followed the current grant while Support remained reachable, and the
+owner web workspace omitted Team editing. The Chrome aggregate receipts in
+`.local/s146-browser-review/` include earlier test-harness stops. A focused
+installed-Chrome staff-layout pass confirms the desktop permission status and
+Edit action do not overlap and the 390px view has no horizontal overflow. The
+Expo Tracking view uses the real preview. An earlier genuine local OTP login
+established one owner page state, not the full journey. The later
+`receipt-expo.json` passed owner Account→Your page→Page address→Cancel UI checks
+with no Team editing, but route-fulfilled a successful OTP-send response after
+the local email quota was exhausted. Token verification used real local
+Supabase. That earlier receipt remains **partial UI coverage**. A separate
+source-bound installed-Chrome run at the Expo web preview `localhost:8082`
+used one real local Supabase/Mailpit OTP send and verification, with zero
+application-response mocks, then completed Account→Your page→Page address→Cancel.
+The local DB handle/version remained unchanged; the receipt records no application
+errors or escaped map tiles. Evidence:
+`.local/s146-browser-review/expo-real-auth/receipt.json`,
+`owner-account-real.png` and `owner-showroom-real.png` in that directory. This
+proves the specific Expo browser owner journey, not an installed Android app
+or email-change activation. The owner approved the combined staff, owner and
+Shipment Tracking layouts and allowed full checks. The owner later separately
+approved the FE-073 wrapped-email and FE-026 Account navigation-hover layouts;
+the owner separately approved the FE-071 showroom directory at desktop and
+phone size. The first full check
+was intentionally interrupted after new UI defects and a new check is running,
+so no full-gate pass is claimed. The remaining
+migration/security matrix, complete check, release and acceptance gates, and
+separately approved hosted rollout remain open. Source and local schema do not
+certify the deployed app.
+
+## S146 owner sign-in email — FE-073 / BE-061 / DEP-050 (local source; disabled)
+
+FE-073 maps the owner-only Account settings task on web and Expo; BE-061 maps
+old/new mailbox proofs, unchanged provider UUID, authoritative `users.email`
+reconciliation and old-session denial. Local migration77 installed empty private
+pending-request/session-fence tables. The local Supabase Auth/Mailpit two-code
+proof and focused owner/staff denial regressions pass as recorded in FE-073,
+BE-061 and DEP-050. Initiation remains feature-flagged off. Actual Chrome
+desktop/phone/Expo UI review of the complete workflow remains open; the owner
+approved the focused wrapped-email and navigation-hover layouts after their
+Chrome captures. Full gates and separately authorized hosted Auth/template/
+notice review and rollout under DEP-029 remain open; no hosted Auth/email
+mutation is claimed.
+
+## S146 illustrative demo booth labels — FE-070 (local visuals approved; release pending)
+
+The 58 `public/landing/showroom-booths/*.svg` illustrations and their generator
+`scripts/materialize-demo-client-portfolio.ts` now carry the MirtPage facade
+label. `scripts/test-platform-narrative.mjs` checks every asset and generator
+source; all SVGs parse with `xmllint`. An exact old/new comparison confirms that
+each generated illustration changed only the label text and its font size,
+preserving business names, cues, facades and tenant-specific palettes. Installed
+Chrome155 loaded three palette variants at 1440/390 without page/console/request
+errors; `.local/booth-brand-s146/` holds the receipt and captures. These are
+retained fictional demo assets, not real merchant artwork or Play screenshots.
+The owner approved the desktop and phone booth visuals for full checks. Later
+full release evidence remains pending; no deployment.
+
+## S146 native empty-product gallery — FE-053 (local focused and visual pass; release pending)
+
+`apps/mobile/src/Gallery.tsx` renders a localized, accessible **No photo yet**
+state for zero media and retains the gallery for non-empty media. The actual
+component port regression in `scripts/test-mobile-video.ts` passes 5/5 via
+`node --import tsx --test`; `npm run mobile:typecheck` and
+`npm run validate:specs` pass. Installed Google Chrome155 headless at
+`http://localhost:8082` (390×844) traversed real demo showroom→product→Back
+with no API/console errors or writes; `.local/prairie-media-s146/` contains the
+screen and protected receipt. This is a labelled response-only fixture that
+changes one demo product's `media` array to empty. It establishes UI behavior,
+not an actual empty-media catalog read or installed Android behavior. Real
+Prairie media was initially audited read-only. After the owner's explicit
+local-only removal decision and visual approval, protected exact rows and a
+validated full local database archive were captured. The admin page/product UI
+saves cleared only its unrelated cover/product media references: local business
+content v6, draft v4, latest publication r3, catalog v6, product 286 still
+published with unchanged non-media fields, and old publication r2 retained.
+Both detached Storage objects retain their exact audited hashes. Installed
+Chrome desktop/phone directory→showroom→product→Back and real Expo phone
+showroom→product→Back pass against the local API, with no response fixture,
+browser error, or unexpected write. See
+`.local/prairie-media-s146/receipt-verify-after.json` and eight local captures.
+The hosted site and installed Android were not changed. Full release gates
+remain pending.
+
+## S146 selected web CI and separate Android admission — DEP-002 / DEP-042 / DEP-044
+
+`.github/workflows/quality.yml` now makes required `core` and `dependency`
+jobs install only the root and shared contracts from the lockfile. Core invokes
+the existing complete `release:web` gate, operations, and pure Android
+artifact-safety tests. Dependency independently checks that Expo/native tools
+are absent and audits all selected web/build dependencies at the unchanged
+moderate threshold. Browser, container and PostgreSQL jobs are unchanged.
+`npm run release` still contains the unsuppressed full monorepo moderate audit;
+new MirtPage AAB admission and any exact per-artifact advisory exception remain
+separate under DEP-042/DEP-044/DEP-049. Focused `test-workflow.mjs`,
+`test-web-install.cjs`, `test:mobile:release-safety` (3/3) and `validate:specs`
+(217 specs/ADRs) pass locally. No remote CI result, new AAB, Play action or
+production deployment is claimed from this source change.

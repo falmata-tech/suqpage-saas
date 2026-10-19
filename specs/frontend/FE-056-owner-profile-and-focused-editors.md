@@ -2,13 +2,22 @@
 id: FE-056
 title: Owner Profile and focused editing
 status: in_progress
-related: [FE-026, FE-036, FE-066, FE-034, FE-032, FE-040, FE-051, FE-053, FE-019, BE-018, BE-032, BE-041, BE-044, BE-045, DEP-042, FE-067, FE-047]
+related: [FE-026, FE-036, FE-066, FE-034, FE-032, FE-040, FE-051, FE-053, FE-019, BE-018, BE-032, BE-041, BE-044, BE-045, DEP-042, FE-067, FE-047, FE-072, BE-060, FE-073]
 owners: [product, frontend, backend, security]
 last_updated: 2026-10-17
 change_level: L2
 ---
 
 # FE-056 — Owner Profile and focused editing
+
+## Planned S146 — retire owner Team editing
+
+FE-072/BE-060 replace owner consent and per-business staff assignments with an
+administrator-controlled, revocable all-business staff grant. Once verified and
+deployed, remove Team editing from every owner page task on web and Expo; old
+task links return to a valid focused owner task. This is planned, not a claim that
+the currently deployed owner switch is already gone. The owner retains their
+showroom tasks; account sign-in email remains owner-only under FE-073/BE-061.
 
 ## S122 — consistent editing and safe exits (implemented locally; review pending)
 

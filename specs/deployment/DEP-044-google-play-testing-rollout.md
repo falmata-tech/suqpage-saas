@@ -10,6 +10,14 @@ change_level: L4
 
 # DEP-044 — Google Play testing and store rollout
 
+The completed Suqpage artifact exceptions below are historical. DEP-049 governs
+the new MirtPage package and requires its own AAB admission. A passing selected
+web CI audit is not a native audit: the full locked-workspace
+`npm audit --omit=dev --audit-level=moderate` remains fail-closed before every
+new AAB, with a fresh exact advisory/source/artifact review and owner approval
+for any one-artifact exception. Neither this CI split nor prior exceptions
+authorize a new MirtPage build or Play rollout.
+
 ## Problem and outcome
 
 The owner has a verified-by-owner personal Play developer account created after

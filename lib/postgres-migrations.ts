@@ -1049,6 +1049,154 @@ export async function migratePostgresDatabase(
       await runner.query('ALTER TABLE tracking_recipients ALTER COLUMN verified_at DROP NOT NULL');
       await runner.query('INSERT INTO schema_migrations(version) VALUES(72)');applied.push(72);
     }
+    const migration73=await runner.query('SELECT version FROM schema_migrations WHERE version=73');
+    if(!migration73.rows.length){
+      const label=await runner.query<{data_type:string;is_nullable:string;column_default:string|null}>(
+        "SELECT data_type,is_nullable,column_default FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='support_conversations' AND column_name='requester_label'",
+      );
+      const column=label.rows[0];
+      const freshBaselineDefault=!installed.rows[0]?.name&&column?.column_default===null;
+      if(column?.data_type!=='text'||column.is_nullable!=='NO'||(!freshBaselineDefault&&!["'Suqpage client'::text","'MirtPage client'::text"].includes(column.column_default||''))){
+        throw new Error('Migration 73 requires the reviewed support requester-label metadata and default.');
+      }
+      await runner.query("ALTER TABLE support_conversations ALTER COLUMN requester_label SET DEFAULT 'MirtPage client'");
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(73)');applied.push(73);
+    }
+    const migration74=await runner.query('SELECT version FROM schema_migrations WHERE version=74');
+    if(!migration74.rows.length){
+      // Immutable platform-reference snapshot; future UI copy cannot alter74.
+      const categories=[
+        ['electronics','Electronics & electrical','circuit',0],
+        ['beauty-wellness','Personal care & household','leaf',1],
+        ['agriculture-growers','Farms, livestock & feed','sprout',2],
+        ['food-farming','Food & drink','bowl',3],
+        ['machinery-tools','Tools, machines & metalwork','tool',4],
+        ['home-living','Furniture, art & building','frame',5],
+        ['fashion-textiles','Clothes, fabrics & leather','thread',6],
+      ] as const;
+      const columns=await runner.query<{column_name:string;data_type:string;is_nullable:string}>(
+        "SELECT column_name,data_type,is_nullable FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='discovery_industries' ORDER BY ordinal_position",
+      );
+      const expectedColumns=[['key','text'],['label','text'],['icon','text'],['position','bigint'],['active','bigint']];
+      const constraints=await runner.query<{contype:string;convalidated:boolean;definition:string}>(
+        "SELECT contype,convalidated,pg_get_constraintdef(oid) definition FROM pg_constraint WHERE conrelid='discovery_industries'::regclass",
+      );
+      const normalized=(definition:string)=>definition.replace(/\s+/g,'');
+      if(columns.rows.length!==5||!columns.rows.every((column,index)=>column.column_name===expectedColumns[index][0]&&column.data_type===expectedColumns[index][1]&&column.is_nullable==='NO')||
+        constraints.rows.length!==2||constraints.rows.some(constraint=>!constraint.convalidated)||
+        !constraints.rows.some(constraint=>constraint.contype==='p'&&normalized(constraint.definition)==='PRIMARYKEY(key)')||
+        !constraints.rows.some(constraint=>constraint.contype==='c'&&normalized(constraint.definition)==='CHECK((active=ANY(ARRAY[(0)::bigint,(1)::bigint])))')){
+        throw new Error('Migration 74 requires the reviewed business-category reference schema.');
+      }
+      const keys=categories.map(category=>category[0]);
+      const existing=await runner.query<{key:string;active:number}>(
+        'SELECT key,active FROM discovery_industries WHERE key=ANY(?::text[]) FOR UPDATE',[keys],
+      );
+      if(existing.rows.some(row=>Number(row.active)!==1))throw new Error('Migration 74 requires existing canonical business categories to be active.');
+      for(const [key,label,icon,position]of categories){
+        await runner.query('INSERT INTO discovery_industries(key,label,icon,position,active) VALUES(?,?,?,?,1) ON CONFLICT(key) DO NOTHING',[key,label,icon,position]);
+        await runner.query('UPDATE discovery_industries SET position=? WHERE key=? AND position IS DISTINCT FROM ?',[position,key,position]);
+      }
+      const after=await runner.query<{key:string;position:number;active:number}>(
+        'SELECT key,position,active FROM discovery_industries WHERE key=ANY(?::text[]) ORDER BY position',[keys],
+      );
+      if(after.rows.length!==categories.length||!after.rows.every((row,index)=>row.key===categories[index][0]&&Number(row.position)===categories[index][3]&&Number(row.active)===1)){
+        throw new Error('Migration 74 could not verify canonical business-category references.');
+      }
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(74)');applied.push(74);
+    }
+    const migration75=await runner.query('SELECT version FROM schema_migrations WHERE version=75');
+    if(!migration75.rows.length){
+      const columns=await runner.query<{table_name:string;column_name:string;data_type:string;is_nullable:string;column_default:string|null}>(
+        "SELECT table_name,column_name,data_type,is_nullable,column_default FROM information_schema.columns WHERE table_schema=current_schema() AND (table_name='tracking_shipments' AND column_name='legs' OR table_name='tracking_events' AND column_name='detail') ORDER BY table_name",
+      );
+      const expectedColumns=[['tracking_events','detail'],['tracking_shipments','legs']];
+      const constraintQuery="SELECT c.conname,c.contype,c.convalidated,pg_get_expr(c.conbin,c.conrelid) expression FROM pg_constraint c JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=ANY(c.conkey) WHERE c.contype='c' AND (c.conrelid='tracking_shipments'::regclass AND a.attname='legs' OR c.conrelid='tracking_events'::regclass AND a.attname='detail') ORDER BY c.conname";
+      const before=await runner.query<{conname:string;contype:string;convalidated:boolean;expression:string}>(constraintQuery);
+      const expressions=[
+        '(octet_length((detail)::text) <= 25000)',
+        "((jsonb_typeof(legs) = 'array'::text) AND ((jsonb_array_length(legs) >= 1) AND (jsonb_array_length(legs) <= 12)) AND (octet_length((legs)::text) <= 24000))",
+      ];
+      const names=['tracking_events_detail_check','tracking_shipments_legs_check'],normalized=(value:string)=>value.replace(/\s+/g,'');
+      const reviewed=(rows:typeof before.rows,expected:readonly string[])=>rows.length===2&&rows.every((row,index)=>row.conname===names[index]&&row.contype==='c'&&row.convalidated&&normalized(row.expression)===normalized(expected[index]));
+      if(columns.rows.length!==2||!columns.rows.every((column,index)=>column.table_name===expectedColumns[index][0]&&column.column_name===expectedColumns[index][1]&&column.data_type==='jsonb'&&column.is_nullable==='NO'&&column.column_default===null)||!reviewed(before.rows,expressions)){
+        throw new Error('Migration 75 requires the reviewed shipment tracking JSON bounds.');
+      }
+      await runner.query("ALTER TABLE tracking_shipments DROP CONSTRAINT tracking_shipments_legs_check, ADD CONSTRAINT tracking_shipments_legs_check CHECK(jsonb_typeof(legs)='array' AND jsonb_array_length(legs) BETWEEN 1 AND 12 AND octet_length(legs::text)<=64000)");
+      await runner.query('ALTER TABLE tracking_events DROP CONSTRAINT tracking_events_detail_check, ADD CONSTRAINT tracking_events_detail_check CHECK(octet_length(detail::text)<=65000)');
+      const after=await runner.query<typeof before.rows[number]>(constraintQuery);
+      if(!reviewed(after.rows,[expressions[0].replace('25000','65000'),expressions[1].replace('24000','64000')]))throw new Error('Migration 75 could not verify shipment tracking JSON bounds.');
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(75)');applied.push(75);
+    }
+    const migration76=await runner.query('SELECT version FROM schema_migrations WHERE version=76');
+    if(!migration76.rows.length){
+      if(!(await runner.query('SELECT version FROM schema_migrations WHERE version=75')).rows.length){
+        throw new Error('Migration 76 requires shipment-tracking schema 75.');
+      }
+      await runner.query(`CREATE TABLE staff_business_grants (
+        user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        enabled BIGINT NOT NULL CHECK(enabled IN (0,1)),
+        version BIGINT NOT NULL CHECK(version>=1),
+        updated_by_user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+        updated_at BIGINT NOT NULL CHECK(updated_at>=0)
+      )`);
+      await runner.query(`INSERT INTO staff_business_grants(user_id,enabled,version,updated_by_user_id,updated_at)
+        SELECT p.user_id,1,1,NULL,? FROM user_access_profiles p
+        WHERE p.access_role IN ('team_member','operations_manager')`,[Date.now()]);
+      await runner.query('REVOKE ALL ON staff_business_grants FROM PUBLIC');
+      await runner.query('ALTER TABLE staff_business_grants ENABLE ROW LEVEL SECURITY');
+      for(const role of ['anon','authenticated','service_role','suqpage_runtime','mirtpage_runtime']){
+        if(!(await runner.query('SELECT 1 FROM pg_roles WHERE rolname=?',[role])).rows.length)continue;
+        if(['anon','authenticated','service_role'].includes(role)){
+          await runner.query(`REVOKE ALL ON staff_business_grants FROM ${quotedRole(role)}`);
+        }else{
+          await runner.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON staff_business_grants TO ${quotedRole(role)}`);
+          await runner.query(`CREATE POLICY ${quotedRole(`staff_business_grants_${role}`)} ON staff_business_grants TO ${quotedRole(role)} USING (true) WITH CHECK (true)`);
+        }
+      }
+      const missing=await runner.query<{total:number}>(`SELECT COUNT(*) total FROM user_access_profiles p
+        LEFT JOIN staff_business_grants g ON g.user_id=p.user_id
+        WHERE p.access_role IN ('team_member','operations_manager') AND (g.user_id IS NULL OR g.enabled<>1 OR g.version<>1)`);
+      if(Number(missing.rows[0]?.total)!==0)throw new Error('Migration 76 did not backfill every current staff account.');
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(76)');applied.push(76);
+    }
+    const migration77=await runner.query('SELECT version FROM schema_migrations WHERE version=77');
+    if(!migration77.rows.length){
+      if(!(await runner.query('SELECT version FROM schema_migrations WHERE version=76')).rows.length){
+        throw new Error('Migration 77 requires staff-grant schema 76.');
+      }
+      await runner.query(`CREATE TABLE owner_email_change_requests (
+        user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        provider_user_id TEXT NOT NULL CHECK(length(provider_user_id) BETWEEN 32 AND 64),
+        old_email TEXT NOT NULL CHECK(length(old_email) BETWEEN 3 AND 254),
+        new_email TEXT NOT NULL CHECK(length(new_email) BETWEEN 3 AND 254),
+        state TEXT NOT NULL CHECK(state IN ('prepared','pending','reconciled')),
+        requested_at BIGINT NOT NULL CHECK(requested_at>=0),
+        expires_at BIGINT NOT NULL CHECK(expires_at>requested_at),
+        last_sent_at BIGINT,
+        old_verified_at BIGINT,
+        new_verified_at BIGINT,
+        reconciled_at BIGINT,
+        CHECK(old_email<>new_email)
+      );
+      CREATE INDEX owner_email_change_expiry ON owner_email_change_requests(expires_at,user_id) WHERE state<>'reconciled';
+      CREATE TABLE owner_auth_session_fences (
+        user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        valid_after_epoch_seconds BIGINT NOT NULL CHECK(valid_after_epoch_seconds>=0)
+      )`);
+      for(const table of ['owner_email_change_requests','owner_auth_session_fences']){
+        await runner.query(`REVOKE ALL ON ${table} FROM PUBLIC; ALTER TABLE ${table} ENABLE ROW LEVEL SECURITY`);
+        const roles=await runner.query<{rolname:string}>("SELECT rolname FROM pg_roles WHERE rolname IN ('anon','authenticated','service_role','suqpage_runtime','mirtpage_runtime')");
+        for(const role of roles.rows){
+          if(['anon','authenticated','service_role'].includes(role.rolname))await runner.query(`REVOKE ALL ON ${table} FROM ${quotedRole(role.rolname)}`);
+          else{
+            await runner.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON ${table} TO ${quotedRole(role.rolname)}`);
+            await runner.query(`CREATE POLICY ${quotedRole(`${table}_${role.rolname}`)} ON ${table} TO ${quotedRole(role.rolname)} USING (true) WITH CHECK (true)`);
+          }
+        }
+      }
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(77)');applied.push(77);
+    }
     return { applied };
   });
 }

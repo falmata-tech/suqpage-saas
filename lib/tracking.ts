@@ -9,7 +9,7 @@ import {
  isTrackingChallengeId,isTrackingReference,isTrackingToken,trackingEmail,trackingRecord,parseTrackingShipment,
  parseTrackingSubmit,parseTrackingUpdate,parseTrackingRevoke,trackingEtag,
  type TrackingChallenge,type TrackingSession,type TrackingList,type TrackingRead,type TrackingShipment,
- type StaffTrackingShipment,type StaffTrackingList,type TrackingLocale,type TransportPlanLegInput,
+ type StaffTrackingShipment,type StaffTrackingList,type TrackingLocale,type TrackingLegInput,
 } from './tracking-contract';
 export {TrackingError} from './tracking-contract';
 export type TrackingChallengeRow={id:string;email:string;email_hash:string;nonce:string;code_hash:string;locale:TrackingLocale;attempts:number;created_at:number;expires_at:number;consumed_at:number|null;superseded_at:number|null};
@@ -126,7 +126,7 @@ export async function listStaffTrackingShipments(actor:SessionUser,input:{q?:str
 export async function readStaffTrackingShipment(actor:SessionUser,shipmentId:number):Promise<StaffTrackingShipment>{
  return runtimeTransaction(async()=>{await staff(actor);if(!Number.isSafeInteger(shipmentId)||shipmentId<1)notFound();const row=await runtimeGet<TrackingShipmentRow>('SELECT * FROM tracking_shipments WHERE id=? FOR SHARE',[shipmentId]);if(!row)notFound();return staffProjection(row);});
 }
-function same(input:readonly TransportPlanLegInput[],row:TrackingShipmentRow,allowNew=false){const legs=shipment(row).legs;return legs.length===input.length&&input.every((leg,i)=>(leg.id===legs[i].id||allowNew&&leg.id===null)&&leg.providerName===legs[i].providerName&&leg.origin===legs[i].origin&&leg.destination===legs[i].destination&&leg.method===legs[i].method);}
+function same(input:readonly TrackingLegInput[],row:TrackingShipmentRow,allowNew=false){const legs=shipment(row).legs;return legs.length===input.length&&input.every((leg,i)=>(leg.id===legs[i].id||allowNew&&leg.id===null)&&leg.providerName===legs[i].providerName&&leg.origin===legs[i].origin&&leg.destination===legs[i].destination&&leg.method===legs[i].method&&leg.trackingUrl===legs[i].trackingUrl&&leg.trackingCode===legs[i].trackingCode);}
 async function audit(actor:SessionUser,row:TrackingShipmentRow,event:'submitted'|'updated'|'revoked',now:number,recipientLocale?:TrackingLocale){await runtimeRun('INSERT INTO tracking_events(shipment_id,actor_user_id,event_type,detail,created_at) VALUES(?,?,?,?::jsonb,?)',[row.id,actor.id,event,JSON.stringify({...shipment(row),...(event==='submitted'?{recipientId:row.recipient_id,recipientLocale}: {})}),now]);}
 export async function submitTrackingShipment(actor:SessionUser,input:unknown,now=Date.now()):Promise<StaffTrackingShipment>{
  time(now);const command=parseTrackingSubmit(input);if(command.legs.some(l=>l.id!==null))throw invalid();

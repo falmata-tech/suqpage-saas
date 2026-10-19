@@ -13,6 +13,7 @@ import { router } from "expo-router";
 import { useAction, ActionStatus, pickImages, addAsset } from "./owner-forms";
 import {useOwnerEditGuard} from './owner-edit-navigation';
 import OwnerEditConfirmation from './OwnerEditConfirmation';
+import OwnerEmailChange, { nativeOwnerEmailChangeEnabled } from './OwnerEmailChange';
 type BusinessLocation = {
   country_code: string;
   city: string;
@@ -184,6 +185,7 @@ export function Settings({ home, onSaved, view }: { home: OwnerHome; onSaved?: (
   }
   const settings=()=>router.replace({pathname:'/owner/[section]',params:{section:'settings',returnTo:'profile'}});
   if(view==='notifications')return <><Copy big heading>{t('Notifications')}</Copy><OwnerAlerts inline preferencesOnly/></>;
+  if(view==='email'&&nativeOwnerEmailChangeEnabled)return <OwnerEmailChange currentEmail={home.user.email}/>;
   if(view==='profile')return <>
     <Copy big heading>{t("Edit account details")}</Copy><Copy muted>{home.user.email}</Copy>
     <Field label={t("Name")} value={name} onChangeText={value=>{guard.changed();setName(value);}} maxLength={80} editable={!action.busy}/>
@@ -198,7 +200,7 @@ export function Settings({ home, onSaved, view }: { home: OwnerHome; onSaved?: (
     <Card><Copy muted>{t('Name')}</Copy><Copy>{home.user.name}</Copy><Copy muted>{t('Account email')}</Copy><Copy>{home.user.email}</Copy><Copy muted>{t('Account phone')}</Copy><Copy>{home.user.phone||t('Not configured')}</Copy>
       <Button secondary label={t('Edit account details')} onPress={()=>router.push({pathname:'/owner/[section]',params:{section:'settings',view:'profile',returnTo:'settings'}})}/>
     </Card>
-    <Card><Button secondary label={t('Notifications')} onPress={()=>router.push({pathname:'/owner/[section]',params:{section:'settings',view:'notifications',returnTo:'settings'}})}/><Button secondary label={t('Blocked businesses')} onPress={()=>router.push('/blocked-businesses')}/></Card>
-    <Card><Copy heading>{t('Account security')}</Copy><Button secondary disabled={logoutPending} label={t("Sign out")} onPress={() => void leaveSession()} /><Button secondary label={t("Delete account")} onPress={() => router.push("/account-deletion")} /></Card>
+    <Card><Button secondary label={t('Notifications')} onPress={()=>router.push({pathname:'/owner/[section]',params:{section:'settings',view:'notifications',returnTo:'settings'}})}/></Card>
+    <Card><Copy heading>{t('Account security')}</Copy>{nativeOwnerEmailChangeEnabled&&<Button secondary label={t('Change sign-in email')} onPress={()=>router.push({pathname:'/owner/[section]',params:{section:'settings',view:'email',returnTo:'settings'}})}/>}<Button secondary disabled={logoutPending} label={t("Sign out")} onPress={() => void leaveSession()} /><Button secondary label={t("Delete account")} onPress={() => router.push("/account-deletion")} /></Card>
   </>;
 }

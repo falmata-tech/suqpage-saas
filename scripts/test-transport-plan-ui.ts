@@ -51,7 +51,7 @@ async function actionFixture(){
 
 test('FE-069 S141 stale chat-plan save/replace actions authenticate but never mutate or redirect historical plans',async()=>{
  const{state,actions,form}=await actionFixture();
- const expected={error:'Create shipment plans from Tracking.'};
+ const expected={error:'Create shipments in Shipment tracking.'};
  for(const action of[actions.saveTransportPlanAction,actions.replaceTransportPlanLinkAction]){
   for(const data of[form(),new FormData(),(()=>{const value=form();value.set('legs','{');value.append('conversationId','72');return value;})()]){
    const before=[...data.entries()];assert.deepEqual(JSON.parse(JSON.stringify(await action(data))),expected);assert.deepEqual([...data.entries()],before);
@@ -101,13 +101,15 @@ test('FE-068 shared actual read view preserves literal ordered stages/methods wi
   b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({contents:'export default {};'}));
   b.onResolve({filter:/^@\/lib\/i18n\/ui$/},a=>({path:a.path,namespace:'ports'}));b.onLoad({filter:/.*/,namespace:'ports'},()=>({contents:`export const useUiText=()=>(key,values={})=>key.replace(/\\{([^}]+)\\}/g,(_,name)=>String(values[name]??'{'+name+'}'));`}));
  }}]});
- const module={exports:{} as{default:(props:{plan:TransportPlan})=>ReactElement}};vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,require});
+ const module={exports:{} as{default:(props:{plan:TransportPlan})=>ReactElement}};vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,require,URL,fetch:()=>{throw Error('Read view must never fetch a provider');}});
  const methods=['air','truck','van','car','motorcycle'] as const;
  const sample:TransportPlan={version:1,legs:methods.map((method,index)=>({...plan.legs[0],id:String(index),method,providerName:index<2?'Same literal provider':'Provider '+index,origin:'Origin '+index,destination:'Destination '+index}))};
  const html=renderToStaticMarkup(createElement(module.exports.default,{plan:sample}));
  assert.match(html,/5 transport stages/);assert.equal((html.match(/Same literal provider/g)||[]).length,2,'Stages are not deduplicated into an invented provider total');
  for(const label of ['Air','Truck','Van','Car','Motorcycle','Origin 4','Destination 4'])assert.ok(html.includes(label),label);
  assert.ok(html.indexOf('Origin 0')<html.indexOf('Origin 4'));assert.doesNotMatch(html,/<button|<input|<form|ETA|current provider|completed/i);
+ const withProvider={version:1,legs:[{...sample.legs[0],trackingUrl:'https://carrier.example.test/track?shipment=public',trackingCode:'Case-<Literal>&09'}]};const details=renderToStaticMarkup(createElement(module.exports.default,{plan:withProvider}));assert.match(details,/href="https:\/\/carrier\.example\.test\/track\?shipment=public"/);assert.match(details,/target="_blank" rel="noopener noreferrer"/);assert.match(details,/Case-&lt;Literal&gt;&amp;09/);assert.match(details,/Copy code/);assert.doesNotMatch(details,/iframe|Delivered|Completed|Current provider/);
+ for(const trackingUrl of['javascript:alert(1)','http://carrier.example.test','https://127.0.0.1/track','https://carrier.example.test:443/track','https://user:pass@carrier.example.test/track']){const inertPlan={version:1,legs:[{...withProvider.legs[0],trackingUrl,trackingCode:''}]};const inert=renderToStaticMarkup(createElement(module.exports.default,{plan:inertPlan}));assert.doesNotMatch(inert,/<a\b|<button\b/,'Hostile provider URLs stay inert even at the renderer boundary');}
 });
 
 type Call={kind:'save'|'replace';data:Record<string,string>};

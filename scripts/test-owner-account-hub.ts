@@ -50,8 +50,9 @@ test('FE-056 Your page menu opens existing focused workflows with a clear Accoun
  const html=await render();
  assert.match(html,/<h1>Your page<\/h1>/);assert.match(html,/Back to account/);assert.match(html,/@merchant-studio/);
  const links=Array.from(html.matchAll(/<a\b[^>]*href="([^"]+)"/g),match=>match[1].replaceAll('&amp;','&'));
- assert.deepEqual(links,['/dashboard/profile','/dashboard/page-editor?view=preview&returnTo=showroom','/dashboard/page-editor?view=edit&task=about&returnTo=showroom','/dashboard/profile/cover?returnTo=showroom','/dashboard/page-editor?view=edit&task=video&returnTo=showroom','/dashboard/page-editor?view=preview&task=color&returnTo=showroom','/dashboard/page-editor?view=edit&task=contacts&returnTo=showroom','/dashboard/profile/handle?returnTo=showroom','/dashboard/page-editor?view=edit&task=team&returnTo=showroom']);
- for(const label of ['Preview page','About the business','Cover photo','Business video','Page color','Public contact details','Page address','Allow team editing','Page content','Appearance','Sharing and access'])assert.ok(html.includes(label));
+ assert.deepEqual(links,['/dashboard/profile','/dashboard/page-editor?view=preview&returnTo=showroom','/dashboard/page-editor?view=edit&task=about&returnTo=showroom','/dashboard/profile/cover?returnTo=showroom','/dashboard/page-editor?view=edit&task=video&returnTo=showroom','/dashboard/page-editor?view=preview&task=color&returnTo=showroom','/dashboard/page-editor?view=edit&task=contacts&returnTo=showroom','/dashboard/profile/handle?returnTo=showroom']);
+ for(const label of ['Preview page','About the business','Cover photo','Business video','Page color','Public contact details','Page address','Page content','Appearance','Sharing and access'])assert.ok(html.includes(label));
+ assert.doesNotMatch(html,/Allow team editing|task=team/,'Owners cannot grant or revoke platform staff business management');
  assert.doesNotMatch(html,/>Edit page</,'Owner navigation must name the actual task rather than open the old omnibus editor');
  assert.deepEqual(Array.from(fixture.homeReads),[18]);assert.deepEqual(Array.from(fixture.businessReads),[18]);
  assert.doesNotMatch(html,/PRIVATE OWNER NAME|private-owner@|12025550199|private-contact@|PRIVATE UNUSED PRODUCT|<form|<input|<details/);

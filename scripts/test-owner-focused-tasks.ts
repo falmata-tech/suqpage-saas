@@ -51,12 +51,13 @@ async function fixture(platform:'web'|'native',initialTask='about',returnTo:unkn
   memo(fn:()=>unknown,deps:unknown[]){const i=this.memoCursor++,before=this.memos[i];if(!before||deps.some((value,j)=>!Object.is(value,before.deps[j])))this.memos[i]={deps,value:fn()};return this.memos[i].value;},
   ownerRequest:async(path:string,body?:Record<string,unknown>)=>{if(path==='owner/home')return fixture.home;assert.equal(path,'owner/page');return write(body!);},
  };
- async function write(body:Record<string,unknown>){fixture.writes.push(structuredClone(body));if(fixture.defer)await fixture.defer();if(fixture.fail)throw Error('This page has newer saved changes. Reload before saving.');assert.equal(body.version,fixture.saved.version,'Every command must use the last acknowledged version');fixture.saved={...fixture.saved,version:fixture.saved.version+1,...(body.content?{content:structuredClone(body.content) as typeof content}:{}),...(body.action==='assistance'?{assistanceEnabled:body.enabled as boolean}:{})};return structuredClone(fixture.saved);}
+ async function write(body:Record<string,unknown>){fixture.writes.push(structuredClone(body));if(fixture.defer)await fixture.defer();if(fixture.fail)throw Error('This page has newer saved changes. Reload before saving.');assert.equal(body.version,fixture.saved.version,'Every command must use the last acknowledged version');fixture.saved={...fixture.saved,version:fixture.saved.version+1,...(body.content?{content:structuredClone(body.content) as typeof content}:{})};return structuredClone(fixture.saved);}
  const output=(await bundled).outputFiles.find(file=>file.path.endsWith(platform==='web'?'/OwnerPageEditor.js':'/owner-forms.js'))!;
  const module={exports:{} as Record<string,(props:Record<string,unknown>)=>Element>};
  const window={location:fixture.location,history:{state:{},replaceState(_state:unknown,_unused:string,url:URL){fixture.location.href=url.href;}},addEventListener(){},removeEventListener(){}};
  vm.runInNewContext(output.text,{module,exports:module.exports,fixture,window,URL,FormData,AbortController,setTimeout,clearTimeout,fetch:async(_url:string,init:RequestInit)=>{try{return{ok:true,json:async()=>await write(JSON.parse(String(init.body)))}}catch(error){return{ok:false,json:async()=>({error:(error as Error).message})}}}});
- const props:Record<string,unknown>=platform==='web'?{catalog:{business:{id:18,name:'Fixture shop',handle:'fixture-shop',status:'draft',description:'Saved business story',hero_image_path:'/seed/shop.webp'},products:[{name:'Real item',description:'Real product',is_published:1}]},initialDraft:structuredClone(draft),initialTask,owner:true,returnTo,locationConfirmed:true}:{home:fixture.home,reload(){},initialTask,onSaved:()=>fixture.routes.push('saved'),onCancel:()=>fixture.routes.push('cancelled')};
+ const task=ownerPageTask(initialTask);
+ const props:Record<string,unknown>=platform==='web'?{catalog:{business:{id:18,name:'Fixture shop',handle:'fixture-shop',status:'draft',description:'Saved business story',hero_image_path:'/seed/shop.webp'},products:[{name:'Real item',description:'Real product',is_published:1}]},initialDraft:structuredClone(draft),initialTask:task,owner:true,returnTo,locationConfirmed:true}:{home:fixture.home,reload(){},initialTask:task,onSaved:()=>fixture.routes.push('saved'),onCancel:()=>fixture.routes.push('cancelled')};
  const render=()=>{let root:Element;for(let pass=0;pass<5;pass++){fixture.cursor=0;fixture.refCursor=0;fixture.effectCursor=0;fixture.memoCursor=0;fixture.changed=false;root=module.exports[platform==='web'?'default':'PageEditor'](props);for(const node of nodes(root,false))if(node.type==='dialog'){const ref=node.props.ref as{current:unknown};if(!ref.current)ref.current={open:false,showModal(){(this as{open:boolean}).open=true;},close(){(this as{open:boolean}).open=false;}};}for(const effect of fixture.effects.splice(0))effect();if(!fixture.changed)return nodes(root);}throw Error('Controlled hook fixture did not settle');};
  return{fixture,props,render};
 }
@@ -66,8 +67,11 @@ test('FE-056 focused task and return hints are bounded',()=>{
  for(const value of [undefined,'all','https://evil.invalid','__proto__'])assert.equal(ownerPageTask(value),'about');
  assert.equal(ownerPageReturn('profile'),'/dashboard/profile');for(const value of ['showroom','https://evil.invalid',undefined])assert.equal(ownerPageReturn(value),'/dashboard/profile/showroom');
 });
-test('FE-056 consented staff cannot open the owner-only Team editing controls through a task hint',async()=>{
- const f=await fixture('web','team');f.props.owner=false;const tree=f.render();assert.ok(input(tree,'shop-about'));assert.ok(!tree.some(node=>node.type==='input'&&node.props.type==='checkbox'));assert.ok(!tree.some(node=>node.type==='button'&&text(node.props.children)==='Allow team editing'));assert.equal(f.fixture.writes.length,0);
+for(const platform of ['web','native'] as const)test(`FE-072 ${platform} retires the Team editing task, including stale links`,async()=>{
+ const f=await fixture(platform,'team'),tree=f.render();
+ assert.ok(input(tree,platform==='web'?'shop-about':'About the business'));
+ assert.ok(!tree.some(node=>String(node.props.label||text(node.props.children)).includes('Team editing')));
+ assert.equal(f.fixture.writes.length,0);
 });
 test('FE-056 focused web tasks have one visible title, accessible fields and publication controls only in Preview',async()=>{
  for(const task of ['about','video','cover']){
@@ -97,7 +101,7 @@ for(const platform of ['web','native'] as const)test(`FE-056 ${platform} opens e
  for(const task of ['about','video','contacts','team','color']){
   const f=await fixture(platform,task),tree=f.render(),fields=tree.filter(node=>node.type==='Field'||['input','textarea'].includes(String(node.type)));
   assert.ok(!tree.some(node=>['details','summary','HandleEditor'].includes(String(node.type))));
-  assert.equal(fields.length,task==='contacts'?8:task==='color'||task==='team'&&platform==='native'?0:1,task);
+  assert.equal(fields.length,task==='contacts'?8:task==='color'?0:1,task);
   assert.equal(f.fixture.writes.length,0,'Opening a task cannot save anything');
   if(task==='color'){assert.ok(tree.some(node=>node.type==='StorefrontAccentPicker'));assert.ok(tree.some(node=>node.type===(platform==='web'?'ShowroomApp':'ShowroomContent')));}
  }
@@ -116,12 +120,13 @@ for(const platform of ['web','native'] as const)test(`FE-056 ${platform} failed 
  f.fixture.defer=null;f.fixture.fail=false;await press(named(tree,platform==='web'?'Save':'Save changes'));await flush();assert.equal(f.fixture.writes.length,2);assert.equal(f.fixture.writes[1].version,4,'Failure never invents a new persisted version');
 });
 
-for(const platform of ['web','native'] as const)test(`FE-056 ${platform} switching to Team editing preserves earlier edits and saves permission at the returned version`,async()=>{
- const f=await fixture(platform);edit(input(f.render(),platform==='web'?'shop-about':'About the business'),'Retained across tasks');f.props.initialTask='team';let tree=f.render();
- if(platform==='web')(tree.find(node=>node.type==='input'&&node.props.type==='checkbox')!.props.onChange as(event:unknown)=>void)({target:{checked:true}});else press(tree.find(node=>node.type==='Chip')!);
+for(const platform of ['web','native'] as const)test(`FE-072 ${platform} a stale Team editing task saves only ordinary page content`,async()=>{
+ const f=await fixture(platform,'team');edit(input(f.render(),platform==='web'?'shop-about':'About the business'),'Updated business story');
  await press(named(f.render(),platform==='web'?'Save':'Save changes'));await flush();
- assert.deepEqual(f.fixture.writes.map(body=>[body.action,body.version]),[['save',4],['assistance',5]]);assert.equal((f.fixture.writes[0].content as{about:string}).about,'Retained across tasks');assert.deepEqual(JSON.parse(JSON.stringify((f.fixture.writes[0].content as{contacts:unknown}).contacts)),contacts);assert.equal(f.fixture.writes[1].enabled,true);
- assert.ok(!Object.hasOwn(f.fixture.writes[1],'content'),'Permission command remains the existing narrow contract');
+ assert.deepEqual(f.fixture.writes.map(body=>[body.action,body.version]),[['save',4]]);
+ assert.equal((f.fixture.writes[0].content as{about:string}).about,'Updated business story');
+ assert.deepEqual(JSON.parse(JSON.stringify((f.fixture.writes[0].content as{contacts:unknown}).contacts)),contacts);
+ assert.equal(f.fixture.saved.assistanceEnabled,false,'Retired owner consent is unchanged');
 });
 
 for(const platform of ['web','native'] as const)test(`FE-056 ${platform} Cancel confirms unsaved work without sending it`,async()=>{
@@ -133,10 +138,4 @@ for(const platform of ['web','native'] as const)test(`FE-056 ${platform} publica
  if(platform==='web'){const target=tree.find(node=>node.type==='a'&&text(node.props.children)==='Add your real contact details');assert.ok(target);assert.equal(target.props.href,'?view=edit&task=contacts');(target.props.onClick as(event:unknown)=>void)({preventDefault(){}});}
  else press(named(tree,'Add your real contact details'));
  tree=f.render();assert.equal(tree.filter(node=>node.type==='Field'||node.type==='input').length,8);assert.equal(f.fixture.writes.length,0);assert.equal(input(tree,platform==='web'?'public-whatsapp':'WhatsApp number').props.value,contacts.whatsapp);
-});
-
-for(const platform of ['web','native'] as const)test(`FE-056 ${platform} an unsaved Team editing change survives a later About save`,async()=>{
- const f=await fixture(platform,'team');let tree=f.render();if(platform==='web')(tree.find(node=>node.type==='input'&&node.props.type==='checkbox')!.props.onChange as(event:unknown)=>void)({target:{checked:true}});else press(tree.find(node=>node.type==='Chip')!);
- f.props.initialTask='about';tree=f.render();edit(input(tree,platform==='web'?'shop-about':'About the business'),'Changed after permission selection');await press(named(f.render(),platform==='web'?'Save':'Save changes'));await flush();
- assert.deepEqual(f.fixture.writes.map(body=>[body.action,body.version]),[['save',4],['assistance',5]]);assert.equal(f.fixture.saved.assistanceEnabled,true);assert.equal(f.fixture.saved.content.about,'Changed after permission selection');
 });

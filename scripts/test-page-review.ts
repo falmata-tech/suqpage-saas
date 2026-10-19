@@ -7,7 +7,7 @@ const owner={id:1,business_id:1,access_role:'client'} as SessionUser;
 const admin={id:2,business_id:null,access_role:'platform_admin'} as SessionUser;
 const content={template:'profile-v1' as const,coverStyle:'blended' as const,videoUrl:'',introduction:'',about:'A simple shop',heroImage:''};
 const record={businessId:1,version:1,content,assistanceEnabled:false,updatedBy:1,updatedAt:1};
-const drafts:OwnerPagePort={read:async()=>record,assigned:async()=>false,create:async()=>record,commit:async()=>record,hasImage:async()=>true};
+const drafts:OwnerPagePort={read:async()=>record,authorized:async(actor,businessId)=>actor.access_role==='platform_admin'||(actor.access_role==='client'&&actor.business_id===businessId),create:async()=>record,commit:async()=>record,hasImage:async()=>true};
 const pending={businessId:1,submission:1,draftVersion:1,contentVersion:1,status:'pending' as const,feedback:'',submittedBy:1,submittedAt:1,reviewedBy:null,reviewedAt:null};
 const port:PageReviewPort={read:async()=>null,readiness:async()=>({status:'draft',contentVersion:1,products:1}),submit:async()=>pending,decide:async()=>({...pending,status:'approved'})};
 test('submission is owner-only and must name the saved version',async()=>{

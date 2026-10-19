@@ -28,7 +28,7 @@ export async function launchWiringCases(port:BasicProductUpkeepPort,owner:Sessio
  const setup=await readOwnerBusiness(owner,bid);
  const place=findPlaceSuggestions('Addis Ababa','ET')[0];assert.ok(place);assert.equal(place.countryCode,'ET');
  const proposed={name:'Launch fixture shop',expectedVersion:setup.business.content_version,locationVersion:setup.proposal?.version||0,category:'electronics',city:place.name,region:place.region,countryCode:place.countryCode,placeId:place.id,mode:'storefront',latitude:9.01234,longitude:38.76543};
- await assert.rejects(()=>saveOwnerBusiness(foreign,bid,proposed),/Only the owner/);
+ await assert.rejects(()=>saveOwnerBusiness(foreign,bid,proposed),/Business details are not available for this account/);
  await saveOwnerBusiness(owner,bid,proposed);
  await assert.rejects(()=>saveOwnerBusiness(owner,bid,proposed),/changed/);
  const firstVersion=(setup.proposal?.version||0)+1;const firstProposal=await readLocationProposal(bid);assert.ok(firstProposal);assert.equal(firstProposal.version,firstVersion);

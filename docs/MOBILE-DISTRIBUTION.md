@@ -1,6 +1,58 @@
-# Android tester distribution
+# MirtPage Android distribution
 
-The current tester app is **Suqpage / com.suqpage.app**. Open
+## Current source and next release
+
+All normal source profiles now use **MirtPage / com.mirtpage.app**. There is no
+Suqpage future-build fallback. The existing Expo project UUID/current slug is an
+infrastructure binding; it is not the app's displayed name.
+
+| Profile | Package | Artifact |
+| --- | --- | --- |
+| development | com.mirtpage.app | Local development |
+| preview | com.mirtpage.app | Internal APK |
+| production | com.mirtpage.app | Google Play AAB |
+
+No new MirtPage binary has been built or distributed. The approved hosted target
+set is deliberately empty until the candidate API/schema/origin compatibility is
+verified. Hosted workers stop rather than use the old runtime or client file.
+After that qualification, only the exact reviewed `mirtpage-production` target
+may be admitted. Existing remote version source/auto-increment remains unchanged;
+never copy/reset the old app's remote version counter.
+
+The client source is only `MIRTPAGE_GOOGLE_SERVICES_FILE`: the real downloaded
+Firebase file for app `1:588262779708:android:9a9f3944058b1fcc248c39`, project
+`suqpage` / `588262779708`. Both legitimate registered clients remain in its
+unchanged bytes. Old variable/static-file fallbacks, wrong client/hash, symlinks,
+oversized or private-key files are rejected. New EAS file/FCM/signing bindings
+still need their separate exact provider qualification; no credentials are here.
+
+The expected new signer is independently verified owner-accepted Play metadata,
+`06:30:C5:6F:88:DF:87:4F:D2:72:96:D1:AA:08:48:A6:8F:C8:34:5F:70:2F:E6:80:2E:DD:82:55:B7:21:11:83`.
+This does not measure a compiled APK/AAB. The new package must pass first-release
+artifact inspection; an old-package APK cannot be its predecessor. iOS workers
+are denied; no new iOS release is implied.
+
+The public MirtPage association is prepared additively with both historical
+entries unchanged. New Android `autoVerify` filters remain empty until the exact
+new hosted target is qualified, then claim only `mirtpage.com`. Verify the served
+association before building and the actual installed/Play-signed app afterward.
+The only new Android custom scheme is `mirtpage`; old public links can still
+navigate safely without supplying account or Tracking authority.
+
+Submission explicitly requires the distinct protected local source
+`../../.local/mirtpage-play-submit/credentials.json` relative to `apps/mobile`.
+That file is not present or included in the upload archive. It must be established
+only after exact new-app grant/custody review; the old app-scoped source is not a
+fallback. Internal/draft submission settings do not authorize an upload.
+
+Focused config/Firebase/link/artifact/artwork tests, strict mobile types and actual
+installed-SDK config/scheme introspection pass locally. Full combined gates,
+actual new runtime/provider bindings, tool/advisory approval, build, OS/device
+checks, listing and fresh Play closed testing remain separate.
+
+## Historical Suqpage tester releases — not current build instructions
+
+The previously distributed tester app is **Suqpage / com.suqpage.app**. Open
 [the completed Expo build](https://expo.dev/accounts/falmatad/projects/suqpage/builds/565b9614-428d-47b4-8780-2b0f9c96d68b)
 on Android to download and install it. It uses live Suqpage accounts/API and needs
 neither Metro nor Expo Go. This first canonical installation needs sign-in; earlier

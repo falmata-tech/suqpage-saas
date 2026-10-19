@@ -1,10 +1,10 @@
 ---
 id: DEP-027
 title: Local Supabase development runtime
-status: done
-related: [DEP-042, DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015]
+status: in_progress
+related: [DEP-042, DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015, DEP-050]
 owners: [development, backend, operations]
-last_updated: 2026-09-21
+last_updated: 2026-10-19
 change_level: L3
 ---
 
@@ -114,6 +114,7 @@ Scenario: Browser acceptance runs beside another Supabase project
 | PostgreSQL schema and adapters | migrations plus PostgreSQL runtime suite |
 | Local Auth and Storage | focused email/Google signup, login, callback, and upload browser smoke |
 | Browser runtime parity and stack isolation | production browser acceptance against disposable Supabase plus Docker project/port assertions |
+| Slow disposable browser-stack readiness | `scripts/test-acceptance-supabase-readiness.mjs`, `test:local-supabase-readiness`, then full isolated browser acceptance |
 | No hosted reset | negative destination-guard test |
 
 ## Rollout and rollback
@@ -228,3 +229,68 @@ exception never authorizes hosted data, provider configuration or production bin
 GIVEN no explicit opt-in WHEN a non-loopback bind is supplied THEN reject it.
 GIVEN the mobile command WHEN launched THEN the app is reachable from the same
 network while existing database/provider target assertions stay enforced.
+
+## Local Next.js development resource origins — 2026-10-19
+
+When the explicitly authorized mobile launcher binds Next.js to `0.0.0.0`, the
+canonical browser address remains `127.0.0.1`. Next.js checks the hostname of a
+development resource request separately from the full origins used to protect
+Server Actions and application mutations. These two allowlists must retain their
+different formats and security purposes.
+
+```gherkin
+Scenario: Loopback browser hydrates the LAN-bound local preview
+  GIVEN the guarded mobile development launcher binds to 0.0.0.0:3102
+  WHEN an authenticated admin opens a page editor at 127.0.0.1:3102
+  THEN Next.js permits its exact loopback development resources and HMR connection
+  AND the page editor hydrates so its fields become usable
+
+Scenario: Development resource trust remains narrow
+  GIVEN exact validated local and explicitly configured origins
+  WHEN the Next.js development resource allowlist is built
+  THEN entries contain hostnames without ports, schemes, paths, or wildcards
+  AND the Server Action allowlist retains its exact host-and-port entries
+  AND unconfigured hostnames are not admitted
+```
+
+The focused test derives both lists from the same validated policy and checks
+that `127.0.0.1` is admitted without broadening mutation origins. Actual Chrome
+must confirm editor hydration on both `127.0.0.1:3102` and `localhost:3102` after
+the local development server restarts. No application schema, business record,
+hosted setting, or production origin change is part of this correction. Local
+Auth test sessions may be created to inspect an authenticated editor.
+
+## Disposable browser-stack readiness — 2026-10-19
+
+Browser acceptance uses its own project ID, database volume, and ports. On a
+slow development host, Supabase Storage may become healthy after the CLI's
+fixed initial health deadline. The harness may start this disposable project
+with `--ignore-health-check` only if it independently waits at most five minutes
+before fixture setup, build, or Playwright and verifies all six exact
+project-labelled services: database, gateway, Auth, REST, Storage, and mail
+catcher. Each must be running; every service with a Docker health check must
+report healthy. The loopback Auth/API and Storage status endpoints must both
+return success. The separate developer project and hosted projects are outside
+this operation. Status output and provider credentials remain private.
+The disposable Auth configuration permits the three independent email sign-ins
+required by the browser suite; this does not change the developer or hosted
+email rate limits.
+
+```gherkin
+Scenario: Slow disposable Storage becomes healthy
+  GIVEN browser acceptance has started its separate local Supabase project
+  WHEN Storage initializes after the Supabase CLI's initial health deadline
+  THEN fixture setup starts only after all six project services and both loopback endpoints are ready
+
+Scenario: Disposable stack never becomes ready
+  GIVEN a required service is missing, stopped, unhealthy, or belongs to another project
+  OR the Auth/API or Storage status endpoint fails
+  WHEN the five-minute readiness deadline expires
+  THEN browser acceptance fails before fixture setup, build, or Playwright
+  AND cleanup stops only its disposable project without printing provider credentials
+```
+
+The focused readiness test covers delayed success, wrong/missing/unhealthy
+services, endpoint failures and timeout. A complete browser acceptance run is
+the separate release gate; the harness test alone does not establish that the
+application workflows pass.

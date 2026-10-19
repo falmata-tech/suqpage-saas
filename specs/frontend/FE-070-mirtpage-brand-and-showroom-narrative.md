@@ -2,13 +2,217 @@
 id: FE-070
 title: MirtPage identity and inclusive digital showroom experience
 status: in_progress
-related: [BE-059, DEP-049, ADR-0029]
+related: [BE-059, DEP-029, DEP-049, FE-071, ADR-0029]
 owners: [product, frontend, localization]
-last_updated: 2026-10-18
+last_updated: 2026-10-19
 change_level: L2
 ---
 
 # FE-070 — MirtPage identity and digital showrooms
+
+## S146 active-language account-copy correction (local focused evidence)
+
+The public account-deletion instructions on web and Expo and the Expo staff
+sign-in denial share two interface messages. Their current Amharic and Afaan
+Oromo translations must name MirtPage, matching the English source and active
+brand, without changing the sign-in, deletion or staff-access workflows.
+Historical translation rows and compatibility identifiers are outside this
+correction.
+
+GIVEN an Amharic or Afaan Oromo visitor opens account deletion on web or Expo
+WHEN the instructions render THEN the sign-in email guidance is localized and
+names MirtPage, with no visible Suqpage name.
+
+GIVEN a staff identity is denied access to the Expo owner app WHEN the account
+notice renders THEN the localized website sign-in instruction names MirtPage,
+with no visible Suqpage name. English retains its current wording.
+
+Regenerate catalogs from `locales/interface.tsv`, assert both messages survive
+the browser/client catalog split, and exercise the affected web/Expo views in
+actual Chrome at phone size plus the web desktop deletion page. This is an L1
+copy correction with no persisted data, Auth, API or provider changes; reverting
+the two source translations and regenerating catalogs restores prior copy.
+
+The two source translations and generated Amharic/Afaan Oromo client catalogs
+now use MirtPage. Focused localization tests pass 22 frontend and four backend
+cases, including both exact client-visible keys; spec validation passes 217.
+Actual installed Chrome verifies the deletion instructions on web desktop/phone
+and Expo phone in both active languages with zero browser errors (five states,
+`.local/account-brand-s146/receipt.json`). An existing local admin's Expo
+sign-in was denied by the real session API with `403 staff_web_only`, and the
+Amharic MirtPage notice rendered. Its only capture included the open language
+sheet; local Auth then rate-limited OTP for a further attempt and a second
+existing identity. Settled Amharic/Afaan Oromo staff-notice captures and visual
+approval remain open before full release checks. No hosted or native release is
+claimed.
+
+## S146 public legal-copy consistency (local copy correction)
+
+The public Privacy and Terms text must describe the current FE-066/BE-055
+external WhatsApp/Telegram/SMS product handoff, retained private inquiry history,
+FE-072/BE-060 administrator-controlled staff business access, and separate
+transport/support chats. It must not promise an active MirtPage business inbox,
+owner-granted staff access or last-mile delivery. The privacy text must keep the
+existing account, third-party map/video, notifications, deletion and tracking
+disclosures; no data flow or provider setting changes with this copy correction.
+
+GIVEN a visitor opens Privacy or Terms on web or through the Expo About links
+WHEN they read English, Amharic or Afaan Oromo THEN the supported contact and
+staff rules are stated accurately and in their selected language, with readable
+desktop and phone layouts. Retained Somali/Tigrinya fallback remains English.
+Test the source assertions, generated locale catalogs and actual Chrome
+desktop/phone legal routes; use FE-049's translation checks before full gates.
+
+## S146 native public-origin correction (local evidence)
+
+The native About legal links and social-video referrer must use the same
+validated public/API origin as the native catalog. The default for an absent
+development origin is `https://mirtpage.com`; an explicitly configured local or
+staging origin takes precedence and malformed input must fail closed. This does
+not change historical session keys, video bridge events, native package IDs or
+tenant-owned links.
+
+1. GIVEN a MirtPage app without an origin override WHEN About opens Privacy or
+   Terms THEN the respective path opens under `https://mirtpage.com`.
+2. GIVEN an explicitly configured safe local or staging API origin WHEN the
+   same links or a native social video open THEN they use that exact origin for
+   the legal destination or WebView base/referrer; the provider embed remains
+   subject to its existing exact-host navigation policy.
+3. GIVEN a malformed or credential-bearing origin WHEN configuration resolves
+   THEN the app rejects it rather than opening a guessed or attacker URL.
+4. GIVEN a native YouTube frame with no Expo application ID WHEN it builds its
+   synthetic WebView origin THEN use `https://com.mirtpage.app`; configured
+   Android package IDs and Expo Go keep their own existing origin, including a
+   historical package on an already-installed app. Only the missing-ID fallback
+   changes; accepted provider navigation and bridge event tokens stay intact.
+
+Use focused pure-origin, actual About-button and native WebView-adapter tests,
+mobile strict types and an Expo preview legal-link/video task before release.
+Exercise the YouTube frame's actual adapter with missing, configured and Expo Go
+IDs, including its provider/hostile navigation rule.
+The web social frame continues to use the browser's own origin.
+
+Current local evidence: the actual native About component and WebView adapter
+pass eight mobile-link cases across default, localhost and staging origins;
+four product-video cases retain exact provider navigation and hostile-link
+denials. Mobile strict types, mobile build safety and217 spec links pass.
+The compiled native YouTube frame passes four focused cases across missing and
+configured Android IDs, the historical installed package and Expo Go; the same
+adapter checks an absent iOS ID, provider-only navigation and disabled cookie
+sharing. The video script passes via `node --import tsx`; the npm `tsx` launcher
+could not open its sandbox IPC pipe (`EPERM`) before test execution.
+Installed Chrome on Expo8082 follows Market → About → Privacy/Terms → About
+and both audience tabs with4 checks, zero local failed requests and no external
+map-tile request (`.local/s146-mobile-origin-review/receipt.json`). The native
+WebView is not the Expo web frame, so real Android/provider playback and an
+installable artifact remain separate release evidence. No visual layout changes,
+remote origin updates or deployment are claimed.
+
+## Ready: illustrative demo booth label parity
+
+The 58 generated demo booth SVGs still show the previous platform name on the
+illustrated facade. Replace that platform label with `MirtPage` in the
+checked-in illustrations and their generation source, with a card-readable
+type size that does not collide with the neighboring cue. Keep each fictional
+business name, illustrative product cue, SVG dimensions, facade layout and
+business-specific palette intact. These demo illustrations are not the
+canonical platform logo and must not imply that a real merchant approved a new
+brand asset. Do not relabel historical artwork outside this generated demo set.
+
+GIVEN a demo booth SVG is viewed directly or generated again WHEN a visitor
+inspects its facade THEN the platform label reads `MirtPage` once, no visible
+`SUQPAGE` remains, and the business identity and artwork still render legibly.
+
+Verify all 58 assets as SVG/XML, check exact label parity with the generator,
+and inspect representative light/dark business palettes in installed Chrome at
+desktop and phone widths. Record captures for visual review before the next
+full release gate. Reverting the SVG and generator label changes restores the
+prior demo artwork without changing customer data or publication state.
+
+Local source/evidence: all 58 labels and the generator now use `MirtPage`; the
+sign type is 40px so it remains readable at card scale. The focused FE-070
+narrative test, all-file XML parse, spec validation and exact old/new asset
+comparison pass. Installed Chrome 155 rendered three different business palettes
+at 1440/390 with six loaded images and no console or request errors; captures
+and receipts are in `.local/booth-brand-s146/`. This is illustrative demo
+artwork, not new logo geometry or current Play Store imagery. Visual approval
+and any subsequent full release gate remain separate.
+
+## S146 shared public canvas (ready)
+
+The shared public shell currently puts decorative venue photography behind
+information and task pages, including Shipment tracking. Use a solid MirtPage
+theme canvas for that shell so headings and content retain clear contrast on
+desktop and phone. Preserve page-owned About hero media, Market content, real
+business/product imagery and tenant showroom identity. Native task pages keep
+their existing plain theme background. No copy, brand asset, route, permission,
+data, provider or release configuration changes are part of this correction.
+
+1. GIVEN Tracking, Featured, About or legal/information content WHEN viewed in
+   the public web shell THEN its shared background is uniform, not an image,
+   and text or controls never rely on a photograph for contrast.
+2. GIVEN Market, a business showroom or product media WHEN the same shell is
+   updated THEN map, page-owned hero and tenant product imagery still render.
+
+FE-069 specifies the Tracking-specific outcome. Test the shared-shell style
+contract and actual Chrome1440/390 pages; inspect Expo8082 Tracking for parity.
+Capture screenshots and obtain new visual approval before full release gates.
+Reverting the isolated CSS restores the prior appearance without data rollback.
+Local source and installed-Chrome background checks pass across five public
+routes at1440/390. The final localhost3102 retry hydrated and exercised the
+Market → chat → Tracking email-entry path on desktop and phone; Expo8082
+retains its plain theme treatment. Settled About/Featured interaction remains
+open after the bounded browser script stopped on an overly specific phone color
+assertion. See FE-069 and `.local/shipment-tracking-canvas-s146/actual/` for
+screenshots and receipts; no publication or visual approval is claimed.
+
+## Ready: canonical Auth email artwork and copy
+
+The independently reviewed BE-059 push split is Ready: new browser workers show
+literal MirtPage for either admitted old/new wire title, and Expo uses MirtPage.
+The browser server wire token remains Suqpage for old installed compatibility.
+Old installations may retain their prior display until a normal worker update;
+this is not public co-branding or proof that every installation has upgraded.
+
+The independent Auth source tranche in BE-059/DEP-029/DEP-049 is Ready. Preserve
+the twelve template layouts, English account-entry meaning, code/link semantics
+and approved palette. Replace the old font-based logo with the approved outlined
+MirtPage wordmark as one deterministic public PNG, identical to the existing
+mobile wordmark bytes, displayed at220×48 with MirtPage alt text. The image URL
+uses SiteURL and a fixed public asset path; no third-party tracking image,
+invented logo, arbitrary font substitute or customer snapshot is introduced.
+Existing derivative bytes remain exact. FE-073/BE-061 separately change the
+email-change template from a confirmation link to old/new mailbox codes; this
+visual branding tranche does not authorize that provider rollout. Static
+desktop/phone previews and later
+actual Chrome/owner review distinguish local implementation from visual approval
+and hosted mail. No locale-aware Auth mail is claimed by this brand-only tranche.
+
+Local source and focused evidence now exist: canonical PNG equals the existing
+mobile wordmark bytes; all prior derivatives are preserved. Actual installed
+Google Chrome covers24 Auth-template states and18 exact plain-text app-mail
+states across phone/desktop. Tracking code/plan and staff alerts cover en/am/om;
+their subjects and From display are MirtPage. The combined private review is
+auth-mail-source/combined-review.html. The owner explicitly approves these
+combined visuals and full checks on2026-10-18. Local Auth reload/real OTP and
+hosted delivery remain separate, with no provider mail sent here.
+
+## Ready: default native application identity
+
+DEP-049's local native tranche makes MirtPage the normal app configuration name
+and com.mirtpage.app its Android package. Reuse the approved M geometry and exact
+palette; derive the Android small notification glyph as white with transparency
+and canonical orange tint. No new layout, dependency or customized splash is
+claimed. Existing visual approval remains applicable to unchanged artwork/UI;
+SDK/config/type/asset tests and later actual binary proof establish their own
+platform-specific evidence.
+
+Local native evidence: three canonical asset cases pass, including exact96px
+white-alpha notification pixels and deterministic shared M derivatives. The
+existing launcher/wordmark outputs remain byte-identical. Actual installed Expo
+configuration resolves proper-case MirtPage across development/preview/production;
+native and scoped script types pass. No new UI layout or native OS splash/device
+proof is inferred, and combined full gates remain separate.
 
 ## Problem and outcome
 

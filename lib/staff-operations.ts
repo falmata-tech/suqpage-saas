@@ -15,7 +15,62 @@ export type StaffAccount = {
 };
 export type ManagedClient = { id:number; email:string; name:string; business_id:number; business_name:string; request_type:"onboarding"|"change" };
 
-export class StaffOperationError extends Error {}
+export class StaffOperationError extends Error {
+  constructor(message: string, public status = 400, public code = 'invalid') { super(message); }
+}
+
+export type StaffBusinessGrant = { userId:number; enabled:boolean; version:number; updatedAt:number };
+type GrantRow = { user_id:number; enabled:number; version:number; updated_at:number };
+function presentGrant(row:GrantRow):StaffBusinessGrant {
+  return {userId:Number(row.user_id),enabled:Number(row.enabled)===1,version:Number(row.version),updatedAt:Number(row.updated_at)};
+}
+
+async function requireCurrentAdministrator(actor:SessionUser, lock=false):Promise<void> {
+  if(actor.access_role!=='platform_admin'||!Number.isSafeInteger(actor.id)||actor.id<1||
+    !await runtimeGet(`SELECT p.user_id FROM user_access_profiles p WHERE p.user_id=? AND p.access_role='platform_admin' ${lock?'FOR SHARE':''}`,[actor.id])){
+    throw new StaffOperationError('Platform administrator access required.',403,'forbidden');
+  }
+}
+
+export async function getStaffBusinessGrant(actor:SessionUser,userId:number):Promise<StaffBusinessGrant> {
+  await requireCurrentAdministrator(actor);
+  if(!Number.isSafeInteger(userId)||userId<1)throw new StaffOperationError('Staff account not found.',404,'not_found');
+  const row=await runtimeGet<GrantRow>(`SELECT g.user_id,g.enabled,g.version,g.updated_at FROM staff_business_grants g
+    JOIN user_access_profiles p ON p.user_id=g.user_id
+    WHERE g.user_id=? AND p.access_role IN ('team_member','operations_manager')`,[userId]);
+  if(!row)throw new StaffOperationError('Staff business permission not found.',404,'not_found');
+  return presentGrant(row);
+}
+
+export async function setStaffBusinessGrant(actor:SessionUser,userId:number,enabled:boolean,expectedVersion:number):Promise<StaffBusinessGrant> {
+  if(typeof enabled!=='boolean'||!Number.isSafeInteger(expectedVersion)||expectedVersion<1){
+    throw new StaffOperationError('Reload this staff permission before saving.',409,'invalid_version');
+  }
+  if(!Number.isSafeInteger(userId)||userId<1)throw new StaffOperationError('Staff account not found.',404,'not_found');
+  return runtimeTransaction(async()=>{
+    await requireCurrentAdministrator(actor,true);
+    const target=await runtimeGet<{access_role:AccessRole}>(`SELECT access_role FROM user_access_profiles
+      WHERE user_id=? FOR SHARE`,[userId]);
+    if(target?.access_role!=='team_member'&&target?.access_role!=='operations_manager'){
+      throw new StaffOperationError('Staff account not found.',404,'not_found');
+    }
+    const row=await runtimeGet<GrantRow>(`SELECT user_id,enabled,version,updated_at FROM staff_business_grants
+      WHERE user_id=? FOR UPDATE`,[userId]);
+    if(!row)throw new StaffOperationError('Staff permission is unavailable. Refresh before saving.',409,'missing_grant');
+    if(Number(row.version)!==expectedVersion)throw new StaffOperationError('This permission changed. Reload before saving.',409,'stale_version');
+    if((Number(row.enabled)===1)===enabled)return presentGrant(row);
+    const now=Date.now();
+    const saved=await runtimeGet<GrantRow>(`UPDATE staff_business_grants
+      SET enabled=?,version=version+1,updated_by_user_id=?,updated_at=?
+      WHERE user_id=? AND version=? RETURNING user_id,enabled,version,updated_at`,
+      [Number(enabled),actor.id,now,userId,expectedVersion]);
+    if(!saved)throw new StaffOperationError('This permission changed. Reload before saving.',409,'stale_version');
+    await audit(enabled?'staff.business_management_enabled':'staff.business_management_revoked',{
+      userId:actor.id,detail:{targetUserId:userId,version:Number(saved.version)},
+    });
+    return presentGrant(saved);
+  });
+}
 
 const clean = (value: unknown, max: number) => String(value ?? "").trim().replace(/[\u0000-\u001F\u007F]/g, "").slice(0, max);
 
@@ -27,6 +82,17 @@ export async function listStaffAccounts(): Promise<StaffAccount[]> {
     WHERE p.access_role IN ('team_member','operations_manager')
     ORDER BY p.access_role,u.name
   `);
+}
+
+export async function getStaffAccount(actor:SessionUser,userId:number):Promise<StaffAccount> {
+  await requireCurrentAdministrator(actor);
+  if(!Number.isSafeInteger(userId)||userId<1)throw new StaffOperationError('Staff account not found.',404,'not_found');
+  const row=await runtimeGet<StaffAccount>(`SELECT u.id,u.email,u.name,u.must_change_password,p.access_role,s.queue_scope
+    FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+    LEFT JOIN support_agent_settings s ON s.user_id=u.id
+    WHERE u.id=? AND p.access_role IN ('team_member','operations_manager')`,[userId]);
+  if(!row)throw new StaffOperationError('Staff account not found.',404,'not_found');
+  return row;
 }
 
 export async function listTeamMembers(): Promise<StaffAccount[]> {
@@ -83,6 +149,8 @@ export async function createStaffAccount(raw: { name:unknown; email:unknown; pas
       `, [email, passwordHash, name, managed ? 0 : 1]);
       const userId = Number(inserted!.id);
       await runtimeRun("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)", [userId, accessRole]);
+      await runtimeRun(`INSERT INTO staff_business_grants(user_id,enabled,version,updated_by_user_id,updated_at)
+        VALUES(?,1,1,?,?)`, [userId,actor.id,Date.now()]);
       await runtimeRun("INSERT INTO support_agent_settings(user_id,enabled,updated_by_user_id,updated_at,queue_scope) VALUES(?,1,?,?,?)",[userId,actor.id,Date.now(),queueScope]);
       if (providerUserId) await runtimeRun("INSERT INTO auth_identity_links(user_id,provider,provider_user_id,email_at_link,created_at) VALUES(?,'supabase',?,?,?)", [userId, providerUserId, email, Date.now()]);
       const routing = await routeWaitingSupportConversations(actor);
@@ -101,8 +169,9 @@ export async function createStaffAccount(raw: { name:unknown; email:unknown; pas
 export async function listAssignedBusinesses(userId: number): Promise<Business[]> {
   return runtimeAll<Business>(`
     SELECT b.* FROM businesses b
-    JOIN staff_business_assignments a ON a.business_id=b.id
-    WHERE a.user_id=? AND a.active=1
+    WHERE EXISTS(SELECT 1 FROM staff_business_grants g
+      JOIN user_access_profiles p ON p.user_id=g.user_id
+      WHERE g.user_id=? AND g.enabled=1 AND p.access_role IN ('team_member','operations_manager'))
     ORDER BY b.name
   `, [userId]);
 }
@@ -120,21 +189,6 @@ export async function assignRequestToTeamMember(requestId: number, teamMemberId:
       if (!teamMember) throw new StaffOperationError("Choose a valid team member.");
     }
     await runtimeRun("UPDATE service_requests SET assigned_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE id=?", [teamMemberId, requestId]);
-    if (request.business_id && teamMemberId !== null) {
-      await runtimeRun(`
-        INSERT INTO staff_business_assignments(user_id,business_id,assigned_by_user_id,active)
-        VALUES(?,?,?,1)
-        ON CONFLICT(user_id,business_id) DO UPDATE SET assigned_by_user_id=excluded.assigned_by_user_id,active=1
-      `, [teamMemberId, request.business_id, actorUserId]);
-    }
-    if (request.business_id && request.assigned_user_id && request.assigned_user_id !== teamMemberId) {
-      const stillNeeded = await runtimeGet(`
-        SELECT 1 FROM service_requests
-        WHERE assigned_user_id=? AND business_id=? AND id<>?
-          AND status NOT IN ('completed','rejected','cancelled') LIMIT 1
-      `, [request.assigned_user_id, request.business_id, requestId]);
-      if (!stillNeeded) await runtimeRun("UPDATE staff_business_assignments SET active=0 WHERE user_id=? AND business_id=?", [request.assigned_user_id, request.business_id]);
-    }
     await runtimeRun("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,?)", [
       requestId, actorUserId, teamMemberId === null ? "unassigned" : "assigned", teamMemberId === null ? "assignment cleared" : `team_member:${teamMemberId}`,
     ]);

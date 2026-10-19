@@ -2,13 +2,130 @@
 id: DEP-049
 title: MirtPage domain, managed services and app release cutover
 status: draft
-related: [FE-070, BE-059, DEP-029, ADR-0029]
+related: [FE-070, FE-071, BE-059, DEP-029, ADR-0029, FE-072, BE-060, DEP-050]
 owners: [operations, security, mobile]
-last_updated: 2026-10-18
+last_updated: 2026-10-19
 change_level: L4
 ---
 
 # DEP-049 — MirtPage cutover
+
+## S146 native public-origin source boundary (ready)
+
+FE-070 aligns all active native API, legal-link and social-video public origins
+to one validated runtime value. Missing development configuration defaults to
+`https://mirtpage.com`; explicitly configured local/staging origins remain
+usable, while hosted builds continue to require their separately qualified
+exact data target. This source correction does not enable an unqualified hosted
+target, change provider settings or publish a new binary. Confirm the default,
+override and hostile-origin cases with focused tests and Expo preview; inspect
+the eventual Android artifact separately before release.
+The independent native YouTube frame retains its package-scoped synthetic
+origin; only its missing-package fallback becomes `com.mirtpage.app`. Installed
+packages and Expo Go still use their actual configured IDs.
+
+The local source and focused/browser review now pass, as mapped in FE-070 and
+`.local/s146-mobile-origin-review/receipt.json`. This verifies URL construction,
+not an installed Android referrer or external provider's playback decision.
+The compiled YouTube WebView adapter additionally passes fallback, configured
+package, Expo Go and restricted-navigation cases through the direct Node/tsx
+runner; its historical installed-package origin remains compatible.
+Hosted target qualification and remote rollout remain pending.
+
+## Planned S146 — staff authority rollout is separate
+
+FE-072/BE-060 plan a later additive staff-grant migration and business
+management cutover. It is not included in MirtPage's current domain, signing,
+Auth-template or Play-app changes. Keep existing owner consent/assignment gates
+until the grant backfill, security tests and separately approved rollout pass.
+
+## Ready: independent Auth template source
+
+BE-059/DEP-029 and FE-070 make the local Auth presentation source independently
+Ready. Retain a protected exact beforeimage and change only sender display,
+manifest subjects/content and local corresponding display/subject settings.
+Generate one email PNG from the approved outlined wordmark; preserve every
+existing derivative byte. Its public path must be served/read back by the future
+web artifact before hosted templates reference it through SiteURL. Focused
+twenty-seven-field/placeholder/disabled-notice/old-plan/security tests and static
+twelve-template previews precede actual Chrome/owner email review. No service
+restart, hosted configuration change, real mail or full gate is part of source
+preparation; a fresh guarded hosted plan and exact owner approval remain required.
+
+The current old deployment's two provider function digests now match the exact
+protected tested ZIP hashes, including its push-only minute worker. Together
+with the fresh schema63 inventory this qualifies eligibility for empty bootstrap
+of post63 app-mail outboxes, not activation. Complete reviewed ledger upgrade,
+backup/restore and fresh empty/current-producer boundary checks remain required.
+
+The owner-authorized local app-mail boundary is independent of hosted rollout:
+use exact supervisor49851 with verified birth/arguments/source and scoped
+SIGTERM propagation, preserving Expo8082 and unchanged settings. Require all
+five owned processes/3102 gone and two stable all-pending/sending/lease-zero
+snapshots before MirtPage Tracking/escalation/Telegram display edits. A bounded
+failure stops editing without broad kill/reset. Restart the identical reviewed
+supervisor command once immediately after quick syntax checks, then run focused
+isolated tests. No hosted process, provider, schema or mail credential changes.
+
+This source boundary is now verified, including two stable stopped-state zero
+counts, all five old processes gone, unchanged Expo and exactly one ordinary
+supervisor restart. Web health and localhost8082 return200. Preserve the initial
+health verifier's wrong127.0.0.1:8082 failure as a harness-address error; no second
+restart or product outage is inferred. Focused renderer/durable-delivery/privacy
+tests pass; the owner approves the actual Chrome static42 email states and full
+checks on2026-10-18. These do not replace the held combined-current-source gates.
+Source SMTP technical values, sender addresses, origins and idempotency keys are
+unchanged. Auth source was not reloaded; no hosted template/sender write or real
+mail follows. The canonical PNG must still be served before its hosted plan.
+
+## Ready: local default Android identity
+
+The newest owner instruction retires Suqpage as a future build default. This
+independent local tranche is Ready: development, preview and production resolve
+MirtPage/com.mirtpage.app, selecting only MIRTPAGE_GOOGLE_SERVICES_FILE and the
+actual registered Firebase app1:588262779708:android:9a9f3944058b1fcc248c39. Its
+downloaded two-client file is pinned by SHA256
+a52bddd06936d2b22b755c3a3d927512a304af424480e05368f385afed1bb1c7.
+The owner-accepted independently verified Play metadata pins expected signer
+0630C56F88DF874FD27296D1AA0848A68FC8345F702FE6802EDD8255B7211183;
+this is not measurement of a new compiled artifact or EAS credential binding.
+
+GIVEN normal source configuration WHEN any known profile resolves THEN the
+visible/default Android identity is MirtPage, without a legacy build fallback.
+GIVEN an unqualified hosted runtime target, wrong/missing new Firebase file,
+private public key, unknown/conflicting profile or iOS worker WHEN build
+validation runs THEN stop before compilation. Initial approved dataTargets is
+empty until candidate runtime qualification. Preserve the existing EAS UUID and
+current infrastructure slug, remote version policy and APK/AAB distinction.
+GIVEN existing submission defaults WHEN a new-package upload is requested THEN
+reject until its exact new-app submission binding is independently qualified;
+an old app-scoped credential is never silently reused.
+
+New Android HTTPS claims contain only exact mirtpage.com public routes and remain
+unadmitted without both its registered association and the exact qualified
+mirtpage-production target. Add the owner-accepted public MirtPage certificate
+association locally now, preserving both old entries; a later web deployment
+can serve it before Android qualification without a second web deployment.
+This source preparation does not claim hosted readback or OS verification.
+Safe old/new public-link
+navigation remains navigation only; private/capability/Tracking boundaries stay
+unchanged. The canonical M supplies a96px transparent white notification glyph;
+no new dependency, native splash claim, build, prebuild, credential write or
+store release is included. FE-053/FE-070/BE-059 and DEP-042/DEP-043 describe this
+local successor to historical one-app rules. Focused actual-source tests,
+strict mobile types and sanitized installed-SDK config introspection precede
+evidence reconciliation and later full/managed-service/artifact gates.
+
+Local implementation evidence: all three normal profiles resolve MirtPage and
+the new Android package; actual installed Expo config and Android scheme plugin
+show only mirtpage, with no root/old-file fallback. Build/Firebase harnesses and
+16 link/artifact/security cases pass; three canonical artwork cases, strict mobile
+types and scoped strict script types pass. The actual protected provider file
+passes exact raw-hash/client validation without alteration or key output.
+The additive association is source preparation only; empty approved targets keep
+both hosted compilation and new autoVerify claims blocked. The submission source
+is a distinct absent protected path. No provider/EAS/Chrome/prebuild/build/upload
+ran, and combined full gates remain pending with the parallel local tranche.
 
 ## Problem and outcome
 
@@ -36,12 +153,33 @@ origin, Google login disabled, and an independent243-field readback exactly
 matches the approved patch with241 non-target fields preserved. New-primary
 Auth is still unapplied; its short-lived read-only plan is not approval.
 Existing production schema63 and local
-candidate schema72 are different release states, not interchangeable baselines.
+candidate schema77 are different release states, not interchangeable baselines.
 
 The final public brand is MirtPage everywhere. Retained old provider IDs,
 protocols and historical evidence support a bounded transition, not permanent
 public co-branding. Retire them only where safe and explicitly reviewed; do not
 delete business records or rotate keys merely to remove an internal old name.
+
+## Production recovery qualification (in progress)
+
+A protected read-only archive of the independently verified hosted schema-63
+database was captured on 2026-10-19. Its private receipt records 98 table
+fingerprints and all 59 existing migration markers. This is database content
+and metadata evidence, not a complete recoverable production backup. The first
+isolated restore rehearsal stopped at a role/extension assertion before
+`pg_restore`; it imported no customer rows, left the ordinary local database
+unchanged and cleaned up its disposable target. Preserve that failed receipt.
+An independently reviewed corrected partial-rehearsal plan is prepared but
+awaits exact owner authorization and has not run. Even a successful partial
+database restore would not qualify full recovery while private Storage object
+bytes and managed role settings remain unrecovered. A guarded first Storage
+download stopped before accessing the object; a later read-only binding check
+verified the canonical MirtPage bucket/key settings on the exact site, but did
+not capture the bytes or prove Storage access. Require those recoverable
+sources, a successful isolated restore and compatibility checks before any
+hosted schema migration or candidate deployment. The archive, rehearsal and
+review remain outside Git under the protected `production-cutover-readiness/`
+area; none performed a hosted write.
 
 ## Independent provisioning readiness
 
@@ -139,3 +277,112 @@ Use staged provider plans with exact fields/digests and recoverable backups.
 Rollback code/domain configuration without dropping new data. Unexpected remote
 mutations/timeouts stop further writes pending exact recovery direction. No
 credentials, private artifacts or customer data enter Git, logs or screenshots.
+
+
+## S145 local support defaults and complete-ledger preflight
+
+This independent local L3 tranche is implemented and focused-test verified under
+BE-059. The historical-ledger correction is implemented and focused-test verified;
+its reference-data74 correction and independent peer review also pass. Full
+gates remain held for mail-bootstrap readiness and fresh source approval.
+Release preflight must
+read a bounded ascending version list and admit exactly two complete histories
+through74:1..74, or1..26 plus31..74 with27–30 entirely absent. Historical research
+under BE-035/DEP-031/ADR-0020 proves27–30 are retired data-only patches; the native
+PostgreSQL migrator starts31 and preserves copied ledgers. They are neither
+missing structural requirements nor permission to replay old data mutations.
+Reject every partial27–30 group, other missing version (including64), duplicate,
+noninteger, zero/negative or unknown/future version. A max marker or filtered
+count is insufficient. Existing rows/markers are never inserted, removed or
+rewritten to satisfy readiness. The endpoint remains shared with fixtures.
+Preserve configuration, Auth37/38, identity reconciliation, administrator and
+temporary-password checks. Errors report only the reviewed endpoint, never
+DSNs, tokens or arbitrary ledger/query values.
+
+GIVEN either valid history stops at63 WHEN release preflight runs THEN fail
+before account checks. GIVEN the observed legacy1..26+31..63 history is upgraded
+by the real64–74 migrations WHEN preflight runs THEN accept its complete legacy
+representation without inventing27–30 markers. GIVEN74 is present but64 is
+missing, only part of27–30 exists, or an unknown/noninteger version occurs WHEN
+preflight runs THEN fail before account reads. GIVEN either complete reviewed
+history WHEN preflight runs THEN existing account/configuration failures remain
+effective. The actual runtime reader and
+injected failure-order regressions must both prove this contract. Netlify's
+normal build remains database-free; runtime health remains a liveness signal,
+not proof of schema readiness.
+
+Migration73 changes only future support-label defaults and the current writer,
+not old rows or the inactive billing default. Rehearse rollback, replay, data
+fingerprints and normal default inserts in an owned local fixture. The ordinary
+local runtime has since advanced to schema77 under a separate approved migration;
+hosted schema63 remains a separate release state pending its reviewed migration.
+No Docker/full-suite/build/provider operation is part of this focused phase;
+complete production recovery qualification, exact target, migration/preflight,
+monitored rollout and separately approved recovery remain required.
+
+
+Focused local evidence for this tranche: `scripts/test-mirtpage-support-defaults.ts`,
+`scripts/test-release-preflight.ts` and `scripts/test-taxonomy-reference-migration.ts`
+pass with actual isolated PostgreSQL,
+including leased-job/all-table fingerprints and custom/default fail-closed
+checks. Fifteen inherited runtime/security/migration/presentation scripts also
+pass, including fresh native install and historical44/45/60 replay. Scoped
+strict types pass; the existing PostgreSQL readiness pipeline now includes the
+three new regressions. Native/current release gates remain separate. Private
+support-default-preflight receipts retain the initial sandbox refusals, the
+metadata-guard fixture failure and both stale positive runtime-fixture failures;
+none is silently reclassified as a pass. Independent source-bound peer review
+passes. See TRACEABILITY for exact scope and rollout limits.
+
+
+The corrected two-history contract passes actual isolated PostgreSQL tests,
+including the exact59-marker legacy63→74 upgrade without backfilling27–30,
+all14 partial-group negatives, hole64, unknown/fractional IDs and retained
+Auth/admin/configuration guards. The support-default73 integrity regression and
+scoped strict types also pass. Full gates remain held; see the detailed current
+TRACEABILITY evidence and the separate production backup/rehearsal requirement.
+
+
+## S145 verified local canonical business-category references
+
+Migration74 is implemented, focused-test verified and independently reviewed
+under the spec-first BE-059/DEP-049 reference-data plan.
+The copied six-key target genuinely lacks agriculture-growers; this is distinct
+from valid missing historical27–30 markers. Freeze seven key/label/icon/position
+insertion tuples in74: electronics0, beauty-wellness1, agriculture-growers2,
+food-farming3, machinery-tools4, home-living5 and fashion-textiles6. Insert only
+missing keys with the reviewed display defaults/active1; preserve existing
+labels/icons/active, all unknown rows and every tenant/product/industry/sponsor
+assignment. Update only those seven known positions where different. An existing
+canonical key inactive0 stops for review; never silently reactivate it.
+
+Before any reference write, verify the exact known five-column text/text/text/
+bigint/bigint NOTNULL table shape, key primary key and validated active0/1 check.
+Unknown metadata refuses the transaction. Verify all seven known active rows in
+canonical order before recording74. The existing advisory-locked transaction
+provides atomic rollback; historical migrations/baseline stay immutable. A fresh
+seven-key target changes no data; replay changes nothing. Endpoint74 admits only
+full1..74 or1..26+31..74, retaining all prior ledger/security denials.
+
+GIVEN the six-key legacy63 lineage WHEN real64–74 migrations run THEN all required
+references exist in canonical order, old27–30 markers remain absent and existing
+account/business/product/assignment facts are preserved according to each prior
+migration's existing contract. GIVEN a current-schema six-key fixture WHEN farm
+signup/owner category selection runs before74 THEN the missing-reference FK
+rejects and rolls back; after74 real farm signup/owner edits succeed while
+foreign-tenant edits remain denied. GIVEN fresh data, rollback, replay, inactive
+known key or unexpected schema WHEN migration74 is exercised THEN prove exact
+no-op/rollback/fail-closed outcomes with fingerprints and no partial marker.
+
+All18 applicable focused scripts and scoped strict types pass. The dedicated
+taxonomy test proves the real signup FK failure before74, successful signup and
+owner edits after74, tenant denial, row/ACL preservation and each rollback,
+replay/inactive/metadata refusal above. A reconstructed six-key legacy63 fixture
+also upgrades through actual64–74 without inventing27–30 markers. This is not an
+actual production-backup rehearsal. Independent peer review passes; mail readiness
+and fresh source approval still precede the held combined gates.
+Hosted64–74 still requires complete protected recovery qualification, an isolated
+restore rehearsal, exact reviewed target/delta and separate approval. The captured
+database archive alone does not meet that gate.
+Code rollback may retain this forward-compatible row/order; deleting a referenced
+category or reversing data needs a separate reviewed beforeimage/operation.

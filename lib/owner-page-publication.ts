@@ -1,4 +1,4 @@
-import { isPageOwner, OwnerPageError, ownerPageVersion, parseShopPageContent, type OwnerPageDraft, type ShopPageContent } from "./owner-page-domain";
+import { OwnerPageError, ownerPageVersion, parseShopPageContent, type OwnerPageDraft, type ShopPageContent } from "./owner-page-domain";
 import { readOwnerPage, type OwnerPagePort } from "./owner-page-service";
 import type { SessionUser } from "./types";
 
@@ -16,7 +16,7 @@ export interface PagePublicationPort {
   latest(businessId: number): Promise<PagePublication | null>;
   previous(businessId: number, revision: number): Promise<PagePublication | null>;
   publishable(businessId: number): Promise<boolean>;
-  // Serialize with draft edits and publication writes; recheck owner, publishable
+  // Serialize with draft edits and publication writes; recheck current authority, publishable
   // business, draft version and expected publication revision in the transaction.
   commit(actor: SessionUser, draft: OwnerPageDraft, expectedRevision: number,
     content: ShopPageContent | null, action: "publish" | "restore"): Promise<PagePublication | null>;
@@ -26,7 +26,6 @@ export async function changePagePublication(
   drafts: OwnerPagePort, publications: PagePublicationPort, actor: SessionUser,
   businessId: number, input: { action: "publish" | "restore"; version: unknown; revision: unknown },
 ): Promise<PagePublication> {
-  if (!isPageOwner(actor, businessId)) throw new OwnerPageError("Only the owner can publish or restore this page.", 403);
   if (input.action !== "publish" && input.action !== "restore") throw new OwnerPageError("Choose a page action.");
   const version = ownerPageVersion(input.version);
   if (typeof input.revision !== "number" || !Number.isSafeInteger(input.revision) || input.revision < 0) {

@@ -2,13 +2,60 @@
 id: DEP-048
 title: Safe verified-recipient tracking migration and delivery rollout
 status: in_progress
-related: [BE-058, FE-069, DEP-047, DEP-029, DEP-043]
+related: [BE-058, FE-049, FE-053, FE-069, DEP-047, DEP-029, DEP-043]
 owners: [operations, security, backend]
 last_updated: 2026-10-18
 change_level: L3
 ---
 
 # DEP-048 — Verified tracking rollout
+
+## S145 follow-on — additive75 provider tracking fields (isolated implementation verified)
+
+BE-058/FE-069 add optional authored URL/code values only to active Tracking's
+existing ordered-leg JSONB; there is no new per-leg table, SQL column, provider
+registry, outbound integration or chat dependency. The reviewed bounds are
+60000 UTF-8 command bytes,64000 stored leg-JSON bytes and65000 audit-detail bytes.
+Append75 after74; change only the two existing legs/detail size checks from their
+24000/25000 bounds, preserving the legs array/type/count checks, all rows/history,
+indexes, RLS, runtime grants, foreign keys, IDs and prior migration bodies/baseline.
+Guard the exact target column/check metadata before DDL and verify the new checks
+before recording75. Unexpected/custom metadata stops the whole transaction.
+Replay is a no-op; rollback of the isolated test transaction restores old metadata
+and the absent marker without rewriting any shipment/event/mail data.
+
+The source implementation and all21 focused scripts pass on isolated fixtures,
+including fresh75, reconstructed74 with actual stored/audit/pending/leased rows,
+exact metadata refusal, all-table/ACL preservation, outer-transaction rollback,
+replay and new rich12-leg bounds. The current finite full/legacy preflight reaches75;
+missing64 and every unrelated hole still fail. Evidence is retained under
+`.local/mirtpage-rebrand-s145/shipment-provider-details/`; final source peer and
+ordinary-local/hosted activation remain separate. Historical migrations through74
+are unchanged, and no normal preview or hosted schema was migrated by these tests.
+
+GIVEN an isolated74 target with existing shipments, submitted snapshots and
+pending/leased email jobs WHEN75 runs THEN only the reviewed two constraints and
+marker change, all table-row fingerprints/permissions remain equal, and old data
+still parses. GIVEN fresh full or retained legacy history WHEN upgraded THEN the
+complete endpoint becomes75 under the existing finite two-history policy; no
+historical27–30 markers are fabricated. GIVEN wrong metadata or a required ledger
+hole THEN refuse, retaining all prior schema/Auth/account/security denials.
+
+No ordinary local/shared or hosted migration is included in source implementation.
+Actual Chrome tasks require a separately reviewed protected local backup/apply
+boundary before normal feature writes. Hosted63→75 needs its own native backup,
+isolated restore/rehearsal, exact target/delta approval and monitored activation.
+Do not mistake reconstructed fixtures or the earlier74 plan for that approval.
+Compatible rollback retains the new parser/data or disables Tracking temporarily;
+never drop fields/audit history, shrink checks over legitimate new data, restore
+anonymous access or run a broad restore automatically.
+
+The initial-email terminology change follows BE-058's separate fresh local
+stop/zero/in-flight fence. Provider URL/code data remains portal-only. Existing
+queued/leased snapshots/keys and sender/from/origin stay unchanged. New interface
+layouts/copy need focused real web/phone/Expo review and owner approval before a
+fresh source-bound check/release/acceptance chain. The completed MirtPage mail
+tranche and its approvals remain valid for that earlier exact source only.
 
 ## S141 additive72 and creation/access separation (ready)
 

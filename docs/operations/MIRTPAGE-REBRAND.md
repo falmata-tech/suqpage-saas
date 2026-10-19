@@ -59,9 +59,26 @@ Existing Play presentation covers English/Amharic; add an Oromo set when the
 native wording and layout are approved.
 
 The last verified live deployment uses schema 63; the unreleased local candidate
-uses schema 72 and contains newer workflows. A rebrand is not permission to deploy
+uses schema 77 and contains newer workflows. A rebrand is not permission to deploy
 that schema/code gap without its release, backup and compatibility gates. Earlier
 S141–S144 work and remaining gates stay in the checklist.
+
+On 2026-10-19, a protected read-only archive of the verified hosted schema-63
+database was captured. Its receipt records 98 table fingerprints and the 59
+existing migration markers; the archive and receipt remain outside Git under
+`.local/mirtpage-rebrand-s145/production-cutover-readiness/protected-live-backup/`.
+This protects database content and metadata only. The first isolated restore
+rehearsal stopped at its role/extension assertion before `pg_restore`, imported
+no customer rows and cleaned up its disposable target. A corrected, independently
+reviewed partial-rehearsal plan awaits the owner's exact authorization; it has not
+run. Recovery remains unqualified because the private Storage object bytes and
+managed role settings are not recoverable from this archive. No hosted schema,
+traffic or data was changed by these read-only/isolated steps.
+The first one-object private Storage backup also stopped before download because
+its guard looked only for the absent legacy bucket setting. A separate bounded
+read-only diagnostic verified that the canonical MirtPage bucket and key settings
+exist on the same Netlify site; it did not access Storage or capture object bytes.
+A corrected one-object backup still requires its own frozen guard and readback.
 
 ## Preserve the business system
 
@@ -123,6 +140,21 @@ See [Netlify's multiple-domain behavior](https://docs.netlify.com/domains/manage
 Update canonical/SEO/OG/sitemap/robots/shared links only when the new host is
 ready. Preserve handles and product/query routes in safe public GET redirects.
 Keep old app API, attachments and active anonymous chat access during transition.
+
+FE-071 now has a local, focused-tested crawl path from the Market introduction
+through About and the public showroom directory to eligible published products.
+The directory, page-specific metadata, canonical URLs, minimal structured data,
+robots rules and bounded sitemap are implemented locally; this is not yet a
+hosted indexing claim. After the reviewed primary-domain deploy, verify that
+`robots.txt`, `sitemap.xml`, representative real showroom/product HTML and
+their canonical/OG URLs all name `mirtpage.com`, and that an old public GET
+redirect preserves its handle and product ID. Then verify the MirtPage domain
+property in Google Search Console and submit the sitemap. Record Search
+Console's actual crawl/index reports; submission does not guarantee indexing.
+Amharic and Afaan Oromo currently share cookie-selected URLs, so do not add
+`hreflang` or claim separately indexed language pages until stable locale URLs
+and matching translated public content exist.
+
 Fresh mirtpage.com browser cookies, local storage and push permission cannot be
 borrowed from suqpage.com. Accounts remain, but sign-in/Tracking OTP and push
 enrollment may be needed on the new origin. Explain that only where useful.
@@ -155,12 +187,48 @@ retries. Preserve immutable snapshots and version new work deliberately. Test Au
 Tracking, staff-overdue alerts and push presentation separately. Mailpit proof is
 local only; provider acceptance is not evidence of inbox delivery or reading.
 
+Current local source now has exact27-field MirtPage Auth presentation and a
+canonical SiteURL-relative PNG identical to the mobile wordmark. Sixty-five
+guard tests preserve provider/credential/origin/OTP/notice fences and reject old
+saved branding plans before provider reads. No local Auth restart or hosted mail
+apply occurred. Serve the PNG before an exact reviewed hosted template operation.
+
+Tracking/escalation/Telegram source changed only after the reviewed ordinary
+supervisor stopped, both app-mail queues proved unfinished/lease-zero twice and
+Expo stayed unchanged. One same-command restart restored web HTTP200; unchanged
+Expo is HTTP200 at localhost8082. The first verifier's wrong127.0.0.1:8082 error
+is retained as harness evidence; it caused no second start. Addresses/origins/
+provider keys/Message-ID namespaces/history remain intact. Tracking subjects
+use en/am/om. Actual Chrome24 Auth and18 exact plain-mail states pass; the owner
+approves their combined visuals/full checks on2026-10-18. No real email, Auth
+OTP redemption or OS delivery is claimed. New worker display is MirtPage while
+browser wire Suqpage preserves installed old-worker compatibility; native Expo
+wire is MirtPage. Keep every channel/tag/token/delivery permission boundary.
+
 For DB records, first inventory platform-owned labels/defaults and exact IDs.
 Use an additive allowlisted migration only where necessary, with an isolated
 rehearsal and protected-row fingerprints. Do not restore retired billing features
 while updating legacy subscription defaults. No tenant/customer-wide text rewrite.
 
 ## New Android and Play identity
+
+The local source now makes MirtPage/com.mirtpage.app the default for development,
+preview and production, with no future Suqpage build fallback. Canonical client
+selection uses only the actual new registration through
+MIRTPAGE_GOOGLE_SERVICES_FILE and pins exact downloaded bytes. The expected
+public Play signer is independently verified and owner-accepted; actual new
+APK/AAB signature and EAS credential-slot proof remain separate. Initial approved
+hosted targets are empty, so workers fail before compilation until the candidate
+runtime qualifies. iOS workers are denied and no new iOS release is claimed.
+
+The prepared additive assetlinks entry preserves both historical entries. The
+new Android claim additionally requires the exact qualified new runtime target,
+then contains only mirtpage.com. A first future web deployment can serve the
+association before native qualification without a second web deployment. Source
+preparation is not hosted or OS verification. Submission names a distinct absent
+protected MirtPage credential path rather than silently borrowing the old grant.
+See docs/MOBILE-DISTRIBUTION.md for current source gates; its old builds are
+explicitly labelled historical.
 
 The confirmed package change creates a separate app, not an update to Suqpage.
 Business data remains on the backend; users install MirtPage and sign in again.

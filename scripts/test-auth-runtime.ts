@@ -42,8 +42,8 @@ async function main() {
         assert.match(otpStartSource, /assertSameOrigin/);
         assert.match(otpStartSource, /otp:start:email:/);
         assert.match(otpVerifySource, /\^\\d\{6\}\$/);
-        assert.match(supabaseConfigSource, /\[auth\.email\.template\.magic_link\][\s\S]*?subject = "Your Suqpage sign-in code"[\s\S]*?content_path = "\.\/supabase\/templates\/magic-link\.html"/);
-        assert.match(supabaseConfigSource, /\[auth\.email\.template\.confirmation\][\s\S]*?subject = "Your Suqpage sign-in code"[\s\S]*?content_path = "\.\/supabase\/templates\/magic-link\.html"/);
+        assert.match(supabaseConfigSource, /\[auth\.email\.template\.magic_link\][\s\S]*?subject = "Your MirtPage sign-in code"[\s\S]*?content_path = "\.\/supabase\/templates\/magic-link\.html"/);
+        assert.match(supabaseConfigSource, /\[auth\.email\.template\.confirmation\][\s\S]*?subject = "Your MirtPage sign-in code"[\s\S]*?content_path = "\.\/supabase\/templates\/magic-link\.html"/);
         assert.match(emailOtpTemplate, /\{\{ \.Token \}\}/);
         assert.doesNotMatch(emailOtpTemplate, /ConfirmationURL/);
         assert.match(signupRouteSource, /currentSupabaseProviderIdentity/);

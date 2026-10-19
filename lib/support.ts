@@ -697,7 +697,7 @@ export async function createSupportConversation(
         public_ref,participant_kind,business_id,opened_by_user_id,
         assistance_category,requester_label,subject,status,
         created_at,updated_at,last_message_at
-      ) VALUES(?,'client',?,?, 'general','Suqpage client',?,'waiting',?,?,?) RETURNING id
+      ) VALUES(?,'client',?,?, 'general','MirtPage client',?,'waiting',?,?,?) RETURNING id
     `, [publicRef, user.business_id, user.id, subject, now, now, now]);
     const conversationId = Number(result!.id);
     const messageResult = await runtimeGet<{ id: number }>(`

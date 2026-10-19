@@ -1,5 +1,6 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
+const crypto=require('node:crypto');
 const vm=require('node:vm');
 const {test}=require('node:test');
 
@@ -46,12 +47,21 @@ function fixture(file,origin='https://mirtpage.com'){
 }
 const payload=(title='Suqpage',silent=false)=>({title,body:'A new chat message.',notificationId:41,destination:{screen:'transport-chat'},silent});
 
+test('published S9910 browser worker still accepts the retained web wire title',async()=>{
+ const file='scripts/fixtures/attention-push-s9910.js';
+ assert.equal(crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'),'eeabe5c6274b46a9a33a58424292b7154c1b8f025b81654d44dbfcee995b20e5');
+ const f=fixture(file,'https://suqpage.com');
+ await f.push(payload());assert.equal(f.shown.length,1);assert.equal(f.shown[0].title,'Suqpage');
+ await f.click(f.shown[0].options.data.destination);assert.deepEqual(f.opened,['/?chat=transport']);
+ await f.push(payload('MirtPage'));assert.equal(f.shown.length,1,'An unconditional wire rename would silently drop this installed worker alert');
+});
+
 for(const worker of workers){
  test(`${worker.file}: both exact brands display with unchanged audible/quiet and deduplication options`,async()=>{
   const f=fixture(worker.file);
   for(const title of ['Suqpage','MirtPage'])for(const silent of [false,true]){
    await f.push(payload(title,silent));
-   const shown=f.shown.at(-1);assert.equal(shown.title,title);assert.equal(shown.options.body,'A new chat message.');
+   const shown=f.shown.at(-1);assert.equal(shown.title,'MirtPage');assert.equal(shown.options.body,'A new chat message.');
    assert.equal(shown.options.silent,silent);assert.equal(shown.options.tag,'suqpage-alert-41');assert.equal(shown.options.renotify,false);
    assert.deepEqual(JSON.parse(JSON.stringify(shown.options.data.destination)),{screen:'transport-chat'});
    if(worker.file==='public/attention-push.js'){

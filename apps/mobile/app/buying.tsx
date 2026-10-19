@@ -249,7 +249,7 @@ export default function BuyingScreen({owner=false,conversationId,newIntake=false
     <Screen>
       {owner&&<><Button secondary label={t('Back to account')} onPress={()=>router.replace('/account')}/><Button secondary label={t('Chat history')} onPress={()=>router.push({pathname:'/owner/[section]',params:{section:'transport-history',returnTo:'profile'}})}/></>}
       <Copy muted>{t("Live Chat")}</Copy>
-      <Button secondary label={t('Tracking')} disabled={busy} onPress={openTracking}/>
+      <Button secondary label={t('Shipment tracking')} disabled={busy} onPress={openTracking}/>
       <Status loading={(!ready && !storageFailed) || restoring || checking} error={error} />
       {storageFailed && <Button secondary label={t("Try again")} onPress={() => setStorageAttempt(value => value + 1)}/>}
       {loadedScope!==scope||(owner&&!ownerId)?null:conversation ? (

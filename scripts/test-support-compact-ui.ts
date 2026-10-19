@@ -31,7 +31,7 @@ test('BE-018 S142 retired handoff action authenticates and redirects safely with
  }}]});
  const module={exports:{}as{saveTransportHandoffAction:(form:FormData)=>Promise<void>}};vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,require,state,URLSearchParams});
  const form=new FormData();for(const[key,value]of Object.entries({conversationId:'42',company:'must not save',contact:'must not save',previousId:'29',nav_queue:'support',nav_status:'overdue',nav_q:'saved search',nav_page:'2',nav_panel:'details'}))form.set(key,value);
- await assert.rejects(module.exports.saveTransportHandoffAction(form),error=>(error as{url?:string}).url==='/dashboard/support/42?queue=transport&status=overdue&q=saved+search&page=2&panel=details&error=Create+shipment+plans+from+Tracking.');
+ await assert.rejects(module.exports.saveTransportHandoffAction(form),error=>(error as{url?:string}).url==='/dashboard/support/42?queue=transport&status=overdue&q=saved+search&page=2&panel=details&error=Create+shipments+in+Shipment+tracking.');
  assert.equal(state.auth,1);assert.equal(state.mutation,0);assert.equal(state.scheduled,0);assert.deepEqual(state.revalidated,[]);
  state.authError=Error('authentication required');await assert.rejects(module.exports.saveTransportHandoffAction(form),error=>error===state.authError);assert.equal(state.mutation,0);
 });

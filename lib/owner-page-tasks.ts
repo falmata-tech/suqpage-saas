@@ -5,7 +5,6 @@ export const OWNER_PAGE_TASKS = [
   {key: 'video', label: 'Business video'},
   {key: 'color', label: 'Page color'},
   {key: 'contacts', label: 'Public contact details'},
-  {key: 'team', label: 'Allow team editing'},
 ] as const;
 export type OwnerPageTask = typeof OWNER_PAGE_TASKS[number]['key'];
 export function ownerPageTask(value: unknown): OwnerPageTask {

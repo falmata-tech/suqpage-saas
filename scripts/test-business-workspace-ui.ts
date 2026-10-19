@@ -7,10 +7,10 @@ import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 
 test('FE-026 business context keeps one global menu and permission-filtered local sections',async()=>{
-  const fixture={pathname:'/dashboard/products',pageAccess:true,groups:[] as Array<{items:Array<{href:string}>}>,OwnerPageError:class extends Error{status=403;}};
+  const fixture={pathname:'/dashboard/products',pageAccess:true,staffGrant:true,groups:[] as Array<{items:Array<{href:string}>}>,OwnerPageError:class extends Error{status=403;}};
   const result=await build({entryPoints:['components/DashboardShell.tsx'],bundle:true,write:false,format:'cjs',platform:'node',external:['react','react/jsx-runtime'],plugins:[{name:'workspace-ports',setup(b){
     b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({contents:'export default new Proxy({}, {get:(_,key)=>key});'}));
-    b.onResolve({filter:/^(next\/link|next\/navigation|@\/lib\/i18n\/server|@\/lib\/config|@\/lib\/owner-page-runtime|@\/lib\/owner-page-service|@\/lib\/owner-page-domain|@\/components\/(PublicMobileNavigation|NavigationPendingIndicator)|\.\/AttentionAlerts|@\/components\/WorkspaceNavigation)$/},a=>({path:a.path,namespace:'ports'}));
+    b.onResolve({filter:/^(next\/link|next\/navigation|@\/lib\/i18n\/server|@\/lib\/config|@\/lib\/owner-page-runtime|@\/lib\/owner-page-service|@\/lib\/owner-page-domain|@\/lib\/staff-business-authority|@\/components\/(PublicMobileNavigation|NavigationPendingIndicator)|\.\/AttentionAlerts|@\/components\/WorkspaceNavigation)$/},a=>({path:a.path,namespace:'ports'}));
     b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:
       a.path==='next/link'?`import React from 'react';export default p=><a {...p}/>;`
       :a.path==='next/navigation'?`export const usePathname=()=>fixture.pathname;`
@@ -19,6 +19,7 @@ test('FE-026 business context keeps one global menu and permission-filtered loca
       :a.path==='@/lib/owner-page-runtime'?`export const ownerPageEditorEnabled=()=>true,ownerPagePort={};`
       :a.path==='@/lib/owner-page-domain'?`export const OwnerPageError=fixture.OwnerPageError;`
       :a.path==='@/lib/owner-page-service'?`export const readOwnerPage=async()=>{if(!fixture.pageAccess)throw new fixture.OwnerPageError();};`
+      :a.path==='@/lib/staff-business-authority'?`export const currentStaffBusinessGrant=async actor=>fixture.staffGrant&&(actor.access_role==='team_member'||actor.access_role==='operations_manager'),currentBusinessAuthority=async(actor,id)=>actor.access_role==='platform_admin'?'administrator':actor.access_role==='client'&&actor.business_id===id?'owner':fixture.staffGrant&&(actor.access_role==='team_member'||actor.access_role==='operations_manager')?'staff':null;`
       :a.path==='@/components/NavigationPendingIndicator'?`import React from 'react';export const NavigationPendingProvider=p=><>{p.children}</>,NavigationPendingMain=p=><main>{p.children}</main>;`
       :a.path==='@/components/WorkspaceNavigation'?`export default p=>{fixture.groups=p.groups;return null;};`
       :`export default ()=>null;`}));
@@ -37,15 +38,25 @@ test('FE-026 business context keeps one global menu and permission-filtered loca
   const localLinks=Array.from(html.matchAll(/<nav[^>]*aria-label="Business workspace"[^>]*>(.*?)<\/nav>/g))[0]?.[1]||'';
   assert.deepEqual(Array.from(localLinks.matchAll(/<a[^>]*>([^<]+)<\/a>/g),item=>item[1]),['Overview','Your page','Products','Business details','Location &amp; visibility','Access']);
   fixture.pathname='/dashboard/catalog';html=renderToStaticMarkup(await module.exports.default({user:principal,business,children:'Categories'}));assert.match(html,/href="\/dashboard\/products\?business=18" aria-current="page"/);
-  fixture.pathname='/dashboard/admin/businesses/18/team';html=renderToStaticMarkup(await module.exports.default({user:principal,business,children:'Staff'}));assert.match(html,/href="\/dashboard\/access\?business=18" aria-current="page"/);
+  fixture.pathname='/dashboard/access';html=renderToStaticMarkup(await module.exports.default({user:principal,business,children:'Access'}));assert.match(html,/href="\/dashboard\/access\?business=18" aria-current="page"/);
   fixture.pathname='/dashboard/admin/sponsors';html=renderToStaticMarkup(await module.exports.default({user:principal,business,children:'Sponsors'}));assert.match(html,/href="\/dashboard\/admin\/discovery\/18" aria-current="page"/);
   fixture.pageAccess=false;
-  html=renderToStaticMarkup(await module.exports.default({user:{...principal,access_role:'team_member',staff_queue_scope:'transport'},business:null,children:'Queue'}));
+  const transportAgent={...principal,access_role:'team_member',staff_queue_scope:'transport'};
+  html=renderToStaticMarkup(await module.exports.default({user:transportAgent,business:null,children:'Queue'}));
   assert.ok(!html.includes('Business details')&&!html.includes('qa-showroom'),'Queue agents have no business context/editor sections.');
-  assert.deepEqual(Array.from(fixture.groups).flatMap(group=>Array.from(group.items,item=>item.href)),['/dashboard/support?queue=transport','/dashboard/tracking'],'Transport staff retain the separate independent Tracking workspace');
+  assert.deepEqual(Array.from(fixture.groups).flatMap(group=>Array.from(group.items,item=>item.href)),['/dashboard/support?queue=transport','/dashboard','/dashboard/tracking'],'Granted Transport staff have a separate Businesses destination alongside chat and Tracking');
   html=renderToStaticMarkup(await module.exports.default({user:{...principal,access_role:'team_member',staff_queue_scope:'support'},business:null,children:'Queue'}));
-  assert.deepEqual(Array.from(fixture.groups).flatMap(group=>Array.from(group.items,item=>item.href)),['/dashboard/support?queue=support','/dashboard/reports'],'Support-only staff gain neither Transport nor Tracking');
+  assert.deepEqual(Array.from(fixture.groups).flatMap(group=>Array.from(group.items,item=>item.href)),['/dashboard/support?queue=support','/dashboard/reports','/dashboard'],'Granted Support staff gain Businesses but neither Transport nor Tracking');
   assert.ok(!html.includes('Business details')&&!html.includes('qa-showroom'),'Support-only staff also have no business editor context');
+  fixture.pageAccess=true;
+  html=renderToStaticMarkup(await module.exports.default({user:transportAgent,business,children:'Record'}));
+  assert.match(html,/Location &amp; visibility/);
+  assert.doesNotMatch(html,/href="\/dashboard\/access\?business=18"/,'Staff business authority does not grant owner account access');
+  fixture.staffGrant=false;fixture.pageAccess=false;
+  html=renderToStaticMarkup(await module.exports.default({user:transportAgent,business:null,children:'Queue'}));
+  assert.deepEqual(Array.from(fixture.groups).flatMap(group=>Array.from(group.items,item=>item.href)),['/dashboard/support?queue=transport','/dashboard/tracking'],'Revoking business management removes Businesses without changing Transport or Tracking');
+  html=renderToStaticMarkup(await module.exports.default({user:transportAgent,business,children:'Record'}));
+  assert.doesNotMatch(html,/Location &amp; visibility|href="\/dashboard\/products\?business=18"/,'Revoked staff see no business task navigation');
 });
 
 import {businessListOrigin,businessListOriginParams} from '../lib/business-workspace-navigation';

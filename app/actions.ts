@@ -9,7 +9,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { clearSession, currentUser, requireUser, revokeAllUserSessions, setSession } from "@/lib/auth";
 import { authDriver } from "@/lib/config";
-import { canMaintainBasicProducts, canManageBusiness, hasCapability } from "@/lib/capabilities";
+import { canManageBusiness, hasCapability } from "@/lib/capabilities";
+import {currentBusinessAuthority} from '@/lib/staff-business-authority';
 import { runtimeBusinessById, runtimeUserByEmail } from "@/lib/catalog-runtime";
 import { runtimeGet, runtimeRun, runtimeTransaction } from "@/lib/runtime-sql";
 import { stageUploadedImage, type StagedImage } from "@/lib/media";
@@ -41,8 +42,8 @@ function go(path:string,params:Record<string,string|number|undefined>={}): never
 
 async function authorizedBusinessId(requested:number) {
   const user=await requireUser();
-  const assigned=user.access_role==="team_member"&&Boolean(await runtimeGet("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1",[user.id,requested]));
-  if(!canManageBusiness(user,requested,assigned))throw new Error("Not authorized for this business.");
+  const authority=await currentBusinessAuthority(user,requested);
+  if(!authority||!canManageBusiness(user,requested,authority==='staff'))throw new Error("Not authorized for this business.");
   if(!await runtimeBusinessById(requested))throw new Error("Business not found.");
   return {businessId:requested,user};
 }

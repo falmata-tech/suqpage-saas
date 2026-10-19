@@ -79,7 +79,8 @@ assert.doesNotMatch(`${publicFrame}\n${mobileNavigation}`, /label:\s*["']Inquiri
 assert.doesNotMatch(mobileNavigation, /t\("More"\)|aria-haspopup="dialog"/);
 assert.doesNotMatch(mobileNavigation, /label: "Home"/);
 
-assert.match(landingCss, /suqpage-public-app-canvas-v1\.webp/);
+assert.match(landingCss, /\.public-app-main \{[^}]*background: var\(--mp-canvas\)/);
+assert.doesNotMatch(landingCss, /suqpage-public-app-canvas-v1\.webp/, "Shared public pages keep text off decorative photography");
 assert.match(landingCss, /\.public-mobile-tabs \{ grid-template-columns: repeat\(4/);
 assert.match(landingCss, /\.public-market-experience > \.discovery/);
 assert.doesNotMatch(landingCss, /\.public-lobby/);

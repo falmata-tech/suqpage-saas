@@ -8,6 +8,7 @@ import { changePasswordAction, logoutAction } from "@/app/actions";
 import { requireUser } from "@/lib/auth";
 import { runtimeBusinessById } from "@/lib/catalog-runtime";
 import { authDriver } from "@/lib/config";
+import { ownerEmailChangeEnabled } from "@/lib/owner-email-runtime";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +40,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
       <p className="muted">{t('These details belong to your account. Public business contacts are managed separately in your page editor.')}</p>
     </section>}
 
-    {managed ? <section className="panel"><h2>{t("Email sign-in")}</h2><p className="muted">{t("Use a one-time code sent to your account email.")}</p></section> : <>
+    {managed ? <section className="panel"><h2>{t("Email sign-in")}</h2><p className="muted">{t("Use a one-time code sent to your account email.")}</p>{user.access_role==='client'&&ownerEmailChangeEnabled()?<Link className="btn secondary" href="/dashboard/account/email">{t('Change sign-in email')}</Link>:null}</section> : <>
       {params.required ? <p className="notice">{t("Change the temporary password before using the dashboard.")}</p> : null}
       {params.error ? <p className="error">{params.error}</p> : null}
       {params.saved ? <p className="notice">{t("Password updated and other sessions revoked.")}</p> : null}

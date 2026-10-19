@@ -41,7 +41,14 @@ async function createFixture(installSchema = true) {
   const target = new URL(connection);
   const local = ['localhost', '127.0.0.1', '[::1]'].includes(target.hostname);
   if (!local && !(process.env.CI === 'true' && process.env.SUQPAGE_TEST_POSTGRES_URL && ['postgres', 'db'].includes(target.hostname))) throw new Error('Persistence fixtures require an isolated local or CI PostgreSQL service.');
-  const config = postgresRuntimeConfig({ SUQPAGE_POSTGRES_URL: connection, SUQPAGE_POSTGRES_POOL_MAX: '1' });
+  // Fixture setup replays the entire migration history before any assertion.
+  // Give only that setup pool room when a full suite has loaded local Postgres;
+  // the application runtime created below retains its normal query timeout.
+  const config = postgresRuntimeConfig({
+    SUQPAGE_POSTGRES_URL: connection,
+    SUQPAGE_POSTGRES_POOL_MAX: '1',
+    SUQPAGE_POSTGRES_STATEMENT_TIMEOUT_MS: '30000',
+  });
   if (!config) throw new Error('A local PostgreSQL test connection is required.');
   const pool = createPostgresPool(config);
   const runner = new PostgresTransactionRunner(pool);

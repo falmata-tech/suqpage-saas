@@ -5,12 +5,12 @@ import vm from 'node:vm';
 import {createRequire} from 'node:module';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {hasCapability,isQueueAgent} from '../lib/capabilities';
+import {canMaintainBasicProducts,hasCapability,isQueueAgent} from '../lib/capabilities';
 import {supportThreadHref,supportViewState} from '../lib/support-navigation';
 
 async function page(entry:string) {
   class ScopeError extends Error {code='forbidden';status=403;}
-  const fixture={actor:{id:1,access_role:'platform_admin',business_id:null,staff_queue_scope:'all'},business:{id:18,name:'QA Shop',handle:'qa-shop',status:'active'},categories:[{id:8,name:'Doors',slug:'doors',sort_order:1,is_active:1},{id:9,name:'Windows',slug:'windows',sort_order:2,is_active:0}],products:[{id:1,category_id:8}],productPage:1,denied:false,history:[] as unknown[],historyCalls:0};
+  const fixture={actor:{id:1,access_role:'platform_admin',business_id:null,staff_queue_scope:'all'},staffGrant:true,business:{id:18,name:'QA Shop',handle:'qa-shop',status:'active'},categories:[{id:8,name:'Doors',slug:'doors',sort_order:1,is_active:1},{id:9,name:'Windows',slug:'windows',sort_order:2,is_active:0}],products:[{id:1,category_id:8}],productPage:1,denied:false,history:[] as unknown[],historyCalls:0};
   const result=await build({entryPoints:[entry],bundle:true,write:false,format:'cjs',platform:'node',external:['react','react/jsx-runtime'],plugins:[{name:'record-screen-ports',setup(b){
     b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({contents:'export default new Proxy({}, {get:(_,key)=>key});'}));
     b.onResolve({filter:/^(next\/(link|navigation)|@\/)/},a=>['@/lib/business-workspace-navigation','@/lib/product-workspace-navigation','@/lib/support-navigation','@/components/StaffWorkspaceNavigation'].includes(a.path)?undefined:({path:a.path,namespace:'ports'}));
@@ -20,11 +20,12 @@ async function page(entry:string) {
       :a.path==='@/lib/auth'?`export const requireUser=async()=>fixture.actor;`
       :a.path==='@/lib/config'?`export const authDriver=()=> 'supabase';`
       :a.path==='@/lib/i18n/server'?`export const getUiText=async()=>s=>s;`
-      :a.path==='@/lib/capabilities'?`export const hasCapability=capability,isQueueAgent=queueAgent;`
+      :a.path==='@/lib/capabilities'?`export const hasCapability=capability,isQueueAgent=queueAgent,canMaintainBasicProducts=maintainProducts;`
+      :a.path==='@/lib/staff-business-authority'?`export const currentStaffBusinessGrant=async actor=>fixture.staffGrant&&(actor.access_role==='team_member'||actor.access_role==='operations_manager'),currentBusinessAuthority=async(actor,id)=>actor.access_role==='platform_admin'?'administrator':actor.access_role==='client'&&actor.business_id===id?'owner':fixture.staffGrant&&(actor.access_role==='team_member'||actor.access_role==='operations_manager')?'staff':null;`
       :a.path==='@/lib/dashboard'?`export const resolveBusiness=async()=>fixture.business,resolveProductBusiness=async()=>fixture.business;`
       :a.path==='@/lib/catalog-runtime'?`export const runtimeCatalogByBusinessId=async()=>({business:fixture.business,categories:fixture.categories,products:fixture.products});`
       :a.path==='@/lib/account-health'?`export const getShowroomInsights=async()=>({totalVisitors:12,last30Days:8});`
-      :a.path==='@/lib/scalable-queries'?`export const getBusinessActivityCounts=async()=>({products:1}),listBusinessClientAccess=async()=>[{name:'QA Owner'}],listBusinessesPage=async()=>({items:[{id:18,name:'QA Shop',handle:'qa-shop',status:'active'}]}),listAssignedBusinessesPage=async()=>({items:[]}),listProductsPage=async()=>({items:[],page:fixture.productPage,pages:fixture.productPage,pageSize:12,total:0,firstItem:0,lastItem:0}),listStaffPage=async()=>({items:[{id:8,name:'QA agent',email:'qa@example.invalid',access_role:'team_member',queue_scope:'transport',open_conversations:137}]});`
+      :a.path==='@/lib/scalable-queries'?`export const getBusinessActivityCounts=async()=>({products:1}),listBusinessClientAccess=async()=>[{name:'QA Owner'}],listBusinessesPage=async()=>({items:[{id:18,name:'QA Shop',handle:'qa-shop',status:'active'}]}),listAssignedBusinessesPage=async()=>({items:[]}),listProductsPage=async()=>({items:[],page:fixture.productPage,pages:fixture.productPage,pageSize:12,total:0,firstItem:0,lastItem:0}),listStaffPage=async()=>({items:[{id:8,name:'QA agent',email:'qa@example.invalid',access_role:'team_member',queue_scope:'transport',open_conversations:137,manage_businesses:true}]});`
       :a.path==='@/lib/discovery-admin'?`export const getDiscoveryProfileAdminView=async()=>({city:'Addis Ababa'});`
       :a.path==='@/lib/owner-page-runtime'?`export const ownerPagePort={};`
       :a.path==='@/lib/owner-page-domain'?`export const OwnerPageError=ScopeError;`
@@ -37,7 +38,7 @@ async function page(entry:string) {
       :`export const createCategoryAction=()=>{},updateCategoryAction=()=>{},deleteCategoryAction=()=>{};`}));
   }}]});
   const module={exports:{} as {default:(p:Record<string,unknown>)=>Promise<React.ReactNode>}};
-  vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,fixture,ScopeError,capability:hasCapability,queueAgent:isQueueAgent,threadHref:supportThreadHref,viewState:supportViewState,require:createRequire(import.meta.url),Intl,Date,Number,URLSearchParams});
+  vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,fixture,ScopeError,capability:hasCapability,queueAgent:isQueueAgent,maintainProducts:canMaintainBasicProducts,threadHref:supportThreadHref,viewState:supportViewState,require:createRequire(import.meta.url),Intl,Date,Number,URLSearchParams});
   return {fixture,render:async(query:Record<string,string>={})=>renderToStaticMarkup(await module.exports.default({searchParams:Promise.resolve(query),params:Promise.resolve({id:'42'})}))};
 }
 
@@ -54,7 +55,9 @@ test('FE-026 selected business overview shows saved status/activity without a du
   const {render,fixture}=await page('app/dashboard/page.tsx');let html=await render({business:'18'});
   assert.match(html,/<h1>Overview/);assert.match(html,/Preview page/);assert.match(html,/Page visits/);assert.match(html,/QA Owner/);assert.doesNotMatch(html,/<form|<details|client-workspace-actions|Edit page|Owner sign-in.*<input/);
   for(const href of ['/dashboard/products?business=18','/dashboard/settings?business=18','/dashboard/admin/discovery/18','/dashboard/access?business=18'])assert.ok(html.includes(`href="${href}"`),href);
-  fixture.actor.access_role='team_member';html=await render({business:'18'});assert.doesNotMatch(html,/href="\/dashboard\/(?:settings|access)|href="\/dashboard\/admin\/discovery/,'Staff cannot gain privileged business administration through contextual links');
+  fixture.actor.access_role='team_member';html=await render({business:'18'});
+  assert.match(html,/href="\/dashboard\/products\?business=18"/);
+  assert.doesNotMatch(html,/href="\/dashboard\/access|href="\/dashboard\/admin\/discovery|href="\/dashboard\/settings/,'Business-management staff do not inherit administrator-only overview links or owner account access');
 });
 
 test('FE-026 business directory uses one entity name and preserves bounded workspace origins',async()=>{
@@ -70,9 +73,8 @@ test('FE-026 Staff accounts and workload are peer tasks and records open the foc
   const html=await render({q:'QA',page:'2',role:'transport_agent'});
   assert.match(html,/href="\/dashboard\/admin\/staff" aria-current="page">Accounts/);
   assert.match(html,/href="\/dashboard\/support\/agents">Workload &amp; availability/);
-  const target=html.match(/href="([^"]*edit=8[^"]*)"/)?.[1].replaceAll('&amp;','&');assert.ok(target);
-  const url=new URL(target,'https://suqpage.invalid');assert.equal(url.pathname,'/dashboard/support/agents');
-  for(const[key,value]of Object.entries({edit:'8',q:'qa@example.invalid',back_origin:'staff',back_q:'QA',back_page:'2',back_role:'transport_agent'}))assert.equal(url.searchParams.get(key),value);
+  assert.match(html,/Business management is on/);
+  assert.match(html,/href="\/dashboard\/admin\/staff\/8"[^>]*>Manage<\/a>/,'Staff records open their own focused account workspace');
   assert.doesNotMatch(html,/<details|name="queueScope"|name="enabled"/);
   for(const access_role of ['operations_manager','team_member','client']){fixture.actor.access_role=access_role;await assert.rejects(render(),error=>(error as {url?:string}).url==='/dashboard');}
 });

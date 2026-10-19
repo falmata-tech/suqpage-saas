@@ -10,6 +10,37 @@ change_level: L3
 
 # DEP-043 — Verified notification delivery rollout
 
+## Ready: compatible browser wire and canonical display
+
+The finite BE-059/FE-070/DEP-049 local split is Ready. Preserve Suqpage as the
+browser wire token so installed old workers still receive alerts; the new exact
+dual-title workers display only MirtPage, and validated Expo payloads use
+MirtPage. Preserve channel/tag/subscription/source/delivery IDs, recipient and
+queue authority, quiet behavior and internal tap validation. Prove old-worker
+wire compatibility plus both new displayed-title branches in executed fixtures;
+do not claim fleet update, permission, provider delivery or device evidence from
+source tests. No provider/credential/SMTP/origin or app-mail retry change occurs.
+
+Focused source evidence now passes11 actual-worker VM cases, including the exact
+published old worker, plus isolated PostgreSQL web/Expo dispatch with retained
+shared-token isolation/revocation/privacy/retry assertions. New workers display
+MirtPage; old installations may retain their previous title. Channel/ID and safe
+tap/quiet checks remain intact. This is not permission, OS/device, provider or
+hosted-worker activation evidence.
+
+## Ready: MirtPage Android client selection
+
+DEP-049's local default-identity phase now selects only the real new MirtPage
+Firebase app through MIRTPAGE_GOOGLE_SERVICES_FILE, without falling back to the
+old file variable. Pin project/number/package/appID and exact downloaded bytes;
+both legitimate clients in that file remain intact. Missing/wrong/private client
+material stops the worker even if notifications are disabled. The approved M
+supplies a white-alpha96px notification icon and canonical orange tint. Channel
+IDs, token registrations, sounds, web delivery and private FCM keys are unchanged.
+Actual new-package EAS/FCM binding and device delivery remain unverified until
+their separate guarded operations. Earlier one-app statements describe releases
+made before this owner-selected new package.
+
 ## S126 — fair assignment deadlines and admin escalation emails (ready)
 
 Newest owner steering adds operational email alongside the existing in-app alert;

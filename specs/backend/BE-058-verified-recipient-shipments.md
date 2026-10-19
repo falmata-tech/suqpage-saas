@@ -2,13 +2,108 @@
 id: BE-058
 title: Email-verified recipients and independent shipment plans
 status: in_progress
-related: [BE-057, BE-044, FE-069, DEP-048]
+related: [BE-057, BE-044, FE-049, FE-053, FE-069, DEP-048]
 owners: [backend, security, operations]
 last_updated: 2026-10-18
 change_level: L3
 ---
 
 # BE-058 — Verified recipient shipments
+
+## S145 follow-on — provider tracking details (backend locally verified; UI/rollout pending)
+
+The latest owner direction names the active feature **Shipment tracking**.
+FE-069 owns visible terminology and web/native tasks; DEP-048 owns additive75
+and rollout. These are optional authored carrier details, not an integration.
+Root reviewed and accepted this controlling contract before implementation.
+
+Each active Tracking leg may have an independent `trackingUrl` and `trackingCode`.
+Use Tracking-only leg/input types; do not widen the retired BE-057
+`TransportPlanLeg` or parser. Missing/null/empty legacy values normalize to empty
+strings on read/command parsing without rewriting existing JSON, events or mail
+jobs. New semantic equality includes both fields. Before later shipment edits,
+retrying an old accepted Submit with identical values and its original caller key
+returns the same shipment and enqueues no new event/email. Equality compares the
+current shipment: after staff edit it, replay of the original values may conflict.
+That conflict must change no row/event/job and must never create a second shipment
+or email. Supplying different nonempty values with the key likewise conflicts
+rather than silently replacing the existing shipment.
+
+`trackingUrl` is trimmed, optional, HTTPS and at most2048 characters. Admit public
+DNS-host syntax without a carrier allowlist or DNS lookup. Reject credentials,
+every explicit port (including443), raw/encoded controls or backslash, single-label
+or local/private-suffix hosts (`localhost`, `localdomain`, `local`, `internal`,
+`lan`, `home`, `corp`, and `home.arpa`), all IPv4/IPv6 literals and unsafe schemes. The pure
+parser returns the canonical URL or empty string and is reused/rechecked at
+web/native explicit-open boundaries. This is neither carrier verification nor a
+promise about DNS resolution. Never fetch, preview, embed, scrape or expand it;
+never append the code, recipient identity, OTP or MirtPage credentials.
+`trackingCode` is optional plain Unicode text, trimmed, at most120 characters,
+with no controls/unpaired surrogates; preserve case and internal punctuation/
+spacing. It is a provider code, never the recipient email-verification code.
+Either field can exist without the other. Unknown keys and all prior leg/type/
+stable-ID/method/order rules still reject. A normalized command's serialized legs
+are bounded to60000 UTF-8 bytes; FE-069 retains a useful draft on invalid input.
+
+Fresh transport/manager authority, immutable recipient ownership, OTP/session
+isolation, optimistic versioning, no-op edits, audit and idempotency are unchanged.
+Only staff and the freshly verified shipment recipient receive the new values;
+list summaries remain small and do not expose leg URLs/codes. Ordinary edits do
+not send email or affect chats. Initial emails continue to omit these optional
+fields; their separate visible terminology correction follows the mail-boundary
+contract below. No scans, computed status, ETA, current carrier/custody or delivery
+claim is inferred from a link/code, provider order or clicks.
+
+GIVEN a legacy row/event without new keys WHEN read or replayed before later
+shipment edits THEN empty optional values are projected, identical accepted Submit
+returns the same shipment, and every stored row/event/job/key stays unchanged.
+GIVEN staff have changed that shipment WHEN the original caller key and original
+values are retried THEN a conflict may be returned, with every Tracking-table
+fingerprint unchanged and no second shipment or email. GIVEN a new or edited ordered1–12-leg shipment
+WHEN one/many providers have either/both fields THEN authorized detail preserves
+the exact code and validated URL per stable leg through rename/reorder/reload.
+GIVEN a changed code/link with the old caller key THEN conflict with no mutation;
+GIVEN stale version, foreign email, revoked session/role/shipment or support-only
+staff THEN deny before detail/304/write exactly as before. GIVEN unsafe/oversized
+input THEN no partial shipment/event/outbox write or network side effect.
+
+Mapped implemented tests: `scripts/test-tracking.ts` covers actual legacy JSON/
+idempotent replay, new fields/order/version/no-op, authorization/304 and no extra
+email; `scripts/test-tracking-provider-fields.ts` covers pure URL/code/byte-bound
+negatives, and `scripts/test-tracking-provider-migration.ts` covers isolated75
+rollback/replay/data/ACL outcomes. Both are registered in the existing PostgreSQL
+readiness pipeline.
+Retain BE-057 parser/legacy tests and every existing recipient/lease/retry negative.
+Old queued and leased code/initial snapshots must parse safely without rewrites;
+new optional portal fields must not enter initial-email serialized content.
+
+Local backend evidence (2026-10-18): all21 bounded isolated PostgreSQL/pure
+scripts pass in `.local/mirtpage-rebrand-s145/shipment-provider-details/focused75/focused-tests.json`,
+including actual OTP/roles/304, old stored JSON/caller-key replay, queued snapshot
+preservation and serialized initial-email exclusion. The new five-case pure
+suite passes after the final URL/error-message precision changes; scoped strict
+types pass. The initial test-launch/fixture diagnostics remain in
+`shipment-provider-details/precision-initial-failures.json`; neither changes the
+21-script result or weakens prior assertions. Source-bound independent peer,
+ordinary-local migration, real UI/Chrome/Expo/visual review and fresh full gates
+remain separate dependencies; these fixtures are not hosted-backup rehearsal.
+The peer-identified replay wording ambiguity is resolved above without changing
+production behavior. A focused real PostgreSQL post-edit original-key conflict
+regression proves exact Tracking-table fingerprints remain unchanged; that full
+Tracking script, the five-case parser suite and scoped strict types pass again.
+
+### Shipment-tracking email terminology boundary
+
+The active initial-email subject/body changes from shipment-plan wording to
+shipment-tracking wording in enabled en/am/om, with inactive fallback consistency.
+This is a separate rendering-context change: before editing a hot local renderer,
+repeat the reviewed exact web/worker stop and two stopped-state zero pending/
+sending/all-lease snapshots, preserve Expo and restore the same supervisor once.
+A live zero snapshot is insufficient. Preserve addresses/origin/provider keys,
+Message-ID namespace, initial snapshot and all delivery guards; do not include
+new provider links/codes or reset/delete jobs. Nonzero/in-flight work stops this
+copy change for an exact drain/immutable-envelope review. Hosted empty-bootstrap,
+Auth templates and production activation remain separate DEP-049 operations.
 
 ## S141 correction — create before verification (ready; latest owner direction)
 

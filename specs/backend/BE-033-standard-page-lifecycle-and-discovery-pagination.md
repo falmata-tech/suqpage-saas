@@ -2,13 +2,24 @@
 id: BE-033
 title: Standard page lifecycle and server-paginated discovery
 status: in_progress
-related: [BE-041, FE-042, FE-026, BE-001, BE-003, BE-032, DEP-030, ADR-0019, BE-009, BE-034]
+related: [BE-041, FE-042, FE-026, BE-001, BE-003, BE-032, DEP-030, ADR-0019, BE-009, BE-034, BE-060, FE-072]
 owners: [backend, security, operations]
 last_updated: 2026-10-17
 change_level: L3
 ---
 
 # BE-033 — Standard page lifecycle and discovery pagination
+
+## Planned S146 — staff business management replaces owner consent
+
+BE-060/FE-072 supersede the active-assignment and owner-consent conditions for
+staff page, category, product and media work only after the new global grant is
+deployed and verified. Current staff with an enabled grant may work across
+businesses; revoked/missing grants fail closed at current role and transaction
+checks. The existing discovery pagination, private-draft/publication readiness,
+versioning and tenant record boundaries stay. Historical assignments are retained
+for audit but no longer authorize business management. The earlier S115 and
+criterion4 text below describes the present contract until S146 is live.
 
 ## S115 — category mutations recheck the saved staff function (ready)
 

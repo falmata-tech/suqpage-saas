@@ -31,7 +31,7 @@ test('FE-026 focused account save binds the actor and only permits account/profi
 for(const screen of ['business','account'])test(`FE-026 owner ${screen} opens saved details before one deliberate editor`,async()=>{
   const fixture={user:{id:7,name:'QA Owner',email:'qa@example.invalid',business_id:18,access_role:'client'},business:{id:18,name:'QA Store',handle:'qa-store',logo_path:'',content_version:4},setup:{business:{name:'QA Store',logo_path:'',content_version:4},category:'electronics',proposal:{country_code:'ET',city:'Addis Ababa'},existing:null}};
   const result=await build({entryPoints:[`app/dashboard/${screen}/page.tsx`],bundle:true,write:false,format:'cjs',platform:'node',external:['react','react/jsx-runtime'],plugins:[{name:'owner-page-ports',setup(b){
-    b.onResolve({filter:/^(next\/link|next\/navigation|@\/lib\/(?:i18n\/server|auth|config|catalog-runtime|account-contact-runtime|owner-business-runtime|business-handle-runtime)|@\/components\/|\.\/(actions|handle-actions)$)/},a=>({path:a.path,namespace:'ports'}));
+    b.onResolve({filter:/^(next\/link|next\/navigation|@\/lib\/(?:i18n\/server|auth|config|catalog-runtime|account-contact-runtime|owner-business-runtime|business-handle-runtime|owner-email-runtime)|@\/components\/|\.\/(actions|handle-actions)$)/},a=>({path:a.path,namespace:'ports'}));
     b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:
       a.path==='next/link'?`import React from 'react';export default props=><a {...props}/>;`
       :a.path==='next/navigation'?`export const redirect=url=>{throw Error(url);};`
@@ -42,6 +42,7 @@ for(const screen of ['business','account'])test(`FE-026 owner ${screen} opens sa
       :a.path.endsWith('owner-business-runtime')?`export const readOwnerBusiness=async()=>fixture.setup;`
       :a.path.endsWith('business-handle-runtime')?`export const readHandleSettings=async()=>({handle:'qa-store'});`
       :a.path.endsWith('account-contact-runtime')?`export const accountContactPort={read:async()=>({account_phone:'+12025550123'})};`
+      :a.path.endsWith('owner-email-runtime')?`export const ownerEmailChangeEnabled=()=>false;`
       :a.path.endsWith('DashboardShell')?`import React from 'react';export default p=><main>{p.children}</main>;`
       :a.path.endsWith('OwnerBusinessForm')?`import React from 'react';export default p=><div data-editor="OwnerBusinessForm" data-return={p.returnTo} data-cancel={p.cancelHref}><a href={p.cancelHref}>Cancel</a></div>;`
       :a.path.includes('/components/')?`import React from 'react';export default p=><div data-editor="${a.path.split('/').at(-1)}" data-return={p.returnTo}/>;`

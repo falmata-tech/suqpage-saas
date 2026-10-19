@@ -9,7 +9,7 @@ import { createPostgresPublicClientWorkspace } from '../lib/signup-postgres';
 import { runtimeCatalogByBusinessId,runtimeUserById } from '../lib/catalog-runtime';
 import { initialBusinessProfile } from '../lib/business-profile';
 import { ownerPagePort } from '../lib/owner-page-runtime';
-import { startOwnerPage,saveOwnerPage,readOwnerPage,setOwnerPageAssistance } from '../lib/owner-page-service';
+import { startOwnerPage,saveOwnerPage,readOwnerPage } from '../lib/owner-page-service';
 import { pageReviewPort } from '../lib/page-review-runtime';
 import { submitPageReview,decidePageReview } from '../lib/page-review';
 import { runtimePublishedPage } from '../lib/owner-page-publication-runtime';
@@ -18,7 +18,7 @@ import { pagePublicationPort } from '../lib/owner-page-publication-runtime';
 import { executeBasicProductUpkeep } from '../lib/product-upkeep';
 import { postgresProductUpkeepPort } from '../lib/product-upkeep-postgres';
 import { changeProductCategory,type CategoryChange } from '../lib/product-categories';
-import { setBusinessAssignment } from '../lib/business-assistance';
+import { setStaffBusinessGrant,getStaffBusinessGrant } from '../lib/staff-operations';
 import { stageTenantProductImage,readTenantProductImage } from '../lib/tenant-product-media';
 import { migratePostgresDatabase } from '../lib/postgres-migrations';
 import type { SessionUser } from '../lib/types';
@@ -33,6 +33,7 @@ async function categorySecurity(){
   async function account(name:string,role:SessionUser['access_role'],tenant:number|null=null,scope?:'all'|'support'|'transport'){
    const id=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id) VALUES(?,'unused',?,'admin',?)").run(name+'@example.test',name,tenant)).insertedId);
    await db.prepare('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)').run(id,role);
+   if(role==='team_member'||role==='operations_manager')await db.prepare('INSERT INTO staff_business_grants(user_id,enabled,version,updated_at) VALUES(?,1,1,1)').run(id);
    if(scope)await db.prepare('INSERT INTO support_agent_settings(user_id,enabled,updated_by_user_id,updated_at,queue_scope) VALUES(?,1,?,1,?)').run(id,id,scope);
    return (await runtimeUserById(id))!;
   }
@@ -48,19 +49,18 @@ async function categorySecurity(){
   const snapshot=async()=>({categories:await db.prepare('SELECT id,business_id,name,slug,sort_order,is_active FROM categories ORDER BY id').all(),products:await db.prepare('SELECT id,business_id,category_id FROM products ORDER BY id').all(),versions:await db.prepare('SELECT id,content_version FROM businesses ORDER BY id').all(),audits:await db.prepare('SELECT id,business_id,action FROM audit_logs ORDER BY id').all()});
   async function denied(actor:SessionUser){const before=await snapshot();for(const command of commands)await assert.rejects(()=>changeProductCategory(actor,command),/access/);assert.deepEqual(await snapshot(),before,'Denied category commands preserve rows, product relations, versions and audit history');}
   await denied(foreign);
-  for(const agent of [support,transport]){
-   await denied(agent);
-   await denied({...agent,staff_queue_scope:'all'});
-   await denied({...agent,access_role:'platform_admin'});
-  }
+  for(const agent of [support,transport])await denied({...agent,access_role:'platform_admin'});
   const beforeForeign=await snapshot();for(const kind of ['update','delete'] as const)await assert.rejects(()=>changeProductCategory(owner,{kind,businessId,id:foreignCategory,name:'Foreign mutation',slug:'foreign-mutation'}),/not found/);assert.deepEqual(await snapshot(),beforeForeign);
-  for(const actor of [generic,genericAll]){
+  for(const actor of [generic,genericAll,support,transport]){
    await changeProductCategory(actor,{kind:'create',businessId,name:'Assigned '+actor.id,slug:'assigned-'+actor.id});
    await changeProductCategory(actor,{kind:'update',businessId,id:category.id,name:'Assigned update',slug:'owner-category',active:true});
    const assignedCategory=await db.prepare('SELECT id FROM categories WHERE business_id=? AND slug=?').get(businessId,'assigned-'+actor.id);
    await changeProductCategory(actor,{kind:'delete',businessId,id:assignedCategory.id});
   }
-  await db.prepare('UPDATE staff_business_assignments SET active=0 WHERE user_id=? AND business_id=?').run(generic.id,businessId);await denied(generic);
+  const grant=await getStaffBusinessGrant(admin,generic.id);
+  await setStaffBusinessGrant(admin,generic.id,false,grant.version);
+  await denied(generic);
+  assert.equal((await db.prepare('SELECT active FROM staff_business_assignments WHERE user_id=? AND business_id=?').get(generic.id,businessId)).active,1,'Historical assignment remains but grants no authority');
   await db.prepare("UPDATE user_access_profiles SET access_role='client' WHERE user_id=?").run(genericAll.id);await denied(genericAll);
   const beforeAudit=await snapshot();
   await db.exec("CREATE FUNCTION reject_category_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'fixture category audit unavailable'; END $$; CREATE TRIGGER reject_category_audit BEFORE INSERT ON audit_logs FOR EACH ROW EXECUTE FUNCTION reject_category_audit()");
@@ -69,7 +69,7 @@ async function categorySecurity(){
   await changeProductCategory(owner,{kind:'delete',businessId,id:category.id});
   assert.equal((await db.prepare('SELECT category_id FROM products WHERE id=?').get(productId)).category_id,null,'Authorized deletion preserves the product without its category');
   assert.equal((await db.prepare('SELECT name FROM categories WHERE id=?').get(foreignCategory)).name,'Foreign category');
-  console.log('PASS isolated category security: current/stale support and transport roles, retained assignments, generic staff, owner/foreign/revoked boundaries, all commands, audit rollback and product preservation.');
+  console.log('PASS isolated category security: support/transport business grants, retained inert assignments, owner/foreign/revoked boundaries, all commands, audit rollback and product preservation.');
  }finally{await closeDbForTests();}
 }
 async function main(){
@@ -96,7 +96,8 @@ async function main(){
   await assert.rejects(()=>submitPageReview(ownerPagePort,pageReviewPort,foreign,bid,draft.version),/Only the owner/);
   await assert.rejects(()=>submitPageReview(ownerPagePort,pageReviewPort,owner,bid,draft.version),/Add a product/);
   await changeProductCategory(owner,{kind:'create',businessId:bid,name:'Sensors',slug:'sensors'});
-  const category=(await runner.query<{id:number}>('SELECT id FROM categories WHERE business_id=?',[bid])).rows[0];
+  const category=(await runner.query<{id:number}>("SELECT id FROM categories WHERE business_id=? AND slug='sensors'",[bid])).rows[0];
+  assert.ok(category,'The test edits the category it just created, not a starter category');
   await assert.rejects(()=>changeProductCategory(foreign,{kind:'delete',businessId:bid,id:category.id}),/access/);
   catalog=(await runtimeCatalogByBusinessId(bid,true))!;
   const png=await sharp({create:{width:12,height:12,channels:3,background:'#446677'}}).png().toBuffer();
@@ -121,16 +122,16 @@ async function main(){
   assert.equal((await runtimePublishedPage(bid))?.about,draft.content.about);assert.equal((await pageReviewPort.readiness(bid))?.status,'active');assert.ok((await readTenantProductImage(key,null))?.isPublic);
   await runner.query("UPDATE businesses SET status='suspended' WHERE id=?",[bid]);assert.equal(await readTenantProductImage(key,null),null);await runner.query("UPDATE businesses SET status='active' WHERE id=?",[bid]);
   await assert.rejects(()=>decidePageReview(pageReviewPort,admin,bid,submitted.submission,'approve',''),/changed/);
-  await assert.rejects(()=>readOwnerPage(ownerPagePort,admin,bid),/access/);
-  draft=await setOwnerPageAssistance(ownerPagePort,owner,bid,draft.version,true);assert.ok(await readOwnerPage(ownerPagePort,admin,bid));
-  await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,admin,bid,{action:'publish',version:draft.version,revision:1}),/Only the owner/);
+  assert.ok(await readOwnerPage(ownerPagePort,admin,bid));
+  assert.equal((await changePagePublication(ownerPagePort,pagePublicationPort,admin,bid,{action:'publish',version:draft.version,revision:1})).publishedBy,admin.id);
   const staff=(await runner.query<SessionUser>(`${userQuery} WHERE p.access_role='team_member' ORDER BY u.id LIMIT 1`)).rows[0];
   assert.ok(staff,'Local staff fixture exists');
-  await assert.rejects(()=>setBusinessAssignment(owner,bid,staff.id,true),/Administrator/);
-  await setBusinessAssignment(admin,bid,staff.id,true);assert.ok(await readOwnerPage(ownerPagePort,staff,bid));
-  await setBusinessAssignment(admin,bid,staff.id,false);await assert.rejects(()=>readOwnerPage(ownerPagePort,staff,bid),/access/);
+  assert.ok(await readOwnerPage(ownerPagePort,staff,bid));
+  const staffGrant=await getStaffBusinessGrant(admin,staff.id);
+  await setStaffBusinessGrant(admin,staff.id,false,staffGrant.version);
+  await assert.rejects(()=>readOwnerPage(ownerPagePort,staff,bid),/access/);
   assert.equal((await runner.query<{n:string}>('SELECT COUNT(*) n FROM service_requests')).rows[0].n,requestsBefore);
-  console.log('PASS draft owner categories/products/private media, foreign denial, exact-version review, feedback/resubmit/atomic publication, consent and direct staff assignment, signup without requests; all database fixtures rolled back');
+  console.log('PASS draft owner categories/products/private media, foreign denial, exact-version review, feedback/resubmit/atomic publication, admin-controlled staff grant, signup without requests; all database fixtures rolled back');
   throw rollback;
  });}catch(error){if(error!==rollback)throw error;}finally{await (staged as StagedImage | null)?.discard();await closePostgresRuntimeForTests();}
 }

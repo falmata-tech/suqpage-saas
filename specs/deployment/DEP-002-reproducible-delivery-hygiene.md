@@ -31,8 +31,8 @@ four-tenant application behavior and single-instance pilot boundary.
   and final image, including bundles left by a previous deployment.
   Dependency builds may reuse a BuildKit npm download cache; `npm ci` still
   verifies the lockfile and package integrity on each fresh dependency layer.
-- Make the release script the canonical CI core gate and retain independent
-  operations, browser, and container evidence.
+- Make the selected web release script the canonical web CI core gate and retain
+  independent operations, browser, container, dependency, and PostgreSQL evidence.
 - Build, seed, start, health-check, and clean up an isolated non-root container
   without printing generated credential values.
 - Require exact production Server Action origins to be available while Next.js
@@ -81,8 +81,11 @@ four-tenant application behavior and single-instance pilot boundary.
 
 ## Contracts
 
-- `npm run release` remains the single core release contract. CI invokes it
-  rather than maintaining a partial duplicate.
+- `npm run release:web` is the web CI core contract. Its clean root/shared-contract
+  install rejects Expo/native tooling and audits all selected web/build dependencies
+  at the existing moderate threshold. CI invokes it rather than maintaining a
+  partial duplicate. `npm run release` retains the separate full-monorepo audit
+  for Android admission; a passing web PR is not native artifact approval.
 - CI additionally invokes operations, Chromium acceptance, an isolated
   container smoke command, dependency audit, and PostgreSQL migration rehearsal
   in separate bounded jobs.
@@ -123,11 +126,18 @@ Scenario: Private local state is excluded from a normal Docker build
   THEN those paths are absent from the build context and final image
   AND the application image still builds successfully
 
-Scenario: CI and local release use the same core contract
-  GIVEN a clean locked dependency installation
+Scenario: CI and local web release use the same selected contract
+  GIVEN a clean locked root and shared-contract dependency installation
   WHEN the GitHub core job runs
-  THEN it invokes the complete release contract including production HTTP smoke tests
-  AND operations, browser, and container workflows retain independent evidence
+  THEN it invokes the complete web release contract including production HTTP smoke tests
+  AND the dependency job independently rejects native tooling and audits the selected web/build graph
+  AND operations, browser, container, and PostgreSQL workflows retain independent evidence
+
+Scenario: Web admission cannot silently approve Android
+  GIVEN a passing web CI run and a planned Android App Bundle
+  WHEN Android admission is evaluated
+  THEN the full monorepo audit still runs at the moderate threshold
+  AND any advisory exception needs a fresh exact artifact-scoped owner decision
 
 Scenario: Isolated container proves the production runtime
   GIVEN a freshly built image and a temporary persistent volume
@@ -210,7 +220,7 @@ tokens, or environment secrets.
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Docker context excludes private/generated state | integration | `scripts/test-container.mjs` and `.dockerignore` assertions |
-| CI invokes canonical release and separate evidence | contract | `scripts/test-workflow.mjs` |
+| CI invokes selected web release, retains independent evidence and separate Android audit | contract | `scripts/test-workflow.mjs`, `scripts/test-web-install.cjs` |
 | Image setup, non-root preflight, health, safe cleanup | operations | `scripts/test-container.mjs` |
 | Exact build-time Server Action origins | integration | `scripts/test-container.mjs` and serialized config assertion |
 | Shared exact development origin policy | security/contract | `scripts/test-security.ts`, `scripts/test-container.mjs` |

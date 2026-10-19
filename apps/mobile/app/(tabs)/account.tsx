@@ -174,7 +174,6 @@ export default function Account() {
         </>
       )}
       {!session&&<><Button secondary label={t("About MirtPage")} onPress={()=>router.navigate("/about")}/>
-      <Button secondary label={t('Blocked businesses')} onPress={()=>router.push('/blocked-businesses')}/>
       <Button secondary label={t("Privacy")} onPress={()=>void openLink(API+"/privacy")}/>
       <Button secondary label={t("Terms")} onPress={()=>void openLink(API+"/terms")}/></>}
     </Screen>

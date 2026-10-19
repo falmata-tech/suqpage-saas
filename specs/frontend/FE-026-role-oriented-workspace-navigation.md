@@ -2,13 +2,38 @@
 id: FE-026
 title: Role-oriented workspace navigation
 status: in_progress
-related: [FE-065, BE-032, BE-033, FE-013, FE-017, FE-019, FE-025, FE-029, FE-031, FE-032, FE-033, FE-034, FE-035, FE-053, BE-018, BE-026, BE-028, BE-044, DEP-021, DEP-022, ADR-0013, FE-062, FE-056, FE-047, BE-054]
+related: [FE-065, BE-032, BE-033, FE-013, FE-017, FE-019, FE-025, FE-029, FE-031, FE-032, FE-033, FE-034, FE-035, FE-053, BE-018, BE-026, BE-028, BE-044, DEP-021, DEP-022, ADR-0013, FE-062, FE-056, FE-047, BE-054, FE-072, BE-060]
 owners: [product, frontend, operations, design]
 last_updated: 2026-10-17
 change_level: L2
 ---
 
 # FE-026 - Role-oriented workspace navigation
+
+## S146 local candidate — one staff business authority
+
+FE-072/BE-060 remove the administrator's per-business Staff assistance task
+from Access and place one per-person Manage businesses grant in Staff. Granted
+Support and Transport team members gain a bounded Businesses directory and the
+usual business task workspace without changing their chat queue access. A revoke
+removes that directory and denies old direct links. The local schema77 preview
+uses this grant; the deployed Access/assignment workflow remains described below
+until separately reviewed hosted rollout.
+
+GIVEN an owner opens a nested Account settings task such as Change sign-in email
+WHEN the pointer remains over a different workspace link such as Support
+THEN only Account settings has the current-page state, and hover remains visibly
+distinct from the selected destination in the desktop sidebar. The owner phone
+layout retains its single Account tab as current; pointer position never changes
+the current destination.
+
+The owner separately approved the focused Account navigation-hover and FE-073
+wrapped-email layouts after installed-Chrome desktop/phone captures; evidence is
+`.local/s146-browser-review/nav-hover-1440.png`,
+`owner-email-change-idle-390.png` and `receipt-email-only.json`. The hover browser
+aggregate stopped on a test-harness phone-drawer expectation; its desktop
+hover/current assertion passed, while phone evidence is a capture rather than a
+new complete journey. Full gates and hosted rollout remain pending.
 
 ## S122 — finish verified workspace workflow gaps (implemented locally; review pending)
 
@@ -415,6 +440,7 @@ private showroom content in navigation telemetry.
 | Role isolation and agent mutations | security/integration | `scripts/test-security.ts`, `scripts/test-support.ts` |
 | Pagination and attention links | integration | `scripts/test-scalable-queries.ts`, `scripts/test-dashboard-attention.ts` |
 | Desktop/mobile navigation and no overflow | browser | `tests/acceptance/app.spec.ts`, workspace capture script |
+| One selected owner Account task and distinct hover preview | browser | `.local/s146-browser-review/nav-hover.mjs`, `receipt-nav-hover.json`, and `nav-hover-1440.png`; phone evidence in `owner-email-change-idle-390.png` |
 
 ## Rollout and rollback
 

@@ -97,4 +97,4 @@ else
   npm audit --omit=dev --audit-level=moderate
 fi
 
-printf '\nAll Suqpage release checks passed.\n'
+printf '\nAll MirtPage release checks passed.\n'

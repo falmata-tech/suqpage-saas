@@ -3,7 +3,7 @@ import { createMarketNavigationIntent, incomingSuqpagePath } from '../src/incomi
 export function redirectSystemPath({ path }: { path: string; initial: boolean }) {
   const target = incomingSuqpagePath(path);
   if (target === '/' || target.startsWith('/?')) {
-    const url = new URL(target, 'https://suqpage.com');
+    const url = new URL(target, 'https://mirtpage.com');
     url.searchParams.set('_intent', createMarketNavigationIntent());
     return `/${url.search}`;
   }

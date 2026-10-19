@@ -18,7 +18,7 @@ async function bundle(native:boolean){
  const resolver=native?nativeRequire:require;
  const contents=`import React from'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';import About from '${native?'./apps/mobile/app/(tabs)/about':'./components/AboutAudience'}';${native?`import Market from'./apps/mobile/app/(tabs)/index';`:''}
   const root=createRoot(document.getElementById('root'));window.qa={mount:kind=>flushSync(()=>root.render(${native?`kind==='market'?<Market/>:`:''}<About/>)),unmount:()=>flushSync(()=>root.render(null))};`;
- return build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents},bundle:true,write:false,outfile:'about.js',platform:'browser',format:'iife',jsx:'automatic',define:native?{global:'globalThis'}:undefined,loader:{'.module.css':'local-css'},plugins:[{name:'about-audience-host-ports',setup(b){
+ return build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents},bundle:true,write:false,outfile:'about.js',platform:'browser',format:'iife',jsx:'automatic',define:native?{global:'globalThis','process.env.EXPO_PUBLIC_API_ORIGIN':'"https://mirtpage.com"'}:undefined,loader:{'.module.css':'local-css'},plugins:[{name:'about-audience-host-ports',setup(b){
   b.onResolve({filter:/^(?:react(?:\/jsx(?:-dev)?-runtime)?|react-dom(?:\/client)?)$/},a=>({path:resolver.resolve(a.path)}));
   b.onResolve({filter:/^(?:react-native|react-native-safe-area-context|expo-router|next\/link|@\/lib\/i18n\/ui)$/},a=>({path:a.path,namespace:'ports'}));
   if(native)b.onResolve({filter:/(?:^|\/)(runtime|ui|chrome|blocked-businesses|MarketMap|MapGroupPicker|use-market-feed|PublicActionDock|MarketSearchControls)$/},a=>({path:a.path.split('/').at(-1)!,namespace:'ports'}));

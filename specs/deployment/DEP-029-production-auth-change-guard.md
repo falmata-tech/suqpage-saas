@@ -1,14 +1,25 @@
 ---
 id: DEP-029
 title: Guarded production Auth configuration changes
-status: done
-related: [BE-059, DEP-049, DEP-048, DEP-032, DEP-028, ADR-0014]
+status: in_progress
+related: [FE-070, BE-059, DEP-049, DEP-048, DEP-032, DEP-028, ADR-0014, DEP-050]
 owners: [operations, security]
 last_updated: 2026-10-18
 change_level: L3
 ---
 
 # DEP-029 - Guarded production Auth configuration changes
+
+## Ready: exact MirtPage email presentation
+
+The independent BE-059/DEP-049 source tranche is Ready. Its only new admitted
+values are the MirtPage sender display and the exact repository manifest's
+thirteen subjects/thirteen HTML fields. Keep the twenty-seven-field allowlist
+finite; old Suqpage presentation values and arbitrary content are refused rather
+than silently migrated. Preserve all target, credential, backup, expiry, drift,
+single-attempt, callback and full changed/unchanged readback checks. This source
+change grants no hosted write, local service restart, SMTP/address/credential
+change, provider enablement, OTP-policy change or security-notification enablement.
 
 ## Problem and outcome
 
@@ -33,13 +44,13 @@ fail-closed plan/apply command, not the Supabase configuration-push command.
   Legacy settings patches cannot write either field or mix a transition with mail,
   OTP or provider fields. Existing safe email-code settings, the reviewed
   repository email templates/subjects, and security-enforcing boolean values are
-  permitted. S17 also permits the exact Suqpage sender display name and reviewed
+  permitted. Current source permits the exact MirtPage sender display name and reviewed
   repository subjects/content for all six Auth and seven security emails. It does
   not change notification enablement or the verified sender address.
   Google enablement/credentials, SMTP credentials, arbitrary templates,
   other providers, paid capabilities, and unknown keys are denied, not stripped.
-  The current repository subject is exactly `Your Suqpage sign-in code`; the
-  earlier platform subject is rejected. Updating this allowlist does not authorize
+  The current repository subject is exactly `Your MirtPage sign-in code`; the
+  earlier platform subjects are rejected. Updating this allowlist does not authorize
   a hosted write or remove the separate reviewed-plan requirement.
 - Apply requires the digest of the reviewed plan, no more than ten minutes old,
   and unchanged remote configuration. It revalidates target, patch, and private
@@ -149,12 +160,17 @@ specified. No new hosted provider, paid service, or application feature is added
 
 ## Current local S145 extension evidence
 
-`npm run test:production-auth-config` passes62 injected-port/credential cases;
+`npm run test:production-auth-config` passes65 injected-port/credential cases;
 scoped strict types and whitespace pass. Positive finite transitions, illegal/
 mixed/retirement/tampered policies, version2 rejection before reads, and existing
 credential/backup/drift/attempt/readback failures are covered. Full current-source
 integration/rollout remains pending; no hosted plan or provider write occurred.
-Earlier dated rollout evidence below applies only to its own historical source.
+The exact27-field MirtPage mail extension preserves all previous fences and
+rejects old-brand subjects/sender and a re-digested old-brand saved plan before
+any provider read. Static Auth emails use the canonical SiteURL-relative PNG;
+this changes no sender address, OTP semantics or disabled-notice flags. Actual
+Chrome covers24 static email states; no Auth reload or new hosted mail write is
+claimed. Earlier dated rollout evidence below applies only to its historical source.
 
 ## Evidence
 

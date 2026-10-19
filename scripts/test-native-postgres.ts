@@ -13,7 +13,26 @@ async function main() {
   try {
     const schema = (await db.prepare('SELECT current_schema() name').get()).name as string;
     assert.match(schema, /^suqpage_test_[a-f0-9]{32}$/);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 72);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 77);
+    assert.deepEqual(
+      (await db.prepare('SELECT version FROM schema_migrations WHERE version>=75 ORDER BY version').all()).map(row => Number(row.version)),
+      [75, 76, 77],
+      'A fresh native install includes shipment bounds, staff grants, and owner email-change migrations in order.',
+    );
+    const privateTables = await db.prepare(`SELECT c.relname,c.relrowsecurity FROM pg_class c
+      JOIN pg_namespace n ON n.oid=c.relnamespace
+      WHERE n.nspname=current_schema() AND c.relname IN
+      ('staff_business_grants','owner_email_change_requests','owner_auth_session_fences')
+      ORDER BY c.relname`).all();
+    assert.deepEqual(privateTables, [
+      { relname: 'owner_auth_session_fences', relrowsecurity: true },
+      { relname: 'owner_email_change_requests', relrowsecurity: true },
+      { relname: 'staff_business_grants', relrowsecurity: true },
+    ], 'New private staff and owner tables exist with row-level security enabled.');
+    for (const table of privateTables) {
+      assert.equal(Number((await db.prepare(`SELECT COUNT(*) total FROM ${table.relname}`).get()).total), 0,
+        `${table.relname} starts empty in a fresh schema.`);
+    }
     const routines = await db.prepare('SELECT prosrc FROM pg_proc WHERE pronamespace=current_schema()::regnamespace').all();
     assert.ok(routines.length >= 11);
     for (const routine of routines) assert.doesNotMatch(routine.prosrc, /(?:"public"|public)\./, 'Fixture triggers never resolve into developer data.');

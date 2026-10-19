@@ -39,7 +39,7 @@ export default async function SettingsPage({searchParams}:{searchParams:Promise<
       <nav className={styles.tasks} aria-label={t('Business details')}>{tasks.map(task=><Link key={task.key} href={`/dashboard/settings?business=${business.id}&section=${task.key}`} aria-current={task.key===section?'page':undefined}>{t(task.label)}</Link>)}</nav>
       <section className="panel">
         <div className="dashboard-section-head"><h2>{t(handle?'Page address':title)}</h2>{!editing&&!handle?<Link className="btn brand" href={`${readHref}&edit=details`}>{t('Edit')}</Link>:null}</div>
-        {handle?<><HandleSettingsForm key={business.content_version} settings={await readHandleSettings(actor,business.id)} businessId={business.id} admin action={saveBusinessHandleAction}/><Link className="btn secondary" href={readHref}>{t('Cancel')}</Link></>:editing?
+        {handle?<><HandleSettingsForm key={business.content_version} settings={await readHandleSettings(actor,business.id)} businessId={business.id} admin={actor.access_role==='platform_admin'} action={saveBusinessHandleAction}/><Link className="btn secondary" href={readHref}>{t('Cancel')}</Link></>:editing?
           <FocusedEditForm action={updateBusinessAction} cancelHref={readHref} submitLabel="Save business details" className="form-grid">
             <input type="hidden" name="businessId" value={business.id}/><input type="hidden" name="expectedVersion" value={business.content_version}/><input type="hidden" name="section" value={section}/>
             {section==='identity'?<>

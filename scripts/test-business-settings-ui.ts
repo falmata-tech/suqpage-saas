@@ -23,6 +23,7 @@ async function page(entry:string){
       :a.path==='@/lib/owner-business-runtime'?`export const readLocationProposal=async()=>null;`
       :a.path==='@/lib/catalog-runtime'?`export const runtimeBusinessById=async()=>fixture.business;`
       :a.path==='@/lib/capabilities'?`export const hasCapability=(...args)=>capability(...args);`
+      :a.path==='@/lib/staff-business-authority'?`export const currentBusinessAuthority=async actor=>actor.access_role==='platform_admin'?'administrator':null;`
       :a.path==='@/lib/dashboard'?`export const resolveManagedBusiness=async(actor,id)=>{fixture.resolved.push(id);if(actor.access_role!=='platform_admin')throw Object.assign(Error('redirect'),{url:'/dashboard'});return fixture.business;};`
       :a.path==='@/lib/i18n/server'?`export const getUiText=async()=>s=>s;`
       :a.path==='@/lib/business-handle-runtime'?`export const readHandleSettings=async()=>({handle:fixture.business.handle});`
@@ -43,7 +44,7 @@ async function page(entry:string){
 }
 
 test('FE-026 location task heading matches its business section without a duplicate return hierarchy',async()=>{
-  const {render,fixture}=await page('app/dashboard/admin/discovery/[businessId]/page.tsx');
+  const {render,fixture}=await page('app/dashboard/(business)/admin/discovery/[businessId]/page.tsx');
   let html=await render();assert.match(html,/<h1>Location &amp; visibility<\/h1>/);assert.doesNotMatch(html,/navigation-trail|<h1>Marketplace|<form|<details/);assert.match(html,/href="\/dashboard\/admin\/discovery\/18\?edit=profile"/);
   html=await render({edit:'profile'});assert.equal((html.match(/<form/g)||[]).length,1);assert.match(html,/href="\/dashboard\/admin\/discovery\/18">Cancel/);
   for(const access_role of ['client','team_member','operations_manager']){fixture.actor.access_role=access_role;await assert.rejects(render(),error=>(error as {url?:string}).url==='/dashboard');}
@@ -66,9 +67,9 @@ test('FE-026 privileged details show exactly one selected saved task and one foc
   const fallback=await render({business:'18',section:'https://untrusted.test'});assert.match(fallback,/section=identity[^" ]*" aria-current="page"/);
 });
 
-test('FE-026 Access separates sign-in and staff assistance, with deliberate recovery/status tasks',async()=>{
+test('FE-026/FE-072 Access separates sign-in from public status and retires business-level staff assistance',async()=>{
   const {render,fixture}=await page('app/dashboard/access/page.tsx');
-  let html=await render({business:'18'});assert.match(html,/private-owner@example.invalid/);assert.match(html,/href="\/dashboard\/admin\/businesses\/18\/team"/);assert.doesNotMatch(html,/<form|<input|<details/);
+  let html=await render({business:'18'});assert.match(html,/private-owner@example.invalid/);assert.doesNotMatch(html,/\/dashboard\/admin\/businesses\/18\/team|Staff assistance/);assert.doesNotMatch(html,/<form|<input|<details/);
   html=await render({business:'18',edit:'status'});assert.equal((html.match(/<form/g)||[]).length,1);assert.match(html,/name="returnTo" value="access"/);assert.doesNotMatch(html,/private-owner@example.invalid|Staff assistance/);
   fixture.managed=false;html=await render({business:'18',edit:'recovery',user:'7'});assert.equal((html.match(/<form/g)||[]).length,1);assert.match(html,/name="userId" value="7"/);assert.match(html,/href="\/dashboard\/access\?business=18">Cancel/);
   html=await render({business:'18',edit:'recovery',user:'99'});assert.doesNotMatch(html,/<form|name="temporaryPassword"/);

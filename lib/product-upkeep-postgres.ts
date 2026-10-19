@@ -12,6 +12,7 @@ import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import { parseOfferingHighlightsJson } from "./offering-presentation";
 import type { Product, SessionUser } from "./types";
 import { isPublicProduct } from "./offerings";
+import { currentBusinessAuthority } from './staff-business-authority';
 
 type StoredCommand = {
   payload_hash: string;
@@ -31,14 +32,12 @@ async function uniqueSlug(businessId: number, name: string) {
   throw new ProductUpkeepError("A unique product address could not be created.", 409, "slug_conflict");
 }
 
-async function authorize(user: SessionUser, command: BasicProductCommand) {
+async function authorize(user: SessionUser, command: BasicProductCommand, lock=false) {
   if (!productUpkeepEnabled()) {
     throw new ProductUpkeepError("Product upkeep is temporarily disabled.", 503, "feature_disabled");
   }
-  const assigned = user.access_role === "team_member" && Boolean(
-    await runtimeGet("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1", [user.id, command.businessId]),
-  );
-  if (!canMaintainBasicProducts(user, command.businessId, assigned)) {
+  const authority=await currentBusinessAuthority(user,command.businessId,lock);
+  if (!authority || !canMaintainBasicProducts(user, command.businessId, authority==='staff')) {
     throw new ProductUpkeepError("You cannot maintain products for this business.", 403, "forbidden");
   }
   const business = await runtimeBusinessById(command.businessId);
@@ -123,7 +122,7 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
   },
   async publish(user, command, stagedImage, payloadHash, stagedGallery = []): Promise<ProductUpkeepResult> {
     return runtimeTransaction(async () => {
-      await authorize(user, command);
+      await authorize(user, command, true);
       const locked=await runtimeRun("UPDATE businesses SET content_version=content_version WHERE id=?",[command.businessId]);
       if(!locked.changes)throw new ProductUpkeepError("Business not found.",404,"not_found");
       const duplicate = await runtimeGet<StoredCommand>(
@@ -137,7 +136,7 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
         return { productId: duplicate.result_product_id, contentVersion: duplicate.result_content_version, duplicate: true };
       }
 
-      const business = await authorize(user, command);
+      const business = await authorize(user, command, true);
       if (business.content_version !== command.expectedContentVersion) {
         throw new ProductUpkeepError("The showroom changed while this form was open. Refresh and review the latest version.", 409, "stale_version");
       }

@@ -5,7 +5,7 @@ import path from 'node:path';
 import {test} from 'node:test';
 import {validateAndroidRelease,signingFingerprint,type AndroidArtifactMetadata} from '../lib/android-release-domain';
 import {inspectAndroidApk,type AndroidToolRunner} from './operations/android-apk-inspection';
-const fingerprint='AB'.repeat(32),policy={packageName:'com.suqpage.app',certificateSha256:fingerprint};
+const fingerprint='AB'.repeat(32),policy={packageName:'com.mirtpage.app',certificateSha256:fingerprint};
 const candidate:AndroidArtifactMetadata={packageName:policy.packageName,versionCode:3,debuggable:false,certificateSha256:[fingerprint.toLowerCase()]};
 test('reviewed signer, canonical identity and newer version admit updates/explicit first release',()=>{
  assert.equal(validateAndroidRelease(candidate,policy,{...candidate,versionCode:2}).versionCode,3);
@@ -15,6 +15,9 @@ test('reviewed signer, canonical identity and newer version admit updates/explic
 test('missing signer, private/legacy identity, debug artifacts, rollback and ambiguous initialization fail closed',()=>{
  assert.throws(()=>validateAndroidRelease(candidate,{...policy,certificateSha256:null},null,true));
  assert.throws(()=>validateAndroidRelease(candidate,{...policy,packageName:'foreign.app'},null,true));
+ assert.throws(()=>validateAndroidRelease(candidate,{...policy,packageName:'com.suqpage.app'},null,true));
+ assert.throws(()=>validateAndroidRelease({...candidate,packageName:'com.suqpage.app'},policy,null,true));
+ assert.throws(()=>validateAndroidRelease(candidate,policy,{...candidate,packageName:'com.suqpage.app',versionCode:2}));
  for(const mutation of [{packageName:'com.suqpage.app.preview'},{debuggable:true},{versionCode:0},{versionCode:1.5},{versionCode:Infinity},{certificateSha256:[]},{certificateSha256:['CD'.repeat(32)]},{certificateSha256:[fingerprint,fingerprint]}])assert.throws(()=>validateAndroidRelease({...candidate,...mutation},policy,null,true));
  for(const versionCode of [3,4])assert.throws(()=>validateAndroidRelease(candidate,policy,{...candidate,versionCode}));
  assert.throws(()=>validateAndroidRelease(candidate,policy,null));assert.throws(()=>validateAndroidRelease(candidate,policy,candidate,true));

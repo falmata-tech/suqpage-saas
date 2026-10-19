@@ -20,7 +20,7 @@ export default async function StaffShipmentPage({params,searchParams}:{params:Pr
  const manager=actor.access_role==='platform_admin'||actor.access_role==='operations_manager';
  return <DashboardShell user={actor} business={null}><div className={styles.workspace} data-staff-shipment>
   <Link className="support-back-link" href={trackingStaffHref(view)}>{t('Back to shipments')}</Link>
-  <header className={styles.heading}><div><span className="eyebrow">{shipment.reference}</span><h1>{shipment.label||t('Shipment plan')}</h1></div>{!editing&&shipment.revokedAt===null?<Link className="btn brand" href={trackingStaffHref(view,id,{edit:true})}>{t('Edit plan')}</Link>:null}</header>
+  <header className={styles.heading}><div><span className="eyebrow">{shipment.reference}</span><h1>{shipment.label||t('Shipment tracking')}</h1></div>{!editing&&shipment.revokedAt===null?<Link className="btn brand" href={trackingStaffHref(view,id,{edit:true})}>{t('Edit shipment')}</Link>:null}</header>
   {editing?<ShipmentEditor shipment={shipment} navigation={view} cancelHref={readHref}/>:<>
    {query.created==='1'||query.saved==='1'?<p className="notice" role="status">{t('Shipment saved.')}</p>:null}
    {shipment.revokedAt!==null?<p className="notice" role="status">{t('Shipment access revoked.')}</p>:null}

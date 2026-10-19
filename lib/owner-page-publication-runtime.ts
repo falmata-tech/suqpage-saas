@@ -1,7 +1,7 @@
 import { firstPublicationIssues } from "./publication-readiness-runtime";
 import { OwnerPageError } from "./owner-page-domain";
 import { applyPendingOwnerLocation } from "./owner-business-runtime";
-import { isPageOwner, parseShopPageContent, type ShopPageContent } from "./owner-page-domain";
+import { parseShopPageContent, type ShopPageContent } from "./owner-page-domain";
 import type { PagePublication, PagePublicationPort } from "./owner-page-publication";
 import { ownerPageEditorEnabled } from "./owner-page-runtime";
 import { ownerPageImageKey } from "./owner-page-media";
@@ -9,6 +9,7 @@ import { getMediaObjectStore } from "./media-storage";
 import { mediaMime } from "./media";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import { publicPageContent } from "./business-profile";
+import { currentBusinessAuthority } from './staff-business-authority';
 export { publicPageContent } from "./business-profile";
 
 type PublicationRow = {
@@ -37,15 +38,12 @@ export const pagePublicationPort: PagePublicationPort = {
     return row ? publication(row) : null;
   },
   async commit(actor, draft, expectedRevision, content, action) {
-    if (!isPageOwner(actor, draft.businessId)) return null;
     return runtimeTransaction(async () => {
+      if(!await currentBusinessAuthority(actor,draft.businessId,true))return null;
       // A no-op update locks the same row as content/consent writes, without
       // changing the owner's draft or granting a new publication authority.
-      const locked = await runtimeRun(`UPDATE owner_page_drafts SET version=version WHERE business_id=? AND version=?
-        AND EXISTS (SELECT 1 FROM users u LEFT JOIN user_access_profiles p ON p.user_id=u.id
-          WHERE u.id=? AND u.business_id=owner_page_drafts.business_id
-          AND COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END)='client')`,
-      [draft.businessId, draft.version, actor.id]);
+      const locked = await runtimeRun(`UPDATE owner_page_drafts SET version=version WHERE business_id=? AND version=?`,
+      [draft.businessId, draft.version]);
       if (!locked.changes) return null;
       const business = await runtimeRun("UPDATE businesses SET content_version=content_version WHERE id=? AND (status='active' OR (status='draft' AND EXISTS(SELECT 1 FROM products p WHERE p.business_id=businesses.id AND p.is_published=1 AND p.offering_kind<>'service')))", [draft.businessId]);
       if (!business.changes) return null;

@@ -202,10 +202,9 @@ export function PageEditor({
   const [content,setContent]=useState<Profile>(initial),[savedContent,setSavedContent]=useState<Profile>(initial);
   const [version,setVersion]=useState(home.draft?.version),[preview,setPreview]=useState(initialPreview||initialTask==='color');
   const [task,setTask]=useState<OwnerPageTask>(initialTask),[colorOpen,setColorOpen]=useState(initialTask==='color');
-  const [assistance,setAssistance]=useState(home.draft?.assistanceEnabled??false),[savedAssistance,setSavedAssistance]=useState(home.draft?.assistanceEnabled??false);
-  const dirty=JSON.stringify(content)!==JSON.stringify(savedContent),unsaved=dirty||assistance!==savedAssistance;
-  const signature=JSON.stringify({content,assistance});
-  const guard=useOwnerEditGuard({dirty:unsaved,signature,busy:action.busy,isBusy:action.isBusy,discard:()=>{setContent(savedContent);setAssistance(savedAssistance);}});
+  const dirty=JSON.stringify(content)!==JSON.stringify(savedContent),unsaved=dirty;
+  const signature=JSON.stringify(content);
+  const guard=useOwnerEditGuard({dirty:unsaved,signature,busy:action.busy,isBusy:action.isBusy,discard:()=>setContent(savedContent)});
   const [publicationReview,setPublicationReview]=useState<{version:number;revision:number;issues:OwnerHome['issues']}|null>(null);
   useEffect(()=>{setTask(initialTask);setPreview(initialPreview||initialTask==='color');setColorOpen(initialTask==='color');},[initialTask,initialPreview]);
   const update=(key:keyof Profile,value:unknown)=>{guard.changed();setContent(current=>({...current,[key]:value}));};
@@ -219,11 +218,7 @@ export function PageEditor({
   }
   async function saveTask(){
     const checkpoint=guard.checkpoint();
-    const currentVersion=task!=='team'||dirty||!version?await saveContent():version;
-    if(task==='team'||assistance!==savedAssistance){
-      const saved=await ownerRequest<{version:number}>('owner/page',{action:'assistance',version:currentVersion,enabled:assistance});
-      setVersion(saved.version);setSavedAssistance(assistance);
-    }
+    await saveContent();
     guard.complete(onSaved,signature,checkpoint);
   }
   async function reviewPublication(){
@@ -268,7 +263,6 @@ export function PageEditor({
         {label:'Social accounts',fields:publicContactFields.filter(field=>['whatsapp','telegram','tiktok','instagram','facebook'].includes(field.key))},
         {label:'Business contacts',fields:publicContactFields.filter(field=>['phone','email','website'].includes(field.key))},
       ].map(group=><Card key={group.label}><Copy heading>{t(group.label)}</Copy>{group.fields.map(field=><Field key={field.key} label={t(field.label)} value={content.contacts?.[field.key]||''} maxLength={500} editable={!action.busy} autoCapitalize="none" keyboardType={field.type==='tel'?'phone-pad':field.type==='email'?'email-address':'default'} onChangeText={value=>{guard.changed();setContent(current=>({...current,contacts:{...current.contacts,[field.key]:value}}));}}/>)}</Card>)}
-      {task==='team'&&<Card><Chip label={t('Allow team editing')} selected={assistance} minHeight={48} onPress={()=>{if(!action.isBusy()){guard.changed();setAssistance(value=>!value);}}}/><Copy muted>{t('The team can prepare changes. Your Save applies them to your live page.')}</Copy></Card>}
     </>}
     <View style={{flexDirection:'row',alignItems:'stretch',gap:10,flexWrap:'wrap'}}>{(!preview||task==='color'||unsaved)&&<View style={{flex:1,minWidth:120}}><Button label={t('Save changes')} wrapLabel disabled={action.busy} onPress={()=>run(saveTask)}/></View>}<View style={{flex:1,minWidth:120}}><Button secondary label={t('Cancel')} wrapLabel disabled={action.busy} onPress={cancel}/></View></View>
     {publicationReview&&<Sheet visible title={t('Publish page')} onClose={()=>{if(!action.busy)setPublicationReview(null);}}><ActionStatus state={action}/><Copy muted>{t('Your page and listed products will be visible to customers. You can update them any time.')}</Copy>{publicationReview.issues.map(issue=><Button key={issue.label} secondary label={t(issue.label)} onPress={()=>openMissing(issue.label)}/>)}<Button label={t('Publish page')} disabled={action.busy||publicationReview.issues.length>0} onPress={()=>run(async()=>{const checkpoint=guard.checkpoint();await ownerRequest('owner/publish',{version:publicationReview.version,revision:publicationReview.revision});setPublicationReview(null);guard.complete(onSaved||reload,signature,checkpoint);},'Your page is live')}/><Button secondary label={t('Cancel')} disabled={action.busy} onPress={()=>setPublicationReview(null)}/></Sheet>}

@@ -50,7 +50,7 @@ export default function OwnerTransportWorkspace({ initial, draftScope="" }: { in
   }
 
   return <>
-    <div className="dashboard-head"><div><h1>{t("Transport chat")}</h1><Link href="/dashboard/profile">{t("Back to account")}</Link></div><div className={styles.actions}><Link className="small-btn" href={trackingHref} onClick={()=>rememberTransportDraft(draftKey,draft)}>{t("Tracking")}</Link><Link className="small-btn" href="/dashboard/transport/history">{t("Chat history")}</Link>{conversation && <Link className="small-btn" href="/dashboard/transport?new=1">{t("Send another request")}</Link>}</div></div>
+    <div className="dashboard-head"><div><h1>{t("Transport chat")}</h1><Link href="/dashboard/profile">{t("Back to account")}</Link></div><div className={styles.actions}><Link className="small-btn" href={trackingHref} onClick={()=>rememberTransportDraft(draftKey,draft)}>{t("Shipment tracking")}</Link><Link className="small-btn" href="/dashboard/transport/history">{t("Chat history")}</Link>{conversation && <Link className="small-btn" href="/dashboard/transport?new=1">{t("Send another request")}</Link>}</div></div>
     <section className={`${transportStyles.dialog} ${styles.panel}`} aria-label={t("Transport chat")} data-owner-transport-id={conversation?.id}>
       <div className={styles.eyebrow}><MessageCircle size={16} aria-hidden="true" />{t("Live Chat")}</div>
       {conversation ? <BuyingConversation key={conversation.publicRef} initial={conversation} draftScope={draftScope} active endpoint={`/api/owner-transport?conversation=${conversation.id}`} conversationId={conversation.id} showAlerts={false} onAnother={() => router.push("/dashboard/transport?new=1")} />

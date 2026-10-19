@@ -41,11 +41,23 @@ async function main(){
   await changeBusinessHandle(admin,created.businessId,{handle:'support-corrected',expectedVersion:current.contentVersion,reason:'Owner requested spelling correction'});
   const audit=await db.prepare("SELECT detail FROM audit_logs WHERE business_id=? AND action='business.handle_changed' ORDER BY id DESC LIMIT 1").get(created.businessId);assert.equal(JSON.parse(audit.detail).override,true);assert.equal(JSON.parse(audit.detail).reason,'Owner requested spelling correction');
   assert.equal((await runtimeBusinessByHandle(initial.handle))?.handle,'support-corrected');
+  const staffId=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role) VALUES('handle-staff@example.test','unused','Staff','admin')").run()).insertedId);
+  await db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'team_member')").run(staffId);
+  await db.prepare('INSERT INTO staff_business_grants(user_id,enabled,version,updated_at) VALUES(?,1,1,1)').run(staffId);
+  const staff=(await getUserById(staffId))!;
+  await db.prepare('UPDATE businesses SET handle_changed_at=? WHERE id=?').run(Date.now()-HANDLE_CHANGE_INTERVAL_MS-1000,created.businessId);
+  const staffBefore=await readHandleSettings(staff,created.businessId);
+  await changeBusinessHandle(staff,created.businessId,{handle:'staff-corrected',expectedVersion:staffBefore.contentVersion});
+  const staffAudit=await db.prepare("SELECT detail FROM audit_logs WHERE business_id=? AND action='business.handle_changed' ORDER BY id DESC LIMIT 1").get(created.businessId);
+  assert.equal(JSON.parse(staffAudit.detail).override,false,'Staff follow owner cooldown and never use admin override');
+  await db.prepare('UPDATE staff_business_grants SET enabled=0,version=version+1 WHERE user_id=?').run(staffId);
+  await assert.rejects(()=>readHandleSettings(staff,created.businessId),/cannot change/);
+  await assert.rejects(()=>changeBusinessHandle(staff,created.businessId,{handle:'revoked-staff',expectedVersion:staffBefore.contentVersion+1}),/cannot change/);
   await db.prepare("UPDATE businesses SET status='suspended' WHERE id=?").run(created.businessId);assert.equal(await runtimeBusinessByHandle(initial.handle),undefined);
-  assert.equal((await getHandleAvailability('support-corrected')).available,false);
+  assert.equal((await getHandleAvailability('staff-corrected')).available,false);
   const rls=await db.prepare("SELECT relrowsecurity FROM pg_class WHERE oid='business_handles'::regclass").get();assert.equal(rls.relrowsecurity,true);
   const grants=await db.runner.query("SELECT grantee FROM information_schema.role_table_grants WHERE table_schema=current_schema() AND table_name='business_handles' AND grantee IN ('anon','authenticated','PUBLIC')");assert.equal(grants.rows.length,0);
-  console.log('PASS automatic collision retry, registry/case uniqueness, retained aliases/private denial, cooldown/concurrency/no-op, owner isolation, audited admin override and server-only registry.');
+  console.log('PASS automatic collision retry, registry/case uniqueness, retained aliases/private denial, cooldown/concurrency/no-op, owner isolation, granted/revoked staff and audited admin override.');
  }finally{await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

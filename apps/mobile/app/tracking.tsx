@@ -70,17 +70,17 @@ export default function Tracking(){
   finally{busyRef.current=false;if(live.current)setBusy(false);}
  }
  const remaining=Math.max(0,Math.ceil((resendAt-now)/1000));
- return <Screen><Copy big heading>{t('Tracking')}</Copy>
+ return <Screen><Copy big heading>{t('Shipment tracking')}</Copy>
   <Status loading={restoring} error={error}/>
   {storageBlocked?<Button label={t('Retry')} disabled={busy||restoring} onPress={()=>void(cleanupToken.current?signOut():restore())}/>:!restoring&&!session?<Card>
-   <Copy>{t('Enter your email to view your shipment plans.')}</Copy>
+   <Copy>{t('Enter your email to view your shipments.')}</Copy>
    <Field label={t('Email')} value={email} maxLength={254} editable={!challenge&&!busy} autoCapitalize="none" autoComplete="email" keyboardType="email-address" onChangeText={setEmail}/>
    {challenge&&<><Copy muted>{t('Check your email for a six-digit code.')}</Copy><Field label={t('Verification code')} value={code} maxLength={6} editable={!busy} autoComplete="one-time-code" keyboardType="number-pad" onChangeText={setCode}/></>}
    <Status loading={busy}/><Button label={t(challenge?'Verify code':'Send code')} disabled={busy||!email.trim()||Boolean(challenge&&!/^\d{6}$/.test(code.trim()))} onPress={()=>void authenticate()}/>
    {challenge&&<><Button secondary label={remaining?t('Resend code in {seconds}s',{seconds:remaining}):t('Resend code')} disabled={busy||remaining>0} onPress={()=>void authenticate(true)}/><Button secondary label={t('Change email')} disabled={busy} onPress={()=>{invalidate();setChallenge(null);setCode('');setError('');}}/></>}
   </Card>:session&&selected?<TrackingDetail key={session.token+':'+selected} token={session.token} reference={selected} onBack={()=>setSelected('')} onExpired={expire}/>:session?<>
    <Copy heading>{t('Your shipments')}</Copy><Button secondary label={t('Sign out')} disabled={busy} onPress={()=>void signOut()}/><Status loading={listLoading} error={listError} retry={()=>void loadList()}/>
-   {!listLoading&&!listError&&!items.length&&<Copy>{t('No shipments yet. Your transport agent can add a plan for this email.')}</Copy>}
+   {!listLoading&&!listError&&!items.length&&<Copy>{t('No shipments yet. Your transport agent can add a shipment for this email.')}</Copy>}
    {items.map(item=><Card key={item.reference}><Copy heading>{item.label||item.reference}</Copy>{Boolean(item.label)&&<Copy muted>{item.reference}</Copy>}<View style={{flexDirection:'row',flexWrap:'wrap',gap:16}}><View style={{flex:1,minWidth:100}}><Copy muted>{t('From')}</Copy><Copy>{item.firstOrigin}</Copy></View><View style={{flex:1,minWidth:100}}><Copy muted>{t('To')}</Copy><Copy>{item.lastDestination}</Copy></View></View><Copy muted>{item.legCount===1?t('1 transport stage'):t('{count} transport stages',{count:item.legCount})}</Copy><Button secondary label={t('Open')} onPress={()=>setSelected(item.reference)}/></Card>)}
    {cursor&&<Button secondary label={t('Load more')} disabled={listLoading} onPress={()=>void loadList(cursor)}/>}
   </>:null}

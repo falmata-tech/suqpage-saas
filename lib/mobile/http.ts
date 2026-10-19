@@ -3,6 +3,8 @@ import { supabaseAuthConfig } from "../config";
 import { linkedSuqpageUserId } from "../supabase-auth";
 import { runtimeUserById } from "../catalog-runtime";
 import type { SessionUser } from "../types";
+import { verifiedJwtIssueTime } from "../owner-email-change";
+import { ownerSessionAllowed, reconcileOwnerEmailIdentity } from "../owner-email-runtime";
 export class MobileError extends Error {
   constructor(
     message: string,
@@ -57,10 +59,16 @@ export async function nativeIdentity(
   if (!identity)
     throw new MobileError("Sign in again to continue.", 401, "unauthenticated");
   const id = await port.linked(identity.id);
-  const user = id ? await port.user(id) : null;
+  let user = id ? await port.user(id) : null;
   if (id && !user) throw new MobileError("Account unavailable.", 401);
   if (user && user.access_role !== "client")
     throw new MobileError("Staff accounts sign in on the website.",403,"staff_web_only");
+  if (user && user.email !== identity.email) {
+    try { user = await reconcileOwnerEmailIdentity(user, identity.id); }
+    catch { throw new MobileError("Sign in again to continue.", 401, "unauthenticated"); }
+  }
+  if (user && !await ownerSessionAllowed(user.id, verifiedJwtIssueTime(value.slice(7), identity.id)))
+    throw new MobileError("Sign in again to continue.", 401, "unauthenticated");
   return { identity, user };
 }
 export async function nativeOwner(

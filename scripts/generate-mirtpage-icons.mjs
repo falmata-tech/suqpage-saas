@@ -19,8 +19,10 @@ export async function mirtpageDerivatives(root=process.cwd()) {
  for(const[asset,size]of[[PLATFORM_BRAND.assets.favicon,32],[PLATFORM_BRAND.assets.apple,180],[PLATFORM_BRAND.assets.icon192,192],[PLATFORM_BRAND.assets.icon512,512]])output.set('public'+asset,await sharp(Buffer.from(mark)).resize(size,size).png().toBuffer());
  const maskable=await sharp(Buffer.from(fullBleed)).resize(512,512).png().toBuffer();output.set('public'+PLATFORM_BRAND.assets.maskable512,maskable);output.set('apps/mobile/assets/icon.png',maskable);output.set('apps/mobile/assets/mirtpage-mark.png',output.get('public'+PLATFORM_BRAND.assets.icon512));
  output.set('public'+PLATFORM_BRAND.assets.notificationBadge,await sharp(Buffer.from(badge)).resize(96,96).png().toBuffer());
+ output.set('apps/mobile/assets/mirtpage-notification.png',await sharp(Buffer.from(badge.replaceAll(PLATFORM_BRAND.colors.logo,PLATFORM_BRAND.colors.white))).resize(96,96).png().toBuffer());
  output.set('public'+PLATFORM_BRAND.assets.wordmarkReverse,Buffer.from(wordmark.replaceAll(PLATFORM_BRAND.colors.ink,PLATFORM_BRAND.colors.white)));
  output.set('apps/mobile/assets/mirtpage-wordmark.png',await sharp(Buffer.from(wordmark)).resize(PLATFORM_BRAND.wordmark.width*3,PLATFORM_BRAND.wordmark.height*3).png().toBuffer());
+ output.set('public'+PLATFORM_BRAND.assets.emailWordmark,output.get('apps/mobile/assets/mirtpage-wordmark.png'));
  return output;
 }
 export async function generateMirtpageIcons({root=process.cwd(),check=false}={}) {

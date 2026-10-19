@@ -38,7 +38,7 @@ test('FE-069 S141 one shell-owned Tracking entry across public/owner intake, rec
    await page.goto('http://localhost:41841/');await page.addScriptTag({content:(await bundled).outputFiles[0].text});
    const mount=()=>page.evaluate(({kind,state})=>(window as unknown as{fixture:Fixture}).fixture.mount(kind,state),{kind,state});await mount();
    const launcher=page.getByRole('button',{name:/Want help with transport\/shipping\?/});if(kind==='public')await launcher.click();
-   const tracking=page.getByRole('link',{name:/^Tracking(?: →)?$/});await tracking.waitFor();
+   const tracking=page.getByRole('link',{name:/^Shipment tracking(?: →)?$/});await tracking.waitFor();
    assert.equal(await tracking.count(),1,'The real nested conversation must never add a second Tracking entry');
    assert.ok((await tracking.boundingBox())!.height>=48,'The single quiet entry remains a48px target');
    const href=await tracking.getAttribute('href');assert.ok(href);const destination=new URL(href,'http://localhost:41841');assert.equal(destination.pathname,'/tracking');

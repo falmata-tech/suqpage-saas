@@ -1,12 +1,12 @@
 import { Linking, Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
-import { apiOrigin } from "@suqpage/contracts";
 import { followLink } from "./link-policy";
+import { PUBLIC_ORIGIN } from "./public-origin";
 
 export function openLink(url: string): Promise<void> {
   return followLink(url, {
     native: Platform.OS !== "web",
-    appOrigin: apiOrigin(process.env.EXPO_PUBLIC_API_ORIGIN || "https://suqpage.com"),
+    appOrigin: PUBLIC_ORIGIN,
     openHandler: destination => Linking.openURL(destination),
     openWebsite: destination => WebBrowser.openBrowserAsync(destination, {
       toolbarColor: "#ffffff",

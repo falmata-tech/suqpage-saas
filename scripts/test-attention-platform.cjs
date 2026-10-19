@@ -2,29 +2,39 @@ const assert=require('node:assert/strict');const fs=require('node:fs');const os=
 (async()=>{
  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'suqpage-notification-config-'));
  try{
-  const file=path.join(temporary,'google-services.json'),env={...process.env,SUQPAGE_MOBILE_BUILD_PROFILE:'preview',EXPO_PUBLIC_API_ORIGIN:'https://suqpage.com',SUQPAGE_MOBILE_DATA_TARGET:'production',EXPO_PUBLIC_SUPABASE_URL:'https://sjeiiqxgscuqajpgddcc.supabase.co',EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture_only',SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED:'1',SUQPAGE_GOOGLE_SERVICES_FILE:'',SUQPAGE_FIREBASE_PROJECT_ID:'suqpage'};
-  const run=extra=>spawnSync(process.execPath,['scripts/validate-mobile-build.cjs'],{encoding:'utf8',env:{...env,...extra},timeout:5000});
+  const policy=require('../apps/mobile/release-policy.json'),crypto=require('node:crypto');
+  const valid={project_info:{project_id:'suqpage',project_number:'588262779708'},client:[{client_info:{mobilesdk_app_id:policy.firebaseAndroidAppId,android_client_info:{package_name:'com.mirtpage.app'}}},{client_info:{mobilesdk_app_id:'1:588262779708:android:old-fixture',android_client_info:{package_name:'com.suqpage.app'}}}]};
+  const validBytes=Buffer.from(JSON.stringify(valid));
+  // A policy port isolates positive worker tests from the deliberately unqualified real target.
+  const fixturePolicy={...policy,firebaseClientSha256:crypto.createHash('sha256').update(validBytes).digest('hex'),dataTargets:{'mirtpage-production':{apiOrigin:'https://mirtpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}}};
+  const buildModule={exports:{}};vm.runInNewContext(fs.readFileSync('apps/mobile/build-config.cjs','utf8'),{module:buildModule,exports:buildModule.exports,URL,Buffer,require:id=>id==='./release-policy.json'?fixturePolicy:require(id)});
+  const file=path.join(temporary,'google-services.json'),env={SUQPAGE_MOBILE_BUILD_PROFILE:'preview',EXPO_PUBLIC_API_ORIGIN:'https://mirtpage.com',SUQPAGE_MOBILE_DATA_TARGET:'mirtpage-production',EXPO_PUBLIC_SUPABASE_URL:'https://sjeiiqxgscuqajpgddcc.supabase.co',EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture_only',EXPO_PUBLIC_EAS_PROJECT_ID:policy.expoProjectId,SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED:'1',MIRTPAGE_GOOGLE_SERVICES_FILE:'',SUQPAGE_FIREBASE_PROJECT_ID:'suqpage'};
+  const run=extra=>{let stdout='';try{vm.runInNewContext(fs.readFileSync('scripts/validate-mobile-build.cjs','utf8'),{require:id=>id==='../apps/mobile/build-config.cjs'?buildModule.exports:id==='../apps/mobile/app.json'?require('../apps/mobile/app.json'):require(id),process:{env:{...env,...extra}},console:{log:value=>{stdout+=value;}}});return{status:0,stdout,stderr:''};}catch(error){return{status:1,stdout,stderr:error.message};}};
   for(const profile of ['preview','production'])assert.notEqual(run({SUQPAGE_MOBILE_BUILD_PROFILE:profile}).status,0,'Missing Firebase source cannot claim either notification build');
   fs.writeFileSync(file,JSON.stringify({project_info:{project_id:'suqpage',project_number:'588262779708'},client:[{client_info:{mobilesdk_app_id:'1:588262779708:android:fixture',android_client_info:{package_name:'com.suqpage.app.preview'}}}]}));
-  for(const profile of ['preview','production'])assert.notEqual(run({SUQPAGE_GOOGLE_SERVICES_FILE:file,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).status,0,'Legacy preview APK package rejected in both profiles');
-  fs.writeFileSync(file,JSON.stringify({project_info:{project_id:'suqpage',project_number:'588262779708'},client:[{client_info:{mobilesdk_app_id:'1:588262779708:android:fixture',android_client_info:{package_name:'com.suqpage.app'}}}]}));
-  for(const profile of ['preview','production'])assert.notEqual(run({SUQPAGE_GOOGLE_SERVICES_FILE:file,SUQPAGE_FIREBASE_PROJECT_ID:'other-fixture',SUQPAGE_MOBILE_BUILD_PROFILE:profile}).status,0,'Wrong Firebase project rejected in both profiles');
-  for(const profile of ['preview','production'])assert.equal(run({SUQPAGE_GOOGLE_SERVICES_FILE:file,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).status,0,'Both hosted profiles admit the same canonical Firebase registration');
-  assert.equal(run({SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED:'0'}).status,0,'Build without background capability remains explicit');
-  const valid=JSON.parse(fs.readFileSync(file,'utf8'));
+  for(const profile of ['preview','production'])assert.notEqual(run({MIRTPAGE_GOOGLE_SERVICES_FILE:file,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).status,0,'Legacy preview APK package rejected in both profiles');
+  fs.writeFileSync(file,validBytes);
+  for(const profile of ['preview','production'])assert.notEqual(run({MIRTPAGE_GOOGLE_SERVICES_FILE:file,SUQPAGE_FIREBASE_PROJECT_ID:'other-fixture',SUQPAGE_MOBILE_BUILD_PROFILE:profile}).status,0,'Wrong Firebase project rejected in both profiles');
+  for(const profile of ['preview','production'])assert.equal(run({MIRTPAGE_GOOGLE_SERVICES_FILE:file,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).status,0,'Both hosted profiles select the exact new client while retaining the legitimate old client');
+  assert.notEqual(run({SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED:'0'}).status,0,'Disabling alerts cannot bypass the required new Firebase source');
+  assert.notEqual(run({SUQPAGE_GOOGLE_SERVICES_FILE:file}).status,0,'Old variable is never a new-package fallback');
+  const unqualified=spawnSync(process.execPath,['scripts/validate-mobile-build.cjs'],{encoding:'utf8',env:{PATH:process.env.PATH,...env,MIRTPAGE_GOOGLE_SERVICES_FILE:file},timeout:5000});assert.notEqual(unqualified.status,0);assert.match(unqualified.stderr,/approved mobile data target/,'Actual CLI remains blocked by its unqualified hosted target');
   const privateFixture='PRIVATE_FIXTURE_NEVER_PRINTED';
   fs.writeFileSync(file,'{"private_key":'+privateFixture+'}');
-  const malformed=run({SUQPAGE_GOOGLE_SERVICES_FILE:file});
+  const malformed=run({MIRTPAGE_GOOGLE_SERVICES_FILE:file});
   assert.notEqual(malformed.status,0,'Malformed client JSON is rejected');
   assert.ok((malformed.stderr+malformed.stdout).includes('must be valid JSON'));
   assert.ok(!(malformed.stderr+malformed.stdout).includes(privateFixture),'JSON parser must not expose a source excerpt');
-  for(const invalid of [{...valid,project_info:{project_id:'suqpage',project_number:'000'}},{...valid,private_key:'fixture-private'},{...valid,extra:{client_secret:'fixture'}},{...valid,extra:{nested:'-----BEGIN PRIVATE KEY-----fixture'}}]){fs.writeFileSync(file,JSON.stringify(invalid));assert.notEqual(run({SUQPAGE_GOOGLE_SERVICES_FILE:file}).status,0,'Wrong project number/private material rejected');}
+  for(const invalid of [{...valid,project_info:{project_id:'suqpage',project_number:'000'}},{...valid,private_key:'fixture-private'},{...valid,extra:{client_secret:'fixture'}},{...valid,extra:{nested:'-----BEGIN PRIVATE KEY-----fixture'}},{...valid,client:[valid.client[1]]},{...valid,client:[valid.client[0],valid.client[0]]},{...valid,client:[{client_info:{mobilesdk_app_id:'1:588262779708:android:wrong',android_client_info:{package_name:'com.mirtpage.app'}}}]}]){fs.writeFileSync(file,JSON.stringify(invalid));assert.notEqual(run({MIRTPAGE_GOOGLE_SERVICES_FILE:file}).status,0,'Wrong project number/app identity/duplicate or private material rejected');}
+  fs.writeFileSync(file,Buffer.concat([validBytes,Buffer.from('\n')]));assert.notEqual(run({MIRTPAGE_GOOGLE_SERVICES_FILE:file}).status,0,'Even semantically identical but unreviewed file bytes reject');
+  fs.writeFileSync(file,Buffer.alloc(65537,32));assert.notEqual(run({MIRTPAGE_GOOGLE_SERVICES_FILE:file}).status,0,'Oversized client file rejects');
+  fs.writeFileSync(file,validBytes);const link=path.join(temporary,'symlink.json');fs.symlinkSync(file,link);assert.notEqual(run({MIRTPAGE_GOOGLE_SERVICES_FILE:link}).status,0,'A symlink is not an admitted file source');
   fs.writeFileSync(file,JSON.stringify(valid));
   for(const worker of ['public/attention-push.js','apps/mobile/public/attention-sw.js']){
    const handlers={},shown=[],opened=[];const self={location:{origin:'https://suqpage.com'},addEventListener:(kind,f)=>handlers[kind]=f,registration:{showNotification:async(...args)=>shown.push(args)},clients:{matchAll:async()=>[],openWindow:async url=>opened.push(url)}};
    vm.runInNewContext(fs.readFileSync(worker,'utf8'),{self,URL,console});
    let wait;const push=value=>{handlers.push({data:{json:()=>value},waitUntil:promise=>wait=promise});return wait;};
-   await push({title:'Suqpage',body:'New chat message',notificationId:1,destination:{screen:'transport-chat'},silent:true});assert.equal(shown.length,1);assert.equal(shown[0][1].silent,true);
+   await push({title:'Suqpage',body:'New chat message',notificationId:1,destination:{screen:'transport-chat'},silent:true});assert.equal(shown.length,1);assert.equal(shown[0][0],'MirtPage');assert.equal(shown[0][1].silent,true);
    await push({title:'Forged brand',body:'Private customer body',notificationId:2});assert.equal(shown.length,1,'Unknown payload not shown');
    const notification={data:{destination:{screen:'transport-chat'}},close(){}};handlers.notificationclick({notification,waitUntil:promise=>wait=promise});await wait;assert.ok(opened[0].startsWith('https://suqpage.com/')||opened[0].startsWith('/'));
    notification.data.destination={screen:'https://evil.example',id:1};handlers.notificationclick({notification,waitUntil:promise=>wait=promise});await wait;assert.ok(opened.every(url=>!url.includes('evil.example')),'Tap cannot become an external redirect');

@@ -13,20 +13,18 @@ import { boundedAuthFetch } from "./auth-fetch";
 import * as SecureStore from "expo-secure-store";
 import { createClient, type Session } from "@supabase/supabase-js";
 import {
-  apiOrigin,
   type Locale,
   type Shop,
   type Offering,
 } from "@suqpage/contracts";
+import { PUBLIC_ORIGIN } from "./public-origin";
 import { createUiText, languageNames, locales, enabledLocales, parseLocale } from "../../../lib/i18n/core";
 import am from "../../../lib/i18n/messages/am.json";
 import om from "../../../lib/i18n/messages/om.json";
 import so from "../../../lib/i18n/messages/so.json";
 import ti from "../../../lib/i18n/messages/ti.json";
 export { languageNames, locales, enabledLocales };
-export const API = apiOrigin(
-  process.env.EXPO_PUBLIC_API_ORIGIN || "https://suqpage.com",
-);
+export const API = PUBLIC_ORIGIN;
 const memory = new Map<string, string>();
 export const secure = {
   getItem: async (key: string) =>

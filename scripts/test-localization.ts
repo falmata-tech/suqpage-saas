@@ -39,6 +39,23 @@ test('FE-070: active MirtPage labels preserve the literal brand and compatibilit
   assert.ok(channels.includes("name:'MirtPage'"));
   assert.ok(fs.readFileSync('lib/i18n/core.ts','utf8').includes('suqpage-language'));
 });
+test('FE-070 S146: active account-deletion and staff notices keep MirtPage in Amharic and Afaan Oromo', async () => {
+  const {clientMessages}=await import('../lib/i18n/client-messages');
+  const labels=[
+    'Send your request from the email you use to sign in. Include your page handle, if you have one.',
+    'Staff accounts sign in on the website.',
+  ];
+  for(const locale of ['am','om'] as const){
+    const selected=clientMessages(catalogs[locale]);
+    for(const label of labels){
+      assert.ok(selected[messageKey(label)],`${locale}: notice reaches the web/Expo client`);
+      const text=createUiText(selected)(label);
+      assert.match(text,/MirtPage/,`${locale}: active brand`);
+      assert.doesNotMatch(text,/Suqpage|SuqPage/,`${locale}: no previous brand`);
+      assert.notEqual(text,label,`${locale}: authored native notice`);
+    }
+  }
+});
 test('FE-049: fallback and literal interpolation preserve customer text', () => {
   for (const locale of locales) {
     const t = createUiText(catalogs[locale]);
@@ -50,6 +67,15 @@ test('FE-049: fallback and literal interpolation preserve customer text', () => 
   }
   assert.equal(createUiText(catalogs.en)('Save'), 'Save');
   assert.notEqual(createUiText(catalogs.am)('Save'), 'Save');
+});
+test('FE-073: fresh sign-in action is authored in active mobile locales', async () => {
+  const { clientMessages } = await import('../lib/i18n/client-messages');
+  for (const locale of ['am', 'om'] as const) {
+    const client = clientMessages(catalogs[locale]);
+    const label = createUiText(client)('Sign in again');
+    assert.ok(client[messageKey('Sign in again')], `${locale}: action reaches Expo`);
+    assert.notEqual(label, 'Sign in again', `${locale}: no English fallback after changing email`);
+  }
 });
 test('FE-049: catalogs have identical keys, no empty translations and bounded selected payloads', () => {
   const reference = Object.keys(catalogs.am).sort();
@@ -102,7 +128,7 @@ test('FE-049: server-only copy is excluded from client messages', async()=>{
   const {clientMessages}=await import('../lib/i18n/client-messages');
   const selected=clientMessages(catalogs.am);
   assert.equal(selected[messageKey('Save')],catalogs.am[messageKey('Save')]);
-  const privacy='MirtPage stores account details, page content, product inquiries, and support conversations to operate the service and help customers contact the relevant seller.';
+  const privacy='MirtPage stores account details, showroom content, support and transport conversations, and shipment-tracking information to operate the service.';
   assert.ok(catalogs.am[messageKey(privacy)]);
   assert.equal(selected[messageKey(privacy)],undefined);
   assert.ok(Object.keys(selected).length<Object.keys(catalogs.am).length);
@@ -336,16 +362,27 @@ test('FE-070: localized Market and About metadata retain the explicit MirtPage O
   const {MARKET_STOREFRONT_COPY}=await import('../lib/storefront-copy');
   for(const file of ['app/(public)/page.tsx','app/(public)/about/page.tsx']){
     const result=await build({entryPoints:[file],bundle:true,write:false,platform:'node',format:'cjs',packages:'external',jsx:'automatic',plugins:[{name:'metadata-localization-ports',setup(b){
-      b.onResolve({filter:/^@\//},args=>args.path==='@/lib/storefront-copy'?{path:process.cwd()+'/lib/storefront-copy.ts'}:{path:args.path,namespace:'metadata-port'});
-      b.onLoad({filter:/.*/,namespace:'metadata-port'},args=>({loader:'js',contents:args.path==='@/lib/i18n/server'?'export const getUiText=async()=>globalThis.__text;':'export default function Unused(){return null};export const MarketWorkspaceLoading=Unused;export function getIndependentPublicMarketplace(){throw Error("Unexpected catalog read");}export function readMarketSearch(){throw Error("Unexpected search read");}export class MarketSearchError extends Error{};'}));
+      b.onResolve({filter:/^@\//},args=>['@/lib/storefront-copy','@/lib/public-seo'].includes(args.path)?{path:process.cwd()+args.path.slice(1)+'.ts'}:{path:args.path,namespace:'metadata-port'});
+      // The real SEO helpers are pure for metadata; their unused profile fallback
+      // imports public-contact fixtures with module-level validation side effects.
+      b.onResolve({filter:/^\.\/business-profile$/},args=>args.importer.endsWith('/lib/public-seo.ts')?{path:'seo-profile-port',namespace:'metadata-port'}:undefined);
+      b.onLoad({filter:/.*/,namespace:'metadata-port'},args=>({loader:'js',contents:args.path==='@/lib/i18n/server'?'export const getUiText=async()=>globalThis.__text;':args.path==='seo-profile-port'?'export const businessProfileDescription=()=>"";':'export default function Unused(){return null};export const MarketWorkspaceLoading=Unused;export function getIndependentPublicMarketplace(){throw Error("Unexpected catalog read");}export function readMarketSearch(){throw Error("Unexpected search read");}export class MarketSearchError extends Error{};'}));
     }}]});
     for(const locale of enabledLocales){
-      const t=createUiText(catalogs[locale]),module={exports:{} as {generateMetadata:()=>Promise<{title:string;description:string;openGraph:{title:string;description:string;siteName:string};twitter:{title:string;description:string}}>}};
-      vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,require,__text:t});
+      const t=createUiText(catalogs[locale]),module={exports:{} as {generateMetadata:()=>Promise<{title:string|{absolute:string};description:string;alternates:{canonical:string};openGraph:{title:string;description:string;siteName:string;url:string;images:string[]};twitter:{title:string;description:string;card:string}}>}};
+      vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,require,URL,__text:t,process:{env:{NEXT_PUBLIC_APP_URL:'https://mirtpage.test'}}});
       const metadata=await module.exports.generateMetadata(),title=t(file.includes('/about/')?'About MirtPage':MARKET_STOREFRONT_COPY.title),description=t(MARKET_STOREFRONT_COPY.description);
-      assert.equal(metadata.title,title);assert.equal(metadata.description,description);
+      if(file.includes('/about/')){
+        assert.equal(typeof metadata.title,'object');assert.equal((metadata.title as {absolute:string}).absolute,title);
+      }else assert.equal(metadata.title,title);
+      assert.equal(metadata.description,description);
       assert.equal(metadata.openGraph.siteName,'MirtPage');assert.equal(metadata.openGraph.title,title);assert.equal(metadata.openGraph.description,description);
+      const path=file.includes('/about/')?'/about':'/';
+      assert.equal(metadata.alternates.canonical,`https://mirtpage.test${path}`);
+      assert.equal(metadata.openGraph.url,metadata.alternates.canonical);
+      assert.equal(metadata.openGraph.images[0],'https://mirtpage.test/pwa/mirtpage-panels-icon-512.png');
       assert.equal(metadata.twitter.title,title);assert.equal(metadata.twitter.description,description);
+      assert.equal(metadata.twitter.card,'summary_large_image');
       assert.doesNotMatch(JSON.stringify(metadata),/Suqpage|SuqPage/);
     }
   }

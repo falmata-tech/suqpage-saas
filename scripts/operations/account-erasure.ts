@@ -6,7 +6,10 @@ import {hashPrivateValue} from '../../lib/security';
 export type ErasureTarget={userId:number;providerId:string;email:string};
 export type ErasurePlan={target:ErasureTarget;businessId:number;digest:string;counts:Record<string,number>};
 export type ErasureApproval={approvedDigest:string;verifiedRequestReference:string;backupSha256:string};
-export interface ErasureIdentityPort { isAbsent(providerId:string):Promise<boolean>; }
+export interface ErasureIdentityPort {
+  current(providerId:string):Promise<{providerId:string;email:string;confirmed:boolean}|null>;
+  isAbsent(providerId:string):Promise<boolean>;
+}
 type Scope={sql:string;values:unknown[]};
 const identifier=(s:string)=>{if(!/^[a-z_][a-z0-9_]*$/.test(s))throw Error('Unexpected schema identifier.');return '"'+s+'"';};
 const digest=(v:unknown)=>crypto.createHash('sha256').update(JSON.stringify(v)).digest('hex');
@@ -15,7 +18,8 @@ async function inspect(runner:PostgresTransactionRunner,target:ErasureTarget,loc
   if(!Number.isSafeInteger(target.userId)||target.userId<1||!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(target.providerId)||!/^\S+@\S+\.\S+$/.test(target.email))throw Error('Invalid exact erasure target.');
   const row=(await runner.query<{business_id:number;email:string;access_role:string;provider_user_id:string;email_at_link:string}>(
     `SELECT u.business_id,u.email,p.access_role,l.provider_user_id,l.email_at_link FROM users u JOIN user_access_profiles p ON p.user_id=u.id JOIN auth_identity_links l ON l.user_id=u.id AND l.provider='supabase' WHERE u.id=? ${lock?'FOR UPDATE OF u,p,l':''}`,[target.userId])).rows[0];
-  if(!row||row.access_role!=='client'||row.email!==target.email||row.email_at_link!==target.email||row.provider_user_id!==target.providerId||!row.business_id)throw Error('Only the exact linked ordinary owner can be erased.');
+  // email_at_link is a historical snapshot, not the current sign-in address.
+  if(!row||row.access_role!=='client'||row.email!==target.email||row.provider_user_id!==target.providerId||!row.business_id)throw Error('Only the exact linked ordinary owner can be erased.');
   const businessId=Number(row.business_id);
   if(lock)await runner.query('SELECT id FROM businesses WHERE id=? FOR UPDATE',[businessId]);
   const owners=(await runner.query<{total:number}>('SELECT count(*) total FROM users WHERE business_id=?',[businessId])).rows[0];
@@ -46,8 +50,15 @@ async function inspect(runner:PostgresTransactionRunner,target:ErasureTarget,loc
   }
   return {target,businessId,counts,digest:digest({target,businessId,counts,fingerprints})};
 }
-export async function planOwnerErasure(runner:PostgresTransactionRunner,target:ErasureTarget):Promise<ErasurePlan>{
+export async function planOwnerErasure(runner:PostgresTransactionRunner,target:ErasureTarget,identity:ErasureIdentityPort):Promise<ErasurePlan>{
+  const current=await identity.current(target.providerId);
+  if(!current||current.providerId!==target.providerId||!current.confirmed||current.email.trim().toLowerCase()!==target.email)throw Error('Verify the current managed owner email and exact identity before planning erasure.');
   return runner.transaction(()=>inspect(runner,target));
+}
+/** A post-provider-deletion replan is allowed only from a plan attested while the identity existed. */
+export async function replanOwnerErasureAfterIdentityRemoval(runner:PostgresTransactionRunner,prior:ErasurePlan,identity:ErasureIdentityPort):Promise<ErasurePlan>{
+  if(!await identity.isAbsent(prior.target.providerId))throw Error('The exact managed identity must be removed before replanning.');
+  return runner.transaction(()=>inspect(runner,prior.target));
 }
 export async function eraseOwnerRows(runner:PostgresTransactionRunner,plan:ErasurePlan,approval:ErasureApproval,identity:ErasureIdentityPort) {
   if(approval.approvedDigest!==plan.digest||!/^[a-f0-9]{64}$/.test(approval.backupSha256)||!/^[a-zA-Z0-9_-]{8,100}$/.test(approval.verifiedRequestReference))throw Error('Verified request, exact approval and recoverable backup evidence are required.');

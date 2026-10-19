@@ -2,13 +2,22 @@
 id: FE-042
 title: Paginated category results and standard page workspaces
 status: in_progress
-related: [FE-048, FE-030, FE-032, FE-040, FE-041, BE-033, DEP-030, FE-008, FE-043, FE-065]
+related: [FE-048, FE-030, FE-032, FE-040, FE-041, BE-033, DEP-030, FE-008, FE-043, FE-065, FE-072, BE-060]
 owners: [product, frontend, operations]
 last_updated: 2026-09-23
 change_level: L2
 ---
 
 # FE-042 — Category results and the standard page workflow
+
+## Planned S146 — staff access across standard page tasks
+
+FE-072/BE-060 plan one administrator-controlled staff grant for standard page,
+category and product management across all businesses. The existing owner
+version, validation, readiness, media and tenant rules still apply. This does
+not change current staff authority until the new grant is implemented and
+verified; historical owner consent and assignments are no longer authority
+after that cutover.
 
 ## Current release evidence — 2026-09-14
 

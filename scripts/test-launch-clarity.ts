@@ -61,7 +61,7 @@ async function main() {
     await db.prepare('UPDATE products SET is_published=0 WHERE business_id=?').run(businessId);
     assert.equal((await firstPublicationIssues(businessId,draft.content)).some(x=>x.key==='offerings'),true,'At least one real offering is needed');
     await db.prepare("INSERT INTO products(business_id,name,slug,description,offering_kind,is_published) VALUES(?,'Portable radio','portable-radio','Compact radio with a built-in speaker.','standard_product',1)").run(businessId);
-    await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,foreign,businessId,{action:'publish',version:draft.version,revision:0}),/Only the owner/);
+    await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,foreign,businessId,{action:'publish',version:draft.version,revision:0}),/Page access/);
     assert.deepEqual(await firstPublicationIssues(businessId,draft.content),[]);
     await publish();
     assert.equal((await db.prepare('SELECT status FROM businesses WHERE id=?').get(businessId)).status,'active');

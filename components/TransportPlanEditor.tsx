@@ -13,25 +13,26 @@ import useFormExitGuard from "./useFormExitGuard";
 import styles from "./TransportPlanStaff.module.css";
 import type {OwnerEditResult} from "@/lib/owner-edit-contract";
 
-type DraftLeg=Omit<TransportPlanLegInput,'method'>&{key:string;method:TransportMethod|''};
+type DraftLeg=Omit<TransportPlanLegInput,'method'>&{key:string;method:TransportMethod|'';trackingUrl?:string;trackingCode?:string};
 const methodKeys:Record<TransportMethod,string>={air:'Air',truck:'Truck',van:'Van',car:'Car',motorcycle:'Motorcycle'};
 
-type EditorProps={plan:TransportPlan|null;cancelHref:string;submitLabel?:string;visibilityMessage?:string;focusFirstLeg?:boolean}&(
+type EditorProps={plan:TransportPlan|null;cancelHref:string;submitLabel?:string;visibilityMessage?:string;focusFirstLeg?:boolean;trackingFields?:boolean}&(
  |{action?:undefined;conversationId:number;publicRef:string;navigation:SupportViewState;formFields?:never;beforeLegs?:never}
  |{action:(form:FormData)=>Promise<OwnerEditResult>;conversationId?:never;publicRef?:never;navigation?:never;formFields?:ReactNode;beforeLegs?:ReactNode}
 );
 
 /** Legacy chat wrapper and independent shipment wrapper share only explicit form UI. */
-export default function TransportPlanEditor({conversationId,publicRef,plan,navigation,cancelHref,action=saveTransportPlanAction,formFields,beforeLegs,submitLabel='Save plan',visibilityMessage='These route details are visible to the requester and anyone with the link.',focusFirstLeg=true}:EditorProps){
+export default function TransportPlanEditor({conversationId,publicRef,plan,navigation,cancelHref,action=saveTransportPlanAction,formFields,beforeLegs,submitLabel='Save plan',visibilityMessage='These route details are visible to the requester and anyone with the link.',focusFirstLeg=true,trackingFields=false}:EditorProps){
   const t=useUiText(),prefix=useId(),serial=useRef(1);
   const expectedVersion=useRef(plan?.version||0);
-  const [legs,setLegs]=useState<DraftLeg[]>(()=>plan?.legs.length?plan.legs.map(leg=>({...leg,key:leg.id})):[{id:null,key:'new-0',providerName:'',method:'',origin:'',destination:''}]);
+  const emptyTracking=()=>trackingFields?{trackingUrl:'',trackingCode:''}:{};
+  const [legs,setLegs]=useState<DraftLeg[]>(()=>plan?.legs.length?plan.legs.map(leg=>({...leg,key:leg.id,...(trackingFields?{trackingUrl:'trackingUrl'in leg&&typeof leg.trackingUrl==='string'?leg.trackingUrl:'',trackingCode:'trackingCode'in leg&&typeof leg.trackingCode==='string'?leg.trackingCode:''}:{})})):[{id:null,key:'new-0',providerName:'',method:'',origin:'',destination:'',...emptyTracking()}]);
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[focusKey,setFocusKey]=useState<string|null>(focusFirstLeg?legs[0]?.key||null:null);
   const pending=useRef(false),form=useRef<HTMLFormElement>(null),inputs=useRef(new Map<string,HTMLInputElement>()),errorRef=useRef<HTMLParagraphElement>(null);
   const guard=useFormExitGuard(form,pending);
   useEffect(()=>{if(focusKey){inputs.current.get(focusKey)?.focus();setFocusKey(null);}},[focusKey,legs]);
   useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
-  const update=(key:string,patch:Partial<Pick<DraftLeg,'providerName'|'method'|'origin'|'destination'>>)=>setLegs(current=>current.map(leg=>leg.key===key?{...leg,...patch}:leg));
+  const update=(key:string,patch:Partial<Pick<DraftLeg,'providerName'|'method'|'origin'|'destination'|'trackingUrl'|'trackingCode'>>)=>setLegs(current=>current.map(leg=>leg.key===key?{...leg,...patch}:leg));
   const move=(index:number,direction:-1|1)=>setLegs(current=>{
     const target=index+direction;
     if(target<0||target>=current.length)return current;
@@ -82,11 +83,18 @@ export default function TransportPlanEditor({conversationId,publicRef,plan,navig
                 <label htmlFor={id+'-origin'}>{t('From')}<input id={id+'-origin'} required maxLength={120} value={leg.origin} onChange={event=>update(leg.key,{origin:event.target.value})}/></label>
                 <label htmlFor={id+'-destination'}>{t('To')}<input id={id+'-destination'} required maxLength={120} value={leg.destination} onChange={event=>update(leg.key,{destination:event.target.value})}/></label>
               </div>
+              {trackingFields&&<div className={styles.providerTracking}>
+                <p id={id+'-tracking-help'}>{t('Add the provider’s own tracking link or code, if available.')}</p>
+                <div className={styles.pair}>
+                  <label htmlFor={id+'-tracking-url'}>{t('Provider tracking link (optional)')}<input id={id+'-tracking-url'} type="url" inputMode="url" autoCapitalize="none" autoCorrect="off" maxLength={2048} aria-describedby={id+'-tracking-help'} value={leg.trackingUrl||''} onChange={event=>update(leg.key,{trackingUrl:event.target.value})}/></label>
+                  <label htmlFor={id+'-tracking-code'}>{t('Provider tracking code (optional)')}<input id={id+'-tracking-code'} autoCapitalize="none" autoCorrect="off" maxLength={120} aria-describedby={id+'-tracking-help'} value={leg.trackingCode||''} onChange={event=>update(leg.key,{trackingCode:event.target.value})}/></label>
+                </div>
+              </div>}
             </li>;
           })}
         </ol>
         <div className={styles.actions}><button type="button" className="btn secondary" disabled={legs.length>=TRANSPORT_PLAN_MAX_LEGS} onClick={()=>{
-          const key='new-'+serial.current++;setLegs(current=>[...current,{id:null,key,providerName:'',method:'',origin:'',destination:''}]);setFocusKey(key);
+          const key='new-'+serial.current++;setLegs(current=>[...current,{id:null,key,providerName:'',method:'',origin:'',destination:'',...emptyTracking()}]);setFocusKey(key);
         }}><Plus size={18} aria-hidden="true"/>{t('Add leg')}</button></div>
       </fieldset>
       {error?<p ref={errorRef} tabIndex={-1} className={styles.error} role="alert">{t(error)}</p>:null}

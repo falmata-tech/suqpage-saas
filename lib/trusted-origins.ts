@@ -30,11 +30,13 @@ export function trustedOriginPolicy(environment: OriginEnvironment = process.env
   const development = environment.NODE_ENV !== "production";
   const serverActionHosts = new Set<string>();
   const mutationOrigins = new Set<string>();
+  const devResourceHostnames = new Set<string>();
   const add = (value: string, fallbackProtocol: "http:" | "https:") => {
     const parsed = exactHttpOrigin(value, fallbackProtocol);
     if (!parsed) return;
     serverActionHosts.add(parsed.host);
     mutationOrigins.add(parsed.origin);
+    if (development) devResourceHostnames.add(new URL(parsed.origin).hostname);
   };
 
   const canonical = environment.NEXT_PUBLIC_APP_URL?.trim();
@@ -53,5 +55,6 @@ export function trustedOriginPolicy(environment: OriginEnvironment = process.env
   return {
     serverActionHosts: [...serverActionHosts],
     mutationOrigins: [...mutationOrigins],
+    devResourceHostnames: [...devResourceHostnames],
   };
 }

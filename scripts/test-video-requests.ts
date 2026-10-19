@@ -44,7 +44,7 @@ async function main(){
  await assert.rejects(()=>reviewVideoRequest(staff,second.id,approve),/video changed/);
  await joinAssignedSupportConversation(staff,second.id);
  await reviewVideoRequest(staff,second.id,{decision:'declined',reply:'Please send the correct product video.'});assert.equal((await getVideoRequest(owner,second.id))?.status,'declined');
- const draft=await ownerPagePort.create(a,owner.id,{...starterPage,about:'Unpublished owner text'});
+ const draft=await ownerPagePort.create(a,owner,{...starterPage,about:'Unpublished owner text'});
  await db.prepare("INSERT INTO owner_page_publications(business_id,revision,draft_version,content_json,action,published_by,published_at) VALUES(?,1,1,?,'publish',?,?)").run(a,JSON.stringify({...starterPage,about:'Existing public text'}),owner.id,Date.now());
  await ownerPagePort.commit(owner,draft,{kind:'content',content:{...draft.content,videoUrl:approve.youtubeUrl}});
  const header=await createVideoRequest(owner,{target:'header',sourceUrl:'https://example.com/header',idempotencyKey:crypto.randomUUID()});

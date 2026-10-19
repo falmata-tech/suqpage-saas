@@ -40,7 +40,7 @@ export function ShowroomMenu() {
   return <><Copy big heading>{t('Your page')}</Copy><Button secondary label={t('Preview page')} icon="eye" onPress={()=>open('page','preview')}/>{[
     {label:'Page content',items:[{label:'About the business',section:'page',view:'about'},{label:'Cover photo',section:'cover'},{label:'Business video',section:'page',view:'video'}]},
     {label:'Appearance',items:[{label:'Page color',section:'page',view:'color'}]},
-    {label:'Sharing and access',items:[{label:'Public contact details',section:'page',view:'contacts'},{label:'Page address',section:'handle'},{label:'Allow team editing',section:'page',view:'team'}]},
+    {label:'Sharing and access',items:[{label:'Public contact details',section:'page',view:'contacts'},{label:'Page address',section:'handle'}]},
   ].map(group=><View key={group.label} style={{gap:8}}><Text style={{fontSize:13,lineHeight:20,fontWeight:'600',color:colors.muted}}>{t(group.label)}</Text><View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>{group.items.map(item=><Pressable key={item.label} accessibilityRole="button" accessibilityLabel={t(item.label)} onPress={()=>open(item.section,item.view)} style={{minHeight:76,flexBasis:'47%',flexGrow:1,padding:12,justifyContent:'center',borderWidth:1,borderColor:colors.line,borderRadius:12,backgroundColor:'white'}}><Text style={{fontSize:14,lineHeight:21,fontWeight:'600',color:colors.ink}}>{t(item.label)}</Text></Pressable>)}</View></View>)}</>;
 }
 

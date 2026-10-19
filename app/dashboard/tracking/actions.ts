@@ -4,7 +4,7 @@ import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
 import {requireUser} from '@/lib/auth';
 import type {OwnerEditResult} from '@/lib/owner-edit-contract';
-import {parseTrackingSubmit,parseTrackingUpdate,parseTrackingRevoke,TrackingError} from '@/lib/tracking-contract';
+import {parseTrackingSubmit,parseTrackingUpdate,parseTrackingRevoke,parseTrackingLegsJson,TrackingError} from '@/lib/tracking-contract';
 import {submitTrackingShipment,updateTrackingShipment,revokeTrackingShipment} from '@/lib/tracking';
 import {scheduleTrackingEmailDelivery} from '@/lib/tracking-after';
 import {trackingStaffFormView,trackingStaffHref} from './navigation';
@@ -14,7 +14,7 @@ function fields(form:FormData,kind:'create'|'edit'|'revoke'){
  for(const[key,value]of form){if(!allowed.has(key)||seen.has(key)||typeof value!=='string')throw new TrackingError('Check the shipment details.','invalid');seen.add(key);}
 }
 function integer(form:FormData,key:string){const value=form.get(key);return typeof value==='string'&&/^(?:0|[1-9]\d{0,15})$/.test(value)?Number(value):NaN;}
-function legs(form:FormData):unknown{const raw=form.get('legs');if(typeof raw!=='string'||raw.length>24_000)throw new TrackingError('Check the shipment details.','invalid');try{return JSON.parse(raw);}catch{throw new TrackingError('Check the shipment details.','invalid');}}
+function legs(form:FormData):unknown{return parseTrackingLegsJson(form.get('legs'));}
 function errorResult(error:unknown){return{error:error instanceof TrackingError?error.message:'Unable to connect. Please try again.'};}
 
 export async function submitShipmentAction(form:FormData):Promise<OwnerEditResult>{

@@ -4,7 +4,8 @@ import { getUiText } from "@/lib/i18n/server";
 import Link from "next/link";
 import { NavigationPendingMain, NavigationPendingProvider } from "@/components/NavigationPendingIndicator";
 import WorkspaceNavigation, { type WorkspaceNavGroup, type WorkspaceNavItem } from "@/components/WorkspaceNavigation";
-import { hasCapability, isClient, isQueueAgent } from "@/lib/capabilities";
+import { canMaintainBasicProducts, hasCapability, isClient, isQueueAgent } from "@/lib/capabilities";
+import {currentBusinessAuthority,currentStaffBusinessGrant} from '@/lib/staff-business-authority';
 import { authDriver } from "@/lib/config";
 import type { Business, SessionUser } from "@/lib/types";
 import { ownerPageEditorEnabled, ownerPagePort } from "@/lib/owner-page-runtime";
@@ -29,8 +30,10 @@ export default async function DashboardShell({ user, business, children, support
   const platformAdmin = hasCapability(user, "platform:admin");
   const teamMember = user.access_role === "team_member";
   const queueAgent = isQueueAgent(user);
+  const staffGrant=teamMember||user.access_role==='operations_manager'?await currentStaffBusinessGrant(user):false;
+  const businessAuthority=business?await currentBusinessAuthority(user,business.id):null;
   const tracking=canUseStaffTracking(user);
-  const canMaintainProducts = Boolean(business && hasCapability(user, "basic-product:maintain"));
+  const canMaintainProducts = Boolean(business&&businessAuthority&&canMaintainBasicProducts(user,business.id,businessAuthority==='staff'));
   let pageEditor = false;
   if (business && ownerPageEditorEnabled()) {
     try { await readOwnerPage(ownerPagePort, user, business.id); pageEditor = true; }
@@ -45,7 +48,7 @@ export default async function DashboardShell({ user, business, children, support
       : operations
         ? "Operations workspace"
         : teamMember
-          ? "Assigned businesses"
+          ? "Business workspaces"
           : "Private workspace";
 
   const globalGroups = platformAdmin ? [
@@ -56,7 +59,7 @@ export default async function DashboardShell({ user, business, children, support
     group("Administration", [
       { href: "/dashboard/admin", label: "Overview", icon: "overview" },
       { href: "/dashboard/admin/businesses", label: "Businesses", icon: "businesses", activePaths:['/dashboard','/dashboard/products','/dashboard/settings','/dashboard/access','/dashboard/page-editor','/dashboard/catalog','/dashboard/admin/discovery',...(business?['/dashboard/admin/sponsors']:[])] },
-      { href: "/dashboard/tracking", label: "Tracking", icon: "tracking" },
+      { href: "/dashboard/tracking", label: "Shipment tracking", icon: "tracking" },
       { href: "/dashboard/admin/staff", label: "Staff", icon: "staff", activePaths:["/dashboard/support/agents"] },
       { href: "/dashboard/reports", label: "Listing reports", icon: "reports" },
     ]),
@@ -83,7 +86,7 @@ export default async function DashboardShell({ user, business, children, support
       {href:'/about',label:'About',icon:'library'},
     ]),
   ].filter((item):item is WorkspaceNavGroup=>Boolean(item));
-  const agentGroups = [group("Chats",[{href:dashboardHref,label:user.staff_queue_scope === "transport" ? "Transport" : "Business support",icon:user.staff_queue_scope === "transport" ? "transport" : "support"},...(user.staff_queue_scope==='support'?[{href:'/dashboard/reports',label:'Listing reports',icon:'reports' as const}]:[])]),tracking?group('Workspace',[{href:'/dashboard/tracking',label:'Tracking',icon:'tracking'}]):null].filter((item): item is WorkspaceNavGroup => Boolean(item));
+  const agentGroups = [group("Chats",[{href:dashboardHref,label:user.staff_queue_scope === "transport" ? "Transport" : "Business support",icon:user.staff_queue_scope === "transport" ? "transport" : "support"},...(user.staff_queue_scope==='support'?[{href:'/dashboard/reports',label:'Listing reports',icon:'reports' as const}]:[])]),group('Workspace',[staffGrant?{href:'/dashboard',label:'Business workspaces',icon:'businesses'}:null,tracking?{href:'/dashboard/tracking',label:'Shipment tracking',icon:'tracking'}:null])].filter((item): item is WorkspaceNavGroup => Boolean(item));
   const operationsGroups = operations && !platformAdmin ? [group("Chats",[
     {href:"/dashboard/support?queue=support",label:"Business support",icon:"support"},
     {href:'/dashboard/reports',label:'Listing reports',icon:'reports'},
@@ -91,19 +94,21 @@ export default async function DashboardShell({ user, business, children, support
     {href:"/dashboard/support/agents",label:"Workload & availability",icon:"staff"},
   ])].filter((item): item is WorkspaceNavGroup => Boolean(item)) : [];
   const staffHomeGroups=[group("Workspace",[
-    {href:'/dashboard',label:teamMember?'Assigned businesses':'Business workspaces',icon:'businesses'},
-    tracking?{href:'/dashboard/tracking',label:'Tracking',icon:'tracking'}:null,
+    staffGrant?{href:'/dashboard',label:'Business workspaces',icon:'businesses'}:null,
+    tracking?{href:'/dashboard/tracking',label:'Shipment tracking',icon:'tracking'}:null,
     !operations?{href:'/dashboard/support',label:'Support inbox',icon:'support'}:null,
   ])].filter((entry):entry is WorkspaceNavGroup=>Boolean(entry));
   const groups = client ? clientGroups : queueAgent ? agentGroups : globalGroups || [...operationsGroups,...staffHomeGroups];
-  const businessLinks:BusinessWorkspaceLink[]=business&&!client&&!queueAgent?[
+  const businessLinks:BusinessWorkspaceLink[]=business&&!client&&businessAuthority?[
     {href:`/dashboard${query}`,label:t('Overview')},
     ...(pageEditor?[{href:`/dashboard/page-editor${query}&view=preview`,label:t('Your page')}]:[]),
     ...(canMaintainProducts?[{href:`/dashboard/products${query}`,label:t('Products'),activePaths:['/dashboard/catalog']}]:[]),
-    ...(platformAdmin?[
+    ...(platformAdmin||businessAuthority==='staff'?[
       {href:`/dashboard/settings${query}`,label:t('Business details')},
       {href:`/dashboard/admin/discovery/${business.id}`,label:t('Location & visibility'),activePaths:['/dashboard/admin/sponsors']},
-      {href:`/dashboard/access${query}`,label:t('Access'),activePaths:[`/dashboard/admin/businesses/${business.id}/team`]},
+    ]:[]),
+    ...(platformAdmin?[
+      {href:`/dashboard/access${query}`,label:t('Access')},
     ]:[]),
   ]:[];
 

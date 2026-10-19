@@ -364,6 +364,8 @@ export type StaffRow = {
   pending_pages: number;
   queue_scope: "support"|"transport"|"all"|null;
   open_conversations: number;
+  manage_businesses: number;
+  grant_version: number | null;
 };
 
 export async function listStaffPage(input: PageInput & { role?: unknown }) {
@@ -380,10 +382,11 @@ export async function listStaffPage(input: PageInput & { role?: unknown }) {
     } else { where += " AND p.access_role=?"; params.push(role); }
   }
   where += searchClause(request.search, ["u.name", "u.email"], params);
-  const from = `FROM users u JOIN user_access_profiles p ON p.user_id=u.id LEFT JOIN support_agent_settings s ON s.user_id=u.id${where}`;
+  const from = `FROM users u JOIN user_access_profiles p ON p.user_id=u.id LEFT JOIN support_agent_settings s ON s.user_id=u.id LEFT JOIN staff_business_grants g ON g.user_id=u.id${where}`;
   return pageRows<StaffRow>(
     `SELECT COUNT(*) total ${from}`,
     `SELECT u.id,u.email,u.name,u.must_change_password,p.access_role,s.queue_scope,
+      COALESCE(g.enabled,0) manage_businesses,g.version grant_version,
       (SELECT COUNT(*) FROM support_conversations c WHERE c.assigned_user_id=u.id AND c.status='open') open_conversations,
       (
         SELECT COUNT(*) FROM staff_business_assignments a
@@ -440,8 +443,9 @@ export async function listAssignedBusinessesPage(userId: number, input: PageInpu
   const search = searchClause(request.search, ["b.name", "b.handle"], params);
   const from = `
     FROM businesses b
-    JOIN staff_business_assignments a ON a.business_id=b.id
-    WHERE a.user_id=? AND a.active=1${search}`;
+    WHERE EXISTS(SELECT 1 FROM staff_business_grants g
+      JOIN user_access_profiles p ON p.user_id=g.user_id
+      WHERE g.user_id=? AND g.enabled=1 AND p.access_role IN ('team_member','operations_manager'))${search}`;
   return pageRows<Business>(
     `SELECT COUNT(*) total ${from}`,
     `SELECT b.* ${from}

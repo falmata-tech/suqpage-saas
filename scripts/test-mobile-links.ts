@@ -62,3 +62,58 @@ test('FE-053 actual Expo adapter uses an in-app native browser and isolated web 
   calls.length=0;await mod.exports.openLink('https://wa.me/251911111111');assert.equal(calls[0].kind,platform==='web'?'browser':'handler');
  }
 });
+
+test('FE-070 native legal links follow the validated MirtPage, local or staging origin',async()=>{
+ const {build}=await import('esbuild'),vm=await import('node:vm');
+ for(const [raw,expected] of [[undefined,'https://mirtpage.com'],['http://127.0.0.1:3102','http://127.0.0.1:3102'],['https://preview.mirtpage.com','https://preview.mirtpage.com']] as const){
+  const calls:string[]=[];
+  const result=await build({entryPoints:['apps/mobile/app/(tabs)/about.tsx'],bundle:true,platform:'node',format:'cjs',write:false,define:{'process.env.EXPO_PUBLIC_API_ORIGIN':raw===undefined?'undefined':JSON.stringify(raw)},plugins:[{name:'about-native-ports',setup(b){
+   b.onResolve({filter:/^(react(?:\/jsx-runtime)?|react-native|expo-router)$|(?:^|\/)(?:ui|runtime|incoming-link)$/},args=>({path:args.path,namespace:'ports'}));
+   b.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'js',contents:args.path==='react'?`export const useRef=initial=>({current:initial}),useState=initial=>[initial,()=>{}];export default {};`
+    :args.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
+    :args.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',ScrollView='ScrollView',StyleSheet={create:value=>value},Platform={OS:'android'};`
+    :args.path==='expo-router'?`export const router={navigate:()=>{}};`
+    :args.path.endsWith('/runtime')?`export const useApp=()=>({t:value=>value});`
+    :args.path.endsWith('/incoming-link')?`export const createMarketNavigationIntent=()=>1;`
+    :`export const Screen='Screen',Button='Button',Icon='Icon',colors={brand:'#c43a00',ink:'#202428',muted:'#63737a',line:'#dbe2e3',soft:'#fff1e9'},useOpenLink=()=>async url=>calls.push(url);`}));
+  }}]});
+  const module={exports:{} as {default:()=>{type:string;props:{children?:unknown}}}};
+  vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,calls,URL,URLSearchParams});
+  const nodes:(node:unknown)=>Array<{type:string;props:Record<string,unknown>}>=node=>node&&typeof node==='object'&&'props'in node?
+   [node as {type:string;props:Record<string,unknown>},...[((node as {props:{children?:unknown}}).props.children)].flat(Infinity).flatMap(nodes)]:[];
+  const buttons=nodes(module.exports.default()).filter(node=>node.type==='Button');
+  for(const [label,path] of [['Privacy','privacy'],['Terms','terms']] as const){
+   const button=buttons.find(node=>node.props.label===label);assert.ok(button,`${label} button exists`);
+   (button.props.onPress as ()=>void)();assert.equal(calls.at(-1),`${expected}/${path}`);
+  }
+ }
+ for(const raw of ['javascript:alert(1)','https://user:pass@mirtpage.com','https://mirtpage.com/private','http://evil.test']){
+  const result=await build({entryPoints:['apps/mobile/src/public-origin.ts'],bundle:true,platform:'node',format:'cjs',write:false,define:{'process.env.EXPO_PUBLIC_API_ORIGIN':JSON.stringify(raw)}});
+  const module={exports:{}};assert.throws(()=>vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,URL}),/Use (?:HTTPS|an API origin)/,raw);
+ }
+});
+
+test('FE-070 native social-video WebView uses the same qualified referrer without opening arbitrary destinations',async()=>{
+ const {build}=await import('esbuild'),vm=await import('node:vm');
+ const id='6718335390845095173';
+ for(const [raw,expected] of [[undefined,'https://mirtpage.com'],['http://127.0.0.1:3102','http://127.0.0.1:3102'],['https://preview.mirtpage.com','https://preview.mirtpage.com']] as const){
+  const result=await build({entryPoints:['apps/mobile/src/SocialVideoFrame.tsx'],bundle:true,platform:'node',format:'cjs',write:false,define:{'process.env.EXPO_PUBLIC_API_ORIGIN':raw===undefined?'undefined':JSON.stringify(raw)},plugins:[{name:'video-native-ports',setup(b){
+   b.onResolve({filter:/^(react(?:\/jsx-runtime)?|react-native|react-native-webview)$/},args=>({path:args.path,namespace:'ports'}));
+   b.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'js',contents:args.path==='react'?`export const useMemo=fn=>fn();export default {};`
+    :args.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx;`
+    :args.path==='react-native'?`export const View='View';`
+    :`export const WebView='WebView';`}));
+  }}]});
+  const module={exports:{} as {default:(props:{id:string;height:number;onEvent:()=>void})=>{props:{children:{props:Record<string,unknown>}}}}};
+  vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,URL,URLSearchParams});
+  const webView=module.exports.default({id,height:260,onEvent:()=>{}}).props.children.props;
+  const source=webView.source as {baseUrl:string;html:string};
+  assert.equal(source.baseUrl,`${expected}/`);
+  assert.ok(source.html.includes(`"origin":"${expected}"`),'Embedded parent/referrer is the configured MirtPage origin');
+  const permits=webView.onShouldStartLoadWithRequest as (request:{url:string})=>boolean;
+  assert.equal(permits({url:`${expected}/`}),true);
+  assert.equal(permits({url:`https://www.tiktok.com/player/v1/${id}`}),true);
+  for(const url of [`${expected}/account`,`https://suqpage.com/`,`https://evil.test/`,`tiktok://video/${id}`])assert.equal(permits({url}),false,url);
+  assert.equal(webView.sharedCookiesEnabled,false);assert.equal(webView.thirdPartyCookiesEnabled,false);
+ }
+});

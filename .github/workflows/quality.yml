@@ -37,11 +37,12 @@ jobs:
         with:
           node-version: 24.18.1
           cache: npm
-      - run: npm ci
-      - run: npm run release
+      - run: SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@suqpage/contracts --include-workspace-root
+      - run: npm run release:web
         env:
           SUQPAGE_DELEGATE_PROVIDER_SMOKE: "1"
       - run: npm run test:operations
+      - run: npm run test:mobile:release-safety
 
   browser:
     runs-on: ubuntu-latest
@@ -88,8 +89,9 @@ jobs:
         with:
           node-version: 24.18.1
           cache: npm
-      - run: npm ci
-      - run: npm audit --omit=dev --audit-level=moderate
+      - run: SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@suqpage/contracts --include-workspace-root
+      - run: node scripts/check-web-install.cjs
+      - run: npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate
 
   postgres:
     runs-on: ubuntu-latest

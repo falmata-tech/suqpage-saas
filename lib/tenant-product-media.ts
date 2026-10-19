@@ -5,11 +5,12 @@ import { getMediaObjectStore } from './media-storage';
 import { runtimeGet } from './runtime-sql';
 import { ProductUpkeepError } from './product-upkeep-domain';
 import type { SessionUser } from './types';
+import { currentBusinessAuthority } from './staff-business-authority';
 const tenantKey=/^product-private-([1-9]\d*)-[a-f0-9-]{36}\.(?:png|jpg|webp)$/;
 export function tenantProductMediaBusiness(filename:string){const id=Number(tenantKey.exec(filename)?.[1]||0);return Number.isSafeInteger(id)&&id<=2147483647?id:0;}
 async function authorized(actor:SessionUser,businessId:number){
- const assigned=actor.access_role==='team_member'&&Boolean(await runtimeGet('SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1',[actor.id,businessId]));
- return canMaintainBasicProducts(actor,businessId,assigned);
+ const authority=await currentBusinessAuthority(actor,businessId);
+ return Boolean(authority&&canMaintainBasicProducts(actor,businessId,authority==='staff'));
 }
 export async function stageTenantProductImage(actor:SessionUser,businessId:number,file:FormDataEntryValue|null):Promise<StagedImage|null>{
  if(!Number.isSafeInteger(businessId)||businessId<1||!await authorized(actor,businessId)||!await runtimeGet('SELECT 1 FROM businesses WHERE id=?',[businessId]))throw new ProductUpkeepError('Product access is not available.',403,'forbidden');

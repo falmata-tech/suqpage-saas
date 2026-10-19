@@ -5,7 +5,7 @@ import { apiUser } from "@/lib/auth";
 import { assertSameOrigin } from "@/lib/security";
 import { OwnerPageError, ownerPageRecord } from "@/lib/owner-page-domain";
 import { ownerPageEditorEnabled, ownerPagePort } from "@/lib/owner-page-runtime";
-import { readOwnerPage, setOwnerPageAssistance } from "@/lib/owner-page-service";
+import { readOwnerPage } from "@/lib/owner-page-service";
 import { changePagePublication } from "@/lib/owner-page-publication";
 import { pagePublicationPort } from "@/lib/owner-page-publication-runtime";
 
@@ -59,10 +59,7 @@ export async function POST(request: Request, context: { params: Promise<{ busine
       revalidatePath("/"); revalidatePath("/dashboard"); revalidatePath("/dashboard/profile");
       return json(saved);
     }
-    if (body.action === "assistance") {
-      ownerPageRecord(body, ["action", "version", "enabled"]);
-      return json(await setOwnerPageAssistance(ownerPagePort, user, businessId, body.version, body.enabled));
-    }
+    if (body.action === "assistance") return json({error:"This page action is no longer available."},410);
     throw new OwnerPageError("Choose an available page action.");
   } catch (error) {
     return error instanceof OwnerPageError ? json({ error: error.message }, error.status) : json({ error: "The page action could not be confirmed. Reload before trying again." }, 500);

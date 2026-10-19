@@ -40,7 +40,7 @@ export default function HandleField({onReady, refreshKey = 0, currentHandle = ""
     <input id="signup-handle" name="handle" value={value} onChange={event => {onReady(false); setValue(event.target.value);}}
       disabled={!mounted} required maxLength={61} autoCapitalize="none" autoCorrect="off" spellCheck={false}
       autoComplete="off" aria-describedby="signup-handle-address signup-handle-status" aria-invalid={Boolean(invalid || current?.kind === 'taken')} />
-    <small id="signup-handle-address" dir="ltr">suqpage.com/@{handle || value.trim().replace(/^@/, '').toLowerCase()}</small>
+    <small id="signup-handle-address" dir="ltr">mirtpage.com/@{handle || value.trim().replace(/^@/, '').toLowerCase()}</small>
     <small id="signup-handle-status" role="status" aria-live="polite">
       {invalid ? <><X size={16} aria-hidden="true" />{t(invalid)}</> : !handle ? null
         : current?.kind === 'available' ? <><Check size={16} aria-hidden="true" />{t('Available')}</>

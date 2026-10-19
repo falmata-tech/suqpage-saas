@@ -47,7 +47,7 @@ async function main() {
       ALTER TABLE support_events ADD CONSTRAINT ck_support_events_1 CHECK(event_type IN
         ('created','assigned','reassigned','message','closed','reopened','transport_handoff','joined'));
       DELETE FROM schema_migrations WHERE version IN (67,68,69,70)`);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 66);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version, 66);
     const business = (await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('response-migration','Response migration','composition','active')").run()).insertedId;
     async function user(name: string, role: string) {
       const id = (await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES(?,'unused',?,'admin',?,0)").run(`${name}@example.test`, name, business)).insertedId;
@@ -112,13 +112,13 @@ async function main() {
     const before = await snapshot();
     const aborted = Error('Fixture migration rollback');
     await assert.rejects(() => db.runner.transaction(async () => {
-      assert.deepEqual((await migratePostgresDatabase(db.runner, schema)).applied, [67,68,69,70,71,72]);
+      assert.deepEqual((await migratePostgresDatabase(db.runner, schema)).applied, [67,68,69,70,71,72,73,74,75]);
       throw aborted;
     }), error => error === aborted);
     assert.equal((await db.prepare("SELECT COUNT(*) n FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='support_conversations' AND column_name='awaiting_staff_since'").get()).n, 0);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 66);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version, 66);
     assert.deepEqual(await snapshot(), before, 'Rollback preserves schema66 data and all history');
-    assert.deepEqual((await migratePostgresDatabase(db.runner, schema)).applied, [67,68,69,70,71,72]);
+    assert.deepEqual((await migratePostgresDatabase(db.runner, schema)).applied, [67,68,69,70,71,72,73,74,75]);
     assert.deepEqual(await snapshot(), before, 'Migration never rewrites retained transcript, events, identity, read or old idle state');
     for (const c of before.conversations) {
       const row = await db.prepare('SELECT awaiting_staff_since,awaiting_staff_message_id,overdue_notified_message_id,staff_joined_assignment_id FROM support_conversations WHERE id=?').get(c.id);
@@ -137,7 +137,7 @@ async function main() {
     }
     const index = (await db.prepare("SELECT indexdef FROM pg_indexes WHERE schemaname=current_schema() AND indexname='support_staff_reply_pending'").get()).indexdef as string;
     for (const token of ['awaiting_staff_since, id', 'resolved_at IS NULL', 'overdue_notified_message_id IS DISTINCT FROM awaiting_staff_message_id']) assert.ok(index.includes(token), token);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 72);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version, 75);
     console.log('PASS S125/S126 pure10-minute state boundaries and isolated schema66→71 migration compatibility: conservative original-side/opener backfill, no legacy push, explicit-join reset, history/read/contact preservation, atomic rollback, CHECK/index and no-op replay.');
   } finally { await closeDbForTests(); }
 }

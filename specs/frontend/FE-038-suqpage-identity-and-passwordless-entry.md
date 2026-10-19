@@ -2,13 +2,22 @@
 id: FE-038
 title: Suqpage identity and passwordless account entry
 status: in_progress
-related: [FE-051, FE-046, DEP-033, BE-036, BE-032, FE-040, FE-013, FE-027, FE-029, FE-034, FE-035, FE-036, FE-039, BE-031, DEP-026, DEP-027, DEP-028, ADR-0017]
+related: [FE-051, FE-046, DEP-033, BE-036, BE-032, FE-040, FE-013, FE-027, FE-029, FE-034, FE-035, FE-036, FE-039, BE-031, DEP-026, DEP-027, DEP-028, ADR-0017, FE-072, BE-060, FE-073, BE-061, DEP-050]
 owners: [product, frontend, design, security]
 last_updated: 2026-09-21
 change_level: L3
 ---
 
 # FE-038 - Suqpage identity and passwordless account entry
+
+## Planned S146 — owner-only sign-in email boundary
+
+FE-072/BE-060 grant administrator-approved staff business/showroom management,
+not account identity authority. FE-073/BE-061/DEP-050 separately plan an
+owner-only sign-in-email change: a code to the current owner email and
+confirmation at the new email. Staff and administrators cannot bypass provider
+verification or change it through business editing. The existing read-only
+account email remains current until that separate security flow is verified.
 
 ## Problem and outcome
 

@@ -143,9 +143,9 @@
         "om": "Gargaarsa geejjibaa gaafadhu."
       },
       "alt": {
-        "en": "Transport chat intake with pickup and destination fields and a link to email-verified Tracking.",
-        "am": "መነሻና መድረሻ የሚሞላበት የማጓጓዣ ቻትና በኢሜይል ኮድ ወደሚከፈት መከታተያ የሚወስድ ሊንክ።",
-        "om": "Chaatii geejjibaa bakka ka'umsaa fi ga'umsaa galchan; liinkii Tracking koodii imeeliin banamu."
+        "en": "Transport chat intake with pickup and destination fields and a link to email-verified Shipment tracking.",
+        "am": "መነሻና መድረሻ የሚሞላበት የማጓጓዣ ቻትና በኢሜይል ኮድ ወደሚከፈት የጭነት ክትትል ገጽ የሚወስድ ሊንክ።",
+        "om": "Chaatii geejjibaa bakka kaʼumsaa fi gaʼumsaa galchan; liinkii Hordoffii feʼumsaa koodii imeeliin banamu."
       },
       "localeFiles": {
         "en": null,

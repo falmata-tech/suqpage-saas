@@ -23,6 +23,8 @@ test('FE-070 presentation identity has original unshadowed assets and mask-safe 
  }
  const mark=fs.readFileSync('public'+PLATFORM_BRAND.assets.mark,'utf8');assert.match(mark,/<title id="title">MirtPage<\/title>/);assert.match(mark,/viewBox="0 0 512 512"/);
  for(const color of mark.match(/#[a-f0-9]{6}/ig)||[])assert.ok(['#ff4b00','#ffffff'].includes(color));
+ const notification=await sharp('apps/mobile/assets/mirtpage-notification.png').ensureAlpha().raw().toBuffer({resolveWithObject:true});assert.equal(notification.info.width,96);assert.equal(notification.info.height,96);
+ let opaque=0,transparent=0;for(let i=0;i<notification.data.length;i+=4){if(notification.data[i+3]){opaque++;assert.equal(notification.data[i],255);assert.equal(notification.data[i+1],255);assert.equal(notification.data[i+2],255);}else transparent++;}assert.ok(opaque>0&&transparent>0,'Canonical Android notification M is white with transparent surrounding pixels');
  for(const [asset,size]of[[PLATFORM_BRAND.assets.favicon,32],[PLATFORM_BRAND.assets.apple,180],[PLATFORM_BRAND.assets.icon192,192],[PLATFORM_BRAND.assets.icon512,512],[PLATFORM_BRAND.assets.maskable512,512]]as const){const m=await sharp('public'+asset).metadata();assert.equal(m.width,size);assert.equal(m.height,size);assert.equal(m.format,'png');}
  const image=await sharp('public'+PLATFORM_BRAND.assets.maskable512).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  const pixel=(x:number,y:number)=>[...image.data.subarray((y*image.info.width+x)*4,(y*image.info.width+x)*4+4)];
@@ -36,6 +38,7 @@ test('FE-070 full wordmark and icon derivatives preserve canonical outlines and 
  const source=fs.readFileSync('public'+PLATFORM_BRAND.assets.wordmark,'utf8');assert.doesNotMatch(source,/<(?:text|image)\b|font-family/);assert.match(source,/viewBox="0 0 440 96"/);
  const expected=await mirtpageDerivatives();for(const[file,bytes]of expected)assert.ok(fs.readFileSync(file).equals(bytes),`${file} must be reproduced from canonical SVG geometry`);
  assert.ok(fs.readFileSync('apps/mobile/assets/mirtpage-wordmark.png').equals(await sharp(Buffer.from(source)).resize(1320,288).png().toBuffer()));
+ assert.ok(fs.readFileSync('public'+PLATFORM_BRAND.assets.emailWordmark).equals(fs.readFileSync('apps/mobile/assets/mirtpage-wordmark.png')),'Email uses the exact canonical mobile wordmark raster');
  assert.equal(fs.readFileSync('public'+PLATFORM_BRAND.assets.wordmarkReverse,'utf8'),source.replaceAll(PLATFORM_BRAND.colors.ink,PLATFORM_BRAND.colors.white));
  const badge=await sharp('public'+PLATFORM_BRAND.assets.notificationBadge).ensureAlpha().raw().toBuffer({resolveWithObject:true});assert.equal(badge.info.width,96);let visible=0,transparent=0;
  for(let i=0;i<badge.data.length;i+=4){if(badge.data[i+3]>0){visible++;assert.deepEqual([...badge.data.subarray(i,i+3)],[255,255,255]);}else transparent++;}assert.ok(visible>500&&transparent>500,'Badge is the white M silhouette, not an opaque colored square');

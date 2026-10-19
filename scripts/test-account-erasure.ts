@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';import crypto from 'node:crypto';import fs from 'node:fs';
 import {getDb,closeDbForTests} from './testing/postgres-fixture';
-import {planOwnerErasure,eraseOwnerRows} from './operations/account-erasure';
+import {planOwnerErasure,replanOwnerErasureAfterIdentityRemoval,eraseOwnerRows} from './operations/account-erasure';
 import {createPublicClientWorkspace} from '../lib/signup';import {findPlaceSuggestions} from '../lib/place-catalog';
 import {createSuqpageSupabaseAdminClient} from '../lib/supabase-auth';import {supabaseAuthConfig,supabaseMediaStorageConfig} from '../lib/config';
 import {runtimeUserById} from '../lib/catalog-runtime';import {getMediaObjectStore,type MediaNamespace} from '../lib/media-storage';
@@ -18,7 +18,12 @@ async function main(){
   const a=await createPublicClientWorkspace(input('LOCAL QA Erasure'),{providerUserId:p.data.user.id,email});
   const b=await createPublicClientWorkspace(input('LOCAL QA Preserve'),{providerUserId:crypto.randomUUID(),email:'qa-preserve@example.test'});
   const target={userId:a.userId,email,providerId:p.data.user.id};
-  const identity={isAbsent:async(id:string)=>{const result=await admin.auth.admin.getUserById(id);return result.data.user===null && result.error?.status===404;}};
+  const identity={
+   current:async(id:string)=>{const result=await admin.auth.admin.getUserById(id);const user=result.data.user;return user?.email ? {providerId:user.id,email:user.email,confirmed:Boolean(user.email_confirmed_at)} : null;},
+   isAbsent:async(id:string)=>{const result=await admin.auth.admin.getUserById(id);return result.data.user===null && result.error?.status===404;},
+  };
+  // This snapshot is intentionally older than the current, provider-verified email.
+  await db.prepare('UPDATE auth_identity_links SET email_at_link=? WHERE user_id=?').run('historical-link@example.test',a.userId);
   const actor=(await runtimeUserById(a.userId))!;
   await createSupportConversation(actor,{subject:'LOCAL QA erasure',message:'Owner conversation to erase',idempotencyKey:crypto.randomUUID()});
   await db.prepare("INSERT INTO attention_preferences(recipient_key,sound_enabled,language,updated_at) VALUES(?,true,'en',0)").run('user:'+a.userId);
@@ -31,11 +36,15 @@ async function main(){
   for(const bid of [a.businessId,b.businessId])await db.prepare('UPDATE products SET image_path=? WHERE business_id=?').run('/media/'+shared,bid);
   const before=await buildRuntimeMediaReferenceManifest();assert.ok(before.references.some(v=>v.key===owned));assert.ok(before.references.some(v=>v.key===shared));
   const otherBefore=await db.prepare('SELECT row_to_json(b)::text value FROM businesses b WHERE id=?').get(b.businessId),otherProducts=await db.prepare('SELECT row_to_json(p)::text value FROM products p WHERE business_id=? ORDER BY id').all(b.businessId);
-  for(const forged of [{...target,providerId:crypto.randomUUID()},{...target,email:'wrong@example.test'}])await assert.rejects(()=>planOwnerErasure(db.runner,forged));
-  await db.prepare("UPDATE user_access_profiles SET access_role='team_member' WHERE user_id=?").run(a.userId);await assert.rejects(()=>planOwnerErasure(db.runner,target));await db.prepare("UPDATE user_access_profiles SET access_role='client' WHERE user_id=?").run(a.userId);
+  for(const forged of [{...target,providerId:crypto.randomUUID()},{...target,email:'wrong@example.test'}])await assert.rejects(()=>planOwnerErasure(db.runner,forged,identity));
+  await assert.rejects(()=>planOwnerErasure(db.runner,target,{...identity,current:async()=>({providerId:target.providerId,email:target.email,confirmed:false})}));
+  await assert.rejects(()=>planOwnerErasure(db.runner,target,{...identity,current:async()=>({providerId:crypto.randomUUID(),email:target.email,confirmed:true})}));
+  await db.prepare("UPDATE user_access_profiles SET access_role='team_member' WHERE user_id=?").run(a.userId);await assert.rejects(()=>planOwnerErasure(db.runner,target,identity));await db.prepare("UPDATE user_access_profiles SET access_role='client' WHERE user_id=?").run(a.userId);
   const sharedUser=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES('qa-shared@example.test','fixture','Shared','owner',?,0)").run(a.businessId)).insertedId);
-  await assert.rejects(()=>planOwnerErasure(db.runner,target));await db.prepare('DELETE FROM users WHERE id=?').run(sharedUser);
-  const initial=await planOwnerErasure(db.runner,target);assert.ok(initial.counts.products>0);assert.ok(initial.counts.support_messages>0);assert.ok(initial.counts.owner_page_events>0);assert.equal(initial.counts.attention_subscriptions,1);
+  await assert.rejects(()=>planOwnerErasure(db.runner,target,identity));await db.prepare('DELETE FROM users WHERE id=?').run(sharedUser);
+  const initial=await planOwnerErasure(db.runner,target,identity);assert.ok(initial.counts.products>0);assert.ok(initial.counts.support_messages>0);assert.ok(initial.counts.owner_page_events>0);assert.equal(initial.counts.attention_subscriptions,1);
+  await assert.rejects(()=>replanOwnerErasureAfterIdentityRemoval(db.runner,initial,identity));
+  assert.equal((await db.prepare('SELECT email_at_link FROM auth_identity_links WHERE user_id=?').get(a.userId)).email_at_link,'historical-link@example.test');
   const approval={approvedDigest:initial.digest,verifiedRequestReference:'LOCAL_QA_VERIFIED_REQUEST',backupSha256:'a'.repeat(64)};
   await assert.rejects(()=>eraseOwnerRows(db.runner,initial,{...approval,approvedDigest:'b'.repeat(64)},identity));
   await assert.rejects(()=>eraseOwnerRows(db.runner,initial,{...approval,backupSha256:''},identity));
@@ -47,7 +56,7 @@ async function main(){
   const removed=await admin.auth.admin.deleteUser(target.providerId);assert.equal(removed.error,null);const absent=await admin.auth.admin.getUserById(target.providerId);assert.equal(absent.data.user,null);assert.ok(absent.error);assert.equal((await client.auth.getUser(oldToken)).data.user,null);
   assert.equal((await handleMobileRequest(new Request('http://127.0.0.1/api/mobile/v1/session',{headers:{authorization:'Bearer '+oldToken}}),['session'])).status,401,'Removed Auth identity must not be offered fresh setup');
   await assert.rejects(()=>eraseOwnerRows(db.runner,initial,approval,identity));assert.ok(await runtimeUserById(a.userId));
-  const current=await planOwnerErasure(db.runner,target);
+  const current=await replanOwnerErasureAfterIdentityRemoval(db.runner,initial,identity);
   await db.exec('CREATE TABLE qa_erasure_blocker (owner_id bigint REFERENCES users(id) ON DELETE RESTRICT)');await db.prepare('INSERT INTO qa_erasure_blocker(owner_id) VALUES(?)').run(a.userId);
   await assert.rejects(()=>eraseOwnerRows(db.runner,current,{...approval,approvedDigest:current.digest},identity));assert.ok(await runtimeUserById(a.userId));assert.equal((await db.prepare('SELECT count(*) n FROM support_conversations WHERE business_id=?').get(a.businessId)).n,1,'Foreign-key failure must roll back all app deletion');
   await db.exec('DROP TABLE qa_erasure_blocker');
@@ -63,7 +72,7 @@ async function main(){
   const ownedOrphans=listed.data.filter(v=>v.name.startsWith('product-private-'+a.businessId+'-')&&!stillUsed.has('pages:'+v.name));await store.remove('pages',ownedOrphans.map(v=>v.name));
   assert.equal(await store.read('pages',owned,'image/png'),null);assert.equal(await store.read('pages',orphan,'image/png'),null);assert.ok(await store.read('public',shared,'image/png'),'Shared upload remains for the other owner');
   assert.deepEqual(await db.prepare('SELECT row_to_json(b)::text value FROM businesses b WHERE id=?').get(b.businessId),otherBefore);assert.deepEqual(await db.prepare('SELECT row_to_json(p)::text value FROM products p WHERE business_id=? ORDER BY id').all(b.businessId),otherProducts);
-  await assert.rejects(()=>planOwnerErasure(db.runner,target));
+  await assert.rejects(()=>planOwnerErasure(db.runner,target,identity));
   console.log('PASS account erasure: isolated PostgreSQL exact-target/shared-owner/staff/drift/approval/backup guards; tenant rows/chat/push deletion; actual local Supabase Auth/session and referenced/orphan media erasure; shared image and other tenant unchanged.');
  }finally{for(const m of media)await store.remove(m.namespace,[m.key]);for(const id of providerIds){const check=await admin.auth.admin.getUserById(id);if(check.data.user)assert.equal((await admin.auth.admin.deleteUser(id)).error,null);}await closeDbForTests();}
 }

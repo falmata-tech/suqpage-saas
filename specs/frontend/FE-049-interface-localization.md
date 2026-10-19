@@ -2,13 +2,33 @@
 id: FE-049
 title: Five-language interface
 status: in_progress
-related: [FE-069, FE-066, FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062, DEP-044, FE-065, FE-067, FE-063, FE-068]
+related: [BE-058, DEP-048, FE-069, FE-066, FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062, DEP-044, FE-065, FE-067, FE-063, FE-068]
 owners: [product, frontend]
-last_updated: 2026-10-15
+last_updated: 2026-10-18
 change_level: L2
 ---
 
 # FE-049 — Five-language interface
+
+## S145 local source: Shipment tracking vocabulary
+
+FE-069/BE-058/DEP-048 add optional provider tracking references, without status
+integration. Use en Shipment tracking, am የጭነት ክትትል and om Hordoffii feʼumsaa
+as the feature name, then explain email access, arranged provider order and
+optional provider-owned link/code in ordinary task language. New controls say
+what opens or copies; avoid literal translation of internal data terms. Preserve
+provider/place names, URLs/codes, technical keys and inactive so/ti availability.
+Auth mail remains English-only. Tracking email terminology requires the separate
+fresh DEP-048 retry boundary before source changes; existing approved Auth/email
+artwork is unchanged. Native/script types, catalog/semantic tests and real local
+web/Expo en/am/om reviews precede explicit visual approval and full gates.
+
+The local UI has23 authored en/am/om rows (optional provider controls, feature
+terminology and the existing privacy explanation). Focused semantic/UI/native
+tests pass. The final generated server-key index will be refreshed with the
+held mail terminology build before catalog parity is rechecked. New mail terminology remains held for
+the fresh stopped/zero-queue boundary; actual en/am/om role reviews and new
+visual approval are pending, not inherited from earlier MirtPage screenshots.
 
 ## S132 — three active languages and clearer meaning (ready; supersedes selection)
 

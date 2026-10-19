@@ -8,40 +8,32 @@ import {
   workspaceHomeHref,
 } from "./capabilities";
 import type { SessionUser } from "./types";
-import { runtimeGet } from "./runtime-sql";
+import { currentBusinessAuthority } from './staff-business-authority';
 
 export async function resolveBusiness(user: SessionUser, requested?: string | number | null) {
   const id = hasCapability(user, "operations:manage") || user.access_role === "team_member" ? Number(requested || 0) : user.business_id;
   if (!id) return null;
-  const assigned = user.access_role === "team_member" && Boolean(await getAssignedBusiness(user.id, id));
-  if (!canViewBusiness(user, id, assigned)) redirect("/dashboard");
+  const authority=await currentBusinessAuthority(user,id);
+  if (!authority || !canViewBusiness(user, id, authority==='staff')) redirect("/dashboard");
   return (await runtimeBusinessById(id)) || null;
 }
 
 export async function resolveManagedBusiness(user: SessionUser, requested?: string | number | null) {
   const business = await resolveBusiness(user, requested);
   if (!business) redirect(workspaceHomeHref(user));
-  const assigned = user.access_role === "team_member" && Boolean(await getAssignedBusiness(user.id, business.id));
-  if (!canManageBusiness(user, business.id, assigned)) redirect("/dashboard");
+  const authority=await currentBusinessAuthority(user,business.id);
+  if (!authority || !canManageBusiness(user, business.id, authority==='staff')) redirect("/dashboard");
   return business;
 }
-
 export async function resolveProductBusiness(
   user: SessionUser,
   requested?: string | number | null,
 ) {
   const business = await resolveBusiness(user, requested);
   if (!business) redirect(workspaceHomeHref(user));
-  const assigned =
-    user.access_role === "team_member" &&
-    Boolean(await getAssignedBusiness(user.id, business.id));
-  if (!canMaintainBasicProducts(user, business.id, assigned)) {
+  const authority=await currentBusinessAuthority(user,business.id);
+  if (!authority || !canMaintainBasicProducts(user, business.id, authority==='staff')) {
     redirect("/dashboard");
   }
   return business;
-}
-
-async function getAssignedBusiness(userId: number, businessId: number) {
-  // Kept local so capability rules remain framework-independent while assignment is an adapter concern.
-  return runtimeGet("SELECT 1 FROM staff_business_assignments WHERE user_id=? AND business_id=? AND active=1", [userId, businessId]);
 }

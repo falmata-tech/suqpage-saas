@@ -51,6 +51,7 @@ const forbidden: unknown[] = [
   { mailer_templates_confirmation_content: "<a href='https://evil.test'>Sign in</a>" },
   { mailer_subjects_confirmation: "Your AfricMade sign-in code" },
   { mailer_subjects_magic_link: "Arbitrary subject" },
+  { smtp_sender_name: "Suqpage" }, { mailer_subjects_confirmation: "Your Suqpage sign-in code" },
   { unknown: true }, { mailer_otp_length: 6, smtp_pass: "smuggled-secret" },
   JSON.parse('{"__proto__":{"mailer_otp_length":6}}'),
 ];
@@ -65,17 +66,32 @@ for (const [index, patch] of forbidden.entries()) {
     } finally { f.dispose(); }
   });
 }
-test("all Suqpage email branding is exact and cannot alter providers or sender addresses", () => {
+test("all MirtPage email branding is exact and cannot alter providers or sender addresses", () => {
   const patch = suqpageEmailBrandingPatch();
   assert.equal(Object.keys(patch).length, 27);
   validatePatch(project, patch, template);
   for (const [key, value] of Object.entries(patch)) {
-    assert.doesNotMatch(value, /africmade|africpage|mirtpage/i);
+    assert.doesNotMatch(value, /africmade|africpage|suqpage/i);
     assert.throws(() => validatePatch(project, { [key]: "unreviewed" }, template));
   }
   for (const patch of [{ smtp_admin_email: "new@example.test" }, { mailer_notifications_email_changed_enabled: true }]) {
     assert.throws(() => validatePatch(project, patch, template));
   }
+});
+
+test("saved legacy-brand settings plans are rejected before any provider read", async () => {
+  const f = fixture();
+  try {
+    const plan = await f.plan({ smtp_sender_name: "MirtPage" });
+    const file = path.join(f.directory, `${plan.id}.json`);
+    const saved = JSON.parse(fs.readFileSync(file, "utf8"));
+    saved.patch.smtp_sender_name = "Suqpage";
+    fs.writeFileSync(file, JSON.stringify(saved));
+    const denied = { ...f.port, async project() { throw Error("Old presentation must fail before provider reads"); } };
+    await assert.rejects(applyAuthPlan({ ...f, ...plan, approval: digest(saved), port: denied }), /policy/);
+    assert.equal(f.writes.length, 0);
+    assert.ok(!fs.existsSync(`${file}.attempt`));
+  } finally { f.dispose(); }
 });
 
 test("plans bind credential source and login, and reject old unbound plans before provider calls", async () => {
@@ -107,7 +123,7 @@ test("plans bind credential source and login, and reject old unbound plans befor
 test("explicit target and safe exact patch are required", async () => {
   assert.throws(() => validatePatch("another-project", { mailer_otp_length: 6 }, template), /project/);
   validatePatch(project, { mailer_otp_length: 6, mailer_otp_exp: 600, smtp_max_frequency: 60, mailer_autoconfirm: false,
-    mailer_subjects_confirmation: "Your Suqpage sign-in code", mailer_subjects_magic_link: "Your Suqpage sign-in code",
+    mailer_subjects_confirmation: "Your MirtPage sign-in code", mailer_subjects_magic_link: "Your MirtPage sign-in code",
     mailer_templates_confirmation_content: template, mailer_templates_magic_link_content: template }, template);
   const f = fixture();
   try {
@@ -291,7 +307,7 @@ test("readback predicts only approved customization flags and preserves every ot
       const config = f.config();
       config.mailer_subjects_custom_contents = { MAILER_SUBJECTS_INVITE: false, MAILER_SUBJECTS_RECOVERY: false };
       config.mailer_templates_custom_contents = { MAILER_TEMPLATES_INVITE_CONTENT: false };
-      const patch = { mailer_subjects_invite: "You are invited to Suqpage",
+      const patch = { mailer_subjects_invite: "You are invited to MirtPage",
         mailer_templates_invite_content: suqpageEmailBrandingPatch().mailer_templates_invite_content };
       const plan = await f.plan(patch);
       const originalPatch = f.port.patch;
@@ -321,14 +337,14 @@ test("readback predicts only approved customization flags and preserves every ot
 });
 test("customization metadata is immutable and malformed metadata cannot admit a write", async () => {
   const before = { mailer_subjects_custom_contents: { MAILER_SUBJECTS_INVITE: false } };
-  const expected = expectedAuthReadback(before, { mailer_subjects_invite: "You are invited to Suqpage" });
+  const expected = expectedAuthReadback(before, { mailer_subjects_invite: "You are invited to MirtPage" });
   assert.equal(before.mailer_subjects_custom_contents.MAILER_SUBJECTS_INVITE, false);
   assert.deepEqual(expected.mailer_subjects_custom_contents, { MAILER_SUBJECTS_INVITE: true });
   for (const flags of [null, [], { MAILER_SUBJECTS_INVITE: "false" }]) {
     const f = fixture();
     try {
       f.config().mailer_subjects_custom_contents = flags;
-      const plan = await f.plan({ mailer_subjects_invite: "You are invited to Suqpage" });
+      const plan = await f.plan({ mailer_subjects_invite: "You are invited to MirtPage" });
       await assert.rejects(f.apply(plan), /metadata/);
       assert.equal(f.writes.length, 0);
       assert.equal(fs.existsSync(path.join(f.directory, `${plan.id}.json.attempt`)), false);
@@ -453,7 +469,7 @@ test("origin plan kind, phases and mixed or malformed patches cannot be laundere
         { site_url: "https://suqpage.com" }, { uri_allow_list: AUTH_ORIGIN_POLICIES["dual-old-primary"].uri_allow_list },
         { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], smtp_pass: "smuggled-secret" },
         { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], mailer_otp_length: 6 },
-        { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], mailer_subjects_magic_link: "Your Suqpage sign-in code" },
+        { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], mailer_subjects_magic_link: "Your MirtPage sign-in code" },
         { ...AUTH_ORIGIN_POLICIES["dual-old-primary"], external_google_enabled: true },
         { site_url: "https://suqpage.com", uri_allow_list: "https://mirtpage.com/auth/callback,https://suqpage.com/auth/callback" },
         { site_url: "https://mirtpage.com", uri_allow_list: "https://mirtpage.com/auth/callback" },

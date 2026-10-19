@@ -125,7 +125,7 @@ export default function PublicSupportChat() {
     {mounted ? createPortal(<dialog ref={dialogRef} className={`public-support-dialog ${styles.dialog}`} aria-labelledby="public-buying-title" onClose={() => { /* A queued close from the previous dismissal must not hide a newly reopened chat. */ if(!openIntent.current)setOpen(false); }} onCancel={event => {event.preventDefault();close();}} onClick={event => {if(event.target === dialogRef.current)close();}}>
       <section className={receipt ? styles.receivedSection : "new-conversation"}>
         <header><div><span className={styles.chatEyebrow}><MessageCircle aria-hidden="true" />{t("Live Chat")}</span><h2 id="public-buying-title">{t(TRANSPORT_COPY.title)}</h2></div><button type="button" onClick={close} aria-label={t("Close")}><X aria-hidden="true" /></button></header>
-        <div className={styles.trackingEntry}><Link href="/tracking" onClick={close}>{t("Tracking")} →</Link></div>
+        <div className={styles.trackingEntry}><Link href="/tracking" onClick={close}>{t("Shipment tracking")} →</Link></div>
         {!sessionReady && loaded ? <button type="button" onClick={() => void loadReceipt()}>{t("Retry")}</button> : null}
         {!loaded ? <LoadingBar/> : receipt ? <><BuyingConversation key={receipt.publicRef} endpoint={endpoint} initial={receipt} active={open&&sessionReady} checking={!sessionReady} onAnother={() => void anotherRequest()} />{error ? <p role="alert">{t(error)}</p> : null}</> : <>
           <TransportIntake draft={{name,phone,origin,destination,message}} onChange={(field,value)=>({name:setName,phone:setPhone,origin:setOrigin,destination:setDestination,message:setMessage}[field])(value)} onSubmit={submit} busy={busy} ready={sessionReady} error={error}/>

@@ -31,9 +31,9 @@ test('BE-054 actual admin geography component clears stale country/city authorit
   (tree.find(node=>node.type==='button')!.props.onClick as()=>void)();tree=render({countryCode:'',city:'Unknown legacy town',place:null});assert.equal(select(tree,'CountrySelect').props.value,'');assert.equal(select(tree,'PlaceSearch').props.selected,null);
 });
 
-test('FE-026 actual admin location page puts the editor first and prefills pending versus reviewed canonical places',async()=>{
-  const fixture={role:'platform_admin',pending:false,place:null as typeof place|null};
-  const built=await build({entryPoints:['app/dashboard/admin/discovery/[businessId]/page.tsx'],bundle:true,write:false,format:'cjs',platform:'node',external:['react','react/jsx-runtime'],plugins:[{name:'geography-page-ports',setup(b){
+test('FE-026/FE-072 location editor requires current business authority and keeps sponsor controls admin-only',async()=>{
+  const fixture={role:'platform_admin',granted:true,pending:false,place:null as typeof place|null};
+  const built=await build({entryPoints:['app/dashboard/(business)/admin/discovery/[businessId]/page.tsx'],bundle:true,write:false,format:'cjs',platform:'node',external:['react','react/jsx-runtime'],plugins:[{name:'geography-page-ports',setup(b){
     b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({contents:'export default {facts:"facts"};'}));
     b.onResolve({filter:/^(next\/|next-intl\/|@\/)/},a=>({path:a.path,namespace:'ports'}));
     b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:
@@ -43,10 +43,11 @@ test('FE-026 actual admin location page puts the editor first and prefills pendi
       :a.path==='@/lib/i18n/server'?`export const getUiText=async()=>s=>s;`
       :a.path==='@/lib/auth'?`export const requireUser=async()=>({access_role:fixture.role});`
       :a.path==='@/lib/capabilities'?`export const hasCapability=actor=>actor.access_role==='platform_admin';`
+      :a.path==='@/lib/staff-business-authority'?`export const currentBusinessAuthority=async actor=>actor.access_role==='platform_admin'?'administrator':actor.access_role==='team_member'&&fixture.granted?'staff':null;`
       :a.path==='@/lib/countries'?`export const countryName=code=>code==='KE'?'Kenya':'South Africa';`
       :a.path==='@/lib/place-catalog'?`export const findKnownPlace=id=>id==='nairobi'?place:id==='cape'?({...place,id:'cape',name:'Cape Town',countryCode:'ZA'}):null;`
       :a.path==='@/lib/owner-business-runtime'?`export const readLocationProposal=async()=>({version:3,reviewed_version:fixture.pending?2:3,country_code:'ZA',city:'Cape Town',region:'Western Cape',place_id:'cape',location_mode:'storefront',latitude:-33.92,longitude:18.42});`
-      :a.path==='@/lib/discovery-admin'?`export const getDiscoveryProfileAdminView=async()=>({businessId:18,businessName:'QA shop',handle:'qa-shop',city:'Nairobi',region:'Nairobi County',zone:'',countryCode:'KE',cityId:'nairobi',industryKeys:['fashion'],latitude:-1.2,longitude:36.8,fallbackStyle:'workshop',productionScale:'workshop'});`
+      :a.path==='@/lib/discovery-admin'?`export const getDiscoveryProfileAdminView=async()=>({businessId:18,businessName:'QA shop',handle:'qa-shop',city:'Nairobi',region:'Nairobi County',zone:'',countryCode:'KE',cityId:'nairobi',industryKeys:['fashion'],latitude:-1.2,longitude:36.8,fallbackStyle:'workshop',productionScale:'workshop',sponsored:true,sponsorPosition:3,excluded:false});`
       :a.path==='@/lib/catalog-runtime'?`export const runtimeBusinessById=async()=>({id:18});`
       :a.path==='@/lib/discovery'?`export const DISCOVERY_INDUSTRIES=[{key:'fashion',label:'Fashion'}];`
       :a.path==='@/app/staff-actions'?`export const updateDiscoveryProfileAction=async()=>{};`
@@ -62,5 +63,7 @@ test('FE-026 actual admin location page puts the editor first and prefills pendi
   assert.doesNotMatch(html,/name="(?:city|zone|region|existingBoothImagePath)"/);assert.match(html,/href="\/dashboard\/admin\/discovery\/18">Cancel/);assert.match(html,/<dt>Country<\/dt><dd>Kenya/);
   fixture.pending=true;html=await render();assert.match(html,/&quot;countryCode&quot;:&quot;ZA&quot;/);assert.match(html,/&quot;id&quot;:&quot;cape&quot;/);assert.match(html,/name="latitude"[^>]*value="-33.92"/);assert.match(html,/Owner location:/,'An unreviewed owner draft keeps its context');
   html=await render('');assert.doesNotMatch(html,/<form|data-geography/);
-  fixture.role='team_member';await assert.rejects(render(),error=>(error as {url?:string}).url==='/dashboard');
+  fixture.role='team_member';html=await render();assert.match(html,/Edit discovery profile/);assert.doesNotMatch(html,/Manage sponsors|Sponsored|and sponsors/);
+  fixture.granted=false;await assert.rejects(render(),error=>(error as {url?:string}).url==='/dashboard');
+  fixture.role='client';fixture.granted=true;await assert.rejects(render(),error=>(error as {url?:string}).url==='/dashboard');
 });

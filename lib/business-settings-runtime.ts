@@ -2,6 +2,7 @@ import {runtimeGet,runtimeTransaction} from './runtime-sql';
 import {audit,cleanText} from './security';
 import {validateLiveSettings} from './live-showroom';
 import type {SessionUser} from './types';
+import { currentBusinessAuthority } from './staff-business-authority';
 
 export class BusinessSettingsError extends Error {}
 export type BusinessSettingsSection='identity'|'live'|'sharing';
@@ -23,7 +24,7 @@ const sectionFields:Record<BusinessSettingsSection,readonly string[]>={
 type SavedSettings={id:number;name:string;contact_email:string;logo_path:string;favicon_path:string;is_live:number;live_platform:string;live_url:string;site_title:string;site_description:string;content_version:number};
 
 export async function saveBusinessSettings(actor:SessionUser,businessId:number,input:BusinessSettingsWrite) {
-  if(actor.access_role!=='platform_admin'||!Number.isSafeInteger(businessId)||businessId<1)throw new BusinessSettingsError('Not authorized for this business.');
+  if(!Number.isSafeInteger(businessId)||businessId<1)throw new BusinessSettingsError('Not authorized for this business.');
   const expectedVersion=Number(input.expectedVersion),values=input as unknown as Record<string,unknown>;
   if(!Number.isSafeInteger(expectedVersion)||expectedVersion<1)throw new BusinessSettingsError('Reload before saving your business details.');
   let section:BusinessSettingsSection|undefined;
@@ -36,8 +37,8 @@ export async function saveBusinessSettings(actor:SessionUser,businessId:number,i
     if(Object.hasOwn(values,'logoPath')&&typeof values.logoPath!=='string')throw new BusinessSettingsError('Reload before saving your business details.');
   }
   return runtimeTransaction(async()=>{
-    const authority=await runtimeGet("SELECT p.user_id FROM user_access_profiles p WHERE p.user_id=? AND p.access_role='platform_admin' FOR SHARE",[actor.id]);
-    if(!authority)throw new BusinessSettingsError('Not authorized for this business.');
+    const authority=await currentBusinessAuthority(actor,businessId,true);
+    if(authority!=='administrator'&&authority!=='staff')throw new BusinessSettingsError('Not authorized for this business.');
     const current=section?await runtimeGet<SavedSettings>('SELECT id,name,contact_email,logo_path,favicon_path,is_live,live_platform,live_url,site_title,site_description,content_version FROM businesses WHERE id=? FOR UPDATE',[businessId]):null;
     if(section&&(!current||current.content_version!==expectedVersion))throw new BusinessSettingsError('Business details changed. Reload before saving.');
     // Omitted fields come from the locked canonical row, never posted snapshots.

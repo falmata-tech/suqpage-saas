@@ -1,67 +1,67 @@
 [
   {
     "key": "confirmation",
-    "subject": "Your Suqpage sign-in code",
+    "subject": "Your MirtPage sign-in code",
     "file": "magic-link.html"
   },
   {
     "key": "magic_link",
-    "subject": "Your Suqpage sign-in code",
+    "subject": "Your MirtPage sign-in code",
     "file": "magic-link.html"
   },
   {
     "key": "invite",
-    "subject": "You are invited to Suqpage",
+    "subject": "You are invited to MirtPage",
     "file": "invite.html"
   },
   {
     "key": "recovery",
-    "subject": "Your Suqpage account access",
+    "subject": "Your MirtPage account access",
     "file": "recovery.html"
   },
   {
     "key": "email_change",
-    "subject": "Confirm your Suqpage email change",
+    "subject": "Confirm your MirtPage email change",
     "file": "email-change.html"
   },
   {
     "key": "reauthentication",
-    "subject": "Your Suqpage verification code",
+    "subject": "Your MirtPage verification code",
     "file": "reauthentication.html"
   },
   {
     "key": "password_changed_notification",
-    "subject": "Your Suqpage password changed",
+    "subject": "Your MirtPage password changed",
     "file": "password-changed-notification.html"
   },
   {
     "key": "email_changed_notification",
-    "subject": "Your Suqpage email changed",
+    "subject": "Your MirtPage email changed",
     "file": "email-changed-notification.html"
   },
   {
     "key": "phone_changed_notification",
-    "subject": "Your Suqpage phone changed",
+    "subject": "Your MirtPage phone changed",
     "file": "phone-changed-notification.html"
   },
   {
     "key": "identity_linked_notification",
-    "subject": "Your Suqpage sign-in method changed",
+    "subject": "Your MirtPage sign-in method changed",
     "file": "identity-linked-notification.html"
   },
   {
     "key": "identity_unlinked_notification",
-    "subject": "Your Suqpage sign-in method changed",
+    "subject": "Your MirtPage sign-in method changed",
     "file": "identity-unlinked-notification.html"
   },
   {
     "key": "mfa_factor_enrolled_notification",
-    "subject": "Your Suqpage verification method changed",
+    "subject": "Your MirtPage verification method changed",
     "file": "mfa-factor-enrolled-notification.html"
   },
   {
     "key": "mfa_factor_unenrolled_notification",
-    "subject": "Your Suqpage verification method changed",
+    "subject": "Your MirtPage verification method changed",
     "file": "mfa-factor-unenrolled-notification.html"
   }
 ]

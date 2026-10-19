@@ -18,7 +18,7 @@ function ShipmentControls({shipment,navigation,canRevoke}:ShipmentActionsProps){
  useEffect(()=>{if(confirm&&!dialog.current?.open)dialog.current?.showModal();if(!confirm&&dialog.current?.open)dialog.current.close();if(!confirm&&wasOpen.current)revokeButton.current?.focus();wasOpen.current=confirm;},[confirm]);
  useEffect(()=>{if(fallback){fallbackInput.current?.focus();fallbackInput.current?.select();}},[fallback]);
  return <section className={styles.link}>
-  <p>{t('This link requires the recipient to verify their email in Tracking.')}</p>
+  <p>{t('This link requires the recipient to verify their email in Shipment tracking.')}</p>
   <div className={styles.actions}>
    <button className="btn secondary" type="button" disabled={shipment.revokedAt!==null} onClick={async()=>{
     setCopied(false);setFallback('');if(!/^\/tracking\/SHP-[A-F0-9]{20}$/.test(shipment.sharePath))return;

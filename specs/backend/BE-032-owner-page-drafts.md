@@ -2,13 +2,26 @@
 id: BE-032
 title: Tenant-owned page drafts and revocable staff assistance
 status: in_progress
-related: [BE-055, BE-054, FE-026, BE-044, FE-060, BE-048, BE-045, FE-056, FE-052, BE-031, FE-038, FE-040, DEP-030, ADR-0018, BE-033, BE-034, FE-019, BE-018, DEP-039, FE-047]
+related: [BE-055, BE-054, FE-026, BE-044, FE-060, BE-048, BE-045, FE-056, FE-052, BE-031, FE-038, FE-040, DEP-030, ADR-0018, BE-033, BE-034, FE-019, BE-018, DEP-039, FE-047, BE-060, FE-072, ADR-0030]
 owners: [backend, security]
 last_updated: 2026-10-17
 change_level: L2
 ---
 
 # BE-032 - Tenant-owned page drafts and revocable staff assistance
+
+## Planned S146 — administrator-controlled staff authority
+
+BE-060/FE-072/ADR-0030 supersede this spec's owner-consent and per-business
+assignment gate for platform staff **only after** the reviewed grant migration,
+server authorization, UI and release checks pass. The current deployed/local
+behavior below remains active until that verified switch. Historical
+`assistance_enabled`, draft versions/events and `staff_business_assignments`
+must remain intact but become inert for future business-management decisions.
+An enabled current staff grant permits page content, private media and
+publication/restore without an owner switch; a revoked or missing grant denies
+reads/writes even from a stale editor. Owner identity and account security stay
+separate. Retired owner assistance commands must not advance a draft version.
 
 ## S122 — focused product-save adapter preserves authority (implemented locally; review pending)
 

@@ -78,7 +78,7 @@ export function supportEscalationEmailKey(notificationId:number){
 export function supportEscalationEmailContent(email:SupportEscalationEmail){
   const t=createUiText({en:{},am,om,so,ti}[parseLocale(email.language)]),queue=t(email.queue==='transport'?'Transport':'Business support');
   return {
-    subject:`Suqpage · ${t('A chat is overdue for a reply.')} · ${email.publicRef}`,
+    subject:`MirtPage · ${t('A chat is overdue for a reply.')} · ${email.publicRef}`,
     text:[t('A chat is overdue for a reply.'),`${t('Queue')}: ${queue}`,`${t('Reference')}: ${email.publicRef}`,t('Assigned to {value1}',{value1:email.assignedStaffName}),'',`${t('Open conversation')}: ${email.dashboardUrl}`].join('\n'),
   };
 }
@@ -99,8 +99,8 @@ export async function sendSupportEscalationEmail(email:SupportEscalationEmail,op
   const headers:Record<string,string>={'Content-Type':'application/json'};
   if(config.key){headers.Authorization=`Bearer ${config.key}`;headers['Idempotency-Key']=key;}
   const body=mode==='local-mailpit'
-    ?{From:{Email:config.from,Name:'Suqpage'},To:[{Email:email.recipientEmail}],Subject:content.subject,Text:content.text,Headers:{'Message-ID':`<${key}@suqpage.test>`}}
-    :{from:`Suqpage <${config.from}>`,to:[email.recipientEmail],subject:content.subject,text:content.text};
+    ?{From:{Email:config.from,Name:'MirtPage'},To:[{Email:email.recipientEmail}],Subject:content.subject,Text:content.text,Headers:{'Message-ID':`<${key}@suqpage.test>`}}
+    :{from:`MirtPage <${config.from}>`,to:[email.recipientEmail],subject:content.subject,text:content.text};
   try{
     const response=await (options.send??fetch)(endpoint,{method:'POST',headers,body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(4000)});
     await response.body?.cancel().catch(()=>{});

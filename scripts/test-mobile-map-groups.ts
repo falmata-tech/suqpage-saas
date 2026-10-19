@@ -43,6 +43,15 @@ async function component(entry:string){
  return{fixture,render:(props:Record<string,unknown>)=>{fixture.cursor=fixture.effectCursor=0;const render=module.exports.default||module.exports.MapMarker;assert.ok(render);const tree=nodes(render(props));for(const effect of fixture.pending.splice(0))effect();return tree;},unmount:()=>fixture.effects.forEach(e=>e.cleanup?.())};
 }
 
+test('FE-053 native map registers only the canonical public User-Agent on the exact OSM tile host',async()=>{
+ const app=await component('MarketMap');
+ assert.deepEqual(JSON.parse(JSON.stringify(app.fixture.headers)),[{id:'suqpage-osm-client',match:'^https://tile\\.openstreetmap\\.org/',name:'User-Agent',value:'MirtPage/0.1 (+https://mirtpage.com)'}]);
+ const header=app.fixture.headers[0] as{match:string;value:string};const match=new RegExp(header.match);
+ assert.ok(match.test('https://tile.openstreetmap.org/9/314/208.png'));
+ for(const target of['http://tile.openstreetmap.org/9/314/208.png','https://other.tile.openstreetmap.org/9/314/208.png','https://tile.openstreetmap.org.evil.test/9/314/208.png','https://tile.openstreetmap.org@evil.test/9/314/208.png','https://mirtpage.com/api/mobile/v1/market','https://sjeiiqxgscuqajpgddcc.supabase.co/auth/v1/user'])assert.equal(match.test(target),false);
+ assert.doesNotMatch(header.value,/Bearer|cookie|token|key=/i);app.unmount();
+});
+
 test('FE-053 native group identities stay fixed across zoom for admitted screen capacities',()=>{
  const shops=Array.from({length:24},(_,i)=>shop(i+1,{isLive:i===1,isFeatured:i===2})),bounds:[number,number,number,number]=[-180,-85.051129,180,85.051129];
  const index=markerIndex([...shops,shops[0],shop(99,{latitude:NaN})]),terminalKeys=index.groups.map(group=>group.key);

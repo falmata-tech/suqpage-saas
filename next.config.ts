@@ -13,7 +13,8 @@ const tsconfigPath = platformEnvironment().SUQPAGE_NEXT_TSCONFIG || "tsconfig.js
 if (tsconfigPath !== "tsconfig.json" && !/^\.acceptance-tsconfig-(?:suqpage|mirtpage)-acceptance-[A-Za-z0-9_-]+\.json$/.test(tsconfigPath)) {
   throw new Error("SUQPAGE_NEXT_TSCONFIG must identify a generated Suqpage acceptance config");
 }
-const serverActionOrigins = trustedOriginPolicy(process.env).serverActionHosts;
+const originPolicy = trustedOriginPolicy(process.env);
+const serverActionOrigins = originPolicy.serverActionHosts;
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
@@ -50,7 +51,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   distDir,
   typescript: { tsconfigPath },
-  allowedDevOrigins: serverActionOrigins,
+  allowedDevOrigins: isDev ? originPolicy.devResourceHostnames : undefined,
   experimental: { serverActions: { bodySizeLimit: "6mb", allowedOrigins: serverActionOrigins } },
   async rewrites() { return [...platformAssetRewrites]; },
   async redirects() {

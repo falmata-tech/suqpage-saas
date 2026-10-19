@@ -2,13 +2,22 @@
 id: BE-044
 title: Native API and session boundaries
 status: in_progress
-related: [BE-058, BE-055, BE-032, BE-048, BE-047, BE-045, FE-056, FE-054, FE-053, FE-026, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023, BE-046, BE-050, BE-051, BE-052, BE-054, BE-056, FE-041, FE-065, BE-057, FE-068]
+related: [BE-058, BE-055, BE-032, BE-048, BE-047, BE-045, FE-056, FE-054, FE-053, FE-026, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023, BE-046, BE-050, BE-051, BE-052, BE-054, BE-056, FE-041, FE-065, BE-057, FE-068, FE-072, BE-060, FE-073, BE-061]
 owners: [product, frontend, backend, security]
 last_updated: 2026-10-17
 change_level: L3
 ---
 
 # BE-044 — Native API and session boundaries
+
+## Planned S146 — retire native owner assistance
+
+FE-072/BE-060 retire the owner assistance command; a stale native request fails
+without changing the historical assistance flag or page version. Owner home
+stops presenting Team editing, while owner page/product commands and the staff
+native-login denial retain their existing boundaries. FE-073/BE-061's future
+owner-only email change must use its separate verified identity contract. None
+of this is implemented by this planned note.
 
 ## S130/S131 — additive public catalog detail (ready)
 

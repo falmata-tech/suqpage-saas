@@ -13,4 +13,12 @@
 .route>div{min-width:0;padding:12px;border-radius:10px;background:#f7f8f6}
 .route dt{margin:0 0 5px;color:#566a70;font-size:12px;font-weight:650}
 .route dd{margin:0;color:#22292b;font-size:15px;line-height:1.45;font-weight:600;overflow-wrap:anywhere}
+.providerTracking{display:grid;gap:12px;border-top:1px solid #e3e9e9;margin-top:16px;padding-top:16px;min-width:0}
+.providerTracking>a,.trackingCode>button{display:inline-flex;align-items:center;justify-content:center;gap:8px;justify-self:start;min-height:48px;min-width:48px;padding:10px 12px;border:1px solid #bac9ca;border-radius:8px;background:#fff;color:#a43107;font:inherit;font-size:14px;font-weight:650;text-decoration:none;overflow-wrap:anywhere}
+.trackingCode{display:flex;align-items:center;flex-wrap:wrap;gap:10px;min-width:0}
+.trackingCode>div{display:grid;gap:5px;flex:1;min-width:120px}
+.trackingCode span{font-size:12px;font-weight:650;color:#566a70}
+.trackingCode code{font:600 15px/1.5 ui-monospace,SFMono-Regular,monospace;overflow-wrap:anywhere;user-select:text}
+.providerTracking>p{margin:0;font-size:14px;overflow-wrap:anywhere}
+.providerTracking :is(a,button,code):focus-visible{outline:3px solid #263c42;outline-offset:3px}
 @media(max-width:420px){.leg{grid-template-columns:30px minmax(0,1fr);gap:8px}.ordinal{min-width:30px;height:30px}.leg:not(:last-child)::after{left:14px;top:38px}.card{padding:12px}.card h3{font-size:16px}.route{gap:8px;margin-top:14px}.route>div{padding:10px}.route dd{font-size:14px}}

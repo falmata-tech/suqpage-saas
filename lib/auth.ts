@@ -7,7 +7,9 @@ import { runtimeUserById } from "./catalog-runtime";
 import { postgresRuntimeServices } from "./postgres-runtime-services";
 import { currentRequestIdentity } from "./security";
 import type { SessionUser } from "./types";
-import { currentSupabaseIdentity, signOutSupabaseSession } from "./supabase-auth";
+import { createSuqpageSupabaseServerClient, currentSupabaseIdentity, signOutSupabaseSession } from "./supabase-auth";
+import { ownerSessionAllowed, reconcileOwnerEmailIdentity } from "./owner-email-runtime";
+import { verifiedJwtIssueTime } from "./owner-email-change";
 const COOKIE = platformCookies.session.current;
 const SESSION_MS = 7 * 24 * 60 * 60 * 1000;
 const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
@@ -21,7 +23,20 @@ export async function currentUser(): Promise<SessionUser | null> {
         const identity = await currentSupabaseIdentity();
         if (!identity)
             return null;
-        return (await runtimeUserById(identity.userId)) || null;
+        let user = await runtimeUserById(identity.userId);
+        if (!user) return null;
+        if (user.email !== identity.email) {
+            if (user.access_role !== "client") return null;
+            try { user = await reconcileOwnerEmailIdentity(user, identity.providerUserId); }
+            catch { return null; }
+        }
+        const client = await createSuqpageSupabaseServerClient();
+        const session = await client.auth.getSession();
+        const issuedAt = session.data.session?.access_token
+            ? verifiedJwtIssueTime(session.data.session.access_token, identity.providerUserId)
+            : null;
+        if (!await ownerSessionAllowed(user.id, issuedAt)) return null;
+        return user;
     }
     const jar = await cookies();
     const token = platformCookie(jar, "session");

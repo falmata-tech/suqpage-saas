@@ -39,7 +39,7 @@ function fixture() {
 const bundled = build({
   entryPoints: ["apps/mobile/src/runtime.tsx", "apps/mobile/app/(tabs)/account.tsx", "apps/mobile/src/owner-business.tsx"],
   bundle: true, write: false, outdir: "/tmp/suqpage-logout-ui", platform: "node", format: "cjs",
-  define: { "process.env.EXPO_PUBLIC_SUPABASE_URL": '"https://auth.example.invalid"', "process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": '"public-test-key"', "process.env.EXPO_PUBLIC_API_ORIGIN": '"https://suqpage.com"' },
+  define: { "process.env.EXPO_PUBLIC_SUPABASE_URL": '"https://auth.example.invalid"', "process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": '"public-test-key"', "process.env.EXPO_PUBLIC_API_ORIGIN": '"https://suqpage.com"', "process.env.EXPO_PUBLIC_OWNER_EMAIL_CHANGE_ENABLED": '"0"' },
   plugins: [{ name: "logout-platform-ports", setup(builder) {
     builder.onResolve({ filter: /^(react(?:\/jsx-runtime)?|react-native|expo-router|expo-secure-store|@supabase\/supabase-js)$/ }, args => ({ path: args.path, namespace: "ports" }));
     builder.onResolve({ filter: /(?:^|\/)(runtime|ui|owner-forms|owner-profile|CountrySelector|CitySelector|AttentionAlerts|owner-edit-navigation|OwnerEditConfirmation)$/ }, args => ({ path: args.path.split("/").at(-1)!, namespace: "ports" }));
@@ -128,6 +128,7 @@ test("FE-053 actual Account blocks new login during pending/failed logout and ha
     assert.equal(tree.some(node => node.type === "Field" && node.props.label === t("Email")), false);
     assert.ok(tree.some(node => node.type === "Status" && node.props.loading === true));
     state.app.logoutPending = false; tree = nodes(account.render()); assert.ok(tree.some(node => node.type === "Field" && node.props.label === t("Email")));
+    assert.ok(!tree.some(node => node.type === "Button" && node.props.label === t("Blocked businesses")), "Guest Account focuses on sign-in and legal links; listing safety remains contextual");
     account.unmount();
   }
 });

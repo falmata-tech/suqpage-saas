@@ -26,9 +26,9 @@ async function main(){
   await db.prepare("INSERT INTO support_events(conversation_id,event_type,detail,created_at) VALUES(?,'closed','Retained old end',4)").run(id);
   const snapshot=async()=>({cases:await db.prepare("SELECT to_jsonb(c)-'overdue_notified_assignment_id' value FROM support_conversations c ORDER BY id").all(),events:await db.prepare('SELECT * FROM support_events ORDER BY id').all()});
   const before=await snapshot(),sentinel=Error('Fixture migration68 rollback');
-  await assert.rejects(()=>db.runner.transaction(async()=>{assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[68,69,70,71,72]);throw sentinel;}),error=>error===sentinel);
-  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,67);assert.deepEqual(await snapshot(),before);
-  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[68,69,70,71,72]);assert.deepEqual(await snapshot(),before);
+  await assert.rejects(()=>db.runner.transaction(async()=>{assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[68,69,70,71,72,73,74,75]);throw sentinel;}),error=>error===sentinel);
+  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version,67);assert.deepEqual(await snapshot(),before);
+  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[68,69,70,71,72,73,74,75]);assert.deepEqual(await snapshot(),before);
   assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);
   await db.prepare('UPDATE support_conversations SET resolved_at=5 WHERE id=?').run(id);
   await assert.rejects(()=>db.prepare("UPDATE support_conversations SET status='open' WHERE id=?").run(id),/support_resolution_check/);

@@ -62,8 +62,13 @@ async function main(){
     await assert.rejects(()=>saveBusinessSettings(admin,businessId,{...input,expectedVersion:7}),/Not authorized/);
     await assert.rejects(()=>saveBusinessSettings(admin,businessId,{section:'sharing',expectedVersion:7,siteTitle:'Revoked',siteDescription:'Revoked'}),/Not authorized/);
     assert.deepEqual(await snapshot(),saved,'A stale administrator principal cannot bypass the current saved role');
+    await db.prepare('INSERT INTO staff_business_grants(user_id,enabled,version,updated_at) VALUES(?,1,1,1)').run(staff.id);
+    const staffSaved=await saveBusinessSettings(staff,businessId,{section:'sharing',expectedVersion:7,siteTitle:'Staff-managed title',siteDescription:'Managed showroom settings'});
+    assert.equal(staffSaved.content_version,8);
+    await db.prepare('UPDATE staff_business_grants SET enabled=0,version=version+1 WHERE user_id=?').run(staff.id);
+    await assert.rejects(()=>saveBusinessSettings(staff,businessId,{section:'sharing',expectedVersion:8,siteTitle:'Revoked staff',siteDescription:'Denied'}),/Not authorized/);
     assert.equal((await db.prepare('SELECT name,content_version FROM businesses WHERE id=?').get(foreignId)).name,'Foreign settings');
-    console.log('PASS isolated PostgreSQL settings mandatory version, simultaneous/stale writes, tenant/role isolation, fresh-role revocation, exact authorized fields and audit rollback.');
+    console.log('PASS isolated PostgreSQL settings mandatory version, simultaneous/stale writes, tenant/role isolation, fresh-role and staff-grant revocation, exact authorized fields and audit rollback.');
   }finally{await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

@@ -2,13 +2,71 @@
 id: FE-053
 title: Native visitor and business-owner app
 status: in_progress
-related: [FE-066, FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062, FE-063, FE-064, FE-065, DEP-043, BE-018, FE-067, FE-041, FE-047, BE-050, BE-023, FE-068]
+related: [FE-066, FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062, FE-063, FE-064, FE-065, DEP-043, BE-018, FE-067, FE-041, FE-047, BE-050, BE-023, FE-068, FE-069, BE-058, DEP-048, FE-072, BE-060, FE-073]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-17
+last_updated: 2026-10-18
 change_level: L3
 ---
 
 # FE-053 — Native visitor and business-owner app
+
+## Planned S146 — simpler owner tasks
+
+FE-072/BE-060 retire Team editing from native owner Profile/Your page and the
+native assistance command, keeping ordinary owner tasks and their Save/Cancel
+behavior. Staff still cannot sign in to the native app. The future owner-only
+sign-in-email flow in FE-073/BE-061 is separate from business editing. This is
+planned until actual Expo review and security tests pass.
+
+## S145 local source: native Shipment tracking provider references
+
+FE-069/BE-058/DEP-048 define the independent Tracking-only leg extension.
+Use visible Shipment tracking terminology, preserving routes, credentials and
+all session/focus/refresh/expiry/revocation behavior. GIVEN an authorized detail
+with optional provider URL/code THEN show literal code with honest explicit Copy
+and an optional external provider action. Revalidate the pure shared HTTPS/DNS
+policy on press before the existing native browser helper; no fetch/embed,
+code-templating or automatic status claim. Missing/legacy fields stay hidden.
+Copy/open errors remain usable, reset when detail values change and do not
+pretend delivery/read/status.48px controls and wrapping work at320/390px, in
+en/am/om. Root accepted the Ready contract before implementation. Local source
+and the focused native/UI cases now pass, including explicit failed copy/open,
+legacy blanks, late response/session fencing and long-code controls. Strict
+mobile types pass. Actual Chrome Expo8082 role journeys, new visual approval and
+full gates remain pending; no installed-device or deployment claim is made.
+
+## Ready: native public map client identification
+
+The finite BE-059/DEP-049 source follow-on is Ready: native OSM requests identify
+the app as MirtPage/0.1 (+https://mirtpage.com). Preserve the existing transform
+registration ID and exact HTTPS tile.openstreetmap.org match. GIVEN the native
+map module loads WHEN the SDK header registers THEN only the fixed public
+User-Agent is added AND no token, cookie or header reaches another host. An
+executed adapter-port regression checks registration and hostile-host exclusion;
+this does not claim a rebuilt native app or provider-side tile acceptance.
+
+The single User-Agent source value is implemented. All11 mobile-map tests pass,
+including executed registration, exact HTTPS host/privacy and hostile URL
+exclusions; mobile strict types pass. Registration ID stays suqpage-osm-client.
+
+## Ready: MirtPage default Android identity
+
+DEP-049's independently Ready local tranche supersedes the old Suqpage future
+build identity: all three normal source profiles become MirtPage/com.mirtpage.app.
+No new iOS application or binary is admitted. Existing EAS infrastructure IDs,
+account/data identities and notification channels are not visible brand labels.
+GIVEN safe MirtPage or legacy public links WHEN opened cold or warm THEN reach
+the same authorized public screens; no URL supplies identity or Tracking access.
+GIVEN new Android OS claims THEN only the exact new apex may be claimed, after
+the registered association qualifies; never inherit the old top-level scheme.
+Verify canonical notification geometry, actual SDK configuration and every
+existing hostile-link negative. Installed-device/artifact proof remains separate.
+
+Local focused evidence: actual Expo config and Android scheme plugin verify all
+three profiles as MirtPage/com.mirtpage.app with only mirtpage scheme. Native
+strict types and16 cold/warm link, handoff and artifact cases pass. The additive
+new public association is prepared, while the empty qualified-target set keeps
+new OS HTTPS claims off. No new binary or real OS-link/device result is claimed.
 
 ## S130/S131 — richer previews and optional showroom categories (ready)
 
@@ -1040,3 +1098,20 @@ the canonical owner transport view; old generic owner-chat destinations classify
 the authorized conversation before routing. BE-018/FE-019 S114 governs lifecycle
 and private-note filtering. Five-language actual Expo captures remain separate
 from installed Android evidence; no new binary or provider change is implied.
+
+## S146 empty public product gallery — local UI correction
+
+GIVEN a published product with no photos or videos WHEN a visitor opens its
+native product details THEN the media area shows a bounded, themed “No photo
+yet” state with a recognizable product icon, rather than an empty horizontal
+gallery. It does not offer gallery arrows or thumbnails. Product name,
+description, availability, contact and inquiry actions remain reachable.
+
+GIVEN one or more valid photos or videos WHEN the same details screen opens
+THEN the existing horizontal gallery and its playback/navigation behavior are
+unchanged. This is presentation only: no upload, storage, authorization,
+catalog, publication, or media-retention behavior changes. Reuse the existing
+localized “No photo yet” message in active languages. Verify the actual
+`Gallery.tsx` component in `scripts/test-mobile-video.ts`, then inspect the
+Expo localhost:8082 phone preview with an explicitly labelled response-only
+zero-media fixture; actual Android device behavior is a separate release check.

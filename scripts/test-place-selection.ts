@@ -49,7 +49,7 @@ async function main() {
     assert.equal(after.proposal?.latitude, null); assert.equal(after.proposal?.longitude, null);
     assert.equal(after.proposal?.city, place.name); assert.equal(after.proposal?.reviewed_version, after.proposal?.version);
     await assert.rejects(() => saveOwnerBusiness(owner, businessId, { ...raw, locationVersion: 1 }), /changed/);
-    await assert.rejects(() => saveOwnerBusiness({ ...owner, business_id: businessId + 1 }, businessId, { ...raw, expectedVersion: 2, locationVersion: 2 }), /Only the owner/);
+    await assert.rejects(() => saveOwnerBusiness({ ...owner, business_id: businessId + 1 }, businessId, { ...raw, expectedVersion: 2, locationVersion: 2 }), /Business details are not available/);
     await assert.rejects(() => saveOwnerBusiness(owner, businessId, { ...raw, expectedVersion: 2, locationVersion: 2, placeId: 'forged' }), /Choose a city or town/);
     assert.deepEqual((await readOwnerBusiness(owner, businessId)).proposal, after.proposal);
     await assert.rejects(() => db.prepare('UPDATE owner_location_proposals SET place_latitude=NULL WHERE business_id=?').run(businessId), /owner_location_place_anchor_check/);

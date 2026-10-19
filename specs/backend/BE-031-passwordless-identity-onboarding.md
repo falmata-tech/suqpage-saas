@@ -2,13 +2,22 @@
 id: BE-031
 title: Passwordless identity and authenticated business onboarding
 status: in_progress
-related: [BE-049, FE-059, BE-047, BE-045, FE-054, BE-043, BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017]
+related: [BE-049, FE-059, BE-047, BE-045, FE-054, BE-043, BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017, BE-060, FE-072, FE-073, BE-061, DEP-050]
 owners: [backend, security, operations]
 last_updated: 2026-09-21
 change_level: L3
 ---
 
 # BE-031 - Passwordless identity and authenticated business onboarding
+
+## Planned S146 — identity stays outside staff business access
+
+BE-060/FE-072 grant current administrator-approved staff business/showroom
+management, not owner account identity access. The separate FE-073/BE-061/
+DEP-050 owner-only email change requires a code to the current owner email and
+confirmation at the new email; staff and administrators cannot bypass provider
+verification. The current read-only sign-in email remains unchanged until that
+security flow is implemented and tested.
 
 ## Problem and outcome
 

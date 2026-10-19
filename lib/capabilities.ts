@@ -26,13 +26,16 @@ export function hasCapability(user: SessionUser, capability: Capability) {
 }
 
 export function canViewBusiness(user: SessionUser, businessId: number, assigned = false) {
-  if (hasCapability(user, "operations:manage") || hasCapability(user, "platform:admin")) return true;
-  if (user.access_role === "team_member") return assigned && !isQueueAgent(user);
-  return user.business_id === businessId;
+  if (!Number.isSafeInteger(businessId) || businessId < 1) return false;
+  if (user.access_role === "platform_admin") return true;
+  if (user.access_role === "team_member" || user.access_role === "operations_manager") return assigned;
+  return user.access_role === "client" && user.business_id === businessId;
 }
 
-export function canManageBusiness(user: SessionUser, businessId: number, _assigned = false) {
-  return businessId > 0 && hasCapability(user, "platform:admin");
+export function canManageBusiness(user: SessionUser, businessId: number, granted = false) {
+  return Number.isSafeInteger(businessId) && businessId > 0 &&
+    (user.access_role === "platform_admin" ||
+      ((user.access_role === "team_member" || user.access_role === "operations_manager") && granted));
 }
 
 export function canMaintainBasicProducts(
@@ -40,13 +43,10 @@ export function canMaintainBasicProducts(
   businessId: number,
   assigned = false,
 ) {
-  if (!hasCapability(user, "basic-product:maintain") || businessId < 1) return false;
+  if (!Number.isSafeInteger(businessId) || businessId < 1) return false;
   if (user.access_role === "client") return user.business_id === businessId;
-  if (user.access_role === "team_member") return assigned;
-  return (
-    user.access_role === "operations_manager" ||
-    user.access_role === "platform_admin"
-  );
+  if (user.access_role === "team_member" || user.access_role === "operations_manager") return assigned;
+  return user.access_role === "platform_admin";
 }
 
 export function canOperateBusiness(user: SessionUser, businessId: number) {

@@ -67,9 +67,9 @@ test('FE-070 backend errors reach active localized clients while server fallback
  }
 });
 
-test('FE-070 this display tranche leaves the persisted support requester label and notification channel IDs unchanged',()=>{
+test('BE-059 future general-support labels use MirtPage while notification channel IDs remain unchanged',()=>{
  const support=fs.readFileSync('lib/support.ts','utf8');
- assert.ok(support.includes("'general','Suqpage client'"));
+ assert.ok(support.includes("'general','MirtPage client'"));
  const native=fs.readFileSync('apps/mobile/src/attention-platform.native.ts','utf8'),sender=fs.readFileSync('lib/attention-push.ts','utf8');
  for(const id of ['suqpage-alerts','suqpage-alerts-quiet']){assert.ok(native.includes(id));assert.ok(sender.includes(id));}
 });

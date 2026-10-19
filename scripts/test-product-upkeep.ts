@@ -65,7 +65,8 @@ async function main() {
         const unassignedTeam = await createUser("team-b@example.test", "team_member");
         const manager = await createUser("manager@example.test", "operations_manager");
         const admin = await createUser("admin@example.test", "platform_admin");
-        await db.prepare("INSERT INTO staff_business_assignments(user_id,business_id,assigned_by_user_id,active) VALUES(?,?,?,1)").run(assignedTeam.id, tenantA.businessId, manager.id);
+        for(const staff of [assignedTeam,manager])await db.prepare("INSERT INTO staff_business_grants(user_id,enabled,version,updated_at) VALUES(?,1,1,1)").run(staff.id);
+        await db.prepare("INSERT INTO staff_business_assignments(user_id,business_id,assigned_by_user_id,active) VALUES(?,?,?,1),(?,?,?,1)").run(assignedTeam.id, tenantA.businessId, manager.id,unassignedTeam.id,tenantA.businessId,manager.id);
         const command = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
             kind: "create",
             businessId: tenantA.businessId,
@@ -180,6 +181,11 @@ async function main() {
             serviceNote: "Client requested this update by phone.",
         }), null);
         assert.equal(teamUpdate.contentVersion, 3);
+        await db.prepare('UPDATE staff_business_grants SET enabled=0,version=version+1 WHERE user_id=?').run(assignedTeam.id);
+        await assert.rejects(() => executeBasicProductUpkeep(assignedTeam, command({
+            kind: 'update',productId:tenantA.productId,idempotencyKey:'upkeep_revoked_0001',expectedContentVersion:3,
+            serviceNote:'Attempt after administrator revoked business management.',
+        }), null), throwsCode('forbidden'));
         assert.deepEqual({
             ...(await db
                 .prepare("SELECT collection_id,category_id,slug,eyebrow,is_published,sort_order FROM products WHERE id=?")

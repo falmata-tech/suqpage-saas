@@ -15,7 +15,7 @@ export default async function StaffTrackingPage({searchParams}:{searchParams:Pro
  const t=await getUiText(),view=trackingStaffView(await searchParams);
  const result=await listStaffTrackingShipments(actor,view).catch(error=>{if(error instanceof TrackingError&&error.code==='forbidden')redirect('/dashboard');throw error;});
  return <DashboardShell user={actor} business={null}>
-  <header className={styles.heading}><div><h1>{t('Tracking')}</h1><p>{t('Create and manage shipment plans.')}</p></div><Link className="btn brand" href={'/dashboard/tracking/new'+(Object.keys(view).length?'?'+new URLSearchParams(view):'')}>{t('New shipment')}</Link></header>
+  <header className={styles.heading}><div><h1>{t('Shipment tracking')}</h1><p>{t('Create and manage shipment tracking.')}</p></div><Link className="btn brand" href={'/dashboard/tracking/new'+(Object.keys(view).length?'?'+new URLSearchParams(view):'')}>{t('New shipment')}</Link></header>
   <form className={styles.search} method="get"><label>{t('Search shipments')}<input name="q" maxLength={120} defaultValue={view.q||''}/></label><button className="btn secondary">{t('Search')}</button>{view.q?<Link className="btn secondary" href="/dashboard/tracking">{t('Clear search')}</Link>:null}</form>
   <div className={styles.workspace}>
    {!result.shipments.length?<p className={styles.notice}>{t('No shipments in this view.')}</p>:<ul className={styles.list}>{result.shipments.map(shipment=><li className={styles.record} key={shipment.id}>

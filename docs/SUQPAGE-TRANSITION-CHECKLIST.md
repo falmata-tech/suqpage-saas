@@ -5958,6 +5958,14 @@ combines dependent UI work, rather than dropping work or recapturing obsolete UI
 
 ### S134 — anonymous safety options and unnecessary UI explanations (CURRENT)
 
+- [x] S146 Account placement follow-on (FE-063): remove the prominent Blocked
+  businesses links from native guest Login and owner Account settings, retaining
+  contextual Listing options → Block/Report/blocked-list management for Google
+  Play public-UGC compliance. Focused native Account/safety tests, mobile
+  typecheck and actual Chrome Expo guest Login→showroom Listing options pass in
+  `.local/s146-account-safety-review/`; no preference or report write.
+- [ ] Capture the affected Expo owner Account settings route and obtain combined
+  visual approval before full gates/commit. No web/backend change.
 - [x] Read user concern and official Google Play public-UGC policy. Business
   listings are contributed content; anonymous browsing does not remove report/
   block requirements. Existing preferences are local to the visitor, not bans.
@@ -6313,6 +6321,136 @@ BE-018/BE-057/DEP-047; one-time L4 operations, not a permanent sync feature.
 
 ### S145 — complete MirtPage rebrand (CURRENT; all earlier work preserved)
 
+Web/native CI boundary (DEP-002/DEP-042/DEP-044/DEP-049; local source):
+
+- [x] Preserve clean root/shared-contract `release:web` and its moderate audit;
+  use those same boundaries in required web `core` and `dependency` PR jobs.
+  Keep core operations and pure Android artifact-safety checks, plus separate
+  browser/container/PostgreSQL jobs. Update the executable workflow contract.
+- [x] Focused `scripts/test-workflow.mjs`, `scripts/test-web-install.cjs`,
+  `test:mobile:release-safety` (3/3), and `validate:specs` (217 specs/ADRs)
+  pass after the workflow edit. Source-bound remote PR jobs remain unverified;
+  web CI success will be web admission only.
+- [ ] Before each new MirtPage AAB, run the full locked-workspace moderate audit
+  fail-closed and obtain a new exact per-artifact owner approval for any advisory
+  exception. Recheck signing/config/archive/device and Play controls separately.
+
+Shipment tracking/provider-reference follow-on (Ready proposal; FE-069/BE-058/
+DEP-048/FE-049/FE-053; master13/15/17/18/19/22):
+
+- [x] Inspect active staff/editor/recipient/native/terminology contracts. Preserve
+  completed native/Auth/mail approval and exact51-path mail evidence as prior
+  source; do not restart or replace earlier tasks.
+- [x] Root reviews exact backend/UI Ready proposals and owned path
+  sets before feature code. Tracking-only optional URL/code, legacy empty
+  normalization, additive75 bounds and no automatic status are explicit.
+- [x] Protect exact new beforeimages; implement independent optional staff
+  fields, authenticated web/native read/copy/external actions and active
+  Shipment tracking terminology. Keep retired form/default serialization and
+  routes/IDs/credentials/session/tenant/receipt/status invariants unchanged.
+- [ ] Current: finish focused UI/native/domain/security/localization/types. Reorder/drafts/
+  Cancel/version/retry, old/missing fields, URL attacks/no fetch, literal copy
+  failures and all existing role/recipient/session negatives remain tested.
+- [ ] Coordinate root-approved local75 runtime and actual Google Chrome
+  desktop/phone staff/admin plus visitor/owner/Expo8082 complete tasks with real
+  local API/DB/email evidence, labelled fixtures and retained failed parents.
+- [ ] Separate fresh stopped producer/two-zero/in-flight fence before changing
+  only initial Tracking-email terminology. No provider URLs/codes in email;
+  preserve sender/address/origin/provider/Message-ID keys and old snapshots.
+- [ ] New en/am/om/320px visual review and explicit approval, then fresh combined
+  full gates/source hashes; separately reviewed backup/hosted/native rollout.
+
+Independent Auth source mail tranche (Ready, L3; BE-059/DEP-029/DEP-049/FE-070):
+
+- [x] Root approves finite push split, now Ready in BE-059/FE-070/DEP-043:
+  browser wire token stays compatible, new workers display MirtPage, validated
+  Expo payload uses MirtPage; all keys/channels/permissions/quiet/tap checks stay.
+- [x] Implement and focused-test the split against current new workers,
+  immutable old worker source and actual isolated web/Expo dispatch ports.
+  Eleven worker cases and real PostgreSQL dispatch pass, retaining original
+  shared-token owner/visitor isolation and retry/privacy guards.
+
+- [x] App-mail follow-on is Ready in BE-059/DEP-049 with exact scoped local
+  stop/settle/two-zero-snapshot gate, unchanged settings and Expo8082. Root
+  authorizes the brief pause, exact MirtPage display changes and prompt one-time
+  restart; no app-mail edit occurs before actual stopped-state proof.
+- [x] Execute that boundary, then change only authored
+  Tracking/escalation display, active-locale subjects and Telegram prefix while
+  preserving provider keys/addresses/origins; restore preview before isolated tests.
+  Exact old processes/listener gone, two zero snapshots, unchanged Expo and one
+  same-command restart are verified. Web and localhost8082 return200. Preserve
+  the first verifier's wrong IPv4 Expo address as a harness failure, not outage.
+  Renderer14, escalation durable11, Tracking delivery and localization24 pass.
+
+- [x] Additional finite scope is Ready in FE-053/BE-059: update only the native
+  OSM public User-Agent with executed registration/host/privacy coverage. Keep
+  its protocol ID. Preserve the unreachable on-behalf compatibility adapter;
+  only its definition and historical runtime test call it.
+
+- [x] Record exact twenty-seven-field scope, protected beforeimages, native
+  artwork parity and unchanged security/credential/language boundaries before
+  code. App-mail queues and push wire/display remain separate dependencies.
+- [x] Update twelve Auth HTML files, manifest/local subjects/sender
+  display and exact guarded values; derive public email PNG without changing
+  existing derivatives or restarting any service.
+- [x] Run focused branding/guard/asset/type/spec checks and prepare twelve
+  desktop/phone static previews. No external mail or provider writes.
+  Auth guard65, canonical artwork/placeholder tests, scoped/mobile strict types
+  and native-map11 pass. Actual installed Chrome passes24 Auth and18 plain-mail
+  phone/desktop states. All prior canonical derivative bytes are unchanged.
+- [x] Owner explicitly approves combined email visuals and full checks on
+  2026-10-18 (call_f4b4e2d16ffe48698f92c4e78814ae59). Review:
+  .local/mirtpage-rebrand-s145/auth-mail-source/combined-review.html.
+- [ ] Coordinated local Auth reload/real Mailpit OTP verification remains separate.
+- [ ] Later full gates and exact hosted plan/backup/approval/readback; verify the
+  PNG is served first. App-mail source boundary above is verified locally;
+  hosted empty-bootstrap/ledger/backup boundaries and exact approval remain separate.
+
+Native default-identity tranche after base99333795 (Ready, L3; DEP-049,
+DEP-042/DEP-043, FE-053/FE-070, BE-059):
+
+S146 native public-origin correction (CURRENT, FE-070/DEP-049):
+
+- [x] Inspect the four active native origin consumers, qualified build targets,
+  validated API-origin contract and existing social-player navigation boundary.
+- [x] Share the validated MirtPage/default-or-explicit origin across native API,
+  About legal links, external-link adapter and social-video WebView; preserve
+  local/staging overrides and reject malformed origins.
+- [x] Prove default, override, invalid and exact-provider navigation outcomes
+  with focused actual-adapter tests and mobile strict types. Installed Chrome
+  Expo8082 opens both legal pages from About through the configured local origin
+  and returns cleanly. Receipt:
+  `.local/s146-mobile-origin-review/receipt.json` (4 checks,0 errors/failed local
+  requests,6 synthetic tiles,0 escaped). Native WebView/provider playback is
+  separately pending on an installed MirtPage Android artifact.
+- [x] Reconcile FE-070/DEP-049/master/traceability with local evidence; no hosted
+  change, app build, store upload or provider mutation follows from this fix.
+- [x] Correct the remaining native YouTube WebView missing-package fallback to
+  the MirtPage package; prove missing/configured/Expo Go and provider/hostile
+  navigation using the actual adapter. Preserve bridge tokens and existing
+  installed-package behavior. The compiled-adapter script passes 4/4 via
+  `node --import tsx scripts/test-mobile-video.ts`; npm's `tsx` launcher hits
+  sandbox IPC `EPERM` before executing tests. Mobile/root types and spec links
+  pass. No new binary or provider check is implied.
+
+- [x] Record exact final default identity, real Firebase client/hash and accepted
+  expected Play signer before code. No future Suqpage default; existing EAS IDs
+  remain infrastructure only. Initial hosted target set is empty, iOS denied,
+  old app-scoped submission binding cannot be reused.
+- [x] Implement canonical policy/config/three profiles, exact new-file validation,
+  safe public-link navigation and artifact admission; no provider/build action.
+- [x] Derive canonical white-alpha notification icon and run focused tests,
+  strict mobile types and sanitized installed-SDK config introspection.
+- [x] Reconcile master §§2/15/17, distribution docs and traceability with measured
+  local results. Root reviews task diff before staging/commit; full gates and
+  actual runtime/EAS/FCM/association/artifact/store qualification remain separate.
+  Two config/Firebase harnesses,16 link/artifact cases and three artwork cases
+  pass, with strict mobile types and scoped script types. Actual installed Expo
+  config/scheme inspection covers all three profiles. Real protected Firebase
+  bytes validate without mutation/output. Additive public association is ready
+  for a future web deployment; new autoVerify remains off until the exact hosted
+  target qualifies. No Chrome/provider/EAS/prebuild/native build/full gate ran.
+
 FE-070/BE-059/DEP-049, proposed ADR-0029; full programme L4. Master affected
 sections1/2/3/5/10/12/13/15/16/17/18/19/22/23/24/25 plus brand appendices.
 S141–S144 remain implemented/verified to their recorded levels; their outstanding
@@ -6453,6 +6591,18 @@ failures and do not call the entire release passed from partial checks.
   6acd6e4203a2e50c6b9286dd. Protected provider-domain-apply/verified.json records
   exact changes/readbacks. Remaining
   provider/data/Auth backup and candidate/runtime cutover gates are separate.
+  On 2026-10-19, a protected read-only archive of the verified hosted schema-63
+  database captured 98 table fingerprints and its actual 59 migration markers.
+  Its first isolated restore stopped before `pg_restore` and imported no rows;
+  the corrected partial rehearsal remains unrun pending exact owner direction.
+  The separate one-object private Storage backup stopped before object download
+  during target/credential binding, with no hosted write. A follow-up read-only
+  diagnostic bound the canonical MirtPage bucket/key settings on the same site;
+  it fetched no Storage object. The archive alone is
+  not a qualified recovery point: private Storage bytes, managed settings and
+  a successful isolated restore are still required. Protected receipts and
+  next-step reviews are outside Git under
+  `.local/mirtpage-rebrand-s145/production-cutover-readiness/`.
 - [x] Ready independent provisioning for exact owner review under DEP-049/ADR-0029:
   new domain aliases/DNS/managed HTTPS on the unchanged published deploy, plus
   additive Firebase/Play draft records. Exact forms, targets and protected
@@ -6519,3 +6669,420 @@ failures and do not call the entire release passed from partial checks.
 - [ ] Verify production/new app/public and private workflows, store availability,
   fresh 12tester/14day eligibility, current docs/traceability and scoped commits.
   Report each implemented/tested/approved/deployed surface distinctly.
+
+
+### S145 local support defaults and complete-ledger preflight
+
+- [x] Ready: BE-059/DEP-049 define future support defaults/writer only, retained
+  rows/inactive billing, rollback/replay and complete reviewed-ledger negatives.
+  Master sections13,15,17 and22 are affected; native Ready sections stay separate.
+- [x] Append migration73 and change only the active general-support
+  writer; centralize the source ledger endpoint and validate complete histories in
+  release preflight. Preserve all existing guards and historical migrations.
+- [x] Add meaningful isolated PostgreSQL regressions for default/writer,
+  duplicate/tenant denial, rollback/replay/history/billing preservation, actual
+  runtime preflight, stale63 and hole64; update legitimate current fixtures and
+  register the new test in the existing PostgreSQL readiness pipeline.
+- [x] Run focused local DB/security/migration/strict type/spec/whitespace checks;
+  reconcile exact evidence. No ordinary local DB migration, full gates,
+  containers, mail changes, provider writes, Git stage/commit or publication.
+- [ ] Separate release dependency: source-bound full gates and explicit runtime/
+  hosted migration/backup/approval under DEP-049. This phase does not authorize
+  changing pending mail envelopes, sender/origin or inactive billing.
+
+  Local evidence: all18 applicable focused scripts pass at endpoint74, with scoped strict
+  types and independent source-bound peer review. New guards preserve custom
+  defaults and pre-existing versioned NULL defaults for review; only a fresh
+  empty baseline may omit the old default. Existing normal preview72 retains
+  the reviewed Suqpage default. Private support-default-preflight receipts retain
+  all failed parents. The current rollout dependency above stays unchecked;
+  these local checks are not full combined-candidate or hosted release evidence.
+
+
+### S145 historical PostgreSQL ledger correction
+
+- [x] Ready: historical BE-035/DEP-031/ADR-0020 evidence establishes27–30 as
+  data-only patches and exactly two legitimate current ledger representations.
+  DEP-049/BE-059 and master sections15/17/22 are reconciled before source edits.
+- [x] Replace the contiguous count with bounded ordered exact-history
+  admission. Admit only full1..74 or1..26+31..74; preserve all account/Auth guards
+  and reject every partial group, required hole, duplicate/noninteger or unknown
+  future ID. No historical marker writes, fake backfills or old patch replay.
+- [x] Prove fresh full/current legacy and observed legacy63→74 using real owned
+  PostgreSQL fixtures, plus partial groups, hole64, stale63 and invalid IDs;
+  retain the default73 rollback/history/security tests and scoped strict types.
+- [x] Independent production peer review of source/tests passes with no material
+  finding; all18 focused tests and scoped strict types pass. Reconcile evidence.
+- [ ] Refresh the private gate plan. Snapshot50a9efa is historical only. No full gate starts
+  until mail-bootstrap readiness, fresh final source and root greenlight.
+- [ ] Separate production backup restore/rehearsal must preserve the actual legacy
+  representation and apply only64–74; no claims based on a fresh full fixture.
+
+
+### S145 canonical business-category references (migration74)
+
+- [x] Ready: reviewed immutable7tuple plan and BE-059/DEP-049/master contract
+  precede code. Missing farms reference is separate from valid historical gaps.
+- [x] Append74 only; guard exact table shape/PK/active check and known
+  key active1, insert missing references and normalize only seven positions.
+  Preserve all old labels/icons/unknown rows/tenant assignments; endpoint74.
+- [x] Real six-key legacy63→74, current farm signup FK-before/success-after,
+  owner tenant denial, all-table fingerprints, fresh no-op, rollback/replay,
+  inactive/metadata refusal; update legitimate latest/tails and existing pipeline.
+- [x] All18 focused migration/security scripts, scoped strict types and independent
+  source-bound peer review pass; exact evidence is mapped in TRACEABILITY.
+- [ ] Current: final full freeze waits for mail tranche completion and root
+  greenlight; earlier full gates cannot certify this newer source.
+- [ ] Hosted backup/restore rehearsal and exact separate migration approval;
+  no reference deletion or broad customer/demo reclassification.
+
+### S145 follow-on: Shipment tracking and optional provider details
+
+- [x] Record the latest owner request without replacing the active rebrand or
+  completed mail work. BE-058/DEP-048 propose Tracking-only URL/code values,
+  bounded DNS-host HTTPS, legacy-empty/idempotent equality,75 constraint-only
+  migration and independent fresh email-copy boundary before code.
+- [x] Root reads/accepts the exact controlling BE-058/DEP-048 and FE-069
+  Ready contracts. Coordinate shared parser/property names and UI/native/catalog
+  ownership; do not implement from a partial cross-agent agreement.
+- [x] Implement pure Tracking-only validation/projection, persistence/equality
+  and additive75 constraint bounds; preserve OTP/tenant/role/order/version/audit/
+  provider keys and historical bodies. Update genuine current endpoint fixtures.
+- [x] Prove legacy accepted Submit replays without new shipment/event/email,
+  old queued/leased snapshots, new per-leg values/reorder/clear/no-op/conflicts,
+  URL/code/byte negatives and migration rollback/replay/rows/ACL integrity.
+- [x] Retired chat-plan actions now point staff to Shipment tracking rather
+  than using the old plan name. The focused legacy-action/UI suite passed all
+  seven cases in the unrestricted local Chrome test environment; its first
+  sandboxed browser launch was denied by macOS and made no app change.
+- [ ] Current: retain the source-bound independent backend peer and reviewed
+  ordinary-local backup/apply before real feature browser writes. All21 focused
+  scripts and final five-case pure suite/scoped types pass; evidence and initial
+  bounded launch/fixture diagnostics are in
+  `.local/mirtpage-rebrand-s145/shipment-provider-details/`.
+- [ ] Separately fence/settle local app-mail before active initial-email
+  shipment-tracking wording changes; preserve runtime/settings/history and restore
+  once. New provider links/codes remain portal-only and are never fetched.
+- [ ] Complete active-language web/phone/native UI and real Chrome/Expo staff/
+  verified-recipient tasks after the reviewed local migration boundary; capture
+  appropriate states and obtain explicit approval of new layouts/copy.
+- [ ] Only after all focused/peer/visual dependencies: fresh full-source freeze,
+  root-reviewed durable harness and single check/release/20-acceptance chain.
+  No new gate/freeze now; earlier receipts certify their own sources only.
+- [ ] Separate reviewed local/hosted backups, actual restore rehearsal and
+  migration/activation/publication approvals; no automatic restore or field loss.
+
+### S145 follow-on: Search discovery for real public showrooms (FE-071)
+
+- [x] Correct missing/draft showroom soft-404 responses before publication:
+  the exact direct-document `@handle` proxy guard reads only indexed status,
+  rejects absent/draft handles with a branded, localized 404/noindex page,
+  retains suspended redirect and directly shared active pages, and leaves the
+  normal route loader and RSC page guard in place. Focused local HTTP, installed
+  Chrome desktop/phone and type/spec checks pass; see
+  `.local/showroom-404-s146/review.md`. This is local source only, not a hosted
+  rollout or approval of the new 404 visual.
+- [x] Audit MirtPage's actual Market, About, Featured, showroom and product
+  render/metadata, current sitemap/robots absence, canonical origin staging,
+  active-language URLs and Google/Next.js primary guidance. Record FE-071 Ready
+  before implementation; coordinate reciprocal FE-070/BE-054/DEP-049 links.
+- [x] Add bounded public-only sitemap/robots, accurate canonical and
+  social metadata, inert visible-content structured data and private/demo
+  exclusion. Preserve real product links and existing card interaction.
+- [x] Prove sitemap pagination and tenant/publication scope, stale/foreign and
+  demo noindex, query/ref canonicalization, JSON-LD injection denial and actual
+  server HTML. Pure, read-only PostgreSQL and HTTP receipts are in
+  `.local/seo-fe071/review.md`; global types remain a shared S145 gate.
+- [x] Add a visible, server-rendered `/showrooms` directory linked from
+  About so real public business/product pages have crawlable internal paths.
+  Keep the same approved non-demo/public-product eligibility as the sitemap,
+  bound pages with numeric keyset links, and show only safe listed city/category
+  context. Pure, read-only DB and actual HTTP checks prove 24-row pagination,
+  About→directory→showroom→product HTML, and invalid/exhausted cursor noindex.
+- [x] Inspect affected public paths in installed Chrome at desktop/phone,
+  including Market→About→directory→showroom→product, ordinary click, new-tab
+  product open, Back, keyset canonical and Amharic phone copy. Captures and
+  bounded request controls are in `.local/seo-fe071/chrome-receipt.json`.
+- [x] Owner approved the new directory layout at desktop/phone for shared full
+  checks after reviewing `.local/seo-fe071/current-review/screens/directory-1440-en.png`
+  and `directory-390-en.png`. The existing local merchant test description is
+  not approved as final marketing content; no deployment was authorized.
+- [x] Owner confirmed Prairie Meadows is a real business that should remain
+  discoverable. In the local preview only, replace its repeated test About text
+  and blank search/sharing description with concise copy grounded in its listed
+  Dodolla grass product. Protected before-image, versioned admin UI saves and
+  authoritative readback are under `.local/prairie-copy-s146/`; actual Chrome
+  desktop/phone directory and showroom evidence is in `receipt-verify.json`,
+  with the settled desktop directory recapture in `receipt-directory-final.json`.
+  The hosted record was not changed; full gates and deployment remain pending.
+- [ ] Join the current final candidate's one full check/release/acceptance chain
+  after all S145 focused and visual dependencies. Existing earlier gate receipts
+  do not certify the newer SEO source.
+- [ ] After the reviewed MirtPage hosted cutover, verify the active canonical
+  origin and public sitemap/robots/product HTML. Search Console setup/submission
+  and indexing outcomes require separate actual provider evidence.
+
+### S146 — administrator-controlled staff business management (LOCAL; release pending)
+
+This follows S145's currently reviewed local migration75 and release work; it
+does not replace or certify any earlier S145 gate. FE-072/BE-060 and ADR-0030
+supersede owner consent and per-business assignments in the local schema77
+preview. The hosted site retains its prior authority until a separately reviewed
+cutover. FE-073/BE-061/DEP-050 separately control owner email.
+
+- [x] Resolve the owner Account settings navigation review: Chrome's retained
+  pointer over Support must not look like a second selected destination on the
+  nested email task. Keep exactly one current-page link and verify distinct
+  hover/current styling in actual Chrome on desktop and the single Account tab
+  on phone; FE-026. Installed Chrome showed one `aria-current`, a neutral
+  Support hover, and a dark selected Account settings row at 1440px; the
+  prior actual phone capture shows one selected Account bottom tab. Evidence:
+  `.local/s146-browser-review/receipt-nav-hover.json`, `nav-hover-1440.png`,
+  and `owner-email-change-idle-390.png`. The first browser aggregate is FAIL
+  only because its phone step expected a drawer that owners do not have; a
+  bounded corrected retry failed before browser navigation on a local Supabase
+  Auth timeout. Neither limitation is a successful new phone E2E run.
+
+- [x] Record the owner decision and Ready FE-072/BE-060 contract: all current and
+  future platform staff start with one explicit all-business Manage businesses
+  grant, administrator revokes/restores it per person, and chat roles remain
+  independent. Account security and owner sign-in email are excluded.
+- [x] Reconcile FE-026/FE-042/FE-053/FE-056, BE-009/BE-032/BE-033/BE-044,
+  FE-038/BE-031 and master current/planned wording; validate reciprocal links
+  and TRACEABILITY. Keep existing consent/assignment behavior current on the
+  deployed site until its separately reviewed cutover.
+- [x] After local schema75 and a protected exact beforeimage, apply the additive
+  local staff-grant migration. The approved, guarded 75→77 transaction backfilled
+  all 14 eligible staff as enabled; its independent readback proved ledger 77,
+  three private RLS tables, preserved existing rows/schema and zero hosted writes.
+  Receipt: `.local/mirtpage-rebrand-s145/local75-to77/attempt-20261019T024300Z/verified.json`.
+- [ ] Complete the isolated migration replay/rollback and new-staff transactional
+  tests, together with the remaining permission/ACL regression matrix. The
+  successful local apply and backup do not substitute for those tests.
+- [ ] Replace all business read/write/publication authority with fresh persisted
+  role+grant decisions. Serialize revoke against in-flight edits; reuse existing
+  business readiness, version, upload, suspension and audit rules. Prove revoked,
+  missing-grant, forged-role, cross-tenant and account-security denial.
+- [ ] Replace admin per-business Staff assistance with a focused per-person
+  Manage businesses control; give granted staff a paginated Businesses directory
+  and existing focused tasks. Remove Team editing from owner web, phone web and
+  Expo; stale links/assistance commands fail safely. Keep Support/Transport
+  queues and owner/private account tasks separate.
+- [ ] Run focused security/integration/UI tests, then actual Chrome desktop/phone
+  and Expo localhost:8082 owner/staff/admin flows with authoritative local DB/API
+  readback. Capture current layout and obtain explicit owner visual approval
+  before full `npm run check`, `npm run release` and acceptance gates.
+  Partial local evidence: staff navigation (4/4), staff boundaries, business-team
+  UI (3/3), web admin revoke/restore with DB versions 1→2→3 and authenticated
+  POST, staff directory/chat separation, owner Your page/Cancel, and solid
+  Tracking/Back passed. The first Chrome run caught a pre-hydration GET form bug;
+  its correction was exercised by POST with no form-field query. The installed
+  Chrome receipts are `.local/s146-browser-review/receipt-owner-selector-harness.json`
+  and `receipt-remaining.json`; each aggregate remains FAIL because the former
+  stopped on an ambiguous test selector and the latter used the wrong IPv4 Expo
+  address. A subsequent focused Chrome staff-layout run passed the desktop
+  badge/button non-overlap and 390px no-overflow checks; screenshots are
+  `.local/s146-browser-review/admin-staff-detail-1440.png` and
+  `admin-staff-detail-390.png`. Expo Tracking at `localhost:8082` passed through
+  the real preview. An earlier genuine local OTP login established one owner page
+  state, but not the complete navigation journey. A later run exercised owner
+  Account→Your page→Page address→Cancel and absence of Team editing with real
+  local Supabase token verification; it **route-fulfilled a successful OTP-send
+  response** after the local email quota was exhausted. Its
+  `.local/s146-browser-review/receipt-expo.json` PASS therefore describes
+  partial UI coverage, not an end-to-end sign-in/workflow pass under the browser
+  review contract. A subsequent source-bound installed-Chrome run at the Expo
+  web preview `localhost:8082` completed a fresh real local Supabase OTP send,
+  Mailpit delivery and verification with **zero application-response mocks**,
+  then Account→Your page→Page address→Cancel. Its local DB readback confirmed
+  the handle and version were unchanged; no application errors or uncontrolled
+  map-tile requests were recorded. See
+  `.local/s146-browser-review/expo-real-auth/receipt.json` and the paired
+  `owner-account-real.png`/`owner-showroom-real.png` captures. This proves that
+  specific Expo browser journey, not an installed Android workflow or email-
+  change activation. The full check started after visual approval but was
+  intentionally interrupted for newly found UI defects; its resumed run,
+  release and acceptance results remain pending here.
+- [x] Owner explicitly approved the combined staff, owner and Shipment Tracking
+  layouts and proceeding to full checks. The visual approval is separate from
+  the Expo browser workflow evidence. The later FE-073 wrapped-email and
+  navigation-hover layouts received their own separate approval below. FE-071's
+  showroom-directory visual approval remains a separate open item.
+- [ ] Use a reviewed hosted backup, exact migration/apply authorization and
+  monitored rollout for the grant; verify current role and revocation in the
+  deployed app. A rollback must fence staff business editing rather than revive
+  old assignment/consent authority for a revoked member. Source completion or
+  local screenshots do not prove deployment.
+
+### S146 — owner sign-in email change (LOCAL SOURCE; disabled pending rollout)
+
+Local schema77 staged empty pending-request and session-fence tables without
+rewriting owner identities. FE-073/BE-061 local Auth/Mailpit two-code proof and
+focused owner/staff denial tests pass. The initiation flag remains off; this is
+neither a hosted Auth configuration change nor an enabled customer workflow.
+
+- [ ] FE-073/BE-061/DEP-050: owner-only Account settings task, code to the
+  current address plus confirmation at the proposed address, secure provider
+  dual confirmation, UUID-bound provider-to-`users.email` reconciliation and
+  historical `email_at_link` preservation. Staff/admin business authority must
+  never permit a direct Auth email mutation or bypass either mailbox proof.
+- [ ] After the staff authority boundary, prove provider-backed local Mailpit/
+  database success and failure paths, session denial after completion and
+  account-erasure compatibility. Obtain desktop/phone/Expo visual approval,
+  then full/release/acceptance evidence. Review exact hosted Auth fields,
+  templates and notices under DEP-029 before any separate monitored rollout.
+  No hosted Auth configuration change or email-change rollout is complete today.
+- [x] Owner separately approved the focused FE-073 wrapped-email form and
+  FE-026 Account navigation-hover layouts and authorized resuming full checks.
+  The approval covers the reviewed desktop/phone visuals, not OTP delivery,
+  account-email activation, the separate FE-071 directory, release or rollout.
+  `npm run check` has resumed after the earlier interrupted attempt; no passing
+  result is recorded yet.
+
+### S146 — readable public information pages (LOCAL SOURCE; Tracking approved)
+
+- [ ] FE-070/FE-049 legal copy: align Privacy/Terms with FE-066/BE-055 external
+  product contact, retained private history, FE-072/BE-060 administrator-granted
+  staff management and transport brokerage. Keep existing third-party,
+  deletion and tracking disclosures. Regenerate active-language catalogs,
+  run focused narrative/localization checks, capture desktop/phone Chrome legal
+  pages, then obtain visual approval before full release gates. No provider,
+  policy-declaration or hosted configuration write is part of this step.
+
+- [ ] On Shipment Tracking and other public information pages, replace the
+  decorative global canvas background with a solid MirtPage theme surface;
+  preserve genuine showroom and product media. Verify Tracking readability and
+  navigation in actual Chrome desktop/phone and Expo localhost:8082, capture
+  visual states and obtain owner approval before the applicable full gates.
+  Installed Chrome captures show no background image on Tracking, About,
+  Privacy, Featured and Market at 1440/390px; the interactive web Tracking/Back
+  journey and Expo Tracking render passed separately. Evidence:
+  `.local/shipment-tracking-canvas-s146/actual/readonly-receipt.json`,
+  `.local/s146-browser-review/receipt-remaining.json`, and
+  `.local/s146-browser-review/receipt-expo.json`. The owner approved the
+  Shipment Tracking layout in the combined S146 visual review; remaining
+  information-page review and applicable full gates remain open.
+
+### S146 — local Next.js dev-resource origin (DEP-027; local-only defect)
+
+- [x] Reproduce with the same authenticated Chrome editor at both loopback
+  hostnames. At `127.0.0.1:3102` the editor and language selector remained
+  unhydrated and Next.js rejected `/_next/hmr`; at `localhost:3102` they enabled
+  with one HMR connection, no console error and no application POST. Installed
+  Next.js 16 documentation requires hostname-only `allowedDevOrigins` entries;
+  the current config supplies host-and-port Server Action entries instead.
+- [x] Keep DEP-027's exact Server Action and mutation origins, derive a separate
+  hostname-only, wildcard-free dev-resource allowlist from validated origins,
+  and prove the distinction with a focused regression test. The installed
+  Next.js 16 guard test admits 127.0.0.1 HMR, denies an unknown host with 403,
+  and confirms Server Action hosts retain exact ports. The unrelated localhost
+  editor save returned 403 with no data write; this dev-resource correction did
+  not broaden its mutation policy.
+- [x] The parent agent restarted the local web server, then repeated the
+  authenticated `127.0.0.1:3102` Chrome hydration check and ran focused type,
+  spec and whitespace checks. Chrome receipt
+  `.local/dev-origin-s146/receipt.json` proves the About field and language
+  selector enabled, one HMR connection, and no console errors or app POSTs.
+  `npm run test:local-supabase-readiness`, `npm run typecheck`,
+  `npm run validate:specs` (217), and `git diff --check` pass. This fixes only
+  local dev resources; no business data, application schema, production origin,
+  hosted Auth or deployment change occurred. The browser checks created only
+  local Auth test sessions.
+
+### S146 — active account-copy brand parity (FE-070/FE-049; local source)
+
+- [x] Correct the two reachable Amharic/Afaan Oromo account-deletion and Expo
+  staff-sign-in notices in `locales/interface.tsv`; preserve historical catalog
+  rows and runtime compatibility identifiers.
+- [x] Regenerate message catalogs and prove the two active keys reach web/Expo
+  client rendering with MirtPage and without the old display name.
+- [ ] In actual Chrome, review account deletion at desktop/phone web and Expo
+  phone in both active languages, plus the Expo staff-denial message; capture
+  settled screens and request/error evidence. Obtain visual approval before
+  full release gates; this source correction does not publish either app.
+  Focused localization (22 frontend, 4 backend) and spec validation (217) pass.
+  `.local/account-brand-s146/receipt.json` records five settled Chrome
+  account-deletion states across web desktop/phone and Expo phone, with zero
+  browser errors. A real local admin sign-in reached the Expo owner-session API
+  and received `403 staff_web_only`; its Amharic notice rendered. The capture
+  retained the language sheet, and local Auth then rate-limited further OTP
+  attempts, including a second existing admin identity. A settled staff notice
+  in both languages remains pending; no Auth setting, production account or
+  full release gate was changed for this copy correction.
+
+### S146 — generated demo booth brand labels (FE-070; local source)
+
+- [x] Inventory the 58 fictional demo booth SVGs, the generator, current label
+  assertion and approved shared MirtPage identity. This is a presentation-only
+  correction to illustrative demo media; no tenant, client or provider media
+  changes. FE-070 states the exact scope and acceptance criteria.
+- [x] Replace the single old platform label in each booth and in its generator;
+  retain each business name, cue, geometry and palette. Raise only the sign
+  label type size to keep it readable in phone cards. The focused FE-070
+  regression checks all 58 files and generator output.
+- [x] Parse all 58 SVGs and inspect three palette variants in installed Chrome
+  at 1440/390; all six image loads pass without page/console/request errors.
+  See `.local/booth-brand-s146/receipt.json` and the paired `booths-*.png`
+  captures. The initial static-capture harness incorrectly assumed SVG
+  intrinsic width 1200; its retained receipt and corrected assertion are
+  separate from the successful actual render. No data or provider writes.
+- [x] Owner approved the new demo-booth desktop/phone visuals and full checks
+  after reviewing `.local/booth-brand-s146/booths-desktop.png` and
+  `booths-phone.png`. This is neither Play-screenshot approval nor deployment.
+
+### S146 — honest native empty product gallery (FE-053; local source)
+
+- [x] Audit the real Prairie Meadows local media and retain the exact scoped
+  plan in `.local/prairie-media-s146/review.md`. The owner approved clearing its
+  unrelated local cover/product mockups and example videos. A protected exact-row
+  before-image and validated full local database archive precede the saves;
+  both original Storage objects retain their verified hashes.
+- [x] Replace the empty native horizontal gallery with a localized, themed
+  no-photo state; preserve non-empty gallery interaction and product details.
+  Add an actual-component regression mapped to FE-053, without API/schema or
+  media-object changes. `node --import tsx --test scripts/test-mobile-video.ts`
+  passes 5/5; mobile typecheck and spec validation pass.
+- [x] Exercise the affected product detail in Expo localhost:8082 at phone
+  width with a labelled response-only zero-media fixture; capture the screen,
+  request/console evidence and source-bound readback. Installed Chrome headless
+  390×844 passes showroom→product→browser Back with no API/console error or
+  write; `.local/prairie-media-s146/empty-gallery-expo-390.png` and matching
+  protected receipt. Fixture changes only a demo product's response `media`
+  array, not the database. Installed Android remains separate.
+- [x] Obtain owner visual approval of the no-photo Expo screen for full checks.
+  The approved local-only Prairie cleanup then used one authorized versioned
+  page-editor save and one product-editor save. Local readback proves business
+  content v6, draft v4, latest publication r3, product 286 still published with
+  empty media and all non-media product fields unchanged; prior publication r2
+  and both original Storage objects remain. Actual Chrome 1440/390 directory →
+  showroom → product → Back and Expo 390 showroom → product → Back pass against
+  the real local API/database, with no response fixture, error or unexpected
+  write. Evidence and eight captures: `.local/prairie-media-s146/receipt-verify-after.json`.
+  This does not change the hosted site or establish installed Android behavior.
+
+### S146 — disposable browser acceptance startup (DEP-027; release gate)
+
+- [x] Classify the isolated acceptance failure as infrastructure: Supabase
+  Storage needed about 177 seconds to become healthy, exceeding the CLI's
+  initial health deadline; no application assertion failed. Preserve the
+  original failed receipt and keep the developer Supabase project untouched.
+- [x] Start only the disposable browser project with CLI health bypass, then
+  require its six exact project-labelled services and Auth/API plus Storage
+  loopback status responses before setup, build or Playwright. Bound the
+  independent wait to five minutes, fail closed and retain project-only cleanup.
+  Add focused delayed-success, wrong-project, endpoint-failure and timeout tests.
+  The six-service inspection and both real loopback status paths are verified;
+  six isolated unit cases, the full local-readiness group and 217-spec validation
+  pass. This is a harness check, not a passing browser journey.
+- [ ] Re-run focused checks, then the source-matched isolated browser acceptance
+  gate. Record both the old infrastructure failure and new result; do not call
+  a harness fix an application workflow pass by itself.
+  The first full run reached all 20 cases: 18 passed. One legacy capture found
+  both visible and hidden copies of the same text; the other sign-in hit the
+  disposable Auth project's two-email hourly limit on its third test account.
+  Scope the former assertion to visible copy and raise the latter limit only in
+  the disposable browser config, then rerun all 20 without weakening assertions.
+  The next full run passed 19/20. Its sole remaining capture expected the
+  retired per-business Staff assistance editor; FE-072 intentionally redirects
+  that URL to the Staff directory. Assert the redirect and directory heading,
+  then exercise the long owner workflow and full browser suite again.
