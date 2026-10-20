@@ -10,7 +10,53 @@ change_level: L4
 
 # DEP-049 — MirtPage cutover
 
-## S151 — one-compilation Android candidate (ready for exact build review)
+## S151 — published candidate; image recovery and device checks pending
+
+Source `d78dcf5`, frozen digest 5129758d…6c1f5, passes the complete check
+(including 415 workflow-UI cases and zero skips), web release with zero vulnerabilities,
+and 20/20 acceptance. GitHub run 39485239127 attempt 2 has all five jobs successful;
+its first failed attempt and local stops remain preserved. B04's separately
+approved data/setting operations and B05's finite demo cleanup are applied and
+independently verified. The new deployment is published; separate setting
+activation and complete hosted workflow verification must not be inferred from
+the initial public health checks.
+
+The complete local assembly manifest is SHA c82b49af…e126c. All eight actual
+compiled-wrapper synthetic routes pass in Deno 2.2.4 (receipt SHA 4185f343…52b0).
+The first actual Linux Node 24 import check loads locked Sharp 0.35.5/libvips
+8.18.7, produces a one-pixel PNG and imports the real server/bootstrap without
+invoking a handler (receipt SHA f72153db…5ea67). Version 2 AAB and derived APK
+are built and pass independent static binary inspection (receipt SHA
+026d843a…a294b). Physical workflows, OS push and Play closed testing remain open;
+Expo Doctor 19/21 and static-versus-device limits remain documented.
+
+The exact owner-approved deployment `6ad7d7978faaa5baa6eee605` is published and
+passes its six initial public/API/association checks. Full rollout is incomplete:
+actual Chrome confirms sponsor/gallery separation at nine widths and desktop/
+phone preview→showroom→Back navigation, but the mixed browser receipt remains
+`passed: false` because optimized images fail and request aborts are retained.
+Read-only GET diagnosis proves the exact `/_next/image` request returns JSON
+400 (missing `url`), while the same source/width/quality sent directly to the
+existing Image CDN returns 200 WebP. B09 below governs a fresh routing recovery.
+The previous healthy deploy `6ad73e5a9df2756523e8ac95` and protected before-image
+remain retained; no automatic rollback, retry or provider write follows the
+incident. Hosted image/worker checks and the separately reviewed opaque-logo
+Auth HTML update remain open.
+
+### Generated middleware compatibility boundary
+
+The original unmodified adapter pipeline failed during generated middleware
+import. A reviewed 83-byte conditional `globalThis.global` alias was added only
+to a copied `___netlify-edge-handler-node-middleware/server/node-middleware.js`.
+The installed official edge bundling step completed that copy (receipt
+SHA 590d8e8c…16ac). Application source, dependency versions and global tools are
+unchanged; this is an artifact compatibility correction, not an application
+polyfill or a tooling upgrade. The original failed pipeline and exact before/after
+hashes remain retained. The current artifact is qualified by the compiled-route
+and Linux checks above. A future unmodified adapter pipeline remains unresolved;
+this evidence does not establish a generic adapter or CI pipeline pass.
+
+## S151 — single-compilation Android candidate (static inspection passed)
 
 Prepare one local release AAB for `com.mirtpage.app`, then derive a universal
 test APK from that exact AAB with the verified existing signing key and official
@@ -26,23 +72,45 @@ explicit owner acceptance of the current unpatched tooling advisories for this
 bounded AAB and derived APK. No previous exception carries over. Final source
 commit and required gates must be bound before execution; no paid build, new
 signer, submission, invitation or closed-test activation is included. Phone
-testing remains on hold at the owner's request. This is preparation, not a
-claim that either new binary exists or that the testing clock has started.
+testing remains on hold at the owner's request. The authorized operation now
+produces version 2 AAB SHA 2a116c63…125fa and its derived universal APK
+SHA 78e8d2fe…145c6 from one compilation. Its terminal receipt,
+`native-admission-20261020/one-build/result.json` (SHA 42696aa4…76a0), initially
+leaves the artifacts unadmitted. Independent final static inspection now passes
+identity, resources, signatures, manifests, privacy and static 16 KB checks:
+`native-admission-20261020/post-build-inspection-v2/final-inspection-receipt.json`
+(SHA 026d843a…a294b). This does not establish physical-device/16 KB runtime, OS
+push, native screenshots, Play delivery or the twelve-person testing clock.
 
-## S151 B09 — public product and showroom images (ready)
+## S151 B09 — query-aware public image routing recovery (ready)
 
 The owner reports missing example pictures. Read-only production diagnosis
 confirms five original product/showroom assets return200 and exist in Git. The
 Featured hero's exact `/_next/image` variants return400 at640 and3840px; its
 original bytes match the repository, and the existing `/.netlify/images`
 endpoint returns a valid resized WebP. This is image delivery, not missing data
-or permission to remove media. B05's separately proposed mismatched-demo-media
-cleanup remains independent and unapplied.
+or permission to remove media. B05's separately owner-approved finite demo-media
+reference cleanup is now applied and independently verified; saved files remain.
 
-Scope: one exact same-origin200 rewrite from `/_next/image` to the existing
-Netlify image endpoint, preserving query parameters and all seventeen legacy
-asset aliases. No new provider, custom image loader, optimizer disablement,
-remote-image allowlist, secret, hosted setting, media upload or native change.
+The first S151 deploy retained a manually added simple `/_next/image` rewrite.
+Netlify evaluates the physical `_redirects` file before the generated TOML
+rules; that simple rule shadows the installed adapter's query-aware rule and
+loses the source parameter. The initial focused source checks did not prove
+hosted behavior. Preserve that failed attempt and the two-GET diagnosis in
+`s151-image-routing-readonly-diagnosis.json` (SHA ef09c3ab…412a), alongside
+`s151-postpublish-receipt.json` (SHA efe75f8d…7148).
+
+Scope: restore the installed official adapter's generated routing contract.
+Physical `public/_redirects` contains only the seventeen unchanged exact legacy
+asset aliases, with no manual image rule. The generated `/_next/image` rule has
+exact query bindings `{ url: ':url', w: ':width', q: ':quality' }` and destination
+`/.netlify/images?url=:url&w=:width&q=:quality`; it precedes the queryless
+`/_next/image` fallback. Preserve the installed adapter's existing query-aware
+`/_ipx/*` compatibility rule between them, rather than adding or broadening any
+wildcard. The server function retains the exact `/_next/image` exclusion so
+dispatch reaches those official rules. No new provider, custom image loader,
+optimizer disablement, remote-image allowlist, secret, hosted setting, media
+upload or native change.
 Private authenticated media remains on its existing unoptimized authorized
 route; never forward browser credentials to the public image CDN. A product
 image selected as a cover can retain `/media/product-private-*` through the
@@ -70,31 +138,42 @@ Scenario: A valid published picture has a responsive web variant
 Scenario: The image repair cannot become a broad asset or private-media rewrite
   GIVEN the release routing artifact is inspected
   WHEN its image route is admitted
-  THEN there is exactly one same-origin image rule with no wildcard or external destination
-  AND all seventeen exact legacy asset aliases remain unchanged
+  THEN public/_redirects contains only the seventeen unchanged exact legacy asset aliases
+  AND the generated query-aware /_next/image rule preserves its exact url, w and q bindings
+  AND that rule precedes the official queryless fallback with existing IPX compatibility retained
+  AND the server function excludes exactly /_next/image from its catch-all dispatch
+  AND no manual image rule shadows the generated rules or adds an external destination
   AND no account, API, private-media or other application route is redirected
 ```
 
 Definition of Ready: the exact failed/successful URLs, byte identities and
-response types are recorded in protected B09 receipts. This recurring delivery
-contract belongs in the existing static routing file, not a new sync utility.
+response types are recorded in protected B09 receipts. The installed official
+adapter and provider rule precedence determine the repair; no new sync utility
+or handcrafted substitute for its query-aware rules is needed.
 Primary provider guidance documents
 [relative image sources and rewrites](https://docs.netlify.com/build/image-cdn/overview/)
-and [automatic query forwarding for200 rules](https://docs.netlify.com/manage/routing/redirects/redirect-options/).
+and [routing rule order](https://docs.netlify.com/manage/routing/redirects/overview/).
 The installed Next image guide was inspected. Privacy/localization effects are
 none: no user text, private access or source membership changes.
 
-Add a failing-then-passing check in `scripts/test-netlify-readiness.mjs`; keep
-`scripts/test-platform-naming.ts` strict on the original alias set while admitting
-only this separate exact rule. Actual Chrome verifies loaded public card images
-and ordinary navigation; local Next success alone cannot prove the Netlify
-rewrite. A later source-bound full artifact must contain the exact rule before
-its function catch-all, preserve public images and private-media handling, and
-pass original plus transformed product/showroom GET/decode checks after the
-reviewed deployment. Retain the previous deploy for an explicitly reviewed
-rollback; no automatic provider recovery or database restore. Master §§15/19/22
-and FE-021 track this local candidate. Visual/full/hosted qualification remains
-pending; nothing in this section authorizes a deployment.
+Focused regressions must reject the previous shadowing rule, missing/wrong query
+bindings, incorrect ordering and missing server exclusion; preserve the original
+seventeen-alias checks and private-media renderer/access regressions. Run fresh
+source-bound check, web release, acceptance and required CI before assembling a
+new exact artifact. Inspect its physical aliases, official generated image rules
+and server dispatch together; local Next success alone cannot prove Netlify
+routing. Obtain a new exact hosted recovery review and owner approval, preserving
+the previous healthy deploy and all failed receipts. Do not infer permission for
+a new artifact from the consumed first-deploy approval.
+
+Monitored recovery must GET/decode original and optimized product/showroom
+images at 384, 640 and 3840 px, repeat public/private-media checks, exercise actual
+Chrome card→preview→showroom→Back on desktop/phone, and verify the scheduled
+worker still runs without request-context errors. The approved UI is unchanged;
+this is nonvisual routing recovery, with no new visual-approval gate. No automatic
+provider recovery or database restore is permitted. Master §§15/19/22 and FE-021
+track the same delivery boundary. Full recovery and hosted qualification remain
+pending; this contract does not itself authorize deployment.
 
 ## S150 — Auth email contrast follow-on (local preparation)
 

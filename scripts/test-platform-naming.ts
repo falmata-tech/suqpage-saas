@@ -61,8 +61,7 @@ assert.doesNotMatch(fs.readFileSync('proxy.ts','utf8'), /process\.env\.SUQPAGE_/
 assert.ok(fs.existsSync('SUQPAGE-MASTER-PROMPT.md'));
 assert.ok(!fs.existsSync('MIRTPAGE-MASTER-PROMPT.md'));
 const cdnRules = fs.readFileSync('public/_redirects', 'utf8').split(/\r?\n/).filter(line => line && !line.startsWith('#'));
-assert.equal(cdnRules[0], '/_next/image /.netlify/images 200', 'The exact public image adapter precedes static aliases and the function catch-all');
-assert.deepEqual(cdnRules.slice(1), platformAssetRewrites.map(route => `${route.source} ${route.destination} 200`), 'All remaining Netlify static aliases must match the bounded Next mappings exactly');
+assert.deepEqual(cdnRules, platformAssetRewrites.map(route => `${route.source} ${route.destination} 200`), 'Physical Netlify redirects retain only exact legacy aliases; image routing belongs to the generated query-aware adapter');
 const auth=fs.readFileSync("lib/auth.ts","utf8");assert.match(auth,/new Set\(\[jar\.get\(COOKIE\)\?\.value, jar\.get\(platformCookies\.session\.legacy\)\?\.value\]\)/);assert.match(auth,/for \(const token of tokens\)[\s\S]*revokeByToken/);
 const db=await getDb();
 try {

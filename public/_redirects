@@ -1,6 +1,3 @@
-# Netlify forwards the existing source/width/quality query on this exact 200 rewrite.
-/_next/image /.netlify/images 200
-
 # Exact legacy asset aliases; keep in sync with lib/platform-assets.ts.
 /brand/africmade-mark.svg /brand/suqpage-mark.svg 200
 /brand/mirtpage-mark-v2.svg /brand/suqpage-mark.svg 200
