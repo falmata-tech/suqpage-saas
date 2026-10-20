@@ -7144,3 +7144,26 @@ neither a hosted Auth configuration change nor an enabled customer workflow.
   nonproduction context has a value. No credential bytes were logged.
 - [ ] Redeploy and prove a labelled tracking code, shipment detail and overdue
   staff alert reach the intended inbox before calling hosted email live.
+
+### S147 — Netlify showroom packaging correction (FE-071, DEP-049)
+
+- [x] Diagnose the source-bound Netlify candidate failure: Next compiled, then
+  Netlify Edge packaging rejected the `pg` driver imported by `proxy.ts`.
+  Preserve both failed local build receipts; neither deployed or changed the
+  provider. The five approved public URL settings were independently read back.
+- [x] Keep the real 404/noindex and active/suspended showroom contracts while
+  moving the indexed public-status query to a bounded same-site Node endpoint.
+  Remove the PostgreSQL import from the Edge proxy and keep Auth refresh there.
+- [x] Prove the Edge origin guard, unknown 404, active 200, language handling,
+  ordinary return navigation, and clean Netlify Edge packaging. The local Node
+  route returns 204 for an active public handle and 404 for an absent handle;
+  the existing FE-071 HTTP test checks a draft when its fixture exists.
+  Installed Chrome passed ten checks at desktop/phone with synthetic map tiles.
+  The new desktop/phone 404 PNGs are byte-identical to the previously approved
+  visuals. The initial broad SEO run stopped on an empty local database; the
+  second stopped because disposable demo seed has no real directory business.
+  These fixture limits do not qualify the entire SEO workflow. See the private
+  S147 Chrome and Netlify diagnostic receipts; no artifact was published.
+- [ ] Freeze the corrected source, rerun full release/acceptance gates, commit
+  and push the focused correction, verify remote CI, rebuild the exact commit,
+  preflight artifacts, and deploy under the guarded one-use plan.

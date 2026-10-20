@@ -3701,14 +3701,25 @@ configured origin while excluding draft, suspended, demo and private material.
 The focused local database and HTTP checks have passed; combined browser,
 release and deployment evidence is still pending. Cookie-only language choices
 do not constitute separate indexable language URLs or `hreflang` variants.
-The focused S146 soft-404 correction maps to `proxy.ts`,
-`lib/showroom-not-found.ts` and `scripts/test-public-seo-http.ts`. One indexed
-status read before a direct showroom document streams returns a branded
+The focused S146/S147 soft-404 correction maps to `proxy.ts`,
+`lib/showroom-not-found.ts`, `lib/showroom-status-origin.ts`,
+`app/api/public/showroom-status/route.ts`, `scripts/test-showroom-status-origin.ts`
+and `scripts/test-public-seo-http.ts`. One indexed Node status read before a
+direct showroom document streams returns a branded
 English/Amharic/Afaan Oromo 404/noindex for unknown and draft handles. Direct
 local HTTP and installed Chrome desktop/phone return-navigation checks pass;
 `.local/showroom-404-s146/review.md` records the scope and earlier harness
-failure. Stale/foreign product query semantics are unchanged. The new 404
-layout, combined gates and hosted behavior are not yet approved or verified.
+failure. The S147 release correction keeps the same 404 HTML and removes the
+PostgreSQL import from the Edge proxy: the Node status endpoint returns only
+204/404/503 with no merchant data, and hosted lookups pin the reviewed MirtPage
+origin rather than an untrusted request Host. Focused origin/proxy and actual
+local active/missing/language HTTP checks pass. Installed Chrome passed ten
+desktop/phone and locale checks; its new 404 PNGs match the owner-approved S146
+screens byte-for-byte. A disposable Netlify build passed Edge packaging, with
+no publication. The broad SEO HTTP rerun stopped on a demo-only fixture lacking
+a real directory business; the earlier complete SEO proof remains bound to its
+earlier source. Stale/foreign product query semantics are unchanged. Combined
+S147 gates and hosted behavior remain pending.
 
 ## S146 staff business authority — FE-072 / BE-060 (local proof; release pending)
 

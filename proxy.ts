@@ -1,5 +1,5 @@
 import { platformEnvironment } from "./lib/platform-environment.mjs";
-import { runtimeGet } from "./lib/runtime-sql";
+import { showroomStatusLookupUrl } from "./lib/showroom-status-origin";
 import { localeCookie, parseLocale } from "./lib/i18n/core";
 import { showroomNotFoundHtml } from "./lib/showroom-not-found";
 import { NextResponse, type NextRequest } from "next/server";
@@ -26,13 +26,24 @@ export async function proxy(request: NextRequest) {
     } catch {
       handle = "";
     }
-    // The indexed handle lookup reads one status, never a merchant/private row.
-    // Do not cache this decision: publication and suspension must take effect now.
-    const business = handle && handle.length <= 128 ? await runtimeGet<{ status: string }>(`
-      SELECT b.status FROM business_handles h JOIN businesses b ON b.id=h.business_id
-      WHERE h.handle=lower(?) LIMIT 1
-    `, [handle]) : undefined;
-    if (!business || (business.status !== "active" && business.status !== "suspended")) {
+    let status = 404;
+    if (handle && handle.length <= 128) {
+      try {
+        const url = showroomStatusLookupUrl(request.url, platformEnvironment());
+        url.searchParams.set("handle", handle);
+        const response = await fetch(url, {
+          cache: "no-store", credentials: "omit", redirect: "error", signal: AbortSignal.timeout(5000),
+        });
+        status = response.status;
+      } catch {
+        status = 503;
+      }
+    }
+    if (status !== 204) {
+      if (status !== 404) return new Response("Showroom temporarily unavailable", {
+        status: 503,
+        headers: { "Cache-Control": "no-store", "Content-Type": "text/plain; charset=utf-8", "Retry-After": "30", "X-Robots-Tag": "noindex, nofollow" },
+      });
       return new Response(await showroomNotFoundHtml(parseLocale(request.cookies.get(localeCookie)?.value)), {
         status: 404,
         headers: {

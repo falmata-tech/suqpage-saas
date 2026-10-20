@@ -4,7 +4,7 @@ title: Search discovery for public MirtPage showrooms and products
 status: in_progress
 related: [FE-070, BE-054, DEP-049]
 owners: [product, frontend, search]
-last_updated: 2026-10-18
+last_updated: 2026-10-19
 change_level: L2
 ---
 
@@ -99,9 +99,12 @@ visual design or promising search placement.
   active-language return action. Suspended showroom handling retains its
   existing inactive redirect. An active directly shared showroom remains
   viewable even when it is intentionally absent from directory and sitemap
-  discovery. The guard runs only on direct showroom documents, selects status
-  by indexed handle without caching, and fails closed on database errors;
-  client navigation still uses the page's existing public-catalog checks.
+  discovery. The Edge request boundary asks a bounded same-site Node endpoint
+  for public handle status; only the Node endpoint accesses PostgreSQL. The
+  hosting build must not bundle a PostgreSQL driver into Edge code. The lookup
+  selects indexed public status without caching, forwards no visitor cookies,
+  uses only the configured MirtPage origin when hosted, and fails closed on
+  unavailable status checks. Client navigation retains the page's catalog check.
 
 ## Scenarios
 
@@ -197,7 +200,7 @@ log customer data, raw merchant text or credentials for SEO verification.
 | JSON-LD escaping and no invented offers | focused | `scripts/test-public-seo.ts` |
 | Product href and server-visible content | Chrome desktop/phone + HTTP | FE-071 local review receipt |
 | Directory link/eligibility/keyset pagination | focused + Chrome desktop/phone | `scripts/test-public-seo.ts`, `scripts/test-public-seo-http.ts` |
-| Missing/draft showroom HTTP status and noindex | local HTTP | `scripts/test-public-seo-http.ts` |
+| Missing/draft showroom HTTP status and noindex | local HTTP and installed Chrome | `scripts/test-public-seo-http.ts`, `scripts/test-showroom-status-origin.ts` |
 | Hosted origin and publication | release and operator review | DEP-049 guarded cutover; separate evidence |
 
 ## Rollout and rollback
@@ -239,7 +242,16 @@ return true 404 with `noindex`, while the real showroom remains 200 and the
 accepted stale/foreign product query behavior remains 200+`noindex`. Installed
 Chrome at 1440/390 proved directory→showroom→Back, a branded missing-page 404,
 and its return action with no uncontrolled map tiles; see
-`.local/showroom-404-s146/review.md`. This new 404 visual still awaits owner
-review. Shared full release gates and hosted publication remain pending. Structured
+`.local/showroom-404-s146/review.md`. The owner approved the 404 visual.
+During the first source-bound Netlify candidate, Edge packaging exposed the
+PostgreSQL import in `proxy.ts`; a focused S147 correction moved only the
+indexed status query into `app/api/public/showroom-status/route.ts` and kept
+the same Edge 404 HTML. `scripts/test-showroom-status-origin.ts`, local HTTP
+active/missing/language checks and installed Chrome desktop/phone pass. The
+new 404 screenshots are byte-identical to the approved ones; a disposable
+Netlify build now completes Edge packaging with exit 0. The broad local SEO
+test is blocked by a disposable demo-only database with no real directory
+business; its earlier complete fixture-backed proof remains source-bound.
+Shared full release gates and hosted publication remain pending. Structured
 data can help understanding but does not guarantee a Google rich result or
 ranking.
