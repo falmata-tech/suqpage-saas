@@ -1,19 +1,8 @@
-import crypto from "node:crypto";
 import { headers } from "next/headers";
 import { runtimeRun } from "./runtime-sql";
 import { trustedOriginPolicy } from "./trusted-origins";
-
-function privacySalt() {
-  const value = process.env.PRIVACY_SALT;
-  if (process.env.NODE_ENV === "production" && (!value || value.length < 24)) {
-    throw new Error("PRIVACY_SALT must be at least 24 characters in production.");
-  }
-  return value || "suqpage-development-privacy-salt";
-}
-
-export function hashPrivateValue(value: string) {
-  return crypto.createHmac("sha256", privacySalt()).update(value).digest("hex");
-}
+import { hashPrivateValue } from "./security-core";
+export { hashPrivateValue, cleanText } from "./security-core";
 
 export function requestIpFromHeaders(source: Headers) {
   const forwarded = source.get("x-forwarded-for")?.split(",")[0]?.trim();
@@ -49,8 +38,4 @@ export async function audit(action: string, options: { userId?: number | null; b
     detail.slice(0, 2000),
     options.ipHash || "",
   ]);
-}
-
-export function cleanText(value: unknown, max: number) {
-  return String(value ?? "").trim().replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").slice(0, max);
 }

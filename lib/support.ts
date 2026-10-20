@@ -10,8 +10,7 @@ import {
   pageWindow,
   type PageResult,
 } from "./pagination";
-import { cleanText } from "./security";
-import { hashPrivateValue } from "./security";
+import { cleanText, hashPrivateValue } from "./security-core";
 import { notifySupportQueue } from "./support-notifications";
 import { confirmedMessageId, type ChatReadCommand } from './chat-read-contract';
 import { enqueueChatAttention, enqueueReplyOverdueAttention } from './attention-postgres';

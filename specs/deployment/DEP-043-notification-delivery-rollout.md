@@ -4,11 +4,30 @@ title: Verified notification delivery rollout
 status: in_progress
 related: [DEP-048, BE-050, FE-062, ADR-0026, DEP-042, DEP-044, BE-018, FE-019, FE-036, FE-053, DEP-047, ADR-0031]
 owners: [operations, security]
-last_updated: 2026-10-17
+last_updated: 2026-10-20
 change_level: L3
 ---
 
 # DEP-043 — Verified notification delivery rollout
+
+## S148 — scheduled worker startup boundary (ready)
+
+The published minute worker failed at module loading because a shared hashing
+utility also imported Next.js request headers. The background worker has no
+request context. Keep the hashing/text rules identical while making its import
+graph independent of `next/headers`, `next/server`, and other request-only
+entry points. This is a packaging defect fix; notification routing, chat timers,
+email contents, and tenant permissions do not change.
+
+GIVEN the scheduled worker is bundled for the production Node runtime, WHEN its
+startup imports are inspected and it is loaded without Next.js request modules,
+THEN it loads and exposes the existing minute schedule and handler. GIVEN a
+request handler uses the same hash/text utilities, WHEN they process the same
+inputs, THEN their results are unchanged. A release requires the packaged
+Netlify function to pass `scripts/test-attention-worker-runtime-boundary.mjs`,
+a private draft invocation or equivalent safe runtime proof, and monitored
+production logs after a separately approved
+rollout; a healthy public page alone does not prove worker recovery.
 
 ## Gmail SMTP manager-email source option (ready; ADR-0031)
 

@@ -4,6 +4,14 @@ proposed ADR-0029 govern the staged data-preserving transition. This note record
 approved direction, not a completed hosted/domain/app cutover. Existing product
 and release facts below remain current until their verified phase is reconciled. -->
 
+Current hosted MirtPage site serves public pages and mobile catalog APIs from
+the new Netlify deploy, but its minute scheduled worker fails at startup on a
+Next.js request-only import. Chat routing/maintenance and queued app email are
+not verified live on that deploy. DEP-043 S148 has a source-bound repair that
+passes local release and Netlify ZIP startup checks; publication and monitored
+worker recovery remain pending. Supabase Auth's primary URL and the Android
+binary/Play closed test remain separate cutover steps under DEP-049.
+
 Local S145 candidate (not released): shared web/native presentation, original
 two-panel M artwork and active English/Amharic/Oromo copy now use MirtPage. The
 latest local introduction is “A professional digital showroom for every business.”

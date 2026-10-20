@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type {SessionUser} from './types';
-import {hashPrivateValue} from './security';
+import {hashPrivateValue} from './security-core';
 import {runtimeGet,runtimeRun,runtimeTransaction} from './runtime-sql';
 import {
  TransportPlanError,isTransportPlanCapability,parseSavedTransportPlan,parseTransportPlanLink,parseTransportPlanSave,

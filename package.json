@@ -163,7 +163,7 @@
     "test:source-map-security": "node scripts/test-source-map-security.cjs",
     "release:web": "SUQPAGE_RELEASE_TARGET=web bash scripts/release.sh",
     "test:mobile:media": "node --import tsx scripts/test-mobile-static-svg.ts && node --import tsx --test scripts/test-mobile-image-upload.ts",
-    "test:attention": "node --import tsx scripts/test-attention-notifications.ts && node --import tsx scripts/test-chat-read-receipts.ts && node scripts/test-attention-platform.cjs && node scripts/test-attention-worker-brand-compat.cjs && node --import tsx scripts/test-chat-read-viewport.ts",
+    "test:attention": "node --import tsx scripts/test-attention-notifications.ts && node --import tsx scripts/test-chat-read-receipts.ts && node scripts/test-attention-platform.cjs && node scripts/test-attention-worker-brand-compat.cjs && node --import tsx --test scripts/test-attention-worker-runtime-boundary.mjs && node --import tsx scripts/test-chat-read-viewport.ts",
     "test:attention:visual": "node --import tsx scripts/capture-notification-workflows.mjs",
     "test:catalog-safety": "node --import tsx scripts/test-catalog-safety.ts",
     "test:reviewer-access": "node --import tsx scripts/test-reviewer-access.ts",

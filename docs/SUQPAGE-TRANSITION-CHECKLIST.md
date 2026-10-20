@@ -7167,3 +7167,27 @@ neither a hosted Auth configuration change nor an enabled customer workflow.
 - [ ] Freeze the corrected source, rerun full release/acceptance gates, commit
   and push the focused correction, verify remote CI, rebuild the exact commit,
   preflight artifacts, and deploy under the guarded one-use plan.
+
+### S148 — repair MirtPage's published minute worker (DEP-043, DEP-049)
+
+- [x] Diagnose the live startup failure from sanitized function logs: the
+  scheduled bundle imports `next/headers` through shared security utilities,
+  so routing, inactivity maintenance, notifications, and email never start.
+  Public page/API health is separate evidence and does not qualify this worker.
+- [x] Separate pure worker-safe security utilities from request-only Next.js
+  access. The request and pure adapters produce identical hash/text results;
+  the Netlify 5.16.3 packaged worker has no Next request import and loads its
+  minute schedule/handler from ZIP SHA-256
+  `81b1cbd6beb8e96db9871fa2f0807f8c648c27e41f8d3f4eb3a6b5b53381d62e`.
+  No UI/layout or schema change was made.
+- [ ] Run focused security/worker tests and the applicable full release gates;
+  commit/push only task paths, verify remote CI and source-bound Linux bundle.
+  Focused PostgreSQL attention tests, `npm run check`, and the isolated clean
+  web `npm run release:web` are green. The first release attempt lacked the
+  isolated web install, the second had a transient disposable Auth identity
+  failure, and the third lacked the clone's local PostgreSQL test setting;
+  the final isolated run passed without weakening a check. Commit/remote CI
+  and Linux packaging remain.
+- [ ] Prepare an exact protected Netlify repair plan with prior deploy retained;
+  obtain separate owner approval, publish, then monitor worker invocations and
+  confirm due chat/email jobs advance before claiming recovery.

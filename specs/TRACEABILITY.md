@@ -3867,3 +3867,19 @@ settings are present in the verified Netlify site's production context, with
 the app password secret-scoped and no nonproduction value. This does not verify
 the password bytes, a real Gmail send, or hosted email delivery; those remain
 pending deployment and a labelled delivery test.
+
+## S148 — published minute-worker startup boundary (DEP-043 / DEP-049)
+
+The current MirtPage web deploy serves public pages, but production function
+logs show its scheduled `attention-worker` failing at module load on
+`next/headers`; no chat or mail job is claimed delivered by that deploy.
+`lib/security-core.ts` retains the private hash and text rules while
+`lib/security.ts` keeps Next request access in the HTTP adapter. Worker imports
+use the pure module. `scripts/test-attention-worker-runtime-boundary.mjs`
+checks the real bundled entry starts without Next request imports and verifies
+both adapters' exact hash/text outputs; the focused PostgreSQL notification and
+read-receipt suite passes. `npm run check` and the clean isolated web
+`npm run release:web` pass; Netlify 5.16.3 offline packaging emits worker ZIP
+SHA-256 `81b1cbd6beb8e96db9871fa2f0807f8c648c27e41f8d3f4eb3a6b5b53381d62e`,
+with no Next request import and a successful direct module load. Live rollout
+and monitored worker invocations remain required before calling it recovered.

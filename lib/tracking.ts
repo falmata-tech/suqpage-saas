@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type {SessionUser} from './types';
-import {hashPrivateValue} from './security';
+import {hashPrivateValue} from './security-core';
 import {consumeRuntimeRateLimit} from './rate-limit-runtime';
 import {runtimeAll,runtimeGet,runtimeRun,runtimeTransaction} from './runtime-sql';
 import {transportPlanEtagMatches} from './transport-plan-contract';

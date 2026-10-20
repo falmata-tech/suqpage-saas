@@ -1,4 +1,4 @@
-import { hashPrivateValue } from './security';
+import { hashPrivateValue } from './security-core';
 import { PostgresTransactionRunner } from './postgres-runtime';
 import { postgresRuntimeServices } from './postgres-runtime-services';
 import type { SessionUser } from './types';
