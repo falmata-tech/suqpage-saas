@@ -1,64 +1,42 @@
-<!-- MirtPage is the current hosted web brand. DEP-049 governs the remaining Android
-and Play stages; historical Suqpage release facts below are retained
-only where their phase has not been superseded by the current status here. -->
+<!-- MirtPage is the current product and hosted brand. DEP-049 controls the
+remaining release stages. Earlier Suqpage rollout notes below are historical
+where superseded by this current-state summary. -->
 
-Current hosted MirtPage site serves public pages and mobile catalog APIs from
-Netlify deploy `6ad73e5a9df2756523e8ac95`. Its minute worker now starts
-without Next.js request-only imports; monitored scheduled runs complete chat
-routing, inactivity, response escalation and queued email checks. The initial
-backlog routed waiting chats and the next observed run routed zero. The Gmail
-provider accepted two admin alerts, but recipient inbox delivery and a new
-labelled end-to-end chat have not yet been checked. Supabase Auth now uses
-`https://mirtpage.com` as its primary URL; exact old and new callback URLs stay
-allowed and Google login remains disabled. The approved change and an independent
-read-only project/configuration check passed. A complete live login remains to be
-exercised. Android APK/AAB and the new Play closed test are still separate steps
-under DEP-049.
+MirtPage runs at https://mirtpage.com on Supabase PostgreSQL schema 77, with
+managed Auth and private Storage. Suqpage domains remain HTTPS aliases. Auth uses
+mirtpage.com as its primary origin, retains the exact approved callbacks and
+keeps Google login disabled. Credentials and stable provider identities are not
+renamed or replaced merely for branding.
 
-Current shared web/native source uses the approved two-panel M artwork and
-English/Amharic/Oromo MirtPage copy. The hosted web introduction is “A
-professional digital showroom for every business.”
-Customer copy explains what businesses sell, make and grow, with identity,
-story, products and optional collections together, followed by direct contact
-through the business's configured channels, without searching social-post history.
-Existing merchant content/design and application workflows are preserved. Both
-web push workers locally accept the exact legacy and new titles; shared sender
-titles and Android channel IDs remain compatible. The final public identity is
-MirtPage throughout; old names remain only where historical records, stable
-provider/protocol identities or a verified transition require them. This does not
-authorize deleting business data or replacing credentials. The Android/Play
-release remains pending under FE-070/BE-059/DEP-049. Hosted shipment and overdue
-staff email uses the separately configured server-only Gmail SMTP sender; live
-worker logs show two provider-accepted admin alerts. Recipient inbox delivery
-still needs a labelled test. Auth sign-in mail remains a separate service.
-The owner approved the combined local visuals on 2026-10-18 and requires the
-same approved M geometry and exact logo colors across web, native and exported
-assets. GoDaddy ownership, records, and Netlify domain beforeimages are verified.
-Both new aliases and approved A/www records are saved/read back; managed HTTPS
-covers all four reviewed hosts. The separately approved guarded Netlify switch
-now makes mirtpage.com primary, while suqpage.com remains an HTTPS alias. The
-published MirtPage deploy is unchanged and all three checked public routes pass.
-The new Firebase Android
-registration and separate Free MirtPage Play Draft exist for com.mirtpage.app;
-its client configuration remains protected. The guarded hosted Auth transition
-now makes mirtpage.com primary while retaining both exact callbacks; independent
-readback confirms the intended fields and disabled Google provider. The
-refined en/am/om text passes27 actual headed Chrome checks/27 states across
-desktop/phone web and Expo, with no app/request/console/lifecycle errors. The owner
-approves this revised copy and full checks on2026-10-18; unchanged artwork
-approval remains valid. The complete 76-group application check and full web
-release gate now pass on source-bound isolated candidates. Release includes a
-clean dependency audit, production build, finite public-catalog artifact privacy
-guard, provider-backed HTTP/security checks and migration/data-isolation checks.
-Full browser acceptance now passes all20 cases with exit0 on isolated snapshot
-9e8e8e04774ca23af878169c64e6704e60cca35a17df3e9c50d560abdb953f00. Its
-application/dependency inputs match the passing release; later test repairs
-preserve assertions. Owned test resources are removed and normal previews remain
-healthy. Earlier failed/interrupted attempts and13 raw stream-closed errors are
-retained. Their occurrence times are unavailable because the synchronous test
-runner buffers asynchronous app-log forwarding; shutdown versus navigation is
-unproven. Passing local gates do not establish application deployment, a new
-native binary or store release.
+The shared web/native identity uses the approved two-panel M artwork, exact logo
+colors and English, Amharic and Afaan Oromo copy. The introduction is “A
+professional digital showroom for every business.” Customers discover what a
+business sells, makes or grows, its story, products and optional collections,
+then contact it through its configured channels without searching social-post
+history. Existing merchant identity and publication controls remain intact.
+
+The approved demo contacts and physical-product catalog cleanup are applied and
+independently verified; private sign-ins, real businesses and immutable history
+remain protected. The current website update is published. Its sponsor/gallery
+layout and preview navigation pass live checks, but optimized public images
+still return 400. DEP-049 B09 governs the routing recovery: retain only the
+seventeen legacy static aliases and use the official generated query-aware
+image rules. Full rollout remains incomplete until the recovery and live image,
+privacy and workflow checks pass.
+
+The minute worker runs chat routing, inactivity, overdue-response escalation and
+queued transactional email checks without startup errors. Shipment and staff
+mail use the explicit server-only Gmail SMTP adapter; Auth sign-in mail is a
+separate service. Automatic worker observations do not prove recipient inbox
+delivery. The white-backed email logo is live; updating hosted Auth HTML remains
+a separately reviewed operation.
+
+The version 2 com.mirtpage.app Play bundle and derived universal APK are built
+and pass independent static inspection. Physical-device workflows, OS push,
+genuine native screenshots and the new twelve-person Play closed test remain
+pending. Expo Doctor reports 19/21; static checks do not establish device runtime.
+DEP-049 and the transition checklist own exact rollout evidence and remaining
+approval gates. No automatic rollback or retry follows an ambiguous hosted write.
 
 # MirtPage Project Master Prompt
 

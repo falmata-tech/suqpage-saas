@@ -7361,13 +7361,10 @@ this batch's evidence and scope; publication and another mobile build remain gat
   `.local/native-showroom-grid-s151/` and the protected batch audit directory.
 - [x] Finish B07 focused implementation and the source-frozen delayed-read browser
   review, retaining initial failures and qualifications. The final three web
-  states retain12 cards/one status with0px layout movement. B04 has a successful
-  isolated SQL rehearsal. B05's frozen mapping,87 pure operation cases and one
-  reviewed scratch-SQL retry now pass; all74 existing local tables/public
-  sequences remain unchanged. Its separate pure hosted draft builder passes78
-  model cases but produces no actual hosted plan or executor. Actual B04 success,
-  fresh hosted qualification and exact approval remain prerequisites. No hosted
-  correction has been performed.
+  states retain 12 cards/one status with 0px layout movement. The protected B04/B05
+  preparation and original failed attempts remain preserved. Their separately
+  approved hosted operations are now complete, as recorded below; the visual
+  approval and local model tests did not themselves authorize those writes.
 - [x] Combine B01/B02/B03/B06/B07/B08/B09 in one concrete visual review at
   `.local/mirtpage-final-release-20261019/s151-batch-audit/review.html`; linked
   screenshot existence and frozen UI hashes are recorded in its manifest.
@@ -7379,17 +7376,50 @@ this batch's evidence and scope; publication and another mobile build remain gat
 - [x] Owner approved the updated B01–B10 combined visual review and full checks
   on2026-10-20, question `call_e750c54380924b4193f423f678d3a783:0`. This does not
   approve hosted demo corrections or a new Android build.
-- [ ] CURRENT: freeze the approved complete source in an isolated checkout,
-  run `npm run check`, clean `npm run release:web` and full
-  `npm run test:acceptance` sequentially with local-only disposable fixtures.
-  Preserve each terminal receipt; diagnose any failure before one bounded retry.
-  Then review scoped commits and required CI. Under a fresh exact DEP-044 review,
-  compile one local release AAB and derive its universal test APK using the
-  existing signer; avoid two separate compilations of the same code. Physical
-  Pixel showroom/catalog/owner journeys and genuine captures remain pending
-  until the owner makes the phone available, before Play-release qualification.
-  A same-version sideload may need reinstalling from Play. No existing artifact
-  exception carries over; no build or rollout is inferred from preparation.
+- [x] Freeze and qualify source 5129758d…6c1f5 (2,314 files): `npm run check`
+  passes, including 415 workflow-UI cases and zero skips; clean `npm run release:web`
+  passes with zero vulnerabilities; `npm run test:acceptance` passes 20/20.
+  Terminal source-matched receipts are in
+  `gates-approved-b01-b10-standard-continuation/` under the protected batch directory.
+- [x] Commit/push scoped source `d78dcf5`; GitHub quality run 39485239127
+  attempt 2 completes all five required jobs successfully. Retain
+  `ci-attempt1-terminal.json` and the original failure logs; `ci-terminal.json`
+  is the terminal successful receipt, not the earlier in-progress snapshot.
+- [x] Apply/read back B04's separately approved demo-contact transaction and one
+  nonsecret production setting. Combined receipt SHA 63ae5217…df0c1 records both;
+  verify its runtime activation separately from the new deployment's initial
+  public health checks.
+- [x] Apply B05's separately approved finite demo cleanup in one transaction and
+  independently verify all ten typed after states, history/private reviewer,
+  contacts/accounts/real-business fences and all 74 outside fingerprints.
+  Combined receipt SHA b9990370…862d7 binds 246 reviewed row writes; saved media
+  files and the first pre-write failure remain preserved.
+- [x] Complete the separately reviewed copied middleware artifact step with the
+  exact 83-byte conditional Node-global alias and official edge bundler.
+  Receipt SHA 590d8e8c…16ac passes; the original full adapter pipeline remains
+  failed and is not relabelled as a successful full build.
+- [x] Assemble the complete local artifact (manifest SHA c82b49af…e126c).
+  The actual compiled edge wrapper passes all eight synthetic route checks in
+  Deno 2.2.4 (receipt SHA 4185f343…52b0), with zero backend/auth/provider calls.
+  The first actual Linux Node 24 runtime passes locked Sharp loading, a one-pixel
+  PNG conversion and real server/bootstrap import without handler invocation
+  (receipt SHA f72153db…5ea67). Preserve both local extractor setup errors.
+- [x] Complete the separately authorized single Android compilation: version 2
+  AAB SHA 2a116c63…125fa and derived universal APK SHA 78e8d2fe…145c6 exist.
+  Independent final static inspection now passes (SHA 026d843a…a294b); retain
+  Expo Doctor 19/21 and static-versus-device limits. No Play upload or closed-test
+  activation occurred.
+- [x] Publish the exact owner-approved web artifact as deployment
+  `6ad7d7978faaa5baa6eee605`; all six initial public/API/association checks pass.
+  Retain previous healthy `6ad73e5a9df2756523e8ac95` and its protected before-image.
+- [ ] CURRENT: finish the B09 image-routing recovery below before declaring the
+  web rollout complete. The new deployment's optimized images return 400 despite
+  successful original/CDN images and nine-width Chrome geometry/navigation.
+  Complete monitored public/API/image/worker checks. Publish/read back the opaque
+  Auth logo before its separate hosted HTML-template update.
+  Physical-phone workflows, Play upload and the new closed test remain pending.
+  Keep the owner's phone/ADB hold. A same-version sideload may need reinstalling
+  from Play; no testing clock or device evidence is inferred from build success.
 - [x] Classify the first full-check stops before retrying: obsolete homepage
   wiring assertions, an incomplete local test environment and one untranslated
   screen-reader loading announcement. Preserve their terminal receipts. Reuse
@@ -7413,7 +7443,7 @@ this batch's evidence and scope; publication and another mobile build remain gat
   All44 affected cases, typecheck and whitespace checks now pass. The receipt is
   `s151-batch-audit/ui-port-qualification/result.json` under the protected release
   directory, SHA-256 `e34f2319ba9c48bc096e32f1e0c1d4d1165f2f880a41e3049bb3c70687086022`.
-  The integrated full gate remains pending on the final source.
+  The final integrated gate now passes on source 5129758d…6c1f5, as recorded above.
 
 #### S151 B07 — contextual loading and matching skeletons (in progress; FE-074)
 
@@ -7459,9 +7489,13 @@ this batch's evidence and scope; publication and another mobile build remain gat
   the initial read timeout and the raw receipt's four intentionally suppressed
   analytics abort observations; no third complete journey or clean telemetry
   result is inferred. Include the screens in the combined review.
-- [ ] Visual approval, source-bound full gates/push and reviewed publication.
-  The B01–B10 visual approval is now received; remaining full gates/publication
-  are separate. No production fix is claimed from local evidence.
+- [x] Visual approval and source-bound full gates/commit/push/CI pass for d78dcf5.
+- [x] First reviewed deployment and actual hosted nine-width sponsor/gallery
+  geometry plus desktop/phone preview→showroom→Back checks pass. Retain the mixed
+  receipt (`passed: false`) with failed image requests and navigation/analytics
+  aborts; this is not a clean browser or full rollout pass.
+- [ ] Complete B09 hosted image recovery before declaring the combined rollout
+  complete; no source/CI-only production image repair is inferred.
 
 #### S151 B09 — restore product/showroom image delivery (new defect; DEP-049/FE-021)
 
@@ -7470,13 +7504,10 @@ this batch's evidence and scope; publication and another mobile build remain gat
   returns400 for the same Featured hero at two actual requested widths. Keep
   images/files intact and distinguish the image-delivery defect from B05's
   separately proposed mismatched-demo-media cleanup.
-- [x] Qualify the existing Netlify image adapter/routing against its
-  installed contract and provider documentation. Choose the smallest repair
-  preserving responsive image sizes, caching, privacy and native direct URLs.
-  The original is byte-identical to Git and the existing CDN returns a valid
-  resized WebP. One exact200 rewrite is implemented; the focused readiness
-  regression first fails without it, then passes. All17 legacy aliases remain
-  exact and the independent privacy/artifact review remains separate.
+- [x] Preserve the initial exact-rewrite implementation, focused passing checks
+  and failed hosted outcome without relabelling it successful. The original is
+  byte-identical to Git and the direct CDN returns a valid resized WebP, but the
+  first new deploy still returns JSON 400 for the exact optimized image URL.
 - [x] Complete focused source admission: both actual image renderers bypass
   page-media/product-private paths; installed Next emits their original source
   without optimized srcSet, while public assets retain optimization. Preserve
@@ -7486,9 +7517,65 @@ this batch's evidence and scope; publication and another mobile build remain gat
   inside its rollback transaction: missing/disabled denial, admin grant, access,
   revoke and six zero-row rollback checks pass. No existing account grant or
   Auth identity is changed.
-- [ ] CURRENT: artifact and hosted original/transformed product/showroom image
-  admission, after combined visual approval and source-bound gates/push.
-  No production repair, blanket cache revocation or new APK is claimed yet.
+- [x] Classify the actual postpublish incident using only read-only evidence.
+  `s151-image-routing-readonly-diagnosis.json` records the optimized URL's missing
+  `url` error and the same query's direct CDN 200 WebP. Physical `_redirects`
+  precedence shadows the official query-aware TOML rule. Retain first deployment,
+  previous healthy backup and mixed Chrome receipt; make no automatic writes.
+- [x] Record the revised DEP-049 B09 contract before production edits: physical
+  `public/_redirects` only seventeen exact aliases; official generated query-aware
+  `/_next/image` → existing CDN with exact url/w/q bindings before its queryless
+  fallback, existing IPX compatibility unchanged, exact server image exclusion.
+  Approved UI, native inputs and private-media protections remain unchanged;
+  this nonvisual routing correction does not require another visual gate.
+- [ ] CURRENT: remove only the shadowing physical image rule and add focused
+  regressions for exact generated query bindings/order/server exclusion, the
+  original alias set and the existing private-media renderer/access boundaries.
+  Inspect the complete routing composition, not a mocked single-rule success.
+- [ ] Freeze the corrected source; run full check, web release and acceptance,
+  review explicit scoped files, commit/push and require terminal green CI.
+  Preserve all first-attempt failures and receipts.
+- [ ] Assemble and qualify the new exact artifact, including official generated
+  image routes and Linux/server/edge/worker admission as applicable. Prepare a
+  new exact protected hosted recovery plan and obtain owner approval before any
+  deployment; consumed first-deploy approval does not authorize the new artifact.
+- [ ] After that approved publication, GET/decode originals and responsive
+  product/showroom images at 384/640/3840 px; verify private-media access and
+  unchanged public APIs, actual Chrome desktop/phone card→preview→showroom→Back,
+  and scheduled worker health. Preserve the protected prior deploy; any rollback
+  requires its own reviewed direction. No blanket CDN cache revocation claim.
+- [ ] After the active B09 shipping dependencies, record observed agent, script,
+  gate, browser and provider delays; prioritize evidence-backed local workflow
+  improvements for the existing VS Code/GitHub/TypeScript/Expo/Netlify Free/
+  Supabase/Gmail stack. Root selects the researched proposals before process
+  changes; avoid duplicate frameworks and preserve authorization, tenant and
+  secret protections. This additive task does not replace web/mobile shipping.
+
+#### Overall engineering housekeeping — additive to shipping (DEP-002)
+
+The owner's clarification covers the project setup, not just today's failures.
+This task preserves every incomplete web/mobile shipping dependency above.
+
+- [x] Inspect existing runtimes, architecture boundaries, test/CI commands,
+  environment separation and developer/agent entry points; research primary
+  guidance for skills, CI caching, TypeScript checking and VS Code tasks.
+- [x] Install three focused repo skills, keep a thin AGENTS router and
+  refresh README plus the evidence-based engineering-readiness review. Reuse
+  existing tooling; record gaps without turning nonblockers into release gates.
+- [x] Validate structure, linked authority, bounded triggers and routing cases.
+  Installed files match the reviewed staging hashes; all three bodies are under
+  300 words. Node YAML validation passes; bundled Python validation is blocked
+  before parse by missing PyYAML. Six positive/six negative cases are reasoned,
+  not observed host selection. Spec validation passes for219 specs/ADRs.
+- [ ] CURRENT: finish source-bound gates and commit scoped changes. Preserve the
+  stopped source-frozen check and classify its declaration-path fixture issue
+  before one bounded retry with the final source.
+- [ ] Verify actual skill discovery/invocation in a fresh Codex session. The
+  bundled validator currently lacks PyYAML; installed Node YAML validation and
+  reviewed prompt cases are separate evidence, not proof of host selection.
+- [ ] Address prioritized follow-ups from the review as independently scoped
+  changes; measure reliability/time/cost where observable. No new global
+  configuration, provider change, paid service or unattended schedule is implied.
 
 #### S151 B10 — readable Featured category icons and labels (CURRENT; FE-021/FE-053)
 
@@ -7514,5 +7601,8 @@ this batch's evidence and scope; publication and another mobile build remain gat
   constraint and missing web pressed state are retained. No hosted/phone action.
 - [x] Owner approves the updated B01–B10 layout and full checks on2026-10-20;
   the review digest and exact answer are retained in the protected visual record.
-- [ ] Source-bound full gates/commit/CI and separately
-  reviewed publication/new Android build. No date/category data is changed.
+- [x] Source-bound full gates/commit/CI pass for d78dcf5.
+- [x] Version 2 AAB/APK build and independent static binary inspection pass;
+  no date/category data changed.
+- [ ] Complete hosted B09 recovery, physical-device qualification and separate
+  Play admission. First publication and static inspection do not prove those steps.

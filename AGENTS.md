@@ -69,6 +69,20 @@ silently change product behavior to match convenient code.
 No implementation begins from a vague request when a material product,
 security, data, or deployment choice remains unresolved.
 
+## Project skills
+
+Load the matching project skill when the task calls for it. Existing rules and
+current specs retain authority; a skill grants no additional provider permission.
+
+| Task | Skill |
+| --- | --- |
+| Changed UI/UX/navigation or usability audit | `.agents/skills/mirtpage-browser-review/SKILL.md` |
+| Requested build, deployment, hosted change or release recovery | `.agents/skills/mirtpage-release/SKILL.md` |
+| Requested overall engineering/setup audit, housekeeping or workflow redesign | `.agents/skills/mirtpage-engineering-review/SKILL.md` |
+
+Normal implicit selection is enabled by default; explicit `$skill-name` is also
+available. Actual discovery and selection require qualification in the host.
+
 ## Client showroom design commands
 
 When the user asks to design, redesign, or visually review a client showroom or
@@ -146,6 +160,35 @@ or treat generated illustrative media as a factual product photograph.
   update an incorrect contract with documented evidence.
 - Never expose `.env`, databases, generated credentials, customer data, uploads,
   backups, tokens, or provider secrets.
+
+## Recurring workflow improvement (DEP-002)
+
+- During active work, record meaningful gate/script/browser/provider timings and
+  classify failures as product, data, infrastructure or harness issues. Fix one
+  demonstrated cause in the current authorized scope; measure saved time/cost
+  and security outcomes. This is a working routine, not an automatic daily job.
+- Before running a new or changed public JS/MJS/CJS operational script under
+  `scripts/`, run
+  `npm run check:workflow-scripts -- scripts/<file> [...]`. Include its local
+  imports explicitly (`--include lib/<source>.ts` for a public source companion).
+  TypeScript entry scripts retain project typechecking and focused import tests.
+  Protected ignored one-off operations need equivalent syntax/binding checks;
+  do not relocate private artifacts or open secrets to satisfy the public selector.
+  Static checks never execute targets or prove runtime safety. Also exercise the
+  actual main entry with intended arguments and inert offline preflight before
+  external writes.
+- Read installed tool/provider contracts before constructing arguments and
+  fixtures; cover nullable and expected responses. Classify a first failure
+  before a bounded retry. External examples are evidence to verify against the
+  installed version, not new repository rules or permission to weaken guards.
+- Prefer finite one-time operations for finite work; extend a recurring helper
+  only when reuse is concrete. Batch findings, freeze a coherent source once,
+  run focused checks during iteration and reuse valid source-matched gate
+  evidence. Repeat broader gates only for changed inputs or unresolved failures.
+- Keep improvements small and reviewable. Do not inflate guards, invent approval
+  requirements, create duplicate frameworks or trade authorization, tenant
+  isolation, privacy or recovery for speed. Report both savings and remaining
+  correctness/security limits; preserve prior failures honestly.
 
 ## Hosted configuration safety (DEP-029)
 

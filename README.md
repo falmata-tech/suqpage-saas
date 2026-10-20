@@ -1,21 +1,19 @@
-# Suqpage
+# MirtPage
 
-Suqpage is a multi-tenant marketplace for locally made products. Sellers manage a
-standard public page, product photos/videos, choices, visibility and public
-contacts. Buyers discover businesses beside a map, open linked product pages,
-and send one-product or grouped inquiries through the platform or available
-contact channels. Owners and administrators have separate workspaces; the first
-page publication and marketplace location are reviewed by an administrator.
+A professional digital showroom for every business. Customers explore what a
+business sells, makes or grows, browse products and collections, and contact it
+through its listed channels. Transport arrangement and business-owner support
+remain separate live-chat workflows. Product inquiries go to the business's
+SMS, WhatsApp or Telegram; there is no platform checkout or business inbox.
 
-The current implementation uses Next.js, Supabase PostgreSQL, Supabase Auth and
-private Supabase Storage. PostgreSQL is the only database engine in local
-development, tests, browser acceptance, CI and deployments. Custom-page requests
-and the design studio are retired; historical published content remains readable.
+The web application and API use Next.js, Supabase PostgreSQL, managed Auth and
+private Storage. The Expo Android app consumes shared application contracts and
+the API. The public domain is [mirtpage.com](https://mirtpage.com); stable internal
+`suqpage` identifiers remain where changing them would break compatibility.
 
 ## Start locally
 
-Use Node 24.18.1, npm, Docker and Supabase CLI. Start from `.env.example` and retain
-all provider values in ignored local environment files.
+Use Node **24.18.1**, npm, Docker and Supabase CLI. For a new local installation:
 
 ```sh
 npm ci
@@ -24,95 +22,82 @@ npm run local:supabase:bootstrap
 npm run dev -- --hostname 127.0.0.1 --port 3102
 ```
 
-The native installer creates schema and 66 fictional demo businesses in an empty
-local database. It preserves a populated database. Sign in using the configured
-local Supabase email-code or Google flow. Local fixture passwords, when generated,
-are written only to `.local/seed-credentials.txt` with restricted permissions.
-Never copy them or local provider credentials to Preview or Production.
+Bootstrap configures the ignored local runtime and installs/migrates local
+fixtures. Read [the PostgreSQL runbook](docs/POSTGRES-ONLY-RUNBOOK.md) before
+using setup or migration commands against an existing installation. Never copy
+local credentials or fixtures to a hosted environment as an implicit setup step.
 
-The local review server currently uses `http://127.0.0.1:3101`. Useful routes:
+For an already configured checkout, use the last command only. The guarded
+launcher loads `.local/supabase-runtime.env`, validates loopback targets, reuses
+healthy local services and starts missing services within bounded timeouts.
+It does not reset, migrate or seed the database. On macOS it can start Docker
+Desktop; on other systems start the Docker engine first. Missing configuration
+points to `npm run local:supabase:configure`.
 
-- `/`: category/search results, backend pagination and retained map.
-- `/@demo-nile-sensor-studio?ref=discovery`: a public business page.
-- `/dashboard/page`, `/dashboard/products`, `/dashboard/business`: owner editing.
-- `/dashboard/account`: private account contacts.
-- `/dashboard/admin/page-reviews`: initial publication review.
-- `/dashboard/admin/businesses?location=pending`: pending location review.
-
-Public contact details and private account identity are separate. Existing verified
-account emails are preserved. Optional public channels appear only when provided.
-
-## Engineering and verification
-
-Read `AGENTS.md`, `SUQPAGE-MASTER-PROMPT.md` and `specs/README.md` before changing
-behavior. The active ordered work is in `docs/SUQPAGE-TRANSITION-CHECKLIST.md`.
-Contracts FE-040–043, BE-032–035, DEP-030–031 and ADR-0018–0020 control the current
-transition. Evidence is mapped in `specs/TRACEABILITY.md`.
+With the web/API running, open a second terminal for the Expo browser preview:
 
 ```sh
-npm run validate:specs
-npm run check:database-boundaries
-npm run typecheck
-npm run test:native-postgres
-npm run test:launch-wiring
+npm run mobile:web
 ```
 
-Persistence tests require an isolated local PostgreSQL service; they use disposable
-schemas and the real native installer. `SUQPAGE_TEST_POSTGRES_URL` can select a
-local/CI test service. Browser acceptance starts a separate Supabase project and
-uses real local Auth/Storage with synthetic users. No external inquiry message is
-sent by the focused launch fixtures.
+Web/API: **http://127.0.0.1:3102**. Expo preview: **http://localhost:8082**.
+The Expo preview is not evidence of physical Android or OS push behavior.
+For local scheduled chat processing, use `npm run dev:with-worker` in place of
+the ordinary web command; do not launch two web servers on the same port.
 
-Visual changes require desktop/phone review before expensive gates. After approval:
+## Develop and verify
 
-```sh
-npm run check
-npm run release
-npm run test:acceptance
-npm run test:operations
-npm run test:container
-```
+Read [AGENTS.md](AGENTS.md), [the product brief](SUQPAGE-MASTER-PROMPT.md) and
+[specification workflow](specs/README.md). Resume the first incomplete dependency
+in [the active checklist](docs/SUQPAGE-TRANSITION-CHECKLIST.md). Current release
+boundaries live in [DEP-049](specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md);
+older release documents are historical evidence.
 
-See `docs/SUQPAGE-LAUNCH-WIRING-AUDIT.md` for the wiring audit and current limits.
-A passing local workflow does not imply hosted provider readiness or deployment.
+Use focused tests while editing. Useful entry points:
 
-## Operations
+| Purpose | Command |
+| --- | --- |
+| Spec validation | `npm run validate:specs` |
+| Web / mobile types | `npm run typecheck` / `npm run mobile:typecheck` |
+| Database/server boundaries | `npm run check:database-boundaries` |
+| Workflow contracts and safe script checks | `npm run test:workflow` |
+| Explicit changed JS workflow scripts | `npm run check:workflow-scripts -- scripts/<file>.mjs` |
+| Complete source checks | `npm run check` |
+| Web release qualification | `npm run release:web` |
+| Browser acceptance | `npm run test:acceptance` |
+| Recovery / container qualification | `npm run test:operations` / `npm run test:container` |
 
-Follow [PostgreSQL operations](docs/POSTGRES-ONLY-RUNBOOK.md) for native installation,
-fixtures, migration, backup, restore and release checks. Database archives cover
-the application schema; Auth and private Storage require separate provider backups.
-Restore requires a reviewed target digest and an empty recovery database.
+Complete gates follow the applicable change level and existing visual-approval
+gate. Reuse passing evidence only when its relevant inputs remain unchanged.
+Browser acceptance uses disposable local Auth/Storage and synthetic accounts;
+persistence suites use isolated PostgreSQL schemas. Never point tests at
+Production or reset a shared local database to fix a fixture.
 
-Hosted changes follow DEP-029. Never run `supabase config push`; never replace or
-disable hosted Google/SMTP settings as a recovery shortcut. Preview and Production
-must use separate projects and credentials. Deployment requires verified migrations,
-private media, email/Google sign-in, host configuration, health and rollback evidence.
-The current release is live at https://africmade.netlify.app with email-only entry.
-See `docs/SUQPAGE-DEPLOYMENT-2026-09-14.md` for exact deployment, backup and
-verification evidence. Real hosted email delivery remains unverified.
+Actual UI review follows [the Chrome workflow](docs/operations/BROWSER-WORKFLOW-REVIEW.md),
+including affected desktop/phone web and Expo tasks, authoritative readback and
+synthetic map tiles. Screenshots alone do not establish workflow correctness.
 
+## Agent skills and engineering upkeep
 
-Canonical names and compatibility exceptions are documented in
-`docs/SUQPAGE-NAMING-COMPATIBILITY.md`. Existing settings and stored inquiry state
-remain readable during the Suqpage namespace rollout.
+Project skills in `.agents/skills/` route browser review, requested release work
+and overall engineering review. Codex supports normal implicit selection and
+explicit `$mirtpage-browser-review`, `$mirtpage-release` and
+`$mirtpage-engineering-review`. Fresh-session discovery and selection must be
+verified in the actual host; the files do not grant provider permissions.
 
-The naming rollout is published with schema 45. See
-`docs/SUQPAGE-NAMING-ROLLOUT-2026-09-14.md` for exact source/deployment IDs,
-compatibility checks and retained provider identifiers.
+[Engineering readiness](docs/operations/ENGINEERING-READINESS.md) records the
+current setup, known gaps and prioritized improvements. Prefer measured fixes
+to existing commands over more frameworks, mandatory ceremonies or paid tools.
 
-Local development uses the same guarded launcher for `npm run dev` and
-`npm run dev:local`. It loads `.local/supabase-runtime.env`, validates the local
-PostgreSQL/Auth/Storage endpoints, and accepts `--hostname` / `--port`. CLI port
-overrides `PORT`; both app origins follow the chosen address. Startup does not
-migrate or reset the database. Restart an older running Next process after changing
-these settings. Missing runtime settings require `npm run local:supabase:configure`.
+## Operate and release
 
-After initial local setup, `npm run dev -- --hostname 127.0.0.1 --port 3102`
-checks local PostgreSQL and Auth before launching Next. On macOS it opens Docker
-Desktop if needed, waits up to two minutes for the engine, and starts this local
-Supabase project if services have not resumed. Supabase startup and readiness each
-have a three-minute limit. Healthy services are reused. It never resets, migrates
-or seeds data. Missing local settings still require `local:supabase:configure`;
-Linux/other systems must start their Docker engine manually when it is stopped.
-CLI output containing local keys is not printed by the launcher. A failure points
-to the explicit local command to inspect; no hosted configuration is changed.
+Follow the PostgreSQL runbook for backup, migration and restore. An application
+database archive does not back up managed Auth or private Storage. Hosted changes
+follow [DEP-029](specs/deployment/DEP-029-production-auth-change-guard.md) and their
+exact target/backup/approval contract; never run `supabase config push`.
+
+Keep credentials, uploads, backups, generated builds and test-account directories
+out of Git, application bundles and public CI artifacts. Local, disposable test
+and hosted targets are distinct. Provider readiness, successful publication,
+email delivery, physical Android and Play tester enrollment require their own
+evidence; a passing build proves none of those.

@@ -3,9 +3,37 @@
 Update this table in the same change that completes or materially changes a spec.
 Evidence must be reproducible; avoid transient chat claims.
 
-S151 B01–B10 remain **local candidates, not deployed**. The protected combined
-review is under `.local/mirtpage-final-release-20261019/s151-batch-audit/`.
-No existing artifact or email gate qualifies the new source as a whole.
+DEP-002 overall engineering housekeeping is additive to release work. The
+sampled review in `docs/operations/ENGINEERING-READINESS.md` covers architecture,
+code quality, tests/CI/CD, local/environment separation, security/dependencies,
+recovery/observability, docs, lifecycle, cost and agents. README now points to
+the current setup rather than historical ports/product behavior. Three focused
+`.agents/skills/` entries are installed with a thin AGENTS router. Structural
+validation and six positive/six negative reasoned trigger cases are distinct
+from actual host discovery/selection, which remains pending. The bundled Python
+validator stopped before parse for missing PyYAML; no dependency was installed.
+No token/cost saving, provider audit or unattended automation is claimed.
+
+The recurring workflow-quality change uses the installed TypeScript compiler,
+an explicit public source set and inert static admission. Fourteen focused
+cases pass, including an actual temporary clone with symlinked dependencies;
+the original complete-check stop at Node declaration resolution is retained.
+The corrected canonical dependency boundary still rejects source symlinks and
+private/outside companions. Existing workflow contracts and the five-script
+default scan pass; new source-frozen complete gates/remote CI remain pending.
+
+S151 application changes B01/B02/B03/B06–B10 are tested, committed and published
+as `6ad7d7978faaa5baa6eee605`, but **full rollout remains incomplete** because
+optimized public images still fail. B04/B05 are separately approved completed
+data operations.
+Source `d78dcf5`, digest 5129758d…6c1f5, passes the complete check (including 415
+workflow-UI cases and zero skips), `release:web` with zero vulnerabilities and 20/20
+acceptance. GitHub run 39485239127 attempt 2 passes all five jobs; the original
+failed attempt is retained. Protected receipts are under
+`.local/mirtpage-final-release-20261019/s151-batch-audit/`, including
+`gates-approved-b01-b10-standard-continuation/result.json` (SHA 0ca879b3…ffe3)
+and `ci-terminal.json` (SHA 8aba7410…b07ee). These qualify the tested source;
+actual local artifacts and their remaining rollout limits are recorded below.
 
 The first complete-check attempts are preserved under the protected S151 gate
 directories. Homepage source-wiring expectations and a reduced local test
@@ -24,8 +52,8 @@ No stopped attempt is represented as a complete check or deployment.
 - FE-041/FE-053 B01/B02: shared flexible card allocation passes864 installed
   Yoga cases,11 component regressions and17 actual Expo Chrome checks. B03's
   missing Support/Preview icon paths now pass the compiled registry regression.
-  Physical Android was stopped at the owner's instruction; the new source has
-  not been rebuilt or requalified on a phone.
+  Physical Android was stopped at the owner's instruction; version 2 has since
+  been built and statically inspected, but remains unqualified on a phone.
 - FE-026 B06: current task/Account selection passes role/nested-route tests and
   five actual Chrome component checks. Linked staff fixtures are absent locally;
   no account or privilege was created to bypass that limit.
@@ -47,31 +75,35 @@ No stopped attempt is represented as a complete check or deployment.
   health classification, the bounded retry passes nine width geometry checks
   and two click-through journeys. The raw receipt retains four suppressed
   analytics abort observations; no clean telemetry pass is inferred.
-- DEP-049/FE-021 B09: five original demo images are published200 and present in
-  Git; the exact optimized hero returns400, while the original byte identity and
-  existing Netlify CDN resize are verified. One exact200 CDN rewrite is added
-  without changing17 legacy aliases or native/private-media adapters.
-  `scripts/test-netlify-readiness.mjs` fails before the correction then passes;
-  `scripts/test-platform-naming.ts` passes against isolated local PostgreSQL
-  after a sandbox-only socket refusal. Artifact and hosted variant verification
-  remain pending. No production image repair is claimed from local success.
-- DEP-045 B04:66 focused cases and a successful exact SQL/rollback rehearsal
-  qualify the prepared contact operation locally; hosted data and its separate
-  nonsecret environment setting still need exact apply approval. DEP-046 B05's
-  offline post-B04 proposal passes17 content and8 composition tests, with110
-  product rows,15 category updates, one returned category identity and11 exact
-  mismatched-media-reference removals proposed. Its scratch-only candidate now
-  passes87 pure operation tests and a reviewed SQL retry with category binding,
-  full typed before/after/history/FK/version/non-key/prerequisite/outside checks.
-  All74 existing local tables/public sequences remain unchanged after rollback.
-  The initial bigint JSON mismatch and root authorization collation failure are
-  preserved. Actual B04 completion/readback, fresh hosted qualification and a
-  separately approved hosted operation remain required. Image files, private
-  aliases, real businesses and history remain unchanged. A separate pure hosted
-  draft builder passes78 model cases but emits no actual hosted plan and has
-  no apply/SQL/network port; it does not prove provider provenance or authorize
-  execution. The current demo access guide distinguishes role/task procedures,
-  historical account results and unqualified local Auth/grant setup.
+- DEP-049/FE-021 B09: five original demo images are published 200 and present in
+  Git. The first exact static rewrite passed focused source checks, but the new
+  deploy's optimized hero still returns JSON 400 (missing `url`); the same query
+  sent directly to the existing CDN returns 200 WebP. Protected two-GET diagnosis
+  `s151-image-routing-readonly-diagnosis.json` (SHA ef09c3ab…412a) classifies the
+  physical `_redirects` rule shadowing official generated query-aware routing.
+  Revised contract requires only seventeen physical legacy aliases, exact
+  generated url/w/q bindings and fallback order, unchanged IPX compatibility and
+  exact server image exclusion. Existing public/private renderer/access guards
+  remain intact. Focused regression, fresh gates/CI/artifact, new exact hosted
+  approval and monitored 384/640/3840 px image admission remain pending. No
+  automatic provider write or successful production image repair is claimed.
+- DEP-045 B04: the separately owner-approved demo-contact transaction and one
+  nonsecret production setting are applied with independent exact readback.
+  `demo-repair-preparation/b04-both-approved-operations-complete.json`
+  (SHA 63ae5217…df0c1) records preserved history/private reviewer/outside fences;
+  runtime activation is verified separately from initial deployment health.
+- DEP-046 B05: the separately approved finite cleanup commits 246 row writes;
+  independent readback reconstructs the actual runtime/category identity and
+  verifies all ten complete typed after states, immutable history/private
+  reviewer, 65 demo contact configurations, private accounts, real businesses
+  and all 74 outside fingerprints. Combined receipt
+  `demo-repair-preparation/b05-approved-operation-complete.json`
+  (SHA b9990370…862d7) binds actual apply a0d5be64…f0305 and independent
+  verification 99ed0626…78f51. The first hosted pre-write ordering stop, exact
+  sorted-copy correction, 47 pure tests and earlier local SQL failures remain
+  preserved. Three ordinary live-activity baselines advanced before the fresh
+  transaction; all 74 fresh baselines matched at commit and independent after-read.
+  Saved media files, private aliases and real-business records remain protected.
 
 - FE-021/FE-053/FE-074 B10: category-first full localized names and32px art replace
   hidden names/weekday-only controls. Seven web category/sponsor/image cases,
@@ -80,14 +112,30 @@ No stopped attempt is represented as a complete check or deployment.
   journeys, retaining two uncorrelated suppressed-analytics aborts. Expo passes
   six states and three real-API selection/business/Back journeys without API/
   page errors or writes. A held real initial GET captures matching silhouettes
-  then completes200. Receipts: protected `s151-batch-audit/b10-*`; no new APK,
-  hosted data/configuration write or deployment.
+  then completes200. Receipts: protected `s151-batch-audit/b10-*`. Version 2
+  binary build/static inspection and first web publication subsequently pass;
+  B09 recovery, physical/device delivery and Play gates remain separate.
 
 The owner explicitly approves the updated B01–B10 combined visuals and full
-checks on2026-10-20 (`call_e750c54380924b4193f423f678d3a783:0`). Full source-bound
-check/web-release/acceptance gates are next; scoped commit/CI, reviewed web
-publication and fresh APK/AAB qualification remain pending. Hosted demo data and
-the new Android build are outside this visual/full-check approval.
+checks on2026-10-20 (`call_e750c54380924b4193f423f678d3a783:0`). Source-bound
+check/web-release/acceptance and commit/CI now pass. The separate middleware
+completion 590d8e8c…16ac passes without changing the failed full-pipeline record.
+The complete local manifest c82b49af…e126c includes the compiled wrapper; all
+eight synthetic Deno 2.2.4 route checks pass (4185f343…52b0). First actual Linux
+Node 24 startup passes Sharp/native PNG and real server/bootstrap import without
+handler invocation (f72153db…5ea67); all 1,851 members remain unchanged. The
+separately owner-authorized version 2 AAB and derived APK are built in one
+compilation (receipt 42696aa4…76a0). Independent static binary inspection passes
+(receipt 026d843a…a294b), retaining Expo Doctor 19/21 and no physical/OS-push/Play
+proof. Initial publication passes six checks; actual hosted Chrome geometry at
+nine widths and two preview/showroom/Back journeys passes, while the complete
+`s151-postpublish-receipt.json` (SHA efe75f8d…7148) remains false because images
+fail and aborts are retained. Prior healthy deploy `6ad73e5a9df2756523e8ac95` and
+its protected before-image remain available only for separately reviewed
+recovery. Full B09 image/worker admission, opaque-logo Auth HTML update,
+physical workflows, Play upload and closed testing remain open. Data/native
+authorization and consumed first-deploy approval do not authorize another
+artifact or recovery write.
 
 S146 active-language account-copy brand parity (FE-070/FE-049, local only):
 two reachable Amharic/Afaan Oromo account-deletion and Expo staff-access notices

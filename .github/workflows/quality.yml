@@ -38,6 +38,7 @@ jobs:
           node-version: 24.18.1
           cache: npm
       - run: SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@suqpage/contracts --include-workspace-root
+      - run: npm run test:workflow
       - run: npm run release:web
         env:
           SUQPAGE_DELEGATE_PROVIDER_SMOKE: "1"

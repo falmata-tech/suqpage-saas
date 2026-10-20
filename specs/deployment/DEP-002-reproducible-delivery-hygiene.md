@@ -4,11 +4,130 @@ title: Reproducible delivery and repository hygiene
 status: in_progress
 related: [FE-035, BE-003, BE-025, DEP_BASE, ADR-0002, ADR-0003, DEP-010, DEP-022, DEP-025]
 owners: [operations, security]
-last_updated: 2026-09-12
+last_updated: 2026-10-20
 change_level: L3
 ---
 
 # DEP-002 — Reproducible delivery and repository hygiene
+
+## Overall engineering readiness and project skills
+
+The owner's housekeeping request covers the overall ability to build and ship,
+not only incidents in the current release. Assess architecture/code quality,
+tests and CI/CD, local reproducibility, environment separation, secrets and
+dependencies, recovery/observability, documentation, maintenance, costs and
+agent tooling. Record repository evidence, unverified provider assumptions and
+prioritized improvements in `docs/operations/ENGINEERING-READINESS.md`. Keep
+release blockers separate from follow-up work; do not impose a new audit on
+every small edit or add an unattended background job.
+
+Plan before implementation:
+
+1. Record the actual capabilities and gaps of the current stack; refresh the
+   developer entry point rather than introduce another launcher or framework.
+2. Install three short instruction-only project skills under `.agents/skills/`
+   for actual browser review, requested delivery work and engineering review.
+   Link them from a thin AGENTS router; preserve existing authority and approvals.
+3. Validate frontmatter, names, bounded triggers, existing references and body
+   length (at most 300 words each); review six positive and six negative routing
+   cases. Keep implicit selection enabled by default. No credentials, helper
+   scripts, dependencies, model settings or provider changes belong here.
+4. Verify spec/workflow consistency and scoped changes. Qualify actual host
+   discovery and explicit/implicit invocation separately in a fresh session;
+   static validation and reasoned cases do not prove automatic activation.
+
+These L0 instructions do not change product behavior, UI or runtime artifacts.
+`SUQPAGE-MASTER-PROMPT.md` remains the product authority. Structural validation
+may use the installed YAML parser if the bundled Python validator cannot import
+its dependency; retain that limitation instead of claiming the bundled tool
+passed. Token/cost savings require observation, not a size-based promise.
+
+Primary references: [Codex skills](https://learn.chatgpt.com/docs/build-skills),
+[maintained repository skills](https://developers.openai.com/blog/skills-agents-sdk)
+and [skill evaluation](https://developers.openai.com/blog/eval-skills).
+
+## S151 — recurring workflow quality improvement (focused checks passed)
+
+Observed operational failures include missing JavaScript bindings and incorrect
+main-entry arguments that syntax checks or mocked ports alone did not detect.
+Improve the existing workflow while keeping release work primary: record
+timing/failure class, fix one demonstrated cause, and measure time/cost saved
+alongside security outcomes. This is a contributor routine, not an unattended
+daily job or a new automation platform.
+
+Ordered implementation plan, recorded before code:
+
+1. Add a concise recurring-development section to `AGENTS.md`, requiring actual
+   offline main-entry preflight, installed contract checks and batched/frozen
+   gates without adding approval requirements or weakening existing controls.
+2. Add `scripts/check-workflow-scripts.mjs`: inspect explicitly named canonical
+   repository `scripts/` JS/MJS/CJS entry files, using the installed TypeScript
+   compiler for syntax and missing-binding/import diagnostics. Read selected
+   source and installed declarations only; never execute a target or its imports,
+   read environment/secret/runtime files, install dependencies or contact services.
+   Public `scripts/` or `lib/` source companions may be explicitly supplied with
+   `--include`, including TypeScript imports; do not scan a directory or discover
+   source graphs implicitly. TypeScript entries retain project typechecking.
+3. Prove valid ESM/CommonJS/Node imports, undefined names/shorthands, misspelled
+   imports, syntax failure, inert imports and rejected paths in focused tests.
+   Include the small safe default set in the existing workflow gate only after
+   it passes; keep explicit changed-file checking available for future scripts.
+4. Run focused tests, actual selected-script admission, existing workflow
+   contracts, spec validation and whitespace checks. Root reviews the independent
+   change before commit/CI; no release/provider mutation belongs to this task.
+5. Invoke the same `npm run test:workflow` gate once in GitHub's existing core
+   job immediately after its clean web install and before `release:web`; assert
+   that exact order in the existing workflow contract. No new job or framework.
+
+```gherkin
+Scenario: A changed operational script has an unresolved name or import
+  GIVEN an explicitly selected canonical scripts JS, MJS or CJS source file
+  WHEN offline workflow-script quality checking runs
+  THEN syntax errors and unresolved bindings or imports fail with file, location and diagnostic code
+  AND neither the selected script nor its imports execute
+  AND secret, private runtime and outside-repository paths are rejected
+
+Scenario: Static admission is not proof of an operation's runtime preflight
+  GIVEN selected scripts pass the offline quality check
+  WHEN an author prepares a provider operation
+  THEN the author still exercises its actual main entry with the intended arguments and inert offline ports
+  AND validates installed provider contracts and nullable responses before an external write
+  AND preserves target, authorization, tenant, privacy and recovery checks
+```
+
+The checker is deliberately narrower than general JavaScript lint/type coverage.
+Only explicitly selected public local imports can join its source set; installed type
+declarations may resolve Node/package imports. It cannot establish runtime
+behavior, SQL correctness, provider response semantics or safety of a computed
+import. No dependency or lockfile change is planned. Test mapping:
+`scripts/test-workflow-script-quality.mjs`, `npm run check:workflow-scripts --
+<explicit scripts...>` and the existing `npm run test:workflow` gate. Local
+`npm run check` and GitHub's core job invoke that same workflow gate; the remote
+step precedes expensive release work. Wiring is not a claim of a completed CI run.
+
+Local implementation evidence on 2026-10-20: the existing workflow contract and
+13 in-memory regression cases pass. The actual changed B09 readiness script plus
+its explicitly selected `lib/platform-assets.ts` companion passes without either
+module executing (1,566 ms in the observed run). Three established recurring
+scripts pass in 1,033 ms; the default list now also checks the new checker and
+its test. Node syntax and specification validation pass. Tests prove undefined
+bindings, shorthand values, imports and syntax fail, while Node/ESM/CommonJS and
+inert TypeScript companions pass. No dependency, lockfile, application, provider
+or secret setting changed. Future avoided-delay/cost savings are not yet
+quantified; source-bound full gates, root review and remote CI remain separate.
+
+The workflow research uses primary examples as evidence, not instructions:
+[iterating development workflows](https://developers.openai.com/cookbook/examples/codex/iterating-development-workflows-with-codex/)
+and [reviewable recurring operations](https://developers.openai.com/blog/automating-repetitive-work-at-openai-with-codex/)
+support small durable plans and reuse; [TypeScript checkJs](https://www.typescriptlang.org/tsconfig/checkJs.html)
+provides the installed compiler mechanism. Existing GitHub npm caching,
+concurrency and failure artifacts already cover the relevant
+[dependency-caching pattern](https://docs.github.com/en/actions/concepts/workflows-and-actions/dependency-caching);
+do not duplicate them. Future [VS Code tasks](https://code.visualstudio.com/docs/debugtest/tasks)
+should invoke existing commands rather than introduce another launcher.
+Apply these ideas to the observed Node 24/Next 16.3.8/Expo 57 Intel Mac setup,
+five GitHub jobs and existing Netlify Free/Supabase/Gmail services. No new
+purchase, account-limit assumption or authorization requirement follows.
 
 ## Problem and outcome
 
