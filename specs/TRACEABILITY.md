@@ -12,11 +12,11 @@ run logs. [Active delivery checklist](../docs/SUQPAGE-TRANSITION-CHECKLIST.md).
 
 | Ref | Verified scope | Evidence and remaining boundary |
 | --- | --- | --- |
-| E1 — web/API baseline | `d78dcf538927a1b403899d196f5631ebc199cd8c`, source `5129758d…6c1f5`: full check (415 workflow-UI cases), clean web release, 20/20 acceptance; five green CI jobs | Protected `s151-batch-audit/gates-approved-b01-b10-standard-continuation/result.json` and `ci-terminal.json`; GitHub run `39485239127` attempt 2. First attempts remain failed. Published `6ad7d7978faaa5baa6eee605` has working sponsor geometry/navigation but broken optimized images; full rollout is incomplete. |
+| E1 — web/API baseline | `d78dcf538927a1b403899d196f5631ebc199cd8c`, source `5129758d…6c1f5`: full check (415 workflow-UI cases), clean web release, 20/20 acceptance; five green CI jobs | Protected `s151-batch-audit/gates-approved-b01-b10-standard-continuation/result.json` and `ci-terminal.json`; GitHub run `39485239127` attempt 2. First attempts remain failed. Earlier `6ad7d7978faaa5baa6eee605` had broken optimized images; E5 records its published replacement. Runtime build lineage remains this baseline. |
 | E2 — exact demo operations | B04 contact repair + one nonsecret production setting and B05 finite product/media cleanup applied and independently read back | Protected `demo-repair-preparation/b04-both-approved-operations-complete.json` (63ae5217…df0c1) and `b05-approved-operation-complete.json` (b9990370…862d7). B05 records 246 row writes, all ten after states, 65 demo contact configs and 74 outside fingerprints. Private identities/history/real businesses remain protected. These consumed approvals do not authorize new data operations. |
 | E3 — Android version 2 | One authorized compilation from `d78dcf5`; exact existing signer/package/Firebase/App Links/Hermes and static native integrity/alignment pass | AAB SHA `2a116c63c017c9d06c0260c66580051cec8ff4c6ebf4f565fc382d6abec125fa`; derived APK SHA `78e8d2fe7d6ecb89b65a6a7b3500975848ef419bc5de146744ce8775995145c6`. Protected `native-admission-20261020/post-build-inspection-v2/final-inspection-receipt.json` SHA `026d843a…a294b`; permission-provenance addendum `c462a5e6…85262`. This is not phone/OS-push/Play proof; Expo Doctor 19/21 and inherited permissions/tooling limits remain. |
 | E4 — Auth/mail | MirtPage primary origin/callbacks, schema 77, sender/subject branding and the thirteen-field opaque-logo HTML repair independently verified | Protected `s148-auth-primary-*`, `s149-netlify-primary-result.json`, `s150-auth-email-brand/` and source templates. Exact owner-approved HTML apply/readback verified at 2026-10-20T22:46:07.318Z: `s151-batch-audit/auth-white-logo-plan/applied-bd7546-receipt.json`. Only thirteen HTML fields changed; no email was sent, so actual inbox rendering/delivery remains separate. Owner email-change initiation stays disabled pending [DEP-050] secure hosted qualification. |
-| E5 — current B09 correction | The shadowing physical image rule is removed; 17 aliases + official query captures/IPX/fallback/exclusion retained; source/CI/local admission pass | Source `c6ddc736c04b5ca52d5941479b292bca207de72dd4d3aa90e2534170d1a3d185`, 2,320 files. Protected `b09-query-routing-recovery/focused-result.json` SHA `0d257853…9ccd0`. All 77 check commands qualify through the retained 18-command prefix and complete 59-command continuation; original full-check exit 1 remains. Clean web release exits 0 with zero production vulnerabilities; acceptance exits 0 with 20/20 scenarios. Raw destination-stream-close messages remain unclassified. GitHub run `39509285979` attempt 2 passes all five jobs on `7e240145992d7bdd79b0cd02c461a96b1d18dd49`; the first core fixture-startup failure and unchanged retry remain recorded without an asserted root cause. Exact recovery approval/publication and monitored image/privacy/worker/Chrome qualification remain incomplete. |
+| E5 — current B09 correction | The shadowing physical image rule is removed; 17 aliases + official query captures/IPX/fallback/exclusion retained; source/CI/local admission pass | Source `c6ddc736c04b5ca52d5941479b292bca207de72dd4d3aa90e2534170d1a3d185`, 2,320 files. Protected `b09-query-routing-recovery/focused-result.json` SHA `0d257853…9ccd0`. All 77 check commands qualify through the retained 18-command prefix and complete 59-command continuation; original full-check exit 1 remains. Clean web release exits 0 with zero production vulnerabilities; acceptance exits 0 with 20/20 scenarios. Raw destination-stream-close messages remain unclassified. GitHub run `39509285979` attempt 2 passes all five jobs on `7e240145992d7bdd79b0cd02c461a96b1d18dd49`; the first core fixture-startup failure and unchanged retry remain recorded without an asserted root cause. The exact approved replacement `6ad7f59795812d9f56be42a2` is independently ready/published after a preserved operator stop. GET/image/worker and visible Chrome journeys qualify; overall browser cancellation classification remains open. |
 | E6 — workflow/role review | Actual local Chrome desktop/phone/Expo and canonical API/DB checks are recorded for affected roles; B01–B10 current visuals approved | Protected `.local/s146-browser-review/`, `s151-batch-audit/` and `.local/contextual-loading-s151/`. Specific evidence is linked in controlling specs. Synthetic maps/component hosts and Expo are not native devices; unsupported roles were not fabricated to obtain a pass. Current physical-phone hold remains. |
 | E7 — engineering/docs | Three focused project skills, thin agent router, setup/readiness docs and recurring workflow checker implemented; compact docs validated, reviewed, committed and pushed | [Engineering readiness](../docs/operations/ENGINEERING-READINESS.md), [DEP-002]. Fourteen workflow regressions include an actual symlink-dependency clone. Docs checks preserve 29 numbered master headings, 219 IDs/statuses/related edges, 273 open-item mappings and 915 local destinations/anchors; spec/identity/narrative checks pass. Root committed/pushed `29327d1ed88a73ab541822ae023ad4c9e0d74fcd` on `docs/consolidate-engineering-reference`; integration remains pending. Protected coverage/receipts retain detail. Static structure/reasoned cases do not prove actual skill selection or token/cost savings; this docs branch does not upgrade hosted/device qualification. |
 
@@ -29,9 +29,27 @@ continuation directory. `image-recovery-artifact/local-artifact-manifest.json`
 (6d33ed8a…9a160), lineage (18575526…bf34e) and assembly (340a2244…2a314)
 qualify the local artifact: exactly one static digest changed, runtime primitives
 match and 114/114 focused tests pass. Final successful CI and actual
-`--check-local` admission are verified. Fresh provider plan `b32d9727…99ad7c`
-is prepared/read back without writes; exact owner approval, publication and
-monitored proof remain. No hosted recovery write is claimed.
+`--check-local` admission are verified. Exact plan `b32d9727…99ad7c` received
+owner approval and was attempted once. Its operator stopped at
+`same_deploy_manifest_update`; no operator PASS is claimed. Separate GET-only
+`postpublication/independent-provider-qualification.json` (caa3389e…48b4d)
+finds `6ad7f59795812d9f56be42a2` ready/published with 786/786 content hashes/sizes,
+zero missing files, exact two function hashes and 41 unchanged environment objects.
+Five unique ASCII-case metadata mappings leave `exactPathBytesProven: false`.
+
+`postpublication/get-only-result.json` (0453c7f8…51855) records 26 checks, zero
+failures and automatic worker health; original/384/640/3840 optimized images
+are decoded. Private negative fixtures are nonexistent, not existing tenant
+objects. Generic HTML200 at `/.env` remains a known limit, not a 4xx pass or
+universal secret-absence proof. `browser-result.json` (23a68f91…ec984) records
+nine widths, zero overlap/overflow, decoded images and complete 1024/390
+preview→showroom→Back journeys with zero page errors/blocked writes, but its
+`passed: false` remains for eight unclassified aborted fetches.
+`abort-provenance-result.json` (0f1bfbc2…aa546) completes one further journey
+without page/HTTP failures; six HTTP200 RSC cancellations remain unclassified,
+and only one analytics abort is proven local-harness behavior. It cannot prove
+the cause of the original eight. Browser classification remains open; this is
+qualified publication/image/worker evidence, not a complete release verdict.
 
 All protected paths above are relative to
 `.local/mirtpage-final-release-20261019/` unless they already start with `.local/`.
@@ -52,8 +70,13 @@ belong in engineering readiness; no source merge or production change is claimed
 
 - Current hosting is Netlify under [DEP-026]/[DEP-049]. [DEP-023] retains the
   former Vercel cutover evidence as deprecated history. DEP-002/V01 records the
-  exact project Git disconnect and fresh provider readback; the next-source-push
-  no-trigger check is still open. The project, account App installation, old
+  exact project Git disconnect and fresh provider readback. The reviewed nine-file
+  docs commit `3c1b539` is pushed; GitHub at 2026-10-20 23:34:18 UTC observes no
+  status contexts, checks or deployments on that head. This is a point-in-time
+  no-Vercel-trigger result, not future certainty or passing/queued CI; non-main
+  pushes without a PR do not trigger the five required jobs. Protected
+  `workflow-improvement-research/vercel-retirement/post-push-observation.json`
+  retains the read-only result. The project, account App installation, old
   deployments, portable dependencies and privacy exclusions remain intact.
 - Products are the current catalog, including ready/custom-order labels:
   [FE-067]/[BE-056] supersede older service-offering behavior.

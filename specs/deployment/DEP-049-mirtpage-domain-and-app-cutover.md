@@ -10,7 +10,7 @@ change_level: L4
 
 # DEP-049 — MirtPage cutover
 
-## S151 — published candidate; image recovery and device checks pending
+## S151 — published web recovery; browser classification and device checks pending
 
 Source `d78dcf5`, frozen digest 5129758d…6c1f5, passes the complete check
 (including 415 workflow-UI cases and zero skips), web release with zero vulnerabilities,
@@ -30,19 +30,19 @@ are built and pass independent static binary inspection (receipt SHA
 026d843a…a294b). Physical workflows, OS push and Play closed testing remain open;
 Expo Doctor 19/21 and static-versus-device limits remain documented.
 
-The exact owner-approved deployment `6ad7d7978faaa5baa6eee605` is published and
-passes its six initial public/API/association checks. Full rollout is incomplete:
-actual Chrome confirms sponsor/gallery separation at nine widths and desktop/
-phone preview→showroom→Back navigation, but the mixed browser receipt remains
-`passed: false` because optimized images fail and request aborts are retained.
-Read-only GET diagnosis proves the exact `/_next/image` request returns JSON
-400 (missing `url`), while the same source/width/quality sent directly to the
-existing Image CDN returns 200 WebP. B09 below governs a fresh routing recovery.
-The previous healthy deploy `6ad73e5a9df2756523e8ac95` and protected before-image
-remain retained; no automatic rollback, retry or provider write follows the
-incident. Hosted image/worker recovery checks remain open. The separately
+The earlier owner-approved deployment `6ad7d7978faaa5baa6eee605` passed its
+initial public/API checks but failed optimized images; its diagnosis and mixed
+browser receipt remain retained. B09’s separately approved replacement
+`6ad7f59795812d9f56be42a2` is now independently verified ready/published. Release
+source is `7e24014`, digest c6ddc736…a3d185; the artifact changes one static file
+and reuses runtime compiled from `d78dcf5`. The operator stopped at
+`same_deploy_manifest_update`; separate
+read-only provider/GET/Chrome evidence establishes the scopes below without
+rewriting that stop as PASS or asserting its cause. Previous deploys/before-images
+remain retained; no automatic retry/restore follows. Image/worker checks pass,
+while browser cancellations and device/Play evidence remain open. The separately
 approved thirteen-field opaque-logo Auth HTML update is applied/read back;
-its receipt and email-delivery limit are recorded in traceability E4.
+traceability E4 retains its actual inbox-delivery limit.
 
 ### Generated middleware compatibility boundary
 
@@ -83,7 +83,7 @@ identity, resources, signatures, manifests, privacy and static 16 KB checks:
 (SHA 026d843a…a294b). This does not establish physical-device/16 KB runtime, OS
 push, native screenshots, Play delivery or the twelve-person testing clock.
 
-## S151 B09 — query-aware public image routing recovery (ready)
+## S151 B09 — published image routing recovery; browser cancellations open
 
 The owner reports missing example pictures. Read-only production diagnosis
 confirms five original product/showroom assets return200 and exist in Git. The
@@ -173,8 +173,20 @@ Chrome card→preview→showroom→Back on desktop/phone, and verify the schedul
 worker still runs without request-context errors. The approved UI is unchanged;
 this is nonvisual routing recovery, with no new visual-approval gate. No automatic
 provider recovery or database restore is permitted. Master §§15/19/22 and FE-021
-track the same delivery boundary. Full recovery and hosted qualification remain
-pending; this contract does not itself authorize deployment.
+track the same delivery boundary. The exact approved operation has now been
+attempted and independently qualified below; this contract does not authorize a
+retry, another artifact or an unrelated hosted change.
+
+### Current post-publication evidence and limits
+
+The approved replacement is independently ready/published after the preserved
+operator stop; no successful apply receipt or stop cause is inferred.
+Public images and the automatic worker are verified. Chrome’s visible tasks
+complete, but its overall verdict remains false for unclassified cancellations.
+Unique-case path metadata and HTML-fallback/private-fixture limits remain.
+[Traceability E5](../TRACEABILITY.md#current-release-evidence) owns exact
+source/runtime lineage, receipts, counts and remaining browser qualification.
+Physical-device/OS/Play evidence remains separate.
 
 ## S150 — Auth email contrast follow-on (hosted readback verified)
 

@@ -11,9 +11,12 @@ not authorize a provider write or rerun an already completed migration/build.
 MirtPage is live at **mirtpage.com** on schema **77**. The new Android identity
 is **com.mirtpage.app**. The prior Suqpage app's enrollment does not transfer.
 Source `d78dcf538927a1b403899d196f5631ebc199cd8c` passes its complete check,
-clean web release, 20/20 acceptance and all five CI jobs. Its website update is
-published as `6ad7d7978faaa5baa6eee605`; optimized public images still fail, so
-**the combined rollout is incomplete**. B09 is the first unmet dependency.
+clean web release, 20/20 acceptance and all five CI jobs. B09’s replacement
+`6ad7f59795812d9f56be42a2` is published/ready and optimized images now decode.
+The operator’s original stopped result is preserved; separate read-only provider,
+GET and Chrome evidence qualify the scopes below. **The combined rollout remains
+incomplete**: browser request-cancellation classification and device/Play proof
+are still open, rather than another image-publication approval.
 
 The nonvisual B09 correction and workflow improvements are qualified at source
 digest `c6ddc736…a3d185` (2,320 files): all 77 check commands pass through the
@@ -26,8 +29,9 @@ a claim of an error-free browser log or a raw full-check exit zero.
 Commits `a153547` (B09 routing) and `7e24014` (workflow/skills) are pushed.
 GitHub run `39509285979` attempt 2 has all five jobs passing on `7e24014`.
 The original core operations-fixture startup failure remains retained; the
-successful unchanged retry does not establish its exact cause. R01 is complete;
-the first unmet release dependency is R02's exact hosted recovery approval.
+successful unchanged retry does not establish its exact cause. R01 and R02’s
+approval/publication/image/worker checks are recorded; R02’s browser cancellation
+classification is the first unmet web qualification.
 
 Version 2 AAB and derived APK are built and statically inspected from `d78dcf5`.
 The owner's phone/ADB hold remains in force; use Expo for permitted local checks.
@@ -38,8 +42,8 @@ or fourteen-day test is claimed.
 
 | Surface | Implemented | Tested | Visually approved | Deployed / delivered |
 | --- | --- | --- | --- | --- |
-| B01–03/B06–08/B10 cards, navigation, loading, sponsors and categories | Yes | Focused + d78 full gates/CI; current recovery gates separate | Updated B01–B10 batch approved | First web update published; image-dependent rollout incomplete; Android static only |
-| B09 physical image routing correction | Yes, exact alias-only file | Focused + c6dd composite check, release, 20/20 acceptance, CI and final local admission pass | Nonvisual correction; no geometry changed | Exact provider plan prepared; owner approval and monitored publication pending |
+| B01–03/B06–08/B10 cards, navigation, loading, sponsors and categories | Yes | Focused + d78 full gates/CI; current recovery gates separate | Updated B01–B10 batch approved | Web images/layout/navigation verified on replacement deploy; browser cancellations unresolved; Android static only |
+| B09 physical image routing correction | Yes, exact alias-only file | Focused + c6dd composite check, release, 20/20 acceptance, CI and final local admission pass | Nonvisual correction; no geometry changed | Published/ready; independent inventory + GET/worker pass; Chrome journeys pass but overall receipt false for retained aborts |
 | B04/B05 demo contacts/catalog cleanup | Applied exact finite operations | Independent complete readback | Separate actual data/settings approvals | Live; no repeat data write needed |
 | Opaque Auth-email logo | Source + public PNG + thirteen HTML templates | Pixel/template/Chrome/local gates and guarded hosted readback | Approved light/dark visuals and exact hosted change | Applied/read back; no email sent by this operation, actual inbox rendering remains separate |
 | Owner sign-in email change | Local guarded source/schema | Local two-mailbox/provider/security proof | Prior reviewed layouts; current hosted behavior unqualified | Initiation disabled; exact Auth/settings/notices gate pending |
@@ -74,15 +78,19 @@ isolated from R02 and does not change application or native artifacts.
   first coverage-harness failure; no application or managed failure was hidden.
 - [x] Root reviewed the exact nine-file docs-only diff and managed-result update.
   Visual approval is inapplicable; no build or CI rerun belongs to this L0 patch.
-- [ ] Commit/push the reviewed docs scope; preserve unrelated work and artifact refs.
+- [x] Commit/push the reviewed nine-file scope as `3c1b5391ce12deb8565bde4a44e8aca31710f783`
+  on `docs/dep-002-retire-vercel`; unrelated work and artifact refs are preserved.
 - [x] Verify the exact project/repository, retain the before-state and disconnect
   only that Git connection. Fresh provider reload confirms the removal on
   2026-10-20; project/deployments and the account App installation remain.
   Netlify, domains/secrets and other repositories were not changed. Protected
   `workflow-improvement-research/vercel-retirement/result.json` records the result.
-- [ ] On the next authorized source push, verify no new Vercel preview/production
-  trigger for that new head. Keep required GitHub checks and Netlify delivery
-  evidence separate; this follow-up is not implied by provider readback.
+- [x] After that normal push, GitHub reads at 2026-10-20 23:34:18 UTC observe
+  zero status contexts, check runs or deployments for `3c1b539`. Protected
+  `vercel-retirement/post-push-observation.json` records this point-in-time
+  no-trigger observation, not a permanent guarantee. No required CI jobs were
+  triggered by this non-main/no-PR push; the empty aggregate’s `pending` label
+  is neither queued CI nor green checks.
 
 ### R01 — Finish B09 source and CI qualification
 
@@ -102,31 +110,42 @@ FE-021, FE-053, FE-074; depends on the frozen source above.
 - [x] Verify all five remote jobs green on `7e24014` in run `39509285979`
   attempt 2. Preserve the original core fixture failure and its unchanged retry.
 
-### R02 — Publish and monitor the exact B09 recovery (CURRENT)
+### R02 — Published B09 recovery; classify browser cancellations (CURRENT)
 
-The local assembly is qualified. Hosted publication depends on **R01**, exact
-artifact/source admission and separate scoped approval under DEP-049.
+Depends on **R01** and the consumed exact DEP-049 recovery approval. Published
+`6ad7f59795812d9f56be42a2` is independently verified ready; the original operator
+stop remains a stop, not a fabricated successful apply result.
 
 - [x] Assemble the complete deployment with only the corrected physical
   `_redirects` bytes changed. Retain byte-identical virtual config, both Linux
   function ZIPs, worker schedule, completed edge artifacts and all three deploy
   blobs. Local manifest/lineage, 114/114 focused tests and actual `--check-local`
   admission pass; successful final CI is bound (traceability E5).
-- [x] Prepare/read back the exact read-only provider plan from the verified
-  site/account/domain/deploy, 41 environment objects and protected previous
-  deploy. This preparation makes no hosted write.
-- [ ] Obtain owner approval of that exact fresh plan, then recheck its guarded
-  admission. Consumed earlier approval is not reusable.
-- [ ] Apply that one reviewed operation and read back the same deployment's
-  files/functions/blobs/configuration. Stop on ambiguity; no automatic retry or
-  restore. Database, Auth, DNS, email and signing are outside this operation.
-- [ ] GET and decode originals and optimized images at 384/640/3840 pixels;
-  exercise desktop/phone Chrome card → preview → showroom → Back; verify public
-  APIs, private-media denial and scheduled worker health. Retain any failures.
-  A generic public HTML response at `/.env` is not a 4xx privacy-test pass or a
-  proof of universal secret absence; evaluate response content and exclusions.
-- [ ] Record exact source/deploy/CI/receipt identities and remaining limitations;
-  declare only the surfaces whose live evidence actually passes.
+- [x] Prepare/read back the exact site/account/domain/deploy plan and obtain the
+  owner’s exact recovery approval. Source is `7e24014`/c6dd; compiled runtime
+  remains `d78dcf5`. Consumed authority does not approve another operation.
+- [x] Run the single approved operation. It stopped at
+  `same_deploy_manifest_update`; preserve that receipt and its unproven cause.
+  Subsequent read-only qualification independently finds this deployment ready
+  and published, with 786/786 content hashes/sizes, no missing files, both exact
+  function hashes and all 41 environment fingerprints unchanged. Five metadata
+  paths require unique ASCII-case mapping; exact path bytes are not proven.
+- [x] GET monitor records 26 checks, zero failed checks, decodable original and
+  384/640/3840 optimized images, public API/private nonexistent-fixture checks and
+  the automatic scheduled worker passing. `/.env` remains generic public HTML
+  with HTTP200: a known limit, not a 4xx privacy pass or universal secret proof.
+- [x] Actual Chrome records nine widths with no overlap/overflow and decoded
+  images; 1024/390 card → preview → showroom → Back journeys complete with zero
+  page errors/blocked writes. Its overall `passed: false` is preserved for eight
+  unclassified aborted fetches; task success does not erase network evidence.
+- [ ] Classify the retained request cancellations. A separate instrumented journey
+  completes without page/HTTP failures but retains six HTTP200 RSC cancellations;
+  only one analytics abort is proven to be the local test harness. It cannot
+  retroactively classify the original eight. Do not claim an all-green browser
+  result or complete web qualification from the successful visible journeys.
+- [x] Record exact source/deploy/CI/receipt identities and limits in traceability
+  E5/DEP-049. Database, Auth, DNS, email and signing were outside this deployment;
+  no automatic retry/restore or new production operation follows these receipts.
 
 ### R03 — Reconcile public and management workflows
 
