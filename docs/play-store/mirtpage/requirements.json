@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "NOT_UPLOAD_READY",
-  "checkedAt": "2026-10-18",
+  "checkedAt": "2026-10-20",
   "sources": [
     {
       "id": "listing-fields",
@@ -14,6 +14,12 @@
       "url": "https://support.google.com/googleplay/android-developer/answer/9866151?hl=en",
       "checkedAt": "2026-10-18",
       "supports": "Icon, feature graphic, screenshot format/dimensions, real app imagery and accessible alt text."
+    },
+    {
+      "id": "icon-design",
+      "url": "https://developer.android.com/distribute/google-play/resources/icon-design-specifications",
+      "checkedAt": "2026-10-20",
+      "supports": "Upload a full-square icon without pre-rounded corners or shadows; Google Play applies the mask and shadow."
     },
     {
       "id": "listing-languages",
@@ -57,8 +63,9 @@
       "format": "PNG",
       "bitDepth": 32,
       "alphaAllowed": true,
+      "shape": "full_square",
       "maxBytes": 1048576,
-      "status": "export_and_visual_review_pending"
+      "status": "owner_approved_logo_export_ready"
     },
     "featureGraphic": {
       "width": 1024,
@@ -69,7 +76,7 @@
       ],
       "pngBitDepth": 24,
       "alphaAllowed": false,
-      "status": "design_and_visual_review_pending"
+      "status": "owner_approved_charcoal_rgb24_exports_ready"
     },
     "phoneScreenshots": {
       "plannedCount": 6,

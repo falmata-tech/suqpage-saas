@@ -7203,3 +7203,40 @@ neither a hosted Auth configuration change nor an enabled customer workflow.
   reported two SMTP-accepted admin alerts; the following observed invocation
   routed zero chats and had no pending or failed email jobs. Inbox receipt and
   a new labelled end-to-end chat remain separate workflow checks.
+
+### S149 — qualify a MirtPage Android build and closed-test release (DEP-049, DEP-042, DEP-044)
+
+- [x] Verify the live MirtPage website, mobile v1 catalog API, account-deletion
+  page, exact new-package assetlinks, schema 77 and Supabase Auth's new primary
+  URL/two exact callbacks. All named routes returned 200; production schema 77
+  has a guarded commit/readback receipt. The exact approved Auth change applied
+  and a separate read-only management API check confirmed the healthy project,
+  MirtPage primary, both callback URLs and unchanged disabled Google provider.
+  A 200 callback without a valid sign-in code is not a completed login test.
+- [x] Promote `mirtpage.com` to Netlify's primary domain using the owner's
+  exact approved guarded plan. Readback confirms the same site/account and
+  published deploy, `suqpage.com` plus both www aliases, forced HTTPS and
+  MirtPage root/health plus old-domain privacy HTTP 200. The protected result
+  is `.local/mirtpage-final-release-20261019/s149-netlify-primary-result.json`.
+- [x] Admit only the reviewed `mirtpage-production` API/Auth pair in the Android
+  release policy; add positive and negative build/App Links tests. Preserve
+  package `com.mirtpage.app`, project UUID, Firebase client hash, and the
+  existing profile names. Run focused tests, native export/privacy audit and
+  applicable release gates before any APK/AAB. Focused build/App Links, native
+  typecheck, 1,693-module Android Hermes export/source-map exclusion, and
+  owner-approved Play artwork tests passed. Full `npm run check` passed after
+  correcting a stale fixture assertion; the clean isolated `npm run release:web`
+  passed including provider smoke and zero-vulnerability web audit. Protected
+  logs: `.local/mirtpage-final-release-20261019/s149-check-rerun.log` and
+  `s149-release-web-passed.log`. Android's separate full-workspace audit still
+  reports 20 high transitive build-tool findings and requires DEP-044 review.
+- [ ] Bind and verify the existing recoverable signing key and new Firebase
+  Android client without exposing credentials or generating a different key.
+  Prepare the exact DEP-044 one-artifact tooling review and owner approval
+  before a local APK or AAB build.
+- [ ] Build and inspect the MirtPage APK locally, install it on Android, exercise
+  visitor/owner/chat/tracking/notification workflows, and capture genuine
+  native screenshots. Then prepare a separately reviewed Play AAB, complete
+  the new-app store forms/assets and app-scoped submission credential, and
+  start the MirtPage closed test for the owner's twelve confirmed testers.
+  The fourteen-day clock starts only after twelve actual opt-ins.

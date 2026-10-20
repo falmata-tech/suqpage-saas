@@ -127,6 +127,58 @@ both hosted compilation and new autoVerify claims blocked. The submission source
 is a distinct absent protected path. No provider/EAS/Chrome/prebuild/build/upload
 ran, and combined full gates remain pending with the parallel local tranche.
 
+## S149 — admit the hosted MirtPage Android runtime (in progress)
+
+The MirtPage Android package was withheld from installable hosted builds
+until the live website, mobile catalog API, account-deletion page, exact
+`com.mirtpage.app` App Links association, production schema 77, and Supabase
+Auth primary/callback configuration were independently read back. Those
+checks now pass; the admitted target is only `mirtpage-production` with
+`https://mirtpage.com` API and
+`https://sjeiiqxgscuqajpgddcc.supabase.co` Auth origin. Keep the same package,
+Firebase client hash, EAS project UUID,
+signing certificate, and existing preview/production profiles.
+
+GIVEN the reviewed target and matching HTTPS origins WHEN hosted build
+validation runs THEN it accepts the MirtPage package and registered Firebase
+client. GIVEN a wrong origin, wrong Firebase file, missing publishable key,
+unknown target, or iOS build WHEN validation runs THEN it stops before native
+compilation. GIVEN the canonical App Links file WHEN inspected THEN it contains
+the approved MirtPage package and certificate without dropping the previous
+association. Passing configuration tests does not qualify an APK or Play
+release: the actual artifact, security audit, signer, and device workflows
+need their separate DEP-042/DEP-044 evidence.
+
+The exact approved Supabase Auth primary-origin operation was applied and read
+back on 2026-10-20. A separate read-only management API call confirmed the
+healthy project, `https://mirtpage.com` primary URL, both allowed callback URLs,
+and unchanged disabled Google login. Live MirtPage web, v1 mobile catalog,
+account-deletion and canonical App Links routes returned 200; the production
+schema-77 commit/readback receipt is retained privately. The sole admitted
+Android data target is now the reviewed MirtPage production API/Auth pair.
+`scripts/test-mobile-build-config.cjs` and `scripts/test-mobile-app-links.ts`
+cover admitted/denied targets and certificate-scoped links. Focused tests pass;
+the full source gates are recorded below. Actual sign-in, Android artifact and
+device workflows remain distinct evidence. The Play listing remains unuploaded.
+
+The owner separately approved the exact guarded Netlify primary-domain plan;
+its one-use apply and readback passed on 2026-10-20. The correct site/account
+now has `mirtpage.com` primary, with `suqpage.com` and both www names retained
+as aliases. Forced HTTPS and published deploy `6ad73e5a9df2756523e8ac95`
+were unchanged. MirtPage root/health and old-domain privacy returned 200.
+The owner approved using the full-square, exact Android launcher image as the
+Play listing icon. Google Play applies its own corner mask; the exported icon
+retains the approved M and orange shade without pre-rounded transparent edges.
+`npm run check` now passes on the admitted target after updating the stale
+notification fixture to test rejection of unreviewed Firebase bytes. A clean
+root/contracts web-only install passed the complete `npm run release:web` gate,
+including provider-backed HTTP smoke, PostgreSQL scale/tenant tests and a
+zero-finding web audit. A source-matched Android Hermes export and source map
+enumerated 1,693 runtime modules without the two affected build-tool packages;
+the full workspace audit still reports 20 high transitive tooling findings.
+These are source/readiness checks, not approval for an installable Android
+artifact; DEP-044's exact one-build exception remains mandatory.
+
 ## Problem and outcome
 
 Move the platform's visible identity and canonical domain to MirtPage/mirtpage.com

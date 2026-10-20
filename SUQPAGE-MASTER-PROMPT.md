@@ -1,8 +1,6 @@
-<!-- S145 staged rebrand: user confirms MirtPage, current palette, purchased
-mirtpage.com through GoDaddy and chooses NEW com.mirtpage.app/separate Play app. FE-070/BE-059/DEP-049 and
-proposed ADR-0029 govern the staged data-preserving transition. This note records
-approved direction, not a completed hosted/domain/app cutover. Existing product
-and release facts below remain current until their verified phase is reconciled. -->
+<!-- MirtPage is the current hosted web brand. DEP-049 governs the remaining Android
+and Play stages; historical Suqpage release facts below are retained
+only where their phase has not been superseded by the current status here. -->
 
 Current hosted MirtPage site serves public pages and mobile catalog APIs from
 Netlify deploy `6ad73e5a9df2756523e8ac95`. Its minute worker now starts
@@ -10,13 +8,16 @@ without Next.js request-only imports; monitored scheduled runs complete chat
 routing, inactivity, response escalation and queued email checks. The initial
 backlog routed waiting chats and the next observed run routed zero. The Gmail
 provider accepted two admin alerts, but recipient inbox delivery and a new
-labelled end-to-end chat have not yet been checked. Supabase Auth's primary URL
-and the Android binary/Play closed test remain separate cutover steps under
-DEP-049.
+labelled end-to-end chat have not yet been checked. Supabase Auth now uses
+`https://mirtpage.com` as its primary URL; exact old and new callback URLs stay
+allowed and Google login remains disabled. The approved change and an independent
+read-only project/configuration check passed. A complete live login remains to be
+exercised. Android APK/AAB and the new Play closed test are still separate steps
+under DEP-049.
 
-Local S145 candidate (not released): shared web/native presentation, original
-two-panel M artwork and active English/Amharic/Oromo copy now use MirtPage. The
-latest local introduction is “A professional digital showroom for every business.”
+Current shared web/native source uses the approved two-panel M artwork and
+English/Amharic/Oromo MirtPage copy. The hosted web introduction is “A
+professional digital showroom for every business.”
 Customer copy explains what businesses sell, make and grow, with identity,
 story, products and optional collections together, followed by direct contact
 through the business's configured channels, without searching social-post history.
@@ -25,31 +26,23 @@ web push workers locally accept the exact legacy and new titles; shared sender
 titles and Android channel IDs remain compatible. The final public identity is
 MirtPage throughout; old names remain only where historical records, stable
 provider/protocol identities or a verified transition require them. This does not
-authorize deleting business data or replacing credentials. Backend/email/default
-phases and the new Android/Play release remain pending under FE-070/BE-059/DEP-049;
-current deployed application facts below are unchanged.
-The local shipment and overdue-staff email adapters can select a guarded Gmail
-SMTP sender as an alternative to Resend, using a server-only Gmail app password
-entered separately for the website. Supabase Auth's existing Gmail SMTP setting
-does not provide that password to the application. Until the new website has its
-own configured credentials and a real send is verified, these application emails
-remain deferred; Auth sign-in mail remains a separate service.
+authorize deleting business data or replacing credentials. The Android/Play
+release remains pending under FE-070/BE-059/DEP-049. Hosted shipment and overdue
+staff email uses the separately configured server-only Gmail SMTP sender; live
+worker logs show two provider-accepted admin alerts. Recipient inbox delivery
+still needs a labelled test. Auth sign-in mail remains a separate service.
 The owner approved the combined local visuals on 2026-10-18 and requires the
 same approved M geometry and exact logo colors across web, native and exported
-assets. Full release gates and hosted changes remain separate. The owner also
-confirms the new domain purchased; independently verify its exact registration
-and DNS before preparing the guarded cutover. Exact GoDaddy7-record and Netlify
-site/domain beforeimages are verified. The independently approved new aliases
-and exact A/www DNS records are now saved/read back, preserving the existing
-primary and deployed application. Managed HTTPS now covers all four reviewed
-hosts; eight root/health probes and the unchanged published deploy/asset paths
-are verified. The new Firebase Android registration and separate Free MirtPage
-Play Draft exist for com.mirtpage.app; generated client configuration is protected.
-These are staging operations; canonical/runtime/mail/data/native release has not
-cut over. Hosted Auth now adds only the exact mirtpage.com/auth/callback alongside
-the old callback; site_url remains https://suqpage.com and Google login disabled.
-An independent243-field readback matches the approved patch with241 non-target
-fields unchanged; new-primary Auth remains a separate unapplied phase. The
+assets. GoDaddy ownership, records, and Netlify domain beforeimages are verified.
+Both new aliases and approved A/www records are saved/read back; managed HTTPS
+covers all four reviewed hosts. The separately approved guarded Netlify switch
+now makes mirtpage.com primary, while suqpage.com remains an HTTPS alias. The
+published MirtPage deploy is unchanged and all three checked public routes pass.
+The new Firebase Android
+registration and separate Free MirtPage Play Draft exist for com.mirtpage.app;
+its client configuration remains protected. The guarded hosted Auth transition
+now makes mirtpage.com primary while retaining both exact callbacks; independent
+readback confirms the intended fields and disabled Google provider. The
 refined en/am/om text passes27 actual headed Chrome checks/27 states across
 desktop/phone web and Expo, with no app/request/console/lifecycle errors. The owner
 approves this revised copy and full checks on2026-10-18; unchanged artwork
@@ -186,7 +179,9 @@ records/assets and compatible catalog readers remain preserved. Historical asset
 briefs and visual evidence remain under showroom-projects/WORKFLOW.md; those files
 do not enable a custom-request application feature.
 
-Suqpage is deployed at `https://suqpage.com`, with www redirected to the apex.
+The following S98 Suqpage baseline is historical; the current MirtPage web and
+Auth status is recorded at the top of this document and in DEP-049. At S98,
+Suqpage was deployed at `https://suqpage.com`, with www redirected to the apex.
 The generated Netlify origin remains an infrastructure compatibility address.
 Released web source `de688325e3c061e5d5031976b5b2de62e480ae00` and Netlify deployment
 `6aca91cb2f49de22d3839199` use schema 63. Complete check, web release, operations,
@@ -198,7 +193,7 @@ in `docs/SUQPAGE-S98-RELEASE-2026-10-08.md`. Real hosted reviewer web/native API
 sessions also pass. Regular hosted email and authenticated physical-phone checks
 remain separate from the local workflows and restricted reviewer verification.
 
-The official product name is:
+The S98 product name was:
 
 ```text
 Suqpage
@@ -212,10 +207,10 @@ Launch origin:
 configured HTTPS Netlify origin
 ```
 
-The owner owns `suqpage.com` and manages DNS at GoDaddy. The approved primary is
-`https://suqpage.com`, with `www` redirecting to it. DNS, hosting registration, HTTPS and the www redirect are verified. Hosted Auth
-uses the apex and /auth/callback after guarded apply/readback. The
-application canonical-origin cutover remains tracked under S18/DEP-026/DEP-029.
+At S98, the approved primary was `https://suqpage.com`, with `www` redirecting
+to it. That stage's DNS, hosting registration, HTTPS and Auth checks were
+verified. MirtPage now owns the primary web and Auth origins; the old domain
+remains an alias and allowed callback during the transition under DEP-049.
 
 Primary support contact:
 
@@ -2592,8 +2587,9 @@ with a separately reviewed reverse primary transition. Both dual policies retain
 the old callback; legacy settings patches cannot change either origin field.
 Old version-2 plans are refused before provider reads and must be replanned.
 The focused injected-port/credential suite passes65 tests, including exact current
-MirtPage mail and legacy-plan rejection; further hosted transition and full current-source
-integration gates remain pending under BE-059/DEP-049. Management tokens
+MirtPage mail and legacy-plan rejection. The owner-approved hosted primary-origin
+transition passed guarded apply and an independent read-only project/configuration
+check; real sign-in and current-source Android gates remain under BE-059/DEP-049. Management tokens
 never enter plan files.
 Hosted configuration pushes and raw-command workarounds are prohibited, including
 during incident recovery. Google/SMTP credential changes are separate authorized

@@ -3893,3 +3893,49 @@ inactivity, response escalation and email processing, then zero new routes
 and zero pending/failed jobs on a later invocation. Provider-accepted Gmail
 alerts are not yet proven in the recipient inbox; a labelled end-to-end chat
 workflow remains a separate verification.
+
+## S149 — hosted MirtPage Android target and Play artwork preparation (DEP-049 / DEP-042 / DEP-044)
+
+The exact owner-approved Supabase Auth primary-origin operation for project
+`sjeiiqxgscuqajpgddcc` passed the guarded apply, and an independent read-only
+management API check confirmed healthy project identity, `mirtpage.com` primary,
+both exact callbacks and disabled Google login. Live root, mobile catalog,
+account-deletion and new-package Asset Links returned 200; the protected
+schema-77 production commit/readback receipt remains under `.local/`.
+`apps/mobile/release-policy.json` now admits only the matching MirtPage API/Auth
+pair; `scripts/test-mobile-build-config.cjs` and
+`scripts/test-mobile-app-links.ts` pass admitted/denied origin, package,
+certificate, public-key and iOS cases. `npm run test:mobile:build`, the seven
+App Links cases and `npm run mobile:typecheck` pass. The approved charcoal
+feature graphics and canonical 512px logo icon are exported in
+`docs/play-store/mirtpage/assets/`; `scripts/test-mirtpage-draft-materials.cjs`
+verifies actual image dimensions, channels, icon byte identity, feature hash,
+listing bounds and the still-pending real Android screenshots. Fresh locked
+workspace audit reports 20 high findings in transitive Expo/Metro tooling;
+artifact/runtime review and exact one-build owner approval remain pending.
+Passing source checks do not establish an installable APK, Play upload, full
+login, or closed-test opt-ins.
+
+The separately owner-approved exact Netlify primary-domain plan applied and
+read back `mirtpage.com` as primary with the old domain and both www aliases;
+the published deploy stayed `6ad73e5a9df2756523e8ac95` and all three
+post-switch route checks passed. Protected result:
+`.local/mirtpage-final-release-20261019/s149-netlify-primary-result.json`.
+The owner approved the full-square Google Play icon after review of the exact
+Android launcher export. `docs/play-store/mirtpage/assets/icon.png` now matches
+`apps/mobile/assets/icon.png` byte for byte; the asset test checks dimensions,
+channels and opaque corners. Google's current icon design guidance is recorded
+in `docs/play-store/mirtpage/requirements.json`.
+
+The current-source full `npm run check` passed after replacing one stale
+notification fixture that expected the previously withheld Android target;
+the corrected test now proves the real policy rejects unreviewed Firebase
+bytes while fixture profiles accept only their exact pinned client. The clean
+web-only `npm run release:web` passed build, trace privacy, provider-backed
+HTTP smoke, PostgreSQL scale/tenant checks, TypeScript and zero-vulnerability
+web audit. Protected logs have SHA-256 `ce080be4c866679c892589b8ac72b9ad223d897e4a5e29bbe5b36677c404f0e5`
+and `7e414f540a3657c6e6effe399da842374464dc0b38ef39e15f04e964022b7d3c`.
+The prior direct web release attempt stopped at its intended mixed-install
+guard; the first isolated attempt passed its HTTP smoke but lacked the local
+PostgreSQL test connection. The corrected isolated run passed without changing
+or bypassing those guards. No new Android build or Play upload occurred.

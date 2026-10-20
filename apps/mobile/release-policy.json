@@ -7,5 +7,10 @@
   "firebaseAndroidAppId": "1:588262779708:android:9a9f3944058b1fcc248c39",
   "firebaseClientSha256": "a52bddd06936d2b22b755c3a3d927512a304af424480e05368f385afed1bb1c7",
   "certificateSha256": "0630C56F88DF874FD27296D1AA0848A68FC8345F702FE6802EDD8255B7211183",
-  "dataTargets": {}
+  "dataTargets": {
+    "mirtpage-production": {
+      "apiOrigin": "https://mirtpage.com",
+      "authOrigin": "https://sjeiiqxgscuqajpgddcc.supabase.co"
+    }
+  }
 }

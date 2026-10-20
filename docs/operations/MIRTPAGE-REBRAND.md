@@ -26,10 +26,13 @@ targets and fields were verified before the owner's approved alias/DNS/TLS stage
 Both new aliases, the reviewed A/www records and managed HTTPS are now verified:
 31 checks include both authoritative nameservers, all four certificate names,
 eight root/health HTTPS probes and unchanged deployment6acd6e4203a2e50c6b9286dd
-with its20 public assets. The existing primary remains suqpage.com; new hosts
-currently serve that unchanged application. This is domain staging, not the
-MirtPage code/canonical/runtime cutover. Earlier missing-domain and TLS-pending
-failures remain historical evidence, not current unavailability.
+with its20 public assets. That was the alias/DNS staging phase. The later
+MirtPage web deploy `6ad73e5a9df2756523e8ac95` is live. A separately
+approved guarded Netlify setting now makes `mirtpage.com` primary and retains
+`suqpage.com`, `www.mirtpage.com` and `www.suqpage.com` as HTTPS aliases. The
+published deploy remained unchanged; MirtPage root/health and old-domain
+privacy routes returned 200 after the switch. Earlier missing-domain and
+TLS-pending failures remain historical evidence, not current unavailability.
 
 MirtPage replaces Suqpage as the final public identity throughout. Retained old
 records and internal identifiers exist only for safe migration, compatibility
@@ -163,12 +166,12 @@ DEP-029's local version3 guard now supports exact legacy, dual-old-primary and
 dual-new-primary policies, with62 injected-port/credential cases passing in the
 complete check. Hosted plans/applies still require their exact protected target/
 field/digest approval and independent readback; local tests do not grant writes.
-The approved hosted callback-staging operation now adds only the exact new
-callback alongside the old. Independent actual readback matches the approved
-patch across243 fields with241 non-target fields preserved; site_url remains
-https://suqpage.com and Google login disabled. This does not switch the Auth
-primary. The later read-only new-primary plan is neither ready, approved nor
-applied; refresh it when candidate/runtime/mail readiness is established.
+The approved hosted callback-staging operation added the exact new callback
+alongside the old, with 241 non-target fields preserved in its readback. The
+separately approved primary-origin transition then set `site_url` to
+`https://mirtpage.com`. The exact guarded apply passed and a separate read-only
+management API check confirmed project health, the new primary, both callback
+URLs and Google login still disabled. A full live login/callback test remains.
 Preserve existing provider configuration. Google sign-in is currently disabled;
 changing consent branding does not authorize enabling it. Do not run config push
 or use broad provider writes as a shortcut.

@@ -3,22 +3,34 @@
   "status": "NOT_UPLOAD_READY",
   "brand": "MirtPage",
   "packageName": "com.mirtpage.app",
-  "assetFilesCreated": [],
-  "artworkStatus": "planned_only_no_actual_screenshots_or_raster_exports",
+  "assetFilesCreated": [
+    "docs/play-store/mirtpage/assets/icon.png",
+    "docs/play-store/mirtpage/assets/feature-graphic-en.png",
+    "docs/play-store/mirtpage/assets/feature-graphic-am.png",
+    "docs/play-store/mirtpage/assets/feature-graphic-om-promo.png"
+  ],
+  "artworkStatus": "owner_approved_logo_and_feature_graphics_exported_actual_android_screenshots_pending",
   "icon": {
-    "sourceCandidate": "public/brand/mirtpage-panels-mark.svg",
-    "file": null,
-    "approved": false
+    "sourceCandidate": "apps/mobile/assets/icon.png",
+    "file": "docs/play-store/mirtpage/assets/icon.png",
+    "approved": true
   },
   "featureGraphic": {
-    "file": null,
-    "approved": false,
-    "headlines": {
-      "en": "A digital showroom for every business.",
-      "am": "ለንግድዎ ዲጂታል ማሳያ።",
-      "om": "Agarsiisa dijitaalaa daldala keetiif."
+    "file": "docs/play-store/mirtpage/assets/feature-graphic-en.png",
+    "approved": true,
+    "ownerApprovedDirection": "charcoal",
+    "localeFiles": {
+      "en": "docs/play-store/mirtpage/assets/feature-graphic-en.png",
+      "am": "docs/play-store/mirtpage/assets/feature-graphic-am.png",
+      "omPromotionalOnly": "docs/play-store/mirtpage/assets/feature-graphic-om-promo.png"
     },
-    "artDirection": "Use the approved MirtPage identity and a restrained composition grounded in a real approved showroom capture. Keep key content central; never invent a screen."
+    "defaultSha256": "dd2fa1f993a1c61da9a9a76dacc53ea2397eb3a595b799d27d057ae3ea022b16",
+    "headlines": {
+      "en": "Digital showrooms. For every business.",
+      "am": "ለእያንዳንዱ ንግድ ዲጂታል ማሳያ።",
+      "om": "Agarsiisa dijitaalaa. Daldala hundaaf."
+    },
+    "artDirection": "Use the owner-approved charcoal layout with the canonical MirtPage logo, exact palette and central minimal headline. The abstract graphic does not depict an app screen."
   },
   "screens": [
     {

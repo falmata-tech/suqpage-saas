@@ -55,13 +55,15 @@ test('DEP-042 Android claims only registered signing identities and exact public
  assert.deepEqual(registry[1].relation,['delegate_permission/common.handle_all_urls']);
  assert.deepEqual(registry[1].target.sha256_cert_fingerprints,registry[0].target.sha256_cert_fingerprints);
  assert.equal(policy.certificateSha256,registry[1].target.sha256_cert_fingerprints[0].replaceAll(':',''));
- for(const packageName of ['com.suqpage.app.preview','com.suqpage.app','com.mirtpage.app'])assert.deepEqual(androidAppLinks(packageName),[],'No old-host claim or unqualified new target is generated');
+ for(const packageName of ['com.suqpage.app.preview','com.suqpage.app'])assert.deepEqual(androidAppLinks(packageName),[],'No old-host claim is generated');
  const qualified={relation:['delegate_permission/common.handle_all_urls'],target:{namespace:'android_app',package_name:'com.mirtpage.app',sha256_cert_fingerprints:registry[0].target.sha256_cert_fingerprints}};
  const qualifiedPolicy={...policy,dataTargets:{'mirtpage-production':{apiOrigin:'https://mirtpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}}};
  const fixture=(entries:unknown[],selectedPolicy=qualifiedPolicy)=>{const module={exports:{} as {androidAppLinks:(packageName:string)=>Array<{autoVerify:boolean;data:Array<{scheme:string;host:string;path?:string;pathPrefix?:string}>}>}};vm.runInNewContext(fs.readFileSync('apps/mobile/link-config.cjs','utf8'),{module,exports:module.exports,require:(id:string)=>id==='./release-policy.json'?selectedPolicy:entries});return module.exports;};
  assert.equal(fixture([]).androidAppLinks('com.mirtpage.app').length,0,'A qualified target without the registered association is insufficient');
  assert.equal(fixture([qualified],{...qualifiedPolicy,dataTargets:{'mirtpage-production':{apiOrigin:'https://suqpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}}}).androidAppLinks('com.mirtpage.app').length,0,'Old API target cannot enable new-host claims');
  const [filter]=fixture([qualified]).androidAppLinks('com.mirtpage.app');assert.equal(filter.autoVerify,true);
+ assert.deepEqual(androidAppLinks('com.mirtpage.app'),JSON.parse(JSON.stringify(fixture([qualified]).androidAppLinks('com.mirtpage.app'))),'The released package claims only the reviewed host, paths and certificate');
+ assert.equal(fixture([qualified],{...policy,dataTargets:{}}).androidAppLinks('com.mirtpage.app').length,0,'Withdrawing the production target disables Android claims');
  for(const item of filter.data){assert.equal(item.scheme,'https');assert.equal(item.host,'mirtpage.com');assert.ok(['/@','/tracking/'].includes(item.pathPrefix||'')||['/','/market','/featured','/about','/login','/account','/transport-plan','/tracking'].includes(item.path||''));}
  for(const fingerprints of [['invalid'],['AB:'.repeat(31)+'AB'],[...registry[0].target.sha256_cert_fingerprints,...registry[0].target.sha256_cert_fingerprints]])assert.throws(()=>fixture([{...qualified,target:{...qualified.target,sha256_cert_fingerprints:fingerprints}}]).androidAppLinks('com.mirtpage.app'));
  assert.deepEqual(androidAppLinks('evil.package'),[]);

@@ -3,16 +3,12 @@ const {spawnSync}=require('node:child_process');
 const fs=require('node:fs'),vm=require('node:vm');
 const actualBuild=require('../apps/mobile/build-config.cjs');
 const policy=require('../apps/mobile/release-policy.json');
-assert.deepEqual(policy.dataTargets,{},'Actual hosted runtime remains unqualified; tests cannot admit a real build');
+assert.deepEqual(policy.dataTargets,{'mirtpage-production':{apiOrigin:'https://mirtpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}},'Only the verified MirtPage production runtime is admitted');
 assert.equal(policy.appName,'MirtPage');assert.equal(policy.packageName,'com.mirtpage.app');
-const qualifiedPolicy={...policy,dataTargets:{'mirtpage-production':{apiOrigin:'https://mirtpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}}};
-// Only this injected test port qualifies a synthetic target; no production env override exists.
-const moduleFixture={exports:{}};
-vm.runInNewContext(fs.readFileSync('apps/mobile/build-config.cjs','utf8'),{module:moduleFixture,exports:moduleFixture.exports,URL,Buffer,require:id=>id==='./release-policy.json'?qualifiedPolicy:require(id)});
-const{mobileBuildSettings}=moduleFixture.exports;
-const env={SUQPAGE_MOBILE_BUILD_PROFILE:'preview',SUQPAGE_MOBILE_DATA_TARGET:'mirtpage-production',EXPO_PUBLIC_API_ORIGIN:qualifiedPolicy.dataTargets['mirtpage-production'].apiOrigin,EXPO_PUBLIC_SUPABASE_URL:qualifiedPolicy.dataTargets['mirtpage-production'].authOrigin,EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',EXPO_PUBLIC_EAS_PROJECT_ID:policy.expoProjectId};
+const{mobileBuildSettings}=actualBuild;
+const env={SUQPAGE_MOBILE_BUILD_PROFILE:'preview',SUQPAGE_MOBILE_DATA_TARGET:'mirtpage-production',EXPO_PUBLIC_API_ORIGIN:policy.dataTargets['mirtpage-production'].apiOrigin,EXPO_PUBLIC_SUPABASE_URL:policy.dataTargets['mirtpage-production'].authOrigin,EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',EXPO_PUBLIC_EAS_PROJECT_ID:policy.expoProjectId};
 for(const profile of ['development','preview','production']){assert.equal(mobileBuildSettings({...env,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).packageName,'com.mirtpage.app');assert.equal(mobileBuildSettings({...env,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).appName,'MirtPage');}
-for(const profile of ['preview','production'])assert.throws(()=>actualBuild.mobileBuildSettings({...env,SUQPAGE_MOBILE_BUILD_PROFILE:profile}),/approved mobile data target/);
+for(const profile of ['preview','production'])assert.equal(mobileBuildSettings({...env,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).dataTarget,'mirtpage-production');
 const profiles=require('../apps/mobile/eas.json');assert.equal(profiles.cli.appVersionSource,'remote');
 assert.equal(profiles.build.preview.autoIncrement,true);assert.equal(profiles.build.production.autoIncrement,true);
 assert.equal(profiles.build.preview.android.buildType,'apk');assert.equal(profiles.build.production.android.buildType,'app-bundle');
@@ -47,7 +43,7 @@ for(const profile of ['preview','production']){
 for(const profile of ['preview','production']){assert.equal(profiles.build[profile].env.SUQPAGE_MOBILE_DATA_TARGET,'mirtpage-production');assert.equal(profiles.build[profile].env.EXPO_PUBLIC_API_ORIGIN,'https://mirtpage.com');assert.equal(profiles.build[profile].env.EXPO_PUBLIC_SUPABASE_URL,'https://sjeiiqxgscuqajpgddcc.supabase.co');assert.equal(profiles.build[profile].environment,profile);}
 assert.equal(profiles.cli.requireCommit,true);assert.equal(profiles.submit.production.android.track,'internal');assert.equal(profiles.submit.production.android.releaseStatus,'draft');
 assert.equal(profiles.submit.production.android.serviceAccountKeyPath,'../../.local/mirtpage-play-submit/credentials.json','New app cannot borrow the old app-scoped submission source');
-console.log('Mobile build config checks passed: MirtPage defaults, exact qualified-target test port, unqualified real target denial, public keys and EAS/file/scheme boundaries.');
+console.log('Mobile build config checks passed: MirtPage defaults, exact qualified production target, wrong-target denial, public keys and EAS/file/scheme boundaries.');
 
 const ignore=require('ignore')().add(fs.readFileSync('.easignore','utf8'));
 for(const filename of ['.git','.git/objects/example','.local/review.json','.env.local','apps/mobile/.env.local','credentials.json','keys/private.keystore','suqpage-firebase-adminsdk-fixture.json','apps/mobile/push-service-account.json'])assert.equal(ignore.ignores(filename),true,`Private upload path: ${filename}`);

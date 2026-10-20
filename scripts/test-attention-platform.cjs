@@ -5,7 +5,7 @@ const assert=require('node:assert/strict');const fs=require('node:fs');const os=
   const policy=require('../apps/mobile/release-policy.json'),crypto=require('node:crypto');
   const valid={project_info:{project_id:'suqpage',project_number:'588262779708'},client:[{client_info:{mobilesdk_app_id:policy.firebaseAndroidAppId,android_client_info:{package_name:'com.mirtpage.app'}}},{client_info:{mobilesdk_app_id:'1:588262779708:android:old-fixture',android_client_info:{package_name:'com.suqpage.app'}}}]};
   const validBytes=Buffer.from(JSON.stringify(valid));
-  // A policy port isolates positive worker tests from the deliberately unqualified real target.
+  // A policy port admits disposable Firebase bytes while the real policy pins the reviewed provider download.
   const fixturePolicy={...policy,firebaseClientSha256:crypto.createHash('sha256').update(validBytes).digest('hex'),dataTargets:{'mirtpage-production':{apiOrigin:'https://mirtpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}}};
   const buildModule={exports:{}};vm.runInNewContext(fs.readFileSync('apps/mobile/build-config.cjs','utf8'),{module:buildModule,exports:buildModule.exports,URL,Buffer,require:id=>id==='./release-policy.json'?fixturePolicy:require(id)});
   const file=path.join(temporary,'google-services.json'),env={SUQPAGE_MOBILE_BUILD_PROFILE:'preview',EXPO_PUBLIC_API_ORIGIN:'https://mirtpage.com',SUQPAGE_MOBILE_DATA_TARGET:'mirtpage-production',EXPO_PUBLIC_SUPABASE_URL:'https://sjeiiqxgscuqajpgddcc.supabase.co',EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture_only',EXPO_PUBLIC_EAS_PROJECT_ID:policy.expoProjectId,SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED:'1',MIRTPAGE_GOOGLE_SERVICES_FILE:'',SUQPAGE_FIREBASE_PROJECT_ID:'suqpage'};
@@ -18,7 +18,7 @@ const assert=require('node:assert/strict');const fs=require('node:fs');const os=
   for(const profile of ['preview','production'])assert.equal(run({MIRTPAGE_GOOGLE_SERVICES_FILE:file,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).status,0,'Both hosted profiles select the exact new client while retaining the legitimate old client');
   assert.notEqual(run({SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED:'0'}).status,0,'Disabling alerts cannot bypass the required new Firebase source');
   assert.notEqual(run({SUQPAGE_GOOGLE_SERVICES_FILE:file}).status,0,'Old variable is never a new-package fallback');
-  const unqualified=spawnSync(process.execPath,['scripts/validate-mobile-build.cjs'],{encoding:'utf8',env:{PATH:process.env.PATH,...env,MIRTPAGE_GOOGLE_SERVICES_FILE:file},timeout:5000});assert.notEqual(unqualified.status,0);assert.match(unqualified.stderr,/approved mobile data target/,'Actual CLI remains blocked by its unqualified hosted target');
+  const unreviewed=spawnSync(process.execPath,['scripts/validate-mobile-build.cjs'],{encoding:'utf8',env:{PATH:process.env.PATH,...env,MIRTPAGE_GOOGLE_SERVICES_FILE:file},timeout:5000});assert.notEqual(unreviewed.status,0);assert.match(unreviewed.stderr,/Firebase client bytes do not match/,'Actual CLI must reject a disposable Firebase file even with the approved hosted target');
   const privateFixture='PRIVATE_FIXTURE_NEVER_PRINTED';
   fs.writeFileSync(file,'{"private_key":'+privateFixture+'}');
   const malformed=run({MIRTPAGE_GOOGLE_SERVICES_FILE:file});

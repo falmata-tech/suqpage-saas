@@ -2,6 +2,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const crypto=require('node:crypto');
 const {test}=require('node:test');
+const sharp=require('sharp');
 
 const files={
  listing:'docs/play-store/mirtpage/listing.json',
@@ -37,15 +38,19 @@ function validate(set){
  copy(l.promotionalOnlyLocales.om,'om promotional-only');assert.equal(l.promotionalOnlyLocales.om.consoleLocale,null);assert.equal(l.promotionalOnlyLocales.om.consoleLanguageStatus,'not_listed_in_official_store_translation_languages');
  assert.deepEqual(r.localePolicy.documentedListingCodes,{en:'en-US',am:'am'});assert.deepEqual(r.localePolicy.notDocumentedAsListingCode,['om']);
  assert.ok(Object.values(l.releaseGates).length>=8);assert.ok(Object.values(l.releaseGates).every(value=>value==='pending'));
- const sourceIds=['listing-fields','preview-assets','listing-languages','listing-practice'];assert.deepEqual(r.sources.map(source=>source.id),sourceIds);
- for(const source of r.sources){const url=new URL(source.url);assert.equal(url.origin,'https://support.google.com');assert.equal(source.checkedAt,r.checkedAt);assert.match(url.pathname,/^\/googleplay\/android-developer\/answer\/\d+$/);}
+ const sourceIds=['listing-fields','preview-assets','icon-design','listing-languages','listing-practice'];assert.deepEqual(r.sources.map(source=>source.id),sourceIds);
+ for(const source of r.sources){const url=new URL(source.url);assert.ok(source.checkedAt<=r.checkedAt);if(source.id==='icon-design'){assert.equal(url.origin,'https://developer.android.com');assert.equal(url.pathname,'/distribute/google-play/resources/icon-design-specifications');}else{assert.equal(url.origin,'https://support.google.com');assert.match(url.pathname,/^\/googleplay\/android-developer\/answer\/\d+$/);}}
  assert.equal(r.sources.find(source=>source.id==='listing-languages').url,'https://support.google.com/googleplay/android-developer/answer/9844778?hl=en','Use listing translation support, not the Console UI language table.');
  assert.deepEqual(r.textLimits,{title:30,shortDescription:80,fullDescription:4000,assetAltText:140});
  assert.deepEqual([r.assets.icon.width,r.assets.icon.height,r.assets.icon.bitDepth,r.assets.icon.maxBytes],[512,512,32,1048576]);
  assert.deepEqual([r.assets.featureGraphic.width,r.assets.featureGraphic.height,r.assets.featureGraphic.pngBitDepth,r.assets.featureGraphic.alphaAllowed],[1024,500,24,false]);
  const image=r.assets.phoneScreenshots;assert.deepEqual([image.plannedCount,image.minimumCount,image.maximumPerDeviceType],[6,2,8]);assert.deepEqual([image.minimumDimension,image.maximumDimension,image.maximumAspectRatio],[320,3840,2]);
  assert.deepEqual([image.chosenWidth,image.chosenHeight,image.chosenOrientation,image.chosenAspect],[1080,1920,'portrait','9:16']);assert.ok(image.chosenHeight/image.chosenWidth<=image.maximumAspectRatio);assert.equal(image.alphaAllowed,false);
- assert.equal(p.artworkStatus,'planned_only_no_actual_screenshots_or_raster_exports');assert.deepEqual(p.assetFilesCreated,[]);assert.equal(p.icon.file,null);assert.equal(p.icon.approved,false);assert.equal(p.featureGraphic.file,null);assert.equal(p.featureGraphic.approved,false);assert.ok(fs.existsSync(p.icon.sourceCandidate));
+ assert.equal(p.artworkStatus,'owner_approved_logo_and_feature_graphics_exported_actual_android_screenshots_pending');
+ assert.deepEqual(p.assetFilesCreated,['docs/play-store/mirtpage/assets/icon.png','docs/play-store/mirtpage/assets/feature-graphic-en.png','docs/play-store/mirtpage/assets/feature-graphic-am.png','docs/play-store/mirtpage/assets/feature-graphic-om-promo.png']);
+ assert.equal(p.icon.file,p.assetFilesCreated[0]);assert.equal(p.icon.approved,true);assert.equal(p.featureGraphic.file,p.assetFilesCreated[1]);assert.equal(p.featureGraphic.approved,true);assert.equal(p.featureGraphic.ownerApprovedDirection,'charcoal');assert.ok(fs.existsSync(p.icon.sourceCandidate));
+ assert.equal(r.assets.icon.status,'owner_approved_logo_export_ready');assert.equal(r.assets.featureGraphic.status,'owner_approved_charcoal_rgb24_exports_ready');
+ for(const file of p.assetFilesCreated)assert.ok(fs.existsSync(file),'Missing review artwork '+file);
  assert.equal(p.screens.length,6);assert.equal(new Set(p.screens.map(screen=>screen.id)).size,6);
  for(const locale of ['en','am','om']){
   assert.equal(new Set(p.screens.map(screen=>screen.alt[locale])).size,6,'Unique '+locale+' alt text');
@@ -80,6 +85,14 @@ function validate(set){
 }
 
 test('FE-070/DEP-049 MirtPage listing, artwork plan and campaign schemas remain honest unuploaded drafts',()=>validate(material));
+test('Play artwork exports have required dimensions, color modes and canonical icon bytes',async()=>{
+ const {presentation:p,requirements:r}=material;
+ const icon=fs.readFileSync(p.icon.file),canonical=fs.readFileSync('apps/mobile/assets/icon.png');assert.ok(icon.equals(canonical),'Store icon must match the approved full-square Android launcher bytes');
+ const iconMeta=await sharp(icon).metadata();assert.deepEqual([iconMeta.width,iconMeta.height,iconMeta.channels],[r.assets.icon.width,r.assets.icon.height,4]);assert.ok(icon.length<=r.assets.icon.maxBytes);assert.equal(r.assets.icon.shape,'full_square');
+ const {data,info}=await sharp(icon).raw().toBuffer({resolveWithObject:true});for(const [x,y] of [[0,0],[info.width-1,0],[0,info.height-1],[info.width-1,info.height-1]])assert.equal(data[(y*info.width+x)*info.channels+3],255,'Play icon corners must be full-bleed for Google masking');
+ for(const file of p.assetFilesCreated.slice(1)){const meta=await sharp(file).metadata();assert.deepEqual([meta.width,meta.height,meta.channels],[1024,500,3],file);}
+ assert.equal(crypto.createHash('sha256').update(fs.readFileSync(p.featureGraphic.file)).digest('hex'),p.featureGraphic.defaultSha256);
+});
 test('Character limits reject overlong localized title, short description, full description and alt text',()=>{
  for(const [field,max,message]of [['title',30,/am title/],['shortDescription',80,/am short description/],['fullDescription',4000,/am full description/]]){const changed=structuredClone(material);changed.listing.listings.am[field]='የ'.repeat(max+1);assert.throws(()=>validate(changed),message);}
  const changed=structuredClone(material);changed.presentation.screens[0].alt.om='x'.repeat(141);assert.throws(()=>validate(changed),/01-showroom alt/);
