@@ -10,6 +10,59 @@ change_level: L3
 
 # DEP-002 — Reproducible delivery and repository hygiene
 
+## GitHub task integration and agent skills (L0)
+
+The owner requests an explicit branch/PR/merge workflow and researched guidance
+for agent skills. Existing staging, review, required-check and hosted-release
+controls remain authoritative. This instruction-only change installs no package,
+changes no GitHub/Netlify setting and grants no merge or deployment permission.
+Master §§22/24 distinguish merged source from delivery and link the workflow;
+product behavior is unaffected.
+
+Ordered plan before implementation:
+
+1. Read actual default/head/PR/protection and delivery wiring; distinguish verified
+   repository state from vendor capabilities and a recommended future workflow.
+2. Document short-lived task branches, typed names/commits, explicit PR bases,
+   isolated agent worktrees, current-head reviews/checks and merge/release boundaries.
+3. Add one short project GitHub skill and link it from AGENTS/README; reuse the
+   existing PR template, making required evidence proportional to change level.
+4. Record upstream-skill adoption criteria and targeted candidates without running
+   installers or enabling integrations. Validate specs, links, skill structure,
+   existing workflow assertions and representative routing/merge-denial cases.
+5. Review and commit this isolated documentation task; keep the frozen recovery
+   checkout unchanged. Actual PR integration/settings/deployment remain separate.
+
+```gherkin
+Scenario: An agent prepares or integrates an authorized task
+  GIVEN a verified repository, default branch, task scope and existing protection
+  WHEN the agent prepares a branch or pull request
+  THEN its base and dependent branches are explicit and unrelated edits stay isolated
+  AND current-head required checks, reviews and authorization govern any merge
+  AND merging does not imply artifact approval, provider configuration or deployment
+
+Scenario: A reusable external skill is considered
+  GIVEN a skill with instructions and possible executable resources
+  WHEN adoption is evaluated
+  THEN its upstream revision, license, resources and conflicts are reviewed
+  AND installation does not grant new credentials or override repository rules
+  AND activation and actual workflow outcomes are qualified separately
+```
+
+Evidence mapping: existing `scripts/validate-specs.mjs` and
+`scripts/test-workflow.mjs`, local Markdown/skill structure checks, and a concise
+review of branch/review/merge-denial examples. These are L0 checks, not another
+application build or a claim that remote settings have changed.
+
+Focused implementation evidence: the 226-word instruction-only skill and selected
+local references validate; all 219 specifications/ADRs, the existing workflow,
+identity and narrative checks pass. Seven positive/negative routing expectations
+and merge-denial cases were reviewed; these are not a model benchmark or proof
+of automatic selection. The local release upstream was corrected without changing
+its source or remote branches. Current repository/provider audit evidence is
+linked from engineering readiness. No installer, dependency, remote setting,
+merge or deployment is part of this L0 change.
+
 ## Current documentation consolidation (L0)
 
 The master, active checklist and traceability index have accumulated repeated

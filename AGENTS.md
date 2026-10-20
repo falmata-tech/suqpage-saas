@@ -79,6 +79,7 @@ current specs retain authority; a skill grants no additional provider permission
 | Changed UI/UX/navigation or usability audit | `.agents/skills/mirtpage-browser-review/SKILL.md` |
 | Requested build, deployment, hosted change or release recovery | `.agents/skills/mirtpage-release/SKILL.md` |
 | Requested overall engineering/setup audit, housekeeping or workflow redesign | `.agents/skills/mirtpage-engineering-review/SKILL.md` |
+| Branch/PR/CI feedback work or an authorized merge/integration | `.agents/skills/mirtpage-github-workflow/SKILL.md` |
 
 Normal implicit selection is enabled by default; explicit `$skill-name` is also
 available. Actual discovery and selection require qualification in the host.
@@ -233,6 +234,10 @@ or treat generated illustrative media as a factual product photograph.
   outer enforcement boundary.
 
 ## Git task isolation and commit discipline
+
+Use [the GitHub workflow](docs/operations/GITHUB-WORKFLOW.md) for new branch and
+commit names, PR bases/reviews, merge qualification and delivery boundaries.
+These conventions do not retroactively rename or rewrite existing work.
 
 - Record `git status --short` before editing. Treat every existing modification
   and untracked file as user-owned unless the current task clearly created it.

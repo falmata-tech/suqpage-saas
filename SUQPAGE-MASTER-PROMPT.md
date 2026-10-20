@@ -791,7 +791,7 @@ Real Android keyboard/accessibility/push and Play delivery/enrollment need actua
 independent evidence and current device availability/authorization.
 
 Status updates distinguish implemented, tested, visually approved, committed,
-pushed and deployed. Store sanitized outcome summaries in specs/traceability;
+pushed, merged and deployed. Store sanitized outcome summaries in specs/traceability;
 protected logs/data/screenshots belong only in authorized ignored task evidence.
 Exact current release limits and remaining steps belong in DEP-049/checklist.
 
@@ -819,8 +819,9 @@ For a requested overall setup review, use
 [ENGINEERING-READINESS.md](docs/operations/ENGINEERING-READINESS.md) and DEP-002.
 Measure actual friction, prioritize coherent improvements and defer nonblockers;
 do not turn every small edit into an audit or promise an unattended daily agent.
-Project skills route browser, release and engineering work without replacing the
-contract or adding provider authority. For a product change, read the nearby
+Project skills route browser, release, engineering and
+[GitHub integration work](docs/operations/GITHUB-WORKFLOW.md) without replacing
+the contract or adding provider authority. For a product change, read the nearby
 specs through [the traceability map](specs/TRACEABILITY.md) rather than every spec.
 
 ### 24.1 Keep this product contract synchronized

@@ -17,7 +17,7 @@ adding frameworks. This assessment does not certify every module or endpoint.
 | Runtime/install | Node 24.18.1 baseline, locked npm graph, clean web install, separate mobile type/dependency checks | Native cold builds are expensive; retain input-matched outputs and measure stages before tuning |
 | Local development | Guarded `start-local-dev.mjs`, loopback admission and bounded PostgreSQL/Auth/Storage readiness | Keep one documented start path and current setup guidance |
 | Tests | Domain/security/SQL fixtures, actual Chrome workflows, disposable browser Supabase and separate mobile contracts | Older helpers duplicate port assumptions; operations readiness should probe the connection path actually used |
-| CI/CD | Five isolated jobs, pinned actions/runtime, npm caching, superseded-run cancellation and bounded failure artifacts; main protection independently read back on 2026-10-20 | Main enforces administrators, strict required checks and pull-request review; force pushes are disabled. Required checks are core/browser/container/dependency/postgres. This does not prove the current run is green |
+| CI/CD | Five isolated jobs, pinned actions/runtime, npm caching, superseded-run cancellation and bounded failure artifacts; main protection independently read back on 2026-10-20 | Main enforces administrators, PRs, strict five-job checks, resolved conversations and linear history; zero approving reviews are required and force pushes are disabled. Actual current-head results remain necessary |
 | Workflow code | TypeScript checks plus explicit JS script admission; actual inert main preflight remains required | Static checks cannot establish provider/SQL/runtime behavior; qualify linked dependency layouts as well as ordinary installs |
 | Environments/security | Separate local/disposable targets; tenant, role, origin, private-media and source-map tests; guarded hosted operations | Provider IAM, MFA, quota and credential-review cadence require an account-level assessment; no secrets are discovered here |
 | Dependencies | Weekly grouped npm and monthly action updates in `.github/dependabot.yml`; production audits and separate Android tooling admission | Keep build-tool advisories distinct from runtime exposure and preserve explicit exception scope |
@@ -25,6 +25,35 @@ adding frameworks. This assessment does not certify every module or endpoint.
 | Observability | `/api/health`, sanitized scheduled-worker counters and bounded failure evidence | External uptime alert delivery, response ownership and retention/cost settings are not established by repository inspection |
 | Documentation | Compact master, active work board and complete spec/evidence index validated, root-reviewed, committed and pushed on the isolated docs branch; browser guide/runbooks retained | Integration is pending. Numbered anchors, all IDs/relations and unfinished requests remain mapped; keep chronology in Git/existing records |
 | Agent tooling | Scoped tasks, explicit staging, source-bound evidence and three focused repo skills | Verify host discovery/routing in a fresh session; measure retries and time instead of promising token savings |
+
+GitHub follow-up: the default is `main` (no `master`), 68 commits behind the
+current release head in the 2026-10-20 read-only comparison. The stale draft PR
+is integration debt, not absent CI. The local release upstream has been corrected
+to its matching remote without changing source or remote branches. Actual main
+protection requires linear history, resolved
+conversations and strict five-job checks, with zero required approving reviews.
+[GitHub workflow](GITHUB-WORKFLOW.md) now documents task branches, typed commits,
+dependent PRs, current-head qualification and source-versus-deployment lineage.
+The three existing skills are now visible in the host catalog; implicit-routing
+accuracy remains unmeasured. No provider integration or merge has been enabled
+by adding those instructions.
+
+The audit's protected receipt is
+`.local/mirtpage-final-release-20261019/s151-batch-audit/workflow-improvement-research/repository-readonly-audit-20261020/audit-result.json`.
+Draft PR #36 targets `main` from the old `release/mirtpage-launch` head; its green
+checks cover that old head only. The separate docs branch is 70 commits ahead
+of main, including its two docs-only commits after the current release source.
+Local main also has two commits absent from current remote main; preserve them
+before any local-main reconciliation. Do not reset or delete branches blindly.
+
+Fresh Netlify site reads report Git provider, repository path and branch as null.
+GitHub's workflow has no Netlify publishing step, so current deployment is the
+separate guarded artifact operation, not a reported main-push trigger. External
+hooks were not inventoried; recheck wiring before merge. Old nonrequired Vercel
+preview checks are not evidence of the current production host. The local default
+VS Code extension inventory includes Codex, GitHub Actions, GitLens and Git Graph;
+the GitHub Pull Requests extension was not listed. It is optional while `gh`
+already supplies the working GitHub interface. Other editor profiles are unverified.
 
 The package files currently specify Next.js 16.3.8, Expo 57 and React Native
 0.86.3. This is an observation, not a recommendation to freeze future security

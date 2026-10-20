@@ -42,6 +42,14 @@ recovery must record its separate release-source lineage truthfully.
 
 ## Current interpretation of inherited contracts
 
+DEP-002 also maps the focused GitHub workflow skill and
+[branch/PR/merge procedure](../docs/operations/GITHUB-WORKFLOW.md). Its L0 evidence
+is spec/workflow/identity/narrative validation, skill/reference checks and reviewed
+routing/merge-denial cases. The three previously installed project skills now
+appear in the host catalog; new GitHub-skill discovery and implicit selection
+remain separately qualified. Current branch/provider audit and integration debt
+belong in engineering readiness; no source merge or production change is claimed.
+
 - Products are the current catalog, including ready/custom-order labels:
   [FE-067]/[BE-056] supersede older service-offering behavior.
 - Business contact is configured external SMS/Telegram/WhatsApp with localized

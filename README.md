@@ -79,15 +79,20 @@ synthetic map tiles. Screenshots alone do not establish workflow correctness.
 
 ## Agent skills and engineering upkeep
 
-Project skills in `.agents/skills/` route browser review, requested release work
-and overall engineering review. Codex supports normal implicit selection and
-explicit `$mirtpage-browser-review`, `$mirtpage-release` and
-`$mirtpage-engineering-review`. Fresh-session discovery and selection must be
-verified in the actual host; the files do not grant provider permissions.
+Project skills in `.agents/skills/` route browser review, delivery, engineering
+review and GitHub integration. Codex supports normal implicit selection and
+explicit `$mirtpage-browser-review`, `$mirtpage-release`,
+`$mirtpage-engineering-review` and `$mirtpage-github-workflow`. Verify discovery
+and selection in the actual host; the files do not grant provider permissions.
 
 [Engineering readiness](docs/operations/ENGINEERING-READINESS.md) records the
 current setup, known gaps and prioritized improvements. Prefer measured fixes
 to existing commands over more frameworks, mandatory ceremonies or paid tools.
+
+[GitHub workflow](docs/operations/GITHUB-WORKFLOW.md) covers task branches,
+commit names, PR review and authorized merge/release boundaries. Use
+`$mirtpage-github-workflow` for that work; installed project skills are instructions,
+not additional app dependencies or merge/deployment permissions.
 
 ## Operate and release
 

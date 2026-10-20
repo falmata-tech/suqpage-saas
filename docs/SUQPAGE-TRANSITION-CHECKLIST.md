@@ -227,6 +227,18 @@ FE-049/052/055/063/064/070/071; DEP-041/044/049.
 
 ### R08 — Finish documentation and workflow housekeeping
 
+GitHub workflow follow-up (DEP-002, L0):
+
+- [x] Inspect actual default branch/divergence, PRs, protection and reported
+  deployment wiring, retaining uninspected-hook limitations.
+- [x] Add one focused GitHub skill and concise branch/commit/PR/merge guidance;
+  retain the existing PR template with change-level-appropriate evidence.
+- [x] Review selected upstream skill candidates and installation/provenance rules;
+  validate the documentation/skill and representative workflow cases.
+- [ ] Integrate the reviewed task after its parent documentation/release dependencies;
+  verify current-head checks and delivery wiring. No remote merge, settings
+  change or deployment is implied by the instruction-only skill.
+
 DEP-002; additive to shipping. Work only in the isolated documentation worktree
 from `7e24014`; keep the exact release checkout unchanged.
 
@@ -245,8 +257,9 @@ Ordered L0 plan, recorded before replacing documents:
   isolated docs branch. Preserve failed receipts and the composite/raw-exit distinction.
 - [ ] Integrate that docs branch and verify applicable checks on the resulting
   head; its isolated publication does not change the exact release checkout.
-- [ ] Verify actual skill discovery/selection in a fresh session; reviewed trigger
-  cases and Node YAML checks are not host-discovery proof. Missing PyYAML is a
+- [x] Verify the three original project skills appear in the current host catalog.
+- [ ] Verify new GitHub-skill discovery and actual selection/routing; reviewed
+  cases and Node YAML checks alone do not prove selection. Missing PyYAML is a
   recorded optional-validator limitation, not permission to install globally.
 - [ ] Prioritize demonstrated engineering follow-ups from
   [engineering readiness](operations/ENGINEERING-READINESS.md), measure observed
