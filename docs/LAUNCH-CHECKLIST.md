@@ -1,18 +1,21 @@
 # Controlled MVP launch checklist
 
-Current checkpoint: BE-035/DEP-031 retire all executable file-database tooling.
-Use `docs/POSTGRES-ONLY-RUNBOOK.md` and `docs/SUQPAGE-LAUNCH-WIRING-AUDIT.md` for
-current commands and evidence. Earlier dated results below are historical and do
-not authorize retired commands or establish readiness of this candidate.
+Current MirtPage work and qualification live in the
+[active delivery checklist](SUQPAGE-TRANSITION-CHECKLIST.md) and
+[DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md).
+Netlify is the host; existing Supabase remains the managed data/Auth/media target.
+BE-035/DEP-031 retire all executable file-database tooling. The inherited pilot
+checks below are historical reference, not current commands or proof of readiness.
+Do not run retired cutover commands or recreate the former Vercel topology.
 
-
-## Required before launch
+## Historical pilot checks
 
 - [ ] Confirm all release-affecting specs are `done` and `npm run validate:specs` passes.
 - [ ] Confirm traceability includes implementation, tests, rollout and rollback evidence.
 - [ ] Set a production HTTPS `NEXT_PUBLIC_APP_URL`.
 - [ ] Set `SUQPAGE_DATABASE_DRIVER=postgres` and the Supabase transaction
-      pooler URL in Vercel. Keep the direct URL only in the operator environment.
+      pooler URL only in the verified Netlify Production secret store, through the
+      current scoped settings review. Keep the direct URL operator-only.
 - [ ] If using Supabase Storage, create a private bucket, configure server-only
       credentials, complete the copy-only hash verification, and retain local
       source media through the rollback window.

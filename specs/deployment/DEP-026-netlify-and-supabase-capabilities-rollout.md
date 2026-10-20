@@ -4,11 +4,27 @@ title: Netlify and bounded Supabase capabilities rollout
 status: in_progress
 related: [DEP-042, DEP-039, FE-019, FE-021, FE-038, BE-018, BE-023, BE-024, BE-026, BE-027, BE-030, BE-031, DEP-015, DEP-020, DEP-023, DEP-027, DEP-028, ADR-0014, ADR-0015, ADR-0016, ADR-0017]
 owners: [deployment, operations, security]
-last_updated: 2026-09-21
+last_updated: 2026-10-20
 change_level: L4
 ---
 
 # DEP-026 - Netlify and bounded Supabase capabilities rollout
+
+## Current hosting boundary
+
+MirtPage is hosted on the existing Netlify site at `https://mirtpage.com`;
+Supabase remains the PostgreSQL, Auth and private Storage provider. DEP-049 and
+the active delivery checklist own exact current source/artifact/rollout status.
+A Git merge does not itself qualify the separately guarded complete-artifact
+publication. Retain the previous compatible Netlify deploy for reviewed recovery;
+Vercel DNS or deployments are not the current rollback path.
+
+The owner-requested removal of this repository’s Vercel Git publishing connection
+is verified for the exact project/repository by a fresh provider reload. The
+project, deployment history and account App installation remain; Netlify,
+domains/secrets and other repositories were not changed. The next authorized
+source push still needs the no-trigger check in V01. DEP-002 controls this L0
+documentation reconciliation; DEP-023 is historical.
 
 ## S139 blocked browser basemap (local candidate; no rollout)
 
@@ -48,11 +64,21 @@ buying cases; an old binary that treats them as chat is not a safe rollback.
 
 ## Problem and outcome
 
-Suqpage needs a reversible Netlify production option and a disciplined way to
-use Supabase Auth, Storage, Realtime, PostGIS, and search extensions without
-turning every free service into an unconditional runtime dependency.
+MirtPage uses Netlify hosting and bounded Supabase capabilities. Keep Auth,
+Storage, Realtime, PostGIS and search extensions behind their existing contracts
+without turning every free service into an unconditional runtime dependency.
 
 ## Named topology
+
+Current application hosting is the existing Netlify site `africmade`
+(`26c795eb-5560-4a88-b38d-3cc922c2a5e6`) with primary `mirtpage.com`.
+PostgreSQL, Auth and private media stay on their existing Supabase target.
+Exact release and provider settings are admitted under DEP-049/DEP-029.
+
+### Historical migration topology
+
+The following dated preparation describes the earlier migration, not current
+DNS instructions, ownership claims or a valid Vercel rollback target.
 
 S18 domain preparation (2026-09-21): owner confirms ownership and completed GoDaddy
 DNS for `suqpage.com`, with apex primary and `www` redirect. Alias-only association
@@ -141,13 +167,18 @@ Scenario: Visitor zooms the map
 
 ## Rollout and rollback
 
-Create a Netlify candidate on the exact approved commit, configure scoped
-environment variables, and test its generated domain. DNS changes only after
-all public/authenticated workflows pass. Restore the current Vercel DNS target
-for rollback; freeze the failed candidate and reconcile provider state rather
-than dual writing.
+Use the exact source/CI/admitted complete artifact and current target under
+DEP-049. Verify the independently selected site/account/environment and retain
+the prior compatible Netlify deployment before publication. Stop on an unexpected
+or ambiguous outcome; any retry, restoration or setting/DNS change requires its
+own reviewed direction. Code rollback does not reverse database/Auth/media state.
+Do not restore historical Vercel DNS or silently dual write.
 
 ## Current evidence
+
+Use DEP-049 and the active delivery checklist for current MirtPage qualification.
+The older implementation/preparation evidence below is retained for history; its
+then-pending credentials, domains and candidate status are not current instructions.
 
 - `netlify.toml` and the static readiness gate define the Node 24/OpenNext
   candidate without storing credentials or pinning a legacy adapter.

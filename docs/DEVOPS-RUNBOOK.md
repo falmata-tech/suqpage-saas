@@ -15,11 +15,13 @@ It does not authorize a production launch, DNS change, or destructive cutover.
   selects PostgreSQL through its own transaction pooler, Supabase Auth, and its
   own private Storage bucket through Suqpage's server-side media port. Suqpage
   remains the only role, capability, tenant, and suspension authority.
-- PostgreSQL tooling supports native installation, isolated fixtures, and
-  explicitly approved archive recovery. The linked Supabase target has reconciled data,
-  and the generated Vercel candidate has passed historical PostgreSQL-backed
-  smoke checks. Netlify is the current reversible candidate and receives no DNS
-  change until the exact current release repeats all gates.
+- PostgreSQL tooling supports native installation, isolated fixtures and
+  explicitly approved archive recovery. The linked Supabase target remains
+  authoritative; MirtPage is hosted on Netlify at `https://mirtpage.com`.
+  [DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md) and the
+  [active checklist](SUQPAGE-TRANSITION-CHECKLIST.md) own current release status.
+  Historical Vercel cutovers are retained in DEP-023, not a current deployment or
+  rollback instruction. Its repository Git connection is now disconnected.
 
 ## Local Supabase development
 
@@ -283,40 +285,44 @@ Keep these outside GitHub artifacts and the repository:
 Production must use HTTPS, private Supabase Storage, bounded PostgreSQL pooling,
 a retained rollback source, and health monitoring on `/api/health`.
 The Next.js configuration explicitly includes its source-map runtime and relative
-LRU cache dependency in every Vercel function trace. A deployment that logs a
-missing framework runtime file fails smoke checks and must not receive the custom
-domain. Do not add a broad `./lib/**/*` output-tracing exclusion: Vercel applies
-it to Next.js's own server library. The release trace test enforces privacy for
-the project's source paths without deleting framework runtime files.
+LRU cache dependency in server-function traces. Missing framework/native runtime
+files fail artifact admission and smoke checks. Do not add a broad `./lib/**/*`
+output-tracing exclusion that also removes Next.js’s own server library. Preserve
+the release trace privacy checks and required Sharp/libvips packages; retiring a
+hosting integration does not remove portable framework dependencies.
 
-## Netlify candidate
+## Netlify publication and recovery
 
-Netlify's maintained Next.js runtime supports App Router, SSR, route handlers,
-Server Actions, image optimization, and ISR through OpenNext. The repository
-intentionally does not pin a legacy Next.js plugin.
+Netlify’s maintained Next.js runtime provides the application host. The existing
+site is `africmade` (`26c795eb-5560-4a88-b38d-3cc922c2a5e6`), with primary
+`mirtpage.com`. Do not create a replacement site or connect another automatic
+publishing path as cleanup. Existing source integration and the separately
+reviewed complete-artifact publication remain distinct.
 
-1. Authenticate the CLI with an isolated local home so an unrelated Netlify
-   account or project cannot be selected: `HOME="$PWD/.local/netlify-home" npx
-   --yes netlify-cli@latest login`. Link only the Suqpage GitHub repository and
-   verify the team and site before every deploy. `netlify.toml` supplies
-   `npm run build` and Node `24.18.1`.
-2. Add separate Preview- and Production-scoped environment variables in the
-   Netlify UI. Preview values must belong only to the Preview Supabase project;
-   Production values must belong only to Production. Both require their own
-   PostgreSQL pooler, publishable key, service-role key, private bucket, and
-   privacy salt. Never place a direct PostgreSQL migration URL in Netlify or
-   reuse a secret across scopes.
-3. Keep existing custom domains on their verified current targets. Test the generated Netlify domain
-   for health, public routes, Auth, upload/read, support, PWA, and tenant denial.
-4. Run the exact release and remote checks. Only then add the custom domain and
-   update DNS. Retain the prior Vercel target for the monitored rollback window.
-5. Monitor Netlify credits. The free plan has a hard monthly credit limit and
-   can pause service when exhausted; it is suitable for a free commercial
-   start, not unmetered production.
+1. Follow DEP-049’s current source/CI/artifact admission and the active checklist;
+   verify the exact account/site/environment and current published deployment.
+   Use the existing reviewed provider adapter and credential source, not an
+   ambient profile or a new unpinned CLI/login command.
+2. Keep Production secrets scoped to the verified production target and previews
+   isolated from them. Settings changes require their existing exact review;
+   do not copy secrets to Vercel or expose a direct migration URL to the app.
+3. Preserve the complete admitted static/config/server/edge/worker/blob artifact
+   and prior compatible Netlify deployment. Verify public/authenticated workflows,
+   optimized images, private-media denial and worker health after publication.
+4. On an unexpected or ambiguous provider response, stop. Any recovery operation
+   requires exact reviewed direction; do not retry, restore, switch DNS or revert
+   to a historical Vercel deployment automatically. Database/Auth/media recovery
+   is a separate operation, not implied by selecting an older application deploy.
+5. Monitor the verified Netlify plan’s current usage and limits. A free service
+   is not unmetered production; unnecessary deploys and unbounded polling remain
+   prohibited. Recheck current provider terms before changing capacity or cost.
 
-The user action required for this stage is Netlify browser/CLI authentication,
-choosing the Netlify team/site name, adding secrets in its encrypted UI, and
-later controlling DNS at the registrar. Do not paste any secret into chat.
+The owner-requested Git disconnect is verified for
+`falmata-ds-projects/mirtpage` → `falmata-tech/suqpage-saas`, including a fresh
+provider reload on 2026-10-20. The project, historical deployments and GitHub App
+account installation remain; Netlify, domains/secrets and other repositories
+were not changed. Qualification of no new Vercel trigger at the next authorized
+source push remains open in V01. Keep `.vercel` privacy exclusions.
 
 ## Realtime, PostGIS, and map geography
 

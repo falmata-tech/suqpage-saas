@@ -88,13 +88,19 @@ installed `gh pr merge --match-head-commit <verified-sha>` option to prevent a
 last-minute head change from merging unnoticed. Auto-merge is optional and needs
 the same authorization/review contract; this guide does not enable it.
 
-Check delivery wiring before merging: a Netlify production branch can deploy
-automatically on merge. Source-integration approval does not implicitly approve
-an unreviewed production rollout. Our current guarded artifact publication is
-separate from a Git merge. Never add a second automatic publishing path without
-reconciling existing release controls, environment isolation and provider settings.
-Deploy Previews may be useful with isolated preview data/credentials; a preview
-URL alone does not prove that isolation or admission.
+Check actual delivery wiring before merging; a GitHub App may publish even when
+traditional repository hooks are empty and Actions has no deploy step. The
+owner-requested Vercel Git disconnect for this project/repository is verified by
+fresh provider reload. The account App installation, project and old deployments
+remain. Confirm no new Vercel deployment on the next authorized source push before
+closing checklist V01; that trigger evidence remains pending. Do not uninstall
+the App for other repositories or delete past deploys as branch cleanup.
+
+Current guarded Netlify artifact publication is separate from a Git merge.
+Source-integration approval does not admit an unreviewed production rollout. A
+future Git-connected production branch could auto-deploy; never add another
+publishing path without reconciling release admission, environment isolation and
+provider settings. A preview URL alone does not prove isolation or release safety.
 
 After merge, verify the merge result/default head and required post-merge checks;
 record what source is integrated and what artifact is actually deployed. Remove
@@ -106,9 +112,9 @@ tag/version until the delivery workflow actually uses it.
 
 A skill is an instruction directory, sometimes with executable resources. It is
 not normally an application dependency. Codex supports `$skill-installer`;
-reviewed files can also be versioned in `.agents/skills/`. Community installers
-such as `npx skills` and Netlify's `npx @netlify/skills` exist. npm/npx distributes
-the installer; installing a skill is distinct from adding a production dependency.
+reviewed files can also be versioned in `.agents/skills/`. Netlify’s
+`npx @netlify/skills` is an optional installer, not a current project requirement.
+Installing a skill is distinct from adding a production dependency.
 
 Before adoption, inspect the maintainer, license, pinned revision/version, entire
 entrypoint and relevant scripts/hooks/MCP dependencies. Check for broad staging,
@@ -146,4 +152,3 @@ add an approving-review requirement where the actual policy requires none.
 - [Netlify deployment contexts](https://docs.netlify.com/deploy/deploy-overview/)
 - [OpenAI skill catalog](https://github.com/openai/skills/tree/main/skills/.curated)
 - [Netlify maintained skills](https://github.com/netlify/context-and-tools)
-- [Community skills installer](https://github.com/vercel-labs/skills)

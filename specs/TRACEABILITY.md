@@ -50,6 +50,11 @@ appear in the host catalog; new GitHub-skill discovery and implicit selection
 remain separately qualified. Current branch/provider audit and integration debt
 belong in engineering readiness; no source merge or production change is claimed.
 
+- Current hosting is Netlify under [DEP-026]/[DEP-049]. [DEP-023] retains the
+  former Vercel cutover evidence as deprecated history. DEP-002/V01 records the
+  exact project Git disconnect and fresh provider readback; the next-source-push
+  no-trigger check is still open. The project, account App installation, old
+  deployments, portable dependencies and privacy exclusions remain intact.
 - Products are the current catalog, including ready/custom-order labels:
   [FE-067]/[BE-056] supersede older service-offering behavior.
 - Business contact is configured external SMS/Telegram/WhatsApp with localized
@@ -231,7 +236,7 @@ related layers, test criteria and detailed completion evidence.
 | [DEP-020] Suqpage marketplace rollout | in_progress | [FE-024], [FE-025], [FE-033], [FE-034], [BE-023], [BE-029], [DEP-017], [DEP-019], [DEP-021], [DEP-024], [DEP-025], [DEP-026] | [discovery-contract.ts](../lib/discovery-contract.ts), [discovery.ts](../lib/discovery.ts) | [Test plan][DEP-020-tests]: `test-discovery.ts`, `test-scale-fixtures.ts` |
 | [DEP-021] Data-preserving launch hardening | in_progress | [FE-009], [FE-024], [FE-025], [FE-026], [BE-008], [BE-010], [BE-024], [BE-025], [BE-026], [DEP-015], [DEP-020], [DEP-022], [ADR-0012], [ADR-0013] | Process-section controlled video, private request and support attachments, post-import labeled image checklist, exact… | [Test plan][DEP-021-tests]: `test-security.ts`, `http-smoke.mjs` |
 | [DEP-022] PostgreSQL and guarded delivery readiness | done | [FE-026], [BE-024], [BE-026], [DEP-001], [DEP-002], [DEP-015], [DEP-021], [ADR-0012], [ADR-0013] | Stable administrator destinations, support-agent management, role-aware navigation, asynchronous password work, bounded… | [Test plan][DEP-022-tests]: `check-runtime-baseline.mjs` |
-| [DEP-023] Supabase and Vercel production cutover | in_progress | [BE-027], [BE-028], [BE-029], [BE-030], [FE-031], [FE-032], [FE-033], [FE-034], [FE-037], [DEP-024], [DEP-025], [DEP-026], [DEP-027], [ADR-0013], [ADR-0014], [ADR-0015] | [postgres-migrations.ts](../lib/postgres-migrations.ts), [invitations.ts](../lib/invitations.ts) | [Test plan][DEP-023-tests] |
+| [DEP-023] Supabase and Vercel production cutover | deprecated; historical topology | [BE-027], [BE-028], [BE-029], [BE-030], [FE-031], [FE-032], [FE-033], [FE-034], [FE-037], [DEP-024], [DEP-025], [DEP-026], [DEP-027], [ADR-0013], [ADR-0014], [ADR-0015] | [postgres-migrations.ts](../lib/postgres-migrations.ts), [invitations.ts](../lib/invitations.ts) | [Test plan][DEP-023-tests] |
 | [DEP-024] Daily Featured schedule migration and rollout | in_progress | [FE-021], [FE-033], [BE-023], [BE-027], [BE-029], [DEP-020], [DEP-023] | S36 single 8:30 PM–midnight EAT agenda | [Test plan][DEP-024-tests]: `test-featured-schedule.ts`, `test-postgres-runtime.ts` |
 | [DEP-025] PWA cache and standalone-shell rollout | in_progress | [FE-034], [FE-036], [FE-037], [DEP-002], [DEP-020], [DEP-023], [DEP_BASE] | Current public routes, query/referral contracts, active component hooks, Daily Featured program modules, Marketplace admin, exact… | [Test plan][DEP-025-tests]: `pwa-cleanup-worker.js` |
 | [DEP-026] Netlify and bounded Supabase capabilities rollout | in_progress | [DEP-042], [DEP-039], [FE-019], [FE-021], [FE-038], [BE-018], [BE-023], [BE-024], [BE-026], [BE-027], [BE-030], [BE-031], [DEP-015], [DEP-020], [DEP-023], [DEP-027], [DEP-028], [ADR-0014], [ADR-0015], [ADR-0016], [ADR-0017] | Selectable identity adapter, immutable provider-to-Suqpage identity links, operator-only bcrypt migration, managed password/Google… | [Test plan][DEP-026-tests]: `test-netlify-native.mjs` |

@@ -10,6 +10,48 @@ change_level: L3
 
 # DEP-002 — Reproducible delivery and repository hygiene
 
+## Retire Vercel publishing for this repository (L0 documentation)
+
+The owner requests removal of MirtPage’s Vercel hosting connection. Netlify is the
+current host; DEP-026 and DEP-049 own its release/recovery admission. DEP-023 is
+retained as historical cutover evidence. Master §§17/22/24 keep the same provider,
+source-versus-artifact and task-isolation boundaries; no product rule changes.
+
+Ordered plan, recorded before editing operator documentation:
+
+1. Inventory the exact repository/App/project and active hosting instructions.
+2. Correct current runbooks/checklists, label superseded topology historical and
+   preserve immutable IDs/evidence, framework dependencies and privacy exclusions.
+3. Run focused specification, local-link, workflow-contract and whitespace checks;
+   return the isolated L0 diff for review before commit/push. No rebuild is needed.
+4. Separately verify project identity and linked repository in the provider, then
+   disconnect only this project’s Git connection and verify its actual outcome.
+   No accountwide App uninstall, project/deployment deletion, domain/secret change
+   or other-repository action is included.
+
+```gherkin
+Scenario: Retired hosting instructions are reconciled
+  GIVEN Netlify hosts MirtPage and the owner requests Vercel retirement
+  WHEN current operator documentation is updated
+  THEN it directs delivery and recovery through the existing Netlify admission
+  AND historical Vercel evidence and private-state exclusions remain intact
+  AND documentation does not claim a managed disconnection without provider readback
+```
+
+Focused evidence: `npm run validate:specs`, existing `npm run test:workflow`, local
+Markdown destinations and a docs-only diff review. Local validation passes all
+219 specs/ADRs, the workflow contract, fourteen checker regressions, five selected
+script checks and 688 local destinations/anchors. Immutable IDs/relations and the
+DEP-023 historical body remain unchanged. The first template-inclusive coverage
+assertion failed and its corrected scope is retained in protected evidence.
+Root reviewed the exact nine-file L0 diff and managed-result reconciliation;
+commit/push remain separate. The separate provider action removed only the
+verified `falmata-ds-projects/mirtpage` → `falmata-tech/suqpage-saas` Git connection;
+fresh reload confirms it. Project/deployments and the account App installation
+remain, with Netlify/domains/secrets/other repos unchanged. V01 retains the open
+no-trigger check at the next authorized source push. Documentation validation
+neither performs the disconnect nor qualifies a new deployment.
+
 ## GitHub task integration and agent skills (L0)
 
 The owner requests an explicit branch/PR/merge workflow and researched guidance

@@ -47,11 +47,20 @@ Local main also has two commits absent from current remote main; preserve them
 before any local-main reconciliation. Do not reset or delete branches blindly.
 
 Fresh Netlify site reads report Git provider, repository path and branch as null.
-GitHub's workflow has no Netlify publishing step, so current deployment is the
-separate guarded artifact operation, not a reported main-push trigger. External
-hooks were not inventoried; recheck wiring before merge. Old nonrequired Vercel
-preview checks are not evidence of the current production host. The local default
-VS Code extension inventory includes Codex, GitHub Actions, GitLens and Git Graph;
+GitHub’s workflow has no Netlify publishing step; current publication is the
+separate guarded artifact operation. The pre-disconnect audit found empty
+conventional GitHub hooks but active Vercel App previews, including integration
+head `580b99d`, and a historical main Production-labelled deployment. Empty hooks
+do not rule out App publishing. The exact `falmata-ds-projects/mirtpage` →
+`falmata-tech/suqpage-saas` Git connection was subsequently removed and verified
+by a fresh provider reload on 2026-10-20. The project, old deployments and account
+App installation remain; Netlify, domains/secrets and other repos are unchanged.
+No-trigger qualification at the next authorized source push remains open in V01.
+Protected inventory and result live under the existing research directory:
+`repository-readonly-audit-20261020/vercel-retirement-inventory-plan.json` and
+`vercel-retirement/result.json`. The docs patch records the separately verified
+provider action; it does not itself disable a service.
+The local default VS Code extension inventory includes Codex, GitHub Actions, GitLens and Git Graph;
 the GitHub Pull Requests extension was not listed. It is optional while `gh`
 already supplies the working GitHub interface. Other editor profiles are unverified.
 

@@ -1,14 +1,32 @@
 ---
 id: DEP-023
 title: Supabase and Vercel production cutover
-status: in_progress
+status: deprecated
 related: [BE-027, BE-028, BE-029, BE-030, FE-031, FE-032, FE-033, FE-034, FE-037, DEP-024, DEP-025, DEP-026, DEP-027, ADR-0013, ADR-0014, ADR-0015]
 owners: [deployment, operations, security, backend]
-last_updated: 2026-08-14
+last_updated: 2026-10-20
 change_level: L4
 ---
 
 # DEP-023 - Supabase and Vercel production cutover
+
+## Historical cutover — superseded
+
+This specification preserves the former Vercel cutover contract and dated
+implementation evidence. Its topology, DNS values, rollback deadlines and open
+readiness boxes below are historical; they are not current launch instructions.
+Netlify hosting supersedes this path under
+[DEP-026](DEP-026-netlify-and-supabase-capabilities-rollout.md); current MirtPage
+release/recovery admission is
+[DEP-049](DEP-049-mirtpage-domain-and-app-cutover.md). This deprecation does not
+mark the old rollout complete or remove its immutable ID, database/media evidence,
+related contracts or tracing/privacy requirements.
+
+The owner-requested removal of this repository’s Vercel Git publishing connection
+is verified by fresh provider reload. The project, old deployments and account
+App installation remain; Netlify, domains/secrets and other repos are unchanged.
+The next authorized source push still needs a no-trigger check under V01/DEP-002.
+This record does not upgrade the historical cutover checklist below to complete.
 
 ## Problem and outcome
 

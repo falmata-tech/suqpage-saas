@@ -55,6 +55,35 @@ A checked task requires its named evidence. Keep **implemented**, **tested**,
 **visually approved** and **deployed** separate; an older approval only covers its
 reviewed scope. Resume at the first unmet dependency.
 
+### V01 — Retire this repository’s Vercel publishing connection
+
+Owner request: remove Vercel from MirtPage. DEP-002/DEP-023/DEP-026 control this
+one-time retirement; Netlify remains the production host. This docs-only task is
+isolated from R02 and does not change application or native artifacts.
+
+- [x] Inventory the exact repository connection and active instructions. The
+  Vercel GitHub App publishes previews for `falmata-tech/suqpage-saas`; its status
+  points to project `falmata-ds-projects/mirtpage`. No tracked Vercel hosting
+  configuration, direct package dependency or npm deployment command was found.
+- [x] Correct current hosting instructions, mark the old DEP-023 topology
+  historical/superseded, and retain immutable IDs, prior evidence, portable
+  framework dependencies and `.vercel` privacy exclusions.
+- [x] Focused L0 checks pass: 219 specs/ADRs, existing workflow plus 14 static
+  checker regressions, five selected script checks, 688 local destinations/anchors
+  and whitespace. The two template placeholders were excluded after a retained
+  first coverage-harness failure; no application or managed failure was hidden.
+- [x] Root reviewed the exact nine-file docs-only diff and managed-result update.
+  Visual approval is inapplicable; no build or CI rerun belongs to this L0 patch.
+- [ ] Commit/push the reviewed docs scope; preserve unrelated work and artifact refs.
+- [x] Verify the exact project/repository, retain the before-state and disconnect
+  only that Git connection. Fresh provider reload confirms the removal on
+  2026-10-20; project/deployments and the account App installation remain.
+  Netlify, domains/secrets and other repositories were not changed. Protected
+  `workflow-improvement-research/vercel-retirement/result.json` records the result.
+- [ ] On the next authorized source push, verify no new Vercel preview/production
+  trigger for that new head. Keep required GitHub checks and Netlify delivery
+  evidence separate; this follow-up is not implied by provider readback.
+
 ### R01 — Finish B09 source and CI qualification
 
 [DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md),
