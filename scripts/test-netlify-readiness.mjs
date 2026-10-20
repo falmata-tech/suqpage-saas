@@ -5,6 +5,16 @@ const config = fs.readFileSync("netlify.toml", "utf8");
 const nodeVersion = fs.readFileSync(".nvmrc", "utf8").trim();
 const environment = fs.readFileSync(".env.example", "utf8");
 const gitignore = fs.readFileSync(".gitignore", "utf8");
+const redirectRules = fs.readFileSync("public/_redirects", "utf8")
+  .split(/\r?\n/).map(line => line.trim()).filter(line => line && !line.startsWith("#"));
+
+// DEP-049 B09: optimized public images must reach Netlify's existing CDN,
+// rather than the server function that cannot resolve the deployed source.
+const imageRules = redirectRules.filter(line => line.split(/\s+/)[0].startsWith("/_next/image"));
+assert.deepEqual(imageRules, ["/_next/image /.netlify/images 200"],
+  "One exact same-origin 200 image rewrite must preserve Next source/width/quality query parameters");
+assert.equal(redirectRules.filter(line => line.includes("/.netlify/images")).length, 1,
+  "No broader application, API, private-media or external route may target the public image CDN");
 
 assert.match(config, /command = "node scripts\/check-web-install.cjs && npm run build"/);
 assert.match(config, /NPM_FLAGS = "--workspace=@suqpage\/contracts --include-workspace-root"/);
@@ -34,4 +44,4 @@ assert.match(environment, /^SUQPAGE_MEDIA_DRIVER=supabase$/m);
 assert.match(environment, /^SUQPAGE_AUTH_DRIVER=supabase$/m);
 assert.match(environment, /^NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER=osm-standard$/m);
 
-console.log("Netlify provider-neutral build and Supabase environment contracts passed.");
+console.log("Netlify provider-neutral build, exact public image routing and Supabase environment contracts passed.");

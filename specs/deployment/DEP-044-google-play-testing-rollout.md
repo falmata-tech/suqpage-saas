@@ -2,9 +2,9 @@
 id: DEP-044
 title: Google Play testing and store rollout
 status: draft
-related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053, FE-052, FE-049, DEP-046]
+related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053, FE-052, FE-049, DEP-046, DEP-049]
 owners: [product, operations, security]
-last_updated: 2026-10-12
+last_updated: 2026-10-20
 change_level: L4
 ---
 

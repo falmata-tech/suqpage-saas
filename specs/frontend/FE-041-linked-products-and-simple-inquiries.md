@@ -2,13 +2,67 @@
 id: FE-041
 title: Linked product pages and simple single or grouped inquiries
 status: in_progress
-related: [FE-066, FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042, FE-049, FE-053, BE-044]
+related: [FE-074, FE-066, FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042, FE-049, FE-053, BE-044]
 owners: [product, frontend, security]
-last_updated: 2026-10-17
+last_updated: 2026-10-20
 change_level: L2
 ---
 
 # FE-041 — Linked products, simpler inquiries and search beside the map
+
+## S151 — native showroom grid survives pixel-rounded layout widths (local correction; review pending)
+
+The physical Android release check found a native-only geometry defect: every
+product occupied half a row while the other half stayed empty. The measured-width
+arithmetic passed the earlier controlled JSX/browser tests, but Yoga exposes a
+pixel-rounded `onLayout` width that can exceed its actual internal row width.
+Feeding two exact half-widths back into that row can therefore wrap the second
+card. Installed React Native 0.86.3 Yoga reproduces this at the Pixel 8a's
+1080px/density2.625 geometry. No product, inquiry, backend or permission changes
+are required; FE-053 controls the native release boundary.
+
+1. GIVEN an actually measured public or private-preview grid wide enough for two
+   150dp cards and the existing12dp gap, with font scale at most1.3 WHEN Yoga lays
+   out cards at fractional widths or display densities THEN two consecutive cards
+   share the row, use its available width and never wrap merely because the
+   reported width was pixel-rounded. Let the layout engine allocate remaining
+   space rather than reuse a rounded measurement as two exact card widths.
+2. GIVEN an unmeasured/narrow grid or enlarged text WHEN cards render THEN each
+   card fills a single row. A final unpaired card may use the full remaining row.
+   Container resize, orientation, filtering, category selection and public/private
+   preview retain their existing description, details, Add, options and list rules.
+3. GIVEN the previous exact-width algorithm WHEN evaluated by the installed Yoga
+   engine at the failing fractional geometry THEN the regression fixture must
+   reproduce the wrap. The corrected styles must pass that same fixture, broader
+   fractional widths/densities, narrow/enlarged fallback and odd item counts.
+   Controlled component ports and Chrome Expo are labelled separately from native
+   Yoga and physical-phone evidence. A rebuilt APK must pass on the actual phone
+   before it or a new AAB is admitted; the old-source AAB review is superseded.
+
+Definition of Ready: the physical defect, minimal native presentation scope,
+unchanged data/security/localization contracts, reusable150dp/12dp breakpoints,
+meaningful engine-level regression and separate visual/full/device/release gates
+are explicit. Plan: reproduce with installed Yoga → use flexible card allocation →
+actual-source/engine/type/spec checks → focused actual Chrome Expo tasks/captures →
+owner visual approval → full gates → newly reviewed APK/device/AAB admission.
+Master §§8,19,22 need corresponding current-source and device-evidence limits.
+
+Focused source implementation now passes: `test-native-showroom-cards.ts` and
+`test-native-featured-grid.ts` cover11 actual-component cases, including existing
+Add/options/categories/return behavior and measured narrow/resize/text fallbacks.
+`test-native-catalog-grid-yoga.ts` compiles the installed React Native0.86.3 Yoga
+sources and passes864 width/density/card-count/font-scale cases using the actual
+shared sizing contract; it first reproduces both previous failure geometries.
+Actual visible Google Chrome155 Expo review passes11 English user/geometry checks
+and6 Amharic/Afaan Oromo label/geometry checks, with15 captures, real local catalog
+reads and browser-local inquiry persistence. Loopback DB schema77/Auth were
+independently verified; no backend writes, remote Auth email or public OSM requests
+occurred. Receipts are `.local/native-showroom-grid-s151/chrome-expo-receipt.json`
+and `chrome-locales-receipt.json`. Initial hidden-route/translation-key harness
+failures were retained and corrected separately; they were not product changes.
+Root/mobile strict types and218 spec links pass. Private-preview browser login,
+owner visual approval, full gates and rebuilt physical-phone verification remain
+pending. This is neither a deployed mobile fix nor a new AAB admission.
 
 ## S131 — optional, visible showroom collections (ready)
 

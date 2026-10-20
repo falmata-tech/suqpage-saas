@@ -12,6 +12,7 @@ import {useBlockedBusinesses} from '../src/blocked-businesses';
 import {CatalogSafety} from '../src/CatalogSafety';
 import {inquiryCatalogProduct,restoreCatalogSelections} from '../src/catalog-products';
 import {useBusinessInquiry} from '../src/use-business-inquiry';
+import ResourceLoading from '../src/ResourceLoading';
 import {
   Screen,
   Copy,
@@ -43,7 +44,7 @@ export default function Inquiry() {
     [error, setError] = useState(""),
     [copyFeedback, setCopyFeedback] = useState(""),
     [busy, setBusy] = useState(false);
-  const shop = load.loading||load.error?null:load.data;
+  const shop = load.data, catalogReady=Boolean(shop&&!load.loading&&!load.error);
   const inquiry=useBusinessInquiry(shop);
   const items = useMemo<BasketItem[]>(() => {
     if (id) {
@@ -66,7 +67,7 @@ export default function Inquiry() {
   const [fallback, setFallback] = useState<{href:string;label:string} | null>(null);
   useEffect(() => { setError(""); setCopyFeedback(""); setFallback(null); }, [summary]);
   async function handoff(link: ReturnType<typeof inquiryHandoffs>[number]) {
-    if (!shop || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, link.kind)) return;
+    if (!catalogReady || !shop || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, link.kind)) return;
     setFallback(null);
     let copied: boolean, opened: boolean;
     if (Platform.OS === "web") ({copied,opened} = await openCopiedBrowserLink(summary,link.href,link.external));
@@ -91,7 +92,7 @@ export default function Inquiry() {
   if(shop&&blocked.list.some(b=>b.id===shop.id))return <Screen><CatalogSafety business={shop}><View/></CatalogSafety></Screen>;
   return (
     <Screen>
-      <Status {...load} retry={load.reload} />
+      <ResourceLoading load={load} variant="editor"/>
       <Status error={inquiry.error} retry={inquiry.retry}/>
       {shop && items.length > 0 ? (
         <>
@@ -124,10 +125,11 @@ export default function Inquiry() {
           <Copy>{t("Message the business")}</Copy>
           <Copy muted>{t("Your message and selected products are copied before the conversation opens. Paste them if needed.")}</Copy>
           <View style={s.wrap}>
-            {handoffs.map(link => <Button key={link.kind} label={link.label} disabled={busy || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, link.kind)}
+            {handoffs.map(link => <Button key={link.kind} label={link.label} disabled={busy || !catalogReady || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, link.kind)}
               onPress={() => void run(() => handoff(link))} />)}
           </View>
-          <View style={{alignItems:"flex-end"}}><Button secondary disabled={busy} label={t("Copy message")} onPress={() => void run(async () => {
+          <View style={{alignItems:"flex-end"}}><Button secondary disabled={busy||!catalogReady} label={t("Copy message")} onPress={() => void run(async () => {
+              if(!catalogReady)return;
               setCopyFeedback(t(await copyMessage() ? "Message copied. Paste it in the conversation if needed." : "Select and copy your message"));
             })} />
           </View>
@@ -135,7 +137,7 @@ export default function Inquiry() {
           <Card><Copy>{t("Your message")}</Copy><Copy selectable>{summary}</Copy></Card>
           {Boolean(copyFeedback) && <Copy>{copyFeedback}</Copy>}
           {Boolean(error) && <Copy>{error}</Copy>}
-          {fallback && <Button secondary label={fallback.label + " ↗"} onPress={() => void run(() => openLink(fallback.href))}/>}
+          {fallback && <Button secondary disabled={!catalogReady} label={fallback.label + " ↗"} onPress={() => {if(catalogReady)void run(() => openLink(fallback.href));}}/>}
         </>
       ) : (
         !load.loading&&!load.error&&inquiry.ready&&!inquiry.error && <Copy>{t("Your inquiry list is empty.")}</Copy>

@@ -11,10 +11,10 @@ test('FE-056 actual native business form blocks stale city saves and preserves e
     b.onResolve({filter:/^(react(?:\/jsx-runtime)?|react-native|expo-router|\.\/runtime|\.\/ui|\.\/owner-forms|\.\/CountrySelector|\.\/CitySelector|\.\/AttentionAlerts|\.\/owner-edit-navigation|\.\/OwnerEditConfirmation)$/},a=>({path:a.path,namespace:'ports'}));
     b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'js',contents:a.path==='react'?`export const useState=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]=initial;return [fixture.states[i],value=>{fixture.states[i]=value}]};export const useRef=initial=>({current:initial}),Fragment='Fragment';export default {Fragment};`
       :a.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
-      :a.path==='react-native'?`export const View='View';`
+      :a.path==='react-native'?`export const View='View',Text='Text',StyleSheet={create:value=>value},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`
       :a.path==='expo-router'?`export const router={push(){}};`
       :a.path==='./runtime'?`export const useApp=()=>({t:s=>s,ownerRequest:async(path,body)=>{if(body)fixture.writes.push({path,body});return fixture.fixture;}}),useLoad=()=>({data:fixture.loads++===0?fixture.fixture:{categories:[]},loading:false,error:'',reload(){}}),request=async()=>({categories:[]}),API='http://127.0.0.1:3102',auth={};`
-      :a.path==='./ui'?`export const Copy='Copy',Field='Field',Chip='Chip',Button='Button',Card='Card',Status='Status',Photo='Photo',s={},useOpenLink=()=>async()=>{};`
+      :a.path==='./ui'?`export const Copy='Copy',Field='Field',Chip='Chip',Button='Button',Card='Card',Status='Status',Photo='Photo',s={},colors={},useOpenLink=()=>async()=>{};`
       :a.path==='./owner-forms'?`export const useAction=()=>({busy:false,isBusy:()=>false,run:fn=>fn()}),ActionStatus='ActionStatus',pickImages=async()=>[],addAsset=async()=>{};`
       :a.path==='./owner-edit-navigation'?`export const useOwnerEditGuard=state=>({confirming:false,changed(){},checkpoint:()=>0,requestLeave:leave=>{if(!state.busy&&!state.isBusy?.())leave();},keepEditing(){},discard(){},complete:leave=>leave?.()});`
       :a.path==='./AttentionAlerts'?`export const OwnerAlerts='OwnerAlerts';`
@@ -22,7 +22,9 @@ test('FE-056 actual native business form blocks stale city saves and preserves e
   }}]});
   const module={exports:{} as {BusinessForm:()=>Node}};vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,fixture:runtime,FormData});
   const nodes=(root:Node):Node[]=>[root,...[root.props.children].flat().filter((n):n is Node=>Boolean(n)&&typeof n==='object').flatMap(nodes)];
-  const form=nodes(module.exports.BusinessForm()).find(n=>typeof n.type==='function')!;
+  const forms=nodes(module.exports.BusinessForm()).filter(n=>typeof n.type==='function'&&n.props.data===fixture);
+  assert.equal(forms.length,1,'Exactly one actual business form consumes the authoritative loaded fixture');
+  const form=forms[0]!;
   const render=()=>{runtime.cursor=0;return nodes((form.type as (p:Record<string,unknown>)=>Node)(form.props));};
   const save=(tree:Node[])=>tree.find(n=>n.type==='Button'&&n.props.label==='Save changes')!;
   const select=(tree:Node[],place:unknown)=>(tree.find(n=>n.type==='CitySelector')!.props.onSelect as (value:unknown)=>void)(place);

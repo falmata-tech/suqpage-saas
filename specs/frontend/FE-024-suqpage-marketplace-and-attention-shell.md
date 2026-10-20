@@ -4,11 +4,36 @@ title: Suqpage marketplace and attention shell
 status: in_progress
 related: [FE-013, FE-017, FE-019, FE-021, FE-023, FE-025, FE-027, FE-028, FE-029, FE-030, FE-033, FE-036, BE-023, DEP-017, DEP-019, DEP-020, DEP-021]
 owners: [product, frontend, design, operations]
-last_updated: 2026-08-09
+last_updated: 2026-10-20
 change_level: L3
 ---
 
 # FE-024 - Suqpage marketplace and attention shell
+
+## S151 B08 — sponsor and Featured targets stay separate (ready)
+
+This bounded responsive defect correction follows FE-021's S151 B08 scenarios:
+GIVEN the real gallery width has been reduced by the navigation and sponsor
+column WHEN Featured renders at any supported width THEN business cards fit
+their allocated gallery, never intersect the sponsor surface, and retain their
+independent slot order and showroom actions. GIVEN zero/one/multiple sponsors
+WHEN resizing or advancing a sponsor THEN disclosure and all visible controls
+remain reachable without overlap. Long labels must not increase track minima.
+Phone sponsor stacking, business image heights and compact business columns
+remain intact. No placement, eligibility, schedule, data or authorization change
+is included.
+
+Definition of Ready and ordered implementation/review plan are recorded in
+FE-021 and checklist S151 B08. The passing actual-Chrome component regression is
+`scripts/test-featured-sponsor-layout.ts`: real component/CSS geometry at nine
+widths and zero/one/five sponsor pools, including hit testing, long names and
+manual sponsor advance. A real local Featured→preview→showroom→Back journey
+supplements controlled component evidence; media load/error outcomes are
+recorded separately. All nine real-page geometry assertions and the two local
+click-through journeys pass, with the preserved analytics-observation limitation
+and initial read timeout recorded in FE-021. Full gates/deployment remain pending combined visual
+approval. Rollback is the gallery CSS alone; relevant master sections are
+§§5/10/19/22.
 
 ## Problem and outcome
 

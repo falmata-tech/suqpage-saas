@@ -17,7 +17,7 @@ export default function PublicActionDock({compact=false,hideInquiry=false,placem
   const active=Boolean(currentPlacement&&(!placement||placement===currentPlacement));
   const handle=active?(path.startsWith('/shop/')?path.slice('/shop/'.length):path==='/product'?(Array.isArray(params.handle)?params.handle[0]:params.handle)||'':''):'';
   const load=useLoad(()=>handle?request<Shop>('shops/'+encodeURIComponent(handle)):Promise.resolve(null),[handle]);
-  const shop=handle&&blocked.ready&&!load.loading&&!load.error&&load.data?.handle===handle&&!blocked.list.some(item=>item.id===load.data!.id)?load.data:null;
+  const shop=handle&&blocked.ready&&load.data?.handle===handle&&!blocked.list.some(item=>item.id===load.data!.id)?load.data:null;
   const inquiry=useBusinessInquiry(shop),count=inquiry.items.length;
   if(!currentPlacement||(placement&&placement!==currentPlacement))return null;
   return <View testID="public-action-dock" style={{width:Math.min(horizontal?244:compact?168:200,width-24),gap:8,flexDirection:horizontal?'row':'column'}}>

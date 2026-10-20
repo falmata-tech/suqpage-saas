@@ -2,7 +2,7 @@
 id: FE-056
 title: Owner Profile and focused editing
 status: in_progress
-related: [FE-026, FE-036, FE-066, FE-034, FE-032, FE-040, FE-051, FE-053, FE-019, BE-018, BE-032, BE-041, BE-044, BE-045, DEP-042, FE-067, FE-047, FE-072, BE-060, FE-073]
+related: [FE-074, FE-026, FE-036, FE-066, FE-034, FE-032, FE-040, FE-051, FE-053, FE-019, BE-018, BE-032, BE-041, BE-044, BE-045, DEP-042, FE-067, FE-047, FE-072, BE-060, FE-073]
 owners: [product, frontend, backend, security]
 last_updated: 2026-10-17
 change_level: L2
@@ -255,6 +255,10 @@ Add focused menu/gating/activity checks to the Profile capture and native API
 isolation tests. Implementation/screenshots/types precede owner visual approval.
 
 ## S76 — real pending feedback
+
+Planned FE-074 / S151 B07 supersedes the blanket visual loading-bar choice below
+with task-local feedback and layout-matched initial skeletons. Its retention and
+privacy contract is under audit; no implementation or rollout is claimed here.
 
 GIVEN a data/auth/map/route/save operation is pending THEN show a compact orange
 horizontal looping loading track in the affected area with an accessible Loading

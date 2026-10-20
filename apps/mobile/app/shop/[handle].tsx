@@ -6,13 +6,14 @@ import { useLoad, request } from "../../src/runtime";
 import { Screen, Status } from "../../src/ui";
 import { ShowroomContent } from "../../src/ShowroomContent";
 import {CatalogSafety} from '../../src/CatalogSafety';
+import ResourceLoading from '../../src/ResourceLoading';
 export default function Showroom() {
   const { handle } = useLocalSearchParams<{ handle: string }>();
   const load = useLoad(() => request<Shop>("shops/" + encodeURIComponent(handle)), [handle]);
   return <Screen scroll={false}>
     <ScrollView keyboardShouldPersistTaps="handled">
-      <Status {...load} retry={load.reload} />
-      {load.data && <CatalogSafety key={handle} business={load.data}><ShowroomContent shop={load.data} /></CatalogSafety>}
+      <ResourceLoading load={load} variant="showroom"/>
+      {load.data && <CatalogSafety key={handle} business={load.data}><ShowroomContent shop={load.data} catalogReady={!load.loading&&!load.error}/></CatalogSafety>}
     </ScrollView>
   </Screen>;
 }

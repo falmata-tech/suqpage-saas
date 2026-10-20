@@ -2,6 +2,8 @@
 import MarketSearchControls from './MarketSearchControls';
 import independentStyles from './IndependentMarket.module.css';
 import {useMarketFeed,type MarketBatch} from '@/lib/use-market-feed';
+import {useBlockedBusinesses} from './useBlockedBusinesses';
+import {excludedBusinessIds} from '@/lib/catalog-safety';
 import {emptyMarketSearch,marketSearchParams,marketWorkspaceParams,MarketSearchError,type MarketSearch,type MarketScope} from '@/lib/market-search';
 import {hasExplicitMarketIntent,marketWorkspaceFromParams,parseMarketWorkspaceSnapshot,serializeMarketWorkspaceSnapshot,type MarketWorkspaceState} from '@/lib/market-workspace';
 import { normalizeDiscoveryPlaces, discoveryPlaceKey } from "@/lib/discovery-contract";
@@ -131,12 +133,22 @@ function ProductResultImage({ product }: { product: DiscoveryProductResult }) {
     : <span className="discovery-search-result-fallback" aria-hidden="true"><Package /><b>{product.name}</b></span>;
 }
 
-function MarketplaceSearchResults({discovery,items,loading,hasMore,loadingMore,moreError,onMore,enabled,resetKey,failed}: {
+function MarketUpdating() {
+ const t=useUiText();
+ return <span className={independentStyles.updating} role="status"><i aria-hidden="true"/>{t('Updating Market results')}</span>;
+}
+
+function MarketplaceSearchResults({discovery,items,loading,hasMore,loadingMore,moreError,onMore,enabled,resetKey,failed,snapshotCurrent}: {
  discovery:MarketplaceDiscoveryView;items:DiscoveryProductResult[];loading:boolean;hasMore:boolean;
- loadingMore:boolean;moreError:string;onMore:()=>void;enabled:boolean;resetKey:string;failed:boolean;
+ loadingMore:boolean;moreError:string;onMore:()=>void;enabled:boolean;resetKey:string|null;failed:boolean;snapshotCurrent:boolean;
 }) {
- const t=useUiText(),resultList=useRef<HTMLDivElement>(null),sentinel=useRef<HTMLDivElement>(null);
- useEffect(()=>{resultList.current?.scrollTo({top:0});},[resetKey]);
+ const t=useUiText(),resultList=useRef<HTMLDivElement>(null),sentinel=useRef<HTMLDivElement>(null),lastResetKey=useRef(resetKey);
+ useEffect(()=>{
+  // Next can reconnect passive effects for a preserved subtree. Only a newly
+  // admitted snapshot changes scroll; replaying the same snapshot does not.
+  if(lastResetKey.current===resetKey)return;
+  lastResetKey.current=resetKey;resultList.current?.scrollTo({top:0});
+ },[resetKey]);
  useEffect(()=>{
   if(!enabled||!hasMore||loading||loadingMore||moreError||!sentinel.current||!resultList.current)return;
   const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting))onMore();},{root:resultList.current,rootMargin:'120px'});
@@ -151,13 +163,13 @@ function MarketplaceSearchResults({discovery,items,loading,hasMore,loadingMore,m
     <Link className="discovery-product-business" href={`/@${encodeURIComponent(product.businessHandle)}?ref=discovery`} onClick={rememberCurrentPublicWorkspace}>{t("From {business}", { business: product.businessName })}</Link>
   </article>;
 
-  return <section className="discovery-search-workspace" aria-labelledby="discovery-search-results-title" aria-busy={loading}>
-    <h2 id="discovery-search-results-title" className="discovery-results-heading">{t("Products")}</h2>
+  return <section className="discovery-search-workspace" aria-labelledby="discovery-search-results-title" aria-busy={loading} data-snapshot-current={snapshotCurrent}>
+    <div className={independentStyles.resultsHeading}><h2 id="discovery-search-results-title" className="discovery-results-heading">{t("Products")}</h2>{loading&&enabled&&<MarketUpdating/>}</div>
     <div ref={resultList} className="discovery-search-results">
       {visibleProducts.length===0&&!loading&&!failed?<div className="discovery-search-empty"><Search aria-hidden="true"/><h3>{t("No matches found")}</h3><p>{t("Try another product, category or city.")}</p></div>:null}
       <div className="discovery-product-results">{visibleProducts.map(renderProduct)}</div>
       <div ref={sentinel} className={independentStyles.feedFooter} aria-live="polite">
-       {loadingMore?<LoadingBar/>:moreError?<><p>{t(moreError)}</p><button type="button" onClick={onMore}>{t("Try again")}</button></>:hasMore?<button type="button" onClick={onMore}>{t("Load more")}</button>:visibleProducts.length>0?<p>{t("You've seen all the results.")}</p>:null}
+       {loadingMore?<LoadingBar/>:moreError?<><p>{t(moreError)}</p><button type="button" onClick={onMore}>{t("Try again")}</button></>:hasMore?<button type="button" onClick={onMore}>{t("Load more")}</button>:snapshotCurrent&&!loading&&!failed&&visibleProducts.length>0?<p>{t("You've seen all the results.")}</p>:null}
        <span className="sr-only">{t("{count} results",{count:visibleProducts.length})}</span>
       </div>
     </div>
@@ -173,35 +185,34 @@ async function loadProductBatch(params:string,signal:AbortSignal) {
  return productBatch(await response.json() as MarketplaceDiscoveryView);
 }
 
-function useIndependentSearch(scope:MarketScope,search:MarketSearch,initial:MarketplaceDiscoveryView,initialSearch:MarketSearch) {
+function useIndependentSearch(scope:MarketScope,search:MarketSearch,initial:MarketplaceDiscoveryView,initialSearch:MarketSearch,exclusionKey:string,initialExclusionKey:string|null) {
  const key=marketSearchParams(scope,search).toString();
- // Cached server props can describe a different scope from preserved client state.
- const [projection,setProjection]=useState(()=>({key:marketSearchParams(scope,initialSearch).toString(),data:initial}));
- const currentProjection=useRef(projection);currentProjection.current=projection;
- const [pending,setPending]=useState(false),[error,setError]=useState(''),[attempt,setAttempt]=useState(0);
- useEffect(()=>{
-  if(key===currentProjection.current.key&&!attempt){setPending(false);setError('');return;}
-  const controller=new AbortController();setPending(true);setError('');
-  const timer=setTimeout(()=>{void fetch('/api/discovery?'+key,{signal:controller.signal}).then(async response=>{
-   if(!response.ok)throw new Error('Search is unavailable. Try again.');return response.json() as Promise<MarketplaceDiscoveryView>;
-  }).then(value=>{if(!controller.signal.aborted)setProjection({key,data:value});}).catch(()=>{if(!controller.signal.aborted)setError('Search is unavailable. Try again.');}).finally(()=>{if(!controller.signal.aborted)setPending(false);});},250);
-  return()=>{clearTimeout(timer);controller.abort();};
- },[key,attempt]);
- const visible=useMemo(()=>projection.key===key?projection.data:{...projection.data,showrooms:[],nearbyGroups:[],searchProducts:[],searchOrder:[],searchBusinesses:[],total:0,resultCounts:{products:0,businesses:0},resultPage:{...projection.data.resultPage,totalItems:0,totalPages:1,firstItem:0,lastItem:0}},[projection,key]);
- return {data:visible,pending,settled:projection.key===key&&!pending&&!error,error,retry:()=>setAttempt(n=>n+1)};
+ const batch=(data:MarketplaceDiscoveryView)=>({data,items:data.showrooms,page:1,pages:1,total:data.total});
+ // Retention is limited to this same-origin public collection. Cached server
+ // props retain their own criteria key; they are never authority for a new one.
+ const feed=useMarketFeed(key,async(params,signal)=>{
+  const response=await fetch('/api/discovery?'+params,{signal});
+  if(!response.ok)throw new Error('Search is unavailable. Try again.');
+  return batch(await response.json() as MarketplaceDiscoveryView);
+ },initialExclusionKey===exclusionKey?batch(initial):undefined,{scopeKey:'/api/discovery:public:'+scope+':excluded:'+exclusionKey,initialSnapshotKey:marketSearchParams(scope,initialSearch).toString()});
+ const visible=feed.batch?.data||{...initial,showrooms:[],nearbyGroups:[],searchProducts:[],searchOrder:[],searchBusinesses:[],total:0,resultCounts:{products:0,businesses:0},resultPage:{...initial.resultPage,totalItems:0,totalPages:1,firstItem:0,lastItem:0}};
+ return {data:visible,pending:feed.loading,settled:feed.snapshotCurrent&&!feed.loading&&!feed.error,snapshotCurrent:feed.snapshotCurrent,error:feed.error,retry:feed.retry};
 }
 
-export default function DiscoveryWorkspace({discovery,productDiscovery,initialBusiness=emptyMarketSearch(),initialProduct=emptyMarketSearch(),view}:{discovery:MarketplaceDiscoveryView;productDiscovery?:MarketplaceDiscoveryView;initialBusiness?:MarketSearch;initialProduct?:MarketSearch;hideIntro?:boolean;view?:DiscoveryViewMode}) {
+export default function DiscoveryWorkspace({discovery,productDiscovery,initialExclusions,initialBusiness=emptyMarketSearch(),initialProduct=emptyMarketSearch(),view}:{discovery:MarketplaceDiscoveryView;productDiscovery?:MarketplaceDiscoveryView;initialExclusions?:readonly number[];initialBusiness?:MarketSearch;initialProduct?:MarketSearch;hideIntro?:boolean;view?:DiscoveryViewMode}) {
  const t=useUiText();
+ const blocked=useBlockedBusinesses(),exclusionKey=excludedBusinessIds(blocked.list.map(item=>item.id)).join(',');
+ // Cached RSC props must prove the same preference boundary as their membership.
+ const initialExclusionKey=initialExclusions===undefined?null:excludedBusinessIds(initialExclusions).join(',');
  const incomingKey=useSearchParams().toString();
  const [ready,setReady]=useState(false);
  const [businessSearch,setBusinessSearch]=useState(initialBusiness),[productSearch,setProductSearch]=useState(initialProduct),[panelOpen,setPanelOpen]=useState(view==='search');
  const readyRef=useRef(false),writtenParams=useRef<string|null>(null),pendingRestore=useRef<string|null>(null);
  const currentWorkspace=useRef<MarketWorkspaceState>({mode:panelOpen?'products':'businesses',business:businessSearch,product:productSearch});
  currentWorkspace.current={mode:panelOpen?'products':'businesses',business:businessSearch,product:productSearch};
- const businesses=useIndependentSearch('businesses',businessSearch,discovery,initialBusiness);
+ const businesses=useIndependentSearch('businesses',businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey);
  const productKey=marketSearchParams('products',productSearch).toString();
- const products=useMarketFeed(productKey,loadProductBatch,productBatch(productDiscovery||discovery));
+ const products=useMarketFeed(productKey,loadProductBatch,initialExclusionKey===exclusionKey?productBatch(productDiscovery||discovery):undefined,{scopeKey:'/api/discovery:public:products:excluded:'+exclusionKey,initialSnapshotKey:marketSearchParams('products',initialProduct).toString()});
  const productData=products.batch?.data||{...(productDiscovery||discovery),searchProducts:[],resultPage:{...(productDiscovery||discovery).resultPage,totalItems:0}};
  const [mapFailed,setMapFailed]=useState(false),[selectedShowroomId,setSelectedShowroomId]=useState<number|null>(null),[activeNearbyGroupKey,setActiveNearbyGroupKey]=useState<string|null>(null),[requestedView,setRequestedView]=useState<MapView|null>(null),[nearMeStatus,setNearMeStatus]=useState('');
  const [mapZoom,setMapZoom]=useState(5);
@@ -306,18 +317,17 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialBu
    </div>
    <div className={independentStyles.activeControls}>
     <MarketSearchControls key={panelOpen?'products':'businesses'} scope={panelOpen?'products':'businesses'} value={panelOpen?productSearch:businessSearch} onChange={panelOpen?setProductSearch:setBusinessSearch} metadata={panelOpen?productData:mapData}/>
-    {!panelOpen&&businesses.pending&&<LoadingBar/>}
     {!panelOpen&&businesses.error&&<div className={independentStyles.error} role="alert">{t(businesses.error)} <button type="button" onClick={businesses.retry}>{t('Try again')}</button></div>}
    </div>
    <div ref={viewport} className={independentStyles.viewport} data-dragging={moving}>
    <aside id="discovery-search-panel" className={independentStyles.panel} data-open={panelOpen} style={moving?{transform:`translateX(${(1-progress)*(paneWidth-16)}px)`,transition:'none'}:undefined} aria-label={t('Products')} aria-hidden={!panelOpen} inert={!panelOpen} onKeyDown={event=>{if(event.key==='Escape'&&!event.defaultPrevented){setPanelOpen(false);requestAnimationFrame(()=>businessButton.current?.focus());}}}>
-    {products.loading&&<div className={independentStyles.loading}><LoadingBar/></div>}
     {products.error&&<div className={independentStyles.error} role="alert">{t(products.error)} <button type="button" onClick={products.retry}>{t('Try again')}</button></div>}
-    <div className={independentStyles.panelBody}><MarketplaceSearchResults discovery={productData} items={products.batch?.items||[]} loading={products.loading} failed={Boolean(products.error)} hasMore={products.hasMore} loadingMore={products.loadingMore} moreError={products.moreError} onMore={products.loadMore} enabled={panelOpen} resetKey={productKey}/></div>
+    <div className={independentStyles.panelBody}><MarketplaceSearchResults discovery={productData} items={products.batch?.items||[]} loading={products.loading} failed={Boolean(products.error)} hasMore={products.hasMore} loadingMore={products.loadingMore} moreError={products.moreError} onMore={products.loadMore} enabled={panelOpen} resetKey={products.displayedSnapshotKey} snapshotCurrent={products.snapshotCurrent}/></div>
    </aside>
    <button type="button" className={independentStyles.peek} data-side={panelOpen?'map':'products'} style={moving?{left:Math.max(16,(viewport.current?.clientWidth||320)-64)-progress*Math.max(0,(viewport.current?.clientWidth||320)-80),right:'auto'}:undefined} aria-label={t(panelOpen?'Map only':'View products')} title={t(panelOpen?'Map only':'View products')} onClick={event=>{if(event.detail===0||!dragged.current)setPanelOpen(!panelOpen);dragged.current=false;}} onPointerDown={panelDragStart} onPointerMove={panelDragMove} onPointerUp={panelDragEnd} onPointerCancel={cancelPanelDrag} onLostPointerCapture={()=>{if(dragStart.current)cancelPanelDrag();}}><i aria-hidden="true"/>{panelOpen?<ChevronRight size={18}/>:<ChevronLeft size={18}/>}</button>
    <span className="sr-only" aria-live="polite">{t(nearMeStatus)}</span>
-   <div className={'discovery-map-shell '+independentStyles.mapPanel} data-open={!panelOpen} style={moving?{transform:`translateX(${-progress*(paneWidth-16)}px)`,transition:'none'}:undefined} aria-hidden={panelOpen} inert={panelOpen}><div className="discovery-map-stage">
+   <div className={'discovery-map-shell '+independentStyles.mapPanel} data-open={!panelOpen} data-snapshot-current={businesses.snapshotCurrent} aria-busy={businesses.pending} style={moving?{transform:`translateX(${-progress*(paneWidth-16)}px)`,transition:'none'}:undefined} aria-hidden={panelOpen} inert={panelOpen}><div className="discovery-map-stage">
+   {!panelOpen&&businesses.pending&&<div className={independentStyles.mapUpdating}><MarketUpdating/></div>}
    {!businesses.pending&&!businesses.error&&mapData.showrooms.length===0&&<p className={independentStyles.emptyMap}>{t('No businesses match these filters.')}</p>}
    {mapData.resultCounts.businesses>mapData.showrooms.length&&<p className={independentStyles.mapLimit}>{t('Showing {count} businesses. Search or filter to see more.',{count:mapData.showrooms.length})}</p>}
     <div className="discovery-floating-tools"><div className="discovery-floating-buttons" aria-label={t('Map controls')}>
@@ -326,8 +336,8 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialBu
      <button type="button" className={previewStyles.zoomControl} disabled={mapZoom<=1} onClick={()=>mapRef.current?.zoomOut()} aria-label={t('Zoom out')}><Minus/></button>
      <button type="button" onClick={()=>{setSelectedShowroomId(null);setActiveNearbyGroupKey(null);mapRef.current?.reset();}} aria-label={t('Reset map')}><Crosshair/></button>
     </div></div>
-    {mapFailed?<div className="discovery-map-fallback"><p>{t('The marketplace map is temporarily unavailable.')}</p><button type="button" onClick={()=>setMapFailed(false)}>{t('Retry map')}</button></div>:<MarketplaceMap ref={mapRef} groupCapacity={groupViewport.capacity} showrooms={mapData.showrooms} featuredNowBusinessId={mapData.featuredNowBusinessId} selectedShowroomId={selectedShowroomId} requestedView={requestedView} onViewChange={v=>{if(!navigationIsCommitted())return;const bounded={...v,zoom:clampMapZoom(v.zoom)};mapViewRef.current=bounded;setMapZoom(bounded.zoom);rememberNavigation(activeNearbyGroupKey,selectedShowroomId,bounded);}} onOpenNearbyGroup={g=>{const eligible=currentMapGroup(groupIndex,mapData.showrooms,g.key,mapViewRef.current.zoom);if(!eligible)return;setActiveNearbyGroupKey(eligible.key);setSelectedShowroomId(null);rememberNavigation(eligible.key,null);}} onSelectShowroom={s=>{mapRef.current?.centerAt(s.latitude,s.longitude,14);setActiveNearbyGroupKey(null);setSelectedShowroomId(s.id);rememberNavigation(null,s.id);}} onError={()=>setMapFailed(true)}/>}
-    {group&&<NearbyShowroomsViewer viewport={groupViewport} group={group} showrooms={group.showroomIds.flatMap(id=>byId.get(id)?[byId.get(id)!]:[])} featuredNowBusinessId={mapData.featuredNowBusinessId} selectedShowroomId={selectedShowroomId} onSelect={id=>{setSelectedShowroomId(id);rememberNavigation(group.key,id);}} onBack={()=>{setSelectedShowroomId(null);rememberNavigation(group.key,null);}} onClose={()=>{setActiveNearbyGroupKey(null);setSelectedShowroomId(null);rememberNavigation(null,null);}} onOpen={rememberCurrentPublicWorkspace}/>}
+    {mapFailed?<div className="discovery-map-fallback"><p>{t('The marketplace map is temporarily unavailable.')}</p><button type="button" onClick={()=>setMapFailed(false)}>{t('Retry map')}</button></div>:<MarketplaceMap ref={mapRef} groupCapacity={groupViewport.capacity} showrooms={mapData.showrooms} featuredNowBusinessId={mapData.featuredNowBusinessId} selectedShowroomId={selectedShowroomId} requestedView={requestedView} onViewChange={v=>{if(!navigationIsCommitted())return;const bounded={...v,zoom:clampMapZoom(v.zoom)};mapViewRef.current=bounded;setMapZoom(bounded.zoom);rememberNavigation(activeNearbyGroupKey,selectedShowroomId,bounded);}} onOpenNearbyGroup={g=>{if(!navigationIsCommitted())return;const eligible=currentMapGroup(groupIndex,mapData.showrooms,g.key,mapViewRef.current.zoom);if(!eligible)return;setActiveNearbyGroupKey(eligible.key);setSelectedShowroomId(null);rememberNavigation(eligible.key,null);}} onSelectShowroom={s=>{if(!navigationIsCommitted())return;mapRef.current?.centerAt(s.latitude,s.longitude,14);setActiveNearbyGroupKey(null);setSelectedShowroomId(s.id);rememberNavigation(null,s.id);}} onError={()=>setMapFailed(true)}/>}
+    {group&&<NearbyShowroomsViewer viewport={groupViewport} group={group} showrooms={group.showroomIds.flatMap(id=>byId.get(id)?[byId.get(id)!]:[])} featuredNowBusinessId={mapData.featuredNowBusinessId} selectedShowroomId={selectedShowroomId} onSelect={id=>{if(!navigationIsCommitted())return;setSelectedShowroomId(id);rememberNavigation(group.key,id);}} onBack={()=>{setSelectedShowroomId(null);rememberNavigation(group.key,null);}} onClose={()=>{setActiveNearbyGroupKey(null);setSelectedShowroomId(null);rememberNavigation(null,null);}} onOpen={rememberCurrentPublicWorkspace}/>}
     {selected&&!group&&<ShowroomPreview showroom={selected} source="discovery" onClose={()=>{setSelectedShowroomId(null);rememberNavigation(null,null);}} onOpen={rememberCurrentPublicWorkspace} presence={showroomPresence(selected,mapData.featuredNowBusinessId,t)}/>}
    </div></div>
    </div>
@@ -337,7 +347,7 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialBu
 
 function ShowroomImage({ showroom }: { showroom: DiscoveryShowroom }) {
   const [failed, setFailed] = useState(false);
-  return showroom.heroImagePath && !failed ? <Image src={showroom.heroImagePath} unoptimized={showroom.heroImagePath.startsWith("/api/page-media/")} alt="" width={240} height={150} onError={() => setFailed(true)} /> : <span className={`discovery-image-fallback ${showroom.fallbackStyle}`} aria-hidden="true"><i>{showroom.name.slice(0, 1)}</i><b>{showroom.name}</b></span>;
+  return showroom.heroImagePath && !failed ? <Image src={showroom.heroImagePath} unoptimized={showroom.heroImagePath.startsWith("/api/page-media/") || showroom.heroImagePath.startsWith("/media/product-private-")} alt="" width={240} height={150} onError={() => setFailed(true)} /> : <span className={`discovery-image-fallback ${showroom.fallbackStyle}`} aria-hidden="true"><i>{showroom.name.slice(0, 1)}</i><b>{showroom.name}</b></span>;
 }
 
 function MapPreviewDialog({ labelledBy, onClose, children, wide = false, restoreGroupKey, restoreShowroomId }: { labelledBy: string; onClose: () => void; children: ReactNode; wide?: boolean; restoreGroupKey?:string;restoreShowroomId?:number }) {

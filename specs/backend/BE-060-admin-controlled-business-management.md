@@ -4,7 +4,7 @@ title: Revocable global staff business-management authority
 status: ready
 related: [FE-072, FE-026, FE-042, FE-053, FE-056, BE-032, BE-033, BE-044, BE-009, BE-031, FE-038, FE-073, BE-061, DEP-050, DEP-049, ADR-0030]
 owners: [backend, security, operations]
-last_updated: 2026-10-18
+last_updated: 2026-10-20
 change_level: L3
 ---
 
@@ -163,6 +163,22 @@ passwords, OTPs, provider tokens and media bytes.
 | Stale editor versus revoke, missing/forged grant and account isolation | concurrency/security | `scripts/test-business-assistance.ts`, `scripts/test-staff-boundaries.ts` |
 | Retired web/native assistance action | route/security | `scripts/test-owner-page.ts`, `scripts/test-mobile-api.ts` |
 
+### Standard-page fixture isolation
+
+`scripts/test-standard-page-postgres.ts` must create its own synthetic
+`@example.test` administrator and staff application identities inside its
+existing rollback transaction, without creating provider identities or Auth
+links for those actors. It must not select or change a pre-existing staff
+account to obtain an enabled grant. The page read must fail with a missing
+grant and with an explicitly disabled fixture grant, succeed only after the
+synthetic administrator enables that grant through the versioned application
+command, and fail again after revocation. Existing owner/foreign-tenant,
+product, private-media, review-version and atomic publication assertions remain
+required. After rollback, queries must verify that the fixture users, profiles,
+grants, synthetic signup links, businesses and invitations are absent before
+the test reports success. This is test-harness qualification, not a change to
+the production authority contract or permission to enable preview staff.
+
 ## Rollout and rollback
 
 Append only a guarded migration after schema 75. Its local and hosted application
@@ -189,6 +205,20 @@ is coupled to this migration.
 - [x] Rollout/rollback decided
 
 ## Completion evidence
+
+The 2026-10-20 standard-page harness correction passed the documented
+`npm run test:standard-pages:postgres` command against the local loopback
+database. The first sandboxed launch was blocked before connecting; the
+authorized network-enabled invocation passed both launch-wiring and page
+lifecycle checks. Its own synthetic administrator/staff proved missing and
+disabled grant denial, administrator enable at version2, successful page read,
+revocation at version3 and immediate denial. Six post-rollback queries verified
+that the fixture users, access profiles, grants, synthetic signup links,
+businesses and invitations were absent. No pre-existing staff grant or Auth
+identity was changed. Focused receipt:
+`.local/mirtpage-final-release-20261019/s151-batch-audit/standard-page-fixture-repair.json`.
+This qualifies the harness only; it does not complete browser, full-release or
+hosted rollout gates.
 
 The guarded local 75→77 apply installed migration76, backfilled all 14 eligible
 staff as enabled and independently checked ledger, preservation and private

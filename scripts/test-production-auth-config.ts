@@ -79,6 +79,14 @@ test("all MirtPage email branding is exact and cannot alter providers or sender 
   }
 });
 
+test("email contrast repair admits only the thirteen exact HTML fields", () => {
+  const patch=Object.fromEntries(Object.entries(suqpageEmailBrandingPatch()).filter(([key])=>key.startsWith("mailer_templates_")&&key.endsWith("_content")));
+  assert.equal(Object.keys(patch).length,13);
+  assert.ok(Object.keys(patch).every(key=>key.startsWith("mailer_templates_")));
+  for(const html of Object.values(patch))assert.match(html,/mirtpage-panels-wordmark-email-white-v2\.png/);
+  validatePatch(project,patch,template);
+});
+
 test("saved legacy-brand settings plans are rejected before any provider read", async () => {
   const f = fixture();
   try {

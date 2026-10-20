@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import DiscoveryWorkspace from "@/components/DiscoveryWorkspace";
 import { MarketWorkspaceLoading } from "@/components/PublicWorkspaceLoading";
 import { getIndependentPublicMarketplace } from "@/lib/public-discovery-cache";
+import {readExcludedBusinesses} from '@/lib/blocked-businesses-server';
 import { BRAND_SOCIAL_IMAGE, publicSeoImageUrl, publicSeoUrl, safeJsonLd } from "@/lib/public-seo";
 import type { Metadata } from "next";
 
@@ -41,13 +42,14 @@ async function MarketWorkspace({ searchParams }: { searchParams: MarketSearchPar
     if(!(error instanceof MarketSearchError))throw error;
     return <section className="panel" role="alert"><p>{t('Check your search filters.')}</p><Link className="btn" href="/?view=map">{t('Clear filters')}</Link></section>;
   }
-  const [discovery,productDiscovery]=await Promise.all([getIndependentPublicMarketplace('businesses',initialBusiness),getIndependentPublicMarketplace('products',initialProduct)]);
+  const [discovery,productDiscovery,initialExclusions]=await Promise.all([getIndependentPublicMarketplace('businesses',initialBusiness),getIndependentPublicMarketplace('products',initialProduct),readExcludedBusinesses()]);
 
   return <>
     {query.showroom === "inactive" ? <div className="landing-account-notice" role="status">{t("That page is temporarily unavailable. Explore other local products in the Market.")}</div> : null}
     <DiscoveryWorkspace
       discovery={discovery}
       productDiscovery={productDiscovery}
+      initialExclusions={initialExclusions}
       initialBusiness={initialBusiness}
       initialProduct={initialProduct}
       hideIntro

@@ -562,8 +562,14 @@ pool. Internal schedule previews name each assigned sponsor and exact time;
 during the live segment, public status names the paid sponsor as **Sponsor
 spotlight**. The S51 carousel keeps rotating independently of that segment.
 On phones, Daily Featured avoids a vertical wall of controls: its long
-description is omitted, broadcast status is compact, and all seven fixed weekdays
-fit in one compact segmented row above the gallery. Daily Featured uses an
+description is omitted and broadcast status is compact. The deployed weekday-first
+ribbon hides category names on small web screens, while the earlier Expo source
+shows only weekday/date. The local FE-021/FE-053 S151 B10 correction passes focused
+and actual Chrome web/Expo checks with readable category-first choices, secondary
+schedule context and horizontal scrolling when needed. It supersedes forcing all
+seven tiny choices into one row. Matching initial silhouettes and selected-choice
+restoration are locally verified; visual/full/release and new Android
+qualification remain pending. Daily Featured uses an
 ordinary responsive image-card grid that grows downward without venue scaling,
 map-style zoom, or pagination. The Ready S127 map picker admits only what fits together on the current
 screen: up to6 desktop/3 phone, reduced for height/font scale, without list
@@ -1034,6 +1040,20 @@ existing gallery for products with media. Actual-component tests and an
 installed-Chrome Expo phone review pass with a labelled response-only demo
 fixture; owner visual approval and full release checks remain pending.
 
+The local S151 (FE-041/FE-053; §§8/19/22) candidate corrects native showroom and Featured row allocation:
+use measured width for the existing narrow/enlarged-text breakpoint, then let
+Yoga share the actual row width. A pixel-rounded layout measurement must not
+leave every card half-width on a separate row. Preserve canonical products,
+inquiry actions, descriptions, category/search and public/private preview rules.
+Featured shares the same measured narrow/enlarged-text fallback while keeping
+scheduled-day selection, sponsor visibility, slot order and business navigation.
+Focused component/installed-Yoga tests and actual Chrome Expo tasks pass, including
+Amharic/Afaan Oromo label fitting. The geometry helper is framework-independent;
+root and mobile types pass. Visual approval, full checks and a rebuilt
+physical-phone APK remain separate pending gates; the old-source AAB build review
+is superseded. Browser/isolated-engine evidence does not claim a fixed installed
+Android binary or private-preview login.
+
 The local S129 FE-041/FE-053 implementation gives native showroom cards short
 descriptions, separate details/Add actions and a bounded required-options picker
 without leaving the grid. Web phone excerpts remain visible. Canonical stock,
@@ -1238,6 +1258,10 @@ and rollout remain pending; this does not update the live site or installed APK.
 
 ## 10. Market discovery behavior
 
+Featured's local FE-021 B10 category controls retain their existing scheduled
+day-to-category mapping. They do not change the independent Market filters or
+admit arbitrary categories into a day's lineup; only presentation is corrected.
+
 The local S140 correction removes the forced maximum-zoom step from terminal
 groups. Larger outer circles still zoom normally; an already-separated group
 opens its exact screen-admitted businesses without moving the map. S139 keeps
@@ -1376,10 +1400,19 @@ accessible labels while visible names wrap within the compact marker width.
 
 Local Auth presentation source (BE-059/DEP-029/DEP-049/FE-070) now uses MirtPage
 for the sender display, thirteen subjects and thirteen HTML-content fields.
-The twelve layouts use the canonical220×48 outlined wordmark PNG, byte-identical
-to the existing mobile wordmark. Code/link/recovery behavior, actual sender
-addresses, credentials, provider/origin settings and seven disabled notices are
-unchanged. Auth remains English-only; no request locale is invented. The guarded
+The hosted twenty-seven-field presentation repair was applied and independently
+read back on 2026-10-20, retaining214 untouched fields. One separately authorized
+sign-in email was confirmed in Gmail with MirtPage sender/subject/body and the
+original1320×288 logo loaded. Its transparent canvas exposed a contrast defect:
+canonical ink lettering disappeared against the recipient's dark background.
+The new local FE-070/BE-059 S150 candidate uses a versioned email-only PNG with
+the same220×48 display/1320×288 geometry and an opaque white canvas; original
+mobile/SVG colors, pixels and the prior transparent PNG remain unchanged. Its
+thirteen changed HTML fields need a fresh exact DEP-029 review after the new
+asset is deployed/read back. That contrast correction is not yet hosted and
+no additional test email is authorized. Code/link/recovery behavior, actual
+sender addresses, credentials, provider/origin settings and seven disabled
+notices are unchanged. Auth remains English-only; no request locale is invented. The guarded
 exact27-field allowlist rejects old-brand saved plans before provider reads;
 65 injected-port tests pass. Actual Google Chrome verifies24 static desktop/
 phone email states. This is source/presentation evidence, not a running Auth
@@ -2170,6 +2203,13 @@ Netlify publication readiness includes a Linux/x64/glibc image transform using
 the exact generated function archive (DEP-026), in addition to application gates
 and privacy scans. A build on another OS does not prove native-library readiness.
 
+Local S151 B09 (DEP-049/FE-021) repairs public responsive-image delivery with one
+exact same-origin Netlify CDN rewrite. Production original demo assets are
+present; the current optimizer route fails while the existing CDN succeeds.
+Native direct URLs, private authenticated media and source files are unchanged.
+The final artifact must preserve the rule before its function catch-all and pass
+hosted source/variant checks. This source candidate is not a live repair.
+
 Important directories:
 
 ```text
@@ -2760,6 +2800,43 @@ Rules:
 
 ## 19. UX and accessibility requirements
 
+Local S151 B10 makes the localized category name primary in Featured, keeps
+weekday/date secondary, and uses readable horizontal overflow on narrow screens.
+Only the row moves to expose the selected choice; page/gallery scroll is retained.
+Web/native initial silhouettes match the larger tiles. Web Expo buttons expose
+their pressed state explicitly; native selected state remains intact. Combined
+visual/full/deployment and a rebuilt phone remain separate gates.
+
+Local FE-074 (S151 B07) replaces the blanket loading-bar convention with
+resource-scoped feedback: preserve authorized same-resource content while it
+updates, use layout-matched skeletons for initial/new content, and keep stable
+headers/navigation available. Web business/product collections also include
+canonical visitor exclusions in their retention identity; server initial data
+must prove that same boundary before use. Blocking or unblocking cannot admit
+an older query, page or queued map action. Initial Market/showroom screen-reader
+announcements reuse the existing translated loading message. Account/tenant/resource changes must never retain
+the wrong private data or action identity. The boundary inventory, implementation
+and focused privacy/race/layout checks are complete. Actual Expo checks preserve
+cards while reads update. Final source-frozen web checks in English, Amharic and
+Afaan Oromo retain12 cards, one scoped status and0px content movement; visible
+images decode successfully. Visual/full/device qualification remains pending.
+Current deployed behavior is not claimed fixed.
+
+Local S151 B08 (FE-021/FE-024) sizes Featured columns from the gallery's actual
+available width alongside sponsors. The live overlap was reproduced at1100,
+1024 and768px despite no document overflow. The corrected compiled-component
+matrix passes27 width/sponsor states with separate hit targets and unchanged
+business order/rotation. Nine real-page geometry assertions and desktop/phone
+Next→preview→showroom→Back also pass; intentionally suppressed analytics abort
+observations remain an explicit receipt limit. Visual/full qualification and
+deployment remain separate.
+
+The local FE-026 B06 candidate resolves one current destination across authorized
+task and Account links before projecting phone tabs. Nested Account/security
+retains Account selection; More represents a selected task outside the primary
+tabs. Focused source and Chrome component checks pass. Authenticated local staff
+workflow evidence is limited by missing linked staff fixtures; deployment is pending.
+
 Local map degradation keeps the existing camera, business markers and previews
 usable on a neutral surface, with concise native-language status and48px Retry.
 Ordinary zooming and preview→showroom→Back must not turn obsolete tile loads into
@@ -3033,6 +3110,12 @@ All success replies are real; fixtures are removed and production chats untouche
 Physical Android/rebuilt APK and hosted rollout remain separate gates.
 
 ## 22. Testing and definition of done
+
+Local S151 B10 category checks cover full active-language labels, enlarged text,
+real local schedule responses, selection and business/Back restoration on web
+and Expo. Initial skeleton checks remain distinct from server streaming and
+physical Android. Preserve raw request failures even when functional assertions
+pass; matching suppressed-analytics paths do not establish a clean network run.
 
 Map automation must use declared local synthetic tiles intercepted before any
 public request, with service-worker bypass prevented and no escaped requests.

@@ -38,7 +38,7 @@ test('FE-070 full wordmark and icon derivatives preserve canonical outlines and 
  const source=fs.readFileSync('public'+PLATFORM_BRAND.assets.wordmark,'utf8');assert.doesNotMatch(source,/<(?:text|image)\b|font-family/);assert.match(source,/viewBox="0 0 440 96"/);
  const expected=await mirtpageDerivatives();for(const[file,bytes]of expected)assert.ok(fs.readFileSync(file).equals(bytes),`${file} must be reproduced from canonical SVG geometry`);
  assert.ok(fs.readFileSync('apps/mobile/assets/mirtpage-wordmark.png').equals(await sharp(Buffer.from(source)).resize(1320,288).png().toBuffer()));
- assert.ok(fs.readFileSync('public'+PLATFORM_BRAND.assets.emailWordmark).equals(fs.readFileSync('apps/mobile/assets/mirtpage-wordmark.png')),'Email uses the exact canonical mobile wordmark raster');
+ assert.ok(fs.readFileSync('public/brand/mirtpage-panels-wordmark-email.png').equals(fs.readFileSync('apps/mobile/assets/mirtpage-wordmark.png')),'The previous transparent email raster and mobile artwork remain unchanged');
  assert.equal(fs.readFileSync('public'+PLATFORM_BRAND.assets.wordmarkReverse,'utf8'),source.replaceAll(PLATFORM_BRAND.colors.ink,PLATFORM_BRAND.colors.white));
  const badge=await sharp('public'+PLATFORM_BRAND.assets.notificationBadge).ensureAlpha().raw().toBuffer({resolveWithObject:true});assert.equal(badge.info.width,96);let visible=0,transparent=0;
  for(let i=0;i<badge.data.length;i+=4){if(badge.data[i+3]>0){visible++;assert.deepEqual([...badge.data.subarray(i,i+3)],[255,255,255]);}else transparent++;}assert.ok(visible>500&&transparent>500,'Badge is the white M silhouette, not an opaque colored square');
@@ -48,6 +48,31 @@ test('FE-070 full wordmark and icon derivatives preserve canonical outlines and 
   fs.copyFileSync('public/pwa/suqpage-icon-192.png',path.join(isolated,'public'+PLATFORM_BRAND.assets.icon192));await assert.rejects(()=>generateMirtpageIcons({root:isolated,check:true}),/stale/);await generateMirtpageIcons({root:isolated});
   const image=await sharp(path.join(isolated,'public'+PLATFORM_BRAND.assets.icon192)).ensureAlpha().raw().toBuffer({resolveWithObject:true});const orange=image.data.findIndex((_,i)=>i%4===0&&image.data[i]===255&&image.data[i+1]===75&&image.data[i+2]===0&&image.data[i+3]===255);assert.ok(orange>=0);image.data.set([201,54,0,255],orange);await sharp(image.data,{raw:image.info}).png().toFile(path.join(isolated,'public'+PLATFORM_BRAND.assets.icon192));await assert.rejects(()=>generateMirtpageIcons({root:isolated,check:true}),/stale/);
  }finally{fs.rmSync(isolated,{recursive:true,force:true});}
+});
+
+test('FE-070 email-only raster keeps canonical pixels on an opaque white canvas for dark inboxes',async()=>{
+ assert.equal(PLATFORM_BRAND.assets.emailWordmark,'/brand/mirtpage-panels-wordmark-email-white-v2.png','A new filename avoids reusing the cached transparent email logo');
+ const canonical=await sharp('apps/mobile/assets/mirtpage-wordmark.png').ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ const email=await sharp('public'+PLATFORM_BRAND.assets.emailWordmark).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ assert.equal(email.info.width,1320);assert.equal(email.info.height,288);
+ assert.equal(email.info.width,canonical.info.width);assert.equal(email.info.height,canonical.info.height);
+ let background=0,ink=0,orange=0;
+ for(let offset=0;offset<email.data.length;offset+=4){
+  assert.equal(email.data[offset+3],255,'Every email logo pixel must remain opaque on dark surfaces');
+  const alpha=canonical.data[offset+3];
+  for(let channel=0;channel<3;channel++){
+   const expected=Math.round((canonical.data[offset+channel]*alpha+255*(255-alpha))/255);
+   assert.ok(Math.abs(email.data[offset+channel]-expected)<=1,'Foreground geometry and white alpha composition must match canonical artwork');
+   if(alpha===255)assert.equal(email.data[offset+channel],canonical.data[offset+channel],'Opaque canonical foreground RGB is exact');
+  }
+  if(alpha===0){background++;assert.deepEqual([...email.data.subarray(offset,offset+4)],[255,255,255,255]);}
+  if(alpha===255&&canonical.data[offset]===32&&canonical.data[offset+1]===36&&canonical.data[offset+2]===40)ink++;
+  if(alpha===255&&canonical.data[offset]===255&&canonical.data[offset+1]===75&&canonical.data[offset+2]===0)orange++;
+ }
+ assert.ok(background>1000&&ink>1000&&orange>1000,'White canvas and both exact canonical foreground colors are exercised');
+ const onBlack=await sharp('public'+PLATFORM_BRAND.assets.emailWordmark).flatten({background:'#000000'}).removeAlpha().raw().toBuffer();
+ const onWhite=await sharp('public'+PLATFORM_BRAND.assets.emailWordmark).flatten({background:'#ffffff'}).removeAlpha().raw().toBuffer();
+ assert.ok(onBlack.equals(onWhite),'Light/dark backing cannot change any opaque logo pixel');
 });
 
 test('FE-070 manifest, metadata and shell preloads use the same new art without changing storage identity',()=>{

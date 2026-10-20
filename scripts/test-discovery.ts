@@ -23,14 +23,17 @@ async function runPostgresFixture() {
     const groupDialogCss = fs.readFileSync("components/MapPreviewDialog.module.css", "utf8");
     const independentSearchSource = discoveryMapSource.slice(discoveryMapSource.indexOf("function useIndependentSearch"), discoveryMapSource.indexOf("export default function DiscoveryWorkspace"));
     const nearbyViewerSource = discoveryMapSource.slice(discoveryMapSource.indexOf("function NearbyShowroomsViewer"));
-    // FE-065: both scoped controllers debounce250ms and cancel superseded work;
+    // FE-065: both scoped adapters use the shared debounced, cancellable loader;
     // URL writes preserve framework history rather than restarting a global route.
-    for (const source of [independentSearchSource,marketFeedSource]) {
-        assert.match(source, /setTimeout\([\s\S]*,\s*250\)/);
-        assert.match(source, /clearTimeout\(timer\);\s*controller\.abort\(\)/);
-        assert.match(source, /controller\.signal\.aborted/);
-    }
-    assert.match(discoveryMapSource, /useIndependentSearch\('businesses',businessSearch,discovery,initialBusiness\)/);
+    assert.match(marketFeedSource, /setTimeout\([\s\S]*,\s*250\)/);
+    assert.match(marketFeedSource, /clearTimeout\(timer\);\s*controller\.abort\(\)/);
+    assert.match(marketFeedSource, /controller\.signal\.aborted/);
+    assert.match(marketFeedSource, /generation\.current === version && activeKey\.current === key && activeScope\.current === scopeKey/);
+    assert.match(independentSearchSource, /useMarketFeed\(key,async\(params,signal\)=>/);
+    assert.match(independentSearchSource, /fetch\('\/api\/discovery\?'\+params,\{signal\}\)/);
+    assert.match(independentSearchSource, /initialExclusionKey===exclusionKey\?batch\(initial\):undefined/);
+    assert.match(independentSearchSource, /scopeKey:'\/api\/discovery:public:'\+scope\+':excluded:'\+exclusionKey/);
+    assert.match(discoveryMapSource, /useIndependentSearch\('businesses',businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey\)/);
     assert.match(discoveryMapSource, /marketSearchParams\('products',productSearch\)/);
     assert.match(discoveryMapSource, /window\.history\.replaceState\(window\.history\.state/);
     assert.doesNotMatch(discoveryUiSource, /type="submit">Search/);

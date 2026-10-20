@@ -22,7 +22,10 @@ export async function mirtpageDerivatives(root=process.cwd()) {
  output.set('apps/mobile/assets/mirtpage-notification.png',await sharp(Buffer.from(badge.replaceAll(PLATFORM_BRAND.colors.logo,PLATFORM_BRAND.colors.white))).resize(96,96).png().toBuffer());
  output.set('public'+PLATFORM_BRAND.assets.wordmarkReverse,Buffer.from(wordmark.replaceAll(PLATFORM_BRAND.colors.ink,PLATFORM_BRAND.colors.white)));
  output.set('apps/mobile/assets/mirtpage-wordmark.png',await sharp(Buffer.from(wordmark)).resize(PLATFORM_BRAND.wordmark.width*3,PLATFORM_BRAND.wordmark.height*3).png().toBuffer());
- output.set('public'+PLATFORM_BRAND.assets.emailWordmark,output.get('apps/mobile/assets/mirtpage-wordmark.png'));
+ // Email clients can put transparent images on a dark surface. Keep the
+ // approved foreground pixels/geometry and give this versioned email-only
+ // derivative an opaque white canvas; native/web artwork stays unchanged.
+ output.set('public'+PLATFORM_BRAND.assets.emailWordmark,await sharp(output.get('apps/mobile/assets/mirtpage-wordmark.png')).flatten({background:PLATFORM_BRAND.colors.white}).png().toBuffer());
  return output;
 }
 export async function generateMirtpageIcons({root=process.cwd(),check=false}={}) {

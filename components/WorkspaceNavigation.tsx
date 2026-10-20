@@ -135,7 +135,8 @@ function NavigationGroups({ groups, onNavigate, clientNavigation=false, supportQ
   const t = useUiText();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeHref = workspaceActiveHref(groups.flatMap(group=>group.items), pathname, searchParams, supportQueue);
+  const destinations = groups.flatMap(group=>group.items);
+  const activeHref = workspaceActiveHref(clientNavigation ? destinations : [...destinations, {href:"/dashboard/account",label:"Account security"}], pathname, searchParams, supportQueue);
   return (
     <nav className="workspace-nav" aria-label={t("Workspace")}>
       {groups.map((group) => (
@@ -163,7 +164,7 @@ function NavigationGroups({ groups, onNavigate, clientNavigation=false, supportQ
       ))}
       {<div className="workspace-nav-group workspace-nav-utility">
         <span className="workspace-nav-label">{t("Account")}</span>
-        {!clientNavigation&&<Link href="/dashboard/account" aria-current={pathname === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}><ShieldCheck aria-hidden="true" size={17}/><span>{t("Account security")}</span><NavigationPendingIndicator label={t("Account security")} /></Link>}
+        {!clientNavigation&&<Link href="/dashboard/account" aria-current={activeHref === "/dashboard/account" ? "page" : undefined} onClick={onNavigate}><ShieldCheck aria-hidden="true" size={17}/><span>{t("Account security")}</span><NavigationPendingIndicator label={t("Account security")} /></Link>}
         <Link href="/" target="_blank" rel="noreferrer" onClick={onNavigate}><ExternalLink aria-hidden="true" size={17}/><span>{t("Public site")}</span><ExternalLink className="workspace-nav-external" aria-hidden="true" size={14}/></Link>
         <form action={logoutAction}><button type="submit"><LogOut aria-hidden="true" size={17}/><span>{t("Sign out")}</span></button></form>
       </div>}
@@ -208,7 +209,9 @@ export default function WorkspaceNavigation({
     if (!item.external && !primaryItems.some((candidate) => candidate.href === item.href)) primaryItems.push(item);
   }
   if (staffNavigation && primaryItems.length < 4) primaryItems.push({href:"/dashboard/account",label:"Account",icon:"account"});
-  const primaryActiveHref = workspaceActiveHref(primaryItems, pathname, searchParams, supportQueue);
+  const destinations = clientNavigation ? allItems : [...allItems, {href:"/dashboard/account",label:"Account security"}];
+  const activeHref = workspaceActiveHref(destinations, pathname, searchParams, supportQueue);
+  const primaryActiveHref = primaryItems.find(item=>item.href===activeHref)?.href;
   const primaryContainsActive = Boolean(primaryActiveHref);
 
   useEffect(() => {

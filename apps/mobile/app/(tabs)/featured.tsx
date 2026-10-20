@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Pressable,
+  Platform,
   View,
   Text,
   ScrollView,
   useWindowDimensions,
   StyleSheet,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import type { Featured } from "@suqpage/contracts";
 import { request, useLoad, useApp } from "../../src/runtime";
 import {
@@ -21,6 +22,8 @@ import {
 import { SponsorCarousel } from "../../src/SponsorCarousel";
 import { CategoryArt } from "../../src/chrome";
 import {useBlockedBusinesses} from '../../src/blocked-businesses';
+import {CATALOG_CARD_GAP,catalogCardStyle} from '../../src/catalog-card-layout';
+import ResourceLoading from '../../src/ResourceLoading';
 type Program = Featured & {
   schedule: {
     weekday: number;
@@ -39,6 +42,7 @@ export default function FeaturedScreen() {
   const [scrollY, setScrollY] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
   const [sponsorBounds, setSponsorBounds] = useState({ y: 0, height: 0 });
+  const [gridWidth,setGridWidth] = useState(0);
   const sponsorVisible = sponsorBounds.height > 0 && Math.min(sponsorBounds.y + sponsorBounds.height, scrollY + viewportHeight) - Math.max(sponsorBounds.y, scrollY) >= sponsorBounds.height / 2;
   const exclude=blocked.list.map(v=>v.id).join(',');
   const load = useLoad(async () => ({exclude, program: await request<Program>("featured?day=" + day+'&exclude='+exclude)}), [day,exclude], true);
@@ -46,6 +50,29 @@ export default function FeaturedScreen() {
     current = program?.schedule.find((d) =>
       day ? String(d.weekday) === day : d.isToday,
     );
+  const categoryScroll = useRef<ScrollView>(null);
+  const categoryLayouts = useRef(new Map<number, { x: number; width: number }>());
+  const categoryViewport = useRef(0);
+  const categoryContentWidth = useRef(0);
+  const categoryOffset = useRef(0);
+  const selectedCategory = useRef(current?.weekday);
+  selectedCategory.current = current?.weekday;
+  const revealCurrentCategory = useCallback((restoreOffset = false) => {
+    const selected = selectedCategory.current;
+    const bounds = selected === undefined ? undefined : categoryLayouts.current.get(selected);
+    const viewport = categoryViewport.current;
+    if (!bounds || viewport <= 0 || categoryContentWidth.current <= 0) return;
+    const offset = categoryOffset.current;
+    const visible = bounds.x >= offset && bounds.x + bounds.width <= offset + viewport;
+    if (visible && !restoreOffset) return;
+    const desired = visible ? offset : bounds.x < offset ? bounds.x - 8 : bounds.x + bounds.width + 8 - viewport;
+    const next = Math.max(0, Math.min(desired, categoryContentWidth.current - viewport));
+    if (!restoreOffset && Math.abs(next - offset) < 1) return;
+    categoryOffset.current = next;
+    categoryScroll.current?.scrollTo({ x: next, animated: false });
+  }, []);
+  useEffect(revealCurrentCategory, [current?.weekday, fontScale, revealCurrentCategory]);
+  useFocusEffect(useCallback(() => { revealCurrentCategory(true); }, [revealCurrentCategory]));
   return (
     <Screen scroll={false}>
       <ScrollView contentContainerStyle={{ padding: 18, gap: 16, paddingBottom: 30 }}
@@ -63,7 +90,7 @@ export default function FeaturedScreen() {
           </View>
         )}
       </View>
-      <Status {...load} retry={load.reload} />
+      <ResourceLoading load={load} variant="featured"/>
       {program && (
         <>
           {program.sponsors.length > 0 && (
@@ -72,19 +99,48 @@ export default function FeaturedScreen() {
             </View>
           )}
           <ScrollView
+            ref={categoryScroll}
+            testID="featured-category-choices"
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 8 }}
+            contentContainerStyle={f.categoryChoices}
+            onLayout={event => {
+              const width = event.nativeEvent.layout.width;
+              if (Number.isFinite(width) && width > 0) {
+                categoryViewport.current = width;
+                revealCurrentCategory();
+              }
+            }}
+            onContentSizeChange={width => {
+              if (Number.isFinite(width) && width > 0) {
+                categoryContentWidth.current = width;
+                revealCurrentCategory();
+              }
+            }}
+            onScroll={event => { categoryOffset.current = event.nativeEvent.contentOffset.x; }}
+            scrollEventThrottle={16}
           >
             {program.schedule.map((d) => (
               <Pressable
                 key={d.weekday}
+                testID={`featured-category-${d.weekday}`}
                 accessibilityRole="button"
-                accessibilityLabel={t(d.dayLabel)}
+                {...(Platform.OS === "web" ? { "aria-pressed": current?.weekday === d.weekday } : {})}
+                accessibilityLabel={t("{value1}, {value2}, {value3}{value4}", {
+                  value1: t(d.industryLabel), value2: t(d.dayLabel), value3: d.dateLabel,
+                  value4: d.isToday ? `, ${t("Today")}` : "",
+                })}
                 accessibilityState={{
                   selected: current?.weekday === d.weekday,
                 }}
                 onPress={() => setDay(String(d.weekday))}
+                onLayout={event => {
+                  const { x, width } = event.nativeEvent.layout;
+                  if (Number.isFinite(x) && x >= 0 && Number.isFinite(width) && width > 0) {
+                    categoryLayouts.current.set(d.weekday, { x, width });
+                    revealCurrentCategory();
+                  }
+                }}
                 style={[
                   f.day,
                   current?.weekday === d.weekday && {
@@ -93,17 +149,24 @@ export default function FeaturedScreen() {
                   },
                 ]}
               >
-                <CategoryArt name={d.industryKey} size={34} />
-                <Text style={f.name}>{t(d.dayLabel)}</Text>
-                <Text style={f.small}>{d.dateLabel}</Text>
+                <View style={f.categoryHeading}>
+                  <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" aria-hidden>
+                    <CategoryArt name={d.industryKey} size={32} />
+                  </View>
+                  <Text style={f.categoryName}>{t(d.industryLabel)}</Text>
+                </View>
+                <Text style={[f.categorySchedule, d.isToday && f.today]}>
+                  {t(d.dayLabel)} · {d.dateLabel}{d.isToday ? ` · ${t("Today")}` : ""}
+                </Text>
               </Pressable>
             ))}
           </ScrollView>
-          <View style={f.grid}>
+          <View testID="featured-business-grid" style={f.grid} onLayout={event=>{const width=event.nativeEvent.layout.width;if(Number.isFinite(width)&&width>0)setGridWidth(current=>current===width?current:width);}}>
             {program.slots.map((slot) => (
               <View
                 key={slot.slot}
-                style={[f.item, { width: fontScale > 1.3 ? "100%" : "48%" }]}
+                testID={`featured-business-${slot.slot}`}
+                style={[f.item,catalogCardStyle(gridWidth,fontScale)]}
               >
                 {slot.shop ? (
                   <Pressable
@@ -160,12 +223,18 @@ const f = StyleSheet.create({
   broadcastText: { fontSize: 13, fontWeight: "600", color: colors.ink },
   name: { fontSize: 15, lineHeight: 20, fontWeight: "700", color: colors.ink },
   small: { fontSize: 11, lineHeight: 16, color: colors.muted },
+  categoryChoices: { gap: 8, alignItems: "stretch" },
+  categoryHeading: { flexDirection: "row", alignItems: "center", gap: 8 },
+  categoryName: { flex: 1, minWidth: 0, fontSize: 14, lineHeight: 18, fontWeight: "700", color: colors.ink },
+  categorySchedule: { fontSize: 12, lineHeight: 17, color: colors.muted },
+  today: { color: colors.brand, fontWeight: "600" },
   day: {
-    width: 94,
-    minHeight: 106,
+    width: 176,
+    minHeight: 96,
+    flexShrink: 0,
     padding: 10,
-    alignItems: "center",
-    gap: 4,
+    justifyContent: "space-between",
+    gap: 8,
     borderWidth: 1,
     borderColor: colors.line,
     borderRadius: 6,
@@ -175,7 +244,7 @@ const f = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 12,
+    gap: CATALOG_CARD_GAP,
   },
   item: {
     borderWidth: 1,

@@ -10,18 +10,39 @@ import {normalizeMarketSearch} from '../lib/market-search';
 // translation, map rendering and HTTP data ports are controlled; not device/API proof.
 const KEY='suqpage:market-workspace:v1',RETURN_KEY='suqpage:last-marketplace-url:v1';
 const bundle=build({stdin:{loader:'jsx',resolveDir:process.cwd(),contents:`
- import React,{useEffect,useState,Fragment} from 'react';import {createRoot} from 'react-dom/client';
+ import React,{useEffect,useState,Fragment,Activity} from 'react';import {createRoot} from 'react-dom/client';
  import Workspace from './components/DiscoveryWorkspace';import {marketWorkspaceFromParams} from './lib/market-workspace';
+ import {useBlockedBusinesses} from './components/useBlockedBusinesses';
  const f=window.fixture;
  const replace=history.replaceState.bind(history);history.replaceState=(...args)=>{replace(...args);queueMicrotask(()=>window.dispatchEvent(new Event('fixture-navigation')));};
  f.go=href=>{history.pushState({framework:'fixture-router',entry:++f.entry},'',href);window.dispatchEvent(new Event('fixture-navigation'));};
  f.goSilent=href=>history.pushState({framework:'fixture-router',entry:++f.entry},'',href);
  f.flush=()=>window.dispatchEvent(new Event('fixture-navigation'));
- window.fetch=async(url,options={})=>{f.requests.push(String(url));const business=new URL(String(url),location.href).searchParams.get('scope')==='businesses';if(f.holdBusiness&&business)await new Promise((resolve,reject)=>{f.pendingReads.push(resolve);options.signal?.addEventListener('abort',()=>{f.abortedReads++;if(!f.ignoreAbort)reject(new DOMException('Aborted','AbortError'));},{once:true});});return new Response(JSON.stringify(f.fullData||f.data),{status:business&&f.failBusiness?503:200,headers:{'content-type':'application/json'}});};
- function App(){const[revision,setRevision]=useState(0);useEffect(()=>{const update=()=>setRevision(n=>n+1);window.addEventListener('fixture-navigation',update);window.addEventListener('popstate',update);return()=>{window.removeEventListener('fixture-navigation',update);window.removeEventListener('popstate',update);};},[]);
+ window.fetch=async(url,options={})=>{
+  f.requests.push(String(url));const parsed=new URL(String(url),location.href);
+  if(parsed.pathname==='/api/catalog/preferences'){
+   f.excluded=JSON.parse(options.body).blockedIds;return Response.json({ok:true});
+  }
+  const business=parsed.searchParams.get('scope')==='businesses',page=Number(parsed.searchParams.get('page')||1);
+  const source=(!business&&page===2&&f.pageTwo)||(!business&&f.nextProducts)||f.fullData||f.data;
+  // Capture server authority when the request starts, before a controlled delay.
+  // Ignoring AbortSignal must still never let an old exclusion response win.
+  const excluded=[...f.excluded];let data=structuredClone(source);
+  if(f.enforceExclusions){
+   data={...data,showrooms:data.showrooms.filter(v=>!excluded.includes(v.id)),searchProducts:data.searchProducts.filter(v=>!excluded.includes(v.businessId))};
+   if(!data.searchProducts.length)data.resultPage={page:1,totalPages:1,totalItems:0,firstItem:0,lastItem:0};
+  }
+  f.reads.push({scope:business?'businesses':'products',page,excluded});
+  if((f.holdBusiness&&business)||(f.holdProducts&&!business))await new Promise((resolve,reject)=>{(business?f.pendingReads:f.pendingProductReads).push(resolve);options.signal?.addEventListener('abort',()=>{f.abortedReads++;if(!f.ignoreAbort)reject(new DOMException('Aborted','AbortError'));},{once:true});});
+  return new Response(JSON.stringify(data),{status:(business&&f.failBusiness)||(!business&&f.failProducts)?503:200,headers:{'content-type':'application/json'}});
+ };
+ function App(){const[revision,setRevision]=useState(0),[preferencesReady,setPreferencesReady]=useState(!f.deferWorkspace),preferences=useBlockedBusinesses();
+  f.saveExclusions=ids=>preferences.save(ids.map(id=>({id,handle:'fixture-'+id,name:'Fixture Business '+id})));
+  useEffect(()=>{setPreferencesReady(true);},[]);
+  useEffect(()=>{const update=()=>setRevision(n=>n+1);window.addEventListener('fixture-navigation',update);window.addEventListener('popstate',update);return()=>{window.removeEventListener('fixture-navigation',update);window.removeEventListener('popstate',update);};},[]);
   const path=location.pathname,state=marketWorkspaceFromParams(new URLSearchParams(location.search)),server=f.serverParams?marketWorkspaceFromParams(new URLSearchParams(f.serverParams)):state;
   return <Fragment><nav><button onClick={()=>f.go('/about')}>Open About</button><button onClick={()=>f.go('/featured')}>Open Featured</button><button onClick={()=>f.go('/')}>Return Market</button><button onClick={()=>history.back()}>Browser Back</button></nav>
-   {path==='/'?<Workspace discovery={f.data} productDiscovery={f.data} initialBusiness={server.business} initialProduct={server.product} view={state.mode==='products'?'search':'map'}/>:<section><h1>{path}</h1>{path==='/featured'&&<button onClick={()=>{sessionStorage.setItem('${RETURN_KEY}','/featured?day=2');f.go('/@fixture-shop');}}>Open Featured showroom</button>}</section>}
+   {path==='/'?preferencesReady&&<Activity mode={f.hidden?'hidden':'visible'}><Workspace discovery={f.data} productDiscovery={f.data} initialExclusions={f.initialExclusions??undefined} initialBusiness={server.business} initialProduct={server.product} view={state.mode==='products'?'search':'map'}/></Activity>:<section><h1>{path}</h1>{path==='/featured'&&<button onClick={()=>{sessionStorage.setItem('${RETURN_KEY}','/featured?day=2');f.go('/@fixture-shop');}}>Open Featured showroom</button>}</section>}
   </Fragment>;
  }
  createRoot(document.getElementById('root')).render(<App/>);
@@ -35,30 +56,33 @@ const bundle=build({stdin:{loader:'jsx',resolveDir:process.cwd(),contents:`
   :args.path==='next/navigation'?`import {useEffect,useState} from 'react';export const useRouter=()=>({push:href=>window.fixture.go(href),replace:href=>window.fixture.go(href),back:()=>history.back()});export function useSearchParams(){const[value,setValue]=useState(()=>location.search);useEffect(()=>{const update=()=>setValue(location.search);window.addEventListener('fixture-navigation',update);window.addEventListener('popstate',update);return()=>{window.removeEventListener('fixture-navigation',update);window.removeEventListener('popstate',update);};},[]);return new URLSearchParams(value);}`
   :args.path==='next/link'?`export default function Link({href,children,onClick,...props}){return <a {...props} href={href} onClick={event=>{onClick?.(event);event.preventDefault();window.fixture.go(href);}}>{children}</a>;}`
   :args.path==='next/image'?`export default function Image({src,alt,...props}){return <img {...props} src={src} alt={alt}/>;}`
-  :`import React,{forwardRef,useEffect,useImperativeHandle} from 'react';export default forwardRef(function Map(p,ref){useImperativeHandle(ref,()=>({centerAt(){},zoomIn(){},zoomOut(){},reset(){}}));useEffect(()=>{if(window.fixture.initialSdkView&&p.showrooms.length)p.onViewChange({center:[9.145,40.4897],zoom:5});},[p.showrooms]);return <div data-fixture-map data-view={JSON.stringify(p.requestedView)} data-fixture-shops={p.showrooms.length}><button onClick={()=>p.onViewChange({center:[1.25,36.75],zoom:11})}>Move fixture map</button><button onClick={()=>p.onViewChange(p.requestedView||{center:[9.03,38.75],zoom:18})}>Commit current fixture map</button></div>;});`}));
+  :`import React,{forwardRef,useEffect,useImperativeHandle} from 'react';export default forwardRef(function Map(p,ref){useImperativeHandle(ref,()=>({centerAt(){},zoomIn(){},zoomOut(){},reset(){}}));useEffect(()=>{if(window.fixture.initialSdkView&&p.showrooms.length)p.onViewChange({center:[9.145,40.4897],zoom:5});},[p.showrooms]);useEffect(()=>{window.fixture.currentSelect=()=>p.showrooms[0]&&p.onSelectShowroom(p.showrooms[0]);window.fixture.currentOpenGroup=()=>p.onOpenNearbyGroup({key:'cluster:1-2'});});return <div data-fixture-map data-view={JSON.stringify(p.requestedView)} data-fixture-shops={p.showrooms.length}><button onClick={()=>p.onViewChange({center:[1.25,36.75],zoom:11})}>Move fixture map</button><button onClick={()=>p.onViewChange(p.requestedView||{center:[9.03,38.75],zoom:18})}>Commit current fixture map</button></div>;});`}));
  }}]});
 
-type Fixture={go:(href:string)=>void;goSilent:(href:string)=>void;flush:()=>void;writes:Array<{key:string;value:string}>;requests:string[];pendingReads:Array<()=>void>;abortedReads:number;holdBusiness:boolean;failBusiness?:boolean};
+type Fixture={go:(href:string)=>void;goSilent:(href:string)=>void;flush:()=>void;writes:Array<{key:string;value:string}>;requests:string[];reads:Array<{scope:string;page:number;excluded:number[]}>;saveExclusions:(ids:number[])=>Promise<void>;currentSelect:()=>void;currentOpenGroup:()=>void;staleSelect:()=>void;staleOpenGroup:()=>void;pendingReads:Array<()=>void>;abortedReads:number;holdBusiness:boolean;holdProducts?:boolean;pendingProductReads:Array<()=>void>;failBusiness?:boolean;failProducts?:boolean};
 let browser:Browser|undefined;
 after(async()=>{await browser?.close();});
 
-async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;memory?:string;blocked?:boolean;serverParams?:string;withShops?:boolean;holdBusiness?:boolean;ignoreAbort?:boolean;initialSdkView?:boolean;discoveryMemory?:string}={}){
+async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;memory?:string;blocked?:boolean;serverParams?:string;withShops?:boolean;holdBusiness?:boolean;holdProducts?:boolean;ignoreAbort?:boolean;initialSdkView?:boolean;discoveryMemory?:string;seedShops?:boolean;excluded?:number[];initialExclusions?:number[]|null;enforceExclusions?:boolean;productPages?:boolean;deferWorkspace?:boolean}={}){
  const compiled=await bundle;
- browser??=await chromium.launch({headless:true});const context:BrowserContext=await browser.newContext();t.after(()=>context.close());
+ browser??=await chromium.launch({channel:'chrome',headless:true});const context:BrowserContext=await browser.newContext();t.after(()=>context.close());
  const page=await context.newPage(),errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
  await page.route('http://market.fixture/**',route=>route.fulfill({contentType:'text/html',body:'<div id="root"></div>'}));
  await page.goto('http://market.fixture'+(options.url||'/'));
- await page.evaluate(({key,memory,blocked,serverParams,withShops,holdBusiness,ignoreAbort,initialSdkView,discoveryMemory})=>{
+ await page.evaluate(({key,memory,blocked,serverParams,withShops,holdBusiness,holdProducts,ignoreAbort,initialSdkView,discoveryMemory,seedShops,excluded=[],initialExclusions=[],enforceExclusions=false,productPages=false,deferWorkspace=false})=>{
   const data={showrooms:[],nearbyGroups:[],searchBusinesses:[],searchOrder:[],industries:[],places:[],countries:[],total:0,resultCounts:{businesses:0,products:1},resultPage:{page:1,totalPages:1,totalItems:1,firstItem:1,lastItem:1},featuredNowBusinessId:null,
-   searchProducts:[{id:101,name:'Fixture cup',description:'A real React fixture product.',categoryName:'Cups',businessHandle:'fixture-shop',businessName:'Fixture Shop',city:'Addis Ababa',region:'Addis Ababa',primaryIndustryKey:'home',imagePath:'',offeringKind:'standard_product',availability:'available'}]};
+   searchProducts:[{id:101,businessId:1,name:'Fixture cup',description:'A real React fixture product.',categoryName:'Cups',businessHandle:'fixture-shop',businessName:'Fixture Shop',city:'Addis Ababa',region:'Addis Ababa',primaryIndustryKey:'home',imagePath:'',offeringKind:'standard_product',availability:'available'}]};
   const shops=Array.from({length:2},(_,index)=>({id:index+1,handle:'fixture-'+(index+1),name:'Fixture Business '+(index+1),tagline:'Physical products',description:'',logoPath:'',heroImagePath:'',city:'Fixture city',zone:'',region:'',latitude:9.03,longitude:38.75,fallbackStyle:'workshop',sponsored:false,productionScale:'workshop',isLive:false,livePlatform:'',liveUrl:'',primaryIndustryKey:'textiles',primaryIndustryLabel:'Textiles',primaryIndustryShortLabel:'Textiles',locationMode:'storefront'}));
-  const f={writes:[] as Array<{key:string;value:string}>,requests:[] as string[],data,fullData:withShops?{...data,showrooms:shops}:null,entry:1,serverParams,holdBusiness:Boolean(holdBusiness),ignoreAbort:Boolean(ignoreAbort),initialSdkView:Boolean(initialSdkView),pendingReads:[],abortedReads:0};(window as unknown as {fixture:unknown}).fixture=f;
+  if(productPages)data.resultPage={page:1,totalPages:2,totalItems:2,firstItem:1,lastItem:1};
+  const initialData=seedShops?{...data,showrooms:shops}:data;
+  const f={writes:[] as Array<{key:string;value:string}>,requests:[] as string[],reads:[],data:initialExclusions?.length?{...initialData,showrooms:initialData.showrooms.filter(v=>!initialExclusions.includes(v.id)),searchProducts:initialData.searchProducts.filter(v=>!initialExclusions.includes(v.businessId))}:initialData,fullData:withShops?{...data,showrooms:shops}:null,pageTwo:productPages?{...data,resultPage:{page:2,totalPages:2,totalItems:2,firstItem:2,lastItem:2},searchProducts:[{...data.searchProducts[0],id:102,name:'Old page cup'}]}:null,excluded,initialExclusions,enforceExclusions,deferWorkspace,entry:1,serverParams,holdBusiness:Boolean(holdBusiness),holdProducts:Boolean(holdProducts),ignoreAbort:Boolean(ignoreAbort),initialSdkView:Boolean(initialSdkView),pendingReads:[],pendingProductReads:[],abortedReads:0};(window as unknown as {fixture:unknown}).fixture=f;
+  localStorage.setItem('suqpage-blocked-businesses-v1',JSON.stringify(excluded.map(id=>({id,handle:'fixture-'+id,name:'Fixture Business '+id}))));
   history.replaceState({framework:'fixture-router',entry:1},'',location.href);
   if(memory)sessionStorage.setItem(key,memory);
   if(discoveryMemory)sessionStorage.setItem('suqpage:discovery-navigation:v2',discoveryMemory);
   const write=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){f.writes.push({key,value});return write.call(this,key,value);};
   if(blocked)Object.defineProperty(window,'sessionStorage',{configurable:true,get(){throw new DOMException('Storage blocked','SecurityError');}});
- },{key:KEY,memory:options.memory,blocked:options.blocked,serverParams:options.serverParams,withShops:options.withShops,holdBusiness:options.holdBusiness,ignoreAbort:options.ignoreAbort,initialSdkView:options.initialSdkView,discoveryMemory:options.discoveryMemory});
+ },{key:KEY,memory:options.memory,blocked:options.blocked,serverParams:options.serverParams,withShops:options.withShops,holdBusiness:options.holdBusiness,holdProducts:options.holdProducts,ignoreAbort:options.ignoreAbort,initialSdkView:options.initialSdkView,discoveryMemory:options.discoveryMemory,seedShops:options.seedShops,excluded:options.excluded,initialExclusions:options.initialExclusions,enforceExclusions:options.enforceExclusions,productPages:options.productPages,deferWorkspace:options.deferWorkspace});
  await page.addScriptTag({content:compiled.outputFiles[0].text});
  await expect(page.getByRole('button',{name:'Products',exact:true})).toBeEnabled();
  return {page,errors};
@@ -166,6 +190,152 @@ test('FE-065 S128 aborting a pending search back to its resolved key clears the 
  const {page,errors}=await boot(t,{url:'/?view=map&b.q=Addis',serverParams:'view=map&b.q=Addis',holdBusiness:true,ignoreAbort:true,withShops:true});
  const search=page.getByRole('searchbox',{name:'Search businesses',exact:true});await search.fill('Other');
  await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingReads.length)).toBe(1);
- await expect(page.locator('.suqpage-loading')).toHaveCount(1);await search.fill('Addis');await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.abortedReads)).toBe(1);
+ await expect(page.getByRole('status').filter({hasText:'Updating Market results'})).toHaveCount(1);await search.fill('Addis');await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.abortedReads)).toBe(1);
  await expect(page.locator('.suqpage-loading')).toHaveCount(0);const saved=await page.evaluate(key=>sessionStorage.getItem(key),DISCOVERY_KEY);await releaseBusinessReads(page);await page.waitForTimeout(50);await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','0');assert.equal(await page.evaluate(key=>sessionStorage.getItem(key),DISCOVERY_KEY),saved,'A late aborted response cannot replace the cached projection or write return memory');assert.deepEqual(errors,[]);
+});
+
+test('FE-074 web product updates retain canonical cards and scroll until a matching snapshot settles',async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=search'});
+ await expect(page.locator('.discovery-product-card')).toHaveCount(1);
+ await page.evaluate(()=>{
+  const f=(window as unknown as{fixture:Fixture&{scrolls:number;nextProducts:unknown;data:{searchProducts:Array<Record<string,unknown>>}}}).fixture;
+  f.holdProducts=true;f.scrolls=0;
+  const scroll=Element.prototype.scrollTo;Element.prototype.scrollTo=function(options?:ScrollToOptions|number,y?:number){if(this.classList.contains('discovery-search-results'))f.scrolls++;Reflect.apply(scroll,this,typeof options==='number'?[options,y??0]:[options]);};
+  f.nextProducts={...f.data,searchProducts:[{...f.data.searchProducts[0],id:202,name:'Matched new product'}]};
+ });
+ await page.getByRole('searchbox',{name:'Search products',exact:true}).fill('New collection');
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingProductReads.length)).toBe(1);
+ await expect(page.locator('.discovery-product-card')).toHaveCount(1);
+ await expect(page.locator('.discovery-product-link')).toHaveAttribute('href',/@fixture-shop\?product=101/);
+ await expect(page.locator('.discovery-search-workspace')).toHaveAttribute('data-snapshot-current','false');
+ await expect(page.getByRole('status').filter({hasText:'Updating Market results'})).toHaveCount(1);
+ await expect(page.locator('.suqpage-loading')).toHaveCount(0);
+ await expect(page.getByText("You've seen all the results.",{exact:true})).toHaveCount(0);
+ assert.equal(await page.evaluate(()=>(window as unknown as{fixture:{scrolls:number}}).fixture.scrolls),0,'Typing does not reset the displayed result list');
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.holdProducts=false;f.pendingProductReads.splice(0).forEach(release=>release());});
+ await expect(page.locator('.discovery-product-link')).toHaveAttribute('href',/@fixture-shop\?product=202/);
+ await expect(page.locator('.discovery-search-workspace')).toHaveAttribute('data-snapshot-current','true');
+ assert.equal(await page.evaluate(()=>(window as unknown as{fixture:{scrolls:number}}).fixture.scrolls),1,'Only admission of the new snapshot resets scroll');
+ assert.deepEqual(errors,[]);
+});
+
+test('FE-074 web business updates retain markers but cannot persist them as new-criteria membership',async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=map',withShops:true,seedShops:true,holdBusiness:true});
+ await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','2');
+ await page.getByRole('button',{name:'Move fixture map',exact:true}).click();
+ const before=await page.evaluate(key=>sessionStorage.getItem(key),DISCOVERY_KEY);
+ await page.getByRole('searchbox',{name:'Search businesses',exact:true}).fill('Different businesses');
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingReads.length)).toBe(1);
+ await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','2');
+ await expect(page.locator('.discovery-map-shell')).toHaveAttribute('data-snapshot-current','false');
+ await page.getByRole('button',{name:'Move fixture map',exact:true}).click();
+ assert.equal(await page.evaluate(key=>sessionStorage.getItem(key),DISCOVERY_KEY),before,'A stale map snapshot cannot become the new filter scope in return memory');
+ await releaseBusinessReads(page);await expect(page.locator('.discovery-map-shell')).toHaveAttribute('data-snapshot-current','true');
+ assert.deepEqual(errors,[]);
+});
+
+test('FE-074 failed web product updates retain useful cards and retry without stale completion claims',async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=search'});
+ await expect(page.locator('.discovery-product-card')).toHaveCount(1);
+ await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.failProducts=true);
+ await page.getByRole('searchbox',{name:'Search products',exact:true}).fill('Unavailable query');
+ await expect(page.getByRole('alert')).toContainText('Search is unavailable. Try again.');
+ await expect(page.locator('.discovery-product-card')).toHaveCount(1);
+ await expect(page.locator('.discovery-search-workspace')).toHaveAttribute('data-snapshot-current','false');
+ await expect(page.getByText("You've seen all the results.",{exact:true})).toHaveCount(0);
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.failProducts=false;f.holdProducts=true;});
+ await page.getByRole('button',{name:'Try again',exact:true}).click();
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingProductReads.length)).toBe(1);
+ await expect(page.locator('.discovery-product-card')).toHaveCount(1);
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.holdProducts=false;f.pendingProductReads.splice(0).forEach(release=>release());});
+ await expect(page.locator('.discovery-search-workspace')).toHaveAttribute('data-snapshot-current','true');
+ await expect(page.getByRole('alert')).toHaveCount(0);assert.deepEqual(errors,[]);
+});
+
+test('FE-074 preserved React Activity reconnect cannot reset an unchanged product snapshot',async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=search'});
+ await expect(page.locator('.discovery-product-card')).toHaveCount(1);
+ await page.evaluate(()=>{
+  const f=(window as unknown as{fixture:Fixture&{scrolls:number;hidden:boolean}}).fixture;f.scrolls=0;
+  const scroll=Element.prototype.scrollTo;Element.prototype.scrollTo=function(options?:ScrollToOptions|number,y?:number){if(this.classList.contains('discovery-search-results'))f.scrolls++;Reflect.apply(scroll,this,typeof options==='number'?[options,y??0]:[options]);};
+  f.hidden=true;f.flush();
+ });
+ await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toBeHidden();
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture&{hidden:boolean}}).fixture;f.hidden=false;f.flush();});
+ await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toBeVisible();
+ assert.equal(await page.evaluate(()=>(window as unknown as{fixture:{scrolls:number}}).fixture.scrolls),0,'Same snapshot reconnect never scrolls retained content');
+ assert.deepEqual(errors,[]);
+});
+
+test('FE-074 queued old map callbacks cannot open membership after new criteria start',async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=map',withShops:true,seedShops:true,holdBusiness:true});
+ await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','2');
+ await page.getByRole('button',{name:'Move fixture map',exact:true}).click();
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:{currentSelect:()=>void;staleSelect:()=>void}}).fixture;f.staleSelect=f.currentSelect;});
+ await page.getByRole('searchbox',{name:'Search businesses',exact:true}).fill('Different businesses');
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingReads.length)).toBe(1);
+ await page.evaluate(()=>(window as unknown as{fixture:{staleSelect:()=>void}}).fixture.staleSelect());
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+ await releaseBusinessReads(page);assert.deepEqual(errors,[]);
+});
+
+const exclude=(page:Page,ids:number[])=>page.evaluate(ids=>(window as unknown as{fixture:Fixture}).fixture.saveExclusions(ids),ids);
+const fixtureReads=(page:Page)=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.reads);
+
+test('FE-065 web exclusions invalidate both same-query collections and unblock refetches without reordering churn',async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=search&p.q=Cup&b.q=Workshop',withShops:true,seedShops:true,enforceExclusions:true,deferWorkspace:true});
+ await expect(page.locator('.discovery-product-card')).toHaveCount(1);
+ assert.deepEqual(await fixtureReads(page),[],'Matching server initial scope needs no extra GET');
+ await exclude(page,[1]);
+ await expect(page.locator('.discovery-product-card')).toHaveCount(0);
+ await expect.poll(async()=>(await fixtureReads(page)).length).toBe(2);
+ await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','1');
+ assert.ok((await fixtureReads(page)).every(read=>read.page===1&&read.excluded.join(',')==='1'));
+ await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
+ await exclude(page,[1,2]);await expect.poll(async()=>(await fixtureReads(page)).length).toBe(4);
+ await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','0');
+ await exclude(page,[2,1]);await page.waitForTimeout(300);
+ assert.equal((await fixtureReads(page)).length,4,'Only canonical membership, not preference order, changes feed authority');
+ await exclude(page,[]);await expect.poll(async()=>(await fixtureReads(page)).length).toBe(6);
+ await expect(page.locator('.discovery-product-card')).toHaveCount(1);
+ await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','2');
+ assert.deepEqual((await fixtureReads(page)).slice(-2).map(read=>read.excluded),[[],[]]);
+ assert.deepEqual(errors,[]);
+});
+
+test('FE-065 web exclusions reject old query/page responses and queued map/group callbacks',async t=>{
+ const discoveryMemory=JSON.stringify({scope:'scope=businesses',activeNearbyGroupKey:null,selectedShowroomId:null,mapView:{center:[9.03,38.75],zoom:18},updatedAt:Date.now()});
+ const {page,errors}=await boot(t,{url:'/?view=map',withShops:true,seedShops:true,enforceExclusions:true,holdBusiness:true,holdProducts:true,ignoreAbort:true,productPages:true,discoveryMemory,deferWorkspace:true});
+ await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','2');
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.staleSelect=f.currentSelect;f.staleOpenGroup=f.currentOpenGroup;f.currentOpenGroup();});
+ await expect(page.getByRole('dialog')).toHaveCount(1);await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);
+ await page.getByRole('searchbox',{name:'Search businesses',exact:true}).fill('Pending query');
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingReads.length)).toBe(1);
+ await page.getByRole('button',{name:'Products',exact:true}).click();
+ if(!(await fixtureReads(page)).some(read=>read.scope==='products'&&read.page===2))await page.getByRole('button',{name:'Load more',exact:true}).click();
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingProductReads.length)).toBe(1);
+ await exclude(page,[1]);
+ await expect(page.locator('.discovery-product-card')).toHaveCount(0);await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','0');
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingReads.length)).toBe(2);
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingProductReads.length)).toBe(2);
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.pendingReads.shift()!();f.pendingProductReads.shift()!();f.staleSelect();f.staleOpenGroup();});
+ await expect(page.locator('.discovery-product-card')).toHaveCount(0);await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','0');await expect(page.getByRole('dialog')).toHaveCount(0);
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.holdBusiness=false;f.holdProducts=false;f.pendingReads.splice(0).forEach(release=>release());f.pendingProductReads.splice(0).forEach(release=>release());});
+ await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','1');await expect(page.locator('.discovery-product-card')).toHaveCount(0);
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.staleSelect();f.staleOpenGroup();});await expect(page.getByRole('dialog')).toHaveCount(0);
+ assert.deepEqual((await fixtureReads(page)).filter(read=>read.scope==='products').map(read=>[read.page,read.excluded]),[[2,[]],[1,[1]]],'An old product page cannot become the new exclusion scope cursor');
+ assert.deepEqual(errors,[]);
+});
+
+test('FE-065 web exclusions admit matching initial source but reject cached mismatched or unproven source',async t=>{
+ const matching=await boot(t,{url:'/?view=search',withShops:true,seedShops:true,enforceExclusions:true,excluded:[1],initialExclusions:[1],deferWorkspace:true});
+ await expect(matching.page.locator('.discovery-product-card')).toHaveCount(0);await expect(matching.page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','1');
+ await matching.page.waitForTimeout(300);assert.deepEqual(await fixtureReads(matching.page),[],'Explicitly matching initial authority remains usable without a GET');assert.deepEqual(matching.errors,[]);
+ for(const initialExclusions of [[],null]){
+  const {page,errors}=await boot(t,{url:'/?view=search',withShops:true,seedShops:true,enforceExclusions:true,excluded:[1],initialExclusions,holdBusiness:true,holdProducts:true,deferWorkspace:true});
+  await expect(page.locator('.discovery-product-card')).toHaveCount(0);await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','0');
+  await expect.poll(async()=>(await fixtureReads(page)).length).toBe(2);
+  await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.holdBusiness=false;f.holdProducts=false;f.pendingReads.splice(0).forEach(release=>release());f.pendingProductReads.splice(0).forEach(release=>release());});
+  await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','1');await expect(page.locator('.discovery-product-card')).toHaveCount(0);assert.deepEqual(errors,[]);
+ }
 });

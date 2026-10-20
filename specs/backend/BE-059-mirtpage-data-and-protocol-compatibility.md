@@ -4,7 +4,7 @@ title: Data-preserving MirtPage branding and compatibility
 status: in_progress
 related: [FE-070, DEP-029, DEP-049, ADR-0029]
 owners: [backend, security, operations]
-last_updated: 2026-10-18
+last_updated: 2026-10-20
 change_level: L3
 ---
 
@@ -68,6 +68,18 @@ Tracking/escalation renderers remain separate: their local public-schema queues
 and every producer/dispatcher/in-flight entrance must be assessed before hot
 source edits. Current hosted empty-bootstrap eligibility does not establish
 local retry safety. Do not change stable keys or manufacture empty queues.
+
+## S150 — email logo contrast source boundary (Ready)
+
+FE-070's email-only contrast correction changes the twelve repository HTML
+image URLs to a new deterministic opaque-white versioned PNG and adds explicit
+white backing on the image. The exact thirteen subjects, twenty-seven-field
+branding allowlist, sender addresses/credentials, OTP/code/link placeholders,
+providers, origins and disabled security notices retain their existing meaning.
+The former PNG is retained for cache/history compatibility. GIVEN the already-applied sender/subjects WHEN a guarded
+contrast plan is prepared THEN only the thirteen exact changed HTML-content
+fields are included and reviewed under DEP-029; a PNG generation or static preview grants no hosted write or mail
+send. Test all template URLs/backing plus the unchanged token/link semantics.
 
 ## Ready: local application-mail display boundary
 

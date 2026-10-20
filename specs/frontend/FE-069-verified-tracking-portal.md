@@ -2,7 +2,7 @@
 id: FE-069
 title: Independent tracking portal and staff tracking workspace
 status: in_progress
-related: [BE-058, FE-068, FE-049, FE-053, FE-062, DEP-048]
+related: [FE-074, BE-058, FE-068, FE-049, FE-053, FE-062, DEP-048]
 owners: [product, frontend, mobile, security]
 last_updated: 2026-10-18
 change_level: L2

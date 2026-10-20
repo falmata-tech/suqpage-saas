@@ -50,7 +50,7 @@ const bundled = build({
         export const useEffect=(create,deps)=>{const i=fixture.effectCursor++,old=fixture.effects[i];if(!old||deps.some((value,j)=>value!==old.deps[j]))fixture.pendingEffects.push(()=>{old?.cleanup?.();fixture.effects[i]={deps,cleanup:create()};});};
         export const useCallback=fn=>fn,createContext=()=>({Provider:'Provider'}),useContext=()=>fixture.app;export default {};
       ` : args.path === "react/jsx-runtime" ? `export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
-        : args.path === "react-native" ? `export const Platform={OS:'android'},View='View',Text='Text',Pressable='Pressable',AppState={addEventListener:()=>({remove(){}})};`
+        : args.path === "react-native" ? `export const Platform={OS:'android'},View='View',Text='Text',Pressable='Pressable',AppState={addEventListener:()=>({remove(){}})},StyleSheet={create:value=>value},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`
         : args.path === "expo-router" ? `export const useFocusEffect=()=>{},useLocalSearchParams=()=>({}),router={push(){},navigate(){},replace:path=>fixture.routes.push(path)};`
         : args.path === "expo-secure-store" ? `export const getItemAsync=async()=>null,setItemAsync=async()=>{},deleteItemAsync=async()=>{fixture.deleteCalls++;if(fixture.deleteFailure)throw Error('private device failure');fixture.providerSession=null;};`
         : args.path === "@supabase/supabase-js" ? `export const createClient=(_url,_key,options)=>{fixture.authOptions=options;return fixture.auth;};`

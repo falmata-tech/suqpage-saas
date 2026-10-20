@@ -8,7 +8,7 @@ const bundled=build({entryPoints:['apps/mobile/src/owner-profile.tsx','apps/mobi
  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'js',contents:
   a.path==='react'?`export const useState=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return[fixture.states[i],v=>fixture.states[i]=typeof v==='function'?v(fixture.states[i]):v];};export const useEffect=()=>{},useRef=initial=>({current:initial}),createContext=()=>({}),useContext=()=>fixture.attention;export default {};`
   :a.path==='jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
-  :a.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',Platform={OS:'android'},AppState={currentState:'active'};`
+  :a.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',Platform={OS:'android'},AppState={currentState:'active'},StyleSheet={create:value=>value},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`
   :a.path==='expo-router'?`export const useLocalSearchParams=()=>fixture.params,useGlobalSearchParams=()=>fixture.params,usePathname=()=>fixture.path,router={push:route=>fixture.routes.push({kind:'push',route}),replace:route=>fixture.routes.push({kind:'replace',route}),navigate:route=>fixture.routes.push({kind:'navigate',route})};`
   :a.path==='react-native-safe-area-context'?`export const useSafeAreaInsets=()=>({bottom:0});`
   :a.path==='runtime'?`export const useApp=()=>fixture.app,useLoad=fn=>{fixture.loads.push(fn);return{data:fixture.app.session?fixture.home:null,loading:false,error:'',reload(){}};},request=async()=>{throw Error('Unexpected public request');},API='https://suqpage.com';`

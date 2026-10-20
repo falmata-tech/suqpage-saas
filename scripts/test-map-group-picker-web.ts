@@ -14,7 +14,7 @@ const click=(node:Node|undefined)=>{assert.ok(node);(node.props.onClick as()=>vo
 const bundled=build({entryPoints:['components/DiscoveryWorkspace.tsx'],bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'controlled-renderer-ports',setup(b){
  b.onLoad({filter:/components\/DiscoveryWorkspace\.tsx$/},async a=>({loader:'tsx',contents:fs.readFileSync(a.path,'utf8')+'\nexport {MapPreviewDialog};'}));
  b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({contents:'export default new Proxy({}, {get:(_,key)=>key});'}));
- b.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|next\/(?:image|link|navigation)|lucide-react|@\/lib\/(?:i18n\/ui|use-market-feed|market-search|market-workspace|discovery-contract|platform-state|product-inquiry|live-showroom|offerings)|\.\/(?:MarketSearchControls|LoadingBar|CategoryChooser)|@\/components\/MarketplaceMap)$/},a=>({path:a.path,namespace:'ports'}));
+ b.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|next\/(?:image|link|navigation)|lucide-react|@\/lib\/(?:i18n\/ui|use-market-feed|market-search|market-workspace|discovery-contract|platform-state|product-inquiry|live-showroom|offerings)|\.\/(?:MarketSearchControls|LoadingBar|CategoryChooser|useBlockedBusinesses)|@\/components\/MarketplaceMap)$/},a=>({path:a.path,namespace:'ports'}));
  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'js',contents:
  a.path==='react'?`const slot=initial=>{const index=fixture.cursor++;if(!(index in fixture.slots))fixture.slots[index]=typeof initial==='function'?initial():initial;return index;};export const useState=initial=>{const index=slot(initial);return[fixture.slots[index],value=>{fixture.slots[index]=typeof value==='function'?value(fixture.slots[index]):value;}];};export const useRef=initial=>fixture.slots[slot(()=>({current:initial}))];export const useEffect=(fn,deps)=>{const index=fixture.cursor++,prior=fixture.dependencies[index];if(!prior||!deps||deps.some((value,i)=>!Object.is(value,prior[i]))){fixture.dependencies[index]=deps;fixture.effects.push(fn);}};export const useLayoutEffect=()=>{},useMemo=fn=>fn(),useTransition=()=>[false,fn=>fn()];`
  :a.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
@@ -26,6 +26,7 @@ const bundled=build({entryPoints:['components/DiscoveryWorkspace.tsx'],bundle:tr
  :a.path==='@/lib/market-workspace'?`export const hasExplicitMarketIntent=()=>false,marketWorkspaceFromParams=()=>({}),parseMarketWorkspaceSnapshot=()=>null,serializeMarketWorkspaceSnapshot=()=>'';`
  :a.path==='@/lib/discovery-contract'?`export const normalizeDiscoveryPlaces=()=>[],discoveryPlaceKey=()=>'';`
  :a.path==='@/lib/platform-state'?`export const readPlatformState=()=>null;`
+ :a.path==='./useBlockedBusinesses'?`export const useBlockedBusinesses=()=>({list:[],save:async()=>{throw new Error('Preference writes are outside the helper renderer scope');}});`
  :a.path==='@/lib/use-market-feed'?`export const useMarketFeed=()=>({});`
  :a.path==='@/lib/product-inquiry'?`export const productHref=()=>'';`
  :a.path==='@/lib/offerings'?`export const productSupplyLabel=()=>'';`

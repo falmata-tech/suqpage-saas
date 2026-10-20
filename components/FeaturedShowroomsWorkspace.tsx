@@ -64,7 +64,7 @@ function showroomPresence(showroom: DiscoveryShowroom, featuredNowBusinessId: nu
 function ShowroomImage({ showroom }: { showroom: DiscoveryShowroom }) {
   const [failed, setFailed] = useState(false);
   return showroom.heroImagePath && !failed
-    ? <Image src={showroom.heroImagePath} unoptimized={showroom.heroImagePath.startsWith("/api/page-media/")} alt="" width={480} height={300} sizes="(max-width: 700px) 46vw, 300px" onError={() => setFailed(true)} />
+    ? <Image src={showroom.heroImagePath} unoptimized={showroom.heroImagePath.startsWith("/api/page-media/") || showroom.heroImagePath.startsWith("/media/product-private-")} alt="" width={480} height={300} sizes="(max-width: 700px) 46vw, 300px" onError={() => setFailed(true)} />
     : <span className={`discovery-image-fallback ${showroom.fallbackStyle}`} aria-hidden="true"><i>{showroom.name.slice(0, 1)}</i><b>{showroom.name}</b></span>;
 }
 
@@ -118,7 +118,35 @@ function FeaturedGallery({ featured, walkthroughs, featuredNowBusinessId, now }:
 
 function FeaturedWeekNav({ featured }: { featured: WeeklyFeaturedProgram }) {
   const t = useUiText();
-  return <nav className="featured-week" aria-label={t("Daily Featured schedule")}>{featured.schedule.map((day) => <Link key={day.weekday} href={featuredHref(day.weekday)} className={[day.weekday === featured.selectedWeekday ? "active" : "", day.isToday ? "today" : ""].filter(Boolean).join(" ")} aria-current={day.weekday === featured.selectedWeekday ? "date" : undefined} aria-label={t("{value1}, {value2}, {value3}{value4}", { value1: t(day.dayLabel), value2: day.dateLabel, value3: t(day.industryLabel), value4: day.isToday ? `, ${t("Today")}` : "" })}><span><CategoryIllustration name={day.industryIcon} size={40} /></span><b>{t(day.dayLabel)}</b><small>{day.dateLabel}</small><em>{t(day.industryLabel)}</em>{day.isToday ? <mark>{t("Today")}</mark> : null}</Link>)}</nav>;
+  const row = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const nav = row.current;
+    const selected = nav?.querySelector<HTMLElement>('[aria-current="date"]');
+    if (!nav || !selected) return;
+    const reveal = () => {
+      const bounds = nav.getBoundingClientRect(), item = selected.getBoundingClientRect();
+      if (item.left < bounds.left || item.right > bounds.right) {
+        // Move this row only; scrollIntoView could also move the gallery page.
+        nav.scrollLeft += item.left - bounds.left - (nav.clientWidth - item.width) / 2;
+      }
+    };
+    reveal();
+    const observer = new ResizeObserver(reveal);
+    observer.observe(nav);
+    observer.observe(selected);
+    return () => observer.disconnect();
+  }, [featured.selectedWeekday, t]);
+  return <nav ref={row} className="featured-week" aria-label={t("Daily Featured schedule")}>
+    {featured.schedule.map(day => <Link key={day.weekday} href={featuredHref(day.weekday)} scroll={false}
+      data-featured-day={day.weekday}
+      className={[day.weekday === featured.selectedWeekday ? "active" : "", day.isToday ? "today" : ""].filter(Boolean).join(" ")}
+      aria-current={day.weekday === featured.selectedWeekday ? "date" : undefined}
+      aria-label={t("{value1}, {value2}, {value3}{value4}", { value1: t(day.industryLabel), value2: t(day.dayLabel), value3: day.dateLabel, value4: day.isToday ? `, ${t("Today")}` : "" })}>
+      <span className="featured-category-art"><CategoryIllustration name={day.industryIcon} size={32} /></span>
+      <b className="featured-category-name">{t(day.industryLabel)}</b>
+      <small className="featured-category-date">{t(day.dayLabel)} · {day.dateLabel}{day.isToday ? ` · ${t("Today")}` : ""}</small>
+    </Link>)}
+  </nav>;
 }
 
 function sponsorForSlot(placements: SponsorPlacement[], slot: number | undefined) {

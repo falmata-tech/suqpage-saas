@@ -15,6 +15,7 @@ for (const entry of manifest) {
   assert.doesNotMatch(html + entry.subject, /africmade|africpage|suqpage|<script/i);
   assert.match(entry.subject, /MirtPage/);
   assert.ok(html.includes(`src="{{ .SiteURL }}${PLATFORM_BRAND.assets.emailWordmark}" alt="MirtPage" width="220" height="48"`));
+  assert.match(html, /<img[^>]+background-color:#ffffff/,'Email wordmark explicitly keeps its white backing');
   assert.equal((html.match(/<img\b/g) || []).length, 1, 'One canonical wordmark without external tracking images.');
   const notification = entry.key.endsWith("_notification");
   const section = `auth.email.${notification ? "notification" : "template"}.${entry.key.replace(/_notification$/, "")}`;

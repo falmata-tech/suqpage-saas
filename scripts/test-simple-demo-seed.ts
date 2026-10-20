@@ -1,3 +1,4 @@
+import './test-demo-physical-fixtures';
 import { publicContactLinks } from '../lib/business-profile-contacts';
 import { inquiryHandoffs } from '../lib/product-inquiry';
 import assert from 'node:assert/strict';

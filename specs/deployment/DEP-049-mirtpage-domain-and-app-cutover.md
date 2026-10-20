@@ -2,13 +2,112 @@
 id: DEP-049
 title: MirtPage domain, managed services and app release cutover
 status: draft
-related: [FE-070, FE-071, BE-059, DEP-029, ADR-0029, FE-072, BE-060, DEP-050]
+related: [FE-021, FE-070, FE-071, BE-059, DEP-029, ADR-0029, FE-072, BE-060, DEP-050, DEP-044]
 owners: [operations, security, mobile]
-last_updated: 2026-10-19
+last_updated: 2026-10-20
 change_level: L4
 ---
 
 # DEP-049 — MirtPage cutover
+
+## S151 — one-compilation Android candidate (ready for exact build review)
+
+Prepare one local release AAB for `com.mirtpage.app`, then derive a universal
+test APK from that exact AAB with the verified existing signing key and official
+bundletool1.18.3. This replaces the earlier operation-specific APK-before-AAB
+compilation sequence; it does not waive source, dependency, privacy, signing,
+physical-device or Play-release checks. Both artifacts share their version and
+compiled application. A tester may need to reinstall from Play later to establish
+Play-delivered evidence; a same-version sideload is not an automatic Play update.
+
+The native input closure and lockfile must exactly match the fresh typecheck,
+Hermes export and dependency/runtime-exclusion evidence. DEP-044 still requires
+explicit owner acceptance of the current unpatched tooling advisories for this
+bounded AAB and derived APK. No previous exception carries over. Final source
+commit and required gates must be bound before execution; no paid build, new
+signer, submission, invitation or closed-test activation is included. Phone
+testing remains on hold at the owner's request. This is preparation, not a
+claim that either new binary exists or that the testing clock has started.
+
+## S151 B09 — public product and showroom images (ready)
+
+The owner reports missing example pictures. Read-only production diagnosis
+confirms five original product/showroom assets return200 and exist in Git. The
+Featured hero's exact `/_next/image` variants return400 at640 and3840px; its
+original bytes match the repository, and the existing `/.netlify/images`
+endpoint returns a valid resized WebP. This is image delivery, not missing data
+or permission to remove media. B05's separately proposed mismatched-demo-media
+cleanup remains independent and unapplied.
+
+Scope: one exact same-origin200 rewrite from `/_next/image` to the existing
+Netlify image endpoint, preserving query parameters and all seventeen legacy
+asset aliases. No new provider, custom image loader, optimizer disablement,
+remote-image allowlist, secret, hosted setting, media upload or native change.
+Private authenticated media remains on its existing unoptimized authorized
+route; never forward browser credentials to the public image CDN. A product
+image selected as a cover can retain `/media/product-private-*` through the
+supported editor/publication path. Both active Market/Featured image renderers
+must bypass optimization for that prefix as well as `/api/page-media/` before
+the public optimizer repair is admitted. Assert the actual renderer's original
+source/unoptimized contract for both private paths and optimized public assets.
+Retain the existing direct-route publication/revocation tests.
+
+This caller guard does not establish CDN-wide revocation: the provider's direct
+image endpoint already exists, and its internal cache is not controlled by a
+source `no-store` header. No unpublished anonymous leak is established by this
+audit. Do not report a UI bypass as proof that an already publicly readable
+image can be recalled from every CDN cache; this remains an explicit provider
+boundary requiring separate qualification.
+
+```gherkin
+Scenario: A valid published picture has a responsive web variant
+  GIVEN a published product or showroom picture is available at its public URL
+  WHEN Next's existing responsive image URL is requested from Netlify
+  THEN the exact image route reaches the existing Netlify Image CDN with its source, width and quality
+  AND the browser receives a decodable image at a successful status
+  AND the source file, native direct URL and card layout remain unchanged
+
+Scenario: The image repair cannot become a broad asset or private-media rewrite
+  GIVEN the release routing artifact is inspected
+  WHEN its image route is admitted
+  THEN there is exactly one same-origin image rule with no wildcard or external destination
+  AND all seventeen exact legacy asset aliases remain unchanged
+  AND no account, API, private-media or other application route is redirected
+```
+
+Definition of Ready: the exact failed/successful URLs, byte identities and
+response types are recorded in protected B09 receipts. This recurring delivery
+contract belongs in the existing static routing file, not a new sync utility.
+Primary provider guidance documents
+[relative image sources and rewrites](https://docs.netlify.com/build/image-cdn/overview/)
+and [automatic query forwarding for200 rules](https://docs.netlify.com/manage/routing/redirects/redirect-options/).
+The installed Next image guide was inspected. Privacy/localization effects are
+none: no user text, private access or source membership changes.
+
+Add a failing-then-passing check in `scripts/test-netlify-readiness.mjs`; keep
+`scripts/test-platform-naming.ts` strict on the original alias set while admitting
+only this separate exact rule. Actual Chrome verifies loaded public card images
+and ordinary navigation; local Next success alone cannot prove the Netlify
+rewrite. A later source-bound full artifact must contain the exact rule before
+its function catch-all, preserve public images and private-media handling, and
+pass original plus transformed product/showroom GET/decode checks after the
+reviewed deployment. Retain the previous deploy for an explicitly reviewed
+rollback; no automatic provider recovery or database restore. Master §§15/19/22
+and FE-021 track this local candidate. Visual/full/hosted qualification remains
+pending; nothing in this section authorizes a deployment.
+
+## S150 — Auth email contrast follow-on (local preparation)
+
+The original twenty-seven-field MirtPage presentation repair completed with
+independent27-field/214-untouched readback, and one owner-authorized Gmail
+message confirmed the new identity and loaded original PNG. The owner then
+reported the ink lettering disappearing on a dark email background. FE-070 and
+BE-059 now prepare a versioned opaque-white email PNG at unchanged geometry;
+all mobile/SVG/legacy assets stay unchanged. Its new public URL must be deployed
+and read back before a separately reviewed, owner-approved DEP-029 patch to only
+the thirteen HTML-content fields. Preserve current subjects/sender and the
+consumed one-email authorization. This does not complete DEP-049 or authorize a
+second email, native build, provider credential or hosted change.
 
 ## S146 native public-origin source boundary (ready)
 

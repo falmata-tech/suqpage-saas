@@ -2,13 +2,128 @@
 id: FE-021
 title: Geographic Showroom map and Daily Featured Showrooms
 status: in_progress
-related: [FE-053, FE-058, FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, FE-048, BE-019, BE-020, BE-021, BE-023, BE-029, BE-041, DEP-016, DEP-017, DEP-024, DEP-026, ADR-0011, ADR-0016, FE-065]
+related: [FE-074, FE-053, FE-058, FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, FE-048, BE-019, BE-020, BE-021, BE-023, BE-029, BE-041, DEP-016, DEP-017, DEP-024, DEP-026, DEP-049, ADR-0011, ADR-0016, FE-065]
 owners: [product, frontend, design]
-last_updated: 2026-10-17
+last_updated: 2026-10-20
 change_level: L3
 ---
 
 # FE-021 - Geographic Showroom map and Daily Featured Showrooms
+
+## S151 B10 — readable category choices in Featured (implemented locally)
+
+The weekday ribbon currently prioritizes dates and hides category names on the
+public phone layout; Expo omits those names entirely. The owner's category-icon
+report supersedes the earlier seven-weekdays-at-once presentation requirement.
+Keep the existing seven scheduled choices, day-to-category mapping and routes.
+This is an L1 presentation correction, not an unrestricted category search.
+
+GIVEN the Featured choices WHEN viewed on web, phone web or Expo THEN each
+choice shows its localized category name as the primary readable label beside
+the existing illustration, with weekday/date as secondary text. Do not hide,
+ellipsis or shrink category names to fit all seven choices. Narrow containers
+may scroll the single row horizontally; they must not widen the document.
+The current choice must be visible on first load and after selection/return.
+Selected/current-day states, keyboard focus and at least48px targets remain
+clear. Category artwork stays decorative; accessible names include the category
+and schedule context. Existing en/am/om labels supply the text without new copy.
+FE-074's Featured initial skeleton must follow the same readable tile width,
+illustration/name/schedule slots and horizontal clipping, rather than retaining
+the superseded tiny weekday-strip geometry. It remains decorative and inert.
+
+Definition of Ready: source and screenshot inspection identify the exact hidden
+label and date-first hierarchy. No data/API/provider/dependency change is needed.
+Plan: category-first web/native markup and measured responsive styling; focused
+actual-component visibility/geometry/accessibility/selection checks with long
+localized labels; actual Chrome desktop/phone and Expo selection, business and
+Back tasks using real local read outcomes. Freeze source before captures and
+add current screenshots to the combined review. Master §§5/10/19/22 and FE-053
+are affected. Visual approval/full release/deployment/new APK stay separate.
+
+Focused evidence: `scripts/test-featured-categories.ts` passes active en/am/om
+catalogs at1440/1024/390/320px and200% base text, with all seven complete names,
+category-first accessible labels,32px decorative art, current-choice visibility
+and keyboard focus. Three sponsor geometry cases and the private-image renderer
+case still pass. Native category/grid/skeleton cases pass14, and the three web
+loading variants pass including updated category silhouettes. Root/mobile strict
+types pass. The first Oromo overflow exposed an obsolete48px parent row; natural
+row height fixes the defect without shrinking text. Expo's legacy selected-state
+prop was absent in the actual DOM; explicit web-only `aria-pressed` now supplies
+valid toggle-button semantics while native selected state remains unchanged.
+
+Actual local Chrome passes five web locale/width states, five category selection/
+Back journeys and one business preview→showroom→Back. Labels match the real API
+schedule. Two raw aborted analytics requests remain after intentional204
+suppression; functional assertions pass but a clean network run is not claimed.
+Actual Expo passes six en/am/om width states and three category→real-response→
+business→Back journeys with no page errors, failed API requests or writes.
+The selected category remains in view. One held real initial Expo GET captures
+the matching skeleton then completes200; web skeleton captures remain clearly
+labelled actual-component evidence, not server-streaming proof. Receipts/screens:
+`.local/mirtpage-final-release-20261019/s151-batch-audit/b10-*`.
+The stopped-preview and first cold5s navigation failures are retained separately.
+No hosted data/configuration or physical Android action occurred.
+
+## S151 B08 — Featured cards remain inside their gallery (ready)
+
+The public Chrome audit reproduced business cards overlapping the independent
+sponsor surface at 1100, 1024 and 768px even though the document itself did not
+overflow. This is a responsive presentation defect; program eligibility, the
+six-slot order, sponsor disclosure and the FE-033/FE-036 rotation contract remain
+unchanged. FE-024 owns the paired sponsor separation criterion.
+
+```gherkin
+Scenario: Featured shares its real available width with sponsors
+  GIVEN zero, one or multiple eligible sponsor placements and up to six revealed businesses
+  WHEN the gallery is narrowed by the workspace navigation or sponsor column
+  THEN every business card stays inside the gallery's content bounds
+  AND business and sponsor targets do not intersect or cover one another
+  AND the gallery selects no more than three columns using its own available width
+  AND phone layouts retain the compact two-column business cards below the sponsor strip
+  AND long business names cannot expand a track beyond its allocated width
+
+Scenario: Sponsor controls preserve independent business navigation
+  GIVEN a Featured gallery and multiple sponsor placements are visible
+  WHEN a visitor uses the sponsor Next control and opens a revealed business
+  THEN the sponsor changes without changing the business slot order
+  AND the business opens its own preview and authoritative showroom destination
+  AND the same controls remain reachable at desktop and phone widths
+```
+
+Definition of Ready: the actual failing rectangles and source boundary are
+recorded in the S151 audit; this L1 correction uses existing CSS and components,
+without data, API, copy, permission or dependency changes. Implement the bounded
+container-sized gallery first, then test actual compiled cards/carousel with real
+CSS at 320–1440px, sponsor pools of zero/one/five and long labels. Check rectangle
+intersection and hit targets rather than document overflow alone. Actual local
+Chrome must also exercise Featured preview, showroom and Back; wait for each
+image's load/error result and report media failures separately. Synthetic map
+tiles remain mandatory. Full gates and deployment follow the combined visual
+approval. Rollback restores only the previous gallery CSS. Relevant master
+sections are §§5/10/19/22; this is a local candidate until its evidence is recorded.
+
+Focused regression: `scripts/test-featured-sponsor-layout.ts` passes all27
+width/sponsor geometry states, independent order/Next/hit targets and preview
+Escape. The real-local bounded retry passes nine width geometry assertions and
+Next→preview→showroom→Back at1024/390, with decoded public images/HTTP200.
+Its raw receipt remains mixed because four explicitly suppressed analytics
+requests report ERR_ABORTED without exact per-request correlation; no clean
+telemetry claim is inferred. The first local database connection timeout is
+retained; read-only schema77/Auth health passes before the one bounded retry.
+No restart, live write or third complete journey rerun occurred. Receipts and
+screens are under the protected `s151-batch-audit/` release directory. Combined
+visual/full/deployment gates remain pending.
+
+### S151 B09 — public image delivery (deployment candidate)
+
+GIVEN a published public showroom image is selected for a Featured card WHEN
+the hosted web renderer requests its responsive image variant THEN the existing
+Netlify image-delivery adapter serves that variant rather than replacing a valid
+source image with an error fallback. DEP-049 controls the narrow hosted-route
+correction and its tests. Private media/API routes, native source-image URLs,
+catalog authorization and card geometry remain unchanged. Local image success
+does not establish hosted optimizer success; retain the separate production
+source/variant response evidence and qualify the deployed result after release.
 
 ## S140 — preview separated final groups without more zoom (ready; latest correction)
 

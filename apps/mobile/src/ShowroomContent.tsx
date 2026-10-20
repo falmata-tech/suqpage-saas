@@ -34,7 +34,8 @@ import {inquiryCatalogProduct,visibleCatalogProduct} from './catalog-products';
 import {useBusinessInquiry} from './use-business-inquiry';
 import {canOpenPublicContact} from '../../../lib/demo-inquiry-policy';
 import {emptyShowroomBrowseState,showroomReturnMemory} from './showroom-return-state';
-export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview?: boolean }) {
+import {CATALOG_CARD_GAP,catalogCardStyle} from './catalog-card-layout';
+export function ShowroomContent({ shop, preview = false, catalogReady = true }: { shop: Shop; preview?: boolean; catalogReady?:boolean }) {
   const { t } = useApp(), { fontScale } = useWindowDimensions();
   const inquiry=useBusinessInquiry(preview?null:shop);
   const accent = storefrontAccent(shop.accentColor);
@@ -63,7 +64,7 @@ export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview
   function closeChoices(){setAddingId(null);setOptions({});}
   function addProduct(id:number,choices:Record<string,string>){
     const product=shop.products.find(value=>value.id===id&&inquiryCatalogProduct(value));
-    if(preview||!inquiry.ready||!product||!validOptions(product,choices))return;
+    if(preview||!catalogReady||!inquiry.ready||!product||!validOptions(product,choices))return;
     let full=false;
     inquiry.setItems(current=>{
       if(current.some(item=>selectionKey(item.product.id,item.options)===selectionKey(id,choices)))return current;
@@ -75,14 +76,14 @@ export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview
   }
   function beginAdd(id:number){
     const product=shop.products.find(value=>value.id===id&&inquiryCatalogProduct(value));
-    if(preview||!inquiry.ready||!product||!validGroups(product))return;
+    if(preview||!catalogReady||!inquiry.ready||!product||!validGroups(product))return;
     const defaults=Object.fromEntries(product.options.filter(group=>group.values.length===1).map(group=>[group.name,group.values[0]]));
     setNotice('');
     if(validOptions(product,defaults))addProduct(id,defaults);
     else{setOptions(defaults);setAddingId(id);}
   }
   async function contactWithSelections(contact: PublicContactLink) {
-    if (preview || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, contact.kind)) return;
+    if (preview || !catalogReady || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, contact.kind)) return;
     const items=inquiry.items;
     const message=buildSocialInquiryMessage(shop,items.map(item=>({id:item.product.id,name:item.product.name,quantity:item.quantity,options:item.options,service:item.product.kind==='service'})),API,t);
     const link=inquiryHandoffs(shop.contacts,message).find(item=>item.kind===contact.kind && item.external);
@@ -184,7 +185,7 @@ export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview
               {addingId===null&&Boolean(notice)&&<Text testID="showroom-inquiry-notice" accessibilityLiveRegion="polite" style={v.body}>{notice}</Text>}
               <View testID="showroom-product-grid" style={v.grid} onLayout={event=>{const width=event.nativeEvent.layout.width;if(Number.isFinite(width)&&width>0)setGridWidth(current=>current===width?current:width);}}>
                 {products.map((p) => (
-                  <View key={p.id} testID={`showroom-product-${p.id}`} style={[v.product,{width:fontScale<=1.3&&gridWidth>=312?(gridWidth-12)/2:'100%'}]}>
+                  <View key={p.id} testID={`showroom-product-${p.id}`} style={[v.product,catalogCardStyle(gridWidth,fontScale)]}>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={p.name}
@@ -218,9 +219,9 @@ export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview
                   </Pressable>
                   <View style={{padding:8,paddingTop:0}}><Pressable testID={`showroom-product-add-${p.id}`} accessibilityRole="button"
                     accessibilityLabel={t('{value1}: {value2}',{value1:t(inquiry.items.some(item=>item.product.id===p.id)?'Added to inquiry list':'Add to inquiry list'),value2:p.name})}
-                    disabled={preview||!inquiry.ready||!inquiryCatalogProduct(p)||!validGroups(p)||inquiry.items.some(item=>item.product.id===p.id)}
-                    accessibilityState={{disabled:preview||!inquiry.ready||!inquiryCatalogProduct(p)||!validGroups(p)||inquiry.items.some(item=>item.product.id===p.id)}}
-                    onPress={()=>beginAdd(p.id)} style={[v.add,{backgroundColor:accent?.soft||colors.soft,borderColor:accent?.edge||colors.line},(preview||!inquiry.ready||!inquiryCatalogProduct(p)||!validGroups(p))&&{opacity:.5}]}>
+                    disabled={preview||!catalogReady||!inquiry.ready||!inquiryCatalogProduct(p)||!validGroups(p)||inquiry.items.some(item=>item.product.id===p.id)}
+                    accessibilityState={{disabled:preview||!catalogReady||!inquiry.ready||!inquiryCatalogProduct(p)||!validGroups(p)||inquiry.items.some(item=>item.product.id===p.id)}}
+                    onPress={()=>beginAdd(p.id)} style={[v.add,{backgroundColor:accent?.soft||colors.soft,borderColor:accent?.edge||colors.line},(preview||!catalogReady||!inquiry.ready||!inquiryCatalogProduct(p)||!validGroups(p))&&{opacity:.5}]}>
                     <Icon name={inquiry.items.some(item=>item.product.id===p.id)?'check':'plus'} size={15} color={accent?.ink||colors.brand}/><Text style={[v.addText,{color:accent?.ink||colors.brand}]}>{t(inquiry.items.some(item=>item.product.id===p.id)?'Added to inquiry list':'Add to inquiry list')}</Text>
                   </Pressable></View>
                   </View>
@@ -233,7 +234,7 @@ export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview
             <Sheet visible={addingId!==null} title={choiceProduct?.name||t('Products')} onClose={closeChoices}><View testID="showroom-product-options" style={{gap:14}}>
               {Boolean(notice)&&<Text accessibilityLiveRegion="polite" style={v.body}>{notice}</Text>}
               {choiceProduct&&<>{choiceProduct.options.map(group=><View key={group.name} style={{gap:8}}><Text style={v.productName}>{group.name}</Text><View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>{group.values.map(value=><Chip key={value} minHeight={48} label={value} selected={options[group.name]===value} onPress={()=>setOptions(current=>({...current,[group.name]:value}))}/>)}</View></View>)}
-              <Button secondary label={t('Cancel')} onPress={closeChoices}/><View testID="showroom-product-options-add"><Button accentColor={shop.accentColor} wrapLabel label={t('Add to inquiry list')} disabled={preview||!inquiry.ready||!inquiryCatalogProduct(choiceProduct)||!validOptions(choiceProduct,options)} onPress={()=>addProduct(choiceProduct.id,options)}/></View></>}
+              <Button secondary label={t('Cancel')} onPress={closeChoices}/><View testID="showroom-product-options-add"><Button accentColor={shop.accentColor} wrapLabel label={t('Add to inquiry list')} disabled={preview||!catalogReady||!inquiry.ready||!inquiryCatalogProduct(choiceProduct)||!validOptions(choiceProduct,options)} onPress={()=>addProduct(choiceProduct.id,options)}/></View></>}
             </View></Sheet>
             <View style={[v.contact, accent && { backgroundColor: accent.soft, borderTopWidth: 2, borderColor: accent.edge }]}>
               <Text style={[v.title, { color: accent ? colors.ink : "white" }]}>
@@ -243,8 +244,8 @@ export function ShowroomContent({ shop, preview = false }: { shop: Shop; preview
                 <Pressable
                   key={c.kind}
                   accessibilityRole="link"
-                  disabled={preview || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, c.kind)}
-                  accessibilityState={{disabled:preview || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, c.kind)}}
+                  disabled={preview || !catalogReady || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, c.kind)}
+                  accessibilityState={{disabled:preview || !catalogReady || !canOpenPublicContact(shop.isDemo, shop.approvedDemoContactMethods, c.kind)}}
                   accessibilityLabel={t(c.label)}
                   onPress={() => void contactWithSelections(c)}
                   style={[v.contactLink, accent && { borderColor: accent.edge }]}
@@ -316,7 +317,7 @@ const v = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 12,
+    gap: CATALOG_CARD_GAP,
   },
   product: {
     borderWidth: 1,

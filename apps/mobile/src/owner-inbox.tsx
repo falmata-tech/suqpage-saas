@@ -11,6 +11,7 @@ import { useAction, ActionStatus } from "./owner-forms";
 import ChatReadSentinel,{ChatReadTranscript} from './ChatReadSentinel';
 import { supportIdlePresentation } from '../../../lib/support-idle-contract';
 import {clientChatPresentation,type ClientChatSnapshot} from '../../../lib/support-client-state';
+import ResourceLoading from './ResourceLoading';
 export function Inquiries({focusId}:{focusId?:string}={}) {
   const { t, ownerRequest } = useApp(),
     action = useAction();
@@ -44,7 +45,7 @@ export function Inquiries({focusId}:{focusId?:string}={}) {
           ),
         )}
       </View>
-      <Status {...load} retry={load.reload} />
+      <ResourceLoading load={load} variant="rows"/>
       <ActionStatus state={action} />
       {load.data?.items.map((i) => (
         <Card key={i.id}>
@@ -147,7 +148,7 @@ export function SupportList() {
           }
         />
       </Card>
-      <Status {...load} retry={load.reload} />
+      <ResourceLoading load={load} variant="rows"/>
       {load.data?.items.map((c) => (
         <Card key={c.id}>
           <Copy>{c.subject}</Copy>
@@ -247,7 +248,7 @@ export function OwnerChat({ id }: { id: string }) {
   }
   return (
     <>
-      <Status {...load} retry={load.reload} />
+      <ResourceLoading load={load} variant="thread"/>
       {load.data && (
         <>
           <Copy big heading>{load.data.conversation.subject}</Copy>

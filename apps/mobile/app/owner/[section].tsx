@@ -14,6 +14,7 @@ import BuyingScreen from '../buying';
 import OwnerTransportHistory from '../../src/OwnerTransportHistory';
 import {ownerPageTask} from '../../../../lib/owner-page-tasks';
 import {useOwnerNavigation} from '../../src/owner-edit-navigation';
+import ResourceLoading from '../../src/ResourceLoading';
 export default function OwnerScreen() {
   const { section: screen, id, view, returnTo } = useLocalSearchParams<{
       section: string;
@@ -58,7 +59,7 @@ export default function OwnerScreen() {
   return (
     <View style={{ flex: 1 }}>
       <Screen key={`${screen}:${screen==='page'?'':view||''}:${id||''}`}>
-        <Status {...load} retry={load.reload} />
+        <ResourceLoading load={load} variant={screen==='products'?'list':screen==='settings'||screen==='showroom'?'profile':screen==='chat'?'thread':'editor'}/>
         {screen!=='page'&&<Button secondary label={t(screen==='product'?'Products':returnTo==='showroom'?'Back to your page':returnTo==='settings'?'Account settings':returnTo==='business'?'Business details':'Back to account')} onPress={()=>navigate(screen==='product'?backToProducts:returnTo==='showroom'?backToShowroom:returnTo==='settings'?backToSettings:returnTo==='business'?backToBusiness:backToProfile)}/>}
         {load.data && (
           <>

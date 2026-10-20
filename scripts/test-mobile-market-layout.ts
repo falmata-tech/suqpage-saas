@@ -58,9 +58,19 @@ function fixture() {
     platform: 'android',dimensions:{width:390,height:844,fontScale:1},focused:true,params:{} as Record<string,string|string[]>,storage:new Map<string,string>(),storageDenied:false,storageWrites:[] as string[],
     browserListeners:new Map<string,()=>void>(),historyWrites:[] as Array<{state:unknown;url:string}>,historyState:{key:'framework-history-key'},locationSearch:'',locationPathname:'/',
     locale:'en',keyboardDismissals: 0, routes: [] as unknown[], t: (value: string) => value,
-    feed: { batch: { data: { showrooms: [], categories: [], places: [], countries: [] }, items: [] as unknown[] }, loading: false, error: "", moreError: "", retry() {}, loadMore() {} },
+    feed: { batch: { data: { showrooms: [], categories: [], places: [], countries: [] }, items: [] as unknown[] }, loading: false, snapshotCurrent:true,initialLoading:false,displayedSnapshotKey:'scope=products',get updating():boolean{return this.loading;}, error: "", moreError: "", retry() {}, loadMore() {} },
   };
 }
+
+test('FE-074 native Market retains the displayed feed/scroll during criteria updates and gates old map membership',async()=>{
+ const state=fixture(),render=await component('index',state),shops=[1,2].map(id=>({id,handle:'retained-'+id,name:'Business '+id,city:'Fixture city',countryCode:'ET',region:'',heroImagePath:'',description:'Description',latitude:9.03,longitude:38.75,locationMode:'storefront'}));
+ Object.assign(state.feed.batch.data,{showrooms:shops});state.feed.batch.items=[{id:1,kind:'product'},{id:2,kind:'product'}];let tree=render();selectMode(tree,true);tree=render();const scrolled:unknown[]=[];
+ const list=tree.find(node=>node.type==='FlatList')!;(list.props.ref as{current:unknown}).current={scrollToOffset:(value:unknown)=>scrolled.push(value)};
+ state.feed.loading=true;state.feed.snapshotCurrent=false;(marketControls(tree).props.onChange as(value:Record<string,unknown>)=>void)({...marketControls(tree).props.value as Record<string,unknown>,query:'new criteria'});tree=render();
+ assert.deepEqual(Array.from((tree.find(node=>node.type==='FlatList')!.props.data as Array<{id:number}>).map(item=>item.id)),[1,2]);assert.deepEqual(scrolled,[],'Typing cannot reset the retained feed scroll');
+ const map=tree.find(node=>node.type==='MarketMap')!;(map.props.onGroup as(value:typeof shops)=>void)(shops);(map.props.onSelect as(value:typeof shops[number])=>void)(shops[0]);tree=render();assert.ok(!tree.some(node=>node.type==='MapGroupPicker'&&node.props.visible===true));assert.ok(!tree.some(node=>node.type==='Sheet'&&node.props.visible===true&&node.props.title==='Business'),'Old pins never become current-query preview authority');
+ state.feed.loading=false;state.feed.snapshotCurrent=true;state.feed.displayedSnapshotKey='scope=products&q=new';tree=render();assert.equal(scrolled.length,1,'Only the committed new result key resets the list');
+});
 const nodes = (element: Element): Element[] => [element, ...[element.props.children].flat(Infinity).filter((value): value is Element => value !== null && typeof value === "object" && "props" in value).flatMap(nodes)];
 function style(element: Element) { return Object.assign({}, ...[element.props.style].flat().filter(value => value && typeof value === "object")) as Record<string, unknown>; }
 function resetHooks(state:ReturnType<typeof fixture>) {
@@ -437,7 +447,7 @@ test('FE-065 S143 actual Market keeps only compact centered modes and one non-la
     const tabs=nodes(row).filter(n=>n.props.accessibilityRole==='tab');assert.deepEqual(tabs.map(n=>nodes(n).find(c=>c.type==='Text')!.props.children),['Businesses','Products']);
     assert.ok(tabs.every(n=>Number(style(n).minHeight)>=48));assert.equal(nodes(row).filter(n=>n.type==='Icon'&&['map','package'].includes(String(n.props.name))).length,width<=360?0:2,'Only decorative mode icons disappear on the smallest phones');
     assert.equal(tree.filter(n=>n.type==='Status').length,0,'A settled empty status does not allocate a toolbar gap');
-    state.feed.loading=true;tree=render();assert.equal(tree.filter(n=>n.type==='Status'&&n.props.loading===true).length,1,'Actual loading remains visible');
+    state.feed.loading=true;tree=render();assert.equal(tree.filter(n=>n.type==='Status'&&n.props.refreshing===true).length,1,'Actual loading remains visible');
     state.feed.loading=false;state.feed.error='Unable to connect';tree=render();assert.equal(tree.filter(n=>n.type==='Status'&&n.props.error==='Unable to connect').length,1,'The same bounded error/retry remains reachable');
     assert.ok(!tree.some(n=>n.props.accessibilityLabel==='About MirtPage'||n.type==='Icon'&&n.props.name==='info'||n.type==='Sheet'&&n.props.title==='About MirtPage'));
   }
@@ -489,8 +499,9 @@ test('FE-065 S128 actual RNWeb View receives no raw idle status text while loadi
     }finally{console.error=originalError;}
     assert.deepEqual(reported.filter(message=>message.includes('Unexpected text node')),[],'Actual RNWeb must not emit a LogBox warning for the settled empty error');
     assert.ok(children.every(child=>typeof child!=='string'&&typeof child!=='number'),'Conditional status cannot leak a falsy text primitive under View');
-    const statuses=tree.filter(n=>n.type==='Status');assert.equal(statuses.length,status.loading||status.error?1:0);
-    if(statuses.length){assert.equal(statuses[0].props.loading,status.loading);assert.equal(statuses[0].props.error,status.error);assert.equal(typeof statuses[0].props.retry,'function');}
+    const list=tree.find(node=>node.type==='FlatList')!;const header=nodes(list.props.ListHeaderComponent as Element);const statuses=[...tree,...header].filter(n=>n.type==='Status');assert.equal(statuses.length,status.loading||status.error?1:0);
+    if(status.loading)assert.equal(statuses[0].props.refreshing,true,'Pending read feedback stays local to the map overlay or product header');
+    if(status.error){assert.equal(statuses[0].props.error,status.error);assert.equal(typeof statuses[0].props.retry,'function');}
   }
 });
 

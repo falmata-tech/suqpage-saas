@@ -60,7 +60,7 @@ const bundled=build({stdin:{contents:entry,resolveDir:process.cwd(),loader:'tsx'
   });
   b.onResolve({filter:/^(?:@\/lib\/i18n\/ui|react-native|expo-router|expo-crypto|(?:\.\/|\.\.\/src\/)(?:runtime|ui|ChatReadSentinel|AttentionAlerts|TransportPlanView|owner-forms|support-files)|\.\/ChatReadObserver)$/},a=>({path:a.path.startsWith('../src/')?'./'+a.path.split('/').at(-1):a.path,namespace:'ports'}));
   b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:a.path==='@/lib/i18n/ui'?`export const useUiText=()=>window.fixture.t;`
-    :a.path==='react-native'?`import React from'react';export const AppState={currentState:'active'},View=({children})=><div>{children}</div>,StyleSheet={create:value=>value};`
+    :a.path==='react-native'?`import React from'react';export const AppState={currentState:'active'},View=({children})=><div>{children}</div>,Text=({children})=><span>{children}</span>,StyleSheet={create:value=>value},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`
     :a.path==='expo-router'?`import{useEffect}from'react';export const useFocusEffect=fn=>useEffect(fn,[fn]),router={push:route=>window.fixture.routes.push(route),replace:route=>window.fixture.routes.push(route)};`
     :a.path==='expo-crypto'?`export const randomUUID=()=> 'controlled-key';`
     :a.path==='./runtime'?runtime:a.path==='./ui'?ui

@@ -41,7 +41,7 @@ export const View=({children,style:s})=><div style={style(s)}>{children}</div>;
 export const Text=({children,style:s})=><span style={style(s)}>{children}</span>;
 export const Pressable=({children,onPress,disabled,accessibilityLabel,accessibilityRole,accessibilityState,style:s})=><button aria-label={accessibilityLabel} role={accessibilityRole||'button'} disabled={disabled} aria-pressed={accessibilityState?.selected} onClick={onPress} style={style(s)}>{children}</button>;
 export const ScrollView=({children})=><div>{children}</div>;export const Modal=({children,visible})=>visible?<div role="dialog">{children}</div>:null;
-export const Platform={OS:'web'},StyleSheet={create:x=>x,absoluteFill:{}},Alert={alert(){throw Error('Unexpected alert');}};
+export const Platform={OS:'web'},StyleSheet={create:x=>x,absoluteFill:{}},Alert={alert(){throw Error('Unexpected alert');}},useWindowDimensions=()=>({width:390,height:844,fontScale:1});
 `;
 const uiPort=String.raw`
 import React from'react';export const colors={ink:'#222',muted:'#667',line:'#ddd',brand:'#c43a00',soft:'#fff1e9'},s={row:{display:'flex',gap:8},wrap:{display:'flex',flexWrap:'wrap',gap:8}};

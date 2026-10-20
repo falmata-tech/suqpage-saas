@@ -416,28 +416,6 @@
 .public-market-experience > .landing-account-notice { position: absolute; z-index: 30; top: 10px; right: 14px; left: 14px; }
 .public-workspace-loading { position: relative; color: var(--mp-navy); }
 .public-workspace-data-loading { display: grid; min-height: 0; overflow: hidden; }
-:is(.public-workspace-loading,.public-workspace-data-loading) [aria-hidden="true"] > i,:is(.public-workspace-loading,.public-workspace-data-loading) [aria-hidden="true"] > b,.public-loading-page-bar,.public-loading-page-hero > i,.public-loading-page-grid > i { display: block; border-radius: 5px; background: #dfe7e7; animation: public-loading-pulse 1.15s ease-in-out infinite alternate; }
-.public-loading-heading { display: grid; width: min(720px,100%); gap: 8px; margin-bottom: 10px; padding: 13px 16px; border: 1px solid var(--mp-line); border-radius: 8px; background: rgb(255 255 255 / 88%); }
-.public-loading-heading > i:first-child { width: 116px; height: 10px; }
-.public-loading-heading > b { width: min(420px,72%); height: 27px; }
-.public-loading-heading > i:last-child { width: min(610px,90%); height: 12px; }
-.public-loading-market,.public-loading-featured { display: grid; min-height: 0; overflow: hidden; border: 1px solid var(--mp-line-strong); border-radius: 8px; background: rgb(255 255 255 / 92%); }
-.public-loading-toolbar { display: grid; grid-template-columns: 160px minmax(220px,460px) 150px; gap: 10px; padding: 12px; border-bottom: 1px solid var(--mp-line); }
-.public-loading-toolbar > i { height: 46px; }
-.public-loading-canvas { display: grid; min-height: 0; grid-template-columns: repeat(2,minmax(0,1fr)); align-content: center; gap: 16px; padding: clamp(22px,5vw,72px); background: #edf2f2; }
-.public-loading-market .public-loading-canvas { min-height: 520px; }
-.public-loading-market .public-loading-canvas > i { height: 76px; border: 8px solid #fff; border-radius: 50%; }
-.public-loading-featured .public-loading-canvas { min-height: 520px; grid-template-columns: repeat(3,minmax(0,1fr)); align-content: start; }
-.public-loading-featured .public-loading-canvas > i { aspect-ratio: 4 / 3; border: 1px solid #d4dede; background: #e3e9e9; }
-.public-page-loading { display: grid; min-height: calc(100dvh - 66px); align-content: start; gap: 18px; padding: clamp(16px,3vw,42px); background: #fff; }
-.public-loading-page-bar { width: min(460px,62%); height: 42px; }
-.public-loading-page-hero { display: grid; min-height: min(52dvh,560px); align-content: center; gap: 14px; padding: clamp(24px,6vw,90px); background: #eef2f2; }
-.public-loading-page-hero > i:first-child { width: min(540px,70%); height: 18px; }
-.public-loading-page-hero > i:nth-child(2) { width: min(720px,88%); height: 44px; }
-.public-loading-page-hero > i:last-child { width: min(620px,78%); height: 14px; }
-.public-loading-page-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
-.public-loading-page-grid > i { height: 180px; }
-@keyframes public-loading-pulse { from { opacity: .52; } to { opacity: 1; } }
 .navigation-pending-status { position: absolute!important; width: 1px!important; height: 1px!important; padding: 0!important; overflow: hidden!important; clip: rect(0,0,0,0)!important; white-space: nowrap!important; border: 0!important; }
 .navigation-pending-indicator { position: absolute; top: 50%; right: 9px; width: 12px; height: 12px; margin-top: -6px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; opacity: 0; pointer-events: none; }
 .navigation-pending-indicator.is-pending { opacity: .76; animation: navigation-pending-spin .7s linear infinite; animation-delay: 120ms; }
@@ -447,7 +425,6 @@
 .navigation-workspace-status > i { width: 14px; height: 14px; flex: 0 0 auto; border: 2px solid var(--mp-teal); border-right-color: transparent; border-radius: 50%; animation: navigation-pending-spin .7s linear infinite; }
 @keyframes navigation-pending-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
-  :is(.public-workspace-loading,.public-workspace-data-loading) [aria-hidden="true"] > i,:is(.public-workspace-loading,.public-workspace-data-loading) [aria-hidden="true"] > b,.public-loading-page-bar,.public-loading-page-hero > i,.public-loading-page-grid > i { animation: none; }
   .navigation-pending-indicator.is-pending { animation: none; border-right-color: currentColor; opacity: .65; }
   .navigation-workspace-status > i { animation: none; border-right-color: var(--mp-teal); }
 }
@@ -544,16 +521,6 @@
   .public-market-experience > .public-experience-head h1 { font-size: 1.08rem; line-height: 1.08; }
   .public-market-experience > .public-experience-head p { display: none; }
   .public-market-experience > .landing-account-notice { top: 4px; right: 6px; left: 6px; }
-  .public-loading-heading { min-height: 66px; margin: 0; padding: 12px 10px; border-inline: 0; border-radius: 0; }
-  .public-loading-heading > b { width: 78%; height: 20px; }
-  .public-loading-toolbar { grid-template-columns: minmax(0,1fr) 48px 48px; gap: 7px; padding: 9px; }
-  .public-loading-canvas { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; padding: 18px 14px; }
-  .public-loading-market .public-loading-canvas,.public-loading-featured .public-loading-canvas { min-height: 0; }
-  .public-loading-featured .public-loading-canvas { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .public-page-loading { min-height: 100dvh; padding: 14px; }
-  .public-loading-page-hero { min-height: 48dvh; padding: 24px 16px; }
-  .public-loading-page-grid { grid-template-columns: minmax(0,1fr); }
-  .public-loading-page-grid > i { height: 140px; }
   .public-experience-head { width: auto; max-width: none; min-height: 106px; justify-content: end; margin: 0; padding: max(16px,env(safe-area-inset-top)) 12px 12px; border: 0; border-radius: 0; background: linear-gradient(180deg,rgb(255 255 255 / 62%),rgb(255 255 255 / 88%)); box-shadow: none; backdrop-filter: blur(7px); }
   .public-experience-head h1 { font-size: 1.55rem; line-height: 1.05; }
   .public-experience-head p { font-size: .72rem; line-height: 1.4; }

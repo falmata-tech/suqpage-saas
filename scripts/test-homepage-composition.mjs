@@ -35,6 +35,8 @@ assert.match(market, /getIndependentPublicMarketplace\(['"]businesses['"],\s*ini
 assert.match(market, /getIndependentPublicMarketplace\(['"]products['"],\s*initialProduct\)/);
 assert.match(market, /initialBusiness=readMarketSearch\(params,['"]b\.['"]\);initialProduct=readMarketSearch\(params,['"]p\.['"]\)/);
 assert.match(market, /productDiscovery=\{productDiscovery\}[\s\S]*initialBusiness=\{initialBusiness\}[\s\S]*initialProduct=\{initialProduct\}/);
+assert.match(market, /getIndependentPublicMarketplace\('products',initialProduct\),readExcludedBusinesses\(\)/);
+assert.match(market, /initialExclusions=\{initialExclusions\}/, 'Server initial membership carries its validated exclusion identity');
 assert.match(publicDiscoveryCache, /getMarketplaceDiscoveryView/);
 assert.match(publicDiscoveryCache, /const cachedIndependentBrowse = unstable_cache\([\s\S]*async \(scope:MarketScope\) => getMarketplaceDiscoveryView\(\{scope\}\)/);
 assert.match(publicDiscoveryCache, /if\(!hasMarketCriteria\(search\)&&search\.page===1&&!options\.excludedBusinessIds\?\.length&&!options\.readPort&&!options\.now\)return cachedIndependentBrowse\(scope\)/, 'Only finite default-browse scopes enter the shared cache');
@@ -85,7 +87,28 @@ assert.match(landingCss, /\.public-mobile-tabs \{ grid-template-columns: repeat\
 assert.match(landingCss, /\.public-market-experience > \.discovery/);
 assert.doesNotMatch(landingCss, /\.public-lobby/);
 
-assert.match(discoveryMapUi, /fetch\(['"]\/api\/discovery\?['"]\+key/);
+// FE-065/FE-074 share request scheduling, not criteria or collection authority.
+// Check both real adapters and their feed bindings rather than the old inline
+// fetch's local variable name. Behavioral race/retention tests remain separate.
+const productLoader = discoveryMapUi.match(/async function loadProductBatch\([\s\S]*?(?=\nfunction useIndependentSearch)/)?.[0];
+const businessLoader = discoveryMapUi.match(/function useIndependentSearch\([\s\S]*?(?=\nexport default function DiscoveryWorkspace)/)?.[0];
+assert.ok(productLoader && businessLoader, 'Both scoped public discovery adapters remain wired');
+for (const loader of [productLoader, businessLoader]) {
+  assert.match(loader, /fetch\(['"]\/api\/discovery\?['"]\+params,\{signal\}\)/, 'Discovery reads stay same-origin and carry the feed abort signal');
+  assert.match(loader, /if\(!response\.ok\)throw new Error\(['"]Search is unavailable\. Try again\.['"]\)/, 'Failed discovery reads cannot become empty-success data');
+}
+assert.match(productLoader, /return productBatch\(await response\.json\(\) as MarketplaceDiscoveryView\)/);
+assert.match(businessLoader, /const key=marketSearchParams\(scope,search\)\.toString\(\)/);
+assert.match(businessLoader, /useMarketFeed\(key,async\(params,signal\)=>/);
+assert.match(businessLoader, /return batch\(await response\.json\(\) as MarketplaceDiscoveryView\)/);
+assert.match(businessLoader, /initialExclusionKey===exclusionKey\?batch\(initial\):undefined,\{scopeKey:['"]\/api\/discovery:public:['"]\+scope\+['"]:excluded:['"]\+exclusionKey,initialSnapshotKey:marketSearchParams\(scope,initialSearch\)\.toString\(\)/, 'Business retention and initial data require the same public collection, criteria and exclusions');
+assert.match(discoveryMapUi, /exclusionKey=excludedBusinessIds\(blocked\.list\.map\(item=>item\.id\)\)\.join\(','\)/, 'Preference identity uses canonical current exclusions');
+assert.match(discoveryMapUi, /const businesses=useIndependentSearch\(['"]businesses['"],businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey\)/);
+assert.match(discoveryMapUi, /const productKey=marketSearchParams\(['"]products['"],productSearch\)\.toString\(\)/);
+assert.match(discoveryMapUi, /const products=useMarketFeed\(productKey,loadProductBatch,initialExclusionKey===exclusionKey\?productBatch\(productDiscovery\|\|discovery\):undefined,\{scopeKey:['"]\/api\/discovery:public:products:excluded:['"]\+exclusionKey,initialSnapshotKey:marketSearchParams\(['"]products['"],initialProduct\)\.toString\(\)\}\)/);
+assert.match(marketFeed, /\},\s*250\);/, 'Criteria changes retain the bounded debounce');
+assert.match(marketFeed, /return \(\) => \{clearTimeout\(timer\); controller\.abort\(\); more\.current\?\.abort\(\);\}/);
+assert.match(marketFeed, /!controller\.signal\.aborted && generation\.current === version && activeKey\.current === key && activeScope\.current === scopeKey/, 'Only the latest correct-scope request may replace results');
 assert.match(discoveryUi, /discovery-workbench/);
 assert.match(discoveryMapUi, /aria-label=\{t\(['"]Search for['"]\)\}/);
 assert.match(discoveryMapUi, /<MarketSearchControls[\s\S]*scope=\{panelOpen\?['"]products['"]:['"]businesses['"]\}[\s\S]*onChange=\{panelOpen\?setProductSearch:setBusinessSearch\}/);
@@ -142,11 +165,11 @@ assert.match(discoveryRuntime, /searchProducts:\s*DiscoveryProductResult\[\]/);
 assert.match(discoveryRuntime, /LIMIT \? OFFSET \?/);
 assert.match(discoveryMapUi, /new IntersectionObserver[\s\S]*root:resultList\.current/);
 assert.match(discoveryMapUi, /if\(!enabled\|\|!hasMore\|\|loading\|\|loadingMore\|\|moreError/);
-assert.match(discoveryMapUi, /enabled=\{panelOpen\} resetKey=\{productKey\}/);
+assert.match(discoveryMapUi, /enabled=\{panelOpen\} resetKey=\{products\.displayedSnapshotKey\} snapshotCurrent=\{products\.snapshotCurrent\}/, 'Only admitted product snapshots reset scroll or establish current result membership');
 assert.match(discoveryMapUi, /t\("Load more"\)/);
 assert.match(discoveryMapUi, /t\("You've seen all the results\."\)/);
-assert.match(marketFeed, /old\.key !== activeKey\.current[\s\S]*old\.loading \|\| more\.current \|\| old\.batch\.page >= old\.batch\.pages/);
-assert.match(marketFeed, /controller\.signal\.aborted \|\| generation\.current !== version \|\| activeKey\.current !== expectedKey/);
+assert.match(marketFeed, /old\.key !== activeKey\.current \|\| old\.displayedSnapshotKey !== activeKey\.current \|\| old\.scopeKey !== activeScope\.current \|\| !old\.batch \|\| old\.loading \|\| old\.error \|\| more\.current \|\| old\.batch\.page >= old\.batch\.pages/, 'Pagination requires current displayed criteria/scope, a settled successful batch and a single in-flight page');
+assert.match(marketFeed, /controller\.signal\.aborted \|\| generation\.current !== version \|\| activeKey\.current !== expectedKey \|\| activeScope\.current !== expectedScope/);
 assert.match(marketFeed, /const seen = new Set\(s\.batch\.items\.map\(item => item\.id\)\)/);
 assert.match(marketFeed, /moreError: ['"]Search is unavailable\. Try again\.['"]/);
 assert.match(independentCss, /:global\(\.discovery-search-results\)\{[^}]*overflow:auto/);

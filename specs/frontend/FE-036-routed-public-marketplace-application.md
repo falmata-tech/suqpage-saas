@@ -2,13 +2,51 @@
 id: FE-036
 title: Routed public marketplace application
 status: in_progress
-related: [FE-041, FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, FE-038, FE-039, BE-023, DEP-025, FE-033, FE-052, FE-053, FE-056, DEP-043, BE-018]
+related: [FE-074, FE-041, FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, FE-038, FE-039, BE-023, DEP-025, FE-033, FE-052, FE-053, FE-056, DEP-043, BE-018]
 owners: [product, frontend, design]
-last_updated: 2026-10-17
+last_updated: 2026-10-20
 change_level: L2
 ---
 
 # FE-036 - Routed public marketplace application
+
+## S151 B07 — matched initial public workspaces (implemented locally)
+
+FE-074 separates first-load skeletons from same-workspace updates. Existing local
+Chrome RSC navigation retains four loaded cards and the surrounding shell while
+the destination resolves; preserve that behavior and `NavigationPendingMain`.
+FE-065 owns the reproduced product-query clearing defect and snapshot boundaries.
+
+GIVEN an initial Market, Featured or showroom page has no admitted content WHEN
+its existing route/data fallback is shown THEN render decorative placeholders
+matching that workspace's mode/search/filter row, map canvas, responsive image
+cards or showroom header/catalog geometry. Retain known shell and headings;
+placeholders have no fake data, actionable controls or extra main landmark.
+GIVEN usable content is already mounted WHEN its data refreshes THEN keep it and
+show one scoped updating indicator rather than substituting the initial skeleton.
+
+Use current layout/CSS breakpoints, accessible busy/status semantics and a static
+reduced-motion treatment. Existing action progress bars remain appropriate to
+their operations. This first web scope changes `PublicWorkspaceLoading` at its
+existing public boundaries; unreviewed private task layouts do not receive a
+generic invented skeleton. Focused geometry/accessibility and actual Chrome
+1440/390px delayed local reads precede the combined visual review and full gates.
+No shared-shell rewrite, artificial minimum delay, provider, cache or schema
+change is required. Master §§10/19 must distinguish verified local source from
+subsequent deployment.
+
+`scripts/test-public-workspace-loading.ts` exercises the actual fallback
+components/CSS with controlled translation only. It checks one busy/status region,
+hidden decorative blocks with positive geometry, no fake actions/main landmark,
+reduced motion and containment at 1440/1100/1024/768/390/320px, reserving the actual
+desktop sidebar space. Featured follows its available gallery content width:
+one/two/three columns at 372/564px, with the current sponsor slots and two-column
+phone exception; it does not assume viewport width equals gallery width.
+Actual compiled-component captures are supplemental initial-layout evidence,
+not proof that the server Suspense fallback was observable on a fast local read.
+Actual local Chrome discovery GET/filter/navigation evidence belongs to FE-065;
+the working shell/navigation-pending implementation is unchanged. Combined
+visual/full/release checks and deployment remain pending under FE-074.
 
 ## S111 — public transport help reachability (ready)
 

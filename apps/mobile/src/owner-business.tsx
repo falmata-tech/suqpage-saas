@@ -14,6 +14,7 @@ import { useAction, ActionStatus, pickImages, addAsset } from "./owner-forms";
 import {useOwnerEditGuard} from './owner-edit-navigation';
 import OwnerEditConfirmation from './OwnerEditConfirmation';
 import OwnerEmailChange, { nativeOwnerEmailChangeEnabled } from './OwnerEmailChange';
+import ResourceLoading from './ResourceLoading';
 type BusinessLocation = {
   country_code: string;
   city: string;
@@ -35,7 +36,7 @@ type Place = KnownPlace;
 export function BusinessSummary({onEdit}:{onEdit:()=>void}) {
   const {t,ownerRequest}=useApp();
   const load=useLoad(()=>ownerRequest<Details>('owner/business'));
-  return <><Copy big heading>{t('Business details')}</Copy><Status {...load} retry={load.reload}/>{load.data&&<Card>
+  return <><Copy big heading>{t('Business details')}</Copy><ResourceLoading load={load} variant="editor"/>{load.data&&<Card>
     <Copy muted>{t('Business name')}</Copy><Copy>{load.data.business.name}</Copy>
     <Copy muted>{t('Country')}</Copy><Copy>{countryName((load.data.location??load.data.proposal)?.country_code||load.data.existing?.country_code||'')}</Copy>
     <Copy muted>{t('City or town')}</Copy><Copy>{(load.data.location??load.data.proposal)?.city||load.data.existing?.city||t('Not configured')}</Copy>
@@ -48,7 +49,7 @@ export function BusinessForm({onSaved,onCancel}: {onSaved?: () => void;onCancel?
   const load = useLoad(() => ownerRequest<Details>("owner/business"));
   return (
     <>
-      <Status {...load} retry={load.reload} />
+      <ResourceLoading load={load} variant="editor"/>
       {load.data && <Form data={load.data} onSaved={onSaved} onCancel={onCancel}/>}
     </>
   );

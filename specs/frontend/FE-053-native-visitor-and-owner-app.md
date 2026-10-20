@@ -2,13 +2,65 @@
 id: FE-053
 title: Native visitor and business-owner app
 status: in_progress
-related: [FE-066, FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062, FE-063, FE-064, FE-065, DEP-043, BE-018, FE-067, FE-041, FE-047, BE-050, BE-023, FE-068, FE-069, BE-058, DEP-048, FE-072, BE-060, FE-073]
+related: [FE-074, FE-066, FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062, FE-063, FE-064, FE-065, DEP-043, BE-018, FE-067, FE-041, FE-047, BE-050, BE-023, FE-068, FE-069, BE-058, DEP-048, FE-072, BE-060, FE-073]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-18
+last_updated: 2026-10-20
 change_level: L3
 ---
 
 # FE-053 — Native visitor and business-owner app
+
+## S151 B10 — category-first Featured choices (implemented locally)
+
+FE-021 B10 controls the shared presentation correction. Expo/native must show
+the actual localized category name with its existing decorative illustration;
+weekday/date are secondary context, never the only visible label. Use a readable
+horizontal row with wrapping names and48px minimum targets rather than seven
+tiny choices. Keep the selected choice visible on load/selection/return and
+include category plus schedule in its accessible name. Preserve day selection,
+request fencing, sponsor visibility, slot identity and business/Back navigation.
+Focused actual-source checks and actual Expo Chrome precede the combined visual
+gate. Fourteen category/grid/skeleton cases and strict mobile types pass. Actual
+Expo Chrome passes six English/Amharic/Afaan Oromo phone states and three real-API
+selection→business→Back journeys. Full localized names wrap without clipping;
+the actual web toggle state is explicit `aria-pressed`, while native retains its
+selected accessibility state. Initial skeleton tiles match the new geometry.
+Protected S151 `b10-*` receipts separate the initial missing-web-state failure,
+controlled ports, actual browser evidence and pending visual/full/release gates.
+No physical phone control or rebuilt Android proof is included.
+
+## S151 — physical showroom and compact Featured grid correction (local correction; review pending)
+
+FE-041 S151 controls the minimal native/Expo grid correction. Use the actual
+measured width only to choose one/two columns; let Yoga allocate card width so
+pixel-rounded measurements cannot wrap every half-width card into its own row.
+Keep enlarged-text/narrow fallbacks, merchant identity, canonical products,
+description, Add/options, categories and return state unchanged. No copy,
+permission, dependency, API or provider change is needed. Verify actual-source
+interaction tests, installed Yoga geometry and focused actual Chrome Expo tasks;
+visual approval/full checks and a rebuilt physical-phone APK remain distinct
+pending gates. Old-source APK geometry and AAB review cannot qualify this fix.
+
+The same batch includes Featured's independently reproduced narrow-screen
+geometry: two48% cards plus12dp gap exceed its284dp content width at a320dp
+viewport. GIVEN Featured's measured grid WHEN two150dp cards plus12dp gap fit
+and font scale is at most1.3 THEN show two flexible columns. GIVEN a narrower or
+unmeasured grid or enlarged text THEN use full-width rows. A final odd card may
+fill its row. Preserve slot order, scheduled-day selection, sponsor visibility,
+canonical business identity and business navigation. The shared native sizing
+contract changes no web showroom layout. Test actual-source measurement/resize,
+font scale, odd count and navigation plus installed Yoga old-failure/new-pass
+fixtures before the consolidated Chrome/owner review. This is a batch correction,
+not permission to build or release the superseded source.
+
+The shared framework-independent geometry helper now delegates actual row
+allocation to Yoga. FE-041 records11 actual-component and864 installed-engine
+regressions plus17 actual Chrome Expo checks across English, Amharic and Afaan
+Oromo. The ordinary public Add/details/Back and Featured/business/Back journeys
+pass against local schema77 with no backend mutation; local screenshots are
+supporting browser evidence. Root/mobile types and spec links pass. Preserve the
+separate visual/full/rebuilt-APK/physical-device gates; no new phone pass or app
+release is inferred from Expo or the isolated engine fixture.
 
 ## Planned S146 — simpler owner tasks
 
@@ -1115,3 +1167,57 @@ localized “No photo yet” message in active languages. Verify the actual
 `Gallery.tsx` component in `scripts/test-mobile-video.ts`, then inspect the
 Expo localhost:8082 phone preview with an explicitly labelled response-only
 zero-media fixture; actual Android device behavior is a separate release check.
+
+## S151 B07 scoped native loading — local implementation under FE-074
+
+GIVEN a resolved native resource WHEN the same dependency/API/actor scope
+refreshes on focus or retry THEN keep its current content and local input state
+mounted and expose one compact loading status. Initial Featured, showroom,
+product, Account and focused owner resources use static, decorative skeletons
+matching their actual media, rows and responsive column geometry. Action loading
+remains local to the action; it does not replace the resource.
+
+GIVEN dependency, API, actor or sign-out scope changes WHEN rendering before
+effects finish THEN the old data and errors are unavailable immediately. Admit
+only the latest live request, ignore superseded/unmounted responses and clear
+retained resources on authorization/permission/not-found failures. A same-scope
+network failure may retain readable data with inline retry. Inquiry content may
+remain visible while refreshing, but external handoff and canonical product
+selection actions wait for current catalog authority. Navigation to a canonical
+product or inquiry page still requalifies that page's own resource.
+
+The local implementation scopes the shared loader by API, validated actor,
+logout state and caller dependencies. A different incoming Auth actor clears
+the validated session while it is checked; same-user token validation keeps
+the Account workspace mounted. An acknowledged manual `setData` result also
+invalidates earlier read generations. Product choices/notices are scoped to
+handle plus product ID, and current option membership gates inquiry actions;
+an old route callback cannot act on the newly selected product.
+
+Focused evidence: `scripts/test-native-resource-loading.ts` exercises actual
+React, the resource hook, RuntimeProvider and Account with controlled Auth/read
+and owner-presentation ports; it proves first-render identity clearing, same-user
+field continuity, stale/unmounted responses, terminal authorization clearing and
+Save-versus-read ordering. `test-native-loading-skeletons.ts` covers static,
+decorative destination shapes and shared responsive card sizing. Existing
+showroom, product, contact, Account and Market component tests cover retained
+content, canonical-action guards, navigation and committed-snapshot scroll.
+
+Actual installed Chrome evidence is source-bound in
+`.local/contextual-loading-s151/native-result.json` and `native-review.html`.
+Featured retains six cards during focus refresh; Market retains nine mounted
+product rows during query loading and four during a custom-order filter update.
+The corrected outer search minimum preserves 48-unit children without a 2px
+layout jump. First failures and their classifications are retained. Public
+Featured/showroom/product initial silhouettes are captured separately from
+authenticated flows; ordinary local owner Auth and installed Android remain
+unverified here. FE-074 owns combined visual approval, full gates and rollout.
+No full-suite pass, new APK, hosted operation or release is implied.
+
+### S151 B03 owner icon registry
+
+The native Support and preview commands now resolve `headphones` and `eye` to
+their own 24-unit outline icons, preserving the current color, stroke and target
+sizes. `scripts/test-native-owner-icons.ts` compiles the actual Icon component
+and proves both paths differ from its unknown-name arrow fallback. This is
+component evidence, not an authenticated owner-workflow claim.

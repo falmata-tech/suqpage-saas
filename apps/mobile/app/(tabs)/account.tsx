@@ -1,5 +1,6 @@
 import {Setup} from '../../src/owner-forms';
 import {OwnerProfile} from "../../src/owner-profile";
+import ResourceLoading from '../../src/ResourceLoading';
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -82,7 +83,7 @@ export default function Account() {
     catch { /* The provider keeps the safe logout error and Retry after this screen changes. */ }
     finally { setBusy(false); }
   }
-  if (!ready)
+  if (!ready&&!session)
     return (
       <Screen>
         <Status loading />
@@ -155,7 +156,7 @@ export default function Account() {
         </>
       ) : (
         <>
-          <Status {...load} retry={load.reload} />
+          <ResourceLoading load={load} variant="profile"/>
           {load.data &&
             ("setup" in load.data ? (
               <Setup/>

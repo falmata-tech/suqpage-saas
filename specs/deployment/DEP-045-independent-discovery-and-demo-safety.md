@@ -4,11 +4,54 @@ title: Independent discovery rollout and safe demo contacts
 status: in_progress
 related: [FE-065, FE-066, BE-055, BE-054, DEP-042, DEP-030, DEP-041, BE-022, ADR-0027, DEP-046]
 owners: [operations, security]
-last_updated: 2026-10-18
+last_updated: 2026-10-20
 change_level: L4
 ---
 
 # DEP-045 — Discovery and demo safety
+
+## S151 — live demo contact rollout gap (inventory; apply not approved)
+
+The batch audit independently verified the MirtPage site/project and schema 77.
+None of its 65 marked demos has all three canonical message destinations set to
+the owner's approved phone, and the production operator setting is absent. Actual
+Chrome and public DTOs show disabled channels. This is an incomplete rollout of
+S118, not permission to weaken the fail-closed policy or hardcode contacts.
+
+Prepare one exact, protected, drift-bound marked-demo correction covering current
+canonical contacts and effective draft/public snapshots, alongside DEP-046's
+separately identified content deltas. Preserve private sign-in aliases, real
+businesses, unpublished state, unrelated content/media/location and immutable
+history. Retain all before-images, append required versions, verify no-op replay,
+and prove web/native projections agree. Setting the operator phone alone is
+insufficient. Any hosted data or environment write still requires its exact
+target/backup/review approval; this inventory authorizes no such mutation.
+
+The S151 contact-only plan now has66 focused planner/negative-operation cases and
+a successful five-table local SQL rollback rehearsal. It updates65 canonical and
+draft contacts, appends65 draft events plus64 public/catalog versions, preserves
+all earlier versions and leaves the private reviewer unpublished. The first
+rehearsal exposed integer/bigint representation differences in the prepared model;
+strict typed corrections pass a read-only schema preflight and one controlled
+retry. Exact after-state, rejected replay, real foreign-key and version-drift
+rollbacks, final schema removal and unchanged preview fingerprints pass.
+Evidence is protected under `s151-batch-audit/demo-repair-preparation/` in the
+release directory. This is local preparation evidence, not a hosted apply or an
+environment-setting approval. DEP-046's content/category/media correction remains
+separate and incomplete.
+
+The separate one-key Netlify environment candidate now passes81 pure
+transport/negative cases and independent source review. It binds the existing
+protected absence backup and exact site/account/project/primary/deploy, admits
+only the nonsecret production destination and existing Free scopes, and checks
+untouched field fingerprints before/after. Approval is revalidated after
+credential resolution and immediately before POST; the initial expiry-during-
+preflight defect and its failing reproduction are retained. HTTP200/201 are
+normal success; any ambiguity consumes the attempt and stops without retry or
+restore. This is mock-provider qualification, not hosted concurrency/CAS or a
+provider rollback rehearsal. A fresh B04 `verify-before` read-only check still
+matches the complete protected data plan. Neither data nor setting is applied;
+the exact owner approval questions remain pending in the combined review.
 
 ## Server country-city artifact admission (Ready)
 

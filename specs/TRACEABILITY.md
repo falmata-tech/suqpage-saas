@@ -3,6 +3,92 @@
 Update this table in the same change that completes or materially changes a spec.
 Evidence must be reproducible; avoid transient chat claims.
 
+S151 B01–B10 remain **local candidates, not deployed**. The protected combined
+review is under `.local/mirtpage-final-release-20261019/s151-batch-audit/`.
+No existing artifact or email gate qualifies the new source as a whole.
+
+The first complete-check attempts are preserved under the protected S151 gate
+directories. Homepage source-wiring expectations and a reduced local test
+environment were corrected without weakening checks. Actual local-provider
+account-erasure/reviewer qualification passes. The localization gate found one
+new untranslated screen-reader announcement; using the existing translated
+`Loading…` message passes26 localization and three actual Chrome skeleton cases
+without changing geometry. A separate review identifies web exclusion identity
+as a required retention boundary; its focused correction precedes the final
+freeze. That correction now passes16 actual Chrome workspace cases, including
+same-query block/unblock, obsolete page/query/map callbacks and proven/unproven
+initial data; seven map-renderer cases and types/homepage/narrative checks pass.
+Production changes are limited to exclusion identity in the public page/client.
+No stopped attempt is represented as a complete check or deployment.
+
+- FE-041/FE-053 B01/B02: shared flexible card allocation passes864 installed
+  Yoga cases,11 component regressions and17 actual Expo Chrome checks. B03's
+  missing Support/Preview icon paths now pass the compiled registry regression.
+  Physical Android was stopped at the owner's instruction; the new source has
+  not been rebuilt or requalified on a phone.
+- FE-026 B06: current task/Account selection passes role/nested-route tests and
+  five actual Chrome component checks. Linked staff fixtures are absent locally;
+  no account or privilege was created to bypass that limit.
+- FE-074 B07: safe same-resource retention, immediate identity/resource clearing,
+  late-response/write fences and matching initial skeletons are implemented.
+  Native focused evidence covers65 cases, root/mobile types and actual Expo
+  Featured/search/filter checks; the qualified filter recheck has0px movement.
+  Web focused feed/workspace/skeleton tests cover latest authority, Activity
+  return and stale map callbacks. Actual en/am/om phone workflows retain12 cards
+  before4 matching results and preserve query on detail/Back. Final quiet-status
+  en1440/am390/om390 review passes with one status,50px search form and0px product/
+  map movement; visible images decode200. Earlier mixed/interrupted receipts
+  are retained. Receipts: `.local/contextual-loading-s151/`.
+- FE-021/FE-024 B08: read-only live Chrome reproduces sponsor overlap at1100,
+  1024 and768px despite no document overflow. The bounded container-size CSS
+  passes27 actual-component width/sponsor states in
+  `scripts/test-featured-sponsor-layout.ts`. The first real-local review stopped
+  at a database connection timeout before gallery rendering. After read-only
+  health classification, the bounded retry passes nine width geometry checks
+  and two click-through journeys. The raw receipt retains four suppressed
+  analytics abort observations; no clean telemetry pass is inferred.
+- DEP-049/FE-021 B09: five original demo images are published200 and present in
+  Git; the exact optimized hero returns400, while the original byte identity and
+  existing Netlify CDN resize are verified. One exact200 CDN rewrite is added
+  without changing17 legacy aliases or native/private-media adapters.
+  `scripts/test-netlify-readiness.mjs` fails before the correction then passes;
+  `scripts/test-platform-naming.ts` passes against isolated local PostgreSQL
+  after a sandbox-only socket refusal. Artifact and hosted variant verification
+  remain pending. No production image repair is claimed from local success.
+- DEP-045 B04:66 focused cases and a successful exact SQL/rollback rehearsal
+  qualify the prepared contact operation locally; hosted data and its separate
+  nonsecret environment setting still need exact apply approval. DEP-046 B05's
+  offline post-B04 proposal passes17 content and8 composition tests, with110
+  product rows,15 category updates, one returned category identity and11 exact
+  mismatched-media-reference removals proposed. Its scratch-only candidate now
+  passes87 pure operation tests and a reviewed SQL retry with category binding,
+  full typed before/after/history/FK/version/non-key/prerequisite/outside checks.
+  All74 existing local tables/public sequences remain unchanged after rollback.
+  The initial bigint JSON mismatch and root authorization collation failure are
+  preserved. Actual B04 completion/readback, fresh hosted qualification and a
+  separately approved hosted operation remain required. Image files, private
+  aliases, real businesses and history remain unchanged. A separate pure hosted
+  draft builder passes78 model cases but emits no actual hosted plan and has
+  no apply/SQL/network port; it does not prove provider provenance or authorize
+  execution. The current demo access guide distinguishes role/task procedures,
+  historical account results and unqualified local Auth/grant setup.
+
+- FE-021/FE-053/FE-074 B10: category-first full localized names and32px art replace
+  hidden names/weekday-only controls. Seven web category/sponsor/image cases,
+  fourteen native category/grid/skeleton cases and three web loading variants
+  pass; root/mobile types pass. Actual web checks five states and six functional
+  journeys, retaining two uncorrelated suppressed-analytics aborts. Expo passes
+  six states and three real-API selection/business/Back journeys without API/
+  page errors or writes. A held real initial GET captures matching silhouettes
+  then completes200. Receipts: protected `s151-batch-audit/b10-*`; no new APK,
+  hosted data/configuration write or deployment.
+
+The owner explicitly approves the updated B01–B10 combined visuals and full
+checks on2026-10-20 (`call_e750c54380924b4193f423f678d3a783:0`). Full source-bound
+check/web-release/acceptance gates are next; scoped commit/CI, reviewed web
+publication and fresh APK/AAB qualification remain pending. Hosted demo data and
+the new Android build are outside this visual/full-check approval.
+
 S146 active-language account-copy brand parity (FE-070/FE-049, local only):
 two reachable Amharic/Afaan Oromo account-deletion and Expo staff-access notices
 now name MirtPage in `locales/interface.tsv` and generated client catalogs.
@@ -3939,3 +4025,56 @@ The prior direct web release attempt stopped at its intended mixed-install
 guard; the first isolated attempt passed its HTTP smoke but lacked the local
 PostgreSQL test connection. The corrected isolated run passed without changing
 or bypassing those guards. No new Android build or Play upload occurred.
+
+
+## S150 — opaque Auth email wordmark (FE-070 / BE-059 / DEP-029)
+
+The email-only asset path in lib/brand.ts points to the new versioned
+mirtpage-panels-wordmark-email-white-v2.png. The canonical Sharp generator
+composites its unchanged outlined foreground on opaque white, retaining the
+1320×288 raster and220×48 email display dimensions. All twelve unique Auth HTML
+templates (thirteen provider content fields) reference it and set white image
+backing. The previous transparent PNG and all eleven existing native/web
+artwork derivatives are byte-preserved. This source is isolated from the active
+Android build and changes no provider, credential, code/link semantic or subject.
+
+Regression evidence: the new pixel test first failed on the previous asset path,
+then three focused platform-artwork tests passed; every opaque foreground RGB
+and position matches canonical mobile art, former transparent pixels are white,
+and rendering the opaque asset over black/white is identical. Thirteen email
+manifest/placeholder/disabled-notice checks pass. Four focused Auth-guard cases
+prove exact branding, the thirteen-field HTML-only repair, rejection of old
+plans and unchanged customization-map preservation. Generator check and
+218-spec validation pass. Actual isolated headed Google Chrome155 passes four
+phone/desktop light/dark entry→preview→Back states with zero errors/external
+requests and visible ink/orange artwork. Dark mode is a CSS simulation, not a
+new Gmail send. Receipt/screens are retained in
+.local/mirtpage-final-release-20261019/s150-auth-email-brand/email-contrast-review/.
+
+The prior hosted27-field MirtPage presentation apply and one confirmed Gmail
+message are separate evidence. That message exposed the new contrast defect.
+The owner approves the S150 logo fix and full local checks on2026-10-20 via
+call_a052d9f4ef4144ab9bf69ff5a958b6b4:0. The source-frozen email candidate
+`25f6e2ac…03f4` passes all77 full-check groups and a clean isolated web release
+gate after the retained harness failures/reboot interruption. Its terminal receipt
+is `s150-auth-email-brand/gates/post-reboot-20261020/result.json` under the
+protected release directory. Root integrates the exact24 email paths while
+preserving the later native/navigation work; that integration does not extend
+the email gates to those edits. Publishing/readback of the new asset and a
+separately approved13-HTML-field hosted repair remain pending.
+No new email, OTP redemption, hosted Auth write or native artifact is claimed.
+
+## S151 — controlled native host qualification (FE-053 / FE-056 / FE-074)
+
+The complete workflow-UI group collected395 cases:375 passed and20 failed
+before their assertions because six controlled native hosts lacked loading
+primitives. The six test-only corrections retain all chat lifecycle, privacy,
+failed-action, navigation and authoritative Save/location assertions. The DOM
+host flattens valid native style arrays; the city helper selects exactly one
+actual business Form by its authoritative data identity. All44 affected cases,
+typecheck and whitespace checks pass. The protected receipt
+`s151-batch-audit/ui-port-qualification/result.json` has SHA-256
+`e34f2319ba9c48bc096e32f1e0c1d4d1165f2f880a41e3049bb3c70687086022`.
+No production change or new visual approval is required for these test hosts.
+Final source-bound full checks, release, acceptance and remote CI remain pending;
+the failed integrated receipts are preserved rather than reported as passing.

@@ -39,9 +39,9 @@ async function setup(shop:Shop,loaded=true){
  const storage={read:async(id:number)=>{reads.push(id);if(failRead)throw Error('Device storage unavailable');return saved.get(id)||null;},write:async(id:number,value:string)=>{writes.push(id);saved.set(id,value);}};
  const store=createInquiryBaskets(storage);if(loaded)await store.load(shop.id);
  const fixture={dimensions:{width:390,height:844,fontScale:1},store,states:[] as unknown[],cursor:0,routes:[] as unknown[],effectCursor:0,effects:[] as unknown[][],pending:[] as Array<()=>void>};
- const module={exports:{} as {ShowroomContent:(props:{shop:Shop;preview?:boolean})=>Element}};
+ const module={exports:{} as {ShowroomContent:(props:{shop:Shop;preview?:boolean;catalogReady?:boolean})=>Element}};
  vm.runInNewContext((await bundle).outputFiles[0].text,{module,exports:module.exports,fixture,URL,URLSearchParams});
- return{store,saved,reads,writes,storage,fixture,failRead:(value:boolean)=>{failRead=value;},render:(current=shop,preview=false)=>{fixture.cursor=fixture.effectCursor=0;const tree=nodes(module.exports.ShowroomContent({shop:current,preview}));for(const effect of fixture.pending.splice(0))effect();return tree;}};
+ return{store,saved,reads,writes,storage,fixture,failRead:(value:boolean)=>{failRead=value;},render:(current=shop,preview=false,catalogReady=true)=>{fixture.cursor=fixture.effectCursor=0;const tree=nodes(module.exports.ShowroomContent({shop:current,preview,catalogReady}));for(const effect of fixture.pending.splice(0))effect();return tree;}};
 }
 
 test('FE-041 S129 native cards clamp merchant description and add separately without opening details',async()=>{
@@ -138,8 +138,8 @@ test('FE-041 S131 ordinary product Back/remount restores scoped public category/
 });
 
 
-test('FE-041 S129 measured public/private grid uses full-width cards until two150px columns plus gap fit',async()=>{
- const shop=business(7,[product(1),product(2)]);
+test('FE-041 S151 measured public/private grids delegate two-column sizing to Yoga and retain narrow fallbacks',async()=>{
+ const shop=business(7,[product(1),product(2),product(3)]);
  for(const sample of[
   {viewport:320,width:252,preview:true,fontScale:1,columns:1},
   {viewport:320,width:284,preview:false,fontScale:1,columns:1},
@@ -147,18 +147,28 @@ test('FE-041 S129 measured public/private grid uses full-width cards until two15
   {viewport:844,width:724,preview:true,fontScale:1,columns:2},
   {viewport:390,width:311,preview:false,fontScale:1,columns:1},
   {viewport:390,width:312,preview:false,fontScale:1,columns:2},
+  {viewport:412,width:375.619049,preview:false,fontScale:1,columns:2},
+  {viewport:390,width:354,preview:false,fontScale:1.3,columns:2},
   {viewport:390,width:354,preview:true,fontScale:2,columns:1},
  ]){
   const f=await setup(shop);f.fixture.dimensions={width:sample.viewport,height:844,fontScale:sample.fontScale};let tree=f.render(shop,sample.preview);
   assert.equal(style(find(tree,'showroom-product-1')).width,'100%','Unmeasured cards cannot occupy half a wrapped row');
   const grid=find(tree,'showroom-product-grid'),layout=grid.props.onLayout as(event:{nativeEvent:{layout:{width:number}}})=>void;
   layout({nativeEvent:{layout:{width:sample.width}}});tree=f.render(shop,sample.preview);
-  const cards=[find(tree,'showroom-product-1'),find(tree,'showroom-product-2')],gap=Number(style(grid).gap);assert.equal(gap,12);
-  for(const card of cards){const width=style(card).width;if(sample.columns===1)assert.equal(width,'100%',JSON.stringify(sample));else{assert.equal(width,(sample.width-gap)/2,JSON.stringify(sample));assert.ok(typeof width==='number'&&width>=150);assert.equal(Number(width)*2+gap,sample.width,'Two actual widths plus gap fit the measured row exactly');}assert.equal(find(tree,'showroom-product-description-1').props.numberOfLines,2);assert.ok(Number(style(find(tree,'showroom-product-add-1')).minHeight)>=48);}
-  const measured=style(cards[0]).width;
-  for(const invalid of[0,-1,NaN,Infinity]){layout({nativeEvent:{layout:{width:invalid}}});tree=f.render(shop,sample.preview);assert.equal(style(find(tree,'showroom-product-1')).width,measured,'Hidden/invalid measurements do not replace known geometry');}
-  layout({nativeEvent:{layout:{width:sample.width}}});tree=f.render(shop,sample.preview);assert.equal(style(find(tree,'showroom-product-1')).width,measured,'Unchanged layout is stable');
+  const cards=[find(tree,'showroom-product-1'),find(tree,'showroom-product-2'),find(tree,'showroom-product-3')],gap=Number(style(grid).gap);assert.equal(gap,12);
+  for(const card of cards){const current=style(card);if(sample.columns===1){assert.equal(current.width,'100%',JSON.stringify(sample));assert.equal(current.flexBasis,undefined);}else{assert.equal(current.width,undefined,'Never feed the rounded measured width back as an exact card width');assert.equal(current.flexBasis,'47%');assert.equal(current.flexGrow,1);assert.equal(current.minWidth,0);}assert.equal(find(tree,'showroom-product-description-1').props.numberOfLines,2);assert.ok(Number(style(find(tree,'showroom-product-add-1')).minHeight)>=48);}
+  const measured=style(cards[0]);
+  for(const invalid of[0,-1,NaN,Infinity]){layout({nativeEvent:{layout:{width:invalid}}});tree=f.render(shop,sample.preview);assert.deepEqual(style(find(tree,'showroom-product-1')),measured,'Hidden/invalid measurements do not replace known geometry');}
+  layout({nativeEvent:{layout:{width:sample.width}}});tree=f.render(shop,sample.preview);assert.deepEqual(style(find(tree,'showroom-product-1')),measured,'Unchanged layout is stable');
   if(sample.fontScale<=1.3){layout({nativeEvent:{layout:{width:284}}});tree=f.render(shop,sample.preview);assert.equal(style(find(tree,'showroom-product-1')).width,'100%','A retained wide grid responds to a narrower actual container');}
   assert.equal(f.store.read(shop).items.length,0);assert.deepEqual(f.fixture.routes,[]);
  }
+});
+
+
+test('FE-074 retained showroom remains readable while canonical Add waits for refreshed catalog authority',async()=>{
+ const shop=business(7,[product(1)]),f=await setup(shop);let tree=f.render(shop,false,false);
+ assert.ok(tree.some(node=>node.props.testID==='showroom-product-1'));assert.equal(find(tree,'showroom-product-add-1').props.disabled,true);press(find(tree,'showroom-product-add-1'));assert.equal(f.store.read(shop).items.length,0);
+ press(tree.find(node=>node.props.accessibilityLabel===shop.products[0].name)!);assert.equal(f.fixture.routes.length,1,'Canonical details navigation can requalify its own resource');
+ tree=f.render(shop,false,true);assert.equal(find(tree,'showroom-product-add-1').props.disabled,false);press(find(tree,'showroom-product-add-1'));assert.equal(f.store.read(shop).items.length,1);
 });

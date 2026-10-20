@@ -4,7 +4,7 @@ title: MirtPage identity and inclusive digital showroom experience
 status: in_progress
 related: [BE-059, DEP-029, DEP-049, FE-071, ADR-0029]
 owners: [product, frontend, localization]
-last_updated: 2026-10-19
+last_updated: 2026-10-20
 change_level: L2
 ---
 
@@ -166,6 +166,43 @@ open after the bounded browser script stopped on an overly specific phone color
 assertion. See FE-069 and `.local/shipment-tracking-canvas-s146/actual/` for
 screenshots and receipts; no publication or visual approval is claimed.
 
+## S150 — opaque Auth email wordmark (Ready; local source only)
+
+Dark email surfaces can hide the approved ink-colored “Mirt” lettering when
+its PNG canvas is transparent. Preserve the exact canonical geometry, display
+size (220×48), orange/ink/white palette and all mobile/web artwork. Publish a
+new versioned email-only PNG with a fully opaque white canvas; keep the previous
+PNG available. Every Auth template references the new asset and explicitly sets
+a white image background. Do not replace the canonical mark or invert its colors.
+
+GIVEN any light or dark email surface WHEN its logo image renders THEN every
+PNG pixel is opaque and the original foreground remains visible on white.
+GIVEN canonical opaque artwork pixels WHEN comparing the email derivative THEN
+their positions and exact RGB values match; formerly transparent pixels become
+white, with ordinary antialias alpha composited on white at unchanged dimensions.
+GIVEN existing platform/native assets WHEN generating the new email derivative
+THEN all previous asset bytes, including the old email PNG, remain unchanged.
+GIVEN a returning Gmail image proxy WHEN templates render THEN the versioned
+asset URL differs from the previous transparent PNG URL rather than relying on
+cache invalidation.
+
+Meaningful regression coverage belongs in scripts/test-platform-brand.ts and
+scripts/test-email-branding.ts; deterministic generation remains checked by
+scripts/generate-mirtpage-icons.mjs. Exercise actual Chrome static email previews
+on desktop/phone in light/dark surfaces, preserving code/link placeholders and
+without sending or redeeming an OTP. Capture visuals and wait for owner visual
+approval before full/release gates. This source correction does not publish the
+asset or apply hosted Auth content; DEP-029 separately controls that later step.
+
+Local S150 implementation and focused checks now pass: three artwork/pixel
+cases, thirteen template semantics, four exact Auth-guard cases, generator
+reproducibility and218-spec validation. Four isolated headed actual Chrome155
+phone/desktop light/dark static states pass with no overflow, browser errors or
+external requests. The dark surface is a CSS simulation, not a new Gmail send.
+Review evidence is retained under the private S150 email-contrast-review
+directory. The owner explicitly approves the logo fix and full local checks on
+2026-10-20; source-bound full gates and all hosted rollout remain pending.
+
 ## Ready: canonical Auth email artwork and copy
 
 The independently reviewed BE-059 push split is Ready: new browser workers show
@@ -177,8 +214,9 @@ this is not public co-branding or proof that every installation has upgraded.
 The independent Auth source tranche in BE-059/DEP-029/DEP-049 is Ready. Preserve
 the twelve template layouts, English account-entry meaning, code/link semantics
 and approved palette. Replace the old font-based logo with the approved outlined
-MirtPage wordmark as one deterministic public PNG, identical to the existing
-mobile wordmark bytes, displayed at220×48 with MirtPage alt text. The image URL
+MirtPage wordmark as one deterministic public PNG, displayed at220×48 with
+MirtPage alt text. S150 gives the versioned email-only derivative an opaque
+white canvas; canonical foreground geometry/colors and mobile bytes remain exact. The image URL
 uses SiteURL and a fixed public asset path; no third-party tracking image,
 invented logo, arbitrary font substitute or customer snapshot is introduced.
 Existing derivative bytes remain exact. FE-073/BE-061 separately change the
@@ -188,8 +226,9 @@ desktop/phone previews and later
 actual Chrome/owner review distinguish local implementation from visual approval
 and hosted mail. No locale-aware Auth mail is claimed by this brand-only tranche.
 
-Local source and focused evidence now exist: canonical PNG equals the existing
-mobile wordmark bytes; all prior derivatives are preserved. Actual installed
+The original transparent email PNG remains identical to the existing mobile
+wordmark bytes and is retained. S150 changes only the versioned email derivative
+canvas to opaque white; all prior derivatives are preserved. Actual installed
 Google Chrome covers24 Auth-template states and18 exact plain-text app-mail
 states across phone/desktop. Tracking code/plan and staff alerts cover en/am/om;
 their subjects and From display are MirtPage. The combined private review is

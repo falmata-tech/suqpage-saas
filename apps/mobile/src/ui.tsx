@@ -66,6 +66,8 @@ export function Icon({
     info: "M12 11v6 M12 7v1 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0",
     chat: "M21 11a9 9 0 0 1-9 9H3l2-4a9 9 0 1 1 16-5",
     bell: 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9 M10 21h4',
+    headphones: 'M3 14h3v7H3z M18 14h3v7h-3z M3 14v-3a9 9 0 0 1 18 0v3',
+    eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12 M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
     arrow: "m8 4 8 8-8 8",
     check: "m4 12 5 5L20 5",
     plus: "M12 4v16 M4 12h16",
@@ -245,14 +247,17 @@ export function Card({ children }: { children: React.ReactNode }) {
 }
 export function Status({
   loading,
+  refreshing,
   error,
   retry,
 }: {
   loading?: boolean;
+  refreshing?: boolean;
   error?: string;
   retry?: () => void;
 }) {
   const { t } = useApp();
+  if (refreshing) return <Text accessibilityRole="text" accessibilityLiveRegion="polite" style={{fontSize:12,lineHeight:18,color:colors.muted}}>{t('Loading…')}</Text>;
   if (loading) return <LoadingBar color={colors.brand} track={colors.soft}/>;
   return error ? (
     <Card>

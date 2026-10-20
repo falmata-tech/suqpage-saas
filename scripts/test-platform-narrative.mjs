@@ -72,7 +72,7 @@ assert.match(read("components/MarketSearchControls.tsx"), /Search products/);
 assert.match(discovery, /Open page/);
 // FE-030/S54: the list contains offerings; businesses remain map results.
 assert.match(discovery, /className="discovery-results-heading">\{t\("Products"\)\}/);
-assert.match(discovery, /useIndependentSearch\('businesses',businessSearch,discovery,initialBusiness\)/, "The shared active toolbar retains an independent business search controller");
+assert.match(discovery, /useIndependentSearch\('businesses',businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey\)/, "The shared active toolbar retains an independent business search controller");
 assert.match(discovery, /marketSearchParams\('products',productSearch\)/, "The shared active toolbar retains a separate product feed/query");
 assert.doesNotMatch(publicNarrative, /water bottling|bottled water|diaper (?:company|factory|manufacturer)/i);
 

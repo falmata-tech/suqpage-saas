@@ -22,7 +22,8 @@ const bundle=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
  builder.onResolve({filter:/^(?:@\/lib\/i18n\/ui|react-native|expo-router|expo-crypto|\.\.\/src\/(runtime|ui|ChatReadSentinel|AttentionAlerts|TransportPlanView)|\.\/(runtime|ui|owner-forms|support-files|ChatReadSentinel|ChatReadObserver|AttentionAlerts))$/},args=>({path:args.path,namespace:'ports'}));
  builder.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'jsx',resolveDir:process.cwd(),contents:
   args.path==='@/lib/i18n/ui'?`export const useUiText=()=>window.fixture.t;`:
-  args.path==='react-native'?`export const AppState={get currentState(){return window.fixture.appState;}},View='div',StyleSheet={create:v=>v};`:
+  args.path==='react-native'?`import React from 'react';const style=value=>Object.assign({},...[value].flat(Infinity).filter(Boolean));
+   export const AppState={get currentState(){return window.fixture.appState;}},View=({children,style:s})=><div style={style(s)}>{children}</div>,Text=({children,style:s})=><span style={style(s)}>{children}</span>,StyleSheet={create:v=>v},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`:
   args.path==='expo-router'?`export const router={push:()=>{},replace:()=>{}};import {useEffect} from 'react';
           // Every focus hook owns its cleanup; route focus/blur fans out to all mounted subscriptions.
           const subscriptions=new Set();let focused=true;

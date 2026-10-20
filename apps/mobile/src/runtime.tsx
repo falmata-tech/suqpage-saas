@@ -6,7 +6,6 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { useFocusEffect } from "expo-router";
 import { AppState, Platform } from "react-native";
 import { endLocalSession } from "./session-lifecycle";
 import { boundedAuthFetch } from "./auth-fetch";
@@ -18,6 +17,7 @@ import {
   type Offering,
 } from "@suqpage/contracts";
 import { PUBLIC_ORIGIN } from "./public-origin";
+import {useResourceLoad} from './use-resource-load';
 import { createUiText, languageNames, locales, enabledLocales, parseLocale } from "../../../lib/i18n/core";
 import am from "../../../lib/i18n/messages/am.json";
 import om from "../../../lib/i18n/messages/om.json";
@@ -162,7 +162,7 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
       // Never await Auth or API work inside this callback: Supabase holds its lock.
       if (logoutFence.current) return;
       setCandidate(s);
-      if (!s) setSession(null);
+      setSession(current=>current?.user.id===s?.user.id?current:null);
       setReady(!s);
     });
     const app = AppState.addEventListener("change", (s) => {
@@ -290,38 +290,8 @@ export function useLoad<T>(
   deps: React.DependencyList = [],
   refreshOnFocus = false,
 ) {
-  const [data, setData] = useState<T | null>(null),
-    [error, setError] = useState(""),
-    [loading, setLoading] = useState(true),
-    [revision, setRevision] = useState(0);
-  useFocusEffect(useCallback(() => { if(refreshOnFocus)setRevision(v=>v+1); }, [refreshOnFocus]));
-  useEffect(() => {
-    let live = true;
-    setLoading(true);
-    setError("");
-    setData(null);
-    loader()
-      .then((v) => {
-        if (live) setData(v);
-      })
-      .catch((e) => {
-        if (live)
-          setError(e instanceof Error ? e.message : "Please try again.");
-      })
-      .finally(() => {
-        if (live) setLoading(false);
-      });
-    return () => {
-      live = false;
-    };
-  }, [...deps, revision]);
-  return {
-    data,
-    error,
-    loading,
-    reload: () => setRevision((v) => v + 1),
-    setData,
-  };
+  const runtime=useContext(Context);
+  return useResourceLoad(loader,[API,runtime?.session?.user.id??null,Boolean(runtime?.logoutPending||runtime?.logoutIssue),...deps],refreshOnFocus);
 }
 export const mediaUrl = (ref: string) =>
   /^(https?:|file:|blob:|data:)/.test(ref) ? ref : `${API}${ref}`;

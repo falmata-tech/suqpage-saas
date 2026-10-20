@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { auth, useApp, useLoad } from './runtime';
+import ResourceLoading from './ResourceLoading';
 import { Button, Card, Copy, Field, Status } from './ui';
 
 type EmailStatus = { state: 'idle' | 'complete' } | {
@@ -39,7 +40,7 @@ export default function OwnerEmailChange({ currentEmail }: { currentEmail: strin
   return <>
     <Copy big heading>{t('Change sign-in email')}</Copy>
     <Copy muted>{t('We will send a different six-digit code to your current and new email addresses. Your sign-in email changes only after both are confirmed.')}</Copy>
-    <Status {...load} retry={load.reload}/>
+    <ResourceLoading load={load} variant="editor"/>
     {status && <Card>
       <Copy muted>{t('Current sign-in email')}</Copy><Copy>{currentEmail}</Copy>
       {status.state === 'idle' && <>

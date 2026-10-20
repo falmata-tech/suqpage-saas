@@ -6,7 +6,7 @@ export const PLATFORM_BRAND = {
   assets: {
     mark: "/brand/mirtpage-panels-mark.svg",
     wordmark: "/brand/mirtpage-panels-wordmark.svg",
-    emailWordmark: "/brand/mirtpage-panels-wordmark-email.png",
+    emailWordmark: "/brand/mirtpage-panels-wordmark-email-white-v2.png",
     wordmarkReverse: "/brand/mirtpage-panels-wordmark-reverse.svg",
     notificationBadge: "/pwa/mirtpage-panels-badge-96.png",
     favicon: "/pwa/mirtpage-panels-favicon-32.png",

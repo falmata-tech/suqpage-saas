@@ -4,11 +4,63 @@ title: Role-oriented workspace navigation
 status: in_progress
 related: [FE-065, BE-032, BE-033, FE-013, FE-017, FE-019, FE-025, FE-029, FE-031, FE-032, FE-033, FE-034, FE-035, FE-053, BE-018, BE-026, BE-028, BE-044, DEP-021, DEP-022, ADR-0013, FE-062, FE-056, FE-047, BE-054, FE-072, BE-060]
 owners: [product, frontend, operations, design]
-last_updated: 2026-10-17
+last_updated: 2026-10-20
 change_level: L2
 ---
 
 # FE-026 - Role-oriented workspace navigation
+
+## S151 B06 — one current workspace destination (implemented locally)
+
+The live ordinary-staff audit reproduced two selected desktop links on Account
+settings: Business workspaces and Account security. The phone bar also selected
+Business workspaces on that Account screen. This is a presentation defect, not
+an authorization or route change. The complete authorized menu, including the
+Account utility destination, must choose one current destination before its
+selection is projected onto the desktop menu, phone tabs or More drawer.
+
+GIVEN an owner, staff member or administrator opens Account settings or a nested
+Account/security task WHEN workspace navigation renders THEN only that Account
+destination is current in the complete menu, and a generic workspace ancestor
+is not also selected. WHEN the current destination is absent from the phone's
+primary tabs THEN More indicates its location and opening More shows the same
+single current destination; an unrelated primary tab is not selected.
+
+GIVEN a user visits a queue, conversation, staff record or business task WHEN its
+existing authorized destination or explicit ancestor matches THEN that same
+destination remains current. Queue hints, business context, link destinations,
+role visibility, hover/focus treatment and owner public mobile navigation keep
+their existing contracts. Navigation state never grants access.
+
+Ready: B06 has live desktop/390px evidence in the protected S151 staff audit;
+the affected role menus, exact and nested routes, and unchanged security/data
+boundaries are known. Use the existing selector and components without schema,
+API, provider, dependency or label changes. Focused actual-component regression
+coverage is `scripts/test-workspace-current-navigation.ts`; existing
+`scripts/test-staff-navigation.ts` and workspace/Tracking tests cover scoped
+queue, role and ancestor behavior. Actual local Chrome desktop/phone navigation,
+drawer interaction and the combined visual review precede full release gates.
+Master §19's workspace-navigation clause must describe the verified single
+selection after focused verification; source implementation is not deployment.
+
+The source now resolves Account utilities together with the complete authorized
+menu before projecting its current destination onto phone tabs. Focused actual
+DashboardShell/WorkspaceNavigation tests cover all/support/transport staff,
+operations, administrators and owners, exact/nested Account routes, queue hints,
+specific record ancestors and revoked business-menu visibility. Existing staff,
+business-workspace and Tracking component/action tests pass. Typecheck and spec
+validation pass after the concurrent native helper's ambient-type correction.
+
+The real deployed staff audit supplies B06's before evidence. The available local
+schema77 fixture has no linked staff identities, so no local sign-in email was
+requested and no account, Auth link or role was created to manufacture a pass.
+Installed Google Chrome source-component review is explicitly supplemental:
+controlled route/role props, actual navigation/components/styles, singular current
+selection, nested Account, phone More, Escape/focus return and primary Tracking
+selection pass. This is not an authenticated local Account workflow or a backend
+write test. Protected evidence is in
+`.local/mirtpage-final-release-20261019/s151-batch-audit/`; combined visual
+approval, full gates and deployment remain pending.
 
 ## S146 local candidate — one staff business authority
 

@@ -7247,16 +7247,272 @@ neither a hosted Auth configuration change nor an enabled customer workflow.
   targeted. Play Store settings also retain `marketvision.tech@gmail.com` and
   `https://mirtpage.com` as public contact details after a full reload.
   Provider reload shows both Alpha setup tasks complete, but the track is
-  inactive and has no release. App access/reviewer rotation, Target audience,
-  IARC rating and genuine native screenshots remain incomplete; saved draft
-  answers are not final Play approval.
-- [ ] Bind and verify the existing recoverable signing key and new Firebase
-  Android client without exposing credentials or generating a different key.
-  Prepare the exact DEP-044 one-artifact tooling review and owner approval
-  before a local APK or AAB build.
-- [ ] Build and inspect the MirtPage APK locally, install it on Android, exercise
-  visitor/owner/chat/tracking/notification workflows, and capture genuine
-  native screenshots. Then prepare a separately reviewed Play AAB, complete
+  inactive and has no release. Later S149 provider reloads verify the repaired
+  reviewer credentials, ages13–15/16–17/adults, content-rating questionnaire and
+  existing content/Data safety declarations. The protected `s149-android-apk/`
+  receipts include `play-reviewer-transfer-v3-result.json`,
+  `play-target-audience-v3-result.json` and `mirtpage-iarc-details-v4-reloaded.json`.
+  A saved questionnaire is not final Play approval or an issued certificate;
+  genuine updated native screenshots remain pending.
+- [x] Bind and verify the existing recoverable signing key and new Firebase
+  Android client without generating a different key. The exact one-local-APK
+  DEP-044 exception is approved and consumed by the version1 build; its static
+  inspection verifies the signer, Firebase client and new package. It does not
+  authorize another APK or AAB.
+- [x] Build and inspect the MirtPage APK locally and install version1 on the
+  physical Pixel8a. The installed SHA matches the inspected artifact;
+  `s149-android-apk/physical-install-result.json` records the actual install.
+  This first APK exposed the S151 grid defect and does not qualify its fix.
+- [ ] Exercise remaining visitor/owner/chat/tracking/notification workflows and
+  capture genuine native screenshots after the source repair is admitted.
+  The owner is using the physical phone; current checks use Expo localhost8082
+  without claiming native device or OS push coverage. Prepare a separately
+  reviewed Play AAB, complete
   the new-app store forms/assets and app-scoped submission credential, and
   start the MirtPage closed test for the owner's twelve confirmed testers.
   The fourteen-day clock starts only after twelve actual opt-ins.
+
+
+### S150 — readable Auth email logo on dark backgrounds (FE-070, BE-059, DEP-029)
+
+- [x] Isolate this source-only correction in a private local clone while the
+  approved Android APK source and active build remain frozen. Confirm the defect:
+  transparent email PNG permits dark email surfaces behind canonical ink text.
+- [x] Define the versioned opaque-white email asset, unchanged canonical geometry,
+  colors/mobile assets, template semantics and guarded hosted boundary in FE-070
+  and BE-059 before editing implementation.
+- [x] Generate only the new email derivative at 1320×288; update its brand path
+  and all twelve Auth HTML templates. Preserve the former PNG and every other
+  canonical/native derivative byte; add pixel/alpha/geometry regression proof.
+- [x] Run focused artwork/template/Auth-guard tests and actual Chrome static
+  desktop/phone light/dark email entry→preview→Back journeys. Three artwork
+  tests, thirteen template semantics, four focused Auth-guard cases, generator
+  reproducibility and218-spec validation pass. Four isolated headed Chrome155
+  states pass with no errors or external requests. Screenshots/source hashes
+  are in the protected S150 email-contrast-review directory. Dark mode is a
+  CSS simulation; no real OTP, database/provider write or email send.
+- [x] Owner explicitly approved the opaque logo fix and full local checks via
+  call_a052d9f4ef4144ab9bf69ff5a958b6b4:0 on2026-10-20. This approves the
+  reviewed appearance and local gates, not deployment or another email.
+- [x] Run source-bound full check and clean isolated web release gates. The
+  frozen email candidate passes all77 check groups and the clean web release
+  gate; the first harness failures and reboot interruption remain recorded.
+  The terminal receipt is `s150-auth-email-brand/gates/post-reboot-20261020/result.json`
+  under the protected release directory. These gates do not qualify later S151
+  changes.
+- [x] Integrate the exact24 reviewed email paths after the APK operation ends,
+  preserving existing native/navigation changes and the S151 checklist. The
+  protected `integration-after-gates/root-actual-integration/receipt.json`
+  records the18 exact source/test/asset paths and six reviewed document merges.
+- [ ] Publish and read back the new asset before any separate exact
+  thirteen-HTML-field DEP-029 hosted template plan/apply. No additional test email
+  or hosted template write is included in the completed source gates.
+
+### S151 — batch actual-user audit before the next repair/build (CURRENT; FE-041, FE-053)
+
+The owner's latest direction is to collect at least a handful of workflow tests
+and findings in one place before implementing repairs. The confirmed native card
+defect is the first finding, not permission to skip the remaining audit. All
+unfinished release/email/Play work remains open; the separately approved email
+contrast checks continue independently. The local source repairs below followed
+this batch's evidence and scope; publication and another mobile build remain gated.
+
+- [x] Record clean task baseline except user-owned untracked `deno.lock`;
+  inspect the actual Pixel 8a screenshot and current source. The source already
+  uses measured numeric card widths, so do not misdiagnose this as the old
+  percentage-width defect. Installed React Native 0.86.3 Yoga reproduces the
+  pixel-rounding wrap at1080px/density2.625. The former exact-width AAB review
+  is explicitly superseded and its runner refuses execution.
+- [x] Define Ready observable outcomes and verification before production edits
+  in FE-041/FE-053 and master §§8/19/22: two columns when the actual container
+  accommodates150dp cards plus12dp gap, full-width narrow/enlarged fallback,
+  unchanged Add/details/categories/return state, and native engine regression.
+- [x] Collect at least six complete or explicitly blocked journeys in
+  one protected review at `.local/mirtpage-final-release-20261019/s151-batch-audit/`:
+  native showroom/categories, product detail, per-business inquiry list/contact
+  handoff, About/language/navigation, Account/owner tasks, and transport/tracking;
+  incorporate the bounded staff-side browser audit. Keep actual failures,
+  source-only concerns, successful checks and environment limits distinct.
+  Record evidence, severity, affected contracts and proposed batch fixes. Do not
+  manufacture a minimum defect count or send social messages.
+  Eleven actual Chrome journeys are recorded (six public, five staff, with one
+  Account navigation issue), plus the physical Pixel showroom and installed Yoga
+  geometry. Five confirmed findings and one source-only candidate are collected;
+  the paired phone continuation remains pending because MirtPage loses foreground.
+  The guard stopped before submitting the third chat; no replacement chat or
+  additional email is claimed. The production
+  inventory confirms 65 demos, no matching canonical inbox phones, missing
+  nonsecret operator setting and 43 published service-kind rows. No hosted writes
+  were made. See the single protected `review.html` and linked receipts.
+- [x] Confirm readiness and acceptance criteria for B01/B02 native grid and B06
+  current navigation before implementation; retain B03 as a source-only icon
+  concern and B04/B05 as separate hosted demo corrections. FE-074 adds the
+  separately audited loading scope below. No finding is silently dropped.
+- [x] Replace rounded exact card widths with Yoga-managed flexible
+  allocation; add actual-source interaction/resize checks and installed-engine
+  regression that first reproduces the old physical geometry. Eleven component
+  checks and864 installed Yoga cases pass; no fixed APK/device result is claimed.
+- [x] Run focused grid tests, mobile/root types and spec validation; actual
+  Chrome Expo passes17 visitor/category/Add/details/return/locale/resize checks.
+  Private-preview coverage is source/engine evidence, not an owner browser login.
+  B06 focused role/navigation checks and five source-component Chrome checks pass;
+  authenticated local staff review is blocked by absent linked staff fixtures,
+  with no account/role created to bypass that limit. Evidence is retained in
+  `.local/native-showroom-grid-s151/` and the protected batch audit directory.
+- [x] Finish B07 focused implementation and the source-frozen delayed-read browser
+  review, retaining initial failures and qualifications. The final three web
+  states retain12 cards/one status with0px layout movement. B04 has a successful
+  isolated SQL rehearsal. B05's frozen mapping,87 pure operation cases and one
+  reviewed scratch-SQL retry now pass; all74 existing local tables/public
+  sequences remain unchanged. Its separate pure hosted draft builder passes78
+  model cases but produces no actual hosted plan or executor. Actual B04 success,
+  fresh hosted qualification and exact approval remain prerequisites. No hosted
+  correction has been performed.
+- [x] Combine B01/B02/B03/B06/B07/B08/B09 in one concrete visual review at
+  `.local/mirtpage-final-release-20261019/s151-batch-audit/review.html`; linked
+  screenshot existence and frozen UI hashes are recorded in its manifest.
+- [x] Refresh `docs/SUQPAGE-DEMO-ACCOUNT-ACCESS.md` with current role/task routes,
+  product-only social handoffs, separate Support/Transport/Shipment tracking,
+  protected account-directory references and actual local Auth/grant limits.
+  Historical account results are dated rather than represented as current
+  sign-in qualification. No account, grant or provider setting is changed.
+- [x] Owner approved the updated B01–B10 combined visual review and full checks
+  on2026-10-20, question `call_e750c54380924b4193f423f678d3a783:0`. This does not
+  approve hosted demo corrections or a new Android build.
+- [ ] CURRENT: freeze the approved complete source in an isolated checkout,
+  run `npm run check`, clean `npm run release:web` and full
+  `npm run test:acceptance` sequentially with local-only disposable fixtures.
+  Preserve each terminal receipt; diagnose any failure before one bounded retry.
+  Then review scoped commits and required CI. Under a fresh exact DEP-044 review,
+  compile one local release AAB and derive its universal test APK using the
+  existing signer; avoid two separate compilations of the same code. Physical
+  Pixel showroom/catalog/owner journeys and genuine captures remain pending
+  until the owner makes the phone available, before Play-release qualification.
+  A same-version sideload may need reinstalling from Play. No existing artifact
+  exception carries over; no build or rollout is inferred from preparation.
+- [x] Classify the first full-check stops before retrying: obsolete homepage
+  wiring assertions, an incomplete local test environment and one untranslated
+  screen-reader loading announcement. Preserve their terminal receipts. Reuse
+  the previously qualified local-provider environment only for `npm run check`;
+  keep those credentials out of web installs/builds. Reviewer-provider and
+  account-erasure qualification pass;26 localization and three skeleton cases
+  pass after reusing the existing translated loading label. The approved visible
+  layouts are unchanged. A parallel review additionally identifies a reachable
+  web exclusion-boundary defect; qualify its correction before the final source
+  freeze instead of treating earlier successful tests as final-source evidence.
+- [x] Correct the web exclusion boundary with canonical client scope keys and
+  explicit server initial-data identity. The retained red regression reproduces
+  the old membership defect;16 actual Chrome workspace cases, seven map-renderer
+  cases, types and homepage/narrative checks pass. Existing PostgreSQL discovery
+  assertions remain unchanged for the final gate. This changes data admission
+  and a screen-reader label, not the approved visible design.
+- [x] Collect the complete workflow-UI failure batch before repairing fixtures:
+  375 of395 cases passed; all20 failures came from six controlled native test
+  hosts missing exports used by the new loading component. Repair those hosts
+  without changing production code, skipping assertions or increasing timeouts.
+  All44 affected cases, typecheck and whitespace checks now pass. The receipt is
+  `s151-batch-audit/ui-port-qualification/result.json` under the protected release
+  directory, SHA-256 `e34f2319ba9c48bc096e32f1e0c1d4d1165f2f880a41e3049bb3c70687086022`.
+  The integrated full gate remains pending on the final source.
+
+#### S151 B07 — contextual loading and matching skeletons (in progress; FE-074)
+
+- [x] Record the new owner request without replacing B01–B06 or email/Android/
+  hosted/Play work. Research React, installed Next guidance and IBM Carbon;
+  define observable retention, initial-load geometry, scoped action feedback,
+  accessibility, failure/race and account/tenant-boundary acceptance criteria.
+  FE-074's first implementation scope is ready; source/native clearing and
+  actual delayed-response behavior are documented separately from passing shells.
+- [x] Inventory web/phone/Expo/native loading boundaries and capture
+  initial load, same-resource update/return, new resource and failure states.
+  Actual Chrome reproduces native Featured six cards→zero→six and web product
+  search twelve→zero→four. Existing RSC navigation correctly retains four cards
+  and its busy shell; leave that working boundary intact. Evidence is in
+  `.local/contextual-loading-s151/`; synthetic map tiles and no hosted writes.
+- [x] Implement the ready scope's safe resource-scoped retention and
+  screen-matched skeletons. Use action-local feedback where appropriate; do not
+  merely replace every bar with an unrelated generic placeholder.
+- [x] Finish the source-frozen actual web geometry review after passing
+  native focused/Expo and web focused retention/race/privacy/skeleton tests.
+  Native focus/search preserves cards and filter controls move0px in the
+  qualified recheck; the original2px failure remains recorded. Shared web
+  Activity-return and queued-map-callback regressions preserve current authority.
+  Final en1440/am390/om390 states retain12 cards and one status,50px search form,
+  decoded HTTP200 images and0px product/map movement. Actual phone web/Expo
+  evidence remains separate from a rebuilt Android device.
+- [x] Updated combined visual approval received with B10 on2026-10-20.
+- [ ] Run full checks and the applicable source-bound web/native release gates.
+
+#### S151 B08 — Featured and sponsor separation (new defect; FE-021/FE-024/FE-033)
+
+- [x] Record the owner's production overlap report without replacing the pending
+  batch. Confirm the affected surface is the live website at `mirtpage.com`.
+- [x] Inspect actual Featured/sponsor geometry and click targets in
+  Chrome at desktop/phone widths, including sponsor changes and long content.
+  Use public reads only; suppress analytics writes and public map tiles.
+- [x] Define the smallest responsive layout correction and acceptance criteria
+  before source edits. Preserve sponsor disclosure/rotation and independent
+  Featured eligibility/order. The container-sized correction passes27 compiled
+  component width/sponsor states with rectangle/hit-target/order checks.
+- [x] Verify the correction in local Chrome: nine width geometry assertions and
+  Next→preview→showroom→Back at1024/390 pass with images decoded200. Preserve
+  the initial read timeout and the raw receipt's four intentionally suppressed
+  analytics abort observations; no third complete journey or clean telemetry
+  result is inferred. Include the screens in the combined review.
+- [ ] Visual approval, source-bound full gates/push and reviewed publication.
+  The B01–B10 visual approval is now received; remaining full gates/publication
+  are separate. No production fix is claimed from local evidence.
+
+#### S151 B09 — restore product/showroom image delivery (new defect; DEP-049/FE-021)
+
+- [x] Record the owner's missing-picture report. Five exact original demo assets
+  return200 from production and exist in Git; the requested Next image route
+  returns400 for the same Featured hero at two actual requested widths. Keep
+  images/files intact and distinguish the image-delivery defect from B05's
+  separately proposed mismatched-demo-media cleanup.
+- [x] Qualify the existing Netlify image adapter/routing against its
+  installed contract and provider documentation. Choose the smallest repair
+  preserving responsive image sizes, caching, privacy and native direct URLs.
+  The original is byte-identical to Git and the existing CDN returns a valid
+  resized WebP. One exact200 rewrite is implemented; the focused readiness
+  regression first fails without it, then passes. All17 legacy aliases remain
+  exact and the independent privacy/artifact review remains separate.
+- [x] Complete focused source admission: both actual image renderers bypass
+  page-media/product-private paths; installed Next emits their original source
+  without optimized srcSet, while public assets retain optimization. Preserve
+  the route-scope/zero-geometry fixture failures separately. Gallery security
+  passes actual isolated PostgreSQL. The older standard-page fixture assumption
+  of a granted pre-existing staff actor is corrected with synthetic admin/staff
+  inside its rollback transaction: missing/disabled denial, admin grant, access,
+  revoke and six zero-row rollback checks pass. No existing account grant or
+  Auth identity is changed.
+- [ ] CURRENT: artifact and hosted original/transformed product/showroom image
+  admission, after combined visual approval and source-bound gates/push.
+  No production repair, blanket cache revocation or new APK is claimed yet.
+
+#### S151 B10 — readable Featured category icons and labels (CURRENT; FE-021/FE-053)
+
+- [x] Record the owner's date-labelled category-icon report without dropping
+  B01–B09 or the existing pending reviews. Source diagnosis finds the public web
+  CSS hides category names and emphasizes weekdays; native renders only the
+  weekday/date beneath the art. Define the category-first readable contract
+  before implementation; affected master sections are §§5/10/19/22.
+- [x] Make the existing category name primary, the weekday/date
+  secondary, and retain decorative art, selected/today states and schedule
+  semantics. Use accessible horizontal overflow where needed, not tiny text.
+  Keep FE-074's initial Featured silhouettes matched to the new tile geometry.
+- [x] Focused web/native regressions, root/mobile types and real local Chrome
+  desktop/phone/Expo selection→business→Back with real read outcomes. Freeze
+  source and update the combined review before its explicit visual gate.
+  Seven category/sponsor/image cases,14 native category/grid/skeleton cases and
+  three web loading variants pass. Actual web passes five geometry/locale states,
+  five category/Back journeys and one business-preview/showroom/Back; its two
+  suppressed-analytics abort observations remain qualified separately. Actual
+  Expo passes six states and three real-API selection→business→Back journeys,
+  with no page/API errors or writes. Initial Expo capture holds a real GET then
+  admits its200 response. Earlier stopped preview, cold5s assertion, Oromo row
+  constraint and missing web pressed state are retained. No hosted/phone action.
+- [x] Owner approves the updated B01–B10 layout and full checks on2026-10-20;
+  the review digest and exact answer are retained in the protected visual record.
+- [ ] Source-bound full gates/commit/CI and separately
+  reviewed publication/new Android build. No date/category data is changed.

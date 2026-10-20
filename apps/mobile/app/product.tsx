@@ -2,7 +2,7 @@ import {
   selectionKey,
   MAX_INQUIRY_SELECTIONS,
 } from "../../../lib/product-inquiry";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import type { Shop } from "@suqpage/contracts";
@@ -13,6 +13,7 @@ import ProductSupply from '../src/ProductSupply';
 import {visibleCatalogProduct} from '../src/catalog-products';
 import {CatalogSafety} from '../src/CatalogSafety';
 import {useBusinessInquiry} from '../src/use-business-inquiry';
+import ResourceLoading from '../src/ResourceLoading';
 export default function Product() {
   const { handle, id } = useLocalSearchParams<{ handle: string; id: string }>(),
     { t } = useApp();
@@ -20,17 +21,27 @@ export default function Product() {
     () => request<Shop>("shops/" + encodeURIComponent(handle)),
     [handle],
   );
-  const [options, setOptions] = useState<Record<string, string>>({}),
-    [notice, setNotice] = useState("");
+  const identity=JSON.stringify([handle,id]);
+  const emptySelection=()=>({identity,options:{} as Record<string,string>,notice:''});
+  const [selection,setSelection]=useState(emptySelection);
+  const currentSelection=selection.identity===identity?selection:emptySelection();
+  if(selection.identity!==identity)setSelection(currentSelection);
+  const{options,notice}=currentSelection;
+  const setOptions=(change:React.SetStateAction<Record<string,string>>)=>setSelection(current=>current.identity===identity?{...current,options:typeof change==='function'?change(current.options):change}:current);
+  const setNotice=(value:string)=>setSelection(current=>current.identity===identity?{...current,notice:value}:current);
   const shop = load.data,
     product = shop?.products.find((p) => p.id === Number(id)&&visibleCatalogProduct(p));
   const ready =
-    product &&
+    !load.loading&&!load.error&&product &&
     ["available", "limited"].includes(product.availability) &&
-    product.options.every((o) => options[o.name]);
+    product.options.every((o) => o.values.includes(options[o.name]));
+  const authority=useRef({identity,shop,product,options,ready});
+  authority.current={identity,shop,product,options,ready};
   const inquiry=useBusinessInquiry(shop);
   function inquire(single: boolean) {
-    if (!shop || !product) return;
+    const current=authority.current;
+    if(current.identity!==identity||!current.ready||!current.shop||!current.product)return;
+    const{shop,product,options}=current;
     const item = { product, quantity: "", options };
     if (single) {
       router.push({
@@ -58,7 +69,7 @@ export default function Product() {
   }
   return (
     <Screen>
-      <Status {...load} retry={load.reload} />
+      <ResourceLoading load={load} variant="product"/>
       <Status error={inquiry.error} retry={inquiry.retry}/>
       {shop && product ? (
         <CatalogSafety business={shop} productId={product.id}>

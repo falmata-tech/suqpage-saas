@@ -17,7 +17,7 @@ const bundle=build({entryPoints:['apps/mobile/app/inquiry.tsx','apps/mobile/src/
   :args.path==='expo-router'?`export const useLocalSearchParams=()=>({handle:fixture.shop.handle}),router={push(){throw Error('Unexpected navigation')}};`
   :args.path==='expo-clipboard'?`export async function setStringAsync(value){fixture.trace.push({kind:'copy',value});return fixture.copyAllowed}`
   :args.path.endsWith('/browser-clipboard')?`export async function copyBrowserText(value){fixture.trace.push({kind:'copy',value});return fixture.copyAllowed}export async function openCopiedBrowserLink(value,href){fixture.trace.push({kind:'copy',value},{kind:'open',value:href});return {copied:fixture.copyAllowed,opened:fixture.openAllowed}}`
-  :args.path.endsWith('/runtime')?`export const API='https://suqpage.fixture',useApp=()=>({t:fixture.t}),useLoad=()=>({data:fixture.shop,loading:false,error:'',reload(){}}),request=async()=>{throw Error('Unexpected API write')};`
+  :args.path.endsWith('/runtime')?`export const API='https://suqpage.fixture',useApp=()=>({t:fixture.t}),useLoad=()=>({data:fixture.shop,loading:fixture.loadPending,error:fixture.loadError,reload(){}}),request=async()=>{throw Error('Unexpected API write')};`
   :args.path.endsWith('/use-business-inquiry')?`export const useBusinessInquiry=()=>({items:fixture.items,error:'',setItems(){throw Error('Unexpected selection mutation')},retry(){}});`
   :args.path.endsWith('/blocked-businesses')?`export const useBlockedBusinesses=()=>({list:[]});`
   :args.path.endsWith('/ui')?`export const Screen='Screen',Copy='Copy',Field='Field',Card='Card',Button='Button',Chip='Chip',Status='Status',Photo='Photo',LinkedText='LinkedText',Icon='Icon',s={wrap:{}},colors={ink:'#222',muted:'#667',brand:'#c43a00',line:'#ddd'};export async function openLink(value){fixture.trace.push({kind:'open',value});if(!fixture.openAllowed)throw Error('Unavailable')}export const useOpenLink=()=>async value=>{try{await openLink(value);return true}catch{return false}};`
@@ -29,7 +29,7 @@ function nodes(value:unknown):Element[]{if(Array.isArray(value))return value.fla
 function text(value:unknown):string{if(Array.isArray(value))return value.map(text).join('');if(value&&typeof value==='object')return text((value as Element).props.children);return typeof value==='string'?value:'';}
 const shop:Shop={id:1,handle:'demo-fixture',name:'Literal shop',about:'',cover:'',videoUrl:'',contacts:{phone:'+447700900123',whatsapp:'+447700900123',telegram:'+447700900123',tiktok:'fixture_shop',instagram:'fixture_shop',facebook:'fixture_shop'},products:[{id:1,name:'Literal product',description:'Physical product',kind:'standard_product',priceMinor:null,media:[],published:true,availability:'available',quantityMode:'optional',options:[]}],version:1,status:'active',isDemo:false};
 async function fixture(platform:'android'|'web',locale='en'){
- const state={shop:{...shop},items:[{product:shop.products[0],quantity:'3 boxes',options:{}}],platform,t:createUiText(locale==='en'?{}:JSON.parse(readFileSync(`lib/i18n/messages/${locale}.json`,'utf8'))),states:[] as unknown[],cursor:0,copyAllowed:true,openAllowed:true,trace:[] as Array<{kind:string;value:string}>};
+ const state={loadPending:false,loadError:'',shop:{...shop},items:[{product:shop.products[0],quantity:'3 boxes',options:{}}],platform,t:createUiText(locale==='en'?{}:JSON.parse(readFileSync(`lib/i18n/messages/${locale}.json`,'utf8'))),states:[] as unknown[],cursor:0,copyAllowed:true,openAllowed:true,trace:[] as Array<{kind:string;value:string}>};
  const outputs=(await bundle).outputFiles;
  function render(entry='inquiry'){
   const mod={exports:{} as Record<string,(props?:unknown)=>unknown>};vm.runInNewContext(outputs.find(o=>o.path.endsWith('/'+entry+'.js'))!.text,{module:mod,exports:mod.exports,fixture:state,URL,URLSearchParams});state.cursor=0;
@@ -71,4 +71,15 @@ test('FE-066 Expo profile links open without copying, while approved demo inbox 
  const examples={...shop.contacts,...DEMO_PROFILE_CONTACT_EXAMPLES};f.state.shop={...shop,isDemo:true,contacts:examples,approvedDemoContactMethods:approvedDemoContactMethods(true,examples,'+447700900123')};f.state.trace=[];tree=f.render('ShowroomContent');
  for(const label of ['TikTok','Instagram','Facebook','Website']){const link=tree.find(n=>n.type==='Pressable'&&n.props.accessibilityLabel===label)!;assert.ok(link,label);assert.equal(link.props.disabled,false);(link.props.onPress as()=>void)();await settle();}
  assert.deepEqual(f.state.trace.map(x=>x.kind),['open','open','open','open'],'Approved official demo profiles stay ordinary links without inquiry copy');
+});
+
+
+test('FE-074 native inquiry retains selected products and draft while refresh/error blocks external handoff',async()=>{
+ const f=await fixture('android');for(const condition of[{pending:true,error:''},{pending:false,error:'Unable to connect. Please try again.'}]){
+  f.state.loadPending=condition.pending;f.state.loadError=condition.error;f.state.trace=[];const tree=f.render();
+  assert.ok(tree.some(node=>text(node)==='Literal product'),'Selected product remains readable');
+  for(const label of ['WhatsApp','Telegram','SMS','Copy message']){const target=button(tree,label);assert.equal(target.props.disabled,true);(target.props.onPress as()=>void)();await settle();}
+  assert.deepEqual(f.state.trace,[],'Disabled and directly invoked handoffs cannot use stale catalog authority');
+ }
+ f.state.loadPending=false;f.state.loadError='';assert.equal(button(f.render(),'WhatsApp').props.disabled,false);
 });

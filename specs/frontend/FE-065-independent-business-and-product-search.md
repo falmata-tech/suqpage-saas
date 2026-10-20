@@ -2,13 +2,99 @@
 id: FE-065
 title: Independent business-map and product-card discovery
 status: in_progress
-related: [FE-026, BE-054, DEP-045, FE-030, FE-042, FE-049, FE-053, FE-059, BE-047, ADR-0027, FE-067, BE-044, FE-021, FE-052]
+related: [FE-074, FE-026, BE-054, DEP-045, FE-030, FE-042, FE-049, FE-053, FE-059, BE-047, ADR-0027, FE-067, BE-044, FE-021, FE-052]
 owners: [product, frontend]
-last_updated: 2026-10-17
+last_updated: 2026-10-20
 change_level: L2
 ---
 
 # FE-065 — Independent business and product discovery
+
+## S151 B07 — retain displayed results during scoped updates (implemented locally)
+
+FE-074 governs contextual loading. A search/filter edit may keep the preceding
+public product cards or business map visible while its latest request runs, but
+displayed membership must retain its actual snapshot key separately from the
+requested criteria. A quiet region-level updating state makes that distinction
+visible; pending criteria must not briefly replace usable results with zero rows.
+
+GIVEN a safely retained public collection WHEN criteria change or a read fails
+THEN retain its displayed rows/map and current scroll/preview until replacement
+data settles, with scoped pending/error feedback. New-result scroll reset happens
+on an admitted snapshot, not each keystroke. Canonical product/business links may
+open their displayed entity by its own identity. Pagination, membership validation,
+map-group actions and saved current-criteria navigation must not use a mismatched
+snapshot as authority; an old cursor/response cannot join a new search.
+
+GIVEN API environment, identity/collection scope or business exclusions change
+WHEN prior content would cross that boundary THEN clear it immediately. Shared
+feed retention is opt-in through an explicit stable scope; default callers keep
+the conservative request-key boundary. Blocked membership disappears immediately.
+Retry/focus/reversal preserve generation/abort fences, real errors and bounded
+requests. No private cache, API/SQL or route-authorization change is included.
+
+### S151 release review — web exclusion identity (locally verified correction)
+
+GIVEN the web visitor changes their saved business exclusions without changing
+search criteria WHEN the current preference hook publishes the canonical IDs
+THEN both public feed scopes change immediately, preceding product/map membership
+and cursors lose authority, and the same criteria are fetched under the new
+cookie preference. Canonical exclusion ordering alone must not trigger a reload.
+An old query/page response or queued map/group callback cannot restore excluded
+membership. Unblocking re-fetches the same criteria rather than reusing an older
+excluded projection.
+
+GIVEN server initial data or a cached route payload WHEN the web component
+mounts THEN admit it only when its explicit server-read exclusion identity
+matches the current canonical client exclusions. A missing or mismatched source
+identity is unproven data, not a current snapshot. Matching ordinary server data
+must retain its existing no-redundant-GET behavior. Reuse the existing server
+exclusion read, client preference hook and shared feed fences; do not change the
+preference UI, generic feed, API/SQL, provider or schema. The focused actual
+component/hook regression in `scripts/test-market-workspace-ui.ts` must first
+reproduce the same-query defect, then prove block/unblock, initial-source
+admission and stale query/page/map denial in isolated Google Chrome with
+controlled HTTP data. This correction changes no layout or copy.
+
+Focused S151 evidence: `scripts/test-market-workspace-ui.ts` passes all 16
+actual Google Chrome component cases, including three new block/unblock,
+initial-source identity and stale query/page/map cases. The same-query regression
+first fails against the prior web wiring. The existing map-group renderer passes
+all seven cases with an explicit empty preference port; homepage, narrative and
+the discovery source/pure map assertions pass. Root TypeScript checks pass.
+The existing PostgreSQL discovery assertions are preserved and await the parent
+release gate; these focused checks make no database or provider calls. Evidence
+and before/after source hashes are retained in the ignored S151
+`exclusion-boundary` receipt. The full integrated gates and rollout remain separate.
+
+Plan: extend `lib/use-market-feed.ts` with requested/displayed keys and safe scope
+admission; adapt web and separately owned native consumers; retain the business
+projection without admitting stale group/navigation actions; add race/scope/error/
+pagination regressions, then actual Chrome desktop/390px delayed local reads.
+`scripts/test-market-feed-retention.ts` and existing discovery/workspace regressions
+cover the shared contract. The existing RSC navigation retention remains unchanged.
+Master §10 and FE-036 describe the matching initial skeletons. Combined visual
+approval and full/release gates follow focused evidence; nothing is deployed here.
+
+Focused evidence: six actual-hook cases in
+`scripts/test-market-feed-retention.ts` cover retained/current keys, superseded
+search/page responses, API/identity/exclusion clearing, failures/retry, reversals
+and mismatched initial data. Thirteen actual-component cases in
+`scripts/test-market-workspace-ui.ts` preserve independent queries/return memory,
+fence stale and queued prior-render map actions/cursors, retain product scroll through filter changes and
+React Activity effect reconnect, and show one compact status rather than moving
+the heading with a refresh bar. The outer web search row stays 50px before/after
+48px Clear controls appear. Map feedback occupies a noninteractive canvas corner.
+Neither this local UI state nor a retained canonical link grants new authority.
+
+Actual local Chrome with real delayed discovery GETs confirms desktop and
+en/am/om phone retention, query/result identity, detail/Back and return context;
+the final geometry review is recorded separately from logic evidence. Synthetic
+map tiles and prevented automatic visit-analytics requests are explicitly test
+controls, not live tile/analytics proof. Preserve the discovered Activity replay,
+successful 5.6s cold-route compile exceeding the original 5s assertion, and blocked
+analytics-accounting failures; no router or backend change was made for them.
+Visual/full/release/deployment qualification remains pending with FE-074.
 
 ## S143 compact mode switch and no information overlay (ready)
 

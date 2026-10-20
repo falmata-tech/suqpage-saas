@@ -76,17 +76,24 @@ async function main(){
  if(process.argv.includes('--category-security'))return categorySecurity();
  const target=new URL(process.env.SUQPAGE_POSTGRES_URL||'');assert.ok(['localhost','127.0.0.1'].includes(target.hostname)&&target.port==='54322');assert.equal(process.env.SUQPAGE_DATABASE_DRIVER,'postgres');
  process.env.SUQPAGE_OWNER_EDITOR_ENABLED='1';const {runner}=postgresRuntimeServices();const rollback=new Error('ROLLBACK_STANDARD_PAGE_TEST');let staged:StagedImage|null=null;
+ const fixtureUserIds:number[]=[],fixtureBusinessIds:number[]=[];
  try{await runner.transaction(async()=>{
   assert.deepEqual((await migratePostgresDatabase(runner)).applied,[]);
   for(const role of ['anon','authenticated'])assert.equal((await runner.query<{allowed:boolean}>("SELECT has_table_privilege(?,'public.owner_page_reviews','SELECT') allowed",[role])).rows[0].allowed,false);
   for(const role of ['anon','authenticated'])assert.equal((await runner.query<{allowed:boolean}>("SELECT has_table_privilege(?,'public.owner_location_proposals','SELECT') allowed",[role])).rows[0].allowed,false);
   const requestsBefore=(await runner.query<{n:string}>('SELECT COUNT(*) n FROM service_requests')).rows[0].n;
   const userQuery='SELECT u.id,u.email,u.name,u.role,u.business_id,u.must_change_password,p.access_role FROM users u JOIN user_access_profiles p ON p.user_id=u.id';
-  const admin=(await runner.query<SessionUser>(`${userQuery} WHERE p.access_role='platform_admin' ORDER BY u.id LIMIT 1`)).rows[0];assert.ok(admin);
-  const create=async()=>{const created=await createPostgresPublicClientWorkspace(runner,{name:'Page review fixture',businessName:'Page review fixture',businessCategory:'electronics', placeId:findPlaceSuggestions("Addis Ababa")[0].id,phone:'+447700900999',consent:true,idempotencyKey:randomUUID()},{providerUserId:randomUUID(),email:`review-${randomUUID()}@example.test`});return (await runner.query<SessionUser>(`${userQuery} WHERE u.id=?`,[created.userId])).rows[0];};
+  const applicationActor=async(role:'platform_admin'|'team_member')=>{
+   const inserted=(await runner.query<{id:number}>("INSERT INTO users(email,password_hash,name,role,business_id) VALUES(?,'!synthetic-test-identity',?,'admin',NULL) RETURNING id",[`page-${role}-${randomUUID()}@example.test`,`Synthetic page ${role}`])).rows[0];
+   fixtureUserIds.push(inserted.id);
+   await runner.query('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)',[inserted.id,role]);
+   return (await runner.query<SessionUser>(`${userQuery} WHERE u.id=?`,[inserted.id])).rows[0];
+  };
+  const admin=await applicationActor('platform_admin');
+  const create=async()=>{const created=await createPostgresPublicClientWorkspace(runner,{name:'Page review fixture',businessName:'Page review fixture',businessCategory:'electronics', placeId:findPlaceSuggestions("Addis Ababa")[0].id,phone:'+447700900999',consent:true,idempotencyKey:randomUUID()},{providerUserId:randomUUID(),email:`review-${randomUUID()}@example.test`});fixtureUserIds.push(created.userId);fixtureBusinessIds.push(created.businessId);return (await runner.query<SessionUser>(`${userQuery} WHERE u.id=?`,[created.userId])).rows[0];};
   const invitation={requestId:null,clientName:'Invitation fixture',email:`invite-${randomUUID()}@example.test`,businessName:'Invitation fixture',handle:`invite-${randomUUID()}`,designKey:'novatech',actorUserId:admin.id};
   await assert.rejects(()=>createClientInvitation({...invitation,requestId:1}),/no longer available/);
-  assert.ok((await createClientInvitation(invitation)).businessId);
+  const invited=await createClientInvitation(invitation);assert.ok(invited.businessId);fixtureBusinessIds.push(invited.businessId);
   const owner=await create();const foreign=await create();const bid=owner.business_id!;
   let catalog=(await runtimeCatalogByBusinessId(bid,true))!;
   const seeded=(await readOwnerPage(ownerPagePort,owner,bid))!;
@@ -124,15 +131,27 @@ async function main(){
   await assert.rejects(()=>decidePageReview(pageReviewPort,admin,bid,submitted.submission,'approve',''),/changed/);
   assert.ok(await readOwnerPage(ownerPagePort,admin,bid));
   assert.equal((await changePagePublication(ownerPagePort,pagePublicationPort,admin,bid,{action:'publish',version:draft.version,revision:1})).publishedBy,admin.id);
-  const staff=(await runner.query<SessionUser>(`${userQuery} WHERE p.access_role='team_member' ORDER BY u.id LIMIT 1`)).rows[0];
-  assert.ok(staff,'Local staff fixture exists');
-  assert.ok(await readOwnerPage(ownerPagePort,staff,bid));
-  const staffGrant=await getStaffBusinessGrant(admin,staff.id);
-  await setStaffBusinessGrant(admin,staff.id,false,staffGrant.version);
+  const staff=await applicationActor('team_member');
+  await assert.rejects(()=>readOwnerPage(ownerPagePort,staff,bid),/access/,'A synthetic staff actor without a persisted grant is denied');
+  await runner.query('INSERT INTO staff_business_grants(user_id,enabled,version,updated_by_user_id,updated_at) VALUES(?,0,1,?,?)',[staff.id,admin.id,Date.now()]);
+  await assert.rejects(()=>readOwnerPage(ownerPagePort,staff,bid),/access/,'A disabled fixture grant does not provide page access');
+  const staffGrant=await getStaffBusinessGrant(admin,staff.id);assert.equal(staffGrant.enabled,false);assert.equal(staffGrant.version,1);
+  const enabled=await setStaffBusinessGrant(admin,staff.id,true,staffGrant.version);assert.equal(enabled.enabled,true);assert.equal(enabled.version,2);
+  assert.ok(await readOwnerPage(ownerPagePort,staff,bid),'Only the explicit administrator grant enables the synthetic staff actor');
+  const revoked=await setStaffBusinessGrant(admin,staff.id,false,enabled.version);assert.equal(revoked.enabled,false);assert.equal(revoked.version,3);
   await assert.rejects(()=>readOwnerPage(ownerPagePort,staff,bid),/access/);
+  assert.equal((await runner.query<{n:number}>('SELECT COUNT(*) n FROM auth_identity_links WHERE user_id=ANY(?::bigint[])',[[admin.id,staff.id]])).rows[0].n,0,'Synthetic application actors have no Auth identity links');
   assert.equal((await runner.query<{n:string}>('SELECT COUNT(*) n FROM service_requests')).rows[0].n,requestsBefore);
-  console.log('PASS draft owner categories/products/private media, foreign denial, exact-version review, feedback/resubmit/atomic publication, admin-controlled staff grant, signup without requests; all database fixtures rolled back');
   throw rollback;
- });}catch(error){if(error!==rollback)throw error;}finally{await (staged as StagedImage | null)?.discard();await closePostgresRuntimeForTests();}
+ });}catch(error){
+  if(error!==rollback)throw error;
+  for(const [table,column,ids] of [
+   ['users','id',fixtureUserIds],['user_access_profiles','user_id',fixtureUserIds],['staff_business_grants','user_id',fixtureUserIds],['auth_identity_links','user_id',fixtureUserIds],
+   ['businesses','id',fixtureBusinessIds],['client_invitations','business_id',fixtureBusinessIds],
+  ] as const){
+   assert.equal((await runner.query<{n:number}>(`SELECT COUNT(*) n FROM ${table} WHERE ${column}=ANY(?::bigint[])`,[ids])).rows[0].n,0,`${table} fixture rows were rolled back`);
+  }
+  console.log('PASS draft owner categories/products/private media, foreign denial, exact-version review, feedback/resubmit/atomic publication, synthetic staff missing/disabled/enabled/revoked grants, signup without requests; verified all fixture identities, grants, Auth links, businesses and invitations rolled back');
+ }finally{await (staged as StagedImage | null)?.discard();await closePostgresRuntimeForTests();}
 }
 main().catch(error=>{console.error(error instanceof Error?error.message:'Standard page test failed');process.exitCode=1;});
