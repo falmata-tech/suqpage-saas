@@ -40,8 +40,9 @@ Read-only GET diagnosis proves the exact `/_next/image` request returns JSON
 existing Image CDN returns 200 WebP. B09 below governs a fresh routing recovery.
 The previous healthy deploy `6ad73e5a9df2756523e8ac95` and protected before-image
 remain retained; no automatic rollback, retry or provider write follows the
-incident. Hosted image/worker checks and the separately reviewed opaque-logo
-Auth HTML update remain open.
+incident. Hosted image/worker recovery checks remain open. The separately
+approved thirteen-field opaque-logo Auth HTML update is applied/read back;
+its receipt and email-delivery limit are recorded in traceability E4.
 
 ### Generated middleware compatibility boundary
 
@@ -175,18 +176,18 @@ provider recovery or database restore is permitted. Master §§15/19/22 and FE-0
 track the same delivery boundary. Full recovery and hosted qualification remain
 pending; this contract does not itself authorize deployment.
 
-## S150 — Auth email contrast follow-on (local preparation)
+## S150 — Auth email contrast follow-on (hosted readback verified)
 
 The original twenty-seven-field MirtPage presentation repair completed with
 independent27-field/214-untouched readback, and one owner-authorized Gmail
 message confirmed the new identity and loaded original PNG. The owner then
 reported the ink lettering disappearing on a dark email background. FE-070 and
-BE-059 now prepare a versioned opaque-white email PNG at unchanged geometry;
-all mobile/SVG/legacy assets stay unchanged. Its new public URL must be deployed
-and read back before a separately reviewed, owner-approved DEP-029 patch to only
-the thirteen HTML-content fields. Preserve current subjects/sender and the
-consumed one-email authorization. This does not complete DEP-049 or authorize a
-second email, native build, provider credential or hosted change.
+BE-059 provide a versioned opaque-white email PNG at unchanged geometry;
+all mobile/SVG/legacy assets stay unchanged. After public asset readback and
+exact owner approval, the guarded DEP-029 patch changed only the thirteen
+HTML-content fields and passed readback. Subjects/sender and the consumed
+one-email authorization remain unchanged; this operation sent no email. Actual
+inbox rendering, complete cutover and any other hosted change remain separate.
 
 ## S146 native public-origin source boundary (ready)
 

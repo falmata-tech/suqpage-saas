@@ -24,11 +24,10 @@ destination-stream-close messages remain retained and unclassified; this is not
 a claim of an error-free browser log or a raw full-check exit zero.
 
 Commits `a153547` (B09 routing) and `7e24014` (workflow/skills) are pushed.
-GitHub run `39509285979` attempt 1 has dependency/postgres/browser/container passes. Core passed
-`release:web`, then failed at disposable operations-fixture startup with a
-terminated connection; the existing mapped-TCP readiness gap is consistent with
-the failure, but its exact cause is unproven. One unchanged core retry is pending.
-Preserve the original and verify the actual retry before closing CI.
+GitHub run `39509285979` attempt 2 has all five jobs passing on `7e24014`.
+The original core operations-fixture startup failure remains retained; the
+successful unchanged retry does not establish its exact cause. R01 is complete;
+the first unmet release dependency is R02's exact hosted recovery approval.
 
 Version 2 AAB and derived APK are built and statically inspected from `d78dcf5`.
 The owner's phone/ADB hold remains in force; use Expo for permitted local checks.
@@ -40,13 +39,13 @@ or fourteen-day test is claimed.
 | Surface | Implemented | Tested | Visually approved | Deployed / delivered |
 | --- | --- | --- | --- | --- |
 | B01–03/B06–08/B10 cards, navigation, loading, sponsors and categories | Yes | Focused + d78 full gates/CI; current recovery gates separate | Updated B01–B10 batch approved | First web update published; image-dependent rollout incomplete; Android static only |
-| B09 physical image routing correction | Yes, exact alias-only file | Focused + c6dd composite check, release and 20/20 acceptance pass; CI pending | Nonvisual correction; no geometry changed | Pending new exact recovery approval and monitored publication |
+| B09 physical image routing correction | Yes, exact alias-only file | Focused + c6dd composite check, release, 20/20 acceptance, CI and final local admission pass | Nonvisual correction; no geometry changed | Exact provider plan prepared; owner approval and monitored publication pending |
 | B04/B05 demo contacts/catalog cleanup | Applied exact finite operations | Independent complete readback | Separate actual data/settings approvals | Live; no repeat data write needed |
-| Opaque Auth-email logo | Source + public PNG | Pixel/template/Chrome/local gates | Approved light/dark visuals | PNG served; hosted thirteen-HTML-field repair pending |
+| Opaque Auth-email logo | Source + public PNG + thirteen HTML templates | Pixel/template/Chrome/local gates and guarded hosted readback | Approved light/dark visuals and exact hosted change | Applied/read back; no email sent by this operation, actual inbox rendering remains separate |
 | Owner sign-in email change | Local guarded source/schema | Local two-mailbox/provider/security proof | Prior reviewed layouts; current hosted behavior unqualified | Initiation disabled; exact Auth/settings/notices gate pending |
 | Android version 2 | Compiled once from d78 | Independent static inspection | Approved shared layouts; genuine native captures pending | Local artifact exists; phone/OS/Play delivery unverified |
 | New MirtPage Alpha | App/listing/tester list saved | Prior console reloads; fresh admission pending | Logo/charcoal graphics approved | No MirtPage release/12 actual opt-ins/14-day test claimed |
-| Workflow/skills/docs consolidation | Skills/checker pushed; compact docs applied in isolated worktree | Workflow regression/static evidence; docs-only validation and root review separate | No UI change | CI pending; documentation commit and actual skill selection remain separate |
+| Workflow/skills/docs consolidation | Skills/checker and reviewed compact docs committed/pushed | App CI passes on 7e; isolated L0 docs checks and root review pass | No UI change | Docs branch integration and actual skill selection remain separate |
 
 ## Ordered work
 
@@ -56,7 +55,7 @@ A checked task requires its named evidence. Keep **implemented**, **tested**,
 **visually approved** and **deployed** separate; an older approval only covers its
 reviewed scope. Resume at the first unmet dependency.
 
-### R01 — Finish B09 source and CI qualification (CURRENT)
+### R01 — Finish B09 source and CI qualification
 
 [DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md),
 FE-021, FE-053, FE-074; depends on the frozen source above.
@@ -71,11 +70,10 @@ FE-021, FE-053, FE-074; depends on the frozen source above.
   pass; no skipped commands, increased timeout or fabricated raw exit-zero claim.
 - [x] Review/stage exact task files and push `a153547` and `7e24014`. Preserve
   unrelated `deno.lock`; no history rewrite or force push is implied.
-- [ ] Require all five remote jobs green on the actual release head; run
-  `39509285979` attempt 1 has four passes and a failed core. Its one unchanged
-  core retry is pending; local gates do not establish CI success.
+- [x] Verify all five remote jobs green on `7e24014` in run `39509285979`
+  attempt 2. Preserve the original core fixture failure and its unchanged retry.
 
-### R02 — Publish and monitor the exact B09 recovery
+### R02 — Publish and monitor the exact B09 recovery (CURRENT)
 
 The local assembly is qualified. Hosted publication depends on **R01**, exact
 artifact/source admission and separate scoped approval under DEP-049.
@@ -83,11 +81,13 @@ artifact/source admission and separate scoped approval under DEP-049.
 - [x] Assemble the complete deployment with only the corrected physical
   `_redirects` bytes changed. Retain byte-identical virtual config, both Linux
   function ZIPs, worker schedule, completed edge artifacts and all three deploy
-  blobs. Local manifest/lineage and 114/114 focused tests pass (traceability E5).
-  Bind successful final CI and actual inert-main admission before publication.
-- [ ] Independently verify the current site/account/domain/deploy and all 41
-  environment objects, preserve the protected previous deploy, prepare the exact
-  new plan and obtain owner approval. Consumed earlier approval is not reusable.
+  blobs. Local manifest/lineage, 114/114 focused tests and actual `--check-local`
+  admission pass; successful final CI is bound (traceability E5).
+- [x] Prepare/read back the exact read-only provider plan from the verified
+  site/account/domain/deploy, 41 environment objects and protected previous
+  deploy. This preparation makes no hosted write.
+- [ ] Obtain owner approval of that exact fresh plan, then recheck its guarded
+  admission. Consumed earlier approval is not reusable.
 - [ ] Apply that one reviewed operation and read back the same deployment's
   files/functions/blobs/configuration. Stop on ambiguity; no automatic retry or
   restore. Database, Auth, DNS, email and signing are outside this operation.
@@ -143,9 +143,9 @@ hosted configuration review; this is separate from the B09 deployment approval.
 - [x] Opaque-white logo source, light/dark review and its local release checks
   pass; the new PNG is publicly served. Prior MirtPage sender/subject changes
   and an actual owner email are separate verified evidence.
-- [ ] Prepare a fresh exact thirteen-HTML-field Auth template repair after asset
-  readback, obtain DEP-029 approval, apply/read back and test only explicitly
-  authorized mail. Do not claim Gmail dark-mode proof from CSS simulation.
+- [x] With asset readback and exact DEP-029 owner approval, apply/read back only
+  the thirteen Auth HTML fields. Sender/subjects/settings stay unchanged; this
+  operation sends no email. Actual inbox/dark-mode rendering remains separate.
 - [ ] Verify separately authorized labelled tracking-code, shipment-detail and
   overdue-staff emails reach the intended inbox; provider acceptance/worker logs
   alone are not delivery proof. Keep server-only Gmail credentials private.
@@ -241,8 +241,10 @@ Ordered L0 plan, recorded before replacing documents:
 - [x] Validate structures, specifications, identity/narrative and local references;
   inspect the docs-only diff. No application rebuild, full gate, provider write or
   additional approval requirement belongs to this L0 maintenance task.
-- [ ] Obtain root review, commit/push only task paths and verify actual remote checks.
-  Preserve failed receipts; distinguish the composite check from a raw exit zero.
+- [x] Obtain root review and commit/push the six documentation paths on the
+  isolated docs branch. Preserve failed receipts and the composite/raw-exit distinction.
+- [ ] Integrate that docs branch and verify applicable checks on the resulting
+  head; its isolated publication does not change the exact release checkout.
 - [ ] Verify actual skill discovery/selection in a fresh session; reviewed trigger
   cases and Node YAML checks are not host-discovery proof. Missing PyYAML is a
   recorded optional-validator limitation, not permission to install globally.
