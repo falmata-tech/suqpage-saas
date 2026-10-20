@@ -7230,6 +7230,26 @@ neither a hosted Auth configuration change nor an enabled customer workflow.
   logs: `.local/mirtpage-final-release-20261019/s149-check-rerun.log` and
   `s149-release-web-passed.log`. Android's separate full-workspace audit still
   reports 20 high transitive build-tool findings and requires DEP-044 review.
+- [x] Stage the new **MirtPage** Play draft independently of the retired
+  SuqPage app. Google Play app `4975632567188114692` retains package
+  `com.mirtpage.app`; the owner-approved full-square launcher-identical icon
+  and charcoal feature graphic are saved in the English listing. The authored
+  Amharic title/descriptions match source exactly after reload, its charcoal
+  feature graphic is localized, and the full-square icon remains common.
+  Privacy and Ads Yes (business-selected embedded videos may show platform ads),
+  Government No, Financial None, Health None and Shopping category
+  are saved. The prior 15-type Data safety answers were reconciled to
+  `https://mirtpage.com/account-deletion`, imported as a draft and verified
+  after provider reload along with the MirtPage privacy URL. The exact twelve
+  owner-confirmed addresses match the existing shared tester-list cells
+  privately; only that list is selected for the **MirtPage Alpha** track, with
+  `marketvision.tech@gmail.com` as feedback and only Ethiopia/United States
+  targeted. Play Store settings also retain `marketvision.tech@gmail.com` and
+  `https://mirtpage.com` as public contact details after a full reload.
+  Provider reload shows both Alpha setup tasks complete, but the track is
+  inactive and has no release. App access/reviewer rotation, Target audience,
+  IARC rating and genuine native screenshots remain incomplete; saved draft
+  answers are not final Play approval.
 - [ ] Bind and verify the existing recoverable signing key and new Firebase
   Android client without exposing credentials or generating a different key.
   Prepare the exact DEP-044 one-artifact tooling review and owner approval
