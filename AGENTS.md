@@ -132,6 +132,12 @@ or treat generated illustrative media as a factual product photograph.
   spec or roadmap outcome; it becomes current behavior only after implementation
   and mapped evidence pass. Preserve history in Git, immutable spec IDs, and
   ADRs rather than retaining obsolete narrative in the master prompt.
+- Maintain each fact in its owning document: current product rules in the master,
+  acceptance and invariants in specs, next work in the active checklist, and
+  concise evidence links once in traceability. Link rather than copy contracts
+  or release chronology between them. When updating current state, replace stale
+  prose instead of appending another dated transcript; Git and existing release
+  records preserve history. Keep unresolved tasks and qualification limits visible.
 
 ## Guardrails against drift and wasted work
 

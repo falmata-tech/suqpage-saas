@@ -10,6 +10,47 @@ change_level: L3
 
 # DEP-002 — Reproducible delivery and repository hygiene
 
+## Current documentation consolidation (L0)
+
+The master, active checklist and traceability index have accumulated repeated
+release narratives. The owner requests less documentation burden while keeping
+the current product/security contract and unfinished work intact. This is a
+documentation-only maintenance change, not a new product or rollout gate.
+
+Ordered plan, recorded before replacement:
+
+1. Inspect the clean isolated documentation worktree and reviewed candidates;
+   record the current source, open-request and immutable-ID coverage.
+2. Apply the compact master, active work board and requirements/evidence index.
+   Preserve numbered master headings, spec/ADR IDs, reciprocal links and all
+   unresolved acceptance criteria. Replace stale chronology with current rules
+   and links to existing history in Git/specs/release records; create no archive.
+3. Reconcile verified release outcomes without upgrading local/source evidence
+   to CI, hosted, device, email or Play success. Add one concise maintenance rule
+   to AGENTS and update the existing engineering-readiness assessment.
+4. Run focused structure/reference, specification, identity/narrative and
+   whitespace checks; return the scoped diff for root review and separate commit.
+   No application rebuild, provider write, dependency install or new approval.
+
+```gherkin
+Scenario: A contributor reads the compact current engineering brief
+  GIVEN existing product rules, immutable specification IDs and unfinished tasks
+  WHEN the master, active checklist and traceability index are consolidated
+  THEN numbered master headings and every spec/ADR identity and relation remain usable
+  AND every inherited unfinished request has a current task or an evidenced outcome
+  AND implemented, tested, approved, published and actually delivered states remain distinct
+  AND obsolete release transcripts are replaced by existing authoritative links
+  AND no product, permission, privacy, retention or release requirement changes
+```
+
+Focused mapping: `node scripts/validate-specs.mjs`,
+`node scripts/test-platform-identity.mjs`,
+`node scripts/test-platform-narrative.mjs`, the existing master-specific workflow
+assertion, original-to-current heading/open-item/ID coverage and local-link checks.
+These L0 checks do not rerun or replace application gates. Keep current rules in
+the master, detailed acceptance in specs and concise evidence pointers in
+traceability; the active checklist owns next work. Git preserves chronology.
+
 ## Overall engineering readiness and project skills
 
 The owner's housekeeping request covers the overall ability to build and ship,

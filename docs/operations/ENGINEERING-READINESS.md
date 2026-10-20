@@ -17,13 +17,13 @@ adding frameworks. This assessment does not certify every module or endpoint.
 | Runtime/install | Node 24.18.1 baseline, locked npm graph, clean web install, separate mobile type/dependency checks | Native cold builds are expensive; retain input-matched outputs and measure stages before tuning |
 | Local development | Guarded `start-local-dev.mjs`, loopback admission and bounded PostgreSQL/Auth/Storage readiness | Keep one documented start path and current setup guidance |
 | Tests | Domain/security/SQL fixtures, actual Chrome workflows, disposable browser Supabase and separate mobile contracts | Older helpers duplicate port assumptions; operations readiness should probe the connection path actually used |
-| CI/CD | Five isolated jobs, pinned actions/runtime, npm caching, superseded-run cancellation and bounded failure artifacts in `.github/workflows/quality.yml` | Provider branch protection/required-check settings have not been independently qualified in this review |
+| CI/CD | Five isolated jobs, pinned actions/runtime, npm caching, superseded-run cancellation and bounded failure artifacts; main protection independently read back on 2026-10-20 | Main enforces administrators, strict required checks and pull-request review; force pushes are disabled. Required checks are core/browser/container/dependency/postgres. This does not prove the current run is green |
 | Workflow code | TypeScript checks plus explicit JS script admission; actual inert main preflight remains required | Static checks cannot establish provider/SQL/runtime behavior; qualify linked dependency layouts as well as ordinary installs |
 | Environments/security | Separate local/disposable targets; tenant, role, origin, private-media and source-map tests; guarded hosted operations | Provider IAM, MFA, quota and credential-review cadence require an account-level assessment; no secrets are discovered here |
 | Dependencies | Weekly grouped npm and monthly action updates in `.github/dependabot.yml`; production audits and separate Android tooling admission | Keep build-tool advisories distinct from runtime exposure and preserve explicit exception scope |
 | Recovery | PostgreSQL archive/restore tests and target-bound operations; runbook distinguishes Auth/Storage backups | Verify provider backup retention and recovery exercise ownership; SQL restore alone is not full managed-service recovery |
 | Observability | `/api/health`, sanitized scheduled-worker counters and bounded failure evidence | External uptime alert delivery, response ownership and retention/cost settings are not established by repository inspection |
-| Documentation | Specs, traceability, browser guide and operations runbooks | Historical narratives and large checklists hinder navigation; maintain a concise current entry point and link history |
+| Documentation | Reviewed compact master, active work board and complete spec/evidence index applied in an isolated L0 documentation worktree; browser guide and operations runbooks retained | Finish focused validation/root review and commit; preserve numbered anchors, all IDs/relations and unfinished requests. Keep chronology in Git/existing records |
 | Agent tooling | Scoped tasks, explicit staging, source-bound evidence and three focused repo skills | Verify host discovery/routing in a fresh session; measure retries and time instead of promising token savings |
 
 The package files currently specify Next.js 16.3.8, Expo 57 and React Native
@@ -37,13 +37,16 @@ do not independently block an otherwise qualified release.
 
 | Priority | Smallest useful outcome | Verification / decision boundary |
 | --- | --- | --- |
-| Now | Refresh README and add three focused project skills | Command/path review, spec and skill structure/trigger checks; actual host invocation remains separate |
+| Implemented | Refresh README and add three focused project skills | Command/path review and spec/skill structure checks pass; actual host selection remains separate |
 | Now | Check changed public JS workflow scripts before costly release work; exercise the real operation entry offline | Missing binding/import, inert execution and path-boundary regressions; existing CI core job uses the same gate |
-| Next scoped patch | Have disposable PostgreSQL operations wait on the mapped TCP connection they actually use | Bounded read-only `SELECT 1` before fixture DDL; no DDL retry or shared-data changes |
+| Current docs-only patch | Keep the current brief, acceptance, next work and evidence in their owning documents | All numbered master anchors, spec/ADR links and inherited open requests remain mapped; focused doc/spec checks, no new application gate |
+| Next scoped patch | Have disposable PostgreSQL operations wait on the mapped TCP connection they actually use | Bounded read-only `SELECT 1` before fixture DDL; no DDL retry or shared-data changes. The current CI core recurs at operations-fixture startup after web release; exact cause is not proven, and no harness fix belongs to this L0 patch |
 | Next scoped patch | Reuse the existing disposable browser port contract in older helpers | Default/alternate loopback families pass; mismatched and nonlocal targets still reject before writes |
+| Later reproducibility decision | Review `ubuntu-latest` runner drift alongside the pinned action/runtime versions | The failed core used Ubuntu 24.04.5; the announced Ubuntu 26 transition is not established as its cause. Inspect actual runner evidence before choosing an explicit OS label; no CI change or new gate here |
 | Next delivery improvement | Consolidate the qualified Netlify assembly path into a reproducible recurring command | Same complete static/server/edge/worker/blob contract, clean-install qualification and no hidden provider writes |
 | Next account review | Establish external health alerts, backup freshness and a response owner using available provider capabilities | Prove alert receipt and a recovery exercise; inspect free-tier capabilities before adding services or cost |
 | As code is touched | Split modules where responsibilities or test seams justify it; reduce repeated setup and stale docs | Preserve behavior/security coverage; avoid an unrelated architecture rewrite |
+| After successful rollout | Review protected failure receipts/source snapshots for necessary retention and safe cleanup | Preserve unresolved incident/recovery evidence and reproducible source lineage; no archive deletion, new retention utility or provider action is part of this patch |
 | After measurement | Consider VS Code task shortcuts and native development-build tuning | Wrap existing npm commands; compare elapsed time/failures; no implicit release-ABI or launcher change |
 
 No provider migration, paid plan, monitoring vendor, credential rotation, global
