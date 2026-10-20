@@ -10,7 +10,7 @@ change_level: L3
 
 # DEP-043 — Verified notification delivery rollout
 
-## S148 — scheduled worker startup boundary (ready)
+## S148 — scheduled worker startup boundary (verified)
 
 The published minute worker failed at module loading because a shared hashing
 utility also imported Next.js request headers. The background worker has no
@@ -28,6 +28,17 @@ Netlify function to pass `scripts/test-attention-worker-runtime-boundary.mjs`,
 a private draft invocation or equivalent safe runtime proof, and monitored
 production logs after a separately approved
 rollout; a healthy public page alone does not prove worker recovery.
+
+Evidence: source commit `c176167`, GitHub quality run `39404830157`
+successful on its one controlled rerun, Linux server SHA-256
+`6b96c439261d4b9d9c178c9773f4efe0c88594ec583bb51301d214f3998fc1dc`,
+worker SHA-256
+`81b1cbd6beb8e96db9871fa2f0807f8c648c27e41f8d3f4eb3a6b5b53381d62e`,
+and owner-approved production deploy `6ad73e5a9df2756523e8ac95`.
+Six public routes passed after publication. Live scheduled invocations
+completed routing, inactivity, reply escalation, and email checks; a
+subsequent invocation routed zero remaining chats with zero pending/failed
+emails. SMTP provider acceptance does not prove inbox receipt.
 
 ## Gmail SMTP manager-email source option (ready; ADR-0031)
 

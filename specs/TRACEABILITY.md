@@ -3870,9 +3870,9 @@ pending deployment and a labelled delivery test.
 
 ## S148 — published minute-worker startup boundary (DEP-043 / DEP-049)
 
-The current MirtPage web deploy serves public pages, but production function
-logs show its scheduled `attention-worker` failing at module load on
-`next/headers`; no chat or mail job is claimed delivered by that deploy.
+The previous MirtPage web deploy served public pages, but production function
+logs showed its scheduled `attention-worker` failing at module load on
+`next/headers`.
 `lib/security-core.ts` retains the private hash and text rules while
 `lib/security.ts` keeps Next request access in the HTTP adapter. Worker imports
 use the pure module. `scripts/test-attention-worker-runtime-boundary.mjs`
@@ -3881,5 +3881,15 @@ both adapters' exact hash/text outputs; the focused PostgreSQL notification and
 read-receipt suite passes. `npm run check` and the clean isolated web
 `npm run release:web` pass; Netlify 5.16.3 offline packaging emits worker ZIP
 SHA-256 `81b1cbd6beb8e96db9871fa2f0807f8c648c27e41f8d3f4eb3a6b5b53381d62e`,
-with no Next request import and a successful direct module load. Live rollout
-and monitored worker invocations remain required before calling it recovered.
+with no Next request import and a successful direct module load. Commit
+`c176167` passed GitHub quality run `39404830157` on one controlled rerun
+after a disposable PostgreSQL disconnect. The owner-approved plan digest
+`228b411f11aac809d72b58c966bc631b3cbd644d366f315f62f0cf0b1c6e9442`
+published Netlify deploy `6ad73e5a9df2756523e8ac95` with matching
+worker hash and Linux server archive SHA-256
+`6b96c439261d4b9d9c178c9773f4efe0c88594ec583bb51301d214f3998fc1dc`.
+Six public routes returned 200. Live minute logs show normal routing,
+inactivity, response escalation and email processing, then zero new routes
+and zero pending/failed jobs on a later invocation. Provider-accepted Gmail
+alerts are not yet proven in the recipient inbox; a labelled end-to-end chat
+workflow remains a separate verification.

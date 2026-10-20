@@ -7180,14 +7180,26 @@ neither a hosted Auth configuration change nor an enabled customer workflow.
   minute schedule/handler from ZIP SHA-256
   `81b1cbd6beb8e96db9871fa2f0807f8c648c27e41f8d3f4eb3a6b5b53381d62e`.
   No UI/layout or schema change was made.
-- [ ] Run focused security/worker tests and the applicable full release gates;
+- [x] Run focused security/worker tests and the applicable full release gates;
   commit/push only task paths, verify remote CI and source-bound Linux bundle.
   Focused PostgreSQL attention tests, `npm run check`, and the isolated clean
   web `npm run release:web` are green. The first release attempt lacked the
   isolated web install, the second had a transient disposable Auth identity
   failure, and the third lacked the clone's local PostgreSQL test setting;
-  the final isolated run passed without weakening a check. Commit/remote CI
-  and Linux packaging remain.
-- [ ] Prepare an exact protected Netlify repair plan with prior deploy retained;
+  the final isolated run passed without weakening a check. Commit
+  `c176167` was pushed to `release/mirtpage-launch`; GitHub run
+  `39404830157` passed all five jobs on its one controlled rerun after a
+  disposable PostgreSQL connection failure. The Linux Sharp/libvips packages
+  match the lockfile integrity and server ZIP SHA-256 is
+  `6b96c439261d4b9d9c178c9773f4efe0c88594ec583bb51301d214f3998fc1dc`.
+- [x] Prepare an exact protected Netlify repair plan with prior deploy retained;
   obtain separate owner approval, publish, then monitor worker invocations and
-  confirm due chat/email jobs advance before claiming recovery.
+  confirm due chat/email jobs advance before claiming recovery. Owner approved
+  plan digest `228b411f11aac809d72b58c966bc631b3cbd644d366f315f62f0cf0b1c6e9442`.
+  Netlify production deploy `6ad73e5a9df2756523e8ac95` passed six public
+  route checks. Monitored minute invocations completed routing, inactivity,
+  reply escalation, tracking cleanup, and configured Gmail dispatch without
+  a startup error. The first live backlog routed three waiting chats and
+  reported two SMTP-accepted admin alerts; the following observed invocation
+  routed zero chats and had no pending or failed email jobs. Inbox receipt and
+  a new labelled end-to-end chat remain separate workflow checks.

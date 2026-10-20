@@ -5,12 +5,14 @@ approved direction, not a completed hosted/domain/app cutover. Existing product
 and release facts below remain current until their verified phase is reconciled. -->
 
 Current hosted MirtPage site serves public pages and mobile catalog APIs from
-the new Netlify deploy, but its minute scheduled worker fails at startup on a
-Next.js request-only import. Chat routing/maintenance and queued app email are
-not verified live on that deploy. DEP-043 S148 has a source-bound repair that
-passes local release and Netlify ZIP startup checks; publication and monitored
-worker recovery remain pending. Supabase Auth's primary URL and the Android
-binary/Play closed test remain separate cutover steps under DEP-049.
+Netlify deploy `6ad73e5a9df2756523e8ac95`. Its minute worker now starts
+without Next.js request-only imports; monitored scheduled runs complete chat
+routing, inactivity, response escalation and queued email checks. The initial
+backlog routed waiting chats and the next observed run routed zero. The Gmail
+provider accepted two admin alerts, but recipient inbox delivery and a new
+labelled end-to-end chat have not yet been checked. Supabase Auth's primary URL
+and the Android binary/Play closed test remain separate cutover steps under
+DEP-049.
 
 Local S145 candidate (not released): shared web/native presentation, original
 two-panel M artwork and active English/Amharic/Oromo copy now use MirtPage. The
