@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
+
 
 import { useState } from "react";
 import type { FeaturedProgramEligibleBusiness } from "@/lib/featured-program-settings";
@@ -15,6 +17,7 @@ export default function FeaturedLineupSelector({
   businesses: LineupBusiness[];
   limit: number;
 }) {
+  const t = useUiText();
   const [selectedIds, setSelectedIds] = useState(
     () => new Set(businesses.filter((business) => business.selected).map((business) => business.id)),
   );
@@ -22,10 +25,10 @@ export default function FeaturedLineupSelector({
 
   return <>
     <div className="featured-lineup-capacity" aria-live="polite">
-      <strong>{selectedIds.size} of {limit} selected</strong>
-      <span>Daily Featured accepts up to {limit} pages.</span>
+      <strong>{selectedIds.size} {" "}{t("of")}{" "}{limit} {" "}{t("selected")}</strong>
+      <span>{t("Daily Featured accepts up to {limit} pages.", {limit})}</span>
     </div>
-    <div className="featured-business-list" role="group" aria-label="Eligible featured pages">
+    <div className="featured-business-list" role="group" aria-label={t("Eligible featured pages")}>
       {businesses.map((business) => {
         const selected = selectedIds.has(business.id);
         return <label className={`featured-business-row${selected ? " selected" : ""}`} key={business.id}>
@@ -43,7 +46,7 @@ export default function FeaturedLineupSelector({
             })}
           />
           <span><strong>{business.name}</strong><small>@{business.handle} · {business.city}, {business.region}</small></span>
-          <span><small>Order</small><input aria-label={`${business.name} order`} name={`position-${business.id}`} type="number" min="1" max={limit} defaultValue={business.position}/></span>
+          <span><small>{t("Order")}</small><input aria-label={t("{value1} order", { value1: business.name })} name={`position-${business.id}`} type="number" min="1" max={limit} defaultValue={business.position}/></span>
         </label>;
       })}
     </div>

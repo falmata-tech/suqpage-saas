@@ -17,7 +17,7 @@ important interactions still expose implementation history: marketplace search
 requires an unnecessary submit button, Daily Featured and city floors resemble graph
 paper, a business process video appears in showroom chrome instead of the
 Process chapter, and the focused revision editor can select admitted images but
-cannot admit a new one in place. MirtPage needs a clear mobile-first public and
+cannot admit a new one in place. Suqpage needs a clear mobile-first public and
 workspace experience that can be demonstrated and operated without misleading
 copy or hidden media steps.
 
@@ -55,7 +55,7 @@ copy or hidden media steps.
   motion controls without exposing one uninterrupted recovery form.
 - Browser review of public, administrator, client, revision, showroom, city,
   Daily Featured, and narrow-phone workflows.
-- One short and one longer MirtPage demonstration video using reviewed demo data
+- One short and one longer Suqpage demonstration video using reviewed demo data
   and clearly provisional/generic media.
 
 ### Non-goals

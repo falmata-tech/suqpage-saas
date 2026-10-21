@@ -1,0 +1,8 @@
+.section { padding:56px 0; background:#faf8f3; }
+.section h2 { margin:0 0 24px; font-size:clamp(24px,3vw,36px); letter-spacing:-.025em; }
+.grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.grid a { display:flex; align-items:center; gap:14px; padding:18px; min-height:92px; border:1px solid #dfdfd7; border-radius:12px; background:#fff; text-decoration:none; color:#252a2d; font-size:15px; font-weight:650; line-height:1.4; }
+.grid a:hover { border-color:#c23806; background:#fff8f1; }
+.grid a:focus-visible { outline:3px solid #c23806; outline-offset:3px; }
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:420px){.grid a{flex-direction:column;align-items:flex-start;gap:8px;padding:14px;font-size:14px;}.section{padding:36px 0;}}

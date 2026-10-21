@@ -17,7 +17,7 @@ remain the final authority.
 ## Durable boundaries
 
 - External AI proposes declarative JSON; it never supplies executable tenant
-  code or writes MirtPage persistence.
+  code or writes Suqpage persistence.
 - Component code, schemas, fixtures, screenshots, compatibility metadata, and
   tests are versioned in the repository.
 - A revision stores or references the exact immutable bank release and design
@@ -166,12 +166,12 @@ remain immutable while additive v4/bank-1.2 work proceeds.
 - Do not export credentials, database IDs, storage paths, unrelated tenant
   data, customer inquiries, invitation/session data, or image bytes.
 - If the external AI needs to inspect images, staff manually supplies the same
-  approved files in that conversation. MirtPage performs no automatic media
+  approved files in that conversation. Suqpage performs no automatic media
   transfer to the AI provider.
 
 #### 4.3 Strict manual import and cross-validation
 
-- Import JSON manually from the team's approved external AI account; MirtPage
+- Import JSON manually from the team's approved external AI account; Suqpage
   performs no provider call in this phase.
 - Validate content, design, and envelope independently, then cross-validate
   component/content-block types, bindings, required/optional media slots, media

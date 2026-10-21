@@ -1,0 +1,71 @@
+import { listBusinessesPage } from "../lib/scalable-queries";
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { executeBasicProductUpkeep, type BasicProductUpkeepPort } from '../lib/product-upkeep';
+import { parseProductOptions } from '../lib/product-upkeep-domain';
+import { parseOwnerBusinessChange } from '../lib/owner-business-domain';
+import { readOwnerBusiness,saveOwnerBusiness,readLocationProposal } from '../lib/owner-business-runtime';
+import { updateDiscoveryProfile } from '../lib/discovery-admin';
+import { runtimeCatalogByBusinessId } from '../lib/catalog-runtime';
+import { runtimeGet,runtimeRun } from '../lib/runtime-sql';
+import { createPublicInquiry } from '../lib/inquiries';
+import { findKnownPlace,findPlaceSuggestions } from '../lib/place-catalog';
+import type { SessionUser } from '../lib/types';
+
+export async function launchWiringCases(port:BasicProductUpkeepPort,owner:SessionUser,foreign:SessionUser,command:Record<string,unknown>,productId:number){
+ const bid=owner.business_id!;
+ for(const raw of [[{name:'Color',values:[]}],[{name:'Color',values:['Blue','blue']}],[{name:'Color',values:['Blue']},{name:'color',values:['Red']}],Array.from({length:5},(_,i)=>({name:String(i),values:['A']})),[{name:'X',values:['a'],unknown:true}]])assert.throws(()=>parseProductOptions(raw));
+ const options=[{name:'Color',values:['Blue','Black']},{name:'Size',values:['Small','Large']}];
+ const current=async()=>(await runtimeCatalogByBusinessId(bid,true))!;
+ const save=async(extra:Record<string,unknown>)=>executeBasicProductUpkeep(port,owner,{...command,kind:'update',productId,imageAction:'keep',expectedContentVersion:(await current()).business.content_version,idempotencyKey:randomUUID(),...extra},null);
+ await save({optionGroups:options,isPublished:false});
+ let product=(await current()).products.find(p=>p.id===productId)!;assert.equal(product.is_published,0);assert.deepEqual(product.option_groups!.map(g=>({name:g.name,values:g.values.map(v=>v.value)})),options);
+ const ids=product.option_groups!.map(g=>g.id);
+ await save({name:'Renamed fixture product'});product=(await current()).products.find(p=>p.id===productId)!;assert.deepEqual(product.option_groups!.map(g=>g.id),ids);assert.equal(product.is_published,0,'omitted visibility preserves hidden state');
+ await save({optionGroups:options,isPublished:true});assert.deepEqual((await current()).products.find(p=>p.id===productId)!.option_groups!.map(g=>g.id),ids,'unchanged options retain identities');
+ await assert.rejects(()=>executeBasicProductUpkeep(port,foreign,{...command,kind:'update',productId,imageAction:'keep',idempotencyKey:randomUUID(),optionGroups:options},null),/cannot maintain/);
+
+ const setup=await readOwnerBusiness(owner,bid);
+ const place=findPlaceSuggestions('Addis Ababa','ET')[0];assert.ok(place);assert.equal(place.countryCode,'ET');
+ const proposed={name:'Launch fixture shop',expectedVersion:setup.business.content_version,locationVersion:setup.proposal?.version||0,category:'electronics',city:place.name,region:place.region,countryCode:place.countryCode,placeId:place.id,mode:'storefront',latitude:9.01234,longitude:38.76543};
+ await assert.rejects(()=>saveOwnerBusiness(foreign,bid,proposed),/Business details are not available for this account/);
+ await saveOwnerBusiness(owner,bid,proposed);
+ await assert.rejects(()=>saveOwnerBusiness(owner,bid,proposed),/changed/);
+ const firstVersion=(setup.proposal?.version||0)+1;const firstProposal=await readLocationProposal(bid);assert.ok(firstProposal);assert.equal(firstProposal.version,firstVersion);
+ assert.equal(firstProposal.country_code,place.countryCode);assert.equal(firstProposal.place_id,place.id,'The owner proposal retains the selected canonical place');
+ assert.ok(!(await listBusinessesPage({location:'pending',q:'Launch fixture shop'})).items.some(row=>row.id===bid),'Owner location Save requires no review');
+ assert.equal((await readLocationProposal(bid))?.reviewed_version,firstVersion);
+ assert.deepEqual(await runtimeGet('SELECT latitude,longitude FROM business_discovery_profiles WHERE business_id=?',[bid]),{latitude:9.01234,longitude:38.76543});
+ const approval={businessId:bid,proposalVersion:firstVersion,industryKeys:['electronics'],boothImagePath:'',city:place.name,zone:place.name,region:place.region,countryCode:place.countryCode,placeId:place.id,latitude:9.01234,longitude:38.76543,fallbackStyle:'technical',productionScale:'workshop',sponsored:false,sponsorPosition:100,excluded:false};
+ await updateDiscoveryProfile(approval);
+ assert.ok((await runtimeGet<{approved_at:number}>('SELECT approved_at FROM business_discovery_profiles WHERE business_id=?',[bid]))!.approved_at>0);
+ const area={...proposed,mode:'area',expectedVersion:(await current()).business.content_version,locationVersion:firstVersion};
+ const parsedArea=parseOwnerBusinessChange(area,findKnownPlace).location;assert.ok(parsedArea);
+ assert.equal(parsedArea.latitude,null,'area mode discards submitted precise coordinates');assert.equal(parsedArea.longitude,null);
+ assert.equal(parsedArea.countryCode,place.countryCode);assert.equal(parsedArea.placeId,place.id,'Area parsing resolves the explicit canonical place');
+ await saveOwnerBusiness(owner,bid,area);
+ assert.equal((await readLocationProposal(bid))?.latitude,null);assert.equal((await readLocationProposal(bid))?.longitude,null);
+ assert.ok((await runtimeGet<{approved_at:number}>('SELECT approved_at FROM business_discovery_profiles WHERE business_id=?',[bid]))!.approved_at>0);
+ assert.deepEqual(await runtimeGet('SELECT latitude,longitude FROM business_discovery_profiles WHERE business_id=?',[bid]),{latitude:9,longitude:38.8},'Area Save replaces exact GPS immediately');
+ const areaSetup=await readOwnerBusiness(owner,bid);
+ assert.deepEqual(areaSetup.location,{city:place.name,region:place.region,country_code:place.countryCode,place_id:place.id,location_mode:'area',latitude:null,longitude:null},'The returned area projection retains canonical metadata without exposing precise coordinates');
+ assert.equal(areaSetup.existing?.country_code,place.countryCode);assert.equal(areaSetup.existing?.city_id,place.id);
+ await assert.rejects(()=>updateDiscoveryProfile(approval),/owner changed/);
+ await updateDiscoveryProfile({...approval,proposalVersion:firstVersion+1});
+ const location=await runtimeGet<{latitude:number;longitude:number}>('SELECT latitude,longitude FROM business_discovery_profiles WHERE business_id=?',[bid]);assert.equal(location?.latitude,9);assert.equal(location?.longitude,38.8);
+ assert.equal((await readLocationProposal(bid))?.reviewed_version,firstVersion+1);
+ assert.ok(!(await listBusinessesPage({location:'pending',q:'Launch fixture shop'})).items.some(row=>row.id===bid));
+
+ // A local fixture has no notification destination, so valid inbox writes cannot send email.
+ const before=await runtimeGet<{status:string;contact_email:string}>('SELECT status,contact_email FROM businesses WHERE id=?',[bid]);
+ await runtimeRun("UPDATE businesses SET status='active',contact_email='' WHERE id=?",[bid]);
+ const input={businessId:bid,customerName:'Fixture buyer',contact:'+447700900999',contactMethod:'phone',items:[{productId,options:{Color:'Blue',Size:'Small'}}],idempotencyKey:randomUUID()};
+ const inquiry=await createPublicInquiry(input,randomUUID());assert.ok(inquiry.inquiryId);
+ await assert.rejects(()=>createPublicInquiry({...input,idempotencyKey:randomUUID(),items:[{productId,options:{Color:'Invalid',Size:'Small'}}]},randomUUID()),/option|Choose|selection/i);
+ await save({isPublished:false});
+ await assert.rejects(()=>createPublicInquiry({...input,idempotencyKey:randomUUID()},randomUUID()),/not found|unavailable|available/i);
+ assert.ok(!(await runtimeCatalogByBusinessId(bid))!.products.some(p=>p.id===productId));
+ await save({isPublished:true});
+ await runtimeRun('UPDATE businesses SET status=?,contact_email=? WHERE id=?',[before!.status,before!.contact_email,bid]);
+ console.log('PASS product option/visibility persistence, stable option IDs, canonical inquiry validation, owner identity/location scope, stale proposal denial, immediate privacy removal and coarse area approval.');
+}

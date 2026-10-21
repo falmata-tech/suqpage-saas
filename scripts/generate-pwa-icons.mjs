@@ -3,7 +3,7 @@ import path from "node:path";
 import sharp from "sharp";
 
 const root = process.cwd();
-const source = path.join(root, "public/brand/mirtpage-mark-v2.svg");
+const source = path.join(root, "public/brand/suqpage-original-mark-v2.svg");
 const output = path.join(root, "public/pwa");
 fs.mkdirSync(output, { recursive: true });
 
@@ -18,4 +18,4 @@ await sharp({ create: { width: 512, height: 512, channels: 4, background: "#0B1D
   .png()
   .toFile(path.join(output, "icon-maskable-512.png"));
 
-console.log("Generated MirtPage PWA icons.");
+console.log("Generated Suqpage PWA icons.");

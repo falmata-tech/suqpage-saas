@@ -10,7 +10,7 @@ import {
   supabaseMediaStorageConfig,
 } from "./config";
 
-export type MediaNamespace = "public" | "requests" | "support";
+export type MediaNamespace = "public" | "requests" | "support" | "pages";
 export type StoredMediaObject = {
   bytes: Buffer;
   contentType: string;
@@ -61,6 +61,8 @@ function localObjectPath(namespace: MediaNamespace, key: string) {
   assertMediaObjectKey(key);
   const root = namespace === "public"
     ? mediaRoot()
+    : namespace === "pages"
+      ? path.join(requestAttachmentRoot(), "pages")
     : namespace === "requests"
       ? requestAttachmentRoot()
       : supportAttachmentRoot();
@@ -326,7 +328,7 @@ export function configuredMediaDriver() {
     return mediaStorageDriver();
   } catch {
     throw new MediaStorageError(
-      "MIRTPAGE_MEDIA_DRIVER must be filesystem or supabase.",
+      "SUQPAGE_MEDIA_DRIVER must be filesystem or supabase.",
       "invalid_configuration",
     );
   }

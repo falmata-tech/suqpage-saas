@@ -2,18 +2,42 @@
 id: BE-009
 title: Tenant-scoped versioned product upkeep
 status: done
-related: [BE-001, BE-003, BE-007, BE-008, BE-014, BE-015, FE-007, FE-008, DEP-008, ADR-0006]
+related: [BE-042, BE-040, BE-001, BE-003, BE-007, BE-008, BE-014, BE-015, FE-007, FE-008, DEP-008, ADR-0006, BE-033, BE-034, BE-056, BE-060]
 owners: [product, backend, security]
-last_updated: 2026-07-28
+last_updated: 2026-09-21
 change_level: L3
 ---
 
 # BE-009 — Tenant-scoped versioned product upkeep
 
+## Planned S146 — administrator-granted staff authority
+
+BE-060 will replace per-business staff assignments and owner consent as the
+staff authorization source for product and category upkeep. Current validation,
+content version, media ownership and publication rules remain. This note is
+planned and does not change the earlier verified `done` scope below.
+
+## Standard-page supersession — 2026-09-14
+
+FE-042/BE-033 supersede the initial-publication prerequisite and custom revision
+entrypoints below. Authorized owners maintain products/categories while their
+business is private; assigned staff retain tenant scope. Product and category
+commands advance the canonical content version. New product images use private
+storage and authorized reads until active publication; suspension removes public
+access. Existing idempotency, validation and retained catalog snapshots remain.
+Focused product-upkeep and local PostgreSQL evidence is mapped in BE-033 and the
+application wiring audit. This note does not claim a completed hosted rollout.
+
+The local candidate FE-047/BE-040 supersedes the owner editor's detailed controls:
+five content fields are submitted; omitted metadata is preserved from canonical
+rows under the tenant/version lock. Staff retain detailed controls. Existing
+version, tenant, idempotency, image and retained-history guarantees still apply.
+Visual approval and rollout remain pending under DEP-037.
+
 ## Problem and outcome
 
 The current managed-service cutover denies every role direct catalog mutation,
-and the catalog couples inquiry eligibility to numeric stock. MirtPage now needs
+and the catalog couples inquiry eligibility to numeric stock. Suqpage now needs
 a narrowly authorized product-upkeep use case without restoring the former broad
 owner editor or bypassing content-version conflict and rollback guarantees.
 
@@ -146,7 +170,7 @@ Scenario: Inquiry requests more than an unknown stock amount
   GIVEN a published available product with no inventory-count field
   WHEN a visitor requests a quantity allowed by the offering's BE-014 policy
   THEN canonical availability permits the inquiry
-  AND MirtPage stores requested intent without claiming or decrementing stock
+  AND Suqpage stores requested intent without claiming or decrementing stock
 
 Scenario: Historical stock snapshot is recovered
   GIVEN a retained v2 snapshot contains product and option stock counts
@@ -225,3 +249,19 @@ Evidence: verified locally on 2026-07-28.
   2026-07-28.
 - `scripts/test-security.ts`, `scripts/test-revisions.ts`, all 10 Playwright
   journeys, `npm run check`, and `npm run release` passed on 2026-07-28.
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.

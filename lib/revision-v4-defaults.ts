@@ -1,3 +1,4 @@
+import { productMedia } from "./product-media";
 import type {
   RevisionBusiness,
   RevisionCategory,
@@ -584,6 +585,7 @@ function catalogToRevisionBase(catalog: Catalog): {
       slug: item.slug,
       eyebrow: item.eyebrow,
       description: item.description,
+      media: productMedia(item),
       imageRef: item.image_path,
       videoRef: item.video_ref || "",
       priceMinor: item.price_minor ?? null,

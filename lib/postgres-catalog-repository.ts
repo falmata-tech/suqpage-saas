@@ -1,3 +1,4 @@
+import { productMedia } from "./product-media";
 import { normalizeQuantityMode } from "./offerings";
 import { parseOfferingHighlightsJson } from "./offering-presentation";
 import type { PostgresTransactionRunner } from "./postgres-runtime";
@@ -20,14 +21,14 @@ export class PostgresCatalogRepository {
   async getBusinessByHandle(handle: string): Promise<Business | undefined> {
     const found = await this.runner.query<Business>(`
       SELECT b.* FROM businesses b
-      WHERE lower(b.handle)=lower(?) AND b.status='active'
+      WHERE b.id=(SELECT business_id FROM business_handles WHERE handle=lower(?)) AND b.status='active'
     `, [handle.replace(/^@/, "")]);
     return found.rows[0];
   }
 
   async getBusinessByHandleAny(handle: string): Promise<Business | undefined> {
     const found = await this.runner.query<Business>(
-      "SELECT * FROM businesses WHERE lower(handle)=lower(?)",
+      "SELECT * FROM businesses WHERE id=(SELECT business_id FROM business_handles WHERE handle=lower(?))",
       [handle.replace(/^@/, "")],
     );
     return found.rows[0];
@@ -59,14 +60,22 @@ export class PostgresCatalogRepository {
     if (!business) return undefined;
 
     const activeClause = includeDrafts ? "" : "AND is_active=1";
-    const publishedClause = includeDrafts ? "" : "AND p.is_published=1";
+    const publishedClause = includeDrafts ? "" : "AND p.is_published=1 AND p.offering_kind<>'service'";
+    // Retire service-only navigation metadata without discarding deliberately
+    // empty showroom sections or anything from authorized private management.
+    const productSection = (column: "collection_id" | "category_id", alias: string) => includeDrafts ? "" : `AND NOT (
+      EXISTS(SELECT 1 FROM products retired WHERE retired.business_id=${alias}.business_id
+        AND retired.${column}=${alias}.id AND retired.is_published=1 AND retired.offering_kind='service')
+      AND NOT EXISTS(SELECT 1 FROM products physical WHERE physical.business_id=${alias}.business_id
+        AND physical.${column}=${alias}.id AND physical.is_published=1 AND physical.offering_kind<>'service')
+    )`;
     const [collections, categories, products] = await Promise.all([
       this.runner.query<Collection>(
-        `SELECT * FROM collections WHERE business_id=? ${activeClause} ORDER BY sort_order,name`,
+        `SELECT collection.* FROM collections collection WHERE collection.business_id=? ${activeClause} ${productSection("collection_id", "collection")} ORDER BY sort_order,name`,
         [businessId],
       ),
       this.runner.query<Category>(
-        `SELECT * FROM categories WHERE business_id=? ${activeClause} ORDER BY sort_order,name`,
+        `SELECT category.* FROM categories category WHERE category.business_id=? ${activeClause} ${productSection("category_id", "category")} ORDER BY sort_order,name`,
         [businessId],
       ),
       this.runner.query<Product>(`
@@ -107,6 +116,7 @@ export class PostgresCatalogRepository {
       else groupsByProduct.set(group.product_id, [hydratedGroup]);
     }
     const hydratedProducts = products.rows.map((product) => {
+      product.media = productMedia(product);
       product.quantity_mode = normalizeQuantityMode(product.quantity_mode);
       product.highlights = parseOfferingHighlightsJson(product.highlights_json);
       product.option_groups = groupsByProduct.get(product.id) || [];
@@ -130,8 +140,10 @@ export class PostgresCatalogRepository {
   ): Promise<(SessionUser & { password_hash: string }) | undefined> {
     const found = await this.runner.query<SessionUser & { password_hash: string }>(`
       SELECT u.id,u.email,u.name,u.role,u.business_id,u.password_hash,u.must_change_password,
-        COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) access_role
-      FROM users u LEFT JOIN user_access_profiles p ON p.user_id=u.id
+        agent.queue_scope staff_queue_scope,
+        p.access_role
+      FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+      LEFT JOIN support_agent_settings agent ON agent.user_id=u.id
       WHERE lower(u.email)=lower(?)
     `, [email]);
     return found.rows[0];
@@ -140,8 +152,10 @@ export class PostgresCatalogRepository {
   async getUserById(id: number): Promise<SessionUser | undefined> {
     const found = await this.runner.query<SessionUser>(`
       SELECT u.id,u.email,u.name,u.role,u.business_id,u.must_change_password,
-        COALESCE(p.access_role,CASE WHEN u.role='admin' THEN 'platform_admin' ELSE 'client' END) access_role
-      FROM users u LEFT JOIN user_access_profiles p ON p.user_id=u.id WHERE u.id=?
+        agent.queue_scope staff_queue_scope,
+        p.access_role
+      FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+      LEFT JOIN support_agent_settings agent ON agent.user_id=u.id WHERE u.id=?
     `, [id]);
     return found.rows[0];
   }

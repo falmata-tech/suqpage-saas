@@ -24,6 +24,7 @@ import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import { evaluateCompositionFitness } from "./showroom-guidance";
 import { parseShowroomContentBlocks } from "./showroom-content-blocks";
 import type { ContentRevision, SessionUser } from "./types";
+import {isActiveProductKind} from './offerings';
 
 const row = <T,>(value: unknown): T =>
   ({ ...(value as Record<string, unknown>) }) as T;
@@ -61,6 +62,7 @@ function snapshotAssetRefs(snapshot: RevisionSnapshotV4) {
     snapshot.business.faviconRef,
     snapshot.business.processVideoRef,
     ...snapshot.products.map((product) => product.imageRef),
+    ...snapshot.products.flatMap(product => (product.media || []).map(media => media.ref)),
     ...snapshot.products.map((product) => product.videoRef),
     ...snapshot.contentBlocks.blocks.flatMap((block) =>
       block.media.flatMap((media) => media.assetKeys),
@@ -78,6 +80,7 @@ async function allowedAssetRefs(requestId: number, businessId: number) {
       catalog.business.favicon_path,
       catalog.business.process_video_ref,
       ...catalog.products.map((product) => product.image_path),
+      ...catalog.products.flatMap(product => (product.media || []).map(media => media.ref)),
       ...catalog.products.map((product) => product.video_ref),
     ].filter(Boolean),
   );
@@ -464,7 +467,7 @@ export async function decideRevision(
     .slice(0, 1000);
   if (decision === "reject" && comment.length < 5) {
     throw new RevisionError(
-      "Tell AfricMade what should change in at least 5 characters.",
+      "Tell MirtPage what should change in at least 5 characters.",
     );
   }
   return runtimeTransaction(async () => {
@@ -652,6 +655,7 @@ async function replaceCanonicalCatalog(
       ],
     );
     const productId = Number(insertedProduct!.id);
+    if (item.media) await runtimeRun("UPDATE products SET media_json=? WHERE id=? AND business_id=?",[JSON.stringify(item.media),productId,businessId]);
     for (const [position, group] of item.optionGroups.entries()) {
       const insertedGroup = await runtimeGet<{ id: number }>(
         "INSERT INTO option_groups(product_id,name,position) VALUES(?,?,?) RETURNING id",
@@ -697,6 +701,9 @@ export async function publishApprovedRevision(
     revision.request_id,
     revision.business_id,
   );
+  if (validated.products.some(product=>!isActiveProductKind(product.offeringKind))) {
+    throw new RevisionError("Choose Ready to ship or Made to order for this product.",400);
+  }
   const staged = await stagePrivateImages(validated, revision.request_id);
   try {
     return runtimeTransaction(async () => {

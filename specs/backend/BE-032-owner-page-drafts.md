@@ -1,0 +1,403 @@
+---
+id: BE-032
+title: Tenant-owned page drafts and revocable staff assistance
+status: in_progress
+related: [BE-055, BE-054, FE-026, BE-044, FE-060, BE-048, BE-045, FE-056, FE-052, BE-031, FE-038, FE-040, DEP-030, ADR-0018, BE-033, BE-034, FE-019, BE-018, DEP-039, FE-047, BE-060, FE-072, ADR-0030]
+owners: [backend, security]
+last_updated: 2026-10-17
+change_level: L2
+---
+
+# BE-032 - Tenant-owned page drafts and revocable staff assistance
+
+## Planned S146 — administrator-controlled staff authority
+
+BE-060/FE-072/ADR-0030 supersede this spec's owner-consent and per-business
+assignment gate for platform staff **only after** the reviewed grant migration,
+server authorization, UI and release checks pass. The current deployed/local
+behavior below remains active until that verified switch. Historical
+`assistance_enabled`, draft versions/events and `staff_business_assignments`
+must remain intact but become inert for future business-management decisions.
+An enabled current staff grant permits page content, private media and
+publication/restore without an owner switch; a revoked or missing grant denies
+reads/writes even from a stale editor. Owner identity and account security stay
+separate. Retired owner assistance commands must not advance a draft version.
+
+## S122 — focused product-save adapter preserves authority (implemented locally; review pending)
+
+FE-047/FE-026 S122 reuse the existing product upkeep domain and PostgreSQL port.
+The focused web action returns expected errors without redirecting away from
+entered input, redacts unknown internal exceptions and preserves staged-media
+cleanup. Successful saves return to the canonical business Products list with
+bounded search/page and a saved notice. Navigation fields are explicitly admitted
+as hints and never become product/tenant authority or arbitrary return URLs.
+Keep expected content version, idempotency, fresh tenant/role authorization,
+publication and media limits unchanged. Existing legacy action callers remain
+compatible. Explicit owner availability/listed fields use existing
+`updateListingState`; omitted staff-only metadata stays canonical inside the
+existing transaction. Focused action/security and isolated persistence tests must
+prove spoofed hints, unknown-error redaction, stale/foreign denial and preservation.
+
+S122 local verification: scripts/test-product-edit-action.ts, scripts/test-product-upkeep.ts and actual private-QA product-save/recovery readback pass. Current source, protected
+readback and scoped harness failures are recorded in TRACEABILITY.md and
+`.local/workspace-audit-s122/`. Both typechecks, localization and spec validation
+pass. Visual approval, full/release/acceptance gates, commit and rollout remain
+pending; this is not physical Android or complete-application certification.
+
+## S115 — focused settings preserve unrelated fields (ready)
+
+GIVEN a focused identity/live/sharing settings submission WHEN current privileged
+authority and expected version are valid THEN update only that section and any
+explicitly admitted upload, preserving every omitted identity/contact/live/SEO/
+media field. Canonical values come from the database inside the version-fenced
+write, never hidden unvalidated client snapshots. Unknown/forged sections and
+cross-section payloads are rejected before mutation; old full-record forms remain
+compatible. Concurrent/stale saves, revoked role and failed audit roll back cleanly.
+Owner page tasks reuse existing complete validated profile/version contracts and
+must preserve untouched fields. FE-026/FE-056/FE-053 define UI; no new schema or
+provider is introduced. Add isolated preservation/concurrency/security regressions.
+
+Local evidence: `scripts/test-business-settings.ts` passes real disposable-schema
+version/race/tenant/fresh-role/section/forgery/audit rollback checks;
+`test-admin-editor-actions.ts` covers actual upload/error/return adapters and
+`test-owner-focused-tasks.ts` proves complete-profile preservation/retry behavior.
+UI/browser approval and full/release evidence remain separate in S115 TRACEABILITY.
+
+## S109 — protected focused business settings
+
+GIVEN an authorized administrator opens the canonical business settings editor
+THEN bind Save to the saved content version. WHEN another write changes that
+version before Save THEN reject the stale form without overwriting canonical
+identity/logo/contact/live/SEO data, retain entered values and explain refresh.
+Missing/invalid/foreign versions fail closed. Successful saves atomically update
+only authorized fields and advance the version once; existing tenant, fresh-role,
+media safety and owner publication rules remain authoritative. Do not invent a
+sign-in email change workflow or expand queue-agent business rights.
+
+This L2 data-integrity correction accompanies FE-026 S109's read-first/focused
+editor; no schema change. Add isolated PostgreSQL simultaneous/stale/foreign and
+expected-error/retry tests. Media/audit failure must not claim success or expose
+internal errors. Keep existing uploads recoverable under existing media contracts.
+
+GIVEN an administrator assigns page-editing assistance THEN offer only current
+legacy generic team members for a new grant and recheck the saved administrator,
+assignee role and queue scope atomically at Save. Support/Transport queue agents
+cannot receive a new business-editor assignment. GIVEN a retained historical
+association for an account that no longer has page-editing authority THEN keep
+that record visible as history, permit explicit revocation and prohibit
+reactivation; do not delete historical associations or widen page permissions.
+Owner assistance consent remains required. Isolated PostgreSQL regressions must
+prove filtered choices, forged/stale role denial, retained history, safe explicit
+revoke and audit rollback; FE-026 covers the focused business-context view.
+
+## S88 — scoped queue staff have no page authority
+
+GIVEN Support/Transport agents with retained legacy business assignments and owner
+assistance consent THEN deny private page/media read and write authority. Queue
+scope is part of the current principal. GIVEN a role/scope change after an earlier
+principal was read WHEN a PostgreSQL page commit executes THEN the current access
+profile and queue setting fence the write; preserve draft/version/events on denial.
+Legacy generic staff and consented operations behavior remain compatible. Focused
+regression: scripts/test-staff-boundaries.ts plus owner-page domain/PostgreSQL suites.
+
+## Current release evidence — 2026-09-14
+
+The owner approved the visual design and deployment. Source `41e2fed` is published
+as Netlify `6aa7fe5a106ca381ba08bba3`; hosted schema 43 and the public desktop/phone
+workflows are verified. Full core/release, seven isolated authenticated/public
+acceptance scenarios, 72 accessibility states, operations, PostgreSQL and container
+gates pass. Earlier approval/full-gate-pending notes below describe intermediate
+local milestones, not a new approval requirement. Remaining hosted email delivery
+and authenticated production smoke are tracked in DEP-030 and
+`docs/SUQPAGE-DEPLOYMENT-2026-09-14.md`; this evidence does not claim those passes.
+
+## Problem and outcome
+
+The existing full-page revision requires a staff service request and replaces
+the catalog at publication. Self-service drafts must be owned by a tenant,
+independent from staff requests, with consent that cannot be forged in content.
+
+## Contracts
+
+- Additive schema stores one current draft per tenant, a monotonically increasing
+  draft version, separate assistance consent and actor-attributed events.
+- A new draft uses one standard business profile; it never changes a canonical catalog or
+  converts the existing live design. No service request is fabricated.
+- Owners read/edit only their own tenant. Scoped staff need explicit active
+  consent. Managers/admins are staff for this content-edit boundary; team members
+  also need an existing assignment. No client-provided role or owner ID is trusted.
+- Consent is off initially, owner-only and revocable. Reads and mutations recheck
+  it; saving an old snapshot cannot enable it. Permission and draft commands are
+  separate operations sharing one draft version to reject races, including
+  revoke-versus-save.
+- Saves require the expected draft version, reject unsupported keys, and accept
+  only bounded text, two admitted cover treatments and tenant-owned media references.
+- Business names come from canonical business details, not a separate heading.
+  Optional business-video URLs use the existing controlled YouTube validator and
+  privacy-enhanced embed. Reject arbitrary hosts, credentials and script URLs.
+- Previously saved local `shop-v1` drafts are read through a bounded adapter;
+  introduction, About and image are preserved, the canonical name is used, and
+  the two old layouts map to the two cover treatments. New writes accept only
+  `profile-v1`. No catalog or schema conversion is required for that draft change.
+- The editor selects existing tenant-owned catalog images or new private
+  uploads using existing sanitization and private storage, authorized before upload
+  and again before attachment. Private reads recheck tenant/consent; no public
+  URL is emitted for a private image.
+- Cover uploads reuse the existing sanitizer and media store in a private
+  `pages` namespace, with tenant-prefixed random object keys. No new bucket,
+  database schema or provider configuration is introduced. Reads authorize the
+  exact tenant and current staff consent before storage access; responses are
+  private/no-store and never redirect to a public or signed provider URL.
+- Both initial and later draft saves require an existing tenant-owned image.
+  Uploads recheck permission after storage and remove staged bytes if permission
+  was lost. Image size is limited to 5 MB, the existing 20M-pixel limit applies,
+  and multipart bodies are stream-bounded before parsing. Twelve upload attempts
+  per tenant/hour are enforced by the existing shared limiter.
+- Replaced or abandoned uploads stay private during this gated checkpoint.
+  Retention/promotion belongs to S3 before public rollout, not a broad cleanup
+  operation in this upload-control fix.
+- API failures are bounded, redacted, no-store and same-origin protected.
+- First save accepts the same validated fields and owned media as later saves.
+  An identical create retry may return the existing draft; a different concurrent
+  create receives a conflict, never an implicit overwrite of the new version.
+- Owner publication for existing active pages is defined by S3a below.
+  Marketplace moderation and new-tenant product authoring remain later steps.
+
+## Optional public contact details (S2f)
+
+- The compatible profile JSON may include optional public contacts: phone, email,
+  website, WhatsApp, Telegram, TikTok, Instagram and Facebook. Missing contacts
+  use canonical public email/phone and legacy public social handles; notification email and private
+  onboarding/account phone/email are never public fallback data.
+- Owners or consented scoped staff may save these with the same private draft
+  version checks. Only explicit owner publication makes those draft edits public.
+  Profile edits do not rewrite canonical contacts, notification or inquiry
+  destinations. S2g below adds explicit canonical public fields for baseline pages.
+- Phone/WhatsApp use bounded international digits, email is bounded and rejects
+  header injection, website requires HTTPS without credentials, and social
+  profiles use bounded handles on fixed provider origins. Unsupported keys,
+  control characters and unsafe URLs fail before saving. Empty fields omit links.
+
+```gherkin
+Scenario: Public contacts require owner publication
+  GIVEN a saved private contact edit by an owner or consented staff member
+  WHEN a visitor opens the business page before publication
+  THEN they still see only canonical public social handles or the last publication
+  WHEN the owner publishes the exact saved draft
+  THEN its validated public contacts appear without changing private notification data
+
+Scenario: Reject unsafe contact destinations
+  GIVEN malformed phones, injected email headers, script URLs or unknown contact keys
+  WHEN a profile is saved
+  THEN it fails validation and preserves the previously saved draft
+```
+
+## Scenarios
+
+### S3a publication checkpoint
+
+- Existing active-page owners can publish only the exact saved draft/version,
+  never client-submitted content. Staff, including admins with editing consent,
+  cannot publish or restore. New/draft and suspended businesses cannot publish.
+  First-listing approval remains S3b and is not granted by this operation.
+- Publication history is append-only, tenant-scoped, with independent revision,
+  source draft version, owner actor and timestamp. Serialize publication with
+  draft writes, compare the expected draft and publication versions, and reject
+  conflicts. No products, contacts, handles, live design manifests, business
+  status or discovery approval records are overwritten.
+- Restore previous appends the immediately preceding published snapshot (or a
+  null profile selecting canonical content in the shared profile on first restoration).
+  The private draft is retained. Neither restore nor later draft edits can
+  silently change another published revision.
+- Public rendering selects the latest published snapshot only while the owner
+  editor gate is enabled and the business is active. Without a snapshot or with
+  the gate off, the same renderer uses canonical content. Public cover reads require the exact currently
+  published private image reference, with an active-business check before and
+  after storage; draft-only and superseded private covers remain inaccessible.
+  These media responses are no-store; no object is copied to public storage.
+- Retained publication images cannot be removed while referenced by history.
+  Abandoned-upload retention remains an S3b rollout requirement. Discovery joins
+  only the latest publication, never drafts, and emits the same public cover
+  reference as the page without per-card database calls. Restoration restores
+  canonical cover selection too. Publish/restore invalidate tagged discovery
+  caches and routes. The public cache adapter refreshes current covers outside
+  the heavier cached geography/schedule projection, in batches of up to 250 IDs,
+  so stale cache entries cannot select a previous cover. No per-card query or
+  private draft read is introduced. Approved draft-cover URLs bypass the image optimizer's persistent
+  cache and retain the media endpoint's no-store behavior.
+  This checkpoint does not change providers.
+
+```gherkin
+Scenario: Publish a saved profile
+  GIVEN an owner with an active page and a saved draft
+  WHEN they publish its current draft and publication versions
+  THEN only that saved profile becomes the public page at the existing handle
+  AND further draft edits remain private until another explicit publication
+
+Scenario: Reject a stale or unauthorized publication
+  GIVEN a staff account, foreign owner, inactive business or changed version
+  WHEN publication or restoration is attempted
+  THEN no public snapshot or canonical catalog record is changed
+
+Scenario: Restore the previous page
+  GIVEN a published profile and the current publication revision
+  WHEN the owner restores the previous page
+  THEN the previous profile or original managed page is selected atomically
+  AND the draft and full publication history are retained
+
+Scenario: Private save
+  GIVEN an owner, their tenant and the current draft version
+  WHEN they save validated page fields
+  THEN the draft version advances and the actor is recorded
+  AND canonical products, public visibility and inquiries are unchanged
+
+Scenario: Cross-tenant or unconsented staff edit
+  GIVEN another tenant owner or staff without current consent and scope
+  WHEN they read or mutate the draft or reference another tenant's media
+  THEN the operation is denied without exposing content
+
+Scenario: Consent revocation wins
+  GIVEN a staff editor loaded a permitted draft
+  WHEN the owner revokes assistance before the save is committed
+  THEN that save cannot overwrite consent or commit private changes
+
+Scenario: Conflicting saves
+  GIVEN two writers with the same expected version
+  WHEN both save different changes
+  THEN at most one succeeds and the other receives a conflict
+
+Scenario: Another account tries a private cover URL
+  GIVEN a saved private cover
+  WHEN an anonymous visitor, foreign client or revoked staff requests its URL
+  THEN no image bytes are returned
+  AND an unknown, traversal or foreign-tenant media reference cannot be saved
+```
+
+## Test plan
+
+Focused tests cover all roles, assignment, consent/revocation, forged fields,
+media scope, concurrent versions, safe failure, and no canonical catalog writes.
+Local PostgreSQL integration is required before persistence is marked verified;
+fakes are identified separately and never claimed provider evidence.
+
+## Local checkpoint evidence
+
+`test:owner-page` has 19 passing cases covering domain permissions, first-save
+conflicts, profile/video validation, saved local draft compatibility, private
+media ownership, bounded multipart/image input, upload-time revocation,
+owner publication, stale revisions, inactive businesses and restoration;
+`test:owner-page:postgres` verifies the actual adapter on local Supabase, including
+the revoked-write race, attributable events, normalized business video/cover
+settings, local saved-draft compatibility and unchanged canonical records.
+Migration 39 adds `owner_page_drafts` and `owner_page_events`; Supabase `anon`
+and `authenticated` have no table access. Authorized app-server access retains
+the current application authorization model. Browser checks verify actual local
+Supabase private Storage upload/read/save/reload, anonymous draft read denial,
+owner publication, exact current public-cover scope and restoration;
+adapter tests separately use fake transport to verify namespace isolation.
+Migration 40 adds server-only publication history. Integration verifies current
+draft/publication version checks, retained drafts, unchanged canonical records,
+restore to original, inactive-business denial and gate rollback. Public image
+reads expose only the approved current reference without changing storage ACLs.
+FE-042/BE-033 verify local first-listing review and discovery pagination.
+Full release gates and the broader asset-retention rollout remain pending;
+no hosted migration or provider configuration change was performed.
+
+## Rollout and rollback
+
+DEP-030 covers the additive migrations. FE-042/BE-033 enable the editor by default;
+SUQPAGE_OWNER_EDITOR_ENABLED=0 explicitly disables it. No
+hosted migration in this implementation checkpoint. Roll back application access
+without dropping drafts, consent history or existing managed-service records.
+
+## Readiness
+
+Draft saving, owner publication and first-listing review are separate operations.
+FE-042/BE-033 govern first publication; marketplace geography remains independently
+approved and is not implied by successful draft persistence.
+
+S2f local evidence (2026-09-14): optional public contacts round-trip through the
+actual PostgreSQL draft/publication adapter; canonical catalog/notification fields
+remain unchanged. Unit regressions reject unsafe destinations and prove private
+contact edits remain unpublished. Browser checks verify visible phone/email and
+safe site/social hrefs only after owner publication. 22 focused domain/security
+cases pass; full build/release and hosted verification remain gated on UI approval.
+
+## S2g — Contact separation contract
+
+Additive migration 41 adds businesses.public_email/public_phone (empty defaults)
+and users.account_phone (empty default). The existing users.email remains the
+verified account email; businesses.contact_email remains private notification
+data. No automatic backfill copies either to public fields. Published contacts
+override canonical public fields, including explicit clearing. Private phone is
+excluded from SessionUser and all public catalogs; a narrow server adapter reads
+and updates only the authenticated user's row. Inputs accept a bounded international
+phone, normalize spaces/parentheses/hyphens, or allow clearing. A phone is contact
+data, not verified identity or an authentication factor.
+
+```gherkin
+Scenario: Forged account target cannot alter another user
+  GIVEN authenticated user A and a submitted user ID B
+  WHEN A saves account phone
+  THEN the server uses A's session ID only
+  AND B's phone, account email and all public contacts are unchanged
+Scenario: Signup contact stays private
+  GIVEN a verified email and valid account phone
+  WHEN private onboarding succeeds
+  THEN users stores that email and phone
+  AND business public phone/email and WhatsApp remain empty
+Scenario: Migration preserves retained identity
+  GIVEN existing users, businesses and immutable identity links
+  WHEN migration 41 is applied twice
+  THEN additive contact columns exist with empty defaults
+  AND retained contacts and identities are unchanged
+```
+
+Test plan: scripts/test-account-contacts.ts (validation/self scope/SQLite privacy),
+scripts/test-account-contacts-postgres.ts (migration/rehearsal/signup/privacy),
+scripts/test-signup.ts, scripts/capture-account-contacts.mjs.
+
+S2g privacy regression: the public route must blank the server-only notification
+email before serializing catalog props to the browser. Structured inquiry delivery
+continues resolving its destination on the server. Tests must inspect anonymous
+HTML/RSC output, not only visible links.
+
+S2g local verification (2026-09-14): migration 41 and repeat apply passed after
+protected loopback backup. Account/signup/domain and PostgreSQL privacy tests pass;
+66 anonymous page responses exclude private contacts. Three account browser
+workflows/accessibility scans and the 24-state/12-profile-scan public matrix pass.
+Approved fictional contacts populated for 66 demo pages and 47 demo users, retaining
+account emails. Two non-demo account phones require owner input. Evidence and
+screenshots: docs/SUQPAGE-TRANSITION-CHECKLIST.md S2g. Visual approval, full gates,
+commit and hosted rollout remain pending.
+
+## S33 first-publication readiness — FE-052 (local)
+
+For the current self-service first-Publish flow, the server rejects an unchanged
+starter About, any retained starter contact value, an unreviewed example location,
+and missing real offerings or listed starter offerings. S102 / BE-054 retains
+recognition of historic starter contacts after safer new defaults: reserved
+phone ranges, example/test/invalid domains and the old sample social handle
+remain publication blockers, without changing real contacts or active-page Save. The owner can replace or
+remove optional sample contacts and offerings. UI readiness links lead to the
+relevant editable fields; the server rechecks while holding publication locks.
+Existing active-page Save, consent and tenant/version guards are preserved.
+`scripts/test-launch-clarity.ts` and `scripts/test-self-service-publication.ts`
+cover denial, correction, publication, atomic failure and immediate live Save.
+This local extension is not a hosted rollout claim.
+
+## S48 reviewed video entry
+
+FE-019/BE-018 and DEP-039 govern video changes. Normal owner/staff media saves
+retain existing references or the example; new links require a target-bound
+support request and assigned staff review. Staff may approve a supported
+YouTube URL from any channel without channel configuration. Existing photos,
+other fields and previously admitted videos remain unchanged. New products use
+the starter video. `scripts/test-video-requests.ts` covers tenant/agent boundaries,
+forged saves, approval without channel setup, retries, stale targets and exact-field
+preservation; `scripts/capture-video-requests.ts` covers the real owner/staff forms.
+Local evidence passes; refreshed release and publication gates remain pending.
+
+S106 / FE-066 / BE-055: public page editors preserve all original contact
+fields and first-publication eligibility. Existing draft values are preserved;
+only public business-inbox submission is retired.

@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-MirtPage has secure application-owned sessions and a provider-neutral media
+Suqpage has secure application-owned sessions and a provider-neutral media
 port, but password hashing still uses synchronous work in request paths,
 object-storage calls have no explicit deadline, and migration tooling does not
 reconcile every database-referenced object. Direct SQLite use is also broad
@@ -44,7 +44,7 @@ enforced portability inventory without weakening current behavior.
 
 ## Domain language and invariants
 
-- **Application-owned identity** means MirtPage owns password credentials,
+- **Application-owned identity** means Suqpage owns password credentials,
   opaque session tokens, revocation, and role/business bindings in its
   authoritative database.
 - **Media manifest** is an operator-only set of normalized namespace/key

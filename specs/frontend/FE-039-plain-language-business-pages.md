@@ -1,24 +1,24 @@
 ---
 id: FE-039
-title: Plain-language AfricMade pages and task-focused copy
+title: Plain-language Suqpage pages and task-focused copy
 status: done
-related: [FE-027, FE-036, FE-037, FE-038, BE-031, DEP-028]
+related: [FE-044, FE-027, FE-036, FE-037, FE-038, BE-031, DEP-028]
 owners: [product, frontend, design, operations]
-last_updated: 2026-09-12
+last_updated: 2026-09-21
 change_level: L2
 ---
 
-# FE-039 - Plain-language AfricMade pages and task-focused copy
+# FE-039 - Plain-language Suqpage pages and task-focused copy
 
 ## Problem and outcome
 
-AfricMade currently alternates among maker, producer, manufacturer, workshop,
+Suqpage currently alternates among maker, producer, manufacturer, workshop,
 showroom, profile, and page. It also repeats the complete platform story inside
 login and setup tasks. Visitors cannot form one simple model of the product, and
 business owners must read marketing copy before completing basic account work.
 
-AfricMade leads with the outcome **find locally made and grown products** and
-uses **AfricMade page** for the customer-facing destination. Where the audience
+Suqpage leads with the outcome **find locally made and grown products** and
+uses **Suqpage page** for the customer-facing destination. Where the audience
 must be named, it uses **artisans, farms and growers, workshops, and small
 manufacturers**. Precise categories and the participant's own trade identity
 explain what each operation does. Each screen states its immediate purpose in
@@ -31,7 +31,7 @@ concise language; the fuller market story belongs on About.
 - Public Market, Daily Featured, account entry, business setup, platform
   navigation, discovery inspectors, workspace navigation, project labels, and
   platform-owned metadata.
-- **AfricMade page** for the public presentation and **production profile** for
+- **Suqpage page** for the public presentation and **production profile** for
   private account details.
 - Plain verbs such as **grow**, **make**, **process**, and **fabricate** when a
   sentence needs to describe the participant set.
@@ -42,7 +42,7 @@ concise language; the fuller market story belongs on About.
 
 - Renaming tenant-authored content, stored handles, component-bank IDs,
   database columns, media keys, or historical analytics values.
-- Claiming AfricMade certifies, guarantees, ranks, transacts with, or represents
+- Claiming Suqpage certifies, guarantees, ranks, transacts with, or represents
   a listed business.
 - Replacing precise business categories with one new vague marketing noun.
 
@@ -53,10 +53,10 @@ concise language; the fuller market story belongs on About.
   bounded participant set. A participant's page may use a more precise identity
   such as furniture workshop, joinery workshop, farm, weaving studio, food
   processor, or small garment manufacturer.
-- **AfricMade page** is the public destination containing approved identity,
+- **Suqpage page** is the public destination containing approved identity,
   offerings, process or story content, contact options, and inquiry controls.
 - **Production profile** is private account and operating information. It is
-  not interchangeable with the public AfricMade page.
+  not interchangeable with the public Suqpage page.
 - **Daily Featured** is the program label. Supporting copy may say featured
   businesses; it does not require “showrooms” in the title.
 - A page may describe relevant participant types once when context requires it.
@@ -77,11 +77,11 @@ concise language; the fuller market story belongs on About.
   is prefilled when safely available and remains editable.
 - Business setup creates a private production profile and opens the dashboard. It
   does not automatically create a business-page design request.
-- The dashboard presents **Create AfricMade page** as a separate deliberate
+- The dashboard presents **Create Suqpage page** as a separate deliberate
   action. Existing design/revision workflows remain authoritative behind that
   label.
 - Buttons use direct actions such as **Open page**, **Finish setup**,
-  **Create AfricMade page**, **Edit page**, and **View details**.
+  **Create Suqpage page**, **Edit page**, and **View details**.
 - Platform-owned active copy does not use “maker” or “producer” as a catch-all
   noun and does not expose “showroom” as the general customer-facing object.
 - Internal source identifiers may retain `showroom` but must not leak into
@@ -93,7 +93,7 @@ concise language; the fuller market story belongs on About.
 Scenario: Visitor understands the marketplace object
   GIVEN a visitor opens Market
   WHEN the page and one result render
-  THEN the interface describes locally made and grown products and their AfricMade pages
+  THEN the interface describes locally made and grown products and their Suqpage pages
   AND category labels explain what each business does
   AND the interface does not require the visitor to interpret “showroom”
 
@@ -153,6 +153,22 @@ Evidence:
 On 2026-09-12 `npm run check`, `npm run release`, and all 10 ordered
 production-browser acceptance workflows passed. The tests prove provider-name
 prefill, private category persistence without public classification, focused
-authenticated setup, separate page-project creation, current AfricMade page
+authenticated setup, separate page-project creation, current Suqpage page
 language, and responsive task copy. Approved desktop, 390px, and 320px form and
 public captures show no horizontal overflow.
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.

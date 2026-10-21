@@ -2,7 +2,7 @@
 id: FE-035
 title: Cross-role accessibility and interface clarity
 status: done
-related: [FE-005, FE-013, FE-017, FE-025, FE-026, FE-031, FE-032, FE-034, FE-036, FE-038, FE_BASE, DEP-002]
+related: [FE-074, FE-005, FE-013, FE-017, FE-025, FE-026, FE-031, FE-032, FE-034, FE-036, FE-038, FE_BASE, DEP-002]
 owners: [product, frontend, design, operations]
 last_updated: 2026-08-11
 change_level: L2
@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and outcome
 
-Individual MirtPage workflows have responsive and keyboard checks, but the
+Individual Suqpage workflows have responsive and keyboard checks, but the
 release candidate needs one cross-role admission that treats accessibility,
 language, navigation clarity, and visual hierarchy as functional quality. A
 screen is not launch-ready merely because its route loads and its mutation
@@ -49,6 +49,8 @@ judge.
 - Every audited page has a useful title, one primary content landmark, a clear
   top-level heading, no duplicate element IDs, and no horizontal page overflow
   at 390 or 1440 CSS pixels.
+  Embedded business previews use a subordinate heading within the owner editor;
+  cover-image galleries remain keyboard-scrollable even before editing is enabled.
 - Controls expose programmatic names and states. Form fields have persistent
   labels or equivalent accessible names; errors are understandable without
   relying on color alone.
@@ -128,14 +130,14 @@ On 2026-08-11, `npm run test:accessibility` passed 88 desktop and
 operations-manager, team-member, and client routes. The matrix includes open
 mobile navigation, discovery filters, showroom preview, product detail,
 inquiry, and workspace-menu states. Structured results are written to
-`/tmp/mirtpage-accessibility-audit.json`.
+`/tmp/suqpage-accessibility-audit.json`.
 
 The ordered browser acceptance suite passed 10/10 workflows, including public
 signup and discovery, mobile map/list parity, hosted showroom inquiry,
 role-specific workspaces, revisions, support, renewal, API authorization, CSP,
 and controlled provider video. Focused reviewed visuals are retained in
-`/tmp/mirtpage-audit-discovery-final`,
-`/tmp/mirtpage-audit-workspaces-final-2`, and
-`/tmp/mirtpage-audit-focused-final-3`. Automation and repository review do not
+`/tmp/suqpage-audit-discovery-final`,
+`/tmp/suqpage-audit-workspaces-final-2`, and
+`/tmp/suqpage-audit-focused-final-3`. Automation and repository review do not
 replace testing with people who use assistive technology; that remains a
 production research responsibility rather than a release claim.

@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
+
 
 import type { CSSProperties } from "react";
 import { resolveShowroomComponentBank } from "@/lib/showroom-bank-release";
@@ -120,7 +122,7 @@ export function CompositionShowroom({
     cartCount: props.cartCount,
     sectionAnchorIds: {
       home: "showroom-home",
-      story: "showroom-story",
+      story: manifest.sections.some((section) => definitionById.get(section.component)?.slot === "content") ? "showroom-story" : undefined,
       offerings: "showroom-catalog",
       contact: "showroom-contact",
     },
@@ -186,15 +188,14 @@ export function CompositionShowroom({
 }
 
 export function InvalidComposition() {
+  const t = useUiText();
   return (
     <main className={styles.invalidComposition} role="alert">
       <div>
-        <p>Page temporarily unavailable</p>
-        <h1>This design could not be verified.</h1>
+        <p>{t("Page temporarily unavailable")}</p>
+        <h1>{t("This design could not be verified.")}</h1>
         <p>
-          No substitute design was loaded. Please try again later or contact
-          AfricMade support.
-        </p>
+          {t("No substitute design was loaded. Please try again later or contact MirtPage support.")}</p>
       </div>
     </main>
   );

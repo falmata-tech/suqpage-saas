@@ -3,7 +3,7 @@ id: ADR-0017
 title: Auth-first passwordless onboarding
 status: accepted
 date: 2026-08-25
-deciders: [AfricMade]
+deciders: [Suqpage]
 related: [FE-038, BE-020, BE-030, BE-031, DEP-028, ADR-0014]
 ---
 
@@ -14,7 +14,7 @@ related: [FE-038, BE-020, BE-030, BE-031, DEP-028, ADR-0014]
 The previous public signup attempted to create identity, credentials, a tenant,
 and a complete showroom request from one long anonymous form. That increases
 friction and couples external identity failure to canonical business creation.
-AfricMade is adopting Supabase Auth and needs email-code and Google entry without
+Suqpage is adopting Supabase Auth and needs email-code and Google entry without
 moving tenant authorization into provider metadata.
 
 ## Decision drivers
@@ -38,13 +38,13 @@ moving tenant authorization into provider metadata.
 ## Decision
 
 Choose option 3. Supabase owns email OTP, Google OAuth, and session validity.
-AfricMade exposes an unlinked provider session only to onboarding and logout.
+Suqpage exposes an unlinked provider session only to onboarding and logout.
 PostgreSQL atomically creates the draft business, application user, access
 profile, immutable provider link, and onboarding request after the user submits
 bounded business details. Provider metadata never supplies role or tenant
 authority.
 
-Retained password hashes and private `MIRTPAGE_*` identifiers remain during the
+Retained password hashes and private `SUQPAGE_*` identifiers remain during the
 rollback window. New passwordless accounts receive no usable local password.
 
 ## Consequences
@@ -62,7 +62,7 @@ rollback window. New passwordless accounts receive no usable local password.
   credentials; neither may be claimed ready from code alone.
 - The application must distinguish authenticated-unlinked from authorized-linked
   sessions on every relevant route.
-- Internal MirtPage compatibility identifiers remain until a later, separately
+- Internal Suqpage compatibility identifiers remain until a later, separately
   reversible cleanup.
 
 ## Verification

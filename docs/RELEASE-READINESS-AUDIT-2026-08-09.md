@@ -1,4 +1,4 @@
-# MirtPage release-readiness audit
+# Suqpage release-readiness audit
 
 **Controlling contracts:** FE-031, FE-032, FE-035, BE-028, DEP-023
 
@@ -13,7 +13,7 @@
 | Service period, renewal notes, and account visibility | Renewal inside a Business workspace or the global Renewals queue | Account-health runtime SQL boundary | Wired; payment collection remains intentionally manual |
 | Direct showroom inquiries | Visitor inquiry sheet; business inquiry inbox | Tenant-scoped inquiry adapters in SQLite/PostgreSQL | Wired |
 | Platform support | Customer support workspace and staff Support inbox | Support adapters in SQLite/PostgreSQL | Wired |
-| Daily Featured Showrooms schedule and MirtPage broadcast destinations | Fixed platform schedule; operator-owned TikTok and YouTube environment values | Server policy plus deployment secrets | Operator-only by design |
+| Daily Featured Showrooms schedule and Suqpage broadcast destinations | Fixed platform schedule; operator-owned TikTok and YouTube environment values | Server policy plus deployment secrets | Operator-only by design |
 | Production URL, DNS, database credentials, Storage credential, backups, and rollback | Operator runbook, Supabase, Vercel, and registrar | Provider secret stores and retained backup artifacts | Operator-only by design |
 
 ## Corrections made

@@ -3,10 +3,10 @@ export const BUSINESS_CATEGORY_OPTIONS = [
   { key: "beauty-wellness", label: "Personal care & household" },
   { key: "agriculture-growers", label: "Farms, livestock & feed" },
   { key: "food-farming", label: "Food & drink" },
-  { key: "machinery-tools", label: "Tools, machinery & metalwork" },
+  { key: "machinery-tools", label: "Tools, machines & metalwork" },
   { key: "home-living", label: "Furniture, art & building" },
-  { key: "fashion-textiles", label: "Clothing, textiles & leather" },
-  { key: "other-manufacturing", label: "Other locally made goods" },
+  { key: "fashion-textiles", label: "Clothes, fabrics & leather" },
+  { key: "other-manufacturing", label: "Other products" },
 ] as const;
 
 export type BusinessCategoryKey = (typeof BUSINESS_CATEGORY_OPTIONS)[number]["key"];

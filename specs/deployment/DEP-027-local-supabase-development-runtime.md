@@ -2,17 +2,29 @@
 id: DEP-027
 title: Local Supabase development runtime
 status: in_progress
-related: [FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015]
+related: [DEP-042, DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015, DEP-050]
 owners: [development, backend, operations]
-last_updated: 2026-08-27
+last_updated: 2026-10-19
 change_level: L3
 ---
 
 # DEP-027 - Local Supabase development runtime
 
+
+Current persistence contract: BE-035/DEP-031 and ADR-0020 supersede every retained
+SQLite fixture, fallback and copy-tool exception in this specification. Only native
+PostgreSQL setup/tests/archives are executable. Earlier migration-parity evidence
+below is historical; current acceptance uses PostgreSQL-only fixtures.
+
 ## Problem and outcome
 
-AfricMade needs one PostgreSQL application model in development and production
+S17 email-only update: local Google is disabled, including runtime generation when
+credentials remain present. All Auth templates use the repository Suqpage catalog.
+Local SMTP targets only the existing Docker mail catcher with Suqpage sender name
+and a fictional .test sender address; no external email is sent. Browser acceptance
+rewrites this SMTP host to its own isolated project so messages never cross stacks.
+
+Suqpage needs one PostgreSQL application model in development and production
 without allowing local reset, seed, Auth, Storage, or Realtime work to touch the
 hosted Supabase project.
 
@@ -29,7 +41,7 @@ hosted Supabase project.
 - Local Google sign-in preserves the approved loopback hostname that began the
   flow. The callback returns to that same hostname and port so the PKCE verifier
   and resulting Supabase session use one cookie scope. Production ignores the
-  request host and always uses the configured AfricMade origin.
+  request host and always uses the configured Suqpage origin.
 - Local Auth, private Storage, and captured email use local provider endpoints;
   production credentials are absent from local setup scripts. Realtime remains
   disabled until the optional visibility-scoped support adapter is implemented.
@@ -39,7 +51,7 @@ hosted Supabase project.
   control only when both values are present. Hosted Google credentials are not
   copied into local configuration.
 - Analytics, Vector buckets, Edge Runtime, Studio, and the local transaction
-  pooler remain disabled because MirtPage does not depend on them in local
+  pooler remain disabled because Suqpage does not depend on them in local
   development; the direct loopback PostgreSQL port is authoritative.
 - SQLite is identified as compatibility and migration infrastructure, not the
   normal development application database.
@@ -55,7 +67,7 @@ hosted Supabase project.
 - The standalone container gate proves image integrity and fail-closed startup
   without provider credentials. Provider-backed runtime health belongs to the
   browser job, not a SQLite container substitute.
-- Application schema migration remains owned by MirtPage's reviewed PostgreSQL
+- Application schema migration remains owned by Suqpage's reviewed PostgreSQL
   migrations; local Supabase startup never substitutes an unreviewed schema.
 
 ## Scenarios
@@ -63,13 +75,13 @@ hosted Supabase project.
 ```gherkin
 Scenario: Developer starts the application
   GIVEN Docker and the local Supabase stack are healthy
-  WHEN the MirtPage development server starts
+  WHEN the Suqpage development server starts
   THEN it uses loopback PostgreSQL and local provider endpoints
   AND no hosted Supabase credential is required
 
 Scenario: Developer enables local Google entry
   GIVEN a separate local Google Web client is configured in the ignored `.env`
-  WHEN the local Supabase stack and AfricMade development server restart
+  WHEN the local Supabase stack and Suqpage development server restart
   THEN the local provider uses `http://127.0.0.1:54321/auth/v1/callback`
   AND the login page offers Google without exposing either provider secret
 
@@ -88,9 +100,9 @@ Scenario: Local setup receives a hosted database URL
 ```gherkin
 Scenario: Browser acceptance runs beside another Supabase project
   GIVEN another local Supabase project is already running
-  WHEN MirtPage browser acceptance starts
-  THEN it uses the MirtPage browser project ID and dedicated loopback ports
-  AND cleanup stops only the disposable MirtPage browser project
+  WHEN Suqpage browser acceptance starts
+  THEN it uses the Suqpage browser project ID and dedicated loopback ports
+  AND cleanup stops only the disposable Suqpage browser project
 ```
 
 ## Test plan
@@ -102,6 +114,7 @@ Scenario: Browser acceptance runs beside another Supabase project
 | PostgreSQL schema and adapters | migrations plus PostgreSQL runtime suite |
 | Local Auth and Storage | focused email/Google signup, login, callback, and upload browser smoke |
 | Browser runtime parity and stack isolation | production browser acceptance against disposable Supabase plus Docker project/port assertions |
+| Slow disposable browser-stack readiness | `scripts/test-acceptance-supabase-readiness.mjs`, `test:local-supabase-readiness`, then full isolated browser acceptance |
 | No hosted reset | negative destination-guard test |
 
 ## Rollout and rollback
@@ -153,3 +166,152 @@ read-only migration comparison until the explicit retirement cleanup.
 - [x] Provider and schema ownership are explicit
 - [x] Positive and negative scenarios are written
 - [x] Evidence and rollback are planned
+
+## Standard development command correction — 2026-09-17
+
+`npm run dev` and `npm run dev:local` must use the same guarded launcher. Both
+load the existing ignored `.local/supabase-runtime.env`, require PostgreSQL and
+local Supabase Auth/Storage, and reject remote provider/database destinations.
+The explicit `--hostname 127.0.0.1 --port 3102` command is supported; CLI port
+overrides PORT, with 3000 retained as the default. The launched application's
+canonical/public origin must use that host/port. Missing configuration reports
+the configure command without logging credentials. No migrations, provider
+configuration, schema resets or implicit seeding occur during server startup.
+
+GIVEN local settings WHEN either npm command starts THEN the child receives the
+PostgreSQL driver and local provider settings. GIVEN explicit CLI port and PORT
+WHEN launched THEN CLI port wins. GIVEN a non-loopback host/provider, invalid port
+or missing settings WHEN startup is attempted THEN fail before spawning Next.
+
+Focused evidence: scripts/test-local-dev-launcher.mjs tests the actual launcher
+with a disposable fixture Next executable; test:local-supabase-readiness retains
+configuration guards. Live local HTTP checks verify the real route. This nonvisual
+startup fix does not approve the pending service/starter visual release.
+
+## Automatic readiness — 2026-09-18
+
+GIVEN existing guarded local runtime settings WHEN npm run dev runs with Docker
+Desktop stopped on macOS THEN open Docker Desktop, wait at most 120 seconds for
+its daemon, and start this repository's local Supabase stack if needed. Wait at
+most 180 seconds for local PostgreSQL/auth readiness before spawning Next. Healthy
+services are reused. Missing CLI, unsupported stopped daemon, failed startup or
+readiness timeout returns actionable sanitized error without spawning Next.
+GIVEN unsafe runtime settings WHEN starting THEN reject before any service command.
+Never reset/seed/migrate, stop other stacks, or write hosted configuration. Initial
+installation/configure is still explicit. Supabase output is captured privately
+because CLI status/start output may contain credentials. Test via injected command/
+readiness ports plus the real healthy local stack; no production bypass flag.
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.
+
+## Explicit mobile-device development exception (DEP-042)
+
+The default web launcher remains loopback-only. The owner authorized phone testing:
+`npm run dev:mobile` supplies both `--allow-lan` and `--hostname 0.0.0.0` to bind
+only the local development application to the LAN. Without that flag, the same
+hostname remains rejected. PostgreSQL and server-side Supabase destinations must
+still be the approved loopback ports; canonical browser URLs stay loopback. This
+exception never authorizes hosted data, provider configuration or production binds.
+GIVEN no explicit opt-in WHEN a non-loopback bind is supplied THEN reject it.
+GIVEN the mobile command WHEN launched THEN the app is reachable from the same
+network while existing database/provider target assertions stay enforced.
+
+## Local Next.js development resource origins — 2026-10-19
+
+When the explicitly authorized mobile launcher binds Next.js to `0.0.0.0`, the
+canonical browser address remains `127.0.0.1`. Next.js checks the hostname of a
+development resource request separately from the full origins used to protect
+Server Actions and application mutations. These two allowlists must retain their
+different formats and security purposes.
+
+```gherkin
+Scenario: Loopback browser hydrates the LAN-bound local preview
+  GIVEN the guarded mobile development launcher binds to 0.0.0.0:3102
+  WHEN an authenticated admin opens a page editor at 127.0.0.1:3102
+  THEN Next.js permits its exact loopback development resources and HMR connection
+  AND the page editor hydrates so its fields become usable
+
+Scenario: Development resource trust remains narrow
+  GIVEN exact validated local and explicitly configured origins
+  WHEN the Next.js development resource allowlist is built
+  THEN entries contain hostnames without ports, schemes, paths, or wildcards
+  AND the Server Action allowlist retains its exact host-and-port entries
+  AND unconfigured hostnames are not admitted
+```
+
+The focused test derives both lists from the same validated policy and checks
+that `127.0.0.1` is admitted without broadening mutation origins. Actual Chrome
+must confirm editor hydration on both `127.0.0.1:3102` and `localhost:3102` after
+the local development server restarts. No application schema, business record,
+hosted setting, or production origin change is part of this correction. Local
+Auth test sessions may be created to inspect an authenticated editor.
+
+## Disposable browser-stack readiness — 2026-10-19
+
+Browser acceptance uses its own project ID, database volume, and ports. On a
+host where another project owns the default browser-test port family, an
+explicit `SUQPAGE_BROWSER_SUPABASE_API_PORT` selects a different unprivileged
+loopback family for this disposable project. All six Supabase ports move
+together; invalid ports are rejected before startup. Readiness still verifies
+the exact disposable project label and the selected API port. This changes
+neither application timeouts nor another project's services.
+
+On a slow development host, Supabase Storage may become healthy after the CLI's
+fixed initial health deadline. The harness may start this disposable project
+with `--ignore-health-check` under a separate five-minute CLI startup bound,
+only if it independently waits at most five more minutes
+before fixture setup, build, or Playwright and verifies all six exact
+project-labelled services: database, gateway, Auth, REST, Storage, and mail
+catcher. Each must be running; every service with a Docker health check must
+report healthy. The loopback Auth/API and Storage status endpoints must both
+return success. The separate developer project and hosted projects are outside
+this operation. Status output and provider credentials remain private.
+The disposable Auth configuration permits the three independent email sign-ins
+required by the browser suite; this does not change the developer or hosted
+email rate limits.
+
+```gherkin
+Scenario: Slow disposable Storage becomes healthy
+  GIVEN browser acceptance has started its separate local Supabase project
+  WHEN Storage initializes after the Supabase CLI's initial health deadline
+  THEN fixture setup starts only after all six project services and both loopback endpoints are ready
+
+Scenario: Docker makes the CLI startup slow
+  GIVEN the disposable Supabase CLI startup exceeds ninety seconds on a busy host
+  WHEN the start command completes within five minutes
+  THEN the harness still performs the independent five-minute service and endpoint readiness check
+  AND it does not treat CLI completion as provider readiness
+
+Scenario: Disposable stack never becomes ready
+  GIVEN a required service is missing, stopped, unhealthy, or belongs to another project
+  OR the Auth/API or Storage status endpoint fails
+  WHEN the five-minute readiness deadline expires
+  THEN browser acceptance fails before fixture setup, build, or Playwright
+  AND cleanup stops only its disposable project without printing provider credentials
+
+Scenario: Another project uses the default browser-test ports
+  GIVEN a different local project occupies the default browser-test port family
+  WHEN the operator selects a free unprivileged loopback API port
+  THEN the six disposable ports move together before Supabase starts
+  AND readiness checks the selected port and the exact disposable project label
+  AND malformed or privileged port overrides fail before startup
+```
+
+The focused readiness test covers delayed success, wrong/missing/unhealthy
+services, endpoint failures and timeout. A complete browser acceptance run is
+the separate release gate; the harness test alone does not establish that the
+application workflows pass.

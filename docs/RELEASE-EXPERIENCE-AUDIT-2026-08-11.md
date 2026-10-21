@@ -1,4 +1,4 @@
-# MirtPage release experience audit
+# Suqpage release experience audit
 
 **Date:** 2026-08-11
 **Controlling contracts:** FE-031, FE-032, FE-034, FE-035, BE-026, BE-027,
@@ -40,7 +40,7 @@ from automation alone.
 
 | Gate | Result |
 |---|---|
-| `npm run test:accessibility` | 88 cross-role desktop/phone states passed; `/tmp/mirtpage-accessibility-audit.json` |
+| `npm run test:accessibility` | 88 cross-role desktop/phone states passed; `/tmp/suqpage-accessibility-audit.json` |
 | `npm run test:acceptance` | 10/10 ordered workflows passed |
 | `npm run release` | Production build, trace privacy, HTTP smoke, scale, security, adapter, revision, recipe, and dependency audit gates passed; 0 production vulnerabilities |
 | `npm run test:operations` | Migration, integrity, private attachment/revision backup, and restore passed |
@@ -48,9 +48,9 @@ from automation alone.
 | `npm run test:postgres-readiness` | PostgreSQL 17 schema, copy, constraints, triggers, sequences, invariants, fingerprints, runtime, and source preservation passed |
 
 Focused visual evidence is available at
-`/tmp/mirtpage-audit-discovery-final`,
-`/tmp/mirtpage-audit-workspaces-final-2`, and
-`/tmp/mirtpage-audit-focused-final-3`.
+`/tmp/suqpage-audit-discovery-final`,
+`/tmp/suqpage-audit-workspaces-final-2`, and
+`/tmp/suqpage-audit-focused-final-3`.
 
 ## Remaining launch evidence
 

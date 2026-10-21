@@ -1,10 +1,10 @@
 ---
 id: BE-022
 title: Demo showroom portfolio contract
-status: done
-related: [FE-023, BE-013, BE-021, BE-023, DEP-019]
+status: in_progress
+related: [DEP-041, FE-023, BE-013, BE-021, BE-023, DEP-019, DEP-045, BE-056, DEP-046]
 owners: [backend, design-systems]
-last_updated: 2026-08-11
+last_updated: 2026-09-21
 change_level: L2
 ---
 
@@ -100,3 +100,44 @@ contract contains 66 admitted client-specific manifests, exactly four offerings
 per showroom, 264 managed offering references, independent logo/hero/booth
 paths, nine growing-factory profiles, and complete custom palettes. Current
 verification is recorded in traceability.
+
+## S12 capability coverage extension — 2026-09-20
+
+The current standard-profile demo contract is FE-023's capability coverage extension,
+with FE-048/BE-041/DEP-038 simplifying offerings/publication. Exact demo admission
+and tenant-preserving before/after checks govern all fixture corrections. Each demo
+has local fictional inquiry/support examples; existing records are never overwritten.
+Private account identities and non-demo data are preserved. Public shared contact
+writes depend on confirmed Alhayarband destinations and validated PublicContacts;
+product handoffs use the same published contact object. No messages are sent.
+Evidence: `scripts/test-simple-demo-seed.ts` and S12 protected audit/operation.
+
+Accepted contact input: the user explicitly supplied `@alhayabrand` even if the
+accounts do not exist. Demo Telegram/TikTok/Instagram/Facebook use this username.
+Existing fictional public phone/email remain; WhatsApp uses that demo public phone;
+website is `https://example.com`. These demonstrate link construction, not verified
+external accounts or delivery. All eight contact actions must render, and WhatsApp/
+Telegram/SMS handoffs must encode the selected products. Never auto-send messages.
+Local missing demo owners may be created with protected generated credentials;
+existing user rows and non-demo identities are preserved.
+
+S12 focused evidence: `docs/SUQPAGE-DEMO-CAPABILITY-REVIEW.md`; all-66 fresh seed
+and retained public-page contact checks, seven Featured days, split-word search,
+14 desktop/phone browser captures and type/spec checks pass. Visual approval,
+full release gates, task-scoped commit and hosted rollout remain pending.
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.

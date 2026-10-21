@@ -1,4 +1,4 @@
-# MirtPage spec-driven development playbook
+# Suqpage spec-driven development playbook
 
 This is the practical workflow behind `AGENTS.md`. It adapts the SpecDevs
 FE/BE/DEP model to an existing, security-sensitive SaaS rather than treating the
@@ -37,6 +37,12 @@ Do not paste the entire repository or duplicate the master prompt into a feature
 spec. Prefer stable IDs, file paths, and concise decisions.
 
 ## Feature workflow
+
+Maintain an ordered task checklist before implementation, linked to the controlling
+specs. Track implementation, verification, visual approval and deployment separately.
+Insert new requests at their dependency-appropriate step, and resume from the first
+unfinished dependency. Record mistakes as a brief cause and prevention rule, not raw
+logs or chat history. See `docs/SUQPAGE-TRANSITION-CHECKLIST.md` for the active example.
 
 1. Draft affected FE/BE/DEP specs from the template.
 2. Write success, denial/failure, retry/idempotency, and boundary scenarios.
@@ -115,7 +121,7 @@ input, or failure whenever those risks exist.
 4. Before production, back up, validate migration compatibility, run
    `npm run release`, then production preflight.
    If a reverse proxy rewrites host headers, configure exact trusted hosts through
-   `MIRTPAGE_SERVER_ACTION_ORIGINS`; never use an unrestricted wildcard.
+   `SUQPAGE_SERVER_ACTION_ORIGINS`; never use an unrestricted wildcard.
 5. Deploy one pilot instance, run health/smoke checks, verify the spec's operator
    signals, and monitor the rollout window.
 6. Roll back using the spec's exact code/data compatibility plan.

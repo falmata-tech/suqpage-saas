@@ -1,12 +1,21 @@
 # Controlled MVP launch checklist
 
-## Required before launch
+Current MirtPage work and qualification live in the
+[active delivery checklist](SUQPAGE-TRANSITION-CHECKLIST.md) and
+[DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md).
+Netlify is the host; existing Supabase remains the managed data/Auth/media target.
+BE-035/DEP-031 retire all executable file-database tooling. The inherited pilot
+checks below are historical reference, not current commands or proof of readiness.
+Do not run retired cutover commands or recreate the former Vercel topology.
+
+## Historical pilot checks
 
 - [ ] Confirm all release-affecting specs are `done` and `npm run validate:specs` passes.
 - [ ] Confirm traceability includes implementation, tests, rollout and rollback evidence.
 - [ ] Set a production HTTPS `NEXT_PUBLIC_APP_URL`.
-- [ ] Set `MIRTPAGE_DATABASE_DRIVER=postgres` and the Supabase transaction
-      pooler URL in Vercel. Keep the direct URL only in the operator environment.
+- [ ] Set `SUQPAGE_DATABASE_DRIVER=postgres` and the Supabase transaction
+      pooler URL only in the verified Netlify Production secret store, through the
+      current scoped settings review. Keep the direct URL operator-only.
 - [ ] If using Supabase Storage, create a private bucket, configure server-only
       credentials, complete the copy-only hash verification, and retain local
       source media through the rollback window.
@@ -16,7 +25,7 @@
 - [ ] Change every temporary or migrated account password.
 - [ ] Reset any password previously distributed with the audited prototype.
 - [ ] Configure each business’s real WhatsApp, Telegram, TikTok and notification email.
-- [ ] Configure `NEXT_PUBLIC_MIRTPAGE_TIKTOK_URL` and `NEXT_PUBLIC_MIRTPAGE_YOUTUBE_URL` with MirtPage's exact public profiles before promoting Daily Featured Showrooms broadcasts.
+- [ ] Configure `NEXT_PUBLIC_SUQPAGE_TIKTOK_URL` and `NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL` with Suqpage's exact public profiles before promoting Daily Featured Showrooms broadcasts.
 - [ ] Confirm only approved businesses are `active`; keep unfinished showrooms `draft`.
 - [ ] Submit a public expression of interest and confirm an administrator can
       review it with zero attachments; confirm public multipart upload is rejected.

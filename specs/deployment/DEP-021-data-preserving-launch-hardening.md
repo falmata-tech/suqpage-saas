@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-MirtPage is moving from reset-friendly local development to a soft-launch demo
+Suqpage is moving from reset-friendly local development to a soft-launch demo
 that must retain its fictional client portfolio. The rollout needs production
 configuration checks, provider-neutral media, non-destructive rehearsal, full
 browser and container evidence, concise operator guidance, and remote CI.
@@ -55,7 +55,7 @@ browser and container evidence, concise operator guidance, and remote CI.
 5. When Supabase credentials are supplied, create a private media bucket outside
    the application, run the copy command in dry-run mode, execute the copy, and
    verify every local public/request key remotely.
-6. Switch `MIRTPAGE_MEDIA_DRIVER=supabase`, run preflight and representative
+6. Switch `SUQPAGE_MEDIA_DRIVER=supabase`, run preflight and representative
    public/private upload/read/publication workflows, then retain local media for
    the rollback window.
 7. Build and test the production container with persistent SQLite storage and one
@@ -65,7 +65,7 @@ browser and container evidence, concise operator guidance, and remote CI.
 
 ## Rollback
 
-Set `MIRTPAGE_MEDIA_DRIVER=filesystem`, redeploy the prior image if needed, and
+Set `SUQPAGE_MEDIA_DRIVER=filesystem`, redeploy the prior image if needed, and
 restore the verified SQLite/media backup only when data integrity requires it.
 Do not delete copied object-store data during the rollback window. Additive
 storage configuration and admitted image rows may remain because prior code
@@ -93,7 +93,7 @@ Scenario: Supabase credentials are not configured
   AND no Supabase request is attempted
 
 Scenario: Operator selects incomplete Supabase mode
-  GIVEN MIRTPAGE_MEDIA_DRIVER is supabase
+  GIVEN SUQPAGE_MEDIA_DRIVER is supabase
   AND one required server-only value is absent
   WHEN production preflight runs
   THEN startup fails before serving traffic
@@ -161,7 +161,7 @@ both in the working tree and in a clean `.env`-free checkout. GitHub Actions run
 `30795553451` then passed `core`, `browser`, and `container` on commit `38e45d5`,
 including all 10 ordered production-browser workflows on Ubuntu.
 
-This rollout remains in progress because MirtPage is not launching yet. A real
+This rollout remains in progress because Suqpage is not launching yet. A real
 HTTPS deployment configuration, credential rotation, optional Supabase private
 bucket copy/hash verification when selected, and an explicitly approved
 production rollout remain required before a launch claim.

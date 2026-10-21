@@ -2,7 +2,7 @@
 id: BE-001
 title: Tenant-scoped canonical inquiry workflow
 status: done
-related: [FE-001, DEP-001, BE-009, BE-011, BE-014, BE-017]
+related: [BE-055, FE-052, FE-041, FE-001, DEP-001, BE-009, BE-011, BE-014, BE-017, BE-033, BE-050]
 owners: [backend, security]
 last_updated: 2026-08-01
 change_level: L2
@@ -12,7 +12,7 @@ change_level: L2
 
 ## Problem and outcome
 
-Public input is untrusted. MirtPage must retain useful inquiries without allowing
+Public input is untrusted. Suqpage must retain useful inquiries without allowing
 forged products/options, cross-tenant references, excessive quantities, duplicate
 records, or uncontrolled spam.
 
@@ -84,3 +84,32 @@ compatibility or verified database/media restore.
 `BE-009` and `DEP-008` now define the implemented eligibility rule:
 availability is canonical, requested quantity is optional bounded text intent
 under BE-014, and no active inventory count is stored or consulted.
+
+## S2h public experience revision
+
+FE-041 now governs the shared profile's linked inline product view, simplified
+public features/unit presentation, single/group inquiry choice, progressive phone
+form and search panel beside the persistent map. It supersedes earlier public
+modal, production-fact, persistent empty-cart and map-replacement statements here.
+Retained data, canonical server security and legacy recovery contracts remain.
+Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+
+## S33 local extension — FE-052
+
+An authenticated client may update status only for their own business's inquiry.
+Operations authorization is retained; another owner or a team member is denied.
+Canonical status values are validated server-side and the update/audit commit
+atomically. UI translation never changes submitted values. Phone contact offers
+Call and SMS; email remains available for retained email inquiries. Opening a
+contact link does not imply message delivery. Local regression evidence is in
+`scripts/test-launch-clarity.ts` and `scripts/test-workflow-wiring-audit.ts`;
+publication remains pending FE-052 visual/release gates.
+
+
+## S105 social-contact revision
+
+FE-066 / BE-055 supersede new customer messages to business inboxes. Only
+configured social accounts receive visitor handoffs; chosen products and the
+simple message follow the active UI language. Retained private history stays
+scoped. Public transport chat and authenticated owner support remain unchanged.
+Local implementation and review evidence are tracked in checklist S105.

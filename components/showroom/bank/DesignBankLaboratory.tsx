@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
+
 
 import { useMemo, useState, type CSSProperties } from "react";
 import {
@@ -172,6 +174,7 @@ export default function DesignBankLaboratory({
   bank: ShowroomComponentBank | ShowroomComponentBankV2;
   combinationFloor: number;
 }) {
+  const t = useUiText();
   const [slot, setSlot] = useState<ShowroomSlot | "all">("all");
   const [tokenId, setTokenId] =
     useState<ShowroomBankTokenId>("harvest-earth");
@@ -226,35 +229,35 @@ export default function DesignBankLaboratory({
 
   return (
     <div className={styles.laboratory}>
-      <div className={styles.labSummary} aria-label="Design library coverage">
+      <div className={styles.labSummary} aria-label={t("Design library coverage")}>
         <div className={styles.labMetric}>
           <strong>{bank.components.length}</strong>
-          <span>reviewed component variants</span>
+          <span>{t("reviewed component variants")}</span>
         </div>
         <div className={styles.labMetric}>
           <strong>{bank.tokenPacks.length}</strong>
-          <span>cross-industry token systems</span>
+          <span>{t("cross-industry token systems")}</span>
         </div>
         <div className={styles.labMetric}>
           <strong>{SHOWROOM_SLOTS.length}</strong>
-          <span>supported component families</span>
+          <span>{t("supported component families")}</span>
         </div>
         <div className={styles.labMetric}>
           <strong>{combinationFloor.toLocaleString()}</strong>
-          <span>base combinations before optional sections</span>
+          <span>{t("base combinations before optional sections")}</span>
         </div>
       </div>
 
       <div className={styles.labControls}>
         <div className={styles.familyControl}>
-          <span className="eyebrow">Filter component family</span>
-          <div className={styles.slotFilters} aria-label="Component family filter">
+          <span className="eyebrow">{t("Filter component family")}</span>
+          <div className={styles.slotFilters} aria-label={t("Component family filter")}>
             <button
               type="button"
               aria-pressed={slot === "all"}
               onClick={() => setSlot("all")}
             >
-              All {bank.components.length}
+              {t("All")}{" "}{bank.components.length}
             </button>
             {SHOWROOM_SLOTS.map((entry) => {
               const count = bank.components.filter(
@@ -274,8 +277,7 @@ export default function DesignBankLaboratory({
           </div>
         </div>
         <label className={styles.tokenSelect}>
-          Preview token system
-          <select
+          {t("Preview token system")}<select
             value={tokenId}
             onChange={(event) =>
               setTokenId(event.target.value as ShowroomBankTokenId)
@@ -289,8 +291,7 @@ export default function DesignBankLaboratory({
           </select>
         </label>
         <label className={styles.tokenSelect}>
-          Motion intensity
-          <select
+          {t("Motion intensity")}<select
             value={motionIntensity}
             onChange={(event) =>
               setMotionIntensity(event.target.value as ShowroomMotionIntensity)
@@ -304,8 +305,7 @@ export default function DesignBankLaboratory({
           </select>
         </label>
         <label className={styles.tokenSelect}>
-          Decorative depth
-          <select
+          {t("Decorative depth")}<select
             value={decorativeDepth}
             onChange={(event) =>
               setDecorativeDepth(event.target.value as ShowroomDecorativeDepth)
@@ -319,7 +319,7 @@ export default function DesignBankLaboratory({
           </select>
         </label>
         <fieldset className={styles.deviceControl}>
-          <legend>Preview width</legend>
+          <legend>{t("Preview width")}</legend>
           <div>
             {SHOWROOM_PREVIEW_DEVICES.map((entry) => (
               <button
@@ -328,7 +328,7 @@ export default function DesignBankLaboratory({
                 aria-pressed={previewDevice === entry}
                 onClick={() => setPreviewDevice(entry)}
               >
-                {entry === "mobile" ? "Mobile · 390 px" : "Responsive"}
+                {entry === "mobile" ? t("Mobile · 390 px") : t("Responsive")}
               </button>
             ))}
           </div>
@@ -337,8 +337,7 @@ export default function DesignBankLaboratory({
 
       <section className={styles.templatePanel}>
         <label className={styles.tokenSelect}>
-          Composition starting point
-          <select
+          {t("Composition starting point")}<select
             value={templateId}
             onChange={(event) => setTemplateId(event.target.value)}
           >
@@ -353,10 +352,9 @@ export default function DesignBankLaboratory({
             {template.description}
           </p>
           <p>
-            {template.catalogShape.replaceAll("_", " ")} catalog ·{" "}
+            {template.catalogShape.replaceAll("_", " ")} {" "}{t("catalog ·")}{" "}
             {template.commerceModes.join(", ")} ·{" "}
-            {template.mediaCondition.replaceAll("_", " ")} media
-          </p>
+            {template.mediaCondition.replaceAll("_", " ")} {" "}{t("media")}</p>
           <div className={styles.templateSequence}>
             {template.sectionPlan.map((section, index) => (
               <span key={`${section.slot}-${section.role}`}>
@@ -411,52 +409,52 @@ export default function DesignBankLaboratory({
                 </div>
                 <code>{definition.id}</code>
                 <p>{definition.description}</p>
-                <div className={styles.experienceBadges} aria-label="Experience guarantees">
-                  <span>Mobile first</span>
-                  <span>Touch ready</span>
-                  <span>Reduced motion safe</span>
+                <div className={styles.experienceBadges} aria-label={t("Experience guarantees")}>
+                  <span>{t("Mobile first")}</span>
+                  <span>{t("Touch ready")}</span>
+                  <span>{t("Reduced motion safe")}</span>
                 </div>
                 {definition.mediaSlots.length ? (
                   <div
                     className={styles.experienceBadges}
-                    aria-label="Media slot contract"
+                    aria-label={t("Media slot contract")}
                   >
                     {definition.mediaSlots.map((mediaSlot) => (
                       <span key={mediaSlot.key}>
                         {mediaSlot.label} ·{" "}
-                        {mediaSlot.required ? "required" : "optional"} ·{" "}
+                        {mediaSlot.required ? t("required") : t("optional")} ·{" "}
                         {mediaSlot.acceptedKinds.join("/")} ·{" "}
                         {mediaSlot.aspectRatio}
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <small>No section-specific media required.</small>
+                  <small>{t("No section-specific media required.")}</small>
                 )}
                 {hasTypedContentMedia(definition) && definition.contentMediaSlots.length ? (
-                  <div className={styles.experienceBadges} aria-label="Typed content media contract">
+                  <div className={styles.experienceBadges} aria-label={t("Typed content media contract")}>
                     {definition.contentMediaSlots.map((mediaSlot) => (
                       <span key={mediaSlot.key}>
-                        Typed {mediaSlot.label} · {mediaSlot.required ? "required" : "optional"} · {mediaSlot.acceptedKinds.join("/")}
+                        {t("Typed")}{" "}{mediaSlot.label} · {mediaSlot.required ? t("required") : t("optional")} · {mediaSlot.acceptedKinds.join("/")}
                       </span>
                     ))}
                   </div>
                 ) : null}
                 {guidance ? (
-                  <div className={styles.guidanceGrid} aria-label="Machine-readable selection guidance">
-                    <span>{guidance.requiresMedia ? "Media required" : "No-media ready"}</span>
-                    <span>Layout: {guidance.layoutFamily.replaceAll("_", " ")}</span>
-                    <span>Media role: {guidance.mediaRole}</span>
-                    <span>Responsive: {guidance.responsiveBehavior.replaceAll("_", " ")}</span>
+                  <div className={styles.guidanceGrid} aria-label={t("Machine-readable selection guidance")}>
+                    <span>{guidance.requiresMedia ? t("Media required") : t("No-media ready")}</span>
+                    <span>{t("Layout:")}{" "}{guidance.layoutFamily.replaceAll("_", " ")}</span>
+                    <span>{t("Media role:")}{" "}{guidance.mediaRole}</span>
+                    <span>{t("Responsive:")}{" "}{guidance.responsiveBehavior.replaceAll("_", " ")}</span>
                     {guidance.recommendedProductCount ? (
                       <span>
-                        Products: {guidance.recommendedProductCount.min}-
+                        {t("Products:")}{" "}{guidance.recommendedProductCount.min}-
                         {guidance.recommendedProductCount.max}
                       </span>
                     ) : null}
-                    <span>Needs: {guidance.contentNeeds.join(", ").replaceAll("_", " ")}</span>
-                    <span>Tones: {guidance.visualTones.join(", ")}</span>
-                    <span>Fallbacks: {guidance.noMediaFallbacks.join(", ").replaceAll("_", " ")}</span>
+                    <span>{t("Needs:")}{" "}{guidance.contentNeeds.join(", ").replaceAll("_", " ")}</span>
+                    <span>{t("Tones:")}{" "}{guidance.visualTones.join(", ")}</span>
+                    <span>{t("Fallbacks:")}{" "}{guidance.noMediaFallbacks.join(", ").replaceAll("_", " ")}</span>
                   </div>
                 ) : null}
               </header>

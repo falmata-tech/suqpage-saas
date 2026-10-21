@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "MirtPage",
+    "slug": "suqpage",
+    "owner": "falmatad",
+    "version": "0.1.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.suqpage.app",
+      "scheme": "suqpage",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.mirtpage.app",
+      "scheme": "mirtpage",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": [
+      "expo-notifications",
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose photos for your business and offerings.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      "expo-sharing",
+      "@maplibre/maplibre-react-native"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bfc289fb-238e-44a3-9e0f-fec6a7c857d1"
+      }
+    }
+  }
+}

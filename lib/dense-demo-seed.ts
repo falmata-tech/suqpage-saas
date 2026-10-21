@@ -72,7 +72,7 @@ export const DENSE_DEMO_BUSINESSES: readonly DenseDemoBusiness[] = [
     offerings: [
       { name: "Printed Folding Carton", category: "Cartons", description: "A compact paperboard carton prepared in an agreed size, print, and finish.", kind: "made_to_order" },
       { name: "Roll Product Labels", category: "Labels", description: "Repeat labels supplied for compatible manual and assisted application.", kind: "production_supply" },
-      { name: "Packaging Structure Sample", category: "Development", description: "A short development service for testing folds, fit, and closure before production.", kind: "manufacturing_capability" },
+      { name: "Packaging Structure Sample", category: "Development", description: "A folded paperboard sample for comparing the shape, fit and closure before ordering a production batch.", kind: "manufacturing_capability" },
     ],
   },
   {

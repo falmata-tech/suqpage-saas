@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {chatReadBounds} from '../apps/mobile/src/chat-read-viewport';
+const base={height:844,topInset:0,bottomInset:0};
+assert.deepEqual(chatReadBounds(base),{upper:52,lower:780});
+assert.deepEqual(chatReadBounds({...base,visibleHeight:410}),{upper:52,lower:410});
+assert.deepEqual(chatReadBounds({...base,visibleTop:90,visibleHeight:410}),{upper:90,lower:500});
+assert.deepEqual(chatReadBounds({...base,keyboardTop:400}),{upper:52,lower:400});
+assert.deepEqual(chatReadBounds({...base,topInset:24,bottomInset:34,keyboardTop:900}),{upper:76,lower:746});
+assert.deepEqual(chatReadBounds({...base,keyboardTop:Number.NaN}),{upper:52,lower:780});
+assert.deepEqual(chatReadBounds({...base,visibleHeight:0}),{upper:52,lower:0});
+const sentinel=fs.readFileSync('apps/mobile/src/ChatReadSentinel.tsx','utf8');assert.doesNotMatch(sentinel,/Keyboard\.metrics\s*\(/,'Web adapter lacks metrics; never call it');
+assert.match(sentinel,/keyboardDidShow/);assert.match(sentinel,/keyboardDidHide/);assert.match(sentinel,/show\.remove\(\);hide\.remove\(\)/);
+console.log('PASS web viewport, native keyboard events, safe-area/navigation/covered bounds and no unsupported keyboard metrics call.');

@@ -2,7 +2,7 @@
 id: DEP_BASE
 title: Deployment and operations base architecture
 status: done
-related: [FE_BASE, BE_BASE, DEP-002, ADR-0002]
+related: [DEP-042, FE_BASE, BE_BASE, DEP-002, ADR-0002]
 owners: [operations, security]
 last_updated: 2026-07-21
 ---
@@ -11,15 +11,15 @@ last_updated: 2026-07-21
 
 ## Supported topology
 
-The controlled pilot runs one Node.js application instance with one persistent
-SQLite database and persistent media/backup directories. Horizontal scaling is
-prohibited until a managed multi-instance database and object storage are
-specified and migrated.
+The application uses Supabase PostgreSQL, Auth and private Storage with separate
+local, isolated test, Preview and Production targets. PostgreSQL is the only
+executable database engine (BE-035/DEP-031). Native archive tools and provider
+backups replace the retired file-database recovery path.
 
 ## Environments
 
-- Local: `.env`, local persistent data, generated temporary credentials.
-- Test: isolated temporary databases/media and deterministic cleanup.
+- Local: isolated Supabase project and ignored local runtime environment.
+- Test: disposable PostgreSQL schemas, isolated browser Supabase project and deterministic cleanup.
 - Production: HTTPS canonical URL, absolute persistent paths, private salt,
   reverse proxy, single instance, monitored health endpoint.
 
@@ -62,7 +62,7 @@ Customer contact details must not enter general logs or monitoring labels.
 
 ## Production gates
 
-Production startup refuses non-HTTPS configuration, missing persistent paths, or
+Production startup refuses non-HTTPS configuration, missing managed provider settings, or
 weak privacy salt. Temporary-password accounts, mock integration status, backup
 freshness, managed-request queue review, and configured notification delivery
 are explicit operator checks.

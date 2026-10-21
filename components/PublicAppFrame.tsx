@@ -1,13 +1,18 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
 
+
+import LanguageSelector from "@/components/LanguageSelector";
 import Link from "next/link";
-import { FileText, Info, LayoutDashboard, LogIn, Mail, Map, Menu, Shield, Star } from "lucide-react";
+import { FileText, Info, LayoutDashboard, LogIn, Map, Menu, Shield, Star } from "lucide-react";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import AfricMadeBrand from "@/components/AfricMadeBrand";
+import SuqpageBrand from "@/components/SuqpageBrand";
 import NavigationPendingIndicator, { NavigationPendingMain, NavigationPendingProvider } from "@/components/NavigationPendingIndicator";
 import PublicMobileNavigation from "@/components/PublicMobileNavigation";
 import PublicSupportChat from "@/components/PublicSupportChat";
+import { PublicActionDockProvider } from "@/components/PublicActionDock";
+import {publicTransportPlacement} from "@/lib/public-transport-placement";
 
 const exploreDestinations = [
   { href: "/", label: "Market", icon: Map },
@@ -18,55 +23,46 @@ function isCurrent(pathname: string, href: string) {
   return href === "/" ? pathname === "/" || pathname === "/discover" : pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function PublicAppFrameContent({ children, signedIn }: { children: ReactNode; signedIn: boolean }) {
+function PublicAppFrameContent({ children, signedIn, dashboardHref="/dashboard" }: { children: ReactNode; signedIn: boolean;dashboardHref?:string }) {
+  const t = useUiText();
   const pathname = usePathname();
   const showroomOpen = pathname.startsWith("/@");
 
-  return <div className={`public-app-shell${showroomOpen ? " public-app-shell-showroom" : ""}`}>
+  return <PublicActionDockProvider enabled={publicTransportPlacement(pathname,"web")==="shell"} transport={<PublicSupportChat />}><div className={`public-app-shell${showroomOpen ? " public-app-shell-showroom" : ""}`}>
     <header className="public-app-header">
-      <AfricMadeBrand className="public-app-brand" />
-      <span className="public-app-purpose">Ethiopia Market</span>
+      <SuqpageBrand className="public-app-brand" />
+      <LanguageSelector />
     </header>
     <aside className="public-app-rail">
       <section className="public-app-rail-group">
-        <span>Explore</span>
-        <nav aria-label="Explore AfricMade">
+        <span>{t("Explore")}</span>
+        <nav aria-label={t("Explore MirtPage")}>
           {exploreDestinations.map(({ href, label, icon: Icon }) => <Link key={href} href={href} aria-current={isCurrent(pathname, href) ? "page" : undefined}>
             <Icon aria-hidden="true" />
-            <span>{label}</span>
-            <NavigationPendingIndicator label={label} />
+            <span>{t(label)}</span>
+            <NavigationPendingIndicator label={t(label)} />
           </Link>)}
         </nav>
       </section>
       <section className="public-app-rail-group">
-        <span>Account</span>
-        <nav aria-label="AfricMade account">
+        <span>{t("Account")}</span>
+        <nav aria-label={t("MirtPage account")}>
           {signedIn
-            ? <Link href="/dashboard"><LayoutDashboard aria-hidden="true" /><span>Dashboard</span><NavigationPendingIndicator label="Dashboard" /></Link>
-            : <Link href="/login"><LogIn aria-hidden="true" /><span>Sign in</span><NavigationPendingIndicator label="Sign in" /></Link>}
+            ? <Link href={dashboardHref} aria-current={isCurrent(pathname,"/dashboard")?"page":undefined}><LayoutDashboard aria-hidden="true" /><span>{t("Account")}</span><NavigationPendingIndicator label={t("Account")} /></Link>
+            : <Link href="/login" aria-current={pathname==="/login"||pathname==="/request"?"page":undefined}><LogIn aria-hidden="true" /><span>{t("Login")}</span><NavigationPendingIndicator label={t("Login")} /></Link>}
         </nav>
       </section>
       <section className="public-app-rail-group public-app-rail-information">
-        <span>Information</span>
-        <nav aria-label="AfricMade information">
-          <Link href="/about" aria-current={isCurrent(pathname, "/about") ? "page" : undefined}><Info aria-hidden="true" /><span>About</span><NavigationPendingIndicator label="About" /></Link>
-          <details className="public-app-more">
-            <summary><Menu aria-hidden="true" /><span>More</span></summary>
-            <div>
-              <a href="mailto:falmata.dawano@gmail.com"><Mail aria-hidden="true" /><span>Contact AfricMade</span></a>
-              <Link href="/privacy"><Shield aria-hidden="true" /><span>Privacy</span><NavigationPendingIndicator label="Privacy" /></Link>
-              <Link href="/terms"><FileText aria-hidden="true" /><span>Terms</span><NavigationPendingIndicator label="Terms" /></Link>
-            </div>
-          </details>
+        <span>{t('Information')}</span><nav aria-label={t('Information')}>
+          {[{href:'/about',label:'About',icon:Info},{href:'/privacy',label:'Privacy',icon:Shield},{href:'/terms',label:'Terms',icon:FileText}].map(({href,label,icon:Icon})=><Link key={href} href={href} aria-current={isCurrent(pathname,href)?'page':undefined}><Icon aria-hidden="true"/><span>{t(label)}</span><NavigationPendingIndicator label={t(label)}/></Link>)}
         </nav>
       </section>
     </aside>
     <NavigationPendingMain className={`public-app-main${showroomOpen ? " public-app-showroom-main" : ""}`}>{children}</NavigationPendingMain>
-    <PublicSupportChat />
-    {showroomOpen ? null : <PublicMobileNavigation signedIn={signedIn} />}
-  </div>;
+    {showroomOpen ? null : <PublicMobileNavigation signedIn={signedIn} dashboardHref={dashboardHref} />}
+  </div></PublicActionDockProvider>;
 }
 
-export default function PublicAppFrame(props: { children: ReactNode; signedIn: boolean }) {
+export default function PublicAppFrame(props: { children: ReactNode; signedIn: boolean;dashboardHref?:string }) {
   return <NavigationPendingProvider><PublicAppFrameContent {...props} /></NavigationPendingProvider>;
 }

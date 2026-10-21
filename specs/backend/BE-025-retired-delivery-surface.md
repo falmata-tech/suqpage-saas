@@ -12,7 +12,7 @@ change_level: L3
 
 ## Problem and outcome
 
-MirtPage no longer offers the demonstration Delivery capability or plans a
+Suqpage no longer offers the demonstration Delivery capability or plans a
 Malikt integration. Keeping its dashboard page, API, permissions, mock company
 data, and tests would confuse operators and preserve an unused private-data
 surface. The active capability must be removed before launch while the populated
@@ -25,7 +25,7 @@ demo database remains intact.
 - Remove Delivery navigation, dashboards, actions, domain adapters, mock-company
   APIs, setup seeds, smoke coverage, and active product documentation.
 - Keep customer inquiries and their copy, WhatsApp, Telegram, and direct
-  MirtPage-inbox workflows unchanged.
+  Suqpage-inbox workflows unchanged.
 - Preserve existing delivery tables and rows as dormant legacy data during this
   data-preserving rollout.
 - Return the framework's normal not-found response for retired pages and APIs.
@@ -36,11 +36,11 @@ demo database remains intact.
 - Replacing Delivery with another logistics provider, checkout, ordering, or
   payment workflow.
 - Preventing businesses and customers from arranging fulfillment outside
-  MirtPage after an inquiry.
+  Suqpage after an inquiry.
 
 ## Domain language and invariants
 
-- **Inquiry** remains the final MirtPage-owned customer-to-business workflow.
+- **Inquiry** remains the final Suqpage-owned customer-to-business workflow.
 - Delivery is not an active product capability, application port, API, role
   permission, dashboard destination, or external integration.
 - Dormant legacy tables provide rollback compatibility only. No active route or
@@ -58,7 +58,7 @@ demo database remains intact.
   mutation. Historical schema migrations remain unchanged and no destructive
   migration is introduced.
 - Current product, launch, and operator documentation contains no claim of a
-  MirtPage Delivery or Malikt capability.
+  Suqpage Delivery or Malikt capability.
 
 ## Scenarios
 
@@ -127,3 +127,6 @@ and 10/10 ordered browser acceptance prove the retired dashboard and Malikt API
 paths return 404 and no role exposes a logistics action. Security, scalable
 query, non-destructive migration, backup/restore, release, and container gates
 passed while dormant compatibility tables remained untouched.
+
+Transport support referrals in FE-019/BE-018 are manual internal support work,
+not a revival of the retired delivery API, booking workflow or carrier integration.

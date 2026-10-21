@@ -1,6 +1,12 @@
 [build]
-  command = "npm run build"
+  command = "node scripts/check-web-install.cjs && npm run build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "24.18.1"
   NEXT_TELEMETRY_DISABLED = "1"
+  NPM_FLAGS = "--workspace=@suqpage/contracts --include-workspace-root"
+  SUQPAGE_INSTALL_TARGET = "web"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

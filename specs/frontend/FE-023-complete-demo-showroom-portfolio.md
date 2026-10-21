@@ -4,7 +4,7 @@ title: Complete demo showroom portfolio
 status: in_progress
 related: [FE-014, FE-022, FE-024, BE-013, BE-022, DEP-011, DEP-019]
 owners: [product, frontend, design]
-last_updated: 2026-08-29
+last_updated: 2026-09-21
 change_level: L2
 ---
 
@@ -154,3 +154,61 @@ contract is 66 active fictional showrooms, 66 briefs/logos/heroes/booths, at
 least 40 palette signatures, 56 small-scale expanded demos, and 264 independent imaged
 offerings. Current browser and release evidence is recorded in traceability;
 production customer publication remains excluded.
+
+## Current capability coverage extension — 2026-09-20 (S12)
+
+FE-048/BE-041/DEP-038 supersede custom recipes, production-only types and approval
+queues for the live standard profile. The user requests complete existing-feature
+coverage across all admitted demos. Every demo needs editable page/cover/video,
+simple offerings, searchable identity/location, owner inquiry examples and support
+history. Featured schedules and sponsorship demonstrate portfolio-wide roles rather
+than marking every shop sponsored or pretending every video is a live broadcast.
+One optional-price offering demonstrates Ask for price; absent obsolete options,
+capacity, minimum order and lead time are intentional simplification, not gaps.
+
+Shared Alhayarband public social/contact destinations are requested for demos only;
+exact destination input is pending. Never guess contacts or replace private account
+contacts, real customers, or automatic new-account starter defaults. Existing
+inquiries/history must remain; only clearly fictional, local demo examples may be
+added. Preserve a protected before-state and use exact handle admission.
+
+GIVEN an admitted demo WHEN its owner opens inquiries/support THEN a clearly
+fictional sample demonstrates those screens without messages sent externally.
+GIVEN an admitted demo WHEN its products are searched and opened THEN media, public
+contact actions and single/group inquiry flows use the same canonical page contacts.
+GIVEN a non-demo business WHEN demo completion runs THEN its rows are unchanged.
+
+Tests: extend `scripts/test-simple-demo-seed.ts` for per-demo inquiry/support coverage;
+read-only retained-data audit and focused browser coverage. Spec remains in_progress;
+contact wiring and browser acceptance depend on verified destinations. Master
+sections 2/7/10/13/21 affected. No new feature/provider or production data write.
+
+Accepted contact input: the user explicitly supplied `@alhayabrand` even if the
+accounts do not exist. Demo Telegram/TikTok/Instagram/Facebook use this username.
+Existing fictional public phone/email remain; WhatsApp uses that demo public phone;
+website is `https://example.com`. These demonstrate link construction, not verified
+external accounts or delivery. All eight contact actions must render, and WhatsApp/
+Telegram/SMS handoffs must encode the selected products. Never auto-send messages.
+Local missing demo owners may be created with protected generated credentials;
+existing user rows and non-demo identities are preserved.
+
+S12 focused evidence: `docs/SUQPAGE-DEMO-CAPABILITY-REVIEW.md`; all-66 fresh seed
+and retained public-page contact checks, seven Featured days, split-word search,
+14 desktop/phone browser captures and type/spec checks pass. Visual approval,
+full release gates, task-scoped commit and hosted rollout remain pending.
+
+## Evidence: verified rollout — 2026-09-21
+
+Source `be134a247c8ea54b18b882f9e2368058f7fbc0ee` is published as Netlify `6ab0d349f099639821fa0f9a` at https://suqpage.com.
+Full check, release, operations, all nine isolated provider browser scenarios,
+artifact privacy and production dependency audit pass. Production schema 47,
+64 updated demo pages/256 offerings, all 64 public routes, live search at
+1440/390/320, email-only entry, private-route denial, health and www redirects
+are independently verified. Mapped focused tests and earlier desktop/phone
+reviews remain applicable; the owner approved this release.
+
+Earlier dated pending-approval/local-only notes are superseded by this rollout.
+No real external email was sent and no authenticated hosted account was used
+for testing; those admission checks remain separate from local provider evidence.
+Demo contact destinations are examples, not verified delivery channels.
+See docs/SUQPAGE-RELEASE-2026-09-21.md for backup, rollback and limitations.

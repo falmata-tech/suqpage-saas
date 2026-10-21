@@ -1,3 +1,4 @@
+import { platformEnvironment } from "./platform-environment.mjs";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -5,8 +6,8 @@ export async function refreshSupabaseAuth(request: NextRequest) {
   if (!request.cookies.getAll().some(({ name }) => name.startsWith("sb-"))) {
     return NextResponse.next({ request });
   }
-  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/$/, "");
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
+  const url = (platformEnvironment().NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/$/, "");
+  const key = platformEnvironment().NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
   if (!url || key.length < 20) return NextResponse.next({ request });
   let response = NextResponse.next({ request });
   const client = createServerClient(url, key, {

@@ -1,3 +1,4 @@
+import {workspaceHomeHref} from "@/lib/capabilities";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { resolveBusiness } from "@/lib/dashboard";
@@ -13,6 +14,6 @@ export default async function ShowroomVisitsPage({
   if (user.access_role === "team_member") redirect("/dashboard");
   const query = await searchParams;
   const business = await resolveBusiness(user, query.business);
-  if (!business) return null;
+  if (!business) redirect(workspaceHomeHref(user));
   redirect(`/dashboard?business=${business.id}#showroom-visits`);
 }

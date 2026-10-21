@@ -226,7 +226,7 @@ BEGIN
     business_id, plan_name, amount_minor, currency, starts_at,
     current_period_start, current_period_end, grace_ends_at, updated_at
   ) VALUES (
-    NEW.id, 'MirtPage monthly', NULL, 'ETB', now_ms, now_ms,
+    NEW.id, 'Suqpage monthly', NULL, 'ETB', now_ms, now_ms,
     now_ms + 2592000000, now_ms + 2937600000, now_ms
   ) ON CONFLICT (business_id) DO NOTHING;
   RETURN NEW;

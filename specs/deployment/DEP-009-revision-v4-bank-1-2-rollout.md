@@ -189,7 +189,7 @@ inside a showroom.
 
 The YouTube normalizer and request-scoped persistence adapter are implemented
 without network access. Admission is enabled in the documented launch
-configuration and retains `MIRTPAGE_YOUTUBE_ADMISSION_ENABLED=0` as an
+configuration and retains `SUQPAGE_YOUTUBE_ADMISSION_ENABLED=0` as an
 independent operational kill switch; stored AI exports expose only opaque asset
 keys. Saved revision fields use normalized `youtube:<provider-id>` references.
 CSP enablement and browser rendering are covered by the production-like

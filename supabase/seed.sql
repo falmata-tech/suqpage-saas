@@ -1,2 +1,2 @@
--- MirtPage application rows are copied through the guarded local PostgreSQL
--- bootstrap so schema and data reconciliation use the same reviewed path.
+-- Application schema and demo rows are installed directly by scripts/setup.ts.
+-- The installer preserves existing databases; it does not import another engine.

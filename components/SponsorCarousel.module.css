@@ -1,0 +1,30 @@
+.carousel { grid-column: 2; grid-row: 2; min-width: 0; align-self: start; padding: 12px; background: #fff4ed; border: 1px solid #ead9ce; border-radius: 8px; color: #22282b; }
+.header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 8px; margin-bottom: 8px; }
+.header h2 { margin: 0; font: inherit; font-size: .75rem; font-weight: 750; color: #913000; }
+.controls { display: flex; align-items: center; gap: 2px; }
+.count { font-size: .7rem; color: #59666c; white-space: nowrap; padding-right: 5px; font-variant-numeric: tabular-nums; }
+.controls button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #e4d4ca; border-radius: 6px; background: white; color: #22282b; cursor: pointer; }
+.controls svg { width: 18px; height: 18px; }
+.controls button:hover { background: #f6e5d9; }
+.controls button:focus-visible, .card:focus-visible { outline: 2px solid #c93600; outline-offset: 2px; }
+.viewport { overflow: hidden; border-radius: 6px; }
+.card { display: grid; grid-template-columns: 1fr; text-decoration: none; color: inherit; background: white; border: 1px solid #ead9ce; border-radius: 6px; overflow: hidden; animation: enter .28s ease-out; }
+.card img, .fallback { display: block; width: 100%; height: 150px; object-fit: cover; }
+.fallback { display: grid; place-items: center; background: #f1ded2; font-size: 2rem; color: #913000; }
+.copy { min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 12px; }
+.copy b { font-size: .95rem; line-height: 1.35; overflow-wrap: anywhere; }
+.details { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: .78rem; line-height: 1.4; color: #59666c; }
+.copy em { display: flex; align-items: center; gap: 5px; color: #ac3500; font-size: .75rem; font-style: normal; font-weight: 700; }
+.copy em svg { width: 15px; height: 15px; flex-shrink: 0; }
+@keyframes enter { from { opacity: .65; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+@media (max-width: 620px) {
+  .carousel { align-self: stretch; order: 1; flex: 0 0 auto; padding: 5px 10px 9px; border-radius: 0; border-inline: 0; }
+  .header { margin-bottom: 4px; }
+  .card { grid-template-columns: 76px minmax(0, 1fr); min-height: 86px; }
+  .card img, .fallback { width: 76px; height: 100%; min-height: 86px; }
+  .copy { gap: 3px; padding: 9px 10px; }
+  .copy b { font-size: .84rem; }
+  .details { font-size: .7rem; -webkit-line-clamp: 1; }
+  .copy em { font-size: .68rem; }
+}
+@media (prefers-reduced-motion: reduce) { .card { animation: none; } }

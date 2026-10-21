@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+release_target="${SUQPAGE_RELEASE_TARGET:-all}"
+if [[ "$release_target" == "web" ]]; then
+  node scripts/check-web-install.cjs
+  npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate
+elif [[ "$release_target" != "all" ]]; then
+  printf 'Unknown release target.\n' >&2
+  exit 1
+fi
+
 scale_fixture_root=""
 cleanup_release_fixtures() {
   if [[ -n "$scale_fixture_root" && -d "$scale_fixture_root" ]]; then
@@ -12,6 +21,8 @@ trap cleanup_release_fixtures EXIT
 printf '\n=== Specification and traceability validation ===\n'
 node scripts/validate-specs.mjs
 
+node scripts/test-source-map-security.cjs
+
 printf '\n=== Production build ===\n'
 NEXT_TELEMETRY_DISABLED=1 node node_modules/next/dist/bin/next build
 
@@ -19,7 +30,7 @@ printf '\n=== Output-file trace privacy validation ===\n'
 node scripts/test-build-trace.mjs
 
 printf '\n=== Provider-backed production HTTP smoke tests ===\n'
-if [[ "${MIRTPAGE_DELEGATE_PROVIDER_SMOKE:-0}" == "1" ]]; then
+if [[ "${SUQPAGE_DELEGATE_PROVIDER_SMOKE:-0}" == "1" ]]; then
   printf 'Delegated to the required provider-backed browser CI job.\n'
 elif command -v supabase >/dev/null 2>&1; then
   node scripts/acceptance-runner.mjs --grep "API authorization, validation, health, and security headers"
@@ -31,22 +42,8 @@ fi
 printf '\n=== Server pagination and scale fixture validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-pagination.ts
 node node_modules/tsx/dist/cli.mjs scripts/test-scalable-queries.ts
-scale_fixture_root="$(mktemp -d "${TMPDIR:-/tmp}/mirtpage-release-scale.XXXXXX")"
-MIRTPAGE_DB_PATH="$scale_fixture_root/mirtpage.db" \
-MIRTPAGE_MEDIA_ROOT="$scale_fixture_root/media" \
-MIRTPAGE_BACKUP_ROOT="$scale_fixture_root/backups" \
-MIRTPAGE_CREDENTIAL_PATH="$scale_fixture_root/seed-credentials.txt" \
-MIRTPAGE_MEDIA_DRIVER=filesystem \
-MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT=1 \
-node node_modules/tsx/dist/cli.mjs scripts/setup.ts
-MIRTPAGE_DB_PATH="$scale_fixture_root/mirtpage.db" \
-MIRTPAGE_MEDIA_ROOT="$scale_fixture_root/media" \
-MIRTPAGE_BACKUP_ROOT="$scale_fixture_root/backups" \
-MIRTPAGE_CREDENTIAL_PATH="$scale_fixture_root/seed-credentials.txt" \
-MIRTPAGE_MEDIA_DRIVER=filesystem \
-node node_modules/tsx/dist/cli.mjs scripts/test-scale-fixtures.ts
-cleanup_release_fixtures
-scale_fixture_root=""
+node --import tsx scripts/test-native-postgres.ts
+node --import tsx scripts/test-scale-fixtures.ts
 
 printf '\n=== TypeScript validation ===\n'
 node node_modules/typescript/bin/tsc --noEmit
@@ -56,9 +53,6 @@ node node_modules/tsx/dist/cli.mjs scripts/validate-designs.ts
 
 printf '\n=== Stockless catalog and recovery validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-stockless-catalog.ts
-
-printf '\n=== Unified offering migration validation ===\n'
-node node_modules/tsx/dist/cli.mjs scripts/test-offering-migration.ts
 
 printf '\n=== Versioned product upkeep validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-product-upkeep.ts
@@ -90,13 +84,17 @@ node node_modules/tsx/dist/cli.mjs scripts/test-security.ts
 printf '\n=== Adapter boundary tests ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-adapters.ts
 
-printf '\n=== Managed request integration tests ===\n'
-node node_modules/tsx/dist/cli.mjs scripts/test-requests.ts
-
-printf '\n=== Revision publication integration tests ===\n'
-node node_modules/tsx/dist/cli.mjs scripts/test-revisions.ts
+printf '\n=== Standard owner page and launch wiring tests ===\n'
+node --import tsx scripts/test-page-review.ts
+node --import tsx scripts/test-standard-invitations.ts
+node --import tsx scripts/test-launch-wiring.ts
+node --import tsx scripts/test-media-reconciliation.ts
 
 printf '\n=== Production dependency audit ===\n'
-npm audit --omit=dev --audit-level=moderate
+if [[ "$release_target" == "web" ]]; then
+  npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate
+else
+  npm audit --omit=dev --audit-level=moderate
+fi
 
-printf '\nAll AfricMade release checks passed.\n'
+printf '\nAll MirtPage release checks passed.\n'

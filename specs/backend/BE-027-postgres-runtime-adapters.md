@@ -2,7 +2,7 @@
 id: BE-027
 title: PostgreSQL runtime adapters and persistence parity
 status: in_progress
-related: [BE-028, BE-029, BE-030, FE-033, DEP-023, DEP-024, DEP-026, DEP-027, ADR-0013, ADR-0014, ADR-0015]
+related: [BE-035, BE-028, BE-029, BE-030, FE-033, DEP-023, DEP-024, DEP-026, DEP-027, ADR-0013, ADR-0014, ADR-0015]
 owners: [backend, security, operations]
 last_updated: 2026-08-05
 change_level: L4
@@ -10,13 +10,19 @@ change_level: L4
 
 # BE-027 - PostgreSQL runtime adapters and persistence parity
 
+
+Current persistence contract: BE-035/DEP-031 and ADR-0020 supersede every retained
+SQLite fixture, fallback and copy-tool exception in this specification. Only native
+PostgreSQL setup/tests/archives are executable. Earlier migration-parity evidence
+below is historical; current acceptance uses PostgreSQL-only fixtures.
+
 ## Problem and outcome
 
-MirtPage's application behavior is bound to synchronous SQLite calls, which
+Suqpage's application behavior is bound to synchronous SQLite calls, which
 cannot provide durable writes from Vercel Functions. The runtime needs explicit
 asynchronous persistence ports and PostgreSQL adapters that preserve tenant,
 authorization, transaction, idempotency, and workflow behavior without coupling
-the domain to Supabase or changing MirtPage-owned authentication.
+the domain to Supabase or changing Suqpage-owned authentication.
 
 ## Scope
 
@@ -30,7 +36,7 @@ the domain to Supabase or changing MirtPage-owned authentication.
 - Runtime selection through validated configuration; PostgreSQL mode fails
   closed when its connection is absent or invalid.
 - Existing bcrypt password hashes, opaque sessions, role checks, tenant binding,
-  and authorization behavior remain MirtPage-owned.
+  and authorization behavior remain Suqpage-owned.
 - Bounded pooled connections suitable for serverless production and deterministic
   adapter injection for tests.
 
@@ -110,7 +116,7 @@ dual-write mode is permitted.
 ## Current implementation evidence
 
 All authoritative application workflows now select asynchronous PostgreSQL
-adapters when `MIRTPAGE_DATABASE_DRIVER=postgres`; the preview guard has been
+adapters when `SUQPAGE_DATABASE_DRIVER=postgres`; the preview guard has been
 removed. The disposable PostgreSQL 17 gate runs catalog, identity/session,
 request, revision, recipe persistence, publication, inquiry, signup, product,
 discovery, subscription, analytics, staff, invitation, support, audit, rate

@@ -868,7 +868,7 @@
     right: 0;
     bottom: 0;
     left: 0;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     min-height: calc(64px + env(safe-area-inset-bottom));
     padding: 4px max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
     border-top: 1px solid var(--bank-line, #d7dfe3);

@@ -1,74 +1,20 @@
-import crypto from "node:crypto";
-import fs from "node:fs";
-import path from "node:path";
-import { DatabaseSync } from "node:sqlite";
-import { backupRoot, databasePath, mediaRoot } from "../lib/config";
-
-const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-const destination = path.resolve(
-  backupRoot(),
-  stamp,
-);
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { backupRoot } from '../lib/config';
+import { archiveTarget, archiveCommand, inspectArchive } from './postgres-archive';
+const target = archiveTarget();
+const destination = path.join(backupRoot(), new Date().toISOString().replace(/[:.]/g, '-'));
 fs.mkdirSync(destination, { recursive: true, mode: 0o700 });
-if (!fs.existsSync(databasePath())) {
-  throw new Error("Database not found. Nothing can be backed up.");
-}
-const source = new DatabaseSync(databasePath());
-const integrity = source.prepare("PRAGMA integrity_check").get() as Record<
-  string,
-  string
->;
-if (!Object.values(integrity).includes("ok")) {
-  source.close();
-  throw new Error("Database integrity check failed. Backup was not created.");
-}
-const foreignKeyFailures = source.prepare("PRAGMA foreign_key_check").all();
-if (foreignKeyFailures.length) {
-  source.close();
-  throw new Error("Database foreign-key check failed. Backup was not created.");
-}
-source.exec("PRAGMA wal_checkpoint(FULL)");
-source.close();
-const databaseBackup = path.join(destination, "mirtpage.db");
-fs.copyFileSync(databasePath(), databaseBackup);
-try { fs.chmodSync(databaseBackup, 0o600); } catch {}
-const databaseBytes = fs.statSync(databaseBackup).size;
-const databaseSha256 = crypto
-  .createHash("sha256")
-  .update(fs.readFileSync(databaseBackup))
-  .digest("hex");
-const copied = new DatabaseSync(databaseBackup, { readOnly: true });
-const copiedIntegrity = copied.prepare("PRAGMA integrity_check").get() as Record<
-  string,
-  string
->;
-const copiedForeignKeys = copied.prepare("PRAGMA foreign_key_check").all();
-copied.close();
-if (
-  !Object.values(copiedIntegrity).includes("ok") ||
-  copiedForeignKeys.length
-) {
-  throw new Error("Copied database failed backup verification.");
-}
-if (fs.existsSync(mediaRoot())) {
-  fs.cpSync(mediaRoot(), path.join(destination, "media"), { recursive: true });
-}
-const manifest = path.join(destination, "backup.json");
-fs.writeFileSync(
-  manifest,
-  JSON.stringify(
-    {
-      createdAt: new Date().toISOString(),
-      sourceDatabase: databasePath(),
-      media: mediaRoot(),
-      integrity: "ok",
-      foreignKeyFailures: 0,
-      databaseBytes,
-      databaseSha256,
-    },
-    null,
-    2,
-  ),
-  { mode: 0o600 },
-);
-console.log(`Backup created: ${destination}`);
+const archive = path.join(destination, 'postgres.dump');
+const descriptor = fs.openSync(archive, 'wx', 0o600);
+try {
+  const command = archiveCommand('pg_dump', ['--format=custom', '--schema=public', '--extension=pg_trgm', '--extension=fuzzystrmatch', '--no-owner', '--no-privileges', `--dbname=${decodeURIComponent(target.pathname.slice(1))}`], target);
+  const result = spawnSync(command.binary, command.args, { env: command.env, stdio: ['ignore', descriptor, 'pipe'] });
+  if (result.error || result.status !== 0) throw new Error('PostgreSQL backup failed; check client availability and database access.');
+} finally { fs.closeSync(descriptor); }
+const bytes = fs.readFileSync(archive);
+inspectArchive(bytes);
+fs.writeFileSync(path.join(destination, 'backup.json'), JSON.stringify({ provider: 'postgres', createdAt: new Date().toISOString(), schema: 'public', databaseBytes: bytes.length, databaseSha256: crypto.createHash('sha256').update(bytes).digest('hex'), storageIncluded: false }, null, 2), { mode: 0o600 });
+console.log(`Verified PostgreSQL archive: ${destination}. Private object storage requires its separate backup.`);

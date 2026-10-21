@@ -65,7 +65,7 @@ export type BankPresentationContext = {
   cartCount: number;
   sectionAnchorIds: {
     home: string;
-    story: string;
+    story?: string;
     offerings: string;
     contact: string;
   };

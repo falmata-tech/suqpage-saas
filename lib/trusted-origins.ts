@@ -1,3 +1,4 @@
+import { platformEnvironment } from "./platform-environment.mjs";
 type OriginEnvironment = Readonly<Record<string, string | undefined>>;
 
 const DEVELOPMENT_PORTS = [3000, 3001] as const;
@@ -25,19 +26,22 @@ function codespaceHosts(environment: OriginEnvironment) {
 }
 
 export function trustedOriginPolicy(environment: OriginEnvironment = process.env) {
+  environment = platformEnvironment(environment);
   const development = environment.NODE_ENV !== "production";
   const serverActionHosts = new Set<string>();
   const mutationOrigins = new Set<string>();
+  const devResourceHostnames = new Set<string>();
   const add = (value: string, fallbackProtocol: "http:" | "https:") => {
     const parsed = exactHttpOrigin(value, fallbackProtocol);
     if (!parsed) return;
     serverActionHosts.add(parsed.host);
     mutationOrigins.add(parsed.origin);
+    if (development) devResourceHostnames.add(new URL(parsed.origin).hostname);
   };
 
   const canonical = environment.NEXT_PUBLIC_APP_URL?.trim();
   if (canonical) add(canonical, "https:");
-  for (const configured of (environment.MIRTPAGE_SERVER_ACTION_ORIGINS || "").split(",")) {
+  for (const configured of (environment.SUQPAGE_SERVER_ACTION_ORIGINS || "").split(",")) {
     add(configured, development ? "http:" : "https:");
   }
 
@@ -51,5 +55,6 @@ export function trustedOriginPolicy(environment: OriginEnvironment = process.env
   return {
     serverActionHosts: [...serverActionHosts],
     mutationOrigins: [...mutationOrigins],
+    devResourceHostnames: [...devResourceHostnames],
   };
 }

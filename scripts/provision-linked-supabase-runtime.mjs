@@ -5,12 +5,12 @@ import path from "node:path";
 import process from "node:process";
 import { Client } from "pg";
 
-const APPROVAL = "PROVISION_MIRTPAGE_RUNTIME";
-const RUNTIME_ROLE = "mirtpage_runtime";
+const APPROVAL = "PROVISION_SUQPAGE_RUNTIME";
+const RUNTIME_ROLE = "suqpage_runtime";
 const SECRET_PATH = path.join(process.cwd(), ".local", "production-secrets.json");
 
-if (process.env.MIRTPAGE_APPROVE_RUNTIME_ROLE !== APPROVAL) {
-  throw new Error(`Set MIRTPAGE_APPROVE_RUNTIME_ROLE=${APPROVAL} for this one command.`);
+if (process.env.SUQPAGE_APPROVE_RUNTIME_ROLE !== APPROVAL) {
+  throw new Error(`Set SUQPAGE_APPROVE_RUNTIME_ROLE=${APPROVAL} for this one command.`);
 }
 
 function runSupabase(args) {
@@ -128,23 +128,23 @@ fs.writeFileSync(
   SECRET_PATH,
   `${JSON.stringify(
     {
-      NEXT_PUBLIC_APP_URL: "https://mirtpage.com",
-      MIRTPAGE_CANONICAL_URL: "https://mirtpage.com",
-      MIRTPAGE_SERVER_ACTION_ORIGINS: "mirtpage.com,www.mirtpage.com",
-      MIRTPAGE_DATABASE_DRIVER: "postgres",
-      MIRTPAGE_POSTGRES_URL: runtimeUrl.toString(),
-      MIRTPAGE_POSTGRES_POOL_MAX: "2",
-      MIRTPAGE_POSTGRES_CONNECTION_TIMEOUT_MS: "6000",
-      MIRTPAGE_POSTGRES_STATEMENT_TIMEOUT_MS: "9000",
-      MIRTPAGE_MEDIA_DRIVER: "supabase",
-      MIRTPAGE_SUPABASE_URL: `https://${projectRef}.supabase.co`,
-      MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY: serviceRoleKey,
-      MIRTPAGE_SUPABASE_STORAGE_BUCKET: "mirtpage-media",
-      MIRTPAGE_SUPABASE_REQUEST_TIMEOUT_MS: "10000",
+      NEXT_PUBLIC_APP_URL: "https://africmade.netlify.app",
+      SUQPAGE_CANONICAL_URL: "https://africmade.netlify.app",
+      SUQPAGE_SERVER_ACTION_ORIGINS: "africmade.netlify.app",
+      SUQPAGE_DATABASE_DRIVER: "postgres",
+      SUQPAGE_POSTGRES_URL: runtimeUrl.toString(),
+      SUQPAGE_POSTGRES_POOL_MAX: "2",
+      SUQPAGE_POSTGRES_CONNECTION_TIMEOUT_MS: "6000",
+      SUQPAGE_POSTGRES_STATEMENT_TIMEOUT_MS: "9000",
+      SUQPAGE_MEDIA_DRIVER: "supabase",
+      SUQPAGE_SUPABASE_URL: `https://${projectRef}.supabase.co`,
+      SUQPAGE_SUPABASE_SERVICE_ROLE_KEY: serviceRoleKey,
+      SUQPAGE_SUPABASE_STORAGE_BUCKET: "mirtpage-media",
+      SUQPAGE_SUPABASE_REQUEST_TIMEOUT_MS: "10000",
       PRIVACY_SALT: privacySalt,
-      MIRTPAGE_RECIPE_STUDIO_ENABLED: "1",
-      MIRTPAGE_PRODUCT_UPKEEP_ENABLED: "1",
-      MIRTPAGE_YOUTUBE_ADMISSION_ENABLED: "1",
+      SUQPAGE_RECIPE_STUDIO_ENABLED: "1",
+      SUQPAGE_PRODUCT_UPKEEP_ENABLED: "1",
+      SUQPAGE_YOUTUBE_ADMISSION_ENABLED: "1",
     },
     null,
     2,

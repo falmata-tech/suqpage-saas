@@ -1,3 +1,4 @@
+import { platformEnvironment } from "./platform-environment.mjs";
 import { PostgresCatalogRepository } from "./postgres-catalog-repository";
 import { createPostgresPool, PostgresTransactionRunner, postgresRuntimeConfig } from "./postgres-runtime";
 import { PostgresSessionRepository } from "./postgres-session-repository";
@@ -14,14 +15,15 @@ type RuntimeServices = {
 let services: RuntimeServices | null = null;
 
 export function postgresRuntimeEnabled() {
-  return process.env.MIRTPAGE_DATABASE_DRIVER === "postgres";
+  if (platformEnvironment().SUQPAGE_DATABASE_DRIVER !== "postgres") throw new Error("SUQPAGE_DATABASE_DRIVER must be postgres in every environment.");
+  return true;
 }
 
 export function postgresRuntimeServices() {
   if (!postgresRuntimeEnabled()) throw new Error("PostgreSQL runtime is not enabled.");
   if (services) return services;
   const config = postgresRuntimeConfig();
-  if (!config) throw new Error("MIRTPAGE_POSTGRES_URL is required for PostgreSQL runtime.");
+  if (!config) throw new Error("SUQPAGE_POSTGRES_URL is required for PostgreSQL runtime.");
   const pool = createPostgresPool(config);
   const runner = new PostgresTransactionRunner(pool);
   services = {

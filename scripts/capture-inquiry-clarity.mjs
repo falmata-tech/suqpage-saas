@@ -1,0 +1,51 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import pg from 'pg';
+import { chromium, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+process.loadEnvFile('.local/supabase-runtime.env');
+const url=new URL(process.env.SUQPAGE_POSTGRES_URL);assert.equal(url.hostname,'127.0.0.1');assert.equal(url.port,'54322');
+const pool=new pg.Pool({connectionString:url.href});
+const base='http://127.0.0.1:3102',out='.local/inquiry-clarity-review';fs.mkdirSync(out,{recursive:true,mode:0o700});
+const browser=await chromium.launch();const captures=[];
+try{
+ const products=(await pool.query("SELECT p.id,p.name,b.handle FROM products p JOIN businesses b ON b.id=p.business_id WHERE b.handle='selam-weave' AND p.is_published=1 ORDER BY p.id LIMIT 3")).rows;assert.equal(products.length,3);
+ const service=(await pool.query("SELECT p.id,p.name,b.handle FROM products p JOIN businesses b ON b.id=p.business_id WHERE b.handle LIKE 'demo-%' AND b.status='active' AND p.offering_kind='service' AND p.is_published=1 ORDER BY p.id LIMIT 1")).rows[0];assert.ok(service);
+ for(const width of [1440,390,320]){
+  const context=await browser.newContext({viewport:{width,height:900}});const page=await context.newPage();let posts=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/api/inquiries'))posts++;});
+  await page.goto(`${base}/@${products[0].handle}`);
+  await page.getByRole('button',{name:`Add to inquiry list: ${products[0].name}`,exact:true}).click();
+  await expect(page.getByRole('dialog',{name:'Business inquiry'})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'View inquiry list, 1 item',exact:true})).toContainText('View inquiry list');
+  await page.getByRole('button',{name:`Add to inquiry list: ${products[1].name}`,exact:true}).click();
+  await expect(page.getByRole('button',{name:'View inquiry list, 2 items',exact:true})).toContainText('View inquiry list');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await page.screenshot({path:`${out}/cards-${width}.png`,fullPage:true});captures.push(`cards-${width}`);
+  await page.goto(`${base}/@${products[2].handle}?product=${products[2].id}`);
+  await expect(page.getByRole('button',{name:'Inquire about this product only',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Add to inquiry list',exact:true})).toBeVisible();
+  await page.locator('[data-product-page]').screenshot({path:`${out}/product-${width}.png`});captures.push(`product-${width}`);
+  const saved=await page.evaluate(()=>localStorage.getItem('suqpage-cart:selam-weave'));
+  await page.getByRole('button',{name:'Inquire about this product only',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'Business inquiry'});await expect(dialog).toBeVisible();
+  const message=await dialog.locator('textarea[aria-label="Inquiry message"]').inputValue();
+  assert.ok(message.includes(products[2].name));for(const p of products.slice(0,2))assert.ok(!message.includes(p.name));
+  await expect(dialog.getByRole('list',{name:'Inquiry items'})).toHaveCount(0);
+  await dialog.getByRole('button',{name:'Close inquiry'}).click();
+  assert.equal(await page.evaluate(()=>localStorage.getItem('suqpage-cart:selam-weave')),saved);
+  await page.getByRole('button',{name:'View inquiry list, 2 items',exact:true}).click();
+  await expect(dialog.getByRole('list',{name:'Inquiry items'}).locator('li')).toHaveCount(2);
+  const grouped=await dialog.locator('textarea[aria-label="Inquiry message"]').inputValue();
+  for(const p of products.slice(0,2))assert.ok(grouped.includes(p.name));assert.ok(!grouped.includes(products[2].name));
+  await dialog.getByRole('button',{name:'Close inquiry'}).click();
+  await page.goto(`${base}/@${service.handle}?product=${service.id}`);
+  await expect(page.getByRole('button',{name:'Inquire about this service only',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Add to inquiry list',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Added to inquiry list',exact:true})).toBeDisabled();await expect(page.getByRole('dialog',{name:'Business inquiry'})).toHaveCount(0);
+  await page.locator('[data-product-page]').screenshot({path:`${out}/service-${width}.png`});captures.push(`service-${width}`);
+  const axe=await new AxeBuilder({page}).include('[data-product-page]').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(axe.violations,[]);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.equal(posts,0);await context.close();
+ }
+ fs.writeFileSync(out+'/evidence.json',JSON.stringify({passed:true,captures,directInquiryPreservesList:true,addNeverSends:true},null,2));
+ console.log('PASS clear card/product/service actions, independent single/group messages, no sending on Add, nine desktop/phone captures and accessibility.');
+}finally{await browser.close();await pool.end();}

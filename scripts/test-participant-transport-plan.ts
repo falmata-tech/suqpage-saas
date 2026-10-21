@@ -1,0 +1,61 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import {createRequire} from 'node:module';
+import {readFileSync} from 'node:fs';
+import {build} from 'esbuild';
+import {chromium,expect} from '@playwright/test';
+
+const require=createRequire(import.meta.url);
+// Actual React participant controllers and plan renderers. HTTP, read observation,
+// native host primitives and poll time are the only controlled ports.
+const entry=String.raw`
+import React from'react';import{createRoot}from'react-dom/client';import Web from'./components/BuyingConversation';import Native from'./apps/mobile/app/buying';
+const nativeTimeout=window.setTimeout.bind(window);window.setTimeout=(fn,ms,...args)=>nativeTimeout(fn,ms===5000?50:ms===30000?90:ms,...args);
+const plan={version:1,legs:[{id:'00000000-0000-4000-8000-000000000001',providerName:'Literal Air Provider',origin:'Place A',destination:'Place B',method:'air'},{id:'00000000-0000-4000-8000-000000000002',providerName:'Literal Truck Provider',origin:'Place B',destination:'Place C',method:'truck'}]};
+window.fixture={kind:'',owner:'owner-A',visitorToken:'controlled-visitor-token',navigation:[],reads:[],calls:[],snapshot:{id:71,publicRef:'SUP-PLAN-71',category:'shipment_observation',subject:'Fixture route',status:'open',assignedUserName:null,agentJoined:false,resolvedAt:null,messages:[{id:2,sender:'staff',senderName:'Agent',body:'A public reply',createdAt:1}],transportPlan:plan},t:(key,values={})=>key.replace(/\{(\w+)\}/g,(_,key)=>String(values[key]??''))};
+const f=window.fixture;f.call=async(path,body)=>{f.calls.push({path,body});if(body)throw Error('Unexpected chat command');return{conversation:structuredClone(f.snapshot),defaults:{name:'PRIVATE OWNER',phone:'PRIVATE PHONE'}};};
+window.fetch=async(path,init={})=>{const payload=await f.call(String(path),init.body?JSON.parse(init.body):undefined);return{ok:true,json:async()=>payload};};
+const root=createRoot(document.getElementById('root'));window.qa={mount:kind=>{f.kind=kind;root.render(kind==='web'?<Web initial={f.snapshot} active onAnother={()=>{}} showAlerts={false}/>:<Native owner={kind!=='native-visitor'}/>);},update:(status,version)=>{f.snapshot.status=status;f.snapshot.transportPlan.version=version;f.snapshot.transportPlan.legs[0].providerName='Updated provider '+version;},leave:()=>root.render(null),unmount:()=>root.unmount()};
+`;
+const bundled=build({stdin:{contents:entry,resolveDir:process.cwd(),loader:'tsx'},bundle:true,write:false,format:'iife',platform:'browser',plugins:[{name:'participant-plan-ports',setup(b){
+ b.onResolve({filter:/^react(?:\/.*)?$/},a=>({path:require.resolve(a.path)}));
+ b.onResolve({filter:/\.css$/},a=>({path:a.path,namespace:'css-port'}));b.onLoad({filter:/.*/,namespace:'css-port'},a=>{const path='components/'+a.path.split('/').at(-1),css=readFileSync(path,'utf8'),classes=Object.fromEntries([...css.matchAll(/\.([A-Za-z_][\w-]*)/g)].map(match=>[match[1],match[1]]));return{loader:'js',contents:`const style=document.createElement('style');style.textContent=${JSON.stringify(css)};document.head.append(style);export default ${JSON.stringify(classes)};`};});
+ b.onResolve({filter:/^(?:@\/lib\/i18n\/ui|next\/link|react-native|expo-router|expo-crypto|(?:\.\/|\.\.\/src\/)(?:runtime|ui|ChatReadSentinel|AttentionAlerts)|\.\/ChatReadObserver)$/},a=>({path:a.path.startsWith('../src/')?'./'+a.path.split('/').at(-1):a.path,namespace:'ports'}));
+ b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:
+  a.path==='@/lib/i18n/ui'?`export const useUiText=()=>window.fixture.t;`
+  :a.path==='next/link'?`import React from'react';export default({children,href,onClick,...props})=><a {...props} href={href} onClick={event=>{event.preventDefault();onClick?.(event);window.fixture.navigation.push(href);}}>{children}</a>;`
+  :a.path==='react-native'?`import React from'react';export const AppState={currentState:'active'},StyleSheet={create:value=>value},View=({children,testID,style})=><div data-testid={testID} style={{display:'flex',flexDirection:'column',...Object.assign({},...[style].flat(Infinity).filter(Boolean))}}>{children}</div>;`
+  :a.path==='expo-router'?`import{useEffect}from'react';export const useFocusEffect=fn=>useEffect(fn,[fn]),router={push:path=>window.fixture.navigation.push(path),replace:()=>{throw Error('Unexpected navigation');}};`
+  :a.path==='expo-crypto'?`export const randomUUID=()=> 'controlled-key';`
+  :a.path==='./runtime'?`export const useApp=()=>({t:window.fixture.t,locale:'en',session:{user:{id:window.fixture.owner}},ownerRequest:window.fixture.call}),request=(path,options)=>{if(window.fixture.kind!=='native-visitor')throw Error('Unexpected guest API');return window.fixture.call(path,options?.body);},secure={getItem:async()=>{if(window.fixture.kind!=='native-visitor')throw Error('Unexpected guest storage');return window.fixture.visitorToken;},setItem:()=>{throw Error('Unexpected guest storage');},removeItem:()=>{throw Error('Unexpected guest storage');}};export class ApiFailure extends Error{};`
+  :a.path==='./ui'?`import React from'react';export const colors={line:'#ddd',soft:'#eee'},Screen=({children})=><main>{children}</main>,Card=({children})=><section>{children}</section>,Copy=({children,heading})=>heading?<h2>{children}</h2>:<p>{children}</p>,Button=({label,onPress,disabled})=><button style={{minHeight:48}} disabled={disabled} onClick={onPress}>{label}</button>,Field=({label,value,onChangeText})=><label>{label}<textarea aria-label={label} value={value||''} onChange={e=>onChangeText(e.target.value)}/></label>,Status=()=>null;`
+  :a.path==='./AttentionAlerts'?`export const TransportAlerts=()=>null;export default()=>null;`
+  :a.path==='./ChatReadObserver'?`export const useVisibleChatRead=(ref,active)=>{window.fixture.reads.push(active);};`
+  :`import React from'react';export const ChatReadTranscript=({children,active})=><div data-transcript data-active={active}>{children}</div>;export default()=>null;`
+ }));
+}}]});
+type Fixture={owner:string;visitorToken:string|null;snapshot:unknown;navigation:string[];calls:Array<{path:string;body:unknown}>;reads:boolean[]};
+type QA={mount:(kind:string)=>void;update:(status:string,version:number)=>void;leave:()=>void;unmount:()=>void};
+
+test('FE-069 actual React chat-only web child and single native Tracking entry retain drafts without legacy-plan authority',{timeout:45000},async t=>{
+ const browser=await chromium.launch({channel:'chrome',headless:true});const errors:string[]=[];
+ try{for(const kind of ['web','native','native-visitor'])await t.test(kind,async()=>{
+  const page=await browser.newPage({viewport:{width:390,height:844}});page.on('pageerror',error=>errors.push(error.message));page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
+  try{await page.route('http://localhost:45919/**',route=>route.fulfill({contentType:'text/html',body:'<style>*{box-sizing:border-box}body{margin:0}button{font:inherit}p{margin:4px 0}</style><div id="root"></div>'}));await page.goto('http://localhost:45919/');await page.addScriptTag({content:(await bundled).outputFiles[0].text});await page.evaluate(kind=>(window as unknown as{qa:QA}).qa.mount(kind),kind);
+   const input=page.getByRole('textbox',{name:kind==='web'?'Reply':'Message',exact:true});await expect(input).toBeVisible();await input.fill('Unsent reply kept while reading');
+   if(kind!=='web'){
+    await expect(page.getByText('Live Chat',{exact:true})).toBeVisible();const tracking=page.getByRole('button',{name:'Shipment tracking',exact:true});await expect(tracking).toBeVisible();assert.equal(await tracking.count(),1);assert.equal(await page.getByRole('button',{name:'View transport plan',exact:true}).count(),0);assert.equal(await page.getByText('Literal Air Provider',{exact:true}).count(),0,'Legacy plan fields never publish through participant chat');
+    await tracking.click();assert.deepEqual(await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.navigation),['/tracking']);await page.evaluate(()=>(window as unknown as{qa:QA}).qa.leave());await expect(input).not.toBeVisible();await page.evaluate(kind=>(window as unknown as{qa:QA}).qa.mount(kind),kind);await expect(input).toHaveValue('Unsent reply kept while reading');
+    await page.evaluate(()=>(window as unknown as{qa:QA}).qa.update('closed',2));await expect(page.getByRole('button',{name:'Start another chat',exact:true})).toBeVisible();await expect(tracking).toBeVisible();assert.equal(await tracking.count(),1);assert.equal(await page.getByRole('button',{name:'View transport plan',exact:true}).count(),0);
+    if(kind==='native'){
+     await page.evaluate(()=>(window as unknown as{qa:QA}).qa.update('open',3));await expect(input).toBeVisible();await input.fill('Actor A private draft');await tracking.click();await page.evaluate(()=>(window as unknown as{qa:QA}).qa.leave());await expect(tracking).not.toBeVisible();await page.evaluate(()=>{(window as unknown as{fixture:Fixture}).fixture.owner='owner-B';(window as unknown as{qa:QA}).qa.mount('native');});await expect(input).toHaveValue('');
+    }
+    await page.evaluate(()=>(window as unknown as{qa:QA}).qa.leave());await expect(tracking).not.toBeVisible();await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.snapshot=null;f.visitorToken=null;});await page.evaluate(kind=>(window as unknown as{qa:QA}).qa.mount(kind),kind);await expect(tracking).toBeVisible();assert.equal(await tracking.count(),1);const from=page.getByRole('textbox',{name:'From',exact:true});await expect(from).toBeVisible();await from.fill('Unsent intake origin');await tracking.click();await page.evaluate(()=>(window as unknown as{qa:QA}).qa.leave());await expect(tracking).not.toBeVisible();await page.evaluate(kind=>(window as unknown as{qa:QA}).qa.mount(kind),kind);await expect(from).toHaveValue('Unsent intake origin');
+    const calls=await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.calls);assert.ok(calls.every(call=>!call.body));assert.ok(calls.every(call=>!call.path.includes('transport-plan')&&!call.path.includes('tracking')),'Chat never obtains portal authority or loads legacy capability');await page.evaluate(()=>(window as unknown as{qa:QA}).qa.unmount());assert.deepEqual(errors,[]);return;
+   }
+   const tracking=page.getByRole('link',{name:'Tracking →',exact:true});assert.equal(await tracking.count(),0,'The owning public/owner shell supplies the single Tracking entry');assert.equal(await page.getByRole('button',{name:'View transport plan',exact:true}).count(),0);assert.equal(await page.getByText('Literal Air Provider',{exact:true}).count(),0);await page.evaluate(()=>(window as unknown as{qa:QA}).qa.leave());await expect(input).not.toBeVisible();await page.evaluate(()=>(window as unknown as{qa:QA}).qa.mount('web'));await expect(input).toHaveValue('Unsent reply kept while reading');
+   await page.evaluate(()=>(window as unknown as{qa:QA}).qa.update('closed',2));await expect(page.getByRole('button',{name:'Send another request',exact:true})).toBeVisible();assert.equal(await tracking.count(),0);assert.equal(await page.getByText('Updated provider 2',{exact:true}).count(),0);await page.evaluate(()=>(window as unknown as{qa:QA}).qa.update('open',3));await expect(input).toHaveValue('Unsent reply kept while reading');assert.equal(await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.reads.at(-1)),true,'Visible chat retains its ordinary read observation; Tracking does not insert a legacy read view');
+   const calls=await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.calls);assert.ok(calls.every(call=>!call.body));assert.ok(calls.every(call=>!call.path.includes('transport-plan')&&!call.path.includes('tracking')));assert.doesNotMatch(await page.locator('body').innerText(),/PRIVATE OWNER|PRIVATE PHONE|ETA|Completed|Scan/);await page.evaluate(()=>(window as unknown as{qa:QA}).qa.unmount());assert.deepEqual(errors,[]);
+  }finally{await page.close();}
+ });}finally{await browser.close();}
+});

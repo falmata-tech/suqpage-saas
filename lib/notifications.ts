@@ -14,8 +14,12 @@ export async function notifyNewInquiry(
   options: NotificationOptions = {},
 ): Promise<NotificationResult> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.NOTIFICATION_FROM_EMAIL;
-  if (!apiKey || !from || !business.contact_email) return "skipped";
+  const configuredFrom = process.env.NOTIFICATION_FROM_EMAIL || "";
+  const address = configuredFrom.includes("<")
+    ? /^[^<>\r\n]*<([^<>\r\n]+)>$/.exec(configuredFrom)?.[1]
+    : configuredFrom;
+  if (!apiKey || !address || !/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(address) || !business.contact_email) return "skipped";
+  const from = `Suqpage <${address}>`;
   const send = options.send ?? fetch;
   try {
     const response = await send("https://api.resend.com/emails", {
@@ -25,8 +29,8 @@ export async function notifyNewInquiry(
       body: JSON.stringify({
         from,
         to: [business.contact_email],
-        subject: `New AfricMade inquiry #${inquiryId}`,
-        text: `${customerName} submitted a new inquiry to ${business.name}. Sign in to AfricMade to review it.`,
+        subject: `New Suqpage inquiry #${inquiryId}`,
+        text: `${customerName} submitted a new inquiry to ${business.name}. Sign in to Suqpage to review it.`,
       }),
     });
     if (!response.ok) throw new Error("provider_non_success");

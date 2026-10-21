@@ -1,5 +1,6 @@
 export const offeringKinds = [
   "standard_product",
+  "service",
   "made_to_order",
   "manufacturing_capability",
   "production_supply",
@@ -10,8 +11,31 @@ export const quantityModes = ["required", "optional"] as const;
 export type OfferingKind = (typeof offeringKinds)[number];
 export type QuantityMode = (typeof quantityModes)[number];
 
+// Storage and historical snapshots retain every offering kind above. New or
+// explicitly reclassified catalog entries are tangible products only.
+export const activeProductKinds = ["standard_product", "made_to_order"] as const;
+export type ActiveProductKind = (typeof activeProductKinds)[number];
+export function isActiveProductKind(value: unknown): value is ActiveProductKind {
+  return activeProductKinds.includes(value as ActiveProductKind);
+}
+export function isPublicProduct(product: { offering_kind?: unknown }): boolean {
+  return offeringKinds.includes(product.offering_kind as OfferingKind) && product.offering_kind !== "service";
+}
+
+/** Merchant supply context, independent of verified inventory or transport. */
+export function productSupplyLabel(kind: string, availability: string): string {
+  if (availability === "coming_soon") return "Coming soon";
+  if (availability === "unavailable") return kind === "made_to_order" ? "Not accepting orders" : "Unavailable";
+  if (availability === "limited") return kind === "made_to_order" ? "Limited capacity" : "Limited availability";
+  if (availability !== "available") return "Unavailable";
+  if (kind === "standard_product") return "Ready to ship";
+  if (kind === "made_to_order") return "Made to order";
+  return isPublicProduct({ offering_kind: kind }) ? "Available" : "Unavailable";
+}
+
 export const offeringKindLabels: Record<OfferingKind, string> = {
   standard_product: "Standard product",
+  service: "Service",
   made_to_order: "Made to order",
   manufacturing_capability: "Manufacturing capability",
   production_supply: "Production supply",
@@ -19,6 +43,7 @@ export const offeringKindLabels: Record<OfferingKind, string> = {
 
 export const offeringKindDescriptions: Record<OfferingKind, string> = {
   standard_product: "A defined item a customer can request in a desired quantity.",
+  service: "Work, expertise or assistance a customer can inquire about.",
   made_to_order: "A defined product made after specifications and quantity are agreed.",
   manufacturing_capability: "Something this business can repeatedly manufacture or fabricate.",
   production_supply: "A crop, material, ingredient, or production output supplied by cycle or batch.",
@@ -28,6 +53,9 @@ export function availabilityLabel(
   kind: OfferingKind,
   availability: "available" | "limited" | "unavailable" | "coming_soon",
 ) {
+  if (kind === "service") {
+    return { available: "Accepting inquiries", limited: "Limited availability", unavailable: "Not currently available", coming_soon: "Coming soon" }[availability];
+  }
   if (kind === "standard_product") {
     return {
       available: "Available",
@@ -50,6 +78,14 @@ export function availabilityLabel(
     unavailable: "Not accepting inquiries",
     coming_soon: "Planned capability",
   }[availability];
+}
+
+export function offeringNoun(kind: OfferingKind): "service" | "product" {
+  return kind === "service" ? "service" : "product";
+}
+
+export function catalogOfferingLabel(_items: readonly { offering_kind: OfferingKind }[]): string {
+  return "Products";
 }
 
 export function normalizeOfferingKind(value: unknown): OfferingKind {

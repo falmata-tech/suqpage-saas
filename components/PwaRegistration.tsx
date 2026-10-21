@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const CACHE_PREFIXES = ["africmade-pwa-", "mirtpage-pwa-"];
+const CACHE_PREFIXES = ["suqpage-pwa-", "africmade-pwa-", "mirtpage-pwa-"];
 
 async function removeDevelopmentWorkers() {
   const registrations = await navigator.serviceWorker.getRegistrations();
@@ -17,7 +17,7 @@ async function removeDevelopmentWorkers() {
 export default function PwaRegistration() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    if (process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED === "false") {
+    if (process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_SUQPAGE_PWA_ENABLED === "false") {
       void removeDevelopmentWorkers();
       return;
     }

@@ -1,19 +1,9 @@
-import { test, expect, type Page } from "@playwright/test";
+import type {Page} from '@playwright/test';
+import {test, expect} from './fixtures';
 import { execFileSync } from "node:child_process";
-import fs from "node:fs";
 import path from "node:path";
 
-type AcceptanceProbe = "inquiryByCustomer";
-const readAcceptanceRow = (probe: AcceptanceProbe, value: string) =>
-  JSON.parse(
-    execFileSync(
-      process.execPath,
-      [path.join(process.cwd(), "scripts/acceptance-db-probe.mjs"), probe, value],
-      { encoding: "utf8" },
-    ),
-  ) as Record<string, unknown> | null;
-
-const mailpitURL = process.env.MIRTPAGE_TEST_MAILPIT_URL!;
+const mailpitURL = process.env.SUQPAGE_TEST_MAILPIT_URL!;
 let loginAttempt = 0;
 const installControlledVideoFixture = (handle = "selam-weave") =>
   JSON.parse(
@@ -23,46 +13,6 @@ const installControlledVideoFixture = (handle = "selam-weave") =>
       { encoding: "utf8" },
     ),
   ) as { handle: string; updated: boolean };
-function monitor(page: Page) {
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(`page: ${error.message}`));
-  page.on("console", (message) => { if (message.type() === "error") errors.push(`console: ${message.text()}`); });
-  return errors;
-}
-async function expectVisibleControlsNamed(page: Page) {
-  const unnamed = await page.locator("input:not([type=hidden]), select, textarea").evaluateAll((controls) =>
-    controls.flatMap((control) => {
-      const element = control as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-      if (element.closest('[aria-hidden="true"]') || element.getClientRects().length === 0) return [];
-      const hasName =
-        Boolean(element.labels?.length) ||
-        Boolean(element.getAttribute("aria-label")) ||
-        Boolean(element.getAttribute("aria-labelledby"));
-      return hasName ? [] : [`${element.tagName.toLowerCase()}[name="${element.getAttribute("name") || ""}"]`];
-    }),
-  );
-  expect(unnamed).toEqual([]);
-}
-async function horizontalOverflowingElements(page: Page) {
-  return page.locator("body *").evaluateAll((elements) => {
-    const viewportWidth = document.documentElement.clientWidth;
-    return elements.flatMap((element) => {
-      const rect = element.getBoundingClientRect();
-      if (rect.right <= viewportWidth + 0.5 && rect.left >= -0.5) return [];
-      const style = getComputedStyle(element);
-      const parentStyle = element.parentElement ? getComputedStyle(element.parentElement) : null;
-      if (parentStyle?.overflowX === "auto" || parentStyle?.overflowX === "scroll") return [];
-      return [{
-        tag: element.tagName.toLowerCase(),
-        className: element.className,
-        left: Math.round(rect.left),
-        right: Math.round(rect.right),
-        width: Math.round(rect.width),
-        overflowX: style.overflowX,
-      }];
-    }).slice(0, 12);
-  });
-}
 async function latestEmailCode(email: string) {
   for (let attempt = 0; attempt < 40; attempt += 1) {
     const response = await fetch(`${mailpitURL}/api/v1/messages`);
@@ -87,1306 +37,177 @@ async function loginWithEmailCode(page: Page, email: string, destination: RegExp
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page).toHaveURL(destination);
 }
-async function signOut(page: Page) { await page.getByRole("button", { name: "Sign out" }).click(); await expect(page).toHaveURL(/\/login$/); }
+async function signOut(page: Page) {
+  const accountSignOut=page.getByRole('main').getByRole('button',{name:'Sign out',exact:true});
+  if (!await accountSignOut.isVisible()) await page.goto('/dashboard/account');
+  await accountSignOut.click(); await expect(page).toHaveURL(/\/login$/);
+}
 
-test("business creates a private client workspace without public uploads", async ({ page }) => {
-  const errors = monitor(page);
-  await page.goto("/about");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("A stronger market starts closer to home.");
-  await expect(page.getByRole("heading", { name: "Remarkable work should not depend on word of mouth." })).toBeVisible();
-  await expect(page.getByText("AfricMade gives it a clear place in the market", { exact: false })).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  const signupEmail = `acceptance-${Date.now()}@example.test`;
-  await loginWithEmailCode(page, signupEmail, /\/request$/);
-  await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Set up your AfricMade account.");
-  await page.getByLabel("Your name").fill("Acceptance Prospect");
-  await expect(page.getByText(signupEmail, { exact: true })).toBeVisible();
-  await page.getByLabel("Name buyers will see").fill("Acceptance Self Signup");
-  await page.getByLabel("Category").selectOption("home-living");
-  await page.getByLabel("Phone or WhatsApp").fill("+251911000111");
-  await expect(page.locator('input[type="file"]')).toHaveCount(0);
-  await page.getByLabel(/I agree to the AfricMade Terms and Privacy Policy/).check();
-  await page.getByRole("button", { name: "Finish setup" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByText("Acceptance Self Signup", { exact: false }).first()).toBeVisible();
-  await signOut(page);
-  const legacyLead = await page.request.post("/api/requests", { data: {
-    contactName: "Acceptance Prospect",
-    contactValue: "prospect@example.test",
-    businessName: "Acceptance Market",
-    requestText: "I am interested in an AfricMade page for our handmade home products.",
-    idempotencyKey: "acceptance-public-lead-0001",
-    consent: true,
-  } });
-  expect(legacyLead.status()).toBe(201);
-  const publicUpload = await page.request.post("/api/requests", { multipart: { contactName: "Upload Attempt", contactValue: "upload@example.test", requestText: "Trying a forbidden public upload", consent: "on", idempotencyKey: "public-upload-test-123", images: { name: "blocked.png", mimeType: "image/png", buffer: fs.readFileSync(path.join(process.cwd(), "public/uploads/seed/mirtpage/icon.png")) } } });
-  expect(publicUpload.status()).toBe(415);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
-});
-
-test("geographic discovery, Daily Featured Showrooms, benchmark Showrooms, and copy-first inquiry", async ({ page }) => {
-  test.setTimeout(120_000);
-  const errors = monitor(page);
-  await page.goto("/?featuredDay=0");
-  await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Find locally made and grown products.");
-  await expect(page.getByText("Explore pages from Ethiopian artisans, farms, workshops, and small manufacturers.", { exact: false })).toBeVisible();
-  await expect(page.getByRole("tablist", { name: "Discovery view" })).toHaveCount(0);
-  await expect(page.getByRole("tab", { name: "Map" })).toHaveCount(0);
-  await expect(page.getByRole("tab", { name: "List" })).toHaveCount(0);
-  await expect(page.locator(".discovery-map-stage")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Choose a category" })).toBeVisible();
-  await page.locator('.discovery-industry-start a[data-industry="all"]').click();
-  await expect(page).toHaveURL(/industry=all/);
-  await expect(page.getByRole("navigation", { name: "Production scale" })).toHaveCount(0);
-  await expect(page.locator(".discovery-summary").getByRole("search")).toBeVisible();
-  await expect(page.locator(".discovery-summary").getByLabel("Filter by region or city")).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Production scale" })).toHaveCount(0);
-  await expect(page.locator('.discovery-map[data-map-provider="osm-standard"]')).toBeVisible();
-  await expect.poll(() => page.locator(".discovery-map img.leaflet-tile-loaded").count()).toBeGreaterThan(0);
-  await expect.poll(() => page.locator(".mp-map-cluster, .mp-map-showroom").count()).toBeGreaterThan(0);
-  await expect(page.locator(".leaflet-control-attribution")).toContainText("OpenStreetMap contributors");
-  await expect(page.getByRole("heading", { name: "How AfricMade works" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: /How it works/i })).toHaveCount(0);
-  await expect(page.locator(".landing-hero-image")).toHaveCount(0);
-  const desktopMap = await page.locator(".discovery-map-stage").boundingBox();
-  expect(desktopMap?.y).toBeLessThan(620);
-  await expect(page.getByRole("heading", { name: "Sponsors", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("navigation", { name: "Daily Featured schedule" })).toHaveCount(0);
-
-  await page.goto("/featured?featuredDay=0");
-  const sponsoredShortcuts = await page.locator(".discovery-sponsored-rail > a").count();
-  expect(sponsoredShortcuts).toBeGreaterThanOrEqual(5);
-  await expect(page.getByRole("heading", { name: "Sponsors", exact: true })).toBeVisible();
-  const sponsoredRail = page.locator(".discovery-sponsored-rail");
-  const sponsoredStart = await sponsoredRail.evaluate((element) => element.scrollLeft);
-  await page.waitForTimeout(5_200);
-  expect(await sponsoredRail.evaluate((element) => element.scrollLeft)).toBe(sponsoredStart);
-  await expect(page.getByRole("button", { name: /sponsored showrooms/i })).toHaveCount(0);
-  const featuredSchedule = page.getByRole("navigation", { name: "Daily Featured schedule" });
-  await expect(featuredSchedule.getByRole("link")).toHaveCount(7);
-  expect(await featuredSchedule.locator("a > b").allTextContents()).toEqual(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
-  const todayLink = featuredSchedule.locator("a.today");
-  await expect(todayLink).toHaveCount(1);
-  const todayColors = await todayLink.evaluate((element) => ({
-    background: getComputedStyle(element).backgroundColor,
-    color: getComputedStyle(element).color,
-  }));
-  expect(todayColors.background).toBe("rgb(201, 54, 0)");
-  expect(todayColors.color).toBe("rgb(255, 255, 255)");
-  const todayHref = (await todayLink.getAttribute("href")) || "";
-  const todayDay = todayHref.match(/featuredDay=(\d)/)?.[1] || "";
-  expect(todayDay).not.toBe("");
-  const previewHref = (await featuredSchedule.locator("a:not(.today)").first().getAttribute("href")) || "";
-  expect(previewHref).not.toBe("");
-  await page.goto(previewHref);
-  await expect(page.locator(".featured-week a[aria-current='date']")).toHaveAttribute("href", previewHref);
-  const previewState = await page.locator(".daily-featured").evaluate((section) => ({
-    boothCount: section.querySelectorAll(".featured-card").length,
-    outlineCount: section.querySelectorAll(".featured-card-preview").length,
-    revealedCount: section.querySelectorAll(".featured-card[data-business-id], .featured-card img").length,
-    hallControlCount: section.querySelectorAll(".featured-hall-controls").length,
-  }));
-  expect(previewState.outlineCount).toBeGreaterThan(0);
-  expect(previewState.boothCount).toBe(previewState.outlineCount);
-  expect(previewState.revealedCount).toBe(0);
-  expect(previewState.hallControlCount).toBe(0);
-  await expect(page.locator(".featured-week a.today")).toHaveAttribute("aria-current", "date", { timeout: 8_000 });
-  await expect(page).toHaveURL(new RegExp(`featuredDay=${todayDay}`));
-  await page.goto("/?industry=all");
-  const desktopIndustryPicker = page.locator(".discovery-industry-picker");
-  await desktopIndustryPicker.locator("summary").click();
-  await desktopIndustryPicker.getByRole("menuitemradio", { name: /Personal care & household/ }).click();
-  await expect(page).toHaveURL(/industry=beauty-wellness/);
-  await expect(page).not.toHaveURL(/featuredDay=/);
-  await expect(page.locator(".discovery-map-stage")).toBeVisible();
-  expect(await page.locator(".mp-map-cluster, .mp-map-showroom").count()).toBeGreaterThan(0);
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/?featuredDay=1");
-  const phoneMap = await page.locator(".discovery-map-stage").boundingBox();
-  expect(phoneMap?.y).toBeLessThan(620);
-  await expect(page.locator(".landing-header")).toBeHidden();
-  await expect(page.locator(".landing-footer")).toBeHidden();
-  const publicAppNavigation = page.getByRole("navigation", { name: "AfricMade application navigation" });
-  await expect(publicAppNavigation).toBeVisible();
-  await publicAppNavigation.getByRole("button", { name: "More" }).click();
-  await expect(page.getByRole("navigation", { name: "AfricMade account" }).getByRole("link", { name: "Sign in" })).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "AfricMade account" }).getByRole("link", { name: "Dashboard" })).toHaveCount(0);
-  await page.getByRole("button", { name: "Close navigation" }).click();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await page.setViewportSize({ width: 320, height: 700 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await page.setViewportSize({ width: 1280, height: 720 });
-  const compositionSignatures = new Set<string>();
-  const heroMediaIntegrations = new Set<string>();
-  for (const handle of ["selam-weave", "afia-botanics", "warka-furniture", "addis-metalworks", "green-terrace-farm", "blue-nile-apiary", "rift-valley-mill", "entoto-ceramics", "koba-leather", "nova-assembly"]) {
-    await page.goto(`/@${handle}`);
-    const hostBar = page.getByRole("navigation", { name: "Page return navigation" });
-    await expect(hostBar).toBeVisible();
-    await expect(hostBar.getByRole("button", { name: "Back to Market" })).toBeVisible();
-    await expect(hostBar.getByText("Powered by AfricMade")).toHaveCount(0);
-    await expect(page.locator(".showroom")).toBeVisible();
-    await expect(page.locator('[data-bank-release="showroom-bank@1.2.0"]')).toBeVisible();
-    await expect(page.locator(".sr-card").first()).toBeVisible();
-    compositionSignatures.add(
-      await page.locator("[data-token-pack]").getAttribute("data-token-pack") || "",
-    );
-    await expect(page.locator('nav[aria-label="Product categories"]')).toHaveCount(0);
-    await expect(page.locator('[aria-label="Catalog filters"]')).toHaveCount(1);
-    const sectionNavigation = page.locator('[data-slot="header"] nav[aria-label="Page sections"]');
-    await expect(sectionNavigation).toHaveCount(1);
-    await expect(sectionNavigation.getByRole("link")).toHaveCount(4);
-    await expect(sectionNavigation.getByRole("link", { name: "Home" })).toHaveAttribute("href", "#showroom-home");
-    await expect(sectionNavigation.getByRole("link", { name: "Story" })).toHaveAttribute("href", "#showroom-story");
-    await expect(sectionNavigation.getByRole("link", { name: "Offerings" })).toHaveAttribute("href", "#showroom-catalog");
-    await expect(sectionNavigation.getByRole("link", { name: "Contact" })).toHaveAttribute("href", "#showroom-contact");
-    await expect(page.locator('[data-slot="header"] button')).toHaveCount(0);
-    await expect(page.locator('[data-slot="footer"] nav')).toHaveCount(0);
-    await expect(page.locator('[data-slot="footer"]').getByText(`@${handle}`, { exact: true })).toBeVisible();
-    await expect(page.locator(".floating-inquiry-trigger")).toHaveCount(1);
-    await expect(page.locator('[data-slot="hero"] button')).toHaveCount(0);
-    await expect(page.locator('a[href="#showroom-catalog"]').first()).toBeVisible();
-    const heroSection = page.locator('[data-slot="hero"]');
-    const mediaIntegration =
-      (await heroSection.getAttribute("data-media-integration")) || "";
-    expect([
-      "natural",
-      "surface_blend",
-      "ambient_overlay",
-      "edge_fade",
-      "split_bleed",
-      "editorial_overlap",
-      "product_stage",
-      "hidden",
-    ]).toContain(mediaIntegration);
-    heroMediaIntegrations.add(mediaIntegration);
-    const heroMedia = page.locator('[data-slot="hero"] img').first();
-    const heroGeometry = await heroMedia.evaluate((image) => {
-      const bounds = image.parentElement!.getBoundingClientRect();
-      const style = getComputedStyle(image.parentElement!);
-      return {
-        width: bounds.width,
-        height: bounds.height,
-        borderWidth:
-          Number.parseFloat(style.borderLeftWidth) +
-          Number.parseFloat(style.borderRightWidth),
-      };
-    });
-    expect(heroGeometry.width).toBeGreaterThan(0);
-    expect(heroGeometry.width).toBeLessThanOrEqual(1280);
-    expect(heroGeometry.height).toBeGreaterThanOrEqual(240);
-    expect(heroGeometry.height).toBeLessThanOrEqual(720);
-    expect(heroGeometry.borderWidth).toBe(0);
-    expect(
-      await page.locator("[data-composition-schema] [data-slot]").evaluateAll(
-        (sections) =>
-          sections.map((section) => section.getAttribute("data-slot")).join(">"),
-      ),
-    ).toBe("header>hero>content>catalog>callToAction>footer");
-    expect(
-      await page.locator("[data-composition-schema] [data-slot]").evaluateAll(
-        (sections) =>
-          sections.map((section) => section.getAttribute("data-surface")).join(">"),
-      ),
-    ).toBe("surface>accent-soft>secondary-soft>canvas>strong>inverse");
-    const catalog = page.locator('[data-slot="catalog"]');
-    const catalogVariant = await catalog.getAttribute("data-variant");
-    if (catalogVariant === "minimal-list") {
-      const thumbnail = await catalog.locator(".sr-card img").first().evaluate((image) => {
-          const bounds = image.getBoundingClientRect();
-          return {
-            width: bounds.width,
-            ratio: bounds.width / bounds.height,
-          };
-        });
-      expect(thumbnail.width).toBeLessThanOrEqual(112);
-      expect(thumbnail.ratio).toBeCloseTo(4 / 3, 2);
-    } else {
-      expect(
-        await catalog.locator(".sr-card").evaluateAll((cards) =>
-          cards.every((card) => card.getBoundingClientRect().width <= 420),
-        ),
-      ).toBe(true);
-      expect(
-        await catalog.locator(".sr-card img").evaluateAll((images) =>
-          images.every((image) => {
-            const bounds = image.getBoundingClientRect();
-            const ratio = bounds.width / bounds.height;
-            return ratio >= 1.32 && ratio <= 1.35;
-          }),
-        ),
-      ).toBe(true);
-    }
-    expect(
-      await page.locator("[data-slot]").evaluateAll((sections) => {
-        const surfaces = new Set(
-          sections.map((section) => getComputedStyle(section).backgroundColor),
-        );
-        return surfaces.size;
-      }),
-    ).toBeGreaterThanOrEqual(3);
-    const categoryButtons = page.locator('[aria-label="Catalog filters"] button');
-    await categoryButtons.nth(1).click();
-    expect(
-      await categoryButtons.nth(1).evaluate((button) => {
-        const style = getComputedStyle(button);
-        const rgb = (value: string) => {
-          const values =
-            value.match(/\d+(?:\.\d+)?/g)?.slice(0, 3).map(Number) ||
-            [0, 0, 0];
-          return value.startsWith("color(")
-            ? values.map((channel) => channel * 255)
-            : values;
-        };
-        const luminance = (value: string) => {
-          const channels = rgb(value).map((channel) => {
-            const normalized = channel / 255;
-            return normalized <= 0.04045
-              ? normalized / 12.92
-              : ((normalized + 0.055) / 1.055) ** 2.4;
-          });
-          return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
-        };
-        const foreground = luminance(style.color);
-        const background = luminance(style.backgroundColor);
-        return (Math.max(foreground, background) + 0.05) /
-          (Math.min(foreground, background) + 0.05);
-      }),
-    ).toBeGreaterThanOrEqual(4.5);
-    expect(
-      await page
-        .locator('[data-slot] h2, [data-slot] h3, [data-slot] p, [data-slot] strong')
-        .evaluateAll((elements) =>
-          elements.every((element) => element.scrollWidth <= element.clientWidth + 1),
-        ),
-    ).toBe(true);
-    await expectVisibleControlsNamed(page);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  }
-  expect(compositionSignatures.size).toBeGreaterThanOrEqual(6);
-  expect(heroMediaIntegrations.size).toBeGreaterThanOrEqual(3);
-  await page.goto("/@selam-weave");
-  const productOpener = page.locator(".sr-card").first().getByRole("button", { name: /^View / });
-  await productOpener.click();
-  await expect(page.getByRole("dialog").first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Close product" })).toBeFocused();
-  await page.keyboard.press("Shift+Tab");
-  expect(await page.getByRole("dialog").first().evaluate((dialog) => dialog.contains(document.activeElement))).toBe(true);
-  await page.keyboard.press("Escape");
-  await expect(productOpener).toBeFocused();
-  await productOpener.click();
-  await page.getByRole("button", { name: "Add selected item" }).click();
-  const drawerOpener = page.locator(".floating-inquiry-trigger");
-  await expect(drawerOpener).toHaveAccessibleName("Inquiry, 1 selected item");
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  await expect(drawerOpener).toBeInViewport();
-  await expect(drawerOpener).toBeVisible();
-  await drawerOpener.click();
-  await expect(page.getByRole("button", { name: "Close inquiry" })).toBeFocused();
-  expect(await page.evaluate(() => document.body.style.overflow)).toBe("hidden");
-  const desktopDrawer = await page
-    .getByRole("dialog", { name: "Product inquiry" })
-    .evaluate((dialog) => {
-      const bounds = dialog.getBoundingClientRect();
-      return {
-        top: bounds.top,
-        right: window.innerWidth - bounds.right,
-        bottom: window.innerHeight - bounds.bottom,
-        width: bounds.width,
-        scrollBehavior: getComputedStyle(dialog.querySelector(".drawer-scroll")!).overflowY,
-      };
-    });
-  expect(desktopDrawer.top).toBeGreaterThanOrEqual(16);
-  expect(desktopDrawer.right).toBeGreaterThanOrEqual(16);
-  expect(desktopDrawer.bottom).toBeGreaterThanOrEqual(16);
-  expect(desktopDrawer.width).toBeLessThanOrEqual(560);
-  expect(desktopDrawer.scrollBehavior).toBe("auto");
-  await page.keyboard.press("Shift+Tab");
-  expect(await page.getByRole("dialog", { name: "Product inquiry" }).evaluate((dialog) => dialog.contains(document.activeElement))).toBe(true);
-  await page.keyboard.press("Escape");
-  expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
-  await expect(drawerOpener).toBeFocused();
-  await expect(page.locator(".inquiry-drawer")).toHaveAttribute("aria-hidden", "true");
-  await drawerOpener.click();
-  await expect(page.getByPlaceholder("Your first name")).toHaveCount(0);
-  const inquiryPhone = page.getByRole("textbox", { name: "Phone number" });
-  await expect(inquiryPhone).toBeVisible();
-  await expect(page.getByRole("button", { name: "TikTok" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Share / copy" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "WhatsApp" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Telegram" })).toBeVisible();
-  await page.getByRole("button", { name: "Copy inquiry" }).click();
-  await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
-  const copiedReference = page.locator(".copied-reference pre");
-  await expect(copiedReference).toContainText("AfricMade page: @selam-weave");
-  await expect(copiedReference).not.toContainText("Desired quantity:");
-  expect(readAcceptanceRow("inquiryByCustomer", "Page visitor")).toBeNull();
-  await inquiryPhone.fill("123");
-  await page.getByRole("button", { name: "Send inquiry" }).click();
-  await expect(page.locator("#inquiry-send-status")).toContainText("7 to 15 digits");
-  expect(readAcceptanceRow("inquiryByCustomer", "Page visitor")).toBeNull();
-  await inquiryPhone.fill("+251 91 123 4567");
-  await page.getByRole("button", { name: "Send inquiry" }).click();
-  await expect(page.locator("#inquiry-send-status")).toContainText("Sent to Selam Weave Studio");
-  expect(readAcceptanceRow("inquiryByCustomer", "Page visitor")).toEqual({
-    status: "new",
-    contact: "+251911234567",
-  });
-  expect(errors).toEqual([]);
-});
-
-test("mobile search, persistent cart, quantity, and overflow", async ({ page }) => {
-  const errors = monitor(page);
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/@addis-metalworks");
-  await page.getByLabel("Search products").fill("Powder-Coated");
-  await expect(page.locator(".sr-card")).toHaveCount(1);
-  await page.locator(".sr-card").first().getByRole("button", { name: /^View / }).click();
-  await page.getByRole("button", { name: "Add selected item" }).click();
+// FE-040–043/BE-032–034: current standard-page acceptance replaces retired studios.
+test('passwordless signup, private account contacts and sign-out',async({page})=>{
+  const email=`acceptance-${Date.now()}@example.test`;
+  await loginWithEmailCode(page,email,/\/request$/);
+  // DEP-033: a credential-free build must not freeze the anonymous redirect.
+  await page.goto('/login'); await expect(page).toHaveURL(/\/request$/);
+  await expect(page.getByLabel('Your name',{exact:true})).toBeVisible();
+  await page.reload(); await expect(page).toHaveURL(/\/request$/);
+  await page.getByLabel('Your name',{exact:true}).fill('Acceptance owner');
+  await page.getByLabel('Name buyers will see',{exact:true}).fill('Acceptance signup shop');
+  await page.getByLabel('Page handle',{exact:true}).fill('acceptance-chosen-shop');
+  await expect(page.locator('#signup-handle-status')).toHaveText('Available');
+  await page.getByLabel('Category',{exact:true}).selectOption('home-living');
+  await page.getByLabel('Account phone (private)',{exact:true}).fill('+447700900999');
+  await expect(page.getByRole('button',{name:'Finish setup',exact:true})).toBeDisabled();
+  await page.getByRole('combobox',{name:'Country',exact:true}).selectOption('ET');
+  await page.getByRole('combobox',{name:'Business city',exact:true}).fill('Addis Ababa');
+  await page.getByRole('option').filter({hasText:'Addis Ababa'}).first().click();
+  await expect(page.locator('input[name=placeId]')).not.toHaveValue('');
+  await expect(page.locator('input[type=file]')).toHaveCount(0);
+  await expect(page.getByText('Page color',{exact:true})).toHaveCount(0);
+  await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Finish setup',exact:true}).click();
+  await expect(page).toHaveURL(/\/dashboard\/page-editor\?view=preview$/);await expect(page.getByLabel('Page preview',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Page color',exact:true}).click();
+  await page.getByLabel('Custom color',{exact:true}).fill('#ff00b8');
+  await expect(page.locator('[data-business-profile]')).toHaveAttribute('data-store-accent','#FF00B8');
+  await expect(page.locator('[data-business-profile] [class*=coverTint]')).toHaveCSS('opacity','0.08');
+  await page.route('https://www.youtube-nocookie.com/embed/**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>Video fixture</title>'}));
+  await page.getByRole('button',{name:/Play business video about/}).click();
+  await expect(page.locator('[data-business-profile] iframe')).toBeVisible();
+  await expect(page.locator('[data-business-profile] [class*=coverTint]')).toHaveCount(0);
+  await page.getByRole('button',{name:'Choose color #B6FF00',exact:true}).click();
+  await page.getByRole('button',{name:'Save',exact:true}).click();
+  await expect(page).toHaveURL(/\/dashboard\/profile\/showroom\?saved=page$/);
+  await expect(page.getByText('Changes saved.',{exact:true})).toBeVisible();
   await page.reload();
-  const mobileNavigation = page.getByRole("navigation", { name: "Page sections" });
-  await expect(mobileNavigation).toBeVisible();
-  await expect(mobileNavigation.locator("a, button")).toHaveCount(5);
-  await expect(page.locator(".floating-inquiry-trigger")).toBeHidden();
-  const mobileInquiry = mobileNavigation.getByRole("button", { name: "Inquiry, 1 selected item" });
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  await expect(mobileNavigation).toBeInViewport();
-  const navigationBounds = await mobileNavigation.evaluate((navigation) => {
-    const bounds = navigation.getBoundingClientRect();
-    return {
-      right: window.innerWidth - bounds.right,
-      bottom: window.innerHeight - bounds.bottom,
-      width: bounds.width,
-      height: bounds.height,
-    };
-  });
-  expect(navigationBounds.right).toBeGreaterThanOrEqual(0);
-  expect(navigationBounds.bottom).toBeGreaterThanOrEqual(0);
-  expect(navigationBounds.width).toBe(390);
-  expect(navigationBounds.height).toBeGreaterThanOrEqual(64);
-  const mobileInquiryBounds = await mobileInquiry.evaluate((button) => {
-    const bounds = button.getBoundingClientRect();
-    return { width: bounds.width, height: bounds.height };
-  });
-  expect(mobileInquiryBounds.width).toBeGreaterThanOrEqual(44);
-  expect(mobileInquiryBounds.height).toBeGreaterThanOrEqual(44);
-  await mobileInquiry.click();
-  const drawerPosition = await page.locator(".inquiry-drawer.open").evaluate((drawer) => getComputedStyle(drawer).position);
-  expect(drawerPosition).toBe("fixed");
-  const mobileDrawer = await page
-    .getByRole("dialog", { name: "Product inquiry" })
-    .evaluate((dialog) => {
-      const bounds = dialog.getBoundingClientRect();
-      const controls = Array.from(dialog.querySelectorAll("button"));
-      return {
-        left: bounds.left,
-        right: window.innerWidth - bounds.right,
-        bottom: window.innerHeight - bounds.bottom,
-        height: bounds.height,
-        controlsMeetTouchTarget: controls.every((control) => {
-          const controlBounds = control.getBoundingClientRect();
-          return controlBounds.width >= 44 && controlBounds.height >= 44;
-        }),
-      };
-    });
-  expect(mobileDrawer.left).toBeGreaterThanOrEqual(5);
-  expect(mobileDrawer.right).toBeGreaterThanOrEqual(5);
-  expect(mobileDrawer.bottom).toBeGreaterThanOrEqual(5);
-  expect(mobileDrawer.height).toBeLessThanOrEqual(832);
-  expect(mobileDrawer.controlsMeetTouchTarget).toBe(true);
-  await expect(page.getByRole("textbox", { name: "Phone number" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Send inquiry" })).toBeVisible();
-  await expect(page.locator(".direct-handoffs")).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "WhatsApp" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Telegram" })).toHaveCount(0);
-  const firstQuantity = page.locator(".cart-item").first().getByRole("textbox", {
-    name: /Desired quantity/,
-  });
-  await expect(firstQuantity).toHaveValue("");
-  await firstQuantity.fill("1 ton");
-  await expect(firstQuantity).toHaveValue("1 ton");
-  await page.getByRole("button", { name: "Close inquiry" }).click();
-  await page.getByLabel("Search products and capabilities").fill("Precision Bracket");
-  await expect(page.locator(".sr-card")).toHaveCount(1);
-  await page.locator(".sr-card").first().getByRole("button", { name: /^View / }).click();
-  await page.getByRole("button", { name: "Add selected item" }).click();
-  await mobileNavigation.getByRole("button", { name: "Inquiry, 2 selected items" }).click();
-  const optionalQuantity = page.locator(".cart-item").last().getByRole("textbox", {
-    name: /Desired quantity/,
-  });
-  await expect(optionalQuantity).toHaveValue("");
-  await optionalQuantity.fill("250 kg");
-  await expect(optionalQuantity).toHaveValue("250 kg");
-  await page.getByRole("button", { name: "Copy inquiry" }).click();
-  await expect(page.locator(".copied-reference pre")).toContainText("Desired quantity: 1 ton");
-  await expect(page.locator(".copied-reference pre")).toContainText("Desired quantity: 250 kg");
-  await page.getByRole("button", { name: "Close inquiry" }).click();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await page.setViewportSize({ width: 320, height: 700 });
-  for (const handle of ["selam-weave", "afia-botanics", "warka-furniture", "addis-metalworks", "green-terrace-farm", "blue-nile-apiary", "rift-valley-mill", "entoto-ceramics", "koba-leather", "nova-assembly"]) {
-    await page.goto(`/@${handle}`);
-    const mobileHostBar = page.getByRole("navigation", { name: "Page return navigation" });
-    await expect(mobileHostBar).toBeVisible();
-    const hostBounds = await mobileHostBar.boundingBox();
-    expect(hostBounds?.width).toBeLessThanOrEqual(320);
-    await expect(page.locator(".showroom")).toBeVisible();
-    await expect(page.locator(".sr-card").first()).toBeVisible();
-    await expect(page.locator('nav[aria-label="Product categories"]')).toHaveCount(0);
-    await expect(page.locator('[aria-label="Catalog filters"]')).toHaveCount(1);
-    const mobileHeroMedia = await page
-      .locator('[data-slot="hero"] img')
-      .first()
-      .evaluate((image) => {
-        const bounds = image.getBoundingClientRect();
-        return {
-          width: bounds.width,
-          height: bounds.height,
-          objectFit: getComputedStyle(image).objectFit,
-        };
-      });
-    expect(mobileHeroMedia.width).toBeGreaterThan(0);
-    expect(mobileHeroMedia.height).toBeGreaterThan(0);
-    expect(mobileHeroMedia.height).toBeLessThanOrEqual(520);
-    expect(["cover", "contain"]).toContain(mobileHeroMedia.objectFit);
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
-      ),
-    ).toBe(true);
-  }
-  expect(errors).toEqual([]);
+  await page.getByRole('link',{name:'Page color',exact:true}).click();
+  await expect(page).toHaveURL(/task=color&returnTo=showroom$/);
+  await expect(page.getByRole('button',{name:'Choose color #B6FF00',exact:true})).toHaveAttribute('aria-pressed','true');
+  await page.getByRole('button',{name:'Default',exact:true}).click();
+  await page.getByRole('button',{name:'Save',exact:true}).click();
+  await expect(page).toHaveURL(/\/dashboard\/profile\/showroom\?saved=page$/);
+  await expect(page.getByText('Changes saved.',{exact:true})).toBeVisible();
+  await page.reload();
+  await page.getByRole('link',{name:'Page color',exact:true}).click();
+  await expect(page.locator('[data-business-profile]')).not.toHaveAttribute('data-store-accent');
+  await page.goto('/dashboard/business');await expect(page.locator('#owner-business-name')).toHaveCount(0);await expect(page.getByText('Acceptance signup shop',{exact:true}).last()).toBeVisible();
+  await page.getByRole('link',{name:'Edit',exact:true}).click();await expect(page.getByLabel('Business name',{exact:true})).toHaveValue('Acceptance signup shop');
+  await page.getByRole('button',{name:'Cancel',exact:true}).click();await expect(page).toHaveURL(/\/dashboard\/business$/);await expect(page.locator('#owner-business-name')).toHaveCount(0);
+  await page.goto('/dashboard/account');await expect(page.locator('#profile-phone')).toHaveCount(0);await expect(page.getByText('+447700900999',{exact:true})).toBeVisible();
+  await page.getByRole('link',{name:'Edit account details',exact:true}).click();await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900999');
+  await page.getByLabel('Account phone',{exact:true}).fill('+447700900998');await page.getByRole('button',{name:'Save changes',exact:true}).click();
+  await expect(page).toHaveURL(/\/dashboard\/account\?contact=saved$/);await expect(page.getByText('Changes saved.',{exact:true})).toBeVisible();await expect(page.locator('#profile-phone')).toHaveCount(0);
+  await page.reload();await expect(page.getByText('+447700900998',{exact:true})).toBeVisible();await page.getByRole('link',{name:'Edit account details',exact:true}).click();await expect(page.getByLabel('Account phone',{exact:true})).toHaveValue('+447700900998');
+  await page.goto('/request');await expect(page).toHaveURL(/\/dashboard\/profile$/);
+  await signOut(page);await page.goto('/dashboard');await expect(page).toHaveURL(/\/login/);
 });
 
-test("mobile clustered map, nearby showroom inspector, and Daily Featured gallery", async ({ page }) => {
-  const errors = monitor(page);
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/discover?industry=electronics&featuredDay=1");
-  await expect(page.locator(".discovery-summary")).toBeVisible();
-  await expect(page.locator(".discovery-summary").getByRole("search")).toBeVisible();
-  await page.getByRole("button", { name: "Open category and location filters" }).click();
-  const filterSheet = page.getByRole("dialog", { name: "Filters" });
-  await expect(filterSheet).toBeVisible();
-  await expect(filterSheet.getByRole("link")).toHaveCount(8);
-  const filterBounds = await filterSheet.boundingBox();
-  expect(filterBounds).not.toBeNull();
-  expect(filterBounds?.width || 0).toBeLessThanOrEqual(390);
-  await filterSheet.getByRole("button", { name: "Close filters" }).click();
-  const streetMap = page.locator('.discovery-map[data-map-provider="osm-standard"]');
-  await expect(streetMap).toBeVisible();
-  await expect.poll(() => streetMap.locator("img.leaflet-tile-loaded").count()).toBeGreaterThan(0);
-  await expect(streetMap.locator(".leaflet-control-attribution")).toContainText("OpenStreetMap contributors");
-  const visibleMarkerIndex = (selector: string) => page.locator(selector).evaluateAll((markers) => {
-    const stage = document.querySelector(".discovery-map-stage")?.getBoundingClientRect();
-    if (!stage) return -1;
-    return markers.findIndex((marker) => {
-      const bounds = marker.getBoundingClientRect();
-      const centerX = bounds.left + bounds.width / 2;
-      const centerY = bounds.top + bounds.height / 2;
-      return centerX >= stage.left && centerX <= stage.right && centerY >= stage.top && centerY <= stage.bottom;
-    });
+test('self-service owner, staff product controls and inquiry lifecycle',async({},testInfo)=>{
+  test.setTimeout(360_000);
+  execFileSync(process.execPath,['--import','tsx',path.join(process.cwd(),'scripts/capture-launch-wiring.mjs')],{
+    env:{...process.env,SUQPAGE_TEST_SCREENSHOT_DIR:testInfo.outputPath('workflows')},stdio:'pipe',timeout:330_000,maxBuffer:4*1024*1024,
   });
-  const clusterColor = await page.locator(".mp-map-cluster").first().evaluate((cluster) => getComputedStyle(cluster).backgroundColor);
-  expect(clusterColor).toBe("rgb(201, 54, 0)");
-  const mobileZoomIn = page.getByRole("button", { name: "Zoom in", exact: true });
-  for (let attempt = 0; attempt < 10 && await page.locator(".mp-map-showroom").count() === 0; attempt += 1) {
-    await mobileZoomIn.click();
-    await page.waitForTimeout(240);
-  }
-  const isolatedPointIndex = await visibleMarkerIndex(".mp-map-showroom");
-  expect(isolatedPointIndex).toBeGreaterThanOrEqual(0);
-  const isolatedPoint = page.locator(".mp-map-showroom").nth(isolatedPointIndex);
-  const isolatedShowroomId = await isolatedPoint.getAttribute("data-showroom-id");
-  expect(isolatedShowroomId).not.toBeNull();
-  await expect(isolatedPoint).toHaveAttribute("data-latitude", /^-?\d+(\.\d+)?$/);
-  await expect(isolatedPoint).toHaveAttribute("data-longitude", /^-?\d+(\.\d+)?$/);
-  const isolatedMarker = isolatedPoint.locator("xpath=..");
-  const isolatedPointName = ((await isolatedMarker.getAttribute("aria-label")) || "").split(",")[0];
-  const isolatedPointLabelLines = await isolatedPoint.locator(":scope > b span").allTextContents();
-  expect(isolatedPointLabelLines.length).toBeGreaterThanOrEqual(1);
-  expect(isolatedPointLabelLines.length).toBeLessThanOrEqual(3);
-  expect(isolatedPointLabelLines.every((line) => line.length <= 13)).toBe(true);
-  expect(isolatedPointLabelLines.join(" ")).not.toBe("SHOWROOM");
-  expect(isolatedPointName.toLowerCase()).toContain(isolatedPointLabelLines[0].toLowerCase());
-  await expect(isolatedPoint.locator(".mp-map-storefront")).toHaveCount(1);
-  await expect(isolatedPoint.locator(".cluster-halo, .point-halo")).toHaveCount(0);
-  const pointColor = await isolatedPoint.locator(".mp-map-storefront").evaluate((storefront) => getComputedStyle(storefront).backgroundColor);
-  expect(pointColor).toBe("rgb(201, 54, 0)");
-  if (await isolatedPoint.getAttribute("data-presence")) await expect(isolatedPoint.locator(".mp-map-status")).toHaveCount(1);
-  await isolatedMarker.click();
-  const discoveryPreview = page.locator(".discovery-preview");
-  if (await discoveryPreview.count() === 0) {
-    await expect.poll(async () => Number(await streetMap.getAttribute("data-map-zoom"))).toBeGreaterThanOrEqual(12);
-    await page.locator(`.mp-map-showroom[data-showroom-id="${isolatedShowroomId}"]`).locator("xpath=..").click();
-  }
-  await expect(discoveryPreview).toHaveAttribute("aria-modal", "false");
-  await expect(discoveryPreview.getByRole("link", { name: "Open page" })).toHaveAttribute("href", /\/@[^?]+\?ref=discovery$/);
-  const previewLayer = page.locator(".discovery-preview-layer");
-  const previewMetrics = await previewLayer.evaluate((layer) => {
-    const preview = layer.querySelector(".discovery-preview")?.getBoundingClientRect();
-    const scrim = layer.querySelector(".discovery-preview-scrim");
-    const map = document.querySelector(".discovery-map-stage")?.getBoundingClientRect();
-    return {
-      centerDelta: preview && map ? Math.abs(preview.left + preview.width / 2 - (map.left + map.width / 2)) : 999,
-      insideMap: Boolean(preview && map && preview.left >= map.left && preview.right <= map.right && preview.top >= map.top && preview.bottom <= map.bottom),
-      scrimColor: scrim ? getComputedStyle(scrim).backgroundColor : "",
-      mapHidden: document.querySelector(".discovery-map-stage")?.getAttribute("aria-hidden"),
-      mapInert: document.querySelector(".discovery-map-stage")?.hasAttribute("inert"),
-    };
+});
+
+test('category product batches retain the independent map on desktop and phones',async({},testInfo)=>{
+  test.setTimeout(180_000);
+  execFileSync(process.execPath,[path.join(process.cwd(),'scripts/capture-category-pagination.mjs')],{
+    env:{...process.env,SUQPAGE_TEST_SCREENSHOT_DIR:testInfo.outputPath('category')},stdio:'pipe',timeout:150_000,maxBuffer:2*1024*1024,
   });
-  expect(previewMetrics.centerDelta).toBeLessThanOrEqual(2);
-  expect(previewMetrics.insideMap).toBe(true);
-  const scrimAlpha = Number(previewMetrics.scrimColor.match(/,\s*(0(?:\.\d+)?)\)$/)?.[1]);
-  expect(scrimAlpha).toBeGreaterThan(0);
-  expect(scrimAlpha).toBeLessThanOrEqual(0.14);
-  expect(previewMetrics.mapHidden).toBeNull();
-  expect(previewMetrics.mapInert).toBe(false);
-  await page.getByRole("button", { name: "Close page preview" }).click();
-  await page.goto("/discover?industry=electronics&place=city%3AAddis%20Ababa%3AAddis%20Ababa");
-  await expect(page.locator(".discovery-map-stage")).toBeVisible();
-  await expect(page.locator(".discovery-summary")).toContainText(/\d+ pages across 1 location/);
-  expect(Number(await streetMap.getAttribute("data-nearby-group-count"))).toBeGreaterThan(0);
-  for (let attempt = 0; attempt < 12; attempt += 1) {
-    const mapZoom = Number(await streetMap.getAttribute("data-map-zoom"));
-    if (mapZoom >= 14) break;
-    await mobileZoomIn.click();
-    await page.waitForTimeout(260);
+});
+
+test('linked products and social-only contact with no inbox submission',async({page})=>{
+  for(const width of [1440,390,320]){
+    await page.setViewportSize({width,height:900});await page.goto('/@selam-weave');
+    await page.locator('a[href*="?product="]').first().click();await expect(page).toHaveURL(/product=\d+/);
+    const url=page.url();await page.reload();await expect(page).toHaveURL(url);
+    await page.getByRole('button',{name:'Inquire about this product only',exact:true}).click();
+    const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();
+    await expect(page.getByLabel('Reply phone number',{exact:true})).toHaveCount(0);
+    await expect(dialog.getByRole('button',{name:'Copy message',exact:true})).toBeVisible();
+    await expect(dialog.getByRole('button',{name:'Send inquiry on Suqpage',exact:true})).toHaveCount(0);
+    await expect(dialog.getByRole('heading',{name:'Message the business',exact:true})).toBeVisible();
+    await dialog.getByRole('button',{name:'Copy message',exact:true}).click();
+    await expect(dialog.getByRole('textbox',{name:'Inquiry message',exact:true})).toHaveValue(/I'd like to ask about:/);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+    await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);
   }
-  await page.waitForTimeout(400);
-  expect(Number(await streetMap.getAttribute("data-map-zoom"))).toBeGreaterThanOrEqual(14);
-  await expect(page.locator(".mp-map-nearby")).toBeVisible();
-  const nearbyGroupIndex = await visibleMarkerIndex(".mp-map-nearby");
-  expect(nearbyGroupIndex).toBeGreaterThanOrEqual(0);
-  const nearbyGroup = page.locator(".mp-map-nearby").nth(nearbyGroupIndex);
-  const nearbyMarker = nearbyGroup.locator("xpath=..");
-  const nearbyLabel = await nearbyMarker.getAttribute("aria-label") || "";
-  const nearbyCount = Number(nearbyLabel.match(/(\d+) nearby pages/)?.[1]);
-  expect(nearbyCount).toBeGreaterThanOrEqual(2);
-  expect(nearbyCount).toBeLessThanOrEqual(6);
-  const mapView = {
-    zoom: await streetMap.getAttribute("data-map-zoom"),
-    center: await streetMap.getAttribute("data-map-center"),
-  };
-  await nearbyMarker.press("Enter");
-  const nearbyViewer = page.locator(".nearby-showroom-viewer");
-  await expect(nearbyViewer).toHaveAttribute("role", "dialog");
-  await expect(nearbyViewer).toHaveAccessibleName("Nearby pages");
-  await expect(nearbyViewer).toBeVisible();
-  await expect(nearbyViewer.locator(".nearby-showroom-grid > button")).toHaveCount(nearbyCount);
-  await expect(page.locator(".discovery-map")).toBeVisible();
-  await expect(nearbyViewer.getByRole("navigation", { name: /pages/i })).toHaveCount(0);
-  await nearbyViewer.locator(".nearby-showroom-grid > button").first().click();
-  const selectedNearbyName = await nearbyViewer.locator(".nearby-showroom-detail h2").textContent();
-  await expect(nearbyViewer.getByRole("button", { name: "Back to results" })).toBeFocused();
-  await expect(nearbyViewer.getByRole("link", { name: "Open page" })).toBeVisible();
-  await nearbyViewer.getByRole("link", { name: "Open page" }).click();
-  await expect(page).toHaveURL(/\/@[^?]+\?ref=discovery$/);
-  await page.getByRole("navigation", { name: "Page return navigation" }).getByRole("button", { name: "Back to Market" }).click();
-  await expect(nearbyViewer).toBeVisible();
-  await expect(nearbyViewer).toHaveClass(/detail-open/);
-  await expect(nearbyViewer.locator(".nearby-showroom-detail h2")).toHaveText(selectedNearbyName || "");
-  await nearbyViewer.getByRole("button", { name: "Back to results" }).click();
-  await expect(nearbyViewer.locator(".nearby-showroom-grid > button")).toHaveCount(nearbyCount);
-  await nearbyViewer.getByRole("button", { name: "Close nearby results" }).click();
-  await expect(nearbyViewer).toHaveCount(0);
-  await expect(streetMap).toHaveAttribute("data-map-zoom", mapView.zoom || "");
-  const restoredCenter = (await streetMap.getAttribute("data-map-center") || "").split(",").map(Number);
-  const expectedCenter = (mapView.center || "").split(",").map(Number);
-  expect(Math.abs(restoredCenter[0] - expectedCenter[0])).toBeLessThan(0.0001);
-  expect(Math.abs(restoredCenter[1] - expectedCenter[1])).toBeLessThan(0.0001);
+});
 
-  await page.goto("/featured?featuredDay=1");
-  await page.locator(".featured-week a:not(.today)").filter({ hasNotText: "Sun" }).first().click();
-  await expect(page.locator(".featured-card-preview")).not.toHaveCount(0);
-  await expect(page.locator(".featured-card[data-business-id], .featured-card img")).toHaveCount(0);
-  await page.locator(".featured-week a.today").click();
-  await expect(page.locator(".featured-week a.today")).toHaveAttribute("aria-current", "date");
-  const featuredCards = page.locator(".featured-card[data-business-id]");
-  expect(await featuredCards.count()).toBeGreaterThan(0);
-  const featuredCard = featuredCards.first();
-  await expect(featuredCard).toBeVisible();
-  const featuredUrlBeforePreview = page.url();
-  await featuredCard.click();
-  const featuredPreview = page.locator(".discovery-preview");
-  await expect(featuredPreview).toBeVisible();
-  expect(page.url()).toBe(featuredUrlBeforePreview);
-  await expect(featuredCard).toHaveClass(/selected/);
-  await expect(featuredPreview.getByRole("link", { name: "Open page" })).toHaveAttribute("href", /\/@[^?]+\?ref=featured$/);
-  await featuredPreview.getByRole("button", { name: "Close page preview" }).click();
-  const featuredGalleryMetrics = await page.locator(".featured-gallery").evaluate((gallery) => ({
-    horizontalOverflow: gallery.scrollWidth - gallery.clientWidth,
-    minimumCardWidth: Math.min(...[...gallery.querySelectorAll(".featured-card")].map((item) => item.getBoundingClientRect().width)),
-  }));
-  expect(featuredGalleryMetrics.horizontalOverflow).toBeLessThanOrEqual(2);
-  expect(featuredGalleryMetrics.minimumCardWidth).toBeGreaterThanOrEqual(140);
-  await expect(page.locator(".featured-hall-controls")).toHaveCount(0);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await page.goto("/?industry=electronics");
-  await expect(page.getByRole("tab", { name: "List" })).toHaveCount(0);
-  await expect(page.locator(".discovery-map-stage")).toBeVisible();
-  await page.goto("/featured?featuredDay=1");
-  const sundayLink = page.getByRole("navigation", { name: "Daily Featured schedule" }).getByRole("link", { name: /Sun/ });
-  const sundayIsToday = await sundayLink.evaluate((link) => link.classList.contains("today"));
-  await sundayLink.click();
-  await expect(page.getByRole("heading", { name: "Daily Featured" })).toBeVisible();
-  await expect(page.locator(".featured-gallery")).toHaveCount(1);
-  if (sundayIsToday) {
-    await expect.poll(() => page.locator(".featured-card[data-business-id]").count()).toBeGreaterThan(0);
+test('administrator and staff remain within workspace permissions',async({page})=>{
+  await loginWithEmailCode(page,'admin@mirtpage.local');
+  for(const route of ['/dashboard/admin/businesses','/dashboard/admin/staff','/dashboard/admin/page-reviews','/dashboard/admin/businesses?location=pending','/dashboard/support/agents','/dashboard/admin/sponsors','/dashboard/admin/featured-schedule']){
+    const response=await page.goto(route);expect(response?.status()).toBe(200);await expect(page.locator('main')).toBeVisible();
+    await expect(page.locator('a[href*="/dashboard/requests"],a[href*="/dashboard/design-bank"]')).toHaveCount(0);
   }
-  else {
-    await expect.poll(() => page.locator(".featured-card-preview").count()).toBeGreaterThan(0);
-    await expect(page.locator(".featured-card[data-business-id]")).toHaveCount(0);
-    const todayHref = await page.locator(".featured-week a.today").getAttribute("href") || "";
-    const todayDay = todayHref.match(/featuredDay=(\d)/)?.[1] || "";
-    await expect(page).toHaveURL(new RegExp(`featuredDay=${todayDay}`), { timeout: 8_000 });
-    await expect(page.locator(".featured-week a.today")).toHaveAttribute("aria-current", "date");
+  await signOut(page);await loginWithEmailCode(page,'team-1@demo.mirtpage.local');
+  await page.goto('/dashboard/admin');await expect(page).not.toHaveURL(/\/dashboard\/admin/);
+  await page.goto('/dashboard/inquiries');await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto('/dashboard/business');await expect(page).toHaveURL(/\/dashboard$/);
+});
+
+test('API authorization, validation, health, and security headers',async({request})=>{
+  const health=await request.get('/api/health');expect(health.status()).toBe(200);expect(await health.json()).toMatchObject({status:'ok'});
+  for(const prefix of ['/api/malikt/companies','/api/malikt/requests','/api/requests','/api/client/requests','/api/operations/requests','/dashboard/requests','/dashboard/design-bank','/dashboard/design-sdk']){
+    expect((await request.get(prefix)).status()).toBe(404);expect((await request.post(prefix,{data:{}})).status()).toBe(404);
   }
-  await page.setViewportSize({ width: 320, height: 700 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  const failurePage = await page.context().newPage();
-  const failureErrors = monitor(failurePage);
-  await failurePage.route("https://tile.openstreetmap.org/**", (route) => route.fulfill({ status: 503, body: "" }));
-  await failurePage.goto("/discover?industry=all");
-  const degradedMap = failurePage.locator('.discovery-map[data-map-provider="osm-standard"]');
-  await expect(degradedMap).toBeVisible();
-  await expect(degradedMap).toHaveAttribute("data-tile-status", "degraded");
-  await expect(degradedMap.locator(".leaflet-control-attribution")).toContainText("OpenStreetMap contributors");
-  await expect.poll(() => failurePage.locator(".mp-map-cluster, .mp-map-showroom").count()).toBeGreaterThan(0);
-  expect(failureErrors.filter((error) => !error.includes("503 (Service Unavailable)"))).toEqual([]);
-  await failurePage.close();
-  expect(errors.filter((error) => !error.includes("503 (Service Unavailable)"))).toEqual([]);
+  expect((await request.get('/api/page-drafts/1')).status()).toBe(405);
+  expect((await request.post('/api/page-drafts/1',{data:{action:'start'}})).status()).toBe(401);
+  const retired=await request.post('/api/inquiries',{data:{businessId:1,customerName:'X',contact:'12345',items:[]}});
+  expect(retired.status()).toBe(410);expect(await retired.json()).toMatchObject({code:'inquiry_retired'});
+  const home=await request.get('/');expect(home.headers()['x-frame-options']).toBe('DENY');
+  expect(home.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
+  expect(home.headers()['content-security-policy']).toContain("frame-src 'self' https://www.youtube-nocookie.com");
+  expect(home.headers()['content-security-policy']).not.toContain('youtube.com ');
 });
 
-test("platform surfaces share the AfricMade identity", async ({ page }) => {
-  const errors = monitor(page);
-  for (const pathName of ["/", "/about", "/featured", "/request", "/login", "/privacy", "/terms"]) {
-    await page.goto(pathName);
-    const brand = page.locator('.africmade-brand img[src="/brand/africmade-mark.svg"]').first();
-    await expect(brand).toBeVisible();
-    await expect(brand.locator("..")).toHaveAccessibleName("AfricMade home");
-    if (["/", "/about"].includes(pathName)) {
-      await expect(page.getByRole("navigation", { name: "AfricMade account" }).getByRole("link", { name: "Sign in" })).toBeVisible();
-      await expect(page.locator('nav a[href="/request"]')).toHaveCount(0);
-      await expect(page.getByRole("link", { name: /For businesses?/i })).toHaveCount(0);
-    }
-    if (pathName === "/login") {
-      await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
-      await expect(page.getByLabel("Password")).toHaveCount(0);
-      await expect(page.getByText("Creating an account?", { exact: true })).toBeVisible();
-    }
-  }
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const pathName of ["/request", "/login"]) {
-    await page.goto(pathName);
-    await expect(page.locator(".platform-task-shell")).toBeVisible();
-    const controlHeights = await page.locator(".platform-form-panel .field input:not([type=hidden]):not([type=checkbox]), .platform-form-panel .field textarea, .platform-form-panel button, .platform-form-panel .consent-field label").evaluateAll((controls) => controls.filter((control) => control.getClientRects().length > 0).map((control) => Math.round(control.getBoundingClientRect().height)));
-    expect(controlHeights.length).toBeGreaterThan(0);
-    expect(controlHeights.every((height) => height >= 44)).toBe(true);
-    const firstField = page.locator(".platform-form-panel .field input:not([type=hidden]):not([type=checkbox])").first();
-    await firstField.focus();
-    expect(await firstField.evaluate((field) => getComputedStyle(field).boxShadow)).not.toBe("none");
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  }
-  expect(errors).toEqual([]);
+test('business video loads a privacy-enhanced frame only after activation',async({page})=>{
+  expect(installControlledVideoFixture()).toEqual({handle:'selam-weave',updated:true});
+  let requested=0;
+  await page.route('https://www.youtube-nocookie.com/embed/**',async route=>{requested++;await route.fulfill({contentType:'text/html',body:'<!doctype html><title>Video fixture</title><p>Controlled video fixture</p>'});});
+  await page.goto('/@selam-weave');await expect(page.locator('iframe')).toHaveCount(0);expect(requested).toBe(0);
+  await page.getByRole('button',{name:/Play business video about/}).click();
+  const embed=new URL(await page.locator('iframe').getAttribute('src')||'');
+  expect(embed.origin).toBe('https://www.youtube-nocookie.com');expect(embed.pathname).toBe('/embed/wJV9EDe_sFc');expect(embed.searchParams.get('autoplay')).toBe('1');
+  await expect(page.frameLocator('iframe').getByText('Controlled video fixture',{exact:true})).toBeVisible();expect(requested).toBe(1);
 });
 
-test("administrator onboards and previews a publicly hidden draft tenant", async ({ page }) => {
-  test.setTimeout(240_000);
-  const errors = monitor(page);
-  await page.context().setExtraHTTPHeaders({ "x-forwarded-for": "198.51.100.11" });
-  const lead = await page.request.post("/api/requests", { data: {
-    contactName: "Acceptance Prospect",
-    contactValue: "prospect@example.test",
-    businessName: "Acceptance Market",
-    requestText: "I am interested in an AfricMade page for our handmade home products.",
-    idempotencyKey: "acceptance-public-lead-0001",
-    consent: true,
-  } });
-  expect([200, 201]).toContain(lead.status());
-  await loginWithEmailCode(page, "admin@mirtpage.local");
-  await page.goto("/");
-  await expect(page.getByRole("navigation", { name: "AfricMade account" }).getByRole("link", { name: "Dashboard" })).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "AfricMade account" }).getByRole("link", { name: "Sign in" })).toHaveCount(0);
-  await expect(page.locator(".public-app-rail a[href='/request']")).toHaveCount(0);
-  await page.goto("/login");
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByRole("heading", { name: "Private workspace" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "AfricMade home" })).toHaveAttribute("href", "/dashboard/admin");
-  await expect(page.getByRole("link", { name: "Public site", exact: true })).toHaveAttribute("target", "_blank");
-  await page.getByRole("link", { name: "AfricMade home" }).click();
-  await expect(page).toHaveURL(/\/dashboard\/admin$/);
-  await page.goto("/dashboard/admin?view=businesses&status=draft");
-  await expect(page).toHaveURL(/\/dashboard\/admin\/businesses\?status=draft$/);
-  await page.goto("/dashboard/admin");
-  await page.getByRole("link", { name: "Businesses", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Accounts" })).toBeVisible();
-  await page.getByLabel("Search").fill("Meda Furniture Studio");
-  await page.getByRole("button", { name: "Apply" }).click();
-  const profileRow = page.getByRole("row").filter({ hasText: "Meda Furniture Studio" }).first();
-  await expect(profileRow.getByText("visible")).toBeVisible();
-  await profileRow.getByRole("link", { name: "Open workspace" }).click();
-  await page.getByRole("link", { name: "Marketplace", exact: true }).click();
-  await page.locator("summary").filter({ hasText: "Advanced visibility" }).click();
-  await page.getByLabel("Include this business in the global Sponsors pool").check();
-  await page.getByRole("button", { name: "Save discovery profile" }).click();
-  await expect(page.getByText("Discovery profile saved")).toBeVisible();
-  await page.goto("/featured");
-  expect(await page.locator(".discovery-sponsored-rail > a").count()).toBeGreaterThanOrEqual(5);
-  await page.goto("/dashboard");
-  await page.getByRole("link", { name: "Design library" }).click();
-  await expect(page.getByRole("heading", { name: "Page design library" })).toBeVisible();
-  await expect(page.getByText("67", { exact: true }).first()).toBeVisible();
-  await page.getByRole("button", { name: "Heroes 13" }).click();
-  await expect(page.locator("article").filter({ has: page.locator("code") })).toHaveCount(13);
-  await page.getByLabel("Preview token system").selectOption("industrial-steel");
-  await page.getByLabel("Motion intensity").selectOption("expressive");
-  await page.getByLabel("Decorative depth").selectOption("signature");
-  await page.getByRole("button", { name: "Mobile · 390 px" }).click();
-  await page.getByRole("button", { name: "All 67" }).click();
-  await expect(page.locator('[data-preview-device="mobile"]')).toHaveCount(67);
-  await expect(page.locator('[data-motion="expressive"]')).toHaveCount(67);
-  await expect(page.locator('[data-decoration="signature"]')).toHaveCount(67);
-  const mobileCanvases = page.locator('[data-preview-device="mobile"] > div');
-  await expect(mobileCanvases).toHaveCount(67);
-  expect(
-    await mobileCanvases.evaluateAll((canvases) =>
-      canvases.every(
-        (canvas) => canvas.scrollWidth <= canvas.clientWidth,
-      ),
-    ),
-  ).toBe(true);
-  await page.setViewportSize({ width: 390, height: 844 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  const undersizedTargets = await page
-    .locator('[data-preview-device="mobile"] button, [data-preview-device="mobile"] input')
-    .evaluateAll((targets) =>
-      targets.flatMap((target) => {
-        const rect = target.getBoundingClientRect();
-        if (!rect.width || !rect.height) return [];
-        return rect.height < 43.5
-          ? [`${target.tagName.toLowerCase()}:${target.textContent?.trim() || target.getAttribute("aria-label")}`]
-          : [];
-      }),
-    );
-  expect(undersizedTargets).toEqual([]);
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  expect(
-    await page.locator('[data-motion="expressive"]').first().evaluate(
-      (section) => getComputedStyle(section).animationName,
-    ),
-  ).toBe("none");
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.setViewportSize({ width: 1280, height: 720 });
-  await page.getByRole("button", { name: "Responsive" }).click();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await page.goto("/dashboard/products?business=1");
-  await expect(page.getByRole("heading",{name:"Custom work, ready products & wholesale supply"})).toBeVisible();
-  await page.getByRole("link",{name:"Edit"}).first().click();
-  await expect(page.getByLabel("Customer-service note")).toBeVisible();
-  await expect(page.getByLabel("Sort order")).toHaveCount(0);
-  await expect(page.getByLabel("Publish in showroom")).toHaveCount(0);
-  await page.getByLabel("Description").fill("Administrator-verified browser upkeep description.");
-  await page.getByLabel("Customer-service note").fill("Verified basic upkeep before the client demo.");
-  await page.getByRole("button",{name:"Save and publish offering"}).click();
-  await expect(page.getByText(/Offering published successfully as page version/)).toBeVisible();
-  await page.goto("/dashboard/requests");
-  await expect(page.getByText("Acceptance Market")).toBeVisible();
-  await page.getByRole("row").filter({ hasText: "Acceptance Market" }).getByRole("link", { name: /REQ-/ }).click();
-  await expect(page.getByText("prospect@example.test")).toBeVisible();
-  await expect(page.locator(".request-image-grid img")).toHaveCount(0);
-  await page.getByLabel("Status").selectOption("under_review");
-  await page.getByRole("button", { name: "Update status" }).click();
-  await expect(page.getByText("Project status updated")).toBeVisible();
-  await expect(page.locator(".dashboard-head .badge")).toHaveText("under review");
-  await page.getByLabel("Client email").fill("acceptance-client@example.test");
-  await page.getByLabel("AfricMade page handle").fill("acceptance-market");
-  await page.getByRole("button", { name: "Accept lead and create invitation" }).click();
-  await expect(page.getByText("Invitation created.")).toBeVisible();
-  const invitationUrl = await page.getByLabel("Single-use invitation link").inputValue();
-  const invitation = new URL(invitationUrl);
-  expect(invitation.origin).toBe(new URL(page.url()).origin);
-  expect(invitation.pathname).toMatch(/^\/invite\/[A-Za-z0-9_-]{40,100}$/);
-  await page.goto("/dashboard/admin/staff");
-  await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("heading",{name:"Staff & access"})).toBeVisible();
-  let staffPanel = page.getByRole("main");
-  await staffPanel.locator("summary").filter({hasText:"Create staff account"}).click();
-  await staffPanel.getByLabel("Name").fill("Acceptance Operations");
-  await staffPanel.getByLabel("Email").fill("operations@example.test");
-  await staffPanel.getByLabel("Access role").selectOption("operations_manager");
-  await staffPanel.getByLabel("Temporary password").fill("OperationsTemp123!");
-  await staffPanel.getByRole("button",{name:"Create staff account"}).click();
-  await expect(page.getByText("Acceptance Operations")).toBeVisible();
-  await page.goto("/dashboard/admin/staff");
-  staffPanel = page.getByRole("main");
-  await staffPanel.locator("summary").filter({hasText:"Create staff account"}).click();
-  await staffPanel.getByLabel("Name").fill("Acceptance Team");
-  await staffPanel.getByLabel("Email").fill("team@example.test");
-  await staffPanel.getByLabel("Access role").selectOption("team_member");
-  await staffPanel.getByLabel("Temporary password").fill("TeamMemberTemp123!");
-  await staffPanel.getByRole("button",{name:"Create staff account"}).click();
-  await expect(page.getByText("Staff account created.")).toBeVisible();
-  await page.getByLabel("Search").fill("Acceptance Team");
-  await page.getByRole("button",{name:"Apply"}).click();
-  await expect(page.getByRole("main").getByText("Acceptance Team",{exact:true})).toBeVisible();
-  await page.setViewportSize({width:390,height:844});
-  await expect(page.locator(".admin-data-surface thead")).toBeHidden();
-  await expect(page.locator('.admin-data-surface td[data-label="Role"]').first()).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await expect(page.locator(".workspace-mobile-header")).toHaveCount(0);
-  await expect(page.getByRole("navigation",{name:"Workspace application navigation"})).toBeVisible();
-  const adminMenuButton = page.getByRole("button",{name:"Open all workspace navigation"});
-  await adminMenuButton.click();
-  const adminMenu = page.getByRole("dialog",{name:"Workspace menu"});
-  await expect(adminMenu.getByRole("link",{name:"Staff & access"})).toBeVisible();
-  await expect(adminMenu.getByRole("link",{name:"Clients",exact:true})).toHaveCount(0);
-  await page.keyboard.press("Escape");
-  await expect(adminMenuButton).toBeFocused();
-  await page.setViewportSize({width:1280,height:720});
-  await page.goto("/dashboard/admin");
-  await page.getByRole("link",{name:"Add business",exact:true}).click();
-  await expect(page.getByRole("heading",{name:"Add a business"})).toBeVisible();
-  await expectVisibleControlsNamed(page);
-  await page.getByLabel("Business name").fill("Acceptance Flowers");
-  await page.getByLabel("AfricMade page handle").fill("acceptanceflowers");
-  await page.getByLabel("Client name").fill("Flower Client");
-  await page.getByLabel("Client email").fill("flowers@example.test");
-  await page.getByRole("button", { name: "Create business and invitation" }).click();
-  await expect(page.getByText("Business workspace created.")).toBeVisible();
-  const directInvitationUrl = await page.getByLabel("Single-use business access invitation").inputValue();
-  const directInvitation = new URL(directInvitationUrl);
-  expect(directInvitation.origin).toBe(new URL(page.url()).origin);
-  expect(directInvitation.pathname).toMatch(/^\/invite\/[A-Za-z0-9_-]{40,100}$/);
-  const hiddenDraft = await page.request.get("/@acceptanceflowers");
-  expect([200, 404]).toContain(hiddenDraft.status());
-  const hiddenDraftBody = await hiddenDraft.text();
-  expect(hiddenDraftBody).toContain("This page could not be found");
-  expect(hiddenDraftBody).not.toContain("Acceptance Flowers");
-  await page.goto("/preview/@acceptanceflowers");
-  await expect(page.locator(".showroom")).toBeVisible();
-  await page.goto("/dashboard");
-  await signOut(page);
-  await loginWithEmailCode(page, "admin@mirtpage.local");
-  await signOut(page);
-  await page.goto(new URL(invitationUrl).pathname);
-  await expect(page.getByRole("heading", { name: "Join Acceptance Market" })).toBeVisible();
-  await page.getByLabel("Your name").fill("Acceptance Client");
-  await page.getByLabel("Password", { exact:true }).fill("InvitedClient123!");
-  await page.getByLabel("Confirm password").fill("InvitedClient123!");
-  await page.getByRole("button", { name: "Create private workspace" }).click();
-  await expect(page.getByRole("main").getByText("Business workspace", { exact:true })).toBeVisible();
-  await expect(page.getByRole("link", { name:"Collections & categories" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name:"Business details" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name:"My offerings" })).toHaveCount(0);
-  await page.goto("/dashboard/products");
-  await expect(page).toHaveURL(/\/dashboard\/requests\/\d+$/);
-  await page.goto("/dashboard/design-bank");
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByRole("heading", { name: "Page design library" })).toHaveCount(0);
-  await page.getByRole("link", { name:"Continue page setup" }).click();
-  await expect(page.getByRole("heading", { name:"Page setup" })).toBeVisible();
-  await expect(page.getByText(/REQ-/)).toBeVisible();
-  await expect(page.getByText("Private reference images")).toHaveCount(0);
-  await page.goto("/dashboard/settings");
-  await expect(page).toHaveURL(/\/dashboard$/);
-  expect((await page.request.get("/api/malikt/requests")).status()).toBe(404);
-  expect(errors.filter((error) => !error.includes("404"))).toEqual([]);
-});
-
-test("operations manager records on behalf and team member sees only assigned work", async ({page}) => {
-  test.setTimeout(240_000);
-  const errors=monitor(page);
-  await loginWithEmailCode(page,"operations@example.test");
-  await page.goto("/dashboard/design-bank");
-  await expect(page.getByRole("heading",{name:"Page design library"})).toBeVisible();
-  await page.goto("/dashboard?business=5");
-  await expect(page.getByRole("link",{name:"View page",exact:true})).toHaveCount(2);
-  await page.goto("/dashboard/requests");
-  await expect(page.getByRole("link",{name:"Record a request"}).first()).toBeVisible();
-  await expect(page.getByRole("link",{name:"SaaS administration"})).toHaveCount(0);
-  await page.getByRole("row").filter({hasText:"Acceptance Market"}).getByRole("link",{name:/REQ-/}).click();
-  await expect(page.getByRole("heading",{name:"Page setup"})).toBeVisible();
-  await page.getByLabel("Status").selectOption("in_progress");
-  await page.getByRole("button",{name:"Update status"}).click();
-  await expect(page.getByText("Project status updated.")).toBeVisible();
-  const assignedRequestUrl=page.url();
-  await page.getByLabel("Ask or answer a clarification").fill("Which hero message should the team prioritize?");
-  await page.getByRole("button",{name:"Add clarification"}).click();
-  await expect(page.getByText("Clarification message added.")).toBeVisible();
-  await expect(page.getByText("Which hero message should the team prioritize?")).toBeVisible();
-  await expect(page.locator(".dashboard-head .badge")).toHaveText("needs information");
-  await signOut(page);
-
-  await loginWithEmailCode(page,"acceptance-client@example.test");
-  await page.goto(assignedRequestUrl);
-  await expect(page.getByText("AfricMade team",{exact:true})).toBeVisible();
-  await page.getByLabel("Reply to AfricMade").fill("Please prioritize our handmade origin story.");
-  await page.getByRole("button",{name:"Add clarification"}).click();
-  await expect(page.locator(".dashboard-head .badge")).toHaveText("under review");
-  await signOut(page);
-
-  await loginWithEmailCode(page,"operations@example.test");
-  await page.goto(assignedRequestUrl);
-  await page.locator("summary").filter({hasText:"Team assignment"}).click();
-  await page.getByLabel("Assigned team member").selectOption({label:"Acceptance Team · team@example.test"});
-  await page.getByRole("button",{name:"Save assignment"}).click();
-  await expect(page.getByText("Assignment updated.")).toBeVisible();
-  await page.goto("/dashboard/catalog?business=5");
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await signOut(page);
-
-  await loginWithEmailCode(page,"team@example.test");
-  await page.goto("/dashboard/design-bank");
-  await expect(page.getByRole("heading",{name:"Page design library"})).toBeVisible();
-  await page.goto("/dashboard/requests");
-  await expect(page.getByRole("heading",{name:"Assigned requests"})).toBeVisible();
-  await expect(page.getByRole("link",{name:"Create client request"})).toHaveCount(0);
-  await page.goto(assignedRequestUrl);
-  await expect(page.getByRole("main").getByText("Acceptance Team",{exact:true})).toBeVisible();
-  await page.getByLabel("Status").selectOption("under_review");
-  await page.getByRole("button",{name:"Update status"}).click();
-  await expect(page.getByText("Project status updated.")).toBeVisible();
-  await expect(page.getByText("Team assignment")).toHaveCount(0);
-  await page.getByRole("button",{name:"Prepare first page design"}).click();
-  await expect(page.getByRole("heading",{name:"Page design workspace"})).toBeVisible();
-  const recipeStudioUrl=page.url();
-  await expectVisibleControlsNamed(page);
-  await signOut(page);
-
-  await loginWithEmailCode(page,"acceptance-client@example.test");
-  await page.goto(assignedRequestUrl);
-  await expect(page.getByText("AfricMade is preparing this revision.")).toBeVisible();
-  await expect(page.getByRole("link",{name:"View preview"})).toHaveCount(0);
-  await expect(page.getByRole("link",{name:"Review preview"})).toHaveCount(0);
-  await expect(page.getByRole("link",{name:"AI redesign"})).toHaveCount(0);
-  await expect(page.getByRole("link",{name:"Edit page"})).toHaveCount(0);
-  await page.locator("summary").filter({hasText:"Project history"}).click();
-  await expect(page.getByText("Team assigned",{exact:true})).toBeVisible();
-  await expect(page.getByText(/team_member:\d+/)).toHaveCount(0);
-  await expect(page.getByText("Acceptance Team",{exact:true})).toHaveCount(0);
-  await signOut(page);
-
-  await loginWithEmailCode(page,"team@example.test");
-  await page.goto(recipeStudioUrl);
-  await expect(page.getByRole("button", { name: "Copy AI brief" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Copy current design" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Complete the image checklist" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Offerings/ })).toBeVisible();
-  await expect(page.getByText(/approved images|reference images/i)).toHaveCount(0);
-  const [briefDownload] = await Promise.all([
-    page.waitForEvent("download"),
-    page.getByRole("button", { name: "Download brief" }).click(),
-  ]);
-  const briefPath = await briefDownload.path();
-  expect(briefPath).toBeTruthy();
-  const brief = JSON.parse(fs.readFileSync(briefPath!, "utf8"));
-  await page.getByText("Complete design-file example").click();
-  const recipe=JSON.parse(await page.locator(".recipe-code").textContent()||"{}");
-  const {
-    schemaVersion: _snapshotSchemaVersion,
-    designManifest,
-    ...currentContent
-  } = brief.currentContent;
-  recipe.baseContentVersion = brief.baseContentVersion;
-  recipe.content = { schemaVersion: 1, ...currentContent };
-  recipe.design = designManifest;
-  recipe.design.customPalette = {
-    canvas: "#F7F8FA",
-    surface: "#FFFFFF",
-    layer: "#E8EDF3",
-    text: "#17212B",
-    textMuted: "#4D5966",
-    primary: "#006D77",
-    primarySoft: "#D9F0F0",
-    secondary: "#9B3A22",
-    secondarySoft: "#F6DDD5",
-    onSecondary: "#FFFFFF",
-    strong: "#113F45",
-    onStrong: "#FFFFFF",
-    inverse: "#201A2B",
-    onInverse: "#FFFFFF",
-    border: "#AEB8C2",
-  };
-  recipe.mediaPlan = [];
-  recipe.provenance = [];
-  recipe.questions = [
-    "Staff should verify the provisional production claims before publication.",
-  ];
-  recipe.summary="A freely drafted private page with a custom color direction.";
-  recipe.content.business.heroTitle="Acceptance approved page";
-  await page.getByRole("textbox", { name: "Page design JSON" }).fill(JSON.stringify(recipe));
-  await page.getByRole("button",{name:"Check design and open preview"}).click();
-  await expect(page.getByRole("heading",{name:"Revision 1 private preview"})).toBeVisible();
-  await expect(page.locator('[data-custom-palette="true"]')).toBeVisible();
-  await expect(page.getByRole("heading",{name:"Imported design changes"})).toBeVisible();
-  const privatePreviewUrl = page.url();
-  const recoveryEditorUrl = new URL(privatePreviewUrl);
-  recoveryEditorUrl.pathname = recoveryEditorUrl.pathname.replace(/\/preview$/, "/edit");
-  recoveryEditorUrl.search = "?area=design";
-  await page.goto(recoveryEditorUrl.toString());
-  await expect(page.getByRole("heading",{name:"Edit current page"})).toBeVisible();
-  await expect(page.getByRole("button", { name: "Layout and style" })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "Design foundation" }).click();
-  await expect(page.getByLabel("Use a custom page palette")).toBeChecked();
-  await page.getByLabel("Primary accent hex value").fill("#14532D");
-  await page.getByLabel("Secondary accent hex value").fill("#FCEFEA");
-  await expect(page.getByLabel("Text on secondary hex value")).toHaveValue("#111111");
-  await expect(page.getByText("Page temporarily unavailable")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Save draft" })).toBeEnabled();
-  await page.getByLabel("Secondary soft surface hex value").fill("#17212B");
-  await expect(page.getByText(/Preview kept on the last valid design/)).toBeVisible();
-  await expect(page.getByText("Page temporarily unavailable")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Save draft" })).toBeDisabled();
-  await page.getByLabel("Secondary soft surface hex value").fill("#F6DDD5");
-  await expect(page.getByText(/Preview kept on the last valid design/)).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Save draft" })).toBeEnabled();
-  const heroSection = recipe.design.sections.find(
-    (section: { component: string }) => section.component.startsWith("hero."),
-  );
-  expect(heroSection).toBeTruthy();
-  await page.getByRole("button", { name: "Layout and style" }).click();
-  const heroSurface = page.getByLabel(`${recipe.content.business.heroTitle} surface`);
-  const heroDisclosure = page.locator("details").filter({ has: heroSurface });
-  await heroDisclosure.locator("summary").click();
-  await heroSurface.selectOption("inverse");
-  await page.getByRole("button", { name: "Offerings" }).click();
-  await expect(page.getByRole("heading", { name: "Products & capabilities" })).toBeVisible();
-  await page.getByRole("button", { name: "Add offering" }).click();
-  await page.getByLabel("Product 1 name").fill("Staff-created page offering");
-  await page.getByLabel("Product 1 slug").fill("staff-created-page-offering");
-  await page.getByLabel("Product 1 description").fill("A staff-edited offering retained in the current page design.");
-  await page.getByRole("button",{name:"Save draft"}).click();
-  await expect(page.getByText("Private draft saved.")).toBeVisible();
-  await page.goto(recipeStudioUrl);
-  const [currentDownload] = await Promise.all([
-    page.waitForEvent("download"),
-    page.getByRole("button", { name: "Download current design" }).click(),
-  ]);
-  const currentPath = await currentDownload.path();
-  expect(currentPath).toBeTruthy();
-  const currentDesign = JSON.parse(fs.readFileSync(currentPath!, "utf8"));
-  expect(currentDesign.design.customPalette.primary).toBe("#14532D");
-  expect(currentDesign.content.products[0].description).toBe(
-    "A staff-edited offering retained in the current page design.",
-  );
-  await page.goto(privatePreviewUrl);
-  const customShowroom = page.locator('[data-custom-palette="true"]');
-  await expect(customShowroom).toBeVisible();
-  await expect(customShowroom.locator(":scope > [data-surface]").nth(1)).toHaveAttribute(
-    "data-surface",
-    "inverse",
-  );
-  expect(
-    await customShowroom.evaluate((element) =>
-      getComputedStyle(element).getPropertyValue("--bank-accent").trim().toUpperCase(),
-    ),
-  ).toBe("#14532D");
-  await page.getByRole("button",{name:"Send revision for client review"}).click();
-  await expect(page.getByRole("heading",{name:"Revision 1 private preview"})).toBeVisible();
-  await expect(page.getByText("Revision sent for client review.")).toBeVisible();
-  await signOut(page);
-
-  await loginWithEmailCode(page,"acceptance-client@example.test");
-  const deniedStudio=await page.goto(recipeStudioUrl);
-  expect([200, 404]).toContain(deniedStudio?.status());
-  await expect(page.getByRole("heading", { name: "This page could not be found." })).toBeVisible();
-  await page.goto(assignedRequestUrl);
-  await page.getByRole("link",{name:"View preview",exact:true}).click();
-  await expect(page.getByRole("button",{name:"Approve this revision"})).toBeVisible();
-  await page.getByRole("button",{name:"Approve this revision"}).click();
-  await expect(page.getByText("Your approve decision was recorded")).toBeVisible();
-  await signOut(page);
-
-  await loginWithEmailCode(page,"operations@example.test");
-  await page.goto(assignedRequestUrl);
-  await page.getByRole("link",{name:"View preview",exact:true}).click();
-  await page.getByRole("button",{name:"Publish approved revision"}).click();
-  await expect(page.getByText("The approved revision is now live.")).toBeVisible();
-  await page.goto("/@acceptance-market");
-  await expect(page.getByRole("heading",{name:"Acceptance approved page"})).toBeVisible();
-  await page.goto(assignedRequestUrl);
-  await page.goto("/dashboard/requests/on-behalf");
-  await expect(page.getByRole("heading",{name:"Record a page request"})).toBeVisible();
-  await signOut(page);
-  await loginWithEmailCode(page,"team@example.test");
-  await page.goto("/dashboard/requests/on-behalf");
-  await expect(page).toHaveURL(/\/dashboard\/requests$/);
-  await page.goto("/dashboard/settings?business=5");
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await page.getByRole("link").filter({hasText:"Acceptance Market"}).first().click();
-  await page.getByRole("link",{name:"Offerings",exact:true}).click();
-  await expect(page.getByRole("heading",{name:"Custom work, ready products & wholesale supply"})).toBeVisible();
-  await page.getByRole("link",{name:"Add offering"}).first().click();
-  await page.getByLabel("Offering name").fill("Team assisted fabrication capability");
-  await page.getByLabel("Description").fill("Created by assigned staff after the first page publication.");
-  await page.getByLabel("Offering type").selectOption("manufacturing_capability");
-  await expect(page.getByText("Desired quantity is optional")).toBeVisible();
-  await page.getByLabel(/Production or supply capacity/).fill("Up to 800 assemblies per month");
-  await page.getByLabel("Availability").selectOption("coming_soon");
-  await page.getByLabel("Customer-service note").fill("The client asked the assigned team member to add this product.");
-  await page.getByRole("button",{name:"Add and publish offering"}).click();
-  await expect(page.getByText(/Offering published successfully as page version/)).toBeVisible();
-  const teamProductUrl=page.url();
-  await signOut(page);
-  await loginWithEmailCode(page,"admin@mirtpage.local");
-  await page.goto(teamProductUrl);
-  await page.getByLabel("Availability").selectOption("available");
-  await page.getByLabel("Customer-service note").fill("Operations confirmed availability with the client.");
-  await page.getByRole("button",{name:"Save and publish offering"}).click();
-  await expect(page.getByText(/Offering published successfully as page version/)).toBeVisible();
-  expect(errors.filter((error)=>!error.includes("404"))).toEqual([]);
-});
-
-test("seeded client is restricted while operations manages customer activity", async ({ page }) => {
-  test.setTimeout(120_000);
-  const errors = monitor(page);
-  await loginWithEmailCode(page, "selam-weave@mirtpage.local");
-  await page.goto("/dashboard");
-  await expect(page.getByRole("main").getByText("Business workspace",{exact:true})).toBeVisible();
-  await expect(page.getByText("Unique visits",{exact:true})).toBeVisible();
-  await page.goto("/dashboard/admin");
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await page.goto("/dashboard/settings");
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await page.goto("/dashboard/catalog");
-  await expect(page).toHaveURL(/\/dashboard$/);
-  await page.goto("/dashboard/products/new");
-  await expect(page.getByRole("heading",{name:"Add a product or capability"})).toBeVisible();
-  await expect(page.getByLabel("Customer-service note")).toHaveCount(0);
-  await expect(page.getByLabel("Option group name")).toHaveCount(0);
-  await expect(page.getByRole("button",{name:/Delete/})).toHaveCount(0);
-  await page.getByLabel("Offering name").fill("Client browser product");
-  await page.getByLabel("Description").fill("A client-managed product created in the simplified workflow.");
-  await page.getByLabel("Availability").selectOption("limited");
-  await expect(page.getByLabel("Collection")).toHaveCount(0);
-  await page.getByLabel("Category").selectOption({index:1});
-  await page.getByRole("button",{name:"Add and publish offering"}).click();
-  await expect(page.getByText(/Offering published successfully as page version/)).toBeVisible();
-  await page.goto("/dashboard/products");
-  await expect(page.getByRole("heading",{name:"Custom work, ready products & wholesale supply"})).toBeVisible();
-  await page.getByLabel("Search").fill("Client browser");
-  await page.getByRole("button",{name:"Apply"}).click();
-  await expect(page.getByText("Client browser product",{exact:true})).toBeVisible();
-  await expect(page.getByText(/Showing 1-1 of 1/)).toBeVisible();
-  await page.setViewportSize({width:390,height:844});
-  const overflowDiagnostics = await horizontalOverflowingElements(page);
-  expect(
-    await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
-    `Unexpected horizontal overflow: ${JSON.stringify(overflowDiagnostics)}`,
-  ).toBe(true);
-  const menuButton = page.getByRole("button",{name:"Open all workspace navigation"});
-  await expect(menuButton).toBeVisible();
-  await menuButton.click();
-  const workspaceMenu = page.getByRole("dialog",{name:"Workspace menu"});
-  await expect(workspaceMenu).toBeVisible();
-  await expect(page.getByRole("button",{name:"Close workspace menu"})).toBeFocused();
-  await expect(workspaceMenu.getByRole("link",{name:"Page project",exact:true})).toBeVisible();
-  await expect(workspaceMenu.getByRole("link",{name:"Customer inquiries"})).toBeVisible();
-  await expect(workspaceMenu.getByRole("link",{name:"Delivery activity"})).toHaveCount(0);
-  await expect(workspaceMenu.getByRole("link",{name:"Account security"})).toBeVisible();
-  const smallWorkspaceTargets = await workspaceMenu.locator("a, button").evaluateAll((targets) => targets.flatMap((target) => {
-    const rect=target.getBoundingClientRect();
-    return rect.width&&rect.height<43.5?[`${target.tagName.toLowerCase()}:${target.textContent?.trim()||target.getAttribute("aria-label")}`]:[];
-  }));
-  expect(smallWorkspaceTargets).toEqual([]);
-  await page.keyboard.press("Escape");
-  await expect(workspaceMenu).toHaveCount(0);
-  await expect(menuButton).toBeFocused();
-  await page.setViewportSize({width:1280,height:720});
-  await page.goto("/dashboard/requests/new");
-  await expect(page.getByRole("heading",{name:"Page update"})).toBeVisible();
-  await expect(page).toHaveURL(/\/dashboard\/requests\/\d+$/);
-  await expect(page.getByText(/fictional|test workflow|operations queue/i)).toHaveCount(0);
-  await expect(page.getByLabel("Request type")).toHaveCount(0);
-  await page.goto("/dashboard/inquiries");
-  await expectVisibleControlsNamed(page);
-  await expect(page.getByRole("button",{name:"Update"})).toHaveCount(0);
-  await expect(page.getByRole("link",{name:"Create delivery"})).toHaveCount(0);
-  await page.getByLabel("Search").fill("Hana");
-  await page.getByRole("button",{name:"Apply"}).click();
-  const showroomInquiry = page.locator("section.panel").filter({hasText:"Hana"});
-  await expect(showroomInquiry).toContainText("whatsapp: 251911000000");
-  await expect(showroomInquiry).toContainText("Desired quantity: 1 unit");
-  await page.goto("/dashboard/account-health");
-  await expect(page.getByRole("heading",{name:"Renewal"})).toBeVisible();
-  await expect(page.getByText(/renewal history for Selam Weave Studio/i)).toBeVisible();
-  await expect(page.getByRole("heading",{name:"Current period"})).toBeVisible();
-  await expect(page.getByText("Unique visits",{exact:true})).toHaveCount(0);
-  await expect(page.getByRole("button",{name:"Record payment and renew one month"})).toHaveCount(0);
-  await page.setViewportSize({width:390,height:844});
-  await page.goto("/dashboard/support");
-  await expect(page.getByRole("heading",{name:"How can we help?"})).toBeVisible();
-  await page.getByLabel("Subject").fill("Acceptance support question");
-  await page.getByLabel("Message").fill("Please help us verify the new support workflow.");
-  await page.getByRole("button",{name:"Send to AfricMade support"}).click();
-  await expect(page.getByRole("heading",{name:"Acceptance support question"})).toBeVisible();
-  await expect(page.getByText("open",{exact:true})).toBeVisible();
-  expect(
-    await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
-  ).toBe(true);
-  await page.setViewportSize({width:1280,height:720});
-  await signOut(page);
-
-  await loginWithEmailCode(page,"operations@example.test");
-  await page.goto("/dashboard/account-health");
-  await expect(page.getByRole("heading",{name:"Renewals"})).toBeVisible();
-  await expect(page.getByLabel("Renewal state")).toBeVisible();
-  await expect(page.getByText(/Showing 1-10 of \d+/)).toBeVisible();
-  await page.goto("/dashboard/support?status=waiting");
-  await expect(page.getByRole("heading",{name:"Support inbox"})).toBeVisible();
-  await page.getByRole("link",{name:"Manage support agents"}).click();
-  await expect(page.getByRole("heading",{name:"Support agents"})).toBeVisible();
-  await expect(page.getByText("Available agents",{exact:true})).toBeVisible();
-  await expect(page.locator(".support-agent-list form").first()).toBeVisible();
-  await page.getByRole("link",{name:"Open inbox"}).click();
-  await expect(page.locator(".support-row").first()).toBeVisible();
-  await expect(page.locator(".support-row").first().getByText("waiting",{exact:true})).toBeVisible();
-  await page.goto("/dashboard/inquiries?business=1");
-  await expectVisibleControlsNamed(page);
-  await page.getByLabel("Search").fill("Hana");
-  await page.getByRole("button",{name:"Apply"}).click();
-  const row = page.locator("section.panel").filter({ hasText: "Hana" });
-  await row.getByRole("combobox").selectOption("confirmed");
-  await row.getByRole("button", { name: "Update" }).click();
-  await expect(page.getByText("Inquiry status updated")).toBeVisible();
-  await expect(row.getByRole("link", { name: /delivery/i })).toHaveCount(0);
-  expect(readAcceptanceRow("inquiryByCustomer", "Hana")).toMatchObject({ status: "confirmed" });
-  expect(errors).toEqual([]);
-});
-
-test("API authorization, validation, health, and security headers", async ({ request }) => {
-  const health = await request.get("/api/health");
-  expect(health.status()).toBe(200);
-  expect(await health.json()).toMatchObject({ status: "ok" });
-  expect((await request.get("/api/malikt/companies")).status()).toBe(404);
-  expect((await request.get("/api/malikt/requests")).status()).toBe(404);
-  expect((await request.post("/api/inquiries", { data: { businessId: 1, customerName: "X", contact: "12345", items: [] } })).status()).toBe(400);
-  const home = await request.get("/");
-  expect(home.headers()["x-frame-options"]).toBe("DENY");
-  expect(home.headers()["content-security-policy"]).toContain("frame-ancestors 'none'");
-  expect(home.headers()["content-security-policy"]).toContain("frame-src 'self' https://www.youtube-nocookie.com");
-  expect(home.headers()["content-security-policy"]).not.toContain("youtube.com ");
-});
-
-test("controlled provider video uses narrow CSP and privacy-enhanced browser embed", async ({ page, request }) => {
-  expect(installControlledVideoFixture()).toEqual({ handle: "selam-weave", updated: true });
-  const response = await request.get("/@selam-weave");
-  const csp = response.headers()["content-security-policy"];
-  expect(csp).toContain("frame-src 'self' https://www.youtube-nocookie.com");
-  expect(csp).not.toContain("https://www.youtube.com");
-  await page.goto("/@selam-weave");
-  const processSection = page.locator('[data-slot="content"]').filter({
-    hasText: "Inside the process",
+// BE-036: a retained cart must survive the namespace upgrade in the real renderer.
+test('legacy saved inquiry migrates and bookmarked assets remain available', async ({ page, request }) => {
+  await page.goto('/@selam-weave');
+  await page.locator('a[href*="?product="]').first().click();
+  await page.getByRole('button', { name: 'Add to inquiry list', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('suqpage-cart:selam-weave'))).not.toBeNull();
+  const saved = await page.evaluate(() => {
+    const key = 'suqpage-cart:selam-weave';
+    const value = localStorage.getItem(key)!;
+    localStorage.setItem('mirtpage-cart:selam-weave', value);
+    localStorage.removeItem(key);
+    return value;
   });
-  await expect(processSection).toBeVisible();
-  await expect(page.locator('[data-slot="header"] iframe, [data-slot="header"] button[aria-label*="process video"]')).toHaveCount(0);
-  await expect(processSection.locator("iframe")).toHaveCount(0);
-  await processSection.getByRole("button", { name: "Play Selam Weave Studio process video" }).click();
-  const frame = processSection.locator('iframe[title="Selam Weave Studio process video"]');
-  await expect(frame).toBeVisible();
-  await expect(frame).toHaveAttribute("loading", "lazy");
-  await expect(frame).toHaveAttribute("allow", /encrypted-media/);
-  await expect(frame).toHaveAttribute("src", "https://www.youtube-nocookie.com/embed/wJV9EDe_sFc");
-  expect(await page.locator('iframe[src*="youtube.com/embed"]').count()).toBe(0);
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('suqpage-cart:selam-weave'))).toBe(saved);
+  expect(await page.evaluate(() => localStorage.getItem('mirtpage-cart:selam-weave'))).toBeNull();
+  for (const url of ['/brand/africmade-mark.svg', '/uploads/seed/mirtpage/icon.png']) {
+    expect((await request.get(url)).status()).toBe(200);
+  }
+});
+
+// BE-040/FE-042: real browser regression for late results and query-only links.
+test('human searches preserve latest typing, filters and product navigation',async({},testInfo)=>{
+  test.setTimeout(180_000);
+  execFileSync(process.execPath,[path.join(process.cwd(),'scripts/capture-human-search.mjs')],{
+    env:{...process.env,SUQPAGE_SEARCH_CAPTURE_DIR:testInfo.outputPath('human-search')},stdio:'pipe',timeout:150_000,maxBuffer:2*1024*1024,
+  });
+});
+
+// FE-019/BE-018: real production-mode staff actions, not canned API successes.
+for (const [name, script] of [
+  ['transport replies, private notes and ended/resolved history', 'capture-live-buying-staff.ts'],
+  ['video request approval and public gallery update', 'capture-video-requests.ts'],
+]) test(name, async ({}, testInfo) => {
+  test.setTimeout(180_000);
+  execFileSync(process.execPath, ['--import', 'tsx', path.join(process.cwd(), 'scripts', script)], {
+    env: {...process.env, SUQPAGE_TEST_SCREENSHOT_DIR: testInfo.outputPath('workflow')},
+    stdio: 'pipe', timeout: 150_000, maxBuffer: 4 * 1024 * 1024,
+  });
 });

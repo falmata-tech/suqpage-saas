@@ -1,0 +1,67 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import {createRequire} from 'node:module';
+import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
+import {build} from 'esbuild';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {chromium} from 'playwright';
+import {supportFormState,supportInboxHref,supportThreadHref,supportViewState} from '../lib/support-navigation';
+
+const require=createRequire(import.meta.url),origin={queue:'transport' as const,status:'overdue',q:'saved search',page:'2'};
+
+test('FE-019 S142 Details is an allowlisted thread mode, retained after actions and stripped from inbox/forms with unknown fields',async()=>{
+ const details={...origin,panel:'details' as const};
+ assert.deepEqual(supportViewState({...details,returnTo:'https://foreign.invalid'}),details);
+ for(const panel of ['chat','https://foreign.invalid',['details'],null])assert.deepEqual(supportViewState({...origin,panel}),origin);
+ assert.equal(supportInboxHref(details),'/dashboard/support?queue=transport&status=overdue&q=saved+search&page=2');
+ assert.equal(supportThreadHref(42,details,{assigned:'1'}),'/dashboard/support/42?queue=transport&status=overdue&q=saved+search&page=2&panel=details&assigned=1');
+ const form=new FormData();for(const[key,value]of Object.entries(details))form.set('nav_'+key,value);assert.deepEqual(supportFormState(form),details);form.set('nav_panel','https://foreign.invalid');assert.deepEqual(supportFormState(form),origin);
+ const output=await build({entryPoints:['components/SupportNavigationFields.tsx'],bundle:true,write:false,format:'cjs',platform:'node',external:['react','react/jsx-runtime']});
+ const module={exports:{}as{default:(props:{state:typeof details})=>import('react').ReactElement}};vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,require,URLSearchParams});
+ const html=renderToStaticMarkup(createElement(module.exports.default,{state:{...details,returnTo:'private'} as typeof details}));assert.match(html,/name="nav_panel" value="details"/);assert.doesNotMatch(html,/private|returnTo/);
+});
+
+test('BE-018 S142 retired handoff action authenticates and redirects safely without any mutation or notification',async()=>{
+ const state={auth:0,mutation:0,scheduled:0,revalidated:[]as string[],actor:{id:8,access_role:'team_member',staff_queue_scope:'transport'},authError:null as Error|null};
+ const output=await build({entryPoints:['app/support-actions.ts'],bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'retired-handoff-ports',setup(b){
+  b.onResolve({filter:/^(?:next\/(?:cache|navigation)|@\/lib\/(?:auth|capabilities|attention-after|support-video-requests|catalog-runtime|support|security|support-media))$/},a=>({path:a.path,namespace:'ports'}));
+  b.onLoad({filter:/.*/,namespace:'ports'},a=>({contents:a.path==='next/navigation'?`export const RedirectType={replace:'replace'},redirect=url=>{throw Object.assign(Error('redirect'),{url});};`:a.path==='next/cache'?`export const revalidatePath=path=>state.revalidated.push(path);`:a.path==='@/lib/auth'?`export const requireUser=async()=>{state.auth++;if(state.authError)throw state.authError;return state.actor;};`:a.path==='@/lib/capabilities'?`export const isQueueAgent=user=>user.access_role==='team_member'&&['transport','support'].includes(user.staff_queue_scope),hasCapability=()=>false;`:a.path==='@/lib/attention-after'?`export const scheduleAttentionDelivery=()=>state.scheduled++;`:a.path==='@/lib/security'?`export const audit=async()=>{};`:a.path==='@/lib/catalog-runtime'?`export const runtimeBusinessById=async()=>null;`:a.path==='@/lib/support-video-requests'?`export const createVideoRequest=async()=>{},reviewVideoRequest=async()=>{};`:a.path==='@/lib/support-media'?`export class SupportAttachmentError extends Error{};export const stageSupportAttachment=async()=>null;`:`export class SupportError extends Error{};export const saveTransportHandoff=async()=>state.mutation++,claimSupportConversation=async()=>{},joinSupportConversation=async()=>{},closeSupportConversation=async()=>{},createSupportConversation=async()=>{},postSupportMessage=async()=>{},reopenSupportConversation=async()=>{},reassignSupportConversation=async()=>{},updateSupportAgentSetting=async()=>{},routeWaitingSupportConversations=async()=>{};`}));
+ }}]});
+ const module={exports:{}as{saveTransportHandoffAction:(form:FormData)=>Promise<void>}};vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,require,state,URLSearchParams});
+ const form=new FormData();for(const[key,value]of Object.entries({conversationId:'42',company:'must not save',contact:'must not save',previousId:'29',nav_queue:'support',nav_status:'overdue',nav_q:'saved search',nav_page:'2',nav_panel:'details'}))form.set(key,value);
+ await assert.rejects(module.exports.saveTransportHandoffAction(form),error=>(error as{url?:string}).url==='/dashboard/support/42?queue=transport&status=overdue&q=saved+search&page=2&panel=details&error=Create+shipments+in+Shipment+tracking.');
+ assert.equal(state.auth,1);assert.equal(state.mutation,0);assert.equal(state.scheduled,0);assert.deepEqual(state.revalidated,[]);
+ state.authError=Error('authentication required');await assert.rejects(module.exports.saveTransportHandoffAction(form),error=>error===state.authError);assert.equal(state.mutation,0);
+});
+
+test('FE-019/FE-062 S142 actual staff page keeps a compact desktop chat, retains phone draft across Details and disables hidden receipt observers',{timeout:90000},async()=>{
+ const output=await build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`import React from'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';import Page from'./app/dashboard/support/[id]/page';const root=createRoot(document.getElementById('root'));window.fixture.navigate=async href=>{const url=new URL(href,location.origin);window.fixture.routes.push(url.pathname+url.search);const element=await Page({params:Promise.resolve({id:'42'}),searchParams:Promise.resolve(Object.fromEntries(url.searchParams))});flushSync(()=>root.render(element));};window.fixture.ready=true;`},bundle:true,write:false,format:'iife',platform:'browser',outdir:'/virtual',plugins:[{name:'compact-staff-browser-ports',setup(b){
+  b.onResolve({filter:/^react(?:\/jsx(?:-dev)?-runtime)?$/},a=>({path:require.resolve(a.path)}));
+  b.onResolve({filter:/^node:crypto$/},()=>({path:'crypto',namespace:'ports'}));
+  b.onResolve({filter:/^(?:next\/(?:link|navigation)|@\/)/},a=>['@/lib/support-navigation','@/lib/support-idle-contract','@/lib/support-staff-state','@/lib/support-client-state','@/lib/buying-assistance','@/components/SupportNavigationFields','@/components/SupportAssignmentPicker','@/components/ChatReadObserver'].includes(a.path)||a.path.endsWith('.module.css')?undefined:({path:a.path,namespace:'ports'}));
+  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:a.path==='crypto'?`export default{randomBytes:()=>({toString:()=> 'fixture-only-key'})};`:a.path==='next/link'?`import React from'react';export default ({children,...props})=><a {...props} onClick={event=>{event.preventDefault();void window.fixture.navigate(props.href);}}>{children}</a>;`:a.path==='next/navigation'?`export const redirect=url=>{throw Error('unexpected redirect:'+url);};`:a.path==='@/lib/auth'?`export const requireUser=async()=>window.fixture.actor;`:a.path==='@/lib/i18n/server'?`export const getUiText=async()=>((key,values={})=>key.replace(/\\{([^}]+)\\}/g,(_,name)=>String(values[name]??'')));`:a.path==='@/lib/capabilities'?`export const isQueueAgent=()=>true;`:a.path==='@/lib/catalog-runtime'?`export const runtimeBusinessById=async()=>null;`:a.path==='@/lib/support-video-requests'?`export const getVideoRequest=async()=>null;`:a.path==='@/lib/support'?`export class SupportError extends Error{};export const getSupportConversation=async()=>window.fixture.data,getSupportIdleEndEvidence=async()=>null,listSupportAgentWorkloads=async()=>[];`:a.path==='@/app/support-actions'?`const noop=async()=>{};export const reviewVideoRequestAction=noop,claimSupportConversationAction=noop,closeSupportConversationAction=noop,postSupportMessageAction=noop,reassignSupportConversationAction=noop,reopenSupportConversationAction=noop,joinSupportConversationAction=noop;`:a.path==='@/components/DashboardShell'?`import React from'react';export default props=><main className="main" data-content-origin>{props.children}</main>;`:a.path==='@/components/SupportJoinButton'?`import React from'react';export default()=> <button>Join chat</button>;`:`export default()=>null;`}));
+ }}]});
+ const browser=await chromium.launch({headless:true,timeout:20000});try{
+  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors:string[]=[],reads:number[]=[];page.on('pageerror',error=>errors.push(error.message));page.setDefaultTimeout(8000);
+  await page.route('http://localhost:45679/**',route=>route.fulfill({contentType:'text/html',body:'<div id="root"></div>'}));
+  await page.route('http://localhost:45679/api/support/42/read',async route=>{reads.push((route.request().postDataJSON()as{messageId:number}).messageId);await route.fulfill({status:200,json:{saved:true}});});
+  await page.goto('http://localhost:45679/dashboard/support/42');
+  await page.addStyleTag({content:await readFile('app/globals.css','utf8')+'\n'+output.outputFiles.find(file=>file.path.endsWith('.css'))!.text});
+  await page.evaluate(()=>{(window as unknown as{fixture:unknown}).fixture={routes:[],actor:{id:8,access_role:'team_member',staff_queue_scope:'transport',business_id:null},data:{conversation:{id:42,publicRef:'SUP-QA',businessName:'Fixture',subject:'Pickup → Destination',participantKind:'visitor',assistanceCategory:'shipment_observation',status:'open',assignedUserId:8,assignedUserName:'Current staff',agentJoined:true,resolvedAt:null,idleEndedAt:null,readEpoch:'29',replyState:'needs_reply',staffReplyDueAt:600000,requesterLabel:'Requester',requestSummary:'Two items',visitorPhone:'+447700900119'},messages:Array.from({length:1},(_,index)=>({id:index+1,senderRole:'visitor',senderName:'Fixture requester',createdAt:index+1,senderUserId:null,body:'Visible fixture message '+index,visitorVisible:true,read:false}))}};});
+  await page.addScriptTag({content:output.outputFiles.find(file=>file.path.endsWith('.js'))!.text});
+  const navigate=(href:string)=>page.evaluate(href=>(window as unknown as{fixture:{navigate:(href:string)=>Promise<void>}}).fixture.navigate(href),href);
+  await navigate('/dashboard/support/42?queue=transport&status=overdue&q=saved+search&page=2');
+  const transcript=page.getByRole('region',{name:'Support message history'});await transcript.waitFor();
+  const originBox=await page.locator('[data-content-origin]').boundingBox(),box=await transcript.boundingBox();assert.ok(originBox&&box);assert.ok(box.y-originBox.y<=160,JSON.stringify({originBox,box}));assert.ok(box.height>=300);const bubble=await page.locator('.support-message').first().boundingBox();assert.ok(bubble&&bubble.height<150&&bubble.height<box.height/2,JSON.stringify({bubble,transcript:box}));assert.equal(await page.getByRole('region',{name:'Manage',exact:true}).isVisible(),true);
+  assert.equal(await page.locator('[data-staff-chat-header]').getByText('SUP-QA',{exact:true}).count(),1);assert.equal(await page.getByRole('link',{name:'Details',exact:true}).isVisible(),false);
+  await page.setViewportSize({width:390,height:844});await page.getByRole('link',{name:'Details',exact:true}).waitFor();assert.equal(await page.getByRole('region',{name:'Manage',exact:true}).isVisible(),false);
+  const draft=page.locator('#support-reply');await draft.fill('Unsaved reply retained');await draft.evaluate(node=>{(node as HTMLElement).dataset.retention='same-node';});
+  await page.getByRole('link',{name:'Details',exact:true}).click();await page.getByRole('link',{name:'Back to conversation',exact:true}).waitFor();assert.equal(await draft.isVisible(),false);assert.equal(await page.getByRole('region',{name:'Manage',exact:true}).isVisible(),true);assert.equal(await page.locator('form').last().locator('[name=nav_panel]').inputValue(),'details');
+  const readsBefore=reads.length;await page.evaluate(()=>{window.dispatchEvent(new Event('focus'));window.dispatchEvent(new Event('scroll'));});await page.waitForTimeout(600);assert.equal(reads.length,readsBefore,'Hidden Details view cannot acknowledge transcript messages');
+  await page.getByRole('link',{name:'Back to conversation',exact:true}).click();await draft.waitFor();assert.equal(await draft.inputValue(),'Unsaved reply retained');assert.equal(await draft.getAttribute('data-retention'),'same-node');assert.equal(await page.getByRole('region',{name:'Manage',exact:true}).isVisible(),false);
+  for(const width of[390,320]){await page.setViewportSize({width,height:844});const controls=await page.locator('[data-staff-chat-header] a').evaluateAll(nodes=>nodes.filter(node=>node.getClientRects().length).map(node=>{const r=node.getBoundingClientRect();return{height:r.height,left:r.left,right:r.right};}));assert.ok(controls.every(box=>box.height>=48&&box.left>=0&&box.right<=width),JSON.stringify({width,controls}));assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);}
+  assert.deepEqual(errors,[]);
+ }finally{await browser.close();}
+});

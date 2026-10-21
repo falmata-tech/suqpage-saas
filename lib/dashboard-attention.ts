@@ -1,10 +1,12 @@
+import { SUPPORT_WAITING_SCOPE_SQL } from "./support";
 import { hasCapability } from "./capabilities";
 import { runtimeGet } from "./runtime-sql";
 import type { SessionUser } from "./types";
 
 export type DashboardAttention = {
   newAccounts?: number;
-  showroomRequests: number;
+  locationReviews?: number;
+  pageReviews: number;
   customerInquiries?: number;
   supportReplies: number;
 };
@@ -19,6 +21,7 @@ export async function getDashboardAttention(
 ): Promise<DashboardAttention> {
   if (hasCapability(user, "operations:manage") && !businessId) {
     return {
+      locationReviews: 0,
       newAccounts: await count(`
         SELECT COUNT(*) total FROM businesses b
         WHERE b.status='draft'
@@ -28,17 +31,17 @@ export async function getDashboardAttention(
             WHERE u.business_id=b.id AND p.access_role='client'
           )
       `),
-      showroomRequests: await count("SELECT COUNT(*) total FROM service_requests WHERE status='submitted'"),
+      pageReviews: 0,
       supportReplies: await count(`
         SELECT COUNT(*) total FROM support_conversations c
         WHERE c.status='waiting'
           OR (c.status='open' AND EXISTS(
             SELECT 1 FROM support_messages m
-            JOIN users u ON u.id=m.sender_user_id
-            JOIN user_access_profiles p ON p.user_id=u.id
+            LEFT JOIN users u ON u.id=m.sender_user_id
+            LEFT JOIN user_access_profiles p ON p.user_id=u.id
             WHERE m.conversation_id=c.id
-              AND m.id>c.staff_last_read_message_id
-              AND p.access_role='client'
+              AND m.id>c.staff_confirmed_read_message_id
+              AND (m.sender_kind='visitor' OR p.access_role='client')
           ))
       `),
     };
@@ -46,35 +49,27 @@ export async function getDashboardAttention(
 
   if (user.access_role === "team_member") {
     return {
-      showroomRequests: await count(`
-        SELECT COUNT(*) total FROM service_requests
-        WHERE assigned_user_id=?
-          AND status IN ('submitted','under_review','approved_for_work','in_progress')
-      `, user.id),
+      pageReviews: 0,
       supportReplies: await count(`
         SELECT COUNT(*) total FROM support_conversations c
-        WHERE c.status='waiting'
+        WHERE (c.status='waiting' AND ${SUPPORT_WAITING_SCOPE_SQL})
           OR (c.assigned_user_id=? AND c.status='open' AND EXISTS(
             SELECT 1 FROM support_messages m
-            JOIN users u ON u.id=m.sender_user_id
-            JOIN user_access_profiles p ON p.user_id=u.id
+            LEFT JOIN users u ON u.id=m.sender_user_id
+            LEFT JOIN user_access_profiles p ON p.user_id=u.id
             WHERE m.conversation_id=c.id
-              AND m.id>c.staff_last_read_message_id
-              AND p.access_role='client'
+              AND m.id>c.staff_confirmed_read_message_id
+              AND (m.sender_kind='visitor' OR p.access_role='client')
           ))
-      `, user.id),
+      `, user.id, user.id),
     };
   }
 
   const scopedBusinessId = businessId || user.business_id;
-  if (!scopedBusinessId) return { showroomRequests: 0, supportReplies: 0 };
+  if (!scopedBusinessId) return { pageReviews: 0, supportReplies: 0 };
   const client = user.access_role === "client";
   return {
-    showroomRequests: await count(
-      `SELECT COUNT(*) total FROM service_requests
-       WHERE business_id=? AND status IN (${client ? "'needs_information','client_review'" : "'submitted','client_approved'"})`,
-      scopedBusinessId,
-    ),
+    pageReviews: 0,
     customerInquiries: await count(
       "SELECT COUNT(*) total FROM inquiries WHERE business_id=? AND status='new'",
       scopedBusinessId,
@@ -82,13 +77,14 @@ export async function getDashboardAttention(
     supportReplies: await count(`
       SELECT COUNT(*) total FROM support_conversations c
       WHERE c.business_id=? AND c.status!='closed'
+        ${client?"AND c.assistance_category NOT IN ('shipment_observation','buying_assistance')":''}
         AND EXISTS(
           SELECT 1 FROM support_messages m
           WHERE m.conversation_id=c.id
-            AND m.id>c.${client ? "client_last_read_message_id" : "staff_last_read_message_id"}
+            AND m.id>c.${client ? "client_confirmed_read_message_id" : "staff_confirmed_read_message_id"}
             AND ${client
               ? "m.sender_user_id<>?"
-              : "EXISTS(SELECT 1 FROM user_access_profiles p WHERE p.user_id=m.sender_user_id AND p.access_role='client')"}
+              : "EXISTS(SELECT 1 FROM user_access_profiles p WHERE p.user_id=m.sender_user_id AND (m.sender_kind='visitor' OR p.access_role='client'))"}
         )
     `, ...[scopedBusinessId, ...(client ? [user.id] : [])]),
   };

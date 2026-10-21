@@ -1,15 +1,14 @@
+import { closePostgresRuntimeForTests } from "../lib/postgres-runtime-services";
 import crypto from "node:crypto";
 import fs from "node:fs";
-import { DatabaseSync } from "node:sqlite";
 import {
-  databasePath,
   mediaRoot,
   requestAttachmentRoot,
   supportAttachmentRoot,
   supabaseMediaStorageConfig,
 } from "../lib/config";
 import {
-  buildMediaReferenceManifest,
+  buildRuntimeMediaReferenceManifest,
   listLocalMediaObjects,
   mediaObjectIdentity,
 } from "../lib/media-manifest";
@@ -27,9 +26,7 @@ async function main() {
     .filter((value) => !["--execute", "--dry-run"].includes(value));
   if (unexpected.length) throw new Error("Use --dry-run or --execute.");
 
-  const db = new DatabaseSync(databasePath(), { readOnly: true });
-  const manifest = buildMediaReferenceManifest(db);
-  db.close();
+  const manifest = await buildRuntimeMediaReferenceManifest();
   if (manifest.invalidReferenceCount || manifest.malformedDocumentCount) {
     throw new Error("The database media manifest contains invalid retained references.");
   }
@@ -106,5 +103,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(error instanceof Error ? error.message : "Media migration failed.");
-  process.exit(1);
-});
+  process.exitCode = 1;
+}).finally(closePostgresRuntimeForTests);

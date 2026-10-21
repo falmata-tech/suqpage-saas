@@ -13,21 +13,21 @@ export function presentRequestEvent(event: Pick<RequestEvent, "event_type" | "de
 
   switch (event.event_type) {
     case "submitted":
-      return { label: "Request received", detail: "AfricMade received this request." };
+      return { label: "Request received", detail: "Suqpage received this request." };
     case "status_changed": {
       const nextStatus = event.detail.split("->").at(-1);
       return { label: "Status updated", detail: nextStatus ? `Request status changed to ${words(nextStatus)}.` : "The request status was updated." };
     }
     case "assigned":
-      return { label: "Team assigned", detail: "An AfricMade team member was assigned to this request." };
+      return { label: "Team assigned", detail: "An Suqpage team member was assigned to this request." };
     case "unassigned":
-      return { label: "Assignment updated", detail: "The request returned to the AfricMade work queue." };
+      return { label: "Assignment updated", detail: "The request returned to the Suqpage work queue." };
     case "invitation_created":
-      return { label: "Invitation prepared", detail: "AfricMade prepared private workspace access." };
+      return { label: "Invitation prepared", detail: "Suqpage prepared private workspace access." };
     case "invitation_accepted":
       return { label: "Workspace joined", detail: "The client workspace was activated." };
     case "revision_created":
-      return { label: "Revision started", detail: "AfricMade started preparing a private page revision." };
+      return { label: "Revision started", detail: "Suqpage started preparing a private page revision." };
     case "revision_submitted": {
       const number = revisionNumber(event.detail);
       return { label: "Preview ready", detail: number ? `Revision ${number} was sent for your review.` : "A private revision was sent for your review." };
@@ -45,6 +45,6 @@ export function presentRequestEvent(event: Pick<RequestEvent, "event_type" | "de
       return { label: "Page published", detail: number ? `Revision ${number} is now live.` : "The approved revision is now live." };
     }
     default:
-      return { label: "Request updated", detail: "AfricMade recorded progress on this request." };
+      return { label: "Request updated", detail: "Suqpage recorded progress on this request." };
   }
 }

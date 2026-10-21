@@ -2,44 +2,32 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import { localBrowserQuery, localBrowserCookies, closeLocalBrowserRuntime } from "./local-browser-auth.mjs";
 import { chromium } from "@playwright/test";
 
-const baseURL = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
-const databasePath = path.resolve(process.env.MIRTPAGE_DB_PATH || "data/mirtpage.db");
-const output = process.env.MIRTPAGE_VISUAL_OUTPUT || path.join("/tmp", "mirtpage-pwa-shell");
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
+const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3101";
+const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "mirtpage-pwa-shell");
 fs.mkdirSync(output, { recursive: true });
 
-const db = new DatabaseSync(databasePath);
-const admin = db.prepare(`
-  SELECT u.id,u.must_change_password
-  FROM users u JOIN user_access_profiles p ON p.user_id=u.id
-  WHERE p.access_role='platform_admin'
-  ORDER BY u.id LIMIT 1
-`).get();
-const showroom = db.prepare(`
-  SELECT handle FROM businesses
-  WHERE status='active' AND design_manifest_json!='' AND content_blocks_json!=''
-  ORDER BY id LIMIT 1
-`).get();
-assert.ok(admin, "PWA shell capture requires a platform administrator");
-assert.ok(showroom, "PWA shell capture requires an active composed showroom");
-
-const token = crypto.randomBytes(32).toString("base64url");
-const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-const now = Date.now();
-db.prepare("UPDATE users SET must_change_password=0 WHERE id=?").run(admin.id);
-db.prepare("INSERT INTO sessions(token_hash,user_id,expires_at,created_at,last_seen_at) VALUES(?,?,?,?,?)")
-  .run(tokenHash, admin.id, now + 10 * 60 * 1000, now, now);
+const [showroom] = await localBrowserQuery("SELECT handle FROM businesses WHERE status='active' ORDER BY id LIMIT 1");
+assert.ok(showroom, "PWA shell review requires an active local page");
+const cookies = await localBrowserCookies('platform_admin', baseURL);
 
 async function noOverflow(page, label) {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true, `${label} has horizontal overflow`);
 }
 
 async function cleanPage(browser, viewport, authenticated = false) {
-  const context = await browser.newContext({ viewport });
-  if (authenticated) await context.addCookies([{ name: "mirtpage_session", value: token, url: baseURL, httpOnly: true, sameSite: "Lax" }]);
+  const context = await browser.newContext({serviceWorkers: 'block', viewport });
+  if (authenticated) await context.addCookies(cookies);
   const page = await context.newPage();
+  mapTileFixtures.push(await installMapTileFixture(page.context()));
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
@@ -48,12 +36,12 @@ async function cleanPage(browser, viewport, authenticated = false) {
 
 const browser = await chromium.launch({
   headless: true,
-  executablePath: process.env.MIRTPAGE_PLAYWRIGHT_EXECUTABLE_PATH || undefined,
+  executablePath: process.env.SUQPAGE_PLAYWRIGHT_EXECUTABLE_PATH || undefined,
 });
 try {
   const desktop = await cleanPage(browser, { width: 1440, height: 1000 });
   await desktop.page.goto(baseURL, { waitUntil: "domcontentloaded" });
-  await desktop.page.getByRole("heading", { name: "Find Ethiopian makers and producers." }).waitFor();
+  await desktop.page.getByRole("heading", { level: 1 }).waitFor();
   await desktop.page.locator("link[rel='manifest']").waitFor({ state: "attached" });
   assert.equal(await desktop.page.locator(".public-app-header").isVisible(), true);
   assert.equal(await desktop.page.locator(".public-app-rail").isVisible(), true);
@@ -65,10 +53,10 @@ try {
 
   const phone = await cleanPage(browser, { width: 390, height: 844 });
   await phone.page.goto(baseURL, { waitUntil: "domcontentloaded" });
-  await phone.page.getByRole("heading", { name: "Find Ethiopian makers and producers." }).waitFor();
+  await phone.page.getByRole("heading", { level: 1 }).waitFor();
   assert.equal(await phone.page.locator(".public-app-header").isVisible(), false);
   assert.equal(await phone.page.locator(".public-app-rail").isVisible(), false);
-  const publicTabs = phone.page.getByRole("navigation", { name: "MirtPage application navigation" });
+  const publicTabs = phone.page.getByRole("navigation", { name: "Suqpage application navigation" });
   await publicTabs.waitFor();
   assert.equal(await publicTabs.locator(":scope > a").count(), 3);
   assert.equal(await publicTabs.locator(":scope > button").count(), 1);
@@ -82,10 +70,10 @@ try {
 
   const narrowPhone = await cleanPage(browser, { width: 320, height: 720 });
   await narrowPhone.page.goto(baseURL, { waitUntil: "domcontentloaded" });
-  await narrowPhone.page.getByRole("heading", { name: "Find Ethiopian makers and producers." }).waitFor();
+  await narrowPhone.page.getByRole("heading", { level: 1 }).waitFor();
   assert.equal(await narrowPhone.page.locator(".public-app-header").isVisible(), false);
   assert.equal(await narrowPhone.page.locator(".public-app-rail").isVisible(), false);
-  const narrowTabs = narrowPhone.page.getByRole("navigation", { name: "MirtPage application navigation" });
+  const narrowTabs = narrowPhone.page.getByRole("navigation", { name: "Suqpage application navigation" });
   await narrowTabs.waitFor();
   assert.equal(await narrowTabs.locator(":scope > a").count(), 3);
   assert.equal(await narrowTabs.locator(":scope > button").count(), 1);
@@ -99,9 +87,10 @@ try {
 
   const login = await cleanPage(browser, { width: 390, height: 844 });
   await login.page.goto(`${baseURL}/login`, { waitUntil: "domcontentloaded" });
-  await login.page.getByRole("heading", { name: "Welcome back to MirtPage." }).waitFor();
+  await login.page.getByRole("heading", { level: 1 }).waitFor();
   assert.equal(await login.page.locator(".landing-header").isVisible(), false);
-  assert.equal(await login.page.getByRole("navigation", { name: "MirtPage application navigation" }).isVisible(), true);
+  await login.page.getByRole("link", { name: "Return to Market", exact: true }).waitFor();
+  assert.equal(await login.page.getByRole("button", { name: "Continue with email", exact: true }).isVisible(), true);
   await noOverflow(login.page, "390px login shell");
   await login.page.screenshot({ path: path.join(output, "login-390.png"), caret: "initial" });
   assert.deepEqual(login.errors, []);
@@ -109,8 +98,8 @@ try {
 
   const hosted = await cleanPage(browser, { width: 390, height: 844 });
   await hosted.page.goto(`${baseURL}/@${showroom.handle}`, { waitUntil: "domcontentloaded" });
-  await hosted.page.getByRole("navigation", { name: "MirtPage showroom host navigation" }).waitFor();
-  assert.equal(await hosted.page.getByRole("navigation", { name: "MirtPage showroom host navigation" }).isVisible(), true);
+  await hosted.page.getByRole("navigation", { name: "Page return navigation" }).waitFor();
+  assert.equal(await hosted.page.getByRole("navigation", { name: "Page return navigation" }).isVisible(), true);
   const showroomFooter = hosted.page.locator('[data-slot="footer"]');
   if (await showroomFooter.count()) assert.equal(await showroomFooter.isVisible(), false);
   await noOverflow(hosted.page, "390px hosted showroom shell");
@@ -119,7 +108,9 @@ try {
   await hosted.context.close();
 
   const workspace = await cleanPage(browser, { width: 390, height: 844 }, true);
-  await workspace.page.goto(`${baseURL}/dashboard/admin`, { waitUntil: "domcontentloaded" });
+  // Server-rendered navigation is visible before its client handlers hydrate.
+  await workspace.page.goto(`${baseURL}/dashboard/admin`, { waitUntil: "networkidle" });
+  assert.deepEqual(workspace.errors, [], "Workspace navigation must hydrate without errors");
   await workspace.page.locator("main").waitFor();
   assert.equal(await workspace.page.locator(".workspace-mobile-header").count(), 0);
   const workspaceTabs = workspace.page.getByRole("navigation", { name: "Workspace application navigation" });
@@ -139,7 +130,6 @@ try {
   console.log(`PWA shell visuals passed: ${output}`);
 } finally {
   await browser.close();
-  db.prepare("DELETE FROM sessions WHERE token_hash=?").run(tokenHash);
-  db.prepare("UPDATE users SET must_change_password=? WHERE id=?").run(admin.must_change_password, admin.id);
-  db.close();
+  await closeLocalBrowserRuntime();
+  for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests();
 }

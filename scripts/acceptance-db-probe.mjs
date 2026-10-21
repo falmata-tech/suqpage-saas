@@ -5,12 +5,12 @@ const queries = {
   inquiryByCustomer: "SELECT status,contact FROM inquiries WHERE customer_name=? ORDER BY id DESC LIMIT 1",
 };
 
-if (!process.env.MIRTPAGE_POSTGRES_URL || !value || !Object.hasOwn(queries, probe)) {
+if (!process.env.SUQPAGE_POSTGRES_URL || !value || !Object.hasOwn(queries, probe)) {
   console.error("Invalid acceptance database probe.");
   process.exit(2);
 }
 
-const database = new pg.Client({ connectionString: process.env.MIRTPAGE_POSTGRES_URL });
+const database = new pg.Client({ connectionString: process.env.SUQPAGE_POSTGRES_URL });
 try {
   await database.connect();
   const result = await database.query(queries[probe].replace("?", "$1"), [value]);

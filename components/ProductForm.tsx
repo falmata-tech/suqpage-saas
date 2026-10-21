@@ -1,21 +1,37 @@
 "use client";
+import { useUiText } from "@/lib/i18n/ui";
 
-import { useEffect, useRef, useState } from "react";
+
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import {unstable_rethrow} from "next/navigation";
+import LoadingBar from "@/components/LoadingBar";
+import ProductMediaFields from "@/components/ProductMediaFields";
+import ProductOptionsFields from "@/components/ProductOptionsFields";
 import type { Catalog, Product } from "@/lib/types";
+import type {OwnerEditResult} from "@/lib/owner-edit-contract";
+import useFormExitGuard from "./useFormExitGuard";
 import {
-  availabilityLabel,
-  offeringKindDescriptions,
-  offeringKindLabels,
-  offeringKinds,
+  activeProductKinds,
+  isActiveProductKind,
+  productSupplyLabel,
   type OfferingKind,
 } from "@/lib/offerings";
-import { controlledYouTubeWatchUrl } from "@/lib/youtube-provider";
-
-function productVideoUrl(product?: Product) {
-  if (!product?.video_ref) return "";
-  try { return controlledYouTubeWatchUrl(product.video_ref); } catch { return ""; }
+function ProductFormControls({ children, pending }: { children: ReactNode; pending: boolean }) {
+  const [ready, setReady] = useState(false);
+  const t = useUiText();
+  useEffect(() => setReady(true), []);
+  const busy = !ready || pending;
+  return (
+    <>
+      <div className="field full" hidden={!busy}>
+        {busy && <LoadingBar label={pending ? t("Saving...") : undefined} />}
+      </div>
+      <fieldset style={{ display: "contents" }} aria-label={t("Products")} aria-busy={busy} disabled={busy}>
+        {children}
+      </fieldset>
+    </>
+  );
 }
-
 export default function ProductForm({
   catalog,
   product,
@@ -24,31 +40,34 @@ export default function ProductForm({
   contentVersion,
   idempotencyKey,
   staffMode,
+  exampleVideoRef,
+  cancelHref = `/dashboard/products?business=${businessId}`,
+  listOrigin,
 }: {
   catalog: Catalog;
   product?: Product;
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => OwnerEditResult | Promise<OwnerEditResult>;
   businessId: number;
   contentVersion: number;
   idempotencyKey: string;
   staffMode: boolean;
+  exampleVideoRef?:string;
+  cancelHref?:string;
+  listOrigin?:{q?:string;page?:string};
 }) {
+  const t = useUiText();
+  const formRef = useRef<HTMLFormElement>(null);
+  const inFlight = useRef(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const exit = useFormExitGuard(formRef, inFlight);
   const [name, setName] = useState(product?.name || "");
   const [description, setDescription] = useState(product?.description || "");
   const [availability, setAvailability] = useState(
     product?.availability || "available",
   );
-  const [offeringKind, setOfferingKind] = useState<OfferingKind>(
-    product?.offering_kind || "standard_product",
-  );
-  const [capacitySummary, setCapacitySummary] = useState(
-    product?.capacity_summary || "",
-  );
-  const [minimumOrderSummary, setMinimumOrderSummary] = useState(
-    product?.minimum_order_summary || "",
-  );
-  const [leadTimeSummary, setLeadTimeSummary] = useState(
-    product?.lead_time_summary || "",
+  const [offeringKind, setOfferingKind] = useState<OfferingKind | "">(
+    !product ? "standard_product" : isActiveProductKind(product.offering_kind) ? product.offering_kind : "",
   );
   const [price, setPrice] = useState(
     product?.price_minor == null ? "" : (product.price_minor / 100).toFixed(product.price_minor % 100 ? 2 : 0),
@@ -56,20 +75,29 @@ export default function ProductForm({
   const [quantityUnit, setQuantityUnit] = useState(product?.quantity_unit || "");
   const [highlights, setHighlights] = useState((product?.highlights || []).join("\n"));
   const [imagePreview, setImagePreview] = useState(product?.image_path || "");
-  const [removeImage, setRemoveImage] = useState(false);
-  const imageInput = useRef<HTMLInputElement>(null);
-  const temporaryImageUrl = useRef<string | null>(null);
-  useEffect(
-    () => () => {
-      if (temporaryImageUrl.current) {
-        URL.revokeObjectURL(temporaryImageUrl.current);
-      }
-    },
-    [],
-  );
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   return (
-    <form action={action} className="panel form-grid product-upkeep-form">
+    <form ref={formRef} aria-busy={saving} onSubmit={async event => {
+      event.preventDefault();
+      if (inFlight.current) return;
+      const formData = new FormData(event.currentTarget);
+      for (const file of galleryFiles) formData.append("mediaImages", file);
+      inFlight.current = true; setSaving(true); setError("");
+      try {
+        const result = await action(formData);
+        if (result) setError(result.error);
+        else exit.markSaved();
+      } catch (error) {
+        try { unstable_rethrow(error); }
+        catch (navigation) { exit.allowExit(); throw navigation; }
+        setError("Unable to connect. Please try again.");
+      } finally { inFlight.current = false; setSaving(false); }
+    }} className="panel form-grid product-upkeep-form">
+      {error ? <p className="error field full" role="alert">{t(error)}</p> : null}
+      <ProductFormControls pending={saving}>
       <input type="hidden" name="businessId" value={businessId} />
+      <input type="hidden" name="nav_q" value={listOrigin?.q || ""} />
+      <input type="hidden" name="nav_page" value={listOrigin?.page || ""} />
       <input
         type="hidden"
         name="expectedContentVersion"
@@ -82,7 +110,7 @@ export default function ProductForm({
       ) : null}
 
       <div className="field full">
-        <label htmlFor="product-name">Offering name</label>
+        <label htmlFor="product-name">{t("Name")}</label>
         <input
           id="product-name"
           name="name"
@@ -92,11 +120,10 @@ export default function ProductForm({
           onChange={(event) => setName(event.target.value)}
           autoComplete="off"
         />
-        <small>Name the product, made-to-order work, supply, or capability exactly as customers should see it.</small>
       </div>
 
       <div className="field">
-        <label htmlFor="product-price">Price in ETB <span className="optional">(optional)</span></label>
+        <label htmlFor="product-price">{t("Price in ETB")}{" "}<span className="optional">{t("(optional)")}</span></label>
         <input
           id="product-price"
           name="priceEtb"
@@ -107,72 +134,68 @@ export default function ProductForm({
           inputMode="decimal"
           value={price}
           onChange={(event) => setPrice(event.target.value)}
-          placeholder="Example: 1250"
+          placeholder="1250"
         />
-        <small>Informational only. AfricMade does not collect payment.</small>
       </div>
 
+      {staffMode ? <>
       <div className="field">
-        <label htmlFor="product-unit">Offered by <span className="optional">(optional)</span></label>
+        <label htmlFor="product-unit">{t("Offered by")}{" "}<span className="optional">{t("(optional)")}</span></label>
         <input
           id="product-unit"
           name="quantityUnit"
           maxLength={40}
           value={quantityUnit}
           onChange={(event) => setQuantityUnit(event.target.value)}
-          placeholder="Example: kg, piece, set, tonne, or project"
+          placeholder={t("Example: piece, kg, box or set")}
         />
       </div>
 
       <div className="field full">
-        <label htmlFor="product-highlights">Highlights <span className="optional">(optional)</span></label>
+        <label htmlFor="product-highlights">{t("Highlights")}{" "}<span className="optional">{t("(optional)")}</span></label>
         <textarea
           id="product-highlights"
           name="highlights"
           maxLength={485}
           value={highlights}
           onChange={(event) => setHighlights(event.target.value)}
-          placeholder={"One highlight per line\nLocally serviceable\nFood-safe stainless steel"}
+          placeholder={t("One highlight per line Locally serviceable Food-safe stainless steel")}
         />
-        <small>Up to six highlights, each 80 characters or fewer.</small>
+        <small>{t("Up to six highlights, each 80 characters or fewer.")}</small>
       </div>
 
-      <div className="field full">
-        <label htmlFor="product-video">Product YouTube video <span className="optional">(optional)</span></label>
-        <input
-          id="product-video"
-          name="videoUrl"
-          type="url"
-          maxLength={500}
-          defaultValue={productVideoUrl(product)}
-          placeholder="https://www.youtube.com/watch?v=..."
-        />
-        <small>Use a standard YouTube watch or share link.</small>
-      </div>
+      </> : null}
+
+
 
       <div className="field">
-        <label htmlFor="product-offering-kind">Offering type</label>
+        <label htmlFor="product-offering-kind">{t("How is this product supplied?")}</label>
         <select
           id="product-offering-kind"
           name="offeringKind"
+          required
           value={offeringKind}
           onChange={(event) => setOfferingKind(event.target.value as OfferingKind)}
         >
-          {offeringKinds.map((kind) => (
-            <option key={kind} value={kind}>{offeringKindLabels[kind]}</option>
+          <option value="" disabled>{t("Choose a product type")}</option>
+          {activeProductKinds.map((kind) => (
+            <option key={kind} value={kind}>{t(kind === "made_to_order" ? "Made to order" : "Ready to ship")}</option>
           ))}
         </select>
-        <small>{offeringKindDescriptions[offeringKind]}</small>
+        {!offeringKind ? <small>{t("Choose how this product is supplied before saving.")}</small> : offeringKind === "made_to_order" ? <small>{t("Products are made after the customer orders.")}</small> : null}
       </div>
 
+      {staffMode ? <>
       <input type="hidden" name="quantityMode" value="optional" />
       <div className="field product-quantity-note">
-        <strong>Desired quantity is optional</strong>
-        <small>Buyers may add a quantity to their inquiry or leave it open for discussion.</small>
+        <strong>{t("Desired quantity is optional")}</strong>
+        <small>{t("Buyers may add a quantity to their inquiry or leave it open for discussion.")}</small>
       </div>
 
+      </> : null}
+
       <div className="field full">
-        <label htmlFor="product-description">Description</label>
+        <label htmlFor="product-description">{t("Description")}</label>
         <textarea
           id="product-description"
           name="description"
@@ -183,44 +206,10 @@ export default function ProductForm({
         />
       </div>
 
-      <div className="field">
-        <label htmlFor="product-capacity">Production or supply capacity <span className="optional">(optional)</span></label>
-        <input
-          id="product-capacity"
-          name="capacitySummary"
-          maxLength={180}
-          value={capacitySummary}
-          onChange={(event) => setCapacitySummary(event.target.value)}
-          placeholder="Example: Up to 5,000 units per month"
-        />
-      </div>
+      <div className="field"><label htmlFor="product-visibility">{t("Visibility")}</label><select id="product-visibility" name="isPublished" defaultValue={product?.is_published === 0 ? "0" : "1"}><option value="1">{t("Listed on my page")}</option><option value="0">{t("Hidden from buyers")}</option></select><small>{t("Your business must be published before buyers can see listed products.")}</small></div>
 
       <div className="field">
-        <label htmlFor="product-minimum-order">Minimum order <span className="optional">(optional)</span></label>
-        <input
-          id="product-minimum-order"
-          name="minimumOrderSummary"
-          maxLength={140}
-          value={minimumOrderSummary}
-          onChange={(event) => setMinimumOrderSummary(event.target.value)}
-          placeholder="Example: MOQ 100 units"
-        />
-      </div>
-
-      <div className="field full">
-        <label htmlFor="product-lead-time">Lead time or production window <span className="optional">(optional)</span></label>
-        <input
-          id="product-lead-time"
-          name="leadTimeSummary"
-          maxLength={140}
-          value={leadTimeSummary}
-          onChange={(event) => setLeadTimeSummary(event.target.value)}
-          placeholder="Example: Samples in 7 days; production in 3-4 weeks"
-        />
-      </div>
-
-      <div className="field">
-        <label htmlFor="product-availability">Availability</label>
+        <label htmlFor="product-availability">{t("Availability")}</label>
         <select
           id="product-availability"
           name="availability"
@@ -231,97 +220,51 @@ export default function ProductForm({
             )
           }
         >
-          <option value="available">Available</option>
-          <option value="limited">Limited availability</option>
-          <option value="unavailable">Unavailable</option>
-          <option value="coming_soon">Coming soon</option>
+          <option value="available">{t("Available")}</option>
+          <option value="limited">{t("Limited availability")}</option>
+          <option value="unavailable">{t("Unavailable")}</option>
+          <option value="coming_soon">{t("Coming soon")}</option>
         </select>
-        <small>No inventory count is stored.</small>
       </div>
 
+      {staffMode ? <>
+      <ProductOptionsFields initial={(product?.option_groups || []).map(group => ({name:group.name,values:group.values.map(value=>value.value)}))} />
       <div className="field">
-        <label htmlFor="product-category">Category</label>
+        <label htmlFor="product-category">{t("Category")}</label>
         <select
           id="product-category"
           name="categoryId"
           defaultValue={product?.category_id || ""}
         >
-          <option value="">Unassigned</option>
+          <option value="">{t("Unassigned")}</option>
           {catalog.categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
             </option>
           ))}
         </select>
-        <small>Only categories for this business are shown.</small>
       </div>
 
-      <div className="field">
-        <label htmlFor="product-image">Primary image</label>
-        <input
-          id="product-image"
-          ref={imageInput}
-          type="file"
-          name="image"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={(event) => {
-            if (temporaryImageUrl.current) {
-              URL.revokeObjectURL(temporaryImageUrl.current);
-              temporaryImageUrl.current = null;
-            }
-            const file = event.target.files?.[0];
-            if (file) {
-              temporaryImageUrl.current = URL.createObjectURL(file);
-              setImagePreview(temporaryImageUrl.current);
-              setRemoveImage(false);
-            } else {
-              setImagePreview(product?.image_path || "");
-            }
-          }}
-        />
-        <small>JPEG, PNG, or WebP; up to 5 MB.</small>
-      </div>
+      </> : null}
 
-      {product?.image_path ? (
-        <div className="field full product-current-media">
-          <img src={product.image_path} alt="" />
-          <label className="check-field">
-            <input
-              type="checkbox"
-              name="removeImage"
-              checked={removeImage}
-              onChange={(event) => {
-                setRemoveImage(event.target.checked);
-                if (event.target.checked && imageInput.current) {
-                  imageInput.current.value = "";
-                  setImagePreview("");
-                } else {
-                  setImagePreview(product.image_path);
-                }
-              }}
-            />
-            Remove the current image without replacing it
-          </label>
-        </div>
-      ) : null}
+      <ProductMediaFields exampleVideoRef={exampleVideoRef} staffMode={staffMode} product={product} onFiles={setGalleryFiles} onCover={setImagePreview} />
 
       {staffMode ? (
         <div className="field full">
-          <label htmlFor="service-note">Customer-service note</label>
+          <label htmlFor="service-note">{t("Customer-service note")}</label>
           <input
             id="service-note"
             name="serviceNote"
             required
             maxLength={300}
-            placeholder="Example: Updated for the client during a support call"
+            placeholder={t("Example: Updated for the client during a support call")}
           />
-          <small>This records why a team member changed client content.</small>
-        </div>
+          </div>
       ) : null}
 
       <aside className="field full product-upkeep-preview" aria-live="polite">
         <div className="product-upkeep-preview-image">
-          {!removeImage && imagePreview ? (
+          {imagePreview ? (
             <img src={imagePreview} alt="" />
           ) : (
             <span aria-hidden="true">◇</span>
@@ -329,37 +272,24 @@ export default function ProductForm({
         </div>
         <div>
           <span className={`badge ${availability}`}>
-            {availabilityLabel(offeringKind, availability)}
+            {t(productSupplyLabel(offeringKind, availability))}
           </span>
-          <small>{offeringKindLabels[offeringKind]}</small>
-          <strong>{name || "Offering name preview"}</strong>
-          <p>{description || "The offering description will appear here."}</p>
+          <strong>{name || t("Name preview")}</strong>
+          {description ? <p>{description}</p> : null}
           {price ? <strong>ETB {price}</strong> : null}
-          {quantityUnit ? <p>Offered by {quantityUnit}</p> : null}
+          {quantityUnit ? <p>{t("Offered by")}{" "}{quantityUnit}</p> : null}
           {highlights.trim() ? <ul className="product-upkeep-facts">{highlights.split(/\r?\n/).filter(Boolean).slice(0, 6).map((item) => <li key={item}>{item}</li>)}</ul> : null}
-          {[capacitySummary, minimumOrderSummary, leadTimeSummary].filter(Boolean).length ? (
-            <ul className="product-upkeep-facts">
-              {capacitySummary ? <li>Capacity: {capacitySummary}</li> : null}
-              {minimumOrderSummary ? <li>Minimum order: {minimumOrderSummary}</li> : null}
-              {leadTimeSummary ? <li>Lead time: {leadTimeSummary}</li> : null}
-            </ul>
-          ) : null}
         </div>
       </aside>
 
-      <div className="field full product-upkeep-explainer">
-        <strong>This publishes only this offering update.</strong>
-        <span>
-          Design, options, order, categories, and business settings
-          stay protected. A retained page version is created automatically.
-        </span>
-      </div>
-
-      <div className="field full">
-        <button className="btn brand" type="submit">
-          {product ? "Save and publish offering" : "Add and publish offering"}
+      <div className="field full inline-actions">
+        <button className="btn brand" type="submit" disabled={saving}>
+          {saving ? t("Saving...") : product ? t("Save changes") : t("Add item")}
         </button>
+        <button className="btn secondary" type="button" disabled={saving} onClick={() => exit.requestExit(cancelHref)}>{t("Cancel")}</button>
       </div>
+      </ProductFormControls>
+      {exit.confirmation}
     </form>
   );
 }

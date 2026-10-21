@@ -2,17 +2,22 @@
 id: FE-034
 title: Installable PWA and mobile application shell
 status: done
-related: [FE-005, FE-013, FE-021, FE-026, FE-030, FE-035, FE-036, FE-038, FE_BASE, DEP-020, DEP-023, DEP-025]
+related: [FE-056, FE-005, FE-013, FE-021, FE-026, FE-030, FE-035, FE-036, FE-038, FE_BASE, DEP-020, DEP-023, DEP-025]
 owners: [product, frontend, design]
-last_updated: 2026-08-14
+last_updated: 2026-09-23
 change_level: L2
 ---
 
 # FE-034 - Installable PWA and mobile application shell
 
+S30 corrects mobile brand visibility under FE-038. Local responsive captures,
+typecheck, PWA shell contract and all required release gates pass. The approved
+change is deployed and verified live; see docs/SUQPAGE-S30-RELEASE-2026-09-23.md.
+Existing worker/cache policy is unchanged.
+
 ## Problem and outcome
 
-MirtPage is responsive but still presents desktop website chrome on phones and
+Suqpage is responsive but still presents desktop website chrome on phones and
 cannot be installed as a complete Progressive Web App. Visitors and workspace
 users need a coherent phone application shell, safe standalone behavior, and a
 useful offline failure state without caching private or mutable business data.
@@ -28,13 +33,13 @@ useful offline failure state without caching private or mutable business data.
 - A shared four-target public phone bar for Market, Featured, About, and More.
   More exposes signup, workspace access, contact, privacy, and
   terms in a bounded sheet.
-- Removal of desktop-style public headers and full public footers at phone
-  widths while retaining MirtPage identity inside primary page content.
+- Compact Suqpage mark/wordmark and language header on phones (FE-038 S30);
+  desktop navigation and full public footers remain hidden.
 - A role-derived authenticated phone tab bar whose **More** action opens the
   existing complete authorized workspace menu.
-- Removal of the authenticated mobile top header once equivalent bottom
-  navigation is available.
-- Removal of composed showroom footers on phones. The compact MirtPage host bar
+- Compact authenticated brand/language header; task navigation stays in the
+  bottom bar.
+- Removal of composed showroom footers on phones. The compact Suqpage host bar
   and business identity remain because they provide Back, hosting provenance,
   live status, and tenant identity rather than duplicate platform navigation.
 
@@ -47,10 +52,10 @@ useful offline failure state without caching private or mutable business data.
 
 ## Contracts
 
-- The manifest uses `/` scope and start URL, `standalone` display, MirtPage
+- The manifest uses `/` scope and start URL, `standalone` display, Suqpage
   colors, and 192px, 512px, maskable, and Apple-compatible raster icons.
 - Registration occurs only in a service-worker-capable production browser.
-  Development unregisters stale MirtPage workers and caches so local debugging
+  Development unregisters stale Suqpage workers and caches so local debugging
   cannot silently use old application code. A build-time public operations flag
   can disable registration and remove controlled workers during rollback.
 - `GET` navigation to public pages is network-first and may fall back to a
@@ -58,13 +63,14 @@ useful offline failure state without caching private or mutable business data.
   workspace routes, preview routes, authentication, mutations, and cross-origin
   requests are never stored in the PWA cache.
 - Service-worker cache names are versioned; activation deletes only prior
-  MirtPage-managed caches and claims open clients.
-- At phone widths, public pages expose no desktop header, hamburger menu, or
-  full footer. The fixed bottom bar respects the device safe area, contains four
+  Suqpage-managed caches and claims open clients.
+- At phone widths, public application pages expose a compact brand/language
+  header without desktop navigation or a full footer. Focused account-entry
+  forms retain their bounded public menu. The fixed bottom bar respects the device safe area, contains four
   labeled icon targets of at least 44 CSS pixels, exposes active-page semantics,
   and does not cover page actions or dialogs.
-- The root Market retains compact MirtPage identity and context without adding
-  a replacement mobile top navigation bar.
+- The root Market reserves height for the compact brand header and bottom bar;
+  map/results remain within the available viewport.
 - Authenticated phone navigation is derived only from links already admitted by
   role and business context. Up to four primary tasks appear in the bottom bar;
   **More** opens every remaining authorized destination with the existing focus
@@ -75,8 +81,8 @@ useful offline failure state without caching private or mutable business data.
 ## Scenarios
 
 ```gherkin
-Scenario: Visitor installs MirtPage
-  GIVEN a supported production browser opens MirtPage over HTTPS
+Scenario: Visitor installs Suqpage
+  GIVEN a supported production browser opens Suqpage over HTTPS
   WHEN the browser evaluates installability
   THEN a valid manifest, service worker, application name, colors, and complete icon set are available
   AND standalone launch begins at the marketplace
@@ -84,14 +90,14 @@ Scenario: Visitor installs MirtPage
 Scenario: Phone visitor uses the marketplace as an application
   GIVEN the public homepage is open at 320 or 390 CSS pixels
   WHEN the visitor moves among Market, Featured, About, and More
-  THEN no desktop public header, hamburger menu, or full footer consumes the viewport
+  THEN the compact Suqpage brand/language header is visible without desktop navigation or a full footer
   AND one safe-area-aware bottom navigation bar remains reachable
   AND the current destination is identified without color alone
 
 Scenario: Authenticated actor uses the phone workspace
   GIVEN an authorized client, team member, or administrator opens a workspace at phone width
   WHEN the workspace renders
-  THEN no mobile top header is shown
+  THEN a compact Suqpage brand/language header is visible
   AND the bottom bar contains only authorized primary tasks
   AND More opens every remaining authorized destination and account action
 
@@ -105,7 +111,7 @@ Scenario: Visitor opens a hosted showroom on a phone
   GIVEN an active composed showroom
   WHEN it renders at phone width
   THEN its full footer is omitted
-  AND its compact tenant identity and MirtPage Back/provenance controls remain available
+  AND its compact tenant identity and Suqpage Back/provenance controls remain available
 ```
 
 ## Quality impact
@@ -145,7 +151,7 @@ On 2026-08-14, the approved desktop, 390px, and 320px shell evidence, complete
 release, and 10/10 browser acceptance workflows passed for the exact production
 release. The HTTPS production probe for deployment
 `dpl_EPpUwucKvJE18WCckB7RqMq3EFVT` proved worker control after reload, offline
-public navigation, bounded MirtPage caches, and exclusion of protected, API,
+public navigation, bounded Suqpage caches, and exclusion of protected, API,
 preview, login, request, and mutation authority. All five required remote jobs
 passed in GitHub Actions run `31750355870`.
 

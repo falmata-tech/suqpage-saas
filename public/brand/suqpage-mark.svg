@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 80" role="img" aria-labelledby="title">
+  <title id="title">Suqpage</title>
+  <path fill="#ff4b00" d="M36 2C18.9 2 5 15.9 5 33c0 18 20.5 36.1 28.6 42.6a3.8 3.8 0 0 0 4.8 0C46.5 69.1 67 51 67 33 67 15.9 53.1 2 36 2Z"/>
+  <path fill="#fff" d="M22 18h28l5 11H17l5-11Zm-4 14h36v15a4 4 0 0 1-4 4H22a4 4 0 0 1-4-4V32Z"/>
+  <path fill="#ff4b00" d="M24 37h11v8H24zm17 0h7v14h-7z"/>
+</svg>

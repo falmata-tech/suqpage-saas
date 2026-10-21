@@ -4,7 +4,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 const destination = path.resolve(".local/supabase-runtime.env");
-const providerConfiguration = path.resolve(".env");
 
 function parseEnvironment(source) {
   const values = new Map();
@@ -46,41 +45,34 @@ const publishableKey = required(values, "ANON_KEY");
 const serviceRoleKey = required(values, "SERVICE_ROLE_KEY");
 
 const retained = fs.existsSync(destination) ? parseEnvironment(fs.readFileSync(destination, "utf8")) : new Map();
-const providerValues = fs.existsSync(providerConfiguration)
-  ? parseEnvironment(fs.readFileSync(providerConfiguration, "utf8"))
-  : new Map();
-const googleConfigured = Boolean(
-  providerValues.get("SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID")
-  && providerValues.get("SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET"),
-);
 const privacySalt = retained.get("PRIVACY_SALT") || crypto.randomBytes(32).toString("hex");
 const lines = [
   "# Generated from the local Supabase stack. Never commit this file.",
   "NEXT_PUBLIC_APP_URL=http://127.0.0.1:3000",
-  "MIRTPAGE_CANONICAL_URL=http://127.0.0.1:3000",
-  "MIRTPAGE_DATABASE_DRIVER=postgres",
-  `MIRTPAGE_POSTGRES_URL=${databaseUrl}`,
-  `MIRTPAGE_POSTGRES_DIRECT_URL=${databaseUrl}`,
-  `MIRTPAGE_LOCAL_POSTGRES_URL=${databaseUrl}`,
-  "MIRTPAGE_POSTGRES_POOL_MAX=4",
-  "MIRTPAGE_POSTGRES_CONNECTION_TIMEOUT_MS=5000",
-  "MIRTPAGE_POSTGRES_STATEMENT_TIMEOUT_MS=8000",
-  "MIRTPAGE_MEDIA_DRIVER=supabase",
-  `MIRTPAGE_SUPABASE_URL=${apiUrl}`,
-  `MIRTPAGE_SUPABASE_SERVICE_ROLE_KEY=${serviceRoleKey}`,
-  "MIRTPAGE_SUPABASE_STORAGE_BUCKET=mirtpage-media",
-  "MIRTPAGE_MEDIA_REQUEST_TIMEOUT_MS=8000",
-  "MIRTPAGE_AUTH_DRIVER=supabase",
+  "SUQPAGE_CANONICAL_URL=http://127.0.0.1:3000",
+  "SUQPAGE_DATABASE_DRIVER=postgres",
+  `SUQPAGE_POSTGRES_URL=${databaseUrl}`,
+  `SUQPAGE_POSTGRES_DIRECT_URL=${databaseUrl}`,
+  `SUQPAGE_LOCAL_POSTGRES_URL=${databaseUrl}`,
+  "SUQPAGE_POSTGRES_POOL_MAX=4",
+  "SUQPAGE_POSTGRES_CONNECTION_TIMEOUT_MS=5000",
+  "SUQPAGE_POSTGRES_STATEMENT_TIMEOUT_MS=8000",
+  "SUQPAGE_MEDIA_DRIVER=supabase",
+  `SUQPAGE_SUPABASE_URL=${apiUrl}`,
+  `SUQPAGE_SUPABASE_SERVICE_ROLE_KEY=${serviceRoleKey}`,
+  "SUQPAGE_SUPABASE_STORAGE_BUCKET=mirtpage-media",
+  "SUQPAGE_MEDIA_REQUEST_TIMEOUT_MS=8000",
+  "SUQPAGE_AUTH_DRIVER=supabase",
   `NEXT_PUBLIC_SUPABASE_URL=${apiUrl}`,
   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${publishableKey}`,
-  "MIRTPAGE_EMAIL_OTP_ENABLED=1",
-  `MIRTPAGE_GOOGLE_AUTH_ENABLED=${googleConfigured ? "1" : "0"}`,
-  "MIRTPAGE_SUPABASE_AUTH_REQUEST_TIMEOUT_MS=8000",
+  "SUQPAGE_EMAIL_OTP_ENABLED=1",
+  "SUQPAGE_GOOGLE_AUTH_ENABLED=0",
+  "SUQPAGE_SUPABASE_AUTH_REQUEST_TIMEOUT_MS=8000",
   `PRIVACY_SALT=${privacySalt}`,
-  "NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED=true",
-  "MIRTPAGE_PRODUCT_UPKEEP_ENABLED=1",
-  "MIRTPAGE_RECIPE_STUDIO_ENABLED=1",
-  "MIRTPAGE_YOUTUBE_ADMISSION_ENABLED=1",
+  "NEXT_PUBLIC_SUQPAGE_PWA_ENABLED=true",
+  "SUQPAGE_PRODUCT_UPKEEP_ENABLED=1",
+  "SUQPAGE_RECIPE_STUDIO_ENABLED=1",
+  "SUQPAGE_YOUTUBE_ADMISSION_ENABLED=1",
   "",
 ];
 

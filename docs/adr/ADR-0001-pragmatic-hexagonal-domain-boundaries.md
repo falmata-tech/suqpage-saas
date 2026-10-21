@@ -3,7 +3,7 @@ id: ADR-0001
 title: Pragmatic hexagonal and domain boundaries
 status: accepted
 date: 2026-07-20
-deciders: [MirtPage]
+deciders: [Suqpage]
 related: [BE_BASE, FE_BASE, BE-025]
 ---
 
@@ -11,7 +11,7 @@ related: [BE_BASE, FE_BASE, BE-025]
 
 ## Context
 
-MirtPage has real domain invariants and external adapters, but the controlled MVP
+Suqpage has real domain invariants and external adapters, but the controlled MVP
 is a compact Next.js application. A mandatory enterprise class hierarchy would
 add migration risk without improving behavior.
 

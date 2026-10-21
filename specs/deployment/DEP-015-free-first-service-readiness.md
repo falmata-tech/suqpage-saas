@@ -4,7 +4,7 @@ title: Free-first service and managed database readiness
 status: in_progress
 related: [FE-010, FE-018, FE-019, FE-025, BE-016, BE-017, BE-018, BE-019, BE-024, BE-030, DEP-010, DEP-016, DEP-017, DEP-021, DEP-022, DEP-026, DEP_BASE, ADR-0002, ADR-0009, ADR-0010, ADR-0012, ADR-0014]
 owners: [deployment, operations, security]
-last_updated: 2026-08-15
+last_updated: 2026-09-23
 change_level: L3
 ---
 
@@ -99,3 +99,26 @@ image build lost the registry connection during `npm ci`, and subsequent
 escalation reviews timed out before the retry could start. Production managed
 PostgreSQL/Supabase migration and multi-instance operation remain explicit
 future rollout work.
+
+## S32 transport rollout (planned)
+
+Migration 51 must precede the transport form release; preflight requires 51.
+It adds nullable route fields and queue/event indexes, updates contact admission
+for email-free transport, and allows audited handoff events. Existing rows and
+legacy support remain intact. General help still requires email/phone.
+Verify migration from the baseline and current schema, support/privacy tests,
+phone/desktop review, then release gates. Before production: protected backup,
+restore evidence and exact target verification. Roll back the application only
+to a compatible release; retain schema/data and disable new transport intake
+if needed rather than deleting requests or reversing the additive migration.
+
+## S89 — subscription retirement rollout
+
+BE-017/FE-018 retire business plans and payment/renewal workflows. Before rollout,
+back up the independently verified PostgreSQL target. The forward migration
+removes only the automatic business subscription trigger; preserve existing
+ledger rows. Verify new business creation has no subscription, historical rows
+are unchanged and public visibility/analytics still work. Application rollback
+may restore old code only together with reviewed trigger restoration; never
+silently resume billing or destructively erase the ledger. Local UI approval,
+focused security/migration checks and release gates precede production rollout.

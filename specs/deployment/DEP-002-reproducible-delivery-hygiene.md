@@ -4,11 +4,266 @@ title: Reproducible delivery and repository hygiene
 status: in_progress
 related: [FE-035, BE-003, BE-025, DEP_BASE, ADR-0002, ADR-0003, DEP-010, DEP-022, DEP-025]
 owners: [operations, security]
-last_updated: 2026-09-12
+last_updated: 2026-10-20
 change_level: L3
 ---
 
 # DEP-002 — Reproducible delivery and repository hygiene
+
+## Retire Vercel publishing for this repository (L0 documentation)
+
+The owner requests removal of MirtPage’s Vercel hosting connection. Netlify is the
+current host; DEP-026 and DEP-049 own its release/recovery admission. DEP-023 is
+retained as historical cutover evidence. Master §§17/22/24 keep the same provider,
+source-versus-artifact and task-isolation boundaries; no product rule changes.
+
+Ordered plan, recorded before editing operator documentation:
+
+1. Inventory the exact repository/App/project and active hosting instructions.
+2. Correct current runbooks/checklists, label superseded topology historical and
+   preserve immutable IDs/evidence, framework dependencies and privacy exclusions.
+3. Run focused specification, local-link, workflow-contract and whitespace checks;
+   return the isolated L0 diff for review before commit/push. No rebuild is needed.
+4. Separately verify project identity and linked repository in the provider, then
+   disconnect only this project’s Git connection and verify its actual outcome.
+   No accountwide App uninstall, project/deployment deletion, domain/secret change
+   or other-repository action is included.
+
+```gherkin
+Scenario: Retired hosting instructions are reconciled
+  GIVEN Netlify hosts MirtPage and the owner requests Vercel retirement
+  WHEN current operator documentation is updated
+  THEN it directs delivery and recovery through the existing Netlify admission
+  AND historical Vercel evidence and private-state exclusions remain intact
+  AND documentation does not claim a managed disconnection without provider readback
+```
+
+Focused evidence: `npm run validate:specs`, existing `npm run test:workflow`, local
+Markdown destinations and a docs-only diff review. Local validation passes all
+219 specs/ADRs, the workflow contract, fourteen checker regressions, five selected
+script checks and 688 local destinations/anchors. Immutable IDs/relations and the
+DEP-023 historical body remain unchanged. The first template-inclusive coverage
+assertion failed and its corrected scope is retained in protected evidence.
+Root reviewed the exact nine-file L0 diff and managed-result reconciliation;
+commit/push remain separate. The separate provider action removed only the
+verified `falmata-ds-projects/mirtpage` → `falmata-tech/suqpage-saas` Git connection;
+fresh reload confirms it. Project/deployments and the account App installation
+remain, with Netlify/domains/secrets/other repos unchanged. V01 retains the open
+no-trigger check at the next authorized source push. Documentation validation
+neither performs the disconnect nor qualifies a new deployment.
+
+## GitHub task integration and agent skills (L0)
+
+The owner requests an explicit branch/PR/merge workflow and researched guidance
+for agent skills. Existing staging, review, required-check and hosted-release
+controls remain authoritative. This instruction-only change installs no package,
+changes no GitHub/Netlify setting and grants no merge or deployment permission.
+Master §§22/24 distinguish merged source from delivery and link the workflow;
+product behavior is unaffected.
+
+Ordered plan before implementation:
+
+1. Read actual default/head/PR/protection and delivery wiring; distinguish verified
+   repository state from vendor capabilities and a recommended future workflow.
+2. Document short-lived task branches, typed names/commits, explicit PR bases,
+   isolated agent worktrees, current-head reviews/checks and merge/release boundaries.
+3. Add one short project GitHub skill and link it from AGENTS/README; reuse the
+   existing PR template, making required evidence proportional to change level.
+4. Record upstream-skill adoption criteria and targeted candidates without running
+   installers or enabling integrations. Validate specs, links, skill structure,
+   existing workflow assertions and representative routing/merge-denial cases.
+5. Review and commit this isolated documentation task; keep the frozen recovery
+   checkout unchanged. Actual PR integration/settings/deployment remain separate.
+
+```gherkin
+Scenario: An agent prepares or integrates an authorized task
+  GIVEN a verified repository, default branch, task scope and existing protection
+  WHEN the agent prepares a branch or pull request
+  THEN its base and dependent branches are explicit and unrelated edits stay isolated
+  AND current-head required checks, reviews and authorization govern any merge
+  AND merging does not imply artifact approval, provider configuration or deployment
+
+Scenario: A reusable external skill is considered
+  GIVEN a skill with instructions and possible executable resources
+  WHEN adoption is evaluated
+  THEN its upstream revision, license, resources and conflicts are reviewed
+  AND installation does not grant new credentials or override repository rules
+  AND activation and actual workflow outcomes are qualified separately
+```
+
+Evidence mapping: existing `scripts/validate-specs.mjs` and
+`scripts/test-workflow.mjs`, local Markdown/skill structure checks, and a concise
+review of branch/review/merge-denial examples. These are L0 checks, not another
+application build or a claim that remote settings have changed.
+
+Focused implementation evidence: the 226-word instruction-only skill and selected
+local references validate; all 219 specifications/ADRs, the existing workflow,
+identity and narrative checks pass. Seven positive/negative routing expectations
+and merge-denial cases were reviewed; these are not a model benchmark or proof
+of automatic selection. The local release upstream was corrected without changing
+its source or remote branches. Current repository/provider audit evidence is
+linked from engineering readiness. No installer, dependency, remote setting,
+merge or deployment is part of this L0 change.
+
+## Current documentation consolidation (L0)
+
+The master, active checklist and traceability index have accumulated repeated
+release narratives. The owner requests less documentation burden while keeping
+the current product/security contract and unfinished work intact. This is a
+documentation-only maintenance change, not a new product or rollout gate.
+
+Ordered plan, recorded before replacement:
+
+1. Inspect the clean isolated documentation worktree and reviewed candidates;
+   record the current source, open-request and immutable-ID coverage.
+2. Apply the compact master, active work board and requirements/evidence index.
+   Preserve numbered master headings, spec/ADR IDs, reciprocal links and all
+   unresolved acceptance criteria. Replace stale chronology with current rules
+   and links to existing history in Git/specs/release records; create no archive.
+3. Reconcile verified release outcomes without upgrading local/source evidence
+   to CI, hosted, device, email or Play success. Add one concise maintenance rule
+   to AGENTS and update the existing engineering-readiness assessment.
+4. Run focused structure/reference, specification, identity/narrative and
+   whitespace checks; return the scoped diff for root review and separate commit.
+   No application rebuild, provider write, dependency install or new approval.
+
+```gherkin
+Scenario: A contributor reads the compact current engineering brief
+  GIVEN existing product rules, immutable specification IDs and unfinished tasks
+  WHEN the master, active checklist and traceability index are consolidated
+  THEN numbered master headings and every spec/ADR identity and relation remain usable
+  AND every inherited unfinished request has a current task or an evidenced outcome
+  AND implemented, tested, approved, published and actually delivered states remain distinct
+  AND obsolete release transcripts are replaced by existing authoritative links
+  AND no product, permission, privacy, retention or release requirement changes
+```
+
+Focused mapping: `node scripts/validate-specs.mjs`,
+`node scripts/test-platform-identity.mjs`,
+`node scripts/test-platform-narrative.mjs`, the existing master-specific workflow
+assertion, original-to-current heading/open-item/ID coverage and local-link checks.
+These L0 checks do not rerun or replace application gates. Keep current rules in
+the master, detailed acceptance in specs and concise evidence pointers in
+traceability; the active checklist owns next work. Git preserves chronology.
+
+## Overall engineering readiness and project skills
+
+The owner's housekeeping request covers the overall ability to build and ship,
+not only incidents in the current release. Assess architecture/code quality,
+tests and CI/CD, local reproducibility, environment separation, secrets and
+dependencies, recovery/observability, documentation, maintenance, costs and
+agent tooling. Record repository evidence, unverified provider assumptions and
+prioritized improvements in `docs/operations/ENGINEERING-READINESS.md`. Keep
+release blockers separate from follow-up work; do not impose a new audit on
+every small edit or add an unattended background job.
+
+Plan before implementation:
+
+1. Record the actual capabilities and gaps of the current stack; refresh the
+   developer entry point rather than introduce another launcher or framework.
+2. Install three short instruction-only project skills under `.agents/skills/`
+   for actual browser review, requested delivery work and engineering review.
+   Link them from a thin AGENTS router; preserve existing authority and approvals.
+3. Validate frontmatter, names, bounded triggers, existing references and body
+   length (at most 300 words each); review six positive and six negative routing
+   cases. Keep implicit selection enabled by default. No credentials, helper
+   scripts, dependencies, model settings or provider changes belong here.
+4. Verify spec/workflow consistency and scoped changes. Qualify actual host
+   discovery and explicit/implicit invocation separately in a fresh session;
+   static validation and reasoned cases do not prove automatic activation.
+
+These L0 instructions do not change product behavior, UI or runtime artifacts.
+`SUQPAGE-MASTER-PROMPT.md` remains the product authority. Structural validation
+may use the installed YAML parser if the bundled Python validator cannot import
+its dependency; retain that limitation instead of claiming the bundled tool
+passed. Token/cost savings require observation, not a size-based promise.
+
+Primary references: [Codex skills](https://learn.chatgpt.com/docs/build-skills),
+[maintained repository skills](https://developers.openai.com/blog/skills-agents-sdk)
+and [skill evaluation](https://developers.openai.com/blog/eval-skills).
+
+## S151 — recurring workflow quality improvement (focused checks passed)
+
+Observed operational failures include missing JavaScript bindings and incorrect
+main-entry arguments that syntax checks or mocked ports alone did not detect.
+Improve the existing workflow while keeping release work primary: record
+timing/failure class, fix one demonstrated cause, and measure time/cost saved
+alongside security outcomes. This is a contributor routine, not an unattended
+daily job or a new automation platform.
+
+Ordered implementation plan, recorded before code:
+
+1. Add a concise recurring-development section to `AGENTS.md`, requiring actual
+   offline main-entry preflight, installed contract checks and batched/frozen
+   gates without adding approval requirements or weakening existing controls.
+2. Add `scripts/check-workflow-scripts.mjs`: inspect explicitly named canonical
+   repository `scripts/` JS/MJS/CJS entry files, using the installed TypeScript
+   compiler for syntax and missing-binding/import diagnostics. Read selected
+   source and installed declarations only; never execute a target or its imports,
+   read environment/secret/runtime files, install dependencies or contact services.
+   Public `scripts/` or `lib/` source companions may be explicitly supplied with
+   `--include`, including TypeScript imports; do not scan a directory or discover
+   source graphs implicitly. TypeScript entries retain project typechecking.
+3. Prove valid ESM/CommonJS/Node imports, undefined names/shorthands, misspelled
+   imports, syntax failure, inert imports and rejected paths in focused tests.
+   Include the small safe default set in the existing workflow gate only after
+   it passes; keep explicit changed-file checking available for future scripts.
+4. Run focused tests, actual selected-script admission, existing workflow
+   contracts, spec validation and whitespace checks. Root reviews the independent
+   change before commit/CI; no release/provider mutation belongs to this task.
+5. Invoke the same `npm run test:workflow` gate once in GitHub's existing core
+   job immediately after its clean web install and before `release:web`; assert
+   that exact order in the existing workflow contract. No new job or framework.
+
+```gherkin
+Scenario: A changed operational script has an unresolved name or import
+  GIVEN an explicitly selected canonical scripts JS, MJS or CJS source file
+  WHEN offline workflow-script quality checking runs
+  THEN syntax errors and unresolved bindings or imports fail with file, location and diagnostic code
+  AND neither the selected script nor its imports execute
+  AND secret, private runtime and outside-repository paths are rejected
+
+Scenario: Static admission is not proof of an operation's runtime preflight
+  GIVEN selected scripts pass the offline quality check
+  WHEN an author prepares a provider operation
+  THEN the author still exercises its actual main entry with the intended arguments and inert offline ports
+  AND validates installed provider contracts and nullable responses before an external write
+  AND preserves target, authorization, tenant, privacy and recovery checks
+```
+
+The checker is deliberately narrower than general JavaScript lint/type coverage.
+Only explicitly selected public local imports can join its source set; installed type
+declarations may resolve Node/package imports. It cannot establish runtime
+behavior, SQL correctness, provider response semantics or safety of a computed
+import. No dependency or lockfile change is planned. Test mapping:
+`scripts/test-workflow-script-quality.mjs`, `npm run check:workflow-scripts --
+<explicit scripts...>` and the existing `npm run test:workflow` gate. Local
+`npm run check` and GitHub's core job invoke that same workflow gate; the remote
+step precedes expensive release work. Wiring is not a claim of a completed CI run.
+
+Local implementation evidence on 2026-10-20: the existing workflow contract and
+13 in-memory regression cases pass. The actual changed B09 readiness script plus
+its explicitly selected `lib/platform-assets.ts` companion passes without either
+module executing (1,566 ms in the observed run). Three established recurring
+scripts pass in 1,033 ms; the default list now also checks the new checker and
+its test. Node syntax and specification validation pass. Tests prove undefined
+bindings, shorthand values, imports and syntax fail, while Node/ESM/CommonJS and
+inert TypeScript companions pass. No dependency, lockfile, application, provider
+or secret setting changed. Future avoided-delay/cost savings are not yet
+quantified; source-bound full gates, root review and remote CI remain separate.
+
+The workflow research uses primary examples as evidence, not instructions:
+[iterating development workflows](https://developers.openai.com/cookbook/examples/codex/iterating-development-workflows-with-codex/)
+and [reviewable recurring operations](https://developers.openai.com/blog/automating-repetitive-work-at-openai-with-codex/)
+support small durable plans and reuse; [TypeScript checkJs](https://www.typescriptlang.org/tsconfig/checkJs.html)
+provides the installed compiler mechanism. Existing GitHub npm caching,
+concurrency and failure artifacts already cover the relevant
+[dependency-caching pattern](https://docs.github.com/en/actions/concepts/workflows-and-actions/dependency-caching);
+do not duplicate them. Future [VS Code tasks](https://code.visualstudio.com/docs/debugtest/tasks)
+should invoke existing commands rather than introduce another launcher.
+Apply these ideas to the observed Node 24/Next 16.3.8/Expo 57 Intel Mac setup,
+five GitHub jobs and existing Netlify Free/Supabase/Gmail services. No new
+purchase, account-limit assumption or authorization requirement follows.
 
 ## Problem and outcome
 
@@ -27,8 +282,12 @@ four-tenant application behavior and single-instance pilot boundary.
 
 - Exclude secrets, credentials, databases, backups, uploads, Git metadata, local
   dependencies, framework output, and test artifacts from Docker build context.
-- Make the release script the canonical CI core gate and retain independent
-  operations, browser, and container evidence.
+  Host-generated `.netlify` and `.vercel` state is excluded from both the context
+  and final image, including bundles left by a previous deployment.
+  Dependency builds may reuse a BuildKit npm download cache; `npm ci` still
+  verifies the lockfile and package integrity on each fresh dependency layer.
+- Make the selected web release script the canonical web CI core gate and retain
+  independent operations, browser, container, dependency, and PostgreSQL evidence.
 - Build, seed, start, health-check, and clean up an isolated non-root container
   without printing generated credential values.
 - Require exact production Server Action origins to be available while Next.js
@@ -72,13 +331,16 @@ four-tenant application behavior and single-instance pilot boundary.
   `next typegen`, `next dev`, or `next build` and is not source authority.
 - Local and CI automation never logs credential values or persists temporary
   customer/runtime data in repository paths or public artifacts.
-- The final image runs as `mirtpage`, uses one persistent volume, and refuses
+- The final image runs as `suqpage`, uses one persistent volume, and refuses
   unsafe production configuration before serving traffic.
 
 ## Contracts
 
-- `npm run release` remains the single core release contract. CI invokes it
-  rather than maintaining a partial duplicate.
+- `npm run release:web` is the web CI core contract. Its clean root/shared-contract
+  install rejects Expo/native tooling and audits all selected web/build dependencies
+  at the existing moderate threshold. CI invokes it rather than maintaining a
+  partial duplicate. `npm run release` retains the separate full-monorepo audit
+  for Android admission; a passing web PR is not native artifact approval.
 - CI additionally invokes operations, Chromium acceptance, an isolated
   container smoke command, dependency audit, and PostgreSQL migration rehearsal
   in separate bounded jobs.
@@ -86,7 +348,7 @@ four-tenant application behavior and single-instance pilot boundary.
   setup credential rows, verifies the runtime user and `/api/health`, and removes
   only resources it created even after failure.
 - Production image builds receive `NEXT_PUBLIC_APP_URL` and optional exact
-  `MIRTPAGE_SERVER_ACTION_ORIGINS` before `next build`; the serialized Next.js
+  `SUQPAGE_SERVER_ACTION_ORIGINS` before `next build`; the serialized Next.js
   configuration must contain the expected host and no wildcard.
 - One pure trusted-origin contract supplies both Next.js configuration and
   custom mutation guards. Development adds only exact localhost origins and the
@@ -119,11 +381,18 @@ Scenario: Private local state is excluded from a normal Docker build
   THEN those paths are absent from the build context and final image
   AND the application image still builds successfully
 
-Scenario: CI and local release use the same core contract
-  GIVEN a clean locked dependency installation
+Scenario: CI and local web release use the same selected contract
+  GIVEN a clean locked root and shared-contract dependency installation
   WHEN the GitHub core job runs
-  THEN it invokes the complete release contract including production HTTP smoke tests
-  AND operations, browser, and container workflows retain independent evidence
+  THEN it invokes the complete web release contract including production HTTP smoke tests
+  AND the dependency job independently rejects native tooling and audits the selected web/build graph
+  AND operations, browser, container, and PostgreSQL workflows retain independent evidence
+
+Scenario: Web admission cannot silently approve Android
+  GIVEN a passing web CI run and a planned Android App Bundle
+  WHEN Android admission is evaluated
+  THEN the full monorepo audit still runs at the moderate threshold
+  AND any advisory exception needs a fresh exact artifact-scoped owner decision
 
 Scenario: Isolated container proves the production runtime
   GIVEN a freshly built image and a temporary persistent volume
@@ -206,7 +475,7 @@ tokens, or environment secrets.
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
 | Docker context excludes private/generated state | integration | `scripts/test-container.mjs` and `.dockerignore` assertions |
-| CI invokes canonical release and separate evidence | contract | `scripts/test-workflow.mjs` |
+| CI invokes selected web release, retains independent evidence and separate Android audit | contract | `scripts/test-workflow.mjs`, `scripts/test-web-install.cjs` |
 | Image setup, non-root preflight, health, safe cleanup | operations | `scripts/test-container.mjs` |
 | Exact build-time Server Action origins | integration | `scripts/test-container.mjs` and serialized config assertion |
 | Shared exact development origin policy | security/contract | `scripts/test-security.ts`, `scripts/test-container.mjs` |

@@ -11,10 +11,11 @@ import {
 const key = "product-00000000-0000-4000-8000-000000000001.webp";
 const requestKey = "00000000-0000-4000-8000-000000000002.png";
 const supportKey = "support-00000000-0000-4000-8000-000000000003.pdf";
+const pageKey = "page-1-00000000-0000-4000-8000-000000000004.webp";
 
 async function main() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mirtpage-media-store-"));
-  process.env.MIRTPAGE_MEDIA_ROOT = root;
+  process.env.SUQPAGE_MEDIA_ROOT = root;
   try {
     const local = new FileMediaObjectStore();
     await local.put("public", key, Buffer.from("public-image"), "image/webp");
@@ -23,6 +24,12 @@ async function main() {
     assert.equal((await local.read("public", key, "image/webp"))?.bytes.toString(), "public-image");
     assert.equal((await local.read("requests", requestKey, "image/png"))?.bytes.toString(), "private-image");
     assert.equal((await local.read("support", supportKey, "application/pdf"))?.bytes.toString(), "%PDF-1.7\n%%EOF");
+    await local.put("pages", pageKey, Buffer.from("private-cover"), "image/webp");
+    assert.equal((await local.read("pages", pageKey, "image/webp"))?.bytes.toString(), "private-cover");
+    assert.equal(await local.read("public", pageKey, "image/webp"), null);
+    assert.equal(await local.read("requests", pageKey, "image/webp"), null);
+    await local.remove("pages", [pageKey]);
+    assert.equal(await local.read("pages", pageKey, "image/webp"), null);
     await local.remove("public", [key]);
     assert.equal(await local.read("public", key, "image/webp"), null);
     await assert.rejects(
@@ -70,6 +77,12 @@ async function main() {
     await remote.put("support", supportKey, Buffer.from("remote-pdf"), "application/pdf");
     assert.equal((await remote.read("public", key, "image/webp"))?.bytes.toString(), "remote-image");
     assert.equal((await remote.read("support", supportKey, "application/pdf"))?.bytes.toString(), "remote-pdf");
+    await remote.put("pages", pageKey, Buffer.from("private-cover"), "image/webp");
+    assert.equal((await remote.read("pages", pageKey, "image/webp"))?.bytes.toString(), "private-cover");
+    assert.equal(await remote.read("public", pageKey, "image/webp"), null);
+    assert.equal(await remote.read("requests", pageKey, "image/webp"), null);
+    await remote.remove("pages", [pageKey]);
+    assert.equal(await remote.read("pages", pageKey, "image/webp"), null);
     await remote.remove("public", [key]);
     assert.equal(await remote.read("public", key, "image/webp"), null);
     assert.ok(calls.every((call) => call.authorization === `Bearer ${secret}`));

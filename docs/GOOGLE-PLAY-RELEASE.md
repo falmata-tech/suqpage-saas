@@ -1,0 +1,847 @@
+# Suqpage on Google Play
+
+Controlling spec: [DEP-044](../specs/deployment/DEP-044-google-play-testing-rollout.md).
+Current stage: version 5 is available and independently verified on internal
+testing, with twelve exact owner-supplied tester accounts eligible. Alpha version 5
+is now published and independently verified Available to selected testers.
+Phone results and fourteen continuous days are pending; production is inactive. Owner
+confirmed a personal account created after November 13, 2023, and has now provided
+the new app dashboard on October 9, 2026. Developer **5256539403314542898**, app
+**4972244998230912603**, reported Play Console login and approved public store
+support email **marketvision.tech@gmail.com**.
+The dashboard link is owner-provided. Google API readback now verifies the developer,
+canonical package and complete app-only Admin grant, and Expo project/current
+signer match. The exact EAS Submit key is connected and independently verified.
+Google API verifies title SuqPage/en-US, selected support email/website and the
+original admitted version-3 AAB. The latest version-5 original-file hash and actual
+Google-signed APK certificate are independently verified through normal Console
+downloads. Normal Console reload verifies revised English/Amharic
+descriptions, eleven phone screenshots, two feature graphics and the unchanged
+icon. The exact AAB is active internally and selected in Alpha's review request;
+country selection is preserved. The Google signer is verified from its actual APK.
+The one-free-AAB exception is consumed. All required
+setup forms are saved and verified. IARC is marked Completed after the reviewed
+25-answer questionnaire and regional ratings are saved/reloaded. North America
+is Teen, most regions are 12+, and PEGI shows parental guidance. Advertising ID No
+is independently saved/reloaded after actual binary/SDK/source checks. Google
+accepts the sixteen-change review request and later publishes the private closed
+release; fresh reload verifies availability. Protected
+phone/notification results are closed-test work required before production readiness.
+The existing Expo APK remains available separately.
+
+The owner requests remote Expo uploads. Follow
+[the beginner connection steps](GOOGLE-PLAY-CONNECTION.md) for app creation,
+app-scoped submission credentials and exact internal upload. Signing/submission
+are complete; do not repeat them. Most declarations are completed through the
+owner-authorized, identity-bound browser. The latest owner delegation also covers
+the completed rating. The prohibited-content policy is live in all five languages
+at https://suqpage.com/terms. Phone evidence, closed activation and any
+Google-requested account verification remain separate from technical completion.
+
+## Create the app
+
+In [Play Console](https://play.google.com/console/), choose **Home → Create app**:
+
+| Field | Value |
+| --- | --- |
+| App name | SuqPage, independently read from the created Console listing |
+| Default language | English (United States), en-US |
+| App or game | App |
+| Free or paid download | Free |
+| Public Play Store support email | marketvision.tech@gmail.com |
+| Package name, when requested during creation | com.suqpage.app, exactly matching the existing app and future bundle |
+
+The account owner completes Google's policy/export/signing declarations and any
+developer/device verification requested by Console. Retain the app dashboard URL
+and public developer/app identifiers for target verification; never share login,
+passwords or verification codes. Creating an entry does not publish the app.
+
+Source: [create and set up an app](https://support.google.com/googleplay/android-developer/answer/9859152).
+
+## Store materials
+
+Use [the listing file](play-store/listing.json) for copy/paste text, and
+[the readiness worksheet](play-store/READINESS.md) for app-content declarations.
+Saved category: Shopping. Website: https://suqpage.com. Existing public
+privacy and deletion resources: https://suqpage.com/privacy and
+https://suqpage.com/account-deletion. Their presence is not a claim that the policy
+and deletion operations are complete; the worksheet identifies remaining work.
+
+Current saved upload assets are in
+`.local/play-s99/store-presentation/proximity-v1/assets/`; the original
+`.local/play-s99/store-assets/` remains preserved. The manifest records actual
+source APK/screenshots, checksums, dimensions and labels. Screenshots depict
+authentic native screens and public example content, not hypothetical UI or
+customer conversations. A later application change requires checking their
+continued accuracy. The revised introduction is live on the web and available
+in internal Play version 5; retained native crops do not prove installation of
+that update on a physical phone.
+
+Google currently lists English and Amharic among supported listing languages;
+its published list does not list Afaan Oromo, Somali or Tigrinya. The native app
+still supports all five. Do not mislabel another Play locale to force a listing
+translation. Keep English as fallback and recheck Console's available languages.
+No Google automatic app-string translation is enabled; Suqpage owns its UI copy.
+
+Sources: [store assets](https://support.google.com/googleplay/android-developer/answer/9866151),
+[listing languages](https://support.google.com/googleplay/android-developer/answer/9844778).
+
+## Build and signing
+
+The existing Expo project is `@falmatad/suqpage`, ID
+`bfc289fb-238e-44a3-9e0f-fec6a7c857d1`. Both hosted profiles use the same name,
+package, Firebase registration and production API/Auth; there is no separate
+Preview application to rename.
+
+After source, artifact admission and target checks pass, the existing
+`apps/mobile/eas.json` production profile builds an **AAB**. The previous S98
+single-APK tooling exception is consumed; it does not authorize this new build.
+Do not run auto-submit or change signing as an incidental build fix.
+
+The current APK's public signing SHA-256 is:
+`0630C56F88DF874FD27296D1AA0848A68FC8345F702FE6802EDD8255B7211183`.
+Before enrolling Play App Signing, resolve and verify either:
+
+- **Existing app signing key:** authorized protected upload to Google, preserving
+  update compatibility for current APK users. Keep the recoverable source and
+  verify Play's app-signing certificate, not merely its upload certificate.
+- **New Google app signing key:** separate explicit choice. Current sideload APKs
+  cannot update across an unrelated signer without reinstalling. Verify the public
+  Play app-signing certificate and authorize its addition to the release policy
+  and HTTPS association before distribution; retain the existing signer too.
+
+For the new AAB, inspect package, increasing version code, target API, upload
+signature, archive/privacy and native alignment. Use bundletool to verify
+PAGE_ALIGNMENT_16K in the actual bundle configuration. The released APK already
+targets API 36 and passes static 16-KB ELF/ZIP checks; this is not future AAB or
+16-KB device proof.
+
+Sources: [EAS Android submission](https://docs.expo.dev/submit/android/),
+[Play App Signing](https://support.google.com/googleplay/android-developer/answer/9842756),
+[16-KB page sizes](https://developer.android.com/guide/practices/page-sizes).
+
+The delegated choice is to retain the existing key. Follow step 5 of the
+connection guide for Google's current signing navigation and the public PEPK
+instructions. Do not accept a generated replacement as an upload workaround.
+
+## First upload
+
+A first manual upload is available through **Test and release → Testing → Internal
+testing → Create new release** after resolving signing and artifact admission.
+Upload only the inspected AAB, add truthful release notes and save as draft.
+This route needs no Google submission service-account key.
+
+EAS Submit is an alternative, including for the first upload. It needs a dedicated
+authorized Play credential and independently verified app/account. Do not reuse
+the Firebase FCM administrator key or expand its permissions. The existing submit
+profile is **internal / draft**. Never substitute the production track or
+auto-submit without the exact rollout being reviewed.
+
+Inspect Play processing/errors and the actual Play-delivered artifact before
+distribution. Following the owner's closed-test start instruction, complete real
+phone workflows during closed testing and require them before production readiness:
+app-signing certificate, update compatibility, domain association,
+map, email sign-in, owner setup/private preview/publish/photo save, inquiry, chat,
+read receipts and actual foreground/background notifications. Server/provider
+acceptance or browser screenshots do not prove phone delivery. Staff/admin are
+web-only and must remain denied by native login.
+
+## Required closed test
+
+Internal testing is useful for the first install but does not satisfy this
+account's public-release requirement. Complete the store/app-content setup, then
+create a closed-testing track and use the admitted build. Add a private tester
+email list or Google Group and obtain the opt-in link from that track. Authorize
+actual recipients before sending any invitations.
+
+At least **12 testers must stay opted in continuously for 14 days**, including
+when applying for production access. Recruit real customers/business owners and
+keep a small buffer of testers. They should actually use the app and provide
+feedback. The clock is based on Console opt-ins, not app-entry creation, an Expo
+download or a local timer. Do not fabricate testing dates or feedback.
+
+Suggested invitation text, sent only after the track is ready:
+
+> You're invited to test Suqpage on Android. Join using the Google account we
+> added to the tester list, then install from Google Play: [closed-test opt-in
+> link]. Please stay enrolled for at least 14 days. Try browsing stores, searching
+> products and contacting a business. If you run a business, also try setting up
+> and editing your page. Send feedback through Google Play's testing feedback or
+> marketvision.tech@gmail.com. This version connects to the live site; use test
+> details and do not place a real transport request just to test it.
+
+Retain actual bug reports, fixes and tester feedback outside Git when they contain
+personal data. A release/test report may retain aggregate counts and issue IDs.
+Apply for production access through Dashboard after Console shows eligibility;
+answer its testing and readiness questions using evidence. Approval is not
+automatic after 14 days. Public rollout follows approval and final signoff.
+
+Source: [new personal-account testing](https://support.google.com/googleplay/android-developer/answer/14151465).
+
+## Current external and product dependencies
+
+- Google verifies the selected developer/package/app-only Admin, Expo target,
+  retained signer and exact version-5 internal release. Required setup, completed
+  IARC, Advertising ID No and store text/contact/images are saved/read back.
+  The twelve-member list remains selected, Alpha version 5 is Available to selected
+  testers and production is inactive. Real opt-ins/phone evidence and any
+  Google-requested account/device verification remain. Submission association is complete; no
+  credential/signing repeat is needed.
+- FE-064/BE-052 reusable owner-demo reviewer access is verified locally and on the
+  deployed web/API; exact production provisioning/binding and real web/native
+  sessions pass. Version 5 and saved restricted Sign in details are verified;
+  protected-phone workflows remain. Google reviewers cannot
+  fetch codes from the owner's personal inbox; no universal OTP or admin access.
+- Merchant content is inferred to be public user-generated content. FE-063/BE-051
+  implement and verify reporting/blocking and private moderation. Delegated visual
+  acceptance, complete local gates and production schema/API/web rollout pass;
+  version 5 is available internally and in closed testing; protected-phone checks remain.
+  General visitor live support stays closed.
+- BE-053 deletion fulfilment is rehearsed against real local Auth/PostgreSQL/media,
+  including exact-target/shared-tenant/drift/FK rollback and other-tenant preservation.
+  Updated native notification/map/embed/deletion privacy text passes five-language
+  phone captures; the verified web/API notice is deployed and Data safety is saved
+  with official UI readback. Separate partial-data deletion is not claimed.
+  Real deletion retention/fulfilment follows the verified-request runbook.
+  Existing request links do not delete data by themselves.
+- This exact artifact's admission, Play signing and AAB/Google APK inspection pass.
+  The consumed exception admits no additional build. Authenticated physical-phone
+  and actual OS-notification checks remain pending.
+
+These dependencies do not prevent connecting the reported app or preparing materials.
+They do prevent claiming that a public store release is ready or completed.
+
+## Verified local release candidate
+
+Full repository check, clean isolated web release, all 11 browser acceptance tests,
+operations and mobile build contracts pass. Reviewer access also proves normal
+page/product edits, publication and public catalog readback. Final privacy copy
+passes all five languages at 390/320 without overflow/errors. Protected evidence
+is under .local/play-s99/; no private tester list or credentials belongs in Git.
+
+These results admit the source workflow, not a future AAB, Play approval or physical
+notification delivery. Hosted schema/API/reviewer rollout is verified; renewed
+artifact admission, existing-key Play enrollment and actual installed verification
+remain pending.
+
+The selected production public-schema backup is verified and its actual restore
+passes migration 62→63, old-table fingerprints, idempotency and private report
+table/sequence grants in a disposable local database. Backup/rehearsal and exact
+migration plan are protected under .local/play-s99/production/database/.
+The approved production migration and monitored web rollout now pass as recorded below.
+
+## Verified production web/API release — October 9, 2026
+
+- Source: `ea1b4526598cff4fb6058265b8e21a68efab1148`; Netlify production
+  `6ac98a227b9a61a7dad27116`, ready on https://suqpage.com. Exact draft
+  `6ac989c691cc77be1a2bce03` used the identical tested function archives.
+- Schema 63, protected production archive and actual restore/migration rehearsal
+  are verified. Migration preserves every original table fingerprint and denies
+  anonymous/authenticated report table/sequence access. The first command failed
+  before schema code began; writes stopped and independent checks proved schema
+  62/no report objects/same app. The owner approved one bounded retry, digest
+  `da2afa38b0ee6bc0f6a8c3203fead342ea1313314048d9064851f875e0fd3c3e`.
+  That retry and independent runtime readback passed. No restore or second retry.
+- One new ordinary, marked demo reviewer has a private populated starter.
+  Only its exact production-only email/immutable UUID server fields were added;
+  its password stays in protected reviewer instructions/Auth, outside runtime,
+  Git and artifacts. Existing accounts were not reset or published. Global Auth,
+  SMTP, notification and signing configuration were not changed by this rollout.
+- 21 live checks verify public pages/privacy/deletion, health, native catalog and
+  Featured, transport return state, anonymous private-route denial, exact Android
+  association bytes, blocked map/product/count results, invalid report/origin
+  rejection and normal email-code mode. Actual reviewer wrong-password denial,
+  native session/private starter and web cookie/dashboard sessions also pass.
+  No customer chat, email or notification was created/sent. The initial live test
+  incorrectly supplied a browser Origin to the native-only production API;
+  focused diagnostics proved rejection, then the harness was corrected to native
+  request shape without changing the origin guard or republishing the app.
+- Public demo aggregate readback remains 64 active demo stores, 256 published demo
+  offerings and 42 services. Existing content is preserved; the new reviewer stays
+  private and is not added to discovery.
+- The draft context is deploy-preview; existing runtime settings are production-only.
+  Its static association passes, but dynamic preview pages are unavailable.
+  Complete local runtime/workflow gates and exact production runtime preflight
+  preceded publication, followed by the live checks above; no preview pass is invented.
+- Actual Linux handler/Sharp cold import and packaged scheduled worker pass.
+  Handler SHA-256: `d9dbf74ddb129a4c725642b58908ee1116eb89bee1b02ed75e76a5d66b5b33c6`.
+  Previous deploy `6ac839e949737af3112e0764` is retained. Recovery remains an exact
+  separately reviewed operation; do not drop private reports or replay a timeout.
+
+Protected receipts are under .local/play-s99/production/, artifact.json,
+production-live-verified.json and the gate/UI directories. Durable docs contain
+no passwords, provider UUID binding values, tester lists, databases or raw logs.
+
+The official EAS archive-only inspection also passes: 1,621 files match source
+ea1b452 exactly, with zero untracked/private credential/runtime files. Archive
+manifest SHA-256: `cfb76cafe578ea0046d9288b43852974ef4abd0ac6003b3d15fa54d7fe4349a6`.
+Protected receipt: .local/play-s99/eas-archive-inspection.json. This preparation
+starts no cloud build and does not admit a future signed bundle. Immutable source
+ea1b452 remains the build candidate even when this operations handoff is committed.
+
+## Verified Google store metadata — October 9, 2026
+
+App-scoped Google API independently saves and reads back title SuqPage/en-US,
+English and Amharic descriptions, marketvision.tech@gmail.com, https://suqpage.com,
+the 512px icon, 1024×500 feature graphic and five actual native screenshots.
+All seven uploaded image hashes and exact text/contact fields match the prepared
+source. Empty before-state and exact plan/readback are protected under
+.local/play-s99/store-metadata/. Read-only verification used a new uncommitted
+edit and deleted only that edit after success.
+
+Google validated the complete metadata edit, then definitively rejected the
+changesNotSentForReview parameter because this app uses automatic review. The
+original attempt remains recorded. Exact uncommitted readback and revalidation
+preceded one supported metadata-only save, with ERROR_IF_IN_REVIEW to prevent
+cancelling another review. No wider permission or signing change was used.
+Standard metadata-review behavior is recorded; Google's approval status is not
+inferred. Every release track and APK/bundle list remains empty. No binary,
+policy declaration, tester invitation or public app publication was performed.
+
+## Verified local signing export — October 10, 2026
+
+The owner selected **Export and upload a key from Java keystore** and supplied
+Google's encryption public key. Its RSA-3072 public-key format and digest are
+verified. Google's official HTTPS PEPK executable/source archives pass bounded
+download and ZIP integrity checks; source inspection confirms direct in-memory
+RSA/AES wrapping and the public-certificate export. PEPK exits 0 with a bounded
+private terminal; password echo is disabled and passwords never enter argv/logs.
+
+The protected file `.local/play-s99/signing/suqpage-play-signing.zip` contains only
+`encryptedPrivateKey` and `certificate.pem`; ZIP integrity, permissions and the
+included certificate pass. Certificate SHA-256 is the existing pinned
+`0630C56F88DF874FD27296D1AA0848A68FC8345F702FE6802EDD8255B7211183`.
+ZIP SHA-256 is `82d3ff08974ceced09e55a965c650bcd5232a5b4f3d3bc1160ffaaaf4d2b4dfb`.
+The recoverable original keystore remains unchanged. No plaintext private-key
+file, new app/upload key, provider write, AAB or enrollment is created/claimed.
+Private receipts and the one-time helper remain outside Git/app archives under
+.local/play-s99/signing/. Owner Console upload and independent Google certificate
+verification are now complete, as recorded below; published domain associations
+remain unchanged.
+
+## Verified version-3 internal draft — October 10, 2026
+
+The owner approves one free AAB under exact digest
+`b97dc5dc89b4aa1c8a97ec04dc01d7dbb5f018e69be5269363c1f16f667d7a38`.
+Fresh locked audit still fails with the same 20 high/two unpatched tooling roots,
+absent from the compiled application. All existing gates and exact source/archive
+checks pass. This exception is now consumed; it does not admit another build.
+
+- Source: `ea1b4526598cff4fb6058265b8e21a68efab1148`.
+- [Finished Expo build](https://expo.dev/accounts/falmatad/projects/suqpage/builds/641cb96a-3296-409b-b7ae-eabb28bc11fa): production AAB, version 3, credentials frozen,
+  no automatic submission. Free use moves from 11/30 to 12/30; total cost zero.
+- AAB SHA-256: `7192acc4b921a1b972a1a18608a376039694b5d27456a75a2174e7bfb524be91`.
+  Actual API 36/nondebug/pinned signature, bundletool validity, 16-KB bundle config,
+  all 50 native ELF libraries and private-byte/runtime binding checks pass.
+- [Finished EAS submission](https://expo.dev/accounts/falmatad/projects/suqpage/submissions/1c29e427-ef90-4119-bca1-1756607fc9a2): exact build ID, internal draft only.
+  Protected Google before-state and independent new-read-edit proof confirm the
+  exact version/hash in draft, other tracks empty and listing/contact unchanged.
+- Google's generated universal APK SHA-256:
+  `4e3e78d9614a62a4152660b5ae6e2c5eba9da4624e5ea90015d9d62f85d65c2b`.
+  Actual apksigner/package/version/debug checks match the pinned existing key and
+  permit updating the previous canonical version 2; ZIP integrity/16-KB alignment pass.
+  Google-generated metadata independently confirms only the existing signing key.
+
+The protected universal APK requires an enabled Play Store and cannot launch in
+our API 35 Google-APIs emulator, which lacks it. Production protection stays
+unchanged. Four official Google-signed test splits are selected for API 29+, x86_64,
+420-DPI and English; every signature/hash is verified. An isolated update retains
+its Somali preference and passes 12 public states, five UI languages, canonical
+HTTPS app links and no app crash/keyboard-metrics/unexpected-text error. No account,
+chat, inquiry or notification is submitted. Only temporary emulator 5576 closes;
+5580/original AVD data remain untouched. This is actual native test-split evidence,
+not a protected Play-installed physical-phone or notification signoff.
+
+The local CLI-result parser's `project` field assumption is corrected to the
+actual SDK `app` field after exit 0; independent accepted-job readback proves
+exact target/source with no second build. Automatic permission review times out
+before one Google read command starts; absence of process/output is verified,
+and its explicitly permitted one same-command retry succeeds. These are not
+ambiguous remote writes or a restore. The APK download uses Google's discovery-
+specified media service; previous read failures/receipts remain preserved.
+
+Protected receipts: .local/play-s99/aab-inspection.json, aab-exception-consumed.json,
+play-upload-verification/, google-test-splits/, native-public-verified.json and
+android-device/. Credentials/runtime data, raw logs and screenshots stay outside Git.
+
+## Next owner actions
+
+1. Check [SuqPage Publishing overview](https://play.google.com/console/u/2/developers/5256539403314542898/app/4972244998230912603/publishing)
+   to inspect the actual status. Closed version 5 is now Available to selected
+   testers; the final publication and reload are verified. No new build/upload
+   or signing setup is needed. Twelve-member access and feedback are saved.
+2. Each tester can now use their allowlisted Google account to open [Google's actual closed-test joining link](https://play.google.com/apps/testing/com.suqpage.app).
+   Anyone previously enrolled internally must first leave
+   [the internal test](https://play.google.com/apps/internaltest/4701297357173307496),
+   then join the closed test. Install/update through the link Google provides.
+   Google may temporarily display **com.suqpage.app (unreviewed)** before review completes.
+3. Test this Play-installed version on the real Android phone, including
+   sign-in/owner media/save/publish/inquiries, report/block controls, transport return/
+   read receipts and real OS notifications. The native public test splits do not
+   replace these checks.
+   Use an ordinary business-owner email for app login. The Google Play tester
+   account and Suqpage login are separate; admin/staff accounts intentionally
+   cannot log into Android. Keep any new sample page private during the check.
+4. At least twelve real testers must actually join and stay opted in continuously
+   for fourteen days while using the app and providing feedback. Follow Console's
+   opt-in count; adding twelve email addresses or submitting a release does not
+   start this period. Feedback goes to **marketvision.tech@gmail.com**. Retain
+   genuine results/bug reports privately for the production-access application.
+
+Current verified count is zero opted-in closed testers. The fourteen-day clock
+has not started. Internal and closed Alpha version 5 are available to their
+selected testers; public production remains inactive. Real-phone/OS-alert results gate
+production readiness; internal participation, aliases and sideloads do not meet
+the closed-test requirement. No tester invitation has been sent by the agent.
+Prepared detailed instructions: .local/play-s99/closed-v5-start/tester-instructions.txt.
+
+Sources: [Google's test-track/opt-out guidance](https://support.google.com/googleplay/android-developer/answer/9845334),
+[personal-account requirement](https://support.google.com/googleplay/android-developer/answer/14151465).
+
+## Autonomous Alpha preparation — October 10, 2026
+
+S99.5 is one-time operational preparation using the existing admitted build.
+The exact SuqPage developer/app/account and current metadata/artifact are checked;
+protected UI/API before-state is retained. Normal Alpha controls save all 178
+offered rows (177 named countries/regions plus Rest of World). Reload verifies
+each exact row is Targeted. Publishing overview records these changes only under
+**Closed testing - Alpha**, including **Unsync from production**; no public
+availability or app rollout is inferred. Google's targeting is based on the
+tester's registered Play country, so this avoids excluding approved testers who
+live or registered their accounts abroad. See [Google's country-targeting guide](https://support.google.com/googleplay/android-developer/answer/7550024?hl=en).
+
+The library's sole existing version **3 / 0.1.0 / target SDK 36** is attached to
+one draft, named **0.1.0 - closed test**, with concise English/Amharic notes.
+Save as draft succeeds, and a fresh track reload says **Inactive / Draft** and
+**3 of 4 complete**. The preview shows no blocking errors and one nonblocking
+warning about the already-known absent crash-deobfuscation file. The preview's
+final Save/confirmation and Send app for review are not performed. Internal
+testing remains Active/Available; only the ten-address SuqPage list is selected.
+Other-app lists are inspected only for nonselection, never changed. Production
+remains access-locked. Publishing overview still says changes are not submitted
+and disables Send app for review until required steps are complete.
+
+The original API metadata reads/comparisons and temporary-edit cleanup succeed,
+but a local receipt formatter dereferences the legitimate empty production-country
+response. Failure evidence is preserved. A separate read-only Google GET confirms
+**This Edit has been deleted**; the formatter correction changes no provider data.
+Automatic approval review nevertheless blocks the proposed fresh final API read
+because a prior operation was recorded as stopped, requiring explicit recovery
+direction. Both rejected calls do not execute; no workaround, write retry or
+restore is attempted. The owner is offered the exact protected readback review.
+Final independent API comparison remains pending and is not represented as passed.
+
+Evidence: .local/play-s99/closed-preparation/ and
+.local/play-s99/console-setup/s995-*.json. No new build, upload, signing, credentials,
+invitation, opt-in, real phone result or review submission. The real Android phone
+workflow/notification gate and Google's closed review remain; no 12/14-day clock
+has started. Further tester addresses can be added to the private list when supplied.
+
+## Catalog policy and completed rating — October 10, 2026
+
+The owner prohibits violent/sexual content and age-restricted goods, including
+alcohol and tobacco, removed when found. Source **de68832** / Netlify
+**6aca91cb2f49de22d3839199** publishes the five-language Terms. Staff guidance uses
+the existing private Reports queue and authorized removal; resolution is denied
+while the reported content remains visible. No automatic image/video screening
+or universal chat moderation is claimed.
+
+Full check, clean isolated web release, all 11 browser acceptance workflows,
+actual packaged Linux handler/Sharp/worker, 15 local multilingual Terms states
+and five live phone-width Terms states pass. Twelve live read-only compatibility
+checks pass; customer listings, chats, email and notification sends stay untouched.
+The earlier local timeout/build-folder/fixture/CLI/receipt failures are preserved
+with diagnosed corrections; no checks or timeouts are weakened. Existing schema,
+Android version 3, signer, provider settings and old rollback archives are preserved.
+
+The exact identity-bound Google form saves 25 reviewed answers. It discloses user
+content, online catalog content, report/block controls and possible minor/moderate
+seller language. It does not invent dedicated chat moderation, friends-only access,
+digital checkout/rewards, a general browser, news/education or broadcasts of current
+user location. Optional saved business coordinates remain separately disclosed.
+Automatic approval review rejected an unsupported language No and a location Yes
+before execution; safer accurate choices replace them, without a bypass.
+
+Google's reloaded rating overview says **IARC Completed / Submitted October 10**;
+the certificate ID is still a dash, so no certificate issuance is claimed. The
+saved summary gives ESRB Teen, generic/USK/Brazil/Russia/South Korea 12+, and PEGI
+parental guidance. Dashboard no longer shows incomplete app setup and unlocks
+closed-track countries/release creation. Publishing overview retains the saved
+listing/declarations and Alpha access, but **Send app for review is disabled**
+until remaining track steps are complete. No Google approval, review submission,
+closed/public release, actual phone or enrollment is invented.
+
+Protected evidence: .local/play-s99/catalog-policy/ and
+.local/play-s99/console-setup/s994-*.json. All credentials, raw logs, tester lists
+and screenshots remain outside Git. Continue with the real-phone check and
+closed countries/release, not another build/signing or a repeated questionnaire.
+
+## Saved setup and internal activation — October 10, 2026
+
+This and the following dated sections record earlier checkpoints. The current
+policy/rating result and next owner actions above supersede their pending-rating
+instructions; do not repeat completed signing, uploads or declarations.
+
+The identity-bound owner-authorized Chrome workflow verifies SuqPage only. Actual
+Google reloads prove separate reviewer credentials/443-character notes; Ads Yes;
+government No; no financial/health features; Shopping with existing contacts and
+marketing preference preserved; and ages 13–15, 16–17, 18+, with no under-13 group.
+
+Data safety is saved using Google's current export and verified in its expanded
+saved UI for all 15 types, purposes, sharing and optionality. Account creation is
+email/other authentication; HTTPS and the full-account deletion URL are retained.
+No separate partial-data deletion, automatic 90-day deletion or unavailable badge
+is claimed. The source/SDK inventory and limitation are in
+[READINESS.md](play-store/READINESS.md). Raw CSV readback is not claimed.
+
+Dashboard verifies **10/11** tasks; only IARC remains manual under
+[its terms](https://web.iarcservices.com/terms). The original questionnaire tab is
+preserved; no agreement, rating or automated answers are submitted.
+
+The separate **SuqPage initial testers** list is created and selected only for this
+app's internal track. Provider reload/dialog comparison proves the six exact
+addresses; the pre-existing other-app list is untouched and unselected. This
+screen offers no separate feedback field; the approved store contact is preserved.
+The internal preview's single nonblocking warning is missing crash-deobfuscation
+metadata. One confirmed rollout shows **Active / Available to internal testers**.
+Independent Google API readback confirms internal status **completed**, exact
+version-3 hash, unchanged listings/contact and other empty tracks; owned read edits
+are deleted. No new build, signer, protection, closed or public track change.
+
+Protected evidence: `.local/play-s99/console-setup/` per-form verified receipts,
+`data-safety-verified.json`, `internal-testers-membership-verified.json`,
+`internal-api-after/verified.json`, `internal-distribution-link.json` and
+`console-setup-final-verified.json`. Private snapshots, CSVs and credentials stay
+outside Git. Future rollback can pause only the internal track after exact review;
+it does not downgrade installed phones or automatically restore provider settings.
+
+## Ten-address access and rating preparation — October 10, 2026
+
+Four more owner-supplied addresses extend the existing SuqPage list to ten. Protected
+before-state and six-member source backups remain; every saved union member is
+verified after provider reload. Only this app's Alpha list selection and approved
+feedback email are also prepared. Alpha remains inactive, releases absent, countries
+unselected and links unavailable; this has not begun closed testing or its clock.
+
+The owner's later delegation replaces the earlier manual-only repository workflow.
+Normal authorized Console controls prepare and save the incomplete IARC draft.
+Eight factual feature answers survive Google reload. Dedicated chat moderation
+is not invented. Policy-sensitive answers remain provisional: automatic approval
+review rejects online-violence No because sample listings do not establish what
+the platform permits. That command never executes and no workaround is used.
+The rejected question remains unanswered, Next disabled, no rating submitted and
+Dashboard still 10/11. Resolve the pending actual catalog-policy question before
+continuing dependent answers; owner authorization does not replace factual evidence.
+
+Private tester instructions and the closed-test handoff are in
+`.local/play-s99/testers-oct10/`. Proof:
+`.local/play-s99/console-setup/tester-expansion-membership-verified.json`,
+`closed-alpha-access-verified.json`, `rating-incomplete-draft-verified.json` and
+`ten-testers-final-verified.json`. No raw questionnaire, addresses or credentials
+are committed. Protected-phone proof, closed countries/release, genuine 12/14 test
+and production-access review remain separate.
+
+## Collection narrative and launch materials — October 11, 2026
+
+The local FE-052/FE-049 candidate leads with **“See the collection. Skip the
+scrolling.”** Market, separate customer/business About sections and account entry
+explain browsing organized products, models, colors, styles and services, then
+inquiring directly. Both clients use shared copy; four locale catalogs are
+authored contextually. Map behavior, merchant text, accounts and data are unchanged.
+Focused narrative/launch-material, localization (1,401 messages), homepage, web/
+mobile type and mobile-contract checks pass. All 69 local browser states pass
+layout/action checks. Explicit app visual approval precedes full checks, commit,
+web deployment and fresh Android admission. The installed version 3 is unchanged.
+
+The English/Amharic listing descriptions and graphics are saved through normal
+identity-bound Console controls. Fresh independent reload verifies exact copy
+and image names; thirteen visible CDN images match the retained originals after
+Google's resizing/transcoding. Six English and five Amharic phone screenshots use
+1080×1920 opaque PNGs, two banners use 1024×500, and the icon stays unchanged.
+Native v3 sources and one unchanged visible v2 showroom fold are recorded; no new
+physical-device capture is claimed. Caption area is 15.625%. All thirteen new
+compositions have accurate AI-content declarations. Authored descriptive alt text
+is retained in presentation.json; no supported Console alt-entry control was
+exposed. The final Publishing overview read verifies SuqPage and a disabled Send
+app for review button. No review action or policy approval is claimed.
+
+The portable review gallery is `.local/play-s99/launch-kit-v3/index.html`; the
+owner download is `.local/play-s99/suqpage-launch-kit-final.zip` (54 files, CRC
+verified). It includes store graphics, two Google preview videos, twenty social
+posters, five portrait social videos, profile icon and five-language captions,
+bios and a relative posting plan. All seven H.264 videos pass full decode;
+social videos are 14.3 seconds at 1080×1920/30 fps. They are silent: use original
+voice or commercially cleared audio. Portrait text avoids conservative platform
+overlay areas. Some localized posters retain authentic English app UI. The pack
+contains no reviewer credentials, tester addresses, private records or raw logs.
+
+The owner still needs to:
+
+1. Review the local web/mobile copy candidate before its release checks.
+2. Complete the protected Play-installed phone login, media, inquiry, chat and
+   actual system-notification checks using the existing internal-test link.
+3. Supply the remaining genuine testers; twelve people must actually opt into
+   the closed test for fourteen continuous days. A saved email list is not proof.
+4. Create the official TikTok/Instagram accounts. Open the gallery, select a
+   language and follow START-HERE.txt and the supplied posting plan. Use the
+   own-brand promotional and appropriate AI-content disclosures separately.
+
+An eligible YouTube URL is optional for Google's preview video; no official
+channel exists and no URL has been invented. Campaigns remain prepared, not
+published or scheduled. Closed review/activation and public production access
+remain separate. S99.5's blocked final API verification retains its exact pending
+owner direction; no helper retry, configuration restore or alternate API was used.
+
+Protected evidence: console-setup/s998-final-two-locale-console-read.json,
+s998-final-publishing-state.json, store-presentation/collection-v2/provider-readback/,
+narrative/screens/ and launch-kit-v3/video-verification.json under .local/play-s99/.
+Durable source and claim checks: docs/play-store/presentation.json,
+docs/marketing/{coming-soon-copy,campaign-plan}.json and
+scripts/test-launch-materials.mjs.
+
+## First-glance copy correction — October 11, 2026
+
+S99.9 supersedes the local S99.8 app slogan after owner feedback that business
+context was unclear. The new Market heading is "Browse products from businesses
+on social media." Its paragraph explains organized online stores, product/service
+details and direct business contact without searching old posts. About headings
+identify browsing those businesses and providing a store for their customers.
+All five app languages use contextual wording. Focused narrative/homepage,
+localization (1,406 messages), both typechecks and 69 browser states pass; no new
+phone proof, artifact, commit or deployment is claimed. Visual acceptance/full
+gates remain. Preserve the prior saved Play drafts and launch ZIP as earlier
+materials; align them after accepting this correction, with new image/video and
+provider verification rather than reusing their old receipts.
+
+## Accepted nearby-business narrative — October 12, 2026
+
+S99.10 supersedes the earlier slogans throughout Market, About, account entry,
+shared web/native copy and five contextual locale catalogs. The accepted first
+sentence is the heading and the remaining sentence supports it. Merchant content,
+map prominence, search, account and data contracts are unchanged; no distance
+calculation, social import, stock guarantee or checkout is added. The owner
+approves actual phone layouts. All 69 local browser states and 1,414-message
+localization coverage pass, followed by full check, isolated release:web, all
+eleven acceptance workflows, operations, mobile contracts and Hermes export.
+Packaged Linux handler/image processing and scheduled worker pass independently.
+
+English/Amharic Play drafts are saved and independently reloaded; only the two
+banners and first two screenshots in each language are replaced. Six public CDN
+transforms match source; ordered remaining images/icon/video and accurate AI
+labels are preserved. Publishing overview verifies unsubmitted changes with
+Send app for review disabled. This does not publish a closed test.
+
+Use the new owner pack: `.local/play-s99/suqpage-launch-kit-proximity.zip`, or open
+`.local/play-s99/launch-kit-proximity-v1/index.html`. Its 54 files pass CRC; fourteen
+store images, twenty social posters, profile icon, five portrait social videos,
+two optional Play videos and contextual copy are verified. All seven videos pass
+full decode. Earlier packs are preserved but use superseded copy. Official social
+accounts and eligible YouTube URL are still absent; nothing is posted or scheduled.
+
+Web upload follows source commit, exact artifact/privacy/rollback verification
+and production backup. The compiled Android runtime contains neither admitted
+tooling root, but the native tooling audit still fails with 20 high findings and
+zero critical. The previous one-free-AAB waiver is consumed: a fresh build needs
+a new exact review. Version 3 remains the current Play-installed build. Protected
+Play phone login/media/inquiries/chat/OS alerts, S99.5 final API direction, the two
+remaining genuine testers and reviewed closed/public gates stay outstanding.
+
+S99.10 web rollout, October 12: app source 3cfa5778e6f851d6934be421d589cd8adbcf33db
+is published as Netlify 6acd6e4203a2e50c6b9286dd. Before upload, a consistent
+owner-only schema-63 backup parses successfully and all 63 tables are represented.
+The exact previous immutable provider deploy remains ready for an owner-reviewed
+republish; cleaned temporary local archives are not claimed as available.
+The clean source binds to the tested handler/worker archives, public asset links
+and privacy scan. The single no-build upload finishes with exit zero; independent
+provider readback confirms publication. Twelve read-only health/catalog/denial/
+association checks and fifteen actual live Market/About/account phone states
+across five languages pass accepted-copy/no-overflow/no-page-error checks. OSM
+tiles are blocked only in automated layout capture. No customer inquiry/chat,
+notification, schema/config write or restoration is performed.
+
+Fresh Android admission for the same source: isolated native-only install passes,
+fresh audit remains failed (20 high, zero critical, two known tooling roots), all
+1,651 runtime modules exclude those roots, and 1,622 actual EAS archive files match
+the committed source and exclude private paths/credentials. Exact public runtime,
+Firebase file metadata and existing default signer are independently verified.
+Free quota is 15/30 builds, zero cost. The exact one-AAB review is requested and
+pending; no new cloud binary is claimed. Protected phone/OS alerts, S99.5 API
+direction and real tester/reviewed closed rollout gates remain. Evidence:
+.local/play-s99/narrative-s9910/{production-live-verified,artifact,source-binding,
+eas-archive-reviewed,aab-admission-plan}.json and its database/backup-manifest.json.
+
+S99.10 Android build admission update: the owner approves exact digest
+4e4b9640bb318a28f147ade33694d78b7ab1f038e3b23888fbad8167bd728383 for one free
+updated AAB from 3cfa577. The official frozen-credential cloud attempt advances
+version 3 to 4 and uploads the source, then explicitly rejects account-wide Free
+Android quota. Independent exact-project readback proves no new job or artifact.
+The exception is not consumed by a completed artifact. The total 15/30 usage
+metric combines platforms; Expo Free permits 15 Android plus 15 iOS, not thirty
+Android builds. Check platform-specific capacity before any future cloud attempt.
+Source: https://expo.dev/pricing. No paid upgrade, signing/configuration change,
+version rollback, Google submission or second cloud attempt is performed.
+
+The same approved source/lock/public runtime and existing frozen certificate are
+now building using official `eas build --local --platform android --profile
+production` on the prepared Mac. JDK 17, SDK/API 36 and the pinned NDK
+27.1.12297006 are installed. The existing remote version workflow reserves 5,
+leaving unused version 4 intact. The private local working directory/logs are
+owner-only; no application dependency is changed. EAS local builds do not create
+a managed cloud job, and are supported on macOS: https://docs.expo.dev/build-reference/local-builds/.
+This preserves one-artifact/no-paid/no-automatic-submission scope. Actual binary
+inspection, consumed-exception evidence and new installed-phone checks remain.
+
+S99.10 updated Android artifact — October 12 (October 13 UTC): one owner-approved
+production AAB from source 3cfa577 is completed locally with official EAS after
+independent confirmation that cloud Free quota rejection created no job/artifact.
+Actual file `.local/play-s99/narrative-s9910/suqpage-play-v5.aab` is 93,109,626 bytes,
+SHA-256 45dea3bec99e715cd652531785524838300eef902d9461aa551a06c43c745e7c,
+package com.suqpage.app/version 5, target API 36, nondebuggable. Java cryptographic
+verification retains existing certificate 0630C56F88DF874FD27296D1AA0848A68FC8345F702FE6802EDD8255B7211183;
+strict self-signed-chain exit 4 is allowed only after pinned certificate, validity,
+verified signature and no unsigned entries pass. Bundletool validation, requested
+16-KB ZIP alignment and all fifty 64-bit native ELF load alignments pass. All
+1,499 archive files pass privacy/credential scans; production API/Auth bindings,
+canonical HTTPS auto-verify and actual Firebase project/sender/client resources
+match. The actual Hermes bundle contains the accepted heading in all five
+languages and the new About/supporting copy. Public EAS signing, legacy and FCM
+metadata before/after remain identical; the private working directory is cleaned
+by SDK. No payment, new key, Google submission or Play-delivered phone is claimed.
+
+The bounded exception 4e4b9640bb318a28f147ade33694d78b7ab1f038e3b23888fbad8167bd728383
+is now consumed by this one artifact. The native audit remains failed, not clean;
+future artifacts need renewed admission. Google internal/Alpha version 3 and the
+Expo-distributed APK version 2 remain unchanged. New Play upload/activation,
+protected-phone workflows/OS alerts, S99.5 API direction and genuine 12-testers/
+14-day closed distribution remain separate. Evidence:
+.local/play-s99/narrative-s9910/{local-build-exit,aab-inspection,verified-artifact,
+aab-exception-consumed}.json. There is no managed cloud build ID for this local
+artifact. Only SuqPage is managed; no other app is changed or Git history pushed.
+
+
+## S99.10 verified internal update and twelve-member access — October 12, 2026
+
+Separate owner approval (digest
+9e220cff5b4c58e780c07b3c82b6dd4254137d20d8c4d446d46a60f432ec8e46) admits
+one upload of the inspected version-5 AAB and internal-only activation. Fresh
+identity-bound Console before-state retains active internal 3, inactive Alpha 3,
+other tracks and the exact ten-member list; Expo independently matches the
+existing submission/signing/FCM/legacy bindings. Official EAS Submit runs once
+with the exact local file, production submission profile internal/draft and no
+new build. Submission 590a091f-e851-4a93-a161-68c5a24917d9 is FINISHED.
+A path submission has no linked cloud build and nullable package metadata;
+Google's accepted artifact supplies independent package/version authority.
+
+Google artifact 4860240074172382563 reports version 5, API 36 and 16-KB support.
+Its normal original-file download is byte-identical to the admitted AAB, SHA-256
+45dea3bec99e715cd652531785524838300eef902d9461aa551a06c43c745e7c.
+Normal internal release 2 confirmation and fresh reload verify Available to
+internal testers. The sole warning is the same optional missing deobfuscation
+mapping file; no device support is lost. Google's actual signed universal APK
+is package com.suqpage.app/version 5, verifies v2/v3 signatures and Google source
+stamp, and retains certificate
+0630C56F88DF874FD27296D1AA0848A68FC8345F702FE6802EDD8255B7211183.
+Its SHA-256 is 454a6b7667e1fa5cfb996d622204b1beae399fb8b0bb590f6ad35decc132a648.
+Existing credentials are unchanged. Original ten-member access is verified
+before the separately requested append-only tester operation.
+
+The owner's two additional, spelling-confirmed Google accounts then extend the
+same SuqPage list to twelve. Exact membership after reload and unchanged
+internal/Alpha selections pass; Alpha stays version 3 inactive Draft with 178
+countries/regions. No other list, app, signing, billing, policy, store listing,
+closed/public release or Google app-review submission changes. No emails are sent.
+The native audit remains failed under the consumed one-artifact exception.
+
+Internal install/join link:
+https://play.google.com/apps/internaltest/4701297357173307496.
+Use the listed Google account on a Play-enabled Android phone; regular business
+owners use email-code sign-in, while administrator/support/transport staff remain
+web-only. Google may temporarily display com.suqpage.app (unreviewed). Actual
+protected-phone workflows and OS alerts remain required before reviewed closed
+rollout. Twelve allowlisted addresses are not twelve closed-test opt-ins and do
+not start the fourteen-day clock. The outstanding S99.5 API-read recovery direction
+remains separate; this update does not replay that blocked read edit.
+
+Protected evidence: .local/play-s99/narrative-s9910/{play-v5-internal-approval,
+play-v5-before-verified,play-v5-submit-current,google-v5-artifact-verified,
+google-v5-signed-apk-verified,play-v5-internal-complete,submit-binding-after,
+twelve-testers-complete}.json and console-setup/v5-* / twelve-* readbacks.
+Private tester identities, binaries, credential metadata and logs stay outside Git.
+Source 3cfa577 and verified web deploy 6acd6e4203a2e50c6b9286dd stay unchanged;
+no Git push or physical-device result is claimed.
+
+
+## S99.11 closed-test submission — October 12, 2026
+
+The owner's explicit start instruction authorizes the existing Alpha test using
+admitted version 5, with protected-phone tests performed during closed testing
+and required before production readiness. Fresh identity-bound before-state
+retains internal 5 Available, Alpha 3 Draft, exact twelve-member access, feedback,
+all 178 country rows, saved setup/listing and other tracks. The existing Alpha
+release 1 is changed through normal controls to only version 5 from Google's
+accepted library; old version 3 stays in the artifact library. Release name and
+English/Amharic notes are unchanged. The sole preview warning is the existing
+optional missing deobfuscation file; Google confirms the release is saved.
+
+Google quick checks discover a missing Advertising ID declaration. Actual
+Google-signed version-5 APK permissions and AAB manifest have no AD_ID permission;
+all seven DEX files lack Advertising ID client, Google Mobile Ads and Firebase
+Analytics APIs. Mobile source/dependencies have no advertising-ID code. The
+factual No answer is saved and independently reloaded. Existing sponsor/Ads Yes,
+notification tokens, code, permissions and Data safety answers are not changed.
+Google clears that issue and enables the sixteen-change review submission.
+
+Normal submission and final confirmation are accepted. Fresh Publishing overview,
+Alpha release overview and Dashboard independently show Changes in review / Alpha
+version 5 In review / production Inactive. Google quick checks are still running;
+the request queues for review when they complete. All 178 country rows match the
+before-state exactly, as do tester/contact fields and selected twelve-member list.
+Internal version 5 remains Available; production/open tracks and other apps are
+untouched. No new upload/build, signing/credential/billing change, stopped API
+replay, tester invitation or fabricated phone/enrollment result is performed.
+
+Google exposes the actual web joining link in Alpha's normal accessibility label:
+https://play.google.com/apps/testing/com.suqpage.app. The Play install link is
+https://play.google.com/store/apps/details?id=com.suqpage.app. Availability is
+unverified while review is pending. Instructions explicitly require leaving the
+internal test before closed enrollment, using an allowlisted Google account,
+actual app testing/feedback and fourteen continuous days with twelve genuine
+opt-ins. Dashboard still shows zero opted-in closed testers, so the clock has
+not begun. Google approval and public production access are separate outcomes.
+
+Private evidence: .local/play-s99/closed-v5-start/{owner-instruction,closed-v5-plan,
+before-verified,advertising-id-binary-evidence,advertising-id-declaration-plan,
+advertising-id-declaration-verified,review-submission-verified,
+closed-submission-complete,join-links-from-console}.json, tester-instructions.txt,
+and console-setup/closed-v5-* before/after/reload receipts. Source remains 3cfa577;
+existing full source/release gates and actual Google artifact proofs are reused.
+Only release workflow/documentation changes; native audit stays failed under its
+consumed artifact exception. Real phone/OS alerts and Google/tester gates remain.
+
+
+## S99.11 Google closed publication confirmed — October 12, 2026
+
+After review submission was recorded in 2bc089e, the final independent status
+check observes Google's expected publication. Alpha release 1/version 5 is
+Available to selected testers and persists after reload; release overview
+independently says Available to testers on Google Play. Publishing overview
+clears its pending changes and shows Last published on October 12. The same
+version-5 artifact, twelve-member selection, feedback and Google joining links
+remain verified; internal version 5 is still Available. Production remains
+Inactive, Dashboard reports zero closed opt-ins, and no installed-phone result
+or general public-policy/production-access approval is inferred.
+
+The closed test is ready for those listed Google accounts to join at
+https://play.google.com/apps/testing/com.suqpage.app. Previously enrolled internal
+testers first leave internal testing. Link propagation can take time; check the
+correct listed account and opt-out before treating an unavailable link as an app
+failure. Twelve genuine continuous opt-ins and fourteen days, real app usage,
+phone/OS-alert feedback and the production-access application remain required.
+No tester invitation is sent and no account is enrolled by the agent.
+
+Separate later provider-outcome evidence: .local/play-s99/closed-v5-start/
+publication-verified.json and console-setup/{closed-v5-published-reloaded,
+closed-v5-published-access-verified,closed-v5-publication-overview-verified,
+closed-v5-published-dashboard}.json. Updated private tester instructions and
+handoff reflect publication; initial In review receipts are retained unchanged.
+Only this status record changes; no additional Google submission or app build.

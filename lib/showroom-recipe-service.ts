@@ -54,14 +54,14 @@ import { PRODUCT_DETAIL_PATTERN_DEFINITIONS } from "./product-detail-patterns";
 import { withAuthoritativeBusinessSettings } from "./revision-domain";
 
 export const SHOWROOM_RECIPE_BRIEF_CONTRACTS = Object.freeze({
-  brief: "mirtpage.recipe-brief@1",
-  recipe: "mirtpage.showroom-recipe@1",
-  content: "mirtpage.showroom-content@1",
-  contentBlocks: "mirtpage.showroom-content-blocks@1",
-  design: "mirtpage.showroom-design@2",
-  componentBankSchema: "mirtpage.component-bank@2",
+  brief: "suqpage.recipe-brief@1",
+  recipe: "suqpage.showroom-recipe@1",
+  content: "suqpage.showroom-content@1",
+  contentBlocks: "suqpage.showroom-content-blocks@1",
+  design: "suqpage.showroom-design@2",
+  componentBankSchema: "suqpage.component-bank@2",
   componentBankRelease: SHOWROOM_COMPONENT_BANK_LATEST.release,
-  designSystems: "mirtpage.showroom-design-systems@2",
+  designSystems: "suqpage.showroom-design-systems@2",
 });
 
 const opaque = (prefix: string, requestId: number, value: string) =>
@@ -287,7 +287,7 @@ export async function admitRecipeImage(
     throw new ShowroomRecipeError([{
       category: "tenant_asset",
       path: "$.media.rights",
-      message: "Confirm that AfricMade may use this image for the client showroom.",
+      message: "Confirm that MirtPage may use this image for the client showroom.",
     }]);
   }
   if (!(file instanceof File) || file.size < 1) {
@@ -362,7 +362,7 @@ export async function admitRecipeYouTube(
     throw new ShowroomRecipeError([{
       category: "tenant_asset",
       path: "$.media.rights",
-      message: "Confirm that AfricMade may use this video for the client showroom.",
+      message: "Confirm that MirtPage may use this video for the client showroom.",
     }]);
   }
   const label = mediaLabel(labelInput, "video");
@@ -882,7 +882,7 @@ export async function buildShowroomRecipeBrief(
         "Use questions and warnings as non-blocking notes for staff review. They do not prevent private import.",
         "Assign every contentBlocks block key to exactly one compatible design section contentBlockKey. Use blockAssignmentChecklist to verify there are no unassigned or duplicate keys.",
         "Product category is the only active catalog grouping. Return content.collections as an empty array, declaredRemovals.collections as an empty array, and every category/product collectionKey as null. Never use a collection as navigation, story, process, trust, footer, or composition content.",
-        "Treat content.products as the compatibility transport for public offerings. Classify each entry from supplied facts as standard_product, made_to_order, manufacturing_capability, or production_supply. Set quantityMode to optional for every offering. Desired quantity is optional buyer intent and never stock.",
+        "Treat content.products as the compatibility transport for public offerings. Classify each entry from supplied facts as standard_product, service, made_to_order, manufacturing_capability, or production_supply. Set quantityMode to optional for every offering. Desired quantity is optional buyer intent and never stock.",
         "For every offering return optional priceMinor in ETB minor units, currency ETB, merchant-defined quantityUnit, zero to six concise highlights, and an admitted videoRef or an empty string. Do not invent a price presented as verified fact; provisional fixture or draft values must be reviewable.",
         "You may draft capacity, minimum-order, lead-time, availability, and marketing copy when the intake is incomplete, but state it provisionally and flag consequential assumptions in warnings for human review.",
         "Choose dynamic catalog and media counts. For intended unresolved photography, copy ownerType, ownerKey, and slotKey exactly from allowedMediaDestinations into mediaPlan and leave the destination image reference empty. Product images always use slotKey product_image. Optional no-media fallbacks may be deliberate, but do not infer that mediaPlan must be empty from an example.",

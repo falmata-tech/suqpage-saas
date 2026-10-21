@@ -91,7 +91,7 @@ rollback proof, and explicit approval.
 
 Evidence: implemented and verified on 2026-08-01:
 
-- `env MIRTPAGE_SUPPRESS_CREDENTIAL_OUTPUT=1 npm run reset` created 58 active
+- `env SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT=1 npm run reset` created 58 active
   small-business Showrooms, 48 lightweight discovery fixtures, six industries, one
   discovery profile per business, and exactly ten featured profiles.
 - `npm run check`, `npm run test:acceptance` (10/10),

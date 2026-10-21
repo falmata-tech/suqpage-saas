@@ -3,8 +3,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
-const baseURL = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
-const output = process.env.MIRTPAGE_VISUAL_OUTPUT || path.join("/tmp", "africmade-loading-states");
+import {installMapTileFixture, MAP_TILE_FIXTURE_ID} from './testing/map-tile-fixture.mjs';
+
+assert.ok(!process.argv.some(value => value === '--actual-tiles' || value.startsWith('--actual-tiles=')), 'Automated map drivers require synthetic tiles; real-provider checks are separate and manual.');
+const mapTileFixtures = [];
+console.info(JSON.stringify({mapTileFixture: MAP_TILE_FIXTURE_ID, providerProof: false}));
+
+const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
+const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "suqpage-loading-states");
 fs.mkdirSync(output, { recursive: true });
 
 function deferred() {
@@ -21,8 +27,9 @@ function intersects(first, second) {
 }
 
 async function captureTransition(browser, viewport, suffix) {
-  const context = await browser.newContext({ viewport, reducedMotion: "reduce" });
+  const context = await browser.newContext({serviceWorkers: 'block', viewport, reducedMotion: "reduce" });
   const page = await context.newPage();
+
   const requestStarted = deferred();
 
   const isFeaturedRscRequest = (request) => {
@@ -39,9 +46,11 @@ async function captureTransition(browser, viewport, suffix) {
     if (isFeaturedRscRequest(request)) {
       await new Promise((resolve) => setTimeout(resolve, 3_000));
     }
-    await route.continue();
+    // Let the context fixture handle tiles after this page-level RSC delay.
+    await route.fallback();
   });
 
+  mapTileFixtures.push(await installMapTileFixture(context));
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await page.locator(".public-app-main").waitFor();
   await page.getByRole("link", { name: /Daily featured|Featured/ }).first().click({ noWaitAfter: true });
@@ -83,12 +92,13 @@ for (const [viewport, suffix] of [
 ]) {
   const browser = await chromium.launch({
     headless: true,
-    executablePath: process.env.MIRTPAGE_PLAYWRIGHT_EXECUTABLE_PATH || undefined,
+    executablePath: process.env.SUQPAGE_PLAYWRIGHT_EXECUTABLE_PATH || undefined,
   });
   try {
     await captureTransition(browser, viewport, suffix);
   } finally {
     await browser.close();
+    for (const fixture of mapTileFixtures) fixture.assertNoExternalRequests();
   }
 }
 console.log(`Localized loading states passed: ${output}`);

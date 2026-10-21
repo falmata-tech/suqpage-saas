@@ -193,7 +193,8 @@ export type AdminBusinessRow = Business & {
   client_name: string | null;
   client_email: string | null;
   client_count: number;
-  request_count: number;
+  page_review_status: string | null;
+  location_pending: number;
   marketplace_city: string | null;
   marketplace_region: string | null;
   marketplace_approved_at: number | null;
@@ -201,7 +202,7 @@ export type AdminBusinessRow = Business & {
   marketplace_sponsored: number;
 };
 
-export async function listBusinessesPage(input: PageInput & { status?: unknown }) {
+export async function listBusinessesPage(input: PageInput & { status?: unknown; location?: unknown }) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const status = ["active", "draft", "suspended"].includes(String(input.status))
     ? String(input.status)
@@ -212,6 +213,7 @@ export async function listBusinessesPage(input: PageInput & { status?: unknown }
     where += " AND b.status=?";
     params.push(status);
   }
+  if(input.location==='pending')where += " AND EXISTS(SELECT 1 FROM owner_location_proposals ol WHERE ol.business_id=b.id AND ol.version<>ol.reviewed_version)";
   where += searchClause(request.search, ["b.name", "b.handle"], params, [
     `EXISTS(
       SELECT 1 FROM users su
@@ -260,7 +262,8 @@ export async function listBusinessesPage(input: PageInput & { status?: unknown }
         ORDER BY u.id LIMIT 1
       ) client_email,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles profile ON profile.user_id=u.id WHERE u.business_id=b.id AND profile.access_role='client') client_count,
-      (SELECT COUNT(*) FROM service_requests r WHERE r.business_id=b.id) request_count,
+      NULL::text page_review_status,
+      0::bigint location_pending,
       (SELECT city FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_city,
       (SELECT region FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_region,
       (SELECT approved_at FROM business_discovery_profiles location WHERE location.business_id=b.id) marketplace_approved_at,
@@ -358,34 +361,38 @@ export type StaffRow = {
   access_role: "team_member" | "operations_manager";
   must_change_password: number;
   active_assignments: number;
-  open_requests: number;
+  pending_pages: number;
+  queue_scope: "support"|"transport"|"all"|null;
+  open_conversations: number;
+  manage_businesses: number;
+  grant_version: number | null;
 };
 
 export async function listStaffPage(input: PageInput & { role?: unknown }) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
-  const role = ["team_member", "operations_manager"].includes(String(input.role))
+  const role = ["support_agent","transport_agent","team_member", "operations_manager"].includes(String(input.role))
     ? String(input.role)
     : "";
   const params: QueryValue[] = [];
   let where = " WHERE p.access_role IN ('team_member','operations_manager')";
   if (role) {
-    where += " AND p.access_role=?";
-    params.push(role);
+    if(role === "support_agent" || role === "transport_agent") {
+      where += " AND p.access_role='team_member' AND s.queue_scope=?";
+      params.push(role === "support_agent" ? "support" : "transport");
+    } else { where += " AND p.access_role=?"; params.push(role); }
   }
   where += searchClause(request.search, ["u.name", "u.email"], params);
-  const from = `FROM users u JOIN user_access_profiles p ON p.user_id=u.id${where}`;
+  const from = `FROM users u JOIN user_access_profiles p ON p.user_id=u.id LEFT JOIN support_agent_settings s ON s.user_id=u.id LEFT JOIN staff_business_grants g ON g.user_id=u.id${where}`;
   return pageRows<StaffRow>(
     `SELECT COUNT(*) total ${from}`,
-    `SELECT u.id,u.email,u.name,u.must_change_password,p.access_role,
+    `SELECT u.id,u.email,u.name,u.must_change_password,p.access_role,s.queue_scope,
+      COALESCE(g.enabled,0) manage_businesses,g.version grant_version,
+      (SELECT COUNT(*) FROM support_conversations c WHERE c.assigned_user_id=u.id AND c.status='open') open_conversations,
       (
         SELECT COUNT(*) FROM staff_business_assignments a
         WHERE a.user_id=u.id AND a.active=1
       ) active_assignments,
-      (
-        SELECT COUNT(*) FROM service_requests r
-        WHERE r.assigned_user_id=u.id
-          AND r.status NOT IN ('completed','rejected','cancelled')
-      ) open_requests
+      0::bigint pending_pages
      ${from}
      ORDER BY p.access_role,lower(u.name),u.id
      LIMIT ? OFFSET ?`,
@@ -411,7 +418,8 @@ export async function listTeamMemberChoices(search: unknown, selectedId?: number
     choices.push("u.id=?");
     params.push(selectedId);
   }
-  const where = `WHERE p.access_role='team_member'${
+  const where = `WHERE p.access_role='team_member' AND NOT EXISTS (
+    SELECT 1 FROM support_agent_settings s WHERE s.user_id=u.id AND s.queue_scope IN ('support','transport'))${
     choices.length ? ` AND (${choices.join(" OR ")})` : ""
   }`;
   return runtimeAll<{
@@ -435,8 +443,9 @@ export async function listAssignedBusinessesPage(userId: number, input: PageInpu
   const search = searchClause(request.search, ["b.name", "b.handle"], params);
   const from = `
     FROM businesses b
-    JOIN staff_business_assignments a ON a.business_id=b.id
-    WHERE a.user_id=? AND a.active=1${search}`;
+    WHERE EXISTS(SELECT 1 FROM staff_business_grants g
+      JOIN user_access_profiles p ON p.user_id=g.user_id
+      WHERE g.user_id=? AND g.enabled=1 AND p.access_role IN ('team_member','operations_manager'))${search}`;
   return pageRows<Business>(
     `SELECT COUNT(*) total ${from}`,
     `SELECT b.* ${from}
@@ -505,13 +514,17 @@ export type InquiryListRow = {
 
 export async function listInquiriesPage(
   businessId: number,
-  input: PageInput & { status?: unknown },
+  input: PageInput & { status?: unknown; inquiryId?:unknown },
 ) {
   const request = normalizePageRequest({ page: input.page, search: input.q });
   const statuses = ["new", "contacted", "confirmed", "closed", "cancelled"];
   const status = statuses.includes(String(input.status)) ? String(input.status) : "";
   const params: QueryValue[] = [businessId];
   let where = " WHERE i.business_id=?";
+  if(input.inquiryId!==undefined&&input.inquiryId!==null&&input.inquiryId!==''){
+    const id=Number(input.inquiryId);
+    if(Number.isSafeInteger(id)&&id>0){where+=' AND i.id=?';params.push(id);}else where+=' AND FALSE';
+  }
   if (status) {
     where += " AND i.status=?";
     params.push(status);
@@ -560,20 +573,9 @@ export async function listInquiriesPage(
 }
 
 export async function getBusinessActivityCounts(businessId: number) {
-  return runtimeGet<{
-    inquiries: number;
-    offerings: number;
-    requests: number;
-  }>(`
-    SELECT
-      (SELECT COUNT(*) FROM inquiries WHERE business_id=?) inquiries,
-      (SELECT COUNT(*) FROM products WHERE business_id=?) offerings,
-      (SELECT COUNT(*) FROM service_requests WHERE business_id=?) requests
-  `, [businessId, businessId, businessId]) as Promise<{
-    inquiries: number;
-    offerings: number;
-    requests: number;
-  }>;
+  return runtimeGet<{inquiries:number;products:number}>(`SELECT
+    (SELECT COUNT(*) FROM inquiries WHERE business_id=?) inquiries,
+    (SELECT COUNT(*) FROM products WHERE business_id=?) products`,[businessId,businessId]) as Promise<{inquiries:number;products:number}>;
 }
 
 export async function getPlatformCounts() {
@@ -581,17 +583,17 @@ export async function getPlatformCounts() {
     businesses: number;
     clients: number;
     staff: number;
-    open_requests: number;
+    pending_pages: number;
   }>(`
     SELECT
       (SELECT COUNT(*) FROM businesses) businesses,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role='client') clients,
       (SELECT COUNT(*) FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE p.access_role IN ('team_member','operations_manager')) staff,
-      (SELECT COUNT(*) FROM service_requests WHERE status NOT IN ('completed','rejected','cancelled')) open_requests
+      0::bigint pending_pages
   `) as Promise<{
     businesses: number;
     clients: number;
     staff: number;
-    open_requests: number;
+    pending_pages: number;
   }>;
 }

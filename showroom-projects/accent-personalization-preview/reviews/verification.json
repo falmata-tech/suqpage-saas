@@ -1,0 +1,71 @@
+{
+  "presets": [
+    {
+      "color": "#087F75",
+      "button": 4.8803791183207395,
+      "text": 5.21336485243608,
+      "softText": 4.703460771452702,
+      "border": 4.8803791183207395
+    },
+    {
+      "color": "#FF00B8",
+      "button": 5.944138344397594,
+      "text": 5.264753599131995,
+      "softText": 4.670740622753413,
+      "border": 3.532892201237661
+    },
+    {
+      "color": "#B6FF00",
+      "button": 17.293016701068897,
+      "text": 5.355121769820362,
+      "softText": 5.248025574663096,
+      "border": 5.355121769820362
+    },
+    {
+      "color": "#7900FF",
+      "button": 6.447671890034886,
+      "text": 6.447671890034886,
+      "softText": 5.626261988822149,
+      "border": 6.447671890034886
+    },
+    {
+      "color": "#FFFF00",
+      "button": 19.555999999999997,
+      "text": 5.241329407186062,
+      "softText": 5.1832319594978165,
+      "border": 5.241329407186062
+    },
+    {
+      "color": "#FFFFFF",
+      "button": 21,
+      "text": 5.32921162976606,
+      "softText": 5.32921162976606,
+      "border": 5.32921162976606
+    },
+    {
+      "color": "#000000",
+      "button": 21,
+      "text": 21,
+      "softText": 17.7759802348148,
+      "border": 21
+    }
+  ],
+  "sampledColors": 4096,
+  "viewports": [
+    1440,
+    390,
+    320
+  ],
+  "checks": [
+    "contrast",
+    "untinted product images",
+    "unchanged platform color",
+    "valid/invalid hex",
+    "cover tint 0/8/14%",
+    "44px controls",
+    "no overflow",
+    "keyboard selection",
+    "no browser errors"
+  ],
+  "scope": "Static design prototype only; no accounts or APIs"
+}

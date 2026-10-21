@@ -7,8 +7,8 @@ const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const manifest = JSON.parse(read("public/manifest.webmanifest"));
 
-assert.equal(manifest.name, "AfricMade");
-assert.equal(manifest.short_name, "AfricMade");
+assert.equal(manifest.name, "MirtPage");
+assert.equal(manifest.short_name, "MirtPage");
 assert.equal(manifest.start_url, "/");
 assert.equal(manifest.scope, "/");
 assert.equal(manifest.display, "standalone");
@@ -18,11 +18,11 @@ assert.ok(manifest.icons.some((icon) => icon.sizes === "512x512" && icon.purpose
 assert.ok(manifest.icons.some((icon) => icon.sizes === "512x512" && icon.purpose === "maskable"));
 
 for (const [file, size] of [
-  ["public/pwa/favicon-32.png", 32],
-  ["public/pwa/apple-touch-icon.png", 180],
-  ["public/pwa/icon-192.png", 192],
-  ["public/pwa/icon-512.png", 512],
-  ["public/pwa/icon-maskable-512.png", 512],
+  ["public/pwa/mirtpage-panels-favicon-32.png", 32],
+  ["public/pwa/mirtpage-panels-apple-touch-icon.png", 180],
+  ["public/pwa/mirtpage-panels-icon-192.png", 192],
+  ["public/pwa/mirtpage-panels-icon-512.png", 512],
+  ["public/pwa/mirtpage-panels-icon-maskable-512.png", 512],
 ]) {
   assert.ok(fs.existsSync(path.join(root, file)), `${file} exists`);
   const metadata = await sharp(path.join(root, file)).metadata();
@@ -33,9 +33,9 @@ for (const [file, size] of [
 
 const worker = read("public/sw.js");
 assert.doesNotThrow(() => new Function(worker), "service worker source parses");
-assert.match(worker, /const CACHE_PREFIX = "africmade-pwa-"/);
-assert.match(worker, /const VERSION = "v3"/);
-assert.match(worker, /name\.startsWith\("mirtpage-pwa-"\)/);
+assert.match(worker, /const CACHE_PREFIX = "suqpage-pwa-"/);
+assert.match(worker, /const VERSION = "v1"/);
+assert.match(worker, /\[CACHE_PREFIX, "africmade-pwa-", "mirtpage-pwa-"\]\.some/);
 assert.match(worker, /const PUBLIC_PATHS = new Set\(\["\/", "\/about", "\/featured", "\/discover"/);
 assert.match(worker, /const PRIVATE_PATHS = \["\/api", "\/dashboard", "\/preview", "\/login", "\/request"\]/);
 assert.match(worker, /if \(request\.method !== "GET"\) return/);
@@ -53,21 +53,20 @@ assert.match(layout, /<PwaRegistration \/>/);
 
 const registration = read("components/PwaRegistration.tsx");
 assert.match(registration, /process\.env\.NODE_ENV !== "production"/);
-assert.match(registration, /NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED === "false"/);
+assert.match(registration, /NEXT_PUBLIC_SUQPAGE_PWA_ENABLED === "false"/);
 assert.match(registration, /navigator\.serviceWorker\.register\("\/sw\.js"/);
 assert.match(registration, /updateViaCache: "none"/);
 assert.match(registration, /CACHE_PREFIXES\.some\(\(prefix\) => name\.startsWith\(prefix\)\)/);
 
 const publicNavigation = read("components/PublicMobileNavigation.tsx");
-for (const label of ["Market", "Featured", "About"]) assert.match(publicNavigation, new RegExp(`label: "${label}"`));
-for (const label of ["Sign in", "Dashboard"]) assert.match(publicNavigation, new RegExp(`label: "${label}"`));
-assert.doesNotMatch(publicNavigation, /label: "Sign up"/);
-assert.match(publicNavigation, /signedIn\s*\? \{ href: "\/dashboard"/);
-assert.match(read("components/PublicAppFrame.tsx"), /signedIn\s*\? <Link href="\/dashboard"/);
-assert.match(read("components/PublicAppFrame.tsx"), /: <Link href="\/login"/);
-assert.match(publicNavigation, /<span>More<\/span>/);
-assert.match(publicNavigation, /aria-haspopup="dialog"/);
-assert.match(publicNavigation, /aria-current=\{active \? "page" : undefined\}/);
+for (const label of ['Market','Featured','About']) assert.match(publicNavigation,new RegExp(`label:\\s*"${label}"`));
+assert.match(publicNavigation,/label:signedIn\?"Account":"Login"/);
+assert.doesNotMatch(publicNavigation,/label:\s*"Sign up"/);
+assert.match(publicNavigation,/signedIn\?dashboardHref/);
+assert.match(read('components/PublicAppFrame.tsx'),/signedIn\s*\? <Link href=\{dashboardHref\}/);
+assert.match(read('components/PublicAppFrame.tsx'),/: <Link href="\/login"/);
+assert.match(publicNavigation,/visible\.length/,'One bar adapts to guest/owner destinations');
+assert.match(publicNavigation,/aria-current=\{active\?"page":undefined\}/);
 
 assert.match(read("app/(public)/layout.tsx"), /<PublicAppShell>/, "the public route group renders the shared application shell once");
 for (const file of ["app/(public)/page.tsx", "app/(public)/featured/page.tsx", "app/(public)/about/page.tsx"]) {
@@ -75,24 +74,24 @@ for (const file of ["app/(public)/page.tsx", "app/(public)/featured/page.tsx", "
 }
 assert.match(read("app/(public)/[handle]/page.tsx"), /withinPublicApp/);
 assert.match(read("components/PublicAppShell.tsx"), /currentUser\(\)/);
-assert.match(read("components/PublicAppFrame.tsx"), /showroomOpen \? null : <PublicMobileNavigation signedIn=\{signedIn\} \/>/);
-for (const file of ["app/privacy/page.tsx", "app/terms/page.tsx", "app/contact-success/page.tsx", "app/invite/[token]/page.tsx"]) {
-  assert.match(read(file), /<PublicMobileNavigation \/>/, `${file} renders shared phone navigation`);
+assert.match(read("components/PublicAppFrame.tsx"), /showroomOpen \? null : <PublicMobileNavigation signedIn=\{signedIn\} dashboardHref=\{dashboardHref\} \/>/);
+for (const route of ['privacy','terms','account-deletion','contact-success','login','request']) {
+  const file=`app/(public)/${route}/page.tsx`;
+  assert.ok(fs.existsSync(path.join(root,file)),`${route} uses the public layout`);
+  assert.doesNotMatch(read(file),/<PublicMobileNavigation|<SuqpageBrand|<LanguageSelector|<main[ >]/,`${route} does not duplicate the shell/header/main`);
 }
-for (const file of ["app/login/page.tsx", "app/request/page.tsx"]) {
-  assert.match(read(file), /className="landing-mobile-menu"/, `${file} provides bounded public navigation without stacking the application tabs on its focused form`);
-  assert.doesNotMatch(read(file), /<PublicMobileNavigation/, `${file} keeps one phone navigation model`);
-}
+assert.match(read('app/invite/[token]/page.tsx'),/<PublicMobileNavigation \/>/);
 assert.match(read("app/discover/page.tsx"), /redirect\(/);
 
 const landingCss = read("app/landing.css");
-assert.match(landingCss, /\.landing-header,\.landing-footer \{ display: none; \}/);
+assert.match(landingCss, /\.landing-footer \{ display: none; \}/);
+assert.doesNotMatch(landingCss, /\.landing-header,\.landing-footer \{ display: none; \}/);
 assert.match(landingCss, /\.public-mobile-tabs \{ display: grid; position: fixed;/);
 assert.match(landingCss, /env\(safe-area-inset-bottom\)/);
 assert.match(landingCss, /\.public-mobile-tabs \{ grid-template-columns: repeat\(4/);
 
 const workspace = read("components/WorkspaceNavigation.tsx");
-assert.doesNotMatch(workspace, /<header className="workspace-mobile-header">/);
+assert.match(workspace, /<header className="workspace-mobile-header">/);
 assert.match(workspace, /className="workspace-mobile-tabs"/);
 assert.match(workspace, /const primaryItems = priority/);
 assert.match(workspace, /<NavigationGroups groups=\{groups\} onNavigate=/);

@@ -1,5 +1,5 @@
 import type { PostgresTransactionRunner } from "./postgres-runtime";
-import type { RateLimitResult } from "./rate-limit";
+export type RateLimitResult = { allowed: boolean; retryAfterSeconds: number; remaining: number };
 
 type RateLimitRow = {
   key: string;

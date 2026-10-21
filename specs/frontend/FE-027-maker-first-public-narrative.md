@@ -12,7 +12,7 @@ change_level: L1
 
 ## Problem and outcome
 
-AfricMade must explain one useful connection without turning every screen into a
+Suqpage must explain one useful connection without turning every screen into a
 manifesto. Small-scale local production is often difficult to discover even
 when the right product, craft, or workshop is nearby. Buyers need a practical
 way to find what is made or grown, understand the work and available capacity,
@@ -42,7 +42,7 @@ business setup, support, and workspace screens describe only the task at hand.
 - Household and individual buyers are the primary public audience. Traders and
   retailers can also discover repeat supply where a listed operation offers it;
   the interface does not recast every participant as a wholesale supplier.
-- Direct contact and optional AfricMade help with transport arrangements or a
+- Direct contact and optional Suqpage help with transport arrangements or a
   report about a listed operation.
 - Exact, concise copy assertions and prohibited overclaims.
 
@@ -50,7 +50,7 @@ business setup, support, and workspace screens describe only the task at hand.
 
 - Changing inquiry, publication, payment, location-review, or page-rendering
   behavior.
-- Presenting AfricMade as checkout, delivery, financing, certification,
+- Presenting Suqpage as checkout, delivery, financing, certification,
   endorsement, quality guarantee, or commercial representative.
 - Listing import-only sellers, repair-only services, or large industrial
   manufacturers in the launch/demo catalog.
@@ -74,16 +74,16 @@ business setup, support, and workspace screens describe only the task at hand.
 - **Artist** or **art studio** covers original physical work offered for sale or
   commission, including painting, sculpture, carving, wall pieces, and interior
   artwork. It does not turn unrelated trade workshops into artists.
-- **AfricMade page** is the public destination for approved identity, offerings,
+- **Suqpage page** is the public destination for approved identity, offerings,
   process or story content, location context, and direct inquiry.
 - **Custom work**, **ready products**, and **wholesale supply** are optional
   capability labels, not a slogan and not a mandatory onboarding questionnaire.
 - Consumer sales are the ordinary starting point. Retail or trader supply is an
   opportunity shown only by relevant products or capabilities, not a platform
   promise or a label applied to every business.
-- AfricMade connects buyers and listed participants. It does not set prices,
+- Suqpage connects buyers and listed participants. It does not set prices,
   process transactions, operate delivery, or guarantee quality or output.
-- AfricMade does not inspect, certify, endorse, negotiate for, or guarantee a
+- Suqpage does not inspect, certify, endorse, negotiate for, or guarantee a
   listed participant. Public support may help arrange transport or receive a
   report about a listing; commercial terms remain between buyer and seller.
 - Reviewed exact-location claims remain limited to the supported launch catalog.
@@ -103,12 +103,12 @@ business setup, support, and workspace screens describe only the task at hand.
   It explains that valuable local production already exists, discovery should
   not depend on word of mouth, and stronger local demand can create a path from
   Ethiopia toward wider African market connections. It may describe the map,
-  AfricMade pages, and direct relationships as one coherent idea, but it does
+  Suqpage pages, and direct relationships as one coherent idea, but it does
   not enumerate support categories, commercial caveats, or internal workflows.
 - Account entry explains access. Business setup explains profile creation.
   Neither recites the whole market strategy, offer taxonomy, design workflow, or
   publication lifecycle.
-- Public support offers only help using AfricMade, transport-arrangement help, and
+- Public support offers only help using Suqpage, transport-arrangement help, and
   reporting a concern about a listed operation. It does not suggest inspection,
   certification, negotiation, production monitoring, or delivery operation.
 - Copy uses short, translation-friendly sentences and concrete nouns. It leads
@@ -122,7 +122,7 @@ business setup, support, and workspace screens describe only the task at hand.
 Scenario: Visitor understands the Market
   GIVEN the public Market is open
   WHEN a visitor reads its introduction
-  THEN the visitor understands that AfricMade lists locally made and grown products
+  THEN the visitor understands that Suqpage lists locally made and grown products
   AND the visitor can search pages from artisans, farms, workshops, and small manufacturers
   AND the visitor can contact them directly
   AND no certification, guaranteed quality, or continent-wide coverage is implied
@@ -142,8 +142,8 @@ Scenario: Task page remains focused
 Scenario: Visitor asks for bounded platform help
   GIVEN a buyer may contact a listed participant directly
   WHEN the buyer opens public support
-  THEN the buyer can ask how to use AfricMade, request help arranging transport, or report a listing
-  AND AfricMade does not claim inspection, certification, negotiation, or delivery responsibility
+  THEN the buyer can ask how to use Suqpage, request help arranging transport, or report a listing
+  AND Suqpage does not claim inspection, certification, negotiation, or delivery responsibility
 
 Scenario: Demo catalog reflects the target market
   GIVEN fictional launch businesses are prepared for public demonstration
@@ -200,5 +200,5 @@ ordered production-browser acceptance workflows. Contract coverage proves
 the consumer-first locally made and grown promise, optional trader and retailer
 opportunities, bounded support language, and exclusion of repair-only and
 mass-industrial demo participants. The approved 1440, 390, and 320 CSS-pixel
-Search captures under `/tmp/africmade-search-review` show concise copy without
+Search captures under `/tmp/suqpage-search-review` show concise copy without
 clipping or horizontal overflow.

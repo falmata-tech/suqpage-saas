@@ -66,7 +66,7 @@ Ethiopia map, and enters each business's permanent Showroom.
 - **Industry picker:** the only top-level business-type filter. It is not a
   calendar and does not change from the visitor's clock.
 - Public copy may explain a Showroom as a professional digital showroom, but actions
-  say **Find a Showroom**, **Visit Showroom**, and **Get your MirtPage**.
+  say **Find a Showroom**, **Visit Showroom**, and **Get your Suqpage**.
 - Industry, search, city, hall, and view state have labeled controls. Industry
   and search state are URL-addressable and server-authoritative.
 - Featured status affects ordering and a compact badge only. Every matching

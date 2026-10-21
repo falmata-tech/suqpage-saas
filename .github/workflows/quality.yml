@@ -17,17 +17,33 @@ jobs:
   core:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.10-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: isolated-ci-fixture
+          POSTGRES_DB: suqpage_tests
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SUQPAGE_DATABASE_DRIVER: postgres
+      SUQPAGE_TEST_POSTGRES_URL: postgresql://postgres:isolated-ci-fixture@127.0.0.1:5432/suqpage_tests
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.18.1
           cache: npm
-      - run: npm ci
-      - run: npm run release
+      - run: SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@suqpage/contracts --include-workspace-root
+      - run: npm run test:workflow
+      - run: npm run release:web
         env:
-          MIRTPAGE_DELEGATE_PROVIDER_SMOKE: "1"
+          SUQPAGE_DELEGATE_PROVIDER_SMOKE: "1"
       - run: npm run test:operations
+      - run: npm run test:mobile:release-safety
 
   browser:
     runs-on: ubuntu-latest
@@ -74,8 +90,9 @@ jobs:
         with:
           node-version: 24.18.1
           cache: npm
-      - run: npm ci
-      - run: npm audit --omit=dev --audit-level=moderate
+      - run: SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@suqpage/contracts --include-workspace-root
+      - run: node scripts/check-web-install.cjs
+      - run: npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate
 
   postgres:
     runs-on: ubuntu-latest

@@ -10,6 +10,17 @@ change_level: L3
 
 # DEP-024 - Daily Featured schedule migration and rollout
 
+## S36 current rollout
+
+The evening-window candidate needs no new migration. Existing policy/override
+rows are retained. New code reads the official evening policy from its domain
+contract, applies a six-business cap and rotates automatic selections weekly.
+Retired two-session writes are removed. After local visual approval, run release
+and acceptance gates; verify public/admin manual-save consistency, four sponsor
+slots, no morning session and the next-day midnight boundary. Historical migration
+32 instructions below apply only to older installations. Production still awaits
+the combined candidate rollout. Rollback retains all stored schedule data.
+
 ## Problem and outcome
 
 Introduce the configurable all-day schedule without deleting retained business,

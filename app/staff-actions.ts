@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
@@ -8,70 +8,62 @@ import { DiscoveryAdminError, updateDiscoveryProfile } from "@/lib/discovery-adm
 import { featuredProgramAssignment } from "@/lib/discovery";
 import {
   FeaturedProgramSettingsError,
-  featuredProgramPolicyFromForm,
   listFeaturedProgramEligibleBusinesses,
   saveFeaturedProgramDay,
-  updateFeaturedProgramPolicy,
 } from "@/lib/featured-program-settings";
-import { assignRequestToTeamMember, createStaffAccount, StaffOperationError } from "@/lib/staff-operations";
+import { createStaffAccount, StaffOperationError } from "@/lib/staff-operations";
+import { currentBusinessAuthority } from "@/lib/staff-business-authority";
+import { scheduleAttentionDelivery } from "@/lib/attention-after";
 import { audit, cleanText } from "@/lib/security";
 import { stageUploadedImage, type StagedImage } from "@/lib/media";
 import { createExternalSponsorAd, getExternalSponsorAd, setBusinessSponsorship, SponsorAdminError, updateExternalSponsorAd } from "@/lib/sponsor-admin";
+import {runtimeTransaction} from '@/lib/runtime-sql';
 
-export async function createStaffAccountAction(formData: FormData) {
+export async function createStaffAccountAction(formData: FormData): Promise<import("@/lib/owner-edit-contract").OwnerEditResult> {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
   try {
-    const created = await createStaffAccount({ name:formData.get("name"), email:formData.get("email"), password:formData.get("temporaryPassword"), accessRole:formData.get("accessRole") });
-    await audit("staff.account_created", { userId:user.id, detail:{ targetUserId:created.userId, accessRole:created.accessRole } });
+    await createStaffAccount({ name:formData.get("name"), email:formData.get("email"), password:formData.get("temporaryPassword"), accessRole:formData.get("accessRole") },user);
   } catch (error) {
-    redirect(`/dashboard/admin/staff?error=${encodeURIComponent(error instanceof StaffOperationError ? error.message : "Could not create staff account.")}`);
+    return {error:error instanceof StaffOperationError ? error.message : "Could not create staff account."};
   }
+  scheduleAttentionDelivery();
   revalidatePath("/dashboard/admin");
   revalidatePath("/dashboard/admin/staff");
-  redirect("/dashboard/admin/staff?saved=staff");
+  redirect(`/dashboard/admin/staff?saved=staff&q=${encodeURIComponent(String(formData.get("email") || "").trim().toLowerCase())}`);
 }
 
-export async function assignRequestAction(formData: FormData) {
+export async function updateDiscoveryProfileAction(formData: FormData):Promise<import('@/lib/owner-edit-contract').OwnerEditResult> {
   const user = await requireUser();
-  if (!hasCapability(user, "operations:manage")) throw new Error("Operations manager access required.");
-  const requestId = Number.parseInt(cleanText(formData.get("requestId"), 20), 10);
-  const rawTeamMember = cleanText(formData.get("teamMemberId"), 20);
-  const teamMemberId = rawTeamMember ? Number.parseInt(rawTeamMember, 10) : null;
-  if (!Number.isInteger(requestId) || teamMemberId !== null && !Number.isInteger(teamMemberId)) redirect("/dashboard/requests?error=assignment");
-  try {
-    const assigned = await assignRequestToTeamMember(requestId, teamMemberId, user.id);
-    await audit("service_request.assigned", { userId:user.id, businessId:assigned.businessId, detail:{ requestId, assignedUserId:assigned.assignedUserId, previousUserId:assigned.previousUserId } });
-  } catch (error) {
-    redirect(`/dashboard/requests/${requestId}?error=assignment`);
-  }
-  redirect(`/dashboard/requests/${requestId}?assigned=1`);
-}
-
-export async function updateDiscoveryProfileAction(formData: FormData) {
-  const user = await requireUser();
-  if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
-  const businessId = Number.parseInt(String(formData.get("businessId") || ""), 10);
+  const rawBusinessId = String(formData.get("businessId") || "");
+  const businessId = /^[1-9]\d{0,9}$/.test(rawBusinessId) ? Number(rawBusinessId) : 0;
+  const authority = await currentBusinessAuthority(user, businessId);
+  if (authority !== 'administrator' && authority !== 'staff') throw new Error('Business management access required.');
+  if (authority === 'staff' && (formData.has('sponsored') || formData.has('sponsorPosition'))) throw new Error('Platform administrator access required.');
   let staged: StagedImage | null = null;
   try {
     staged = await stageUploadedImage(formData.get("boothImage"), "booth");
-    const result = await updateDiscoveryProfile({
-      businessId,
-      industryKeys: formData.getAll("industryKeys"),
-      boothImagePath: staged?.imageRef || formData.get("existingBoothImagePath"),
-      city: formData.get("city"), zone: formData.get("zone"), region: formData.get("region"),
-      latitude: formData.get("latitude"), longitude: formData.get("longitude"),
-      fallbackStyle: formData.get("fallbackStyle"),
-      productionScale: formData.get("productionScale"),
-      sponsored: formData.get("sponsored") === "on",
-      sponsorPosition: formData.get("sponsorPosition"),
-      excluded: formData.get("excluded") === "on",
+    await runtimeTransaction(async () => {
+      // Hold the current grant through the write and audit. Revocation takes an
+      // exclusive lock on this same row, so a stale editor cannot save later.
+      const current = await currentBusinessAuthority(user, businessId, true);
+      if (current !== 'administrator' && current !== 'staff') throw new DiscoveryAdminError('Business management access changed. Reload before saving.');
+      if (current === 'staff' && (formData.has('sponsored') || formData.has('sponsorPosition'))) throw new DiscoveryAdminError('Platform administrator access required.');
+      const result = await updateDiscoveryProfile({
+        businessId,
+        proposalVersion:formData.get("proposalVersion"),
+        ...(formData.has('industryKeys')||formData.get('industriesPresent')==='1'?{industryKeys:formData.getAll("industryKeys")} : {}),
+        ...(staged ? {boothImagePath:staged.imageRef} : {}),
+        ...Object.fromEntries(['city','zone','region','countryCode','placeId','latitude','longitude','fallbackStyle','productionScale'].filter(key=>formData.has(key)).map(key=>[key,formData.get(key)])),
+        ...(formData.has('sponsorPosition') ? {sponsored:formData.get("sponsored") === "on",sponsorPosition:formData.get('sponsorPosition')} : {}),
+        ...(formData.has('excluded')||formData.get('visibilityPresent')==='1'?{excluded:formData.get("excluded") === "on"} : {}),
+      });
+      await audit("discovery.profile_updated", { userId:user.id, businessId:result.businessId, detail:{ businessId:result.businessId } });
     });
-    await audit("discovery.profile_updated", { userId:user.id, businessId:result.businessId, detail:{ businessId:result.businessId } });
   } catch (error) {
     await staged?.discard();
     const message = error instanceof DiscoveryAdminError ? error.message : "Could not save the discovery profile.";
-    redirect(`/dashboard/admin/discovery/${businessId}?error=${encodeURIComponent(message)}`);
+    return {error:message};
   }
   revalidatePath("/dashboard/admin/discovery");
   revalidatePath("/");
@@ -83,29 +75,40 @@ function sponsorAdminError(error: unknown) {
   return error instanceof SponsorAdminError ? error.message : "The sponsor placement could not be saved.";
 }
 
-export async function createExternalSponsorAdAction(formData: FormData) {
+function sponsorReturnPath(formData:FormData) {
+  const query=new URLSearchParams(),q=cleanText(formData.get('return_q'),200);
+  const business=String(formData.get('return_business')||'');
+  if(/^[1-9]\d{0,9}$/.test(business)&&Number(business)===Number(formData.get('businessId')))return '/dashboard/admin/sponsors?business='+business;
+  if(q)query.set('q',q);
+  for(const key of ['businessPage','adPage']){const value=String(formData.get('return_'+key)||'');if(/^[1-9]\d{0,5}$/.test(value))query.set(key,value);}
+  return '/dashboard/admin/sponsors'+(query.size?'?'+query:'');
+}
+function sponsorSavedPath(formData:FormData,kind:string){const path=sponsorReturnPath(formData);return path+(path.includes('?')?'&':'?')+'saved='+kind;}
+
+export async function createExternalSponsorAdAction(formData: FormData):Promise<import('@/lib/owner-edit-contract').OwnerEditResult> {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
   let staged: StagedImage | null = null;
   try {
     staged = await stageUploadedImage(formData.get("image"), "sponsor");
     if (!staged) throw new SponsorAdminError("Upload a sponsor image.");
-    const created = await createExternalSponsorAd({
-      name: formData.get("name"), description: formData.get("description"), imagePath: staged.imageRef,
+    const imagePath=staged.imageRef;
+    await runtimeTransaction(async()=>{const created = await createExternalSponsorAd({
+      name: formData.get("name"), description: formData.get("description"), imagePath,
       websiteUrl: formData.get("websiteUrl"), phone: formData.get("phone"), position: formData.get("position"),
       active: formData.get("active") === "on",
     });
-    await audit("sponsor.external_created", { userId: user.id, detail: { sponsorAdId: created.id } });
+    await audit("sponsor.external_created", { userId: user.id, detail: { sponsorAdId: created.id } });});
   } catch (error) {
     await staged?.discard();
-    redirect(`/dashboard/admin/sponsors?error=${encodeURIComponent(sponsorAdminError(error))}`);
+    return {error:sponsorAdminError(error)};
   }
   revalidatePath("/featured");
   revalidatePath("/dashboard/admin/sponsors");
-  redirect("/dashboard/admin/sponsors?saved=external");
+  redirect(sponsorSavedPath(formData,'external'));
 }
 
-export async function updateExternalSponsorAdAction(formData: FormData) {
+export async function updateExternalSponsorAdAction(formData: FormData):Promise<import('@/lib/owner-edit-contract').OwnerEditResult> {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
   const id = Number.parseInt(String(formData.get("id") || ""), 10);
@@ -114,74 +117,38 @@ export async function updateExternalSponsorAdAction(formData: FormData) {
     const current = Number.isInteger(id) ? await getExternalSponsorAd(id) : undefined;
     if (!current) throw new SponsorAdminError("Sponsor ad not found.");
     staged = await stageUploadedImage(formData.get("image"), "sponsor");
-    await updateExternalSponsorAd({
+    await runtimeTransaction(async()=>{await updateExternalSponsorAd({
       id, name: formData.get("name"), description: formData.get("description"), imagePath: staged?.imageRef || current.imagePath,
       websiteUrl: formData.get("websiteUrl"), phone: formData.get("phone"), position: formData.get("position"),
       active: formData.get("active") === "on",
     });
-    await audit("sponsor.external_updated", { userId: user.id, detail: { sponsorAdId: id } });
+    await audit("sponsor.external_updated", { userId: user.id, detail: { sponsorAdId: id } });});
   } catch (error) {
     await staged?.discard();
-    redirect(`/dashboard/admin/sponsors?error=${encodeURIComponent(sponsorAdminError(error))}`);
+    return {error:sponsorAdminError(error)};
   }
   revalidatePath("/featured");
   revalidatePath("/dashboard/admin/sponsors");
-  redirect("/dashboard/admin/sponsors?saved=external");
+  redirect(sponsorSavedPath(formData,'external'));
 }
 
-export async function setBusinessSponsorshipAction(formData: FormData) {
+export async function setBusinessSponsorshipAction(formData: FormData):Promise<import('@/lib/owner-edit-contract').OwnerEditResult> {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
   try {
-    const result = await setBusinessSponsorship({
+    await runtimeTransaction(async()=>{const result = await setBusinessSponsorship({
       businessId: formData.get("businessId"), position: formData.get("position"), active: formData.get("active") === "on",
     });
-    await audit("sponsor.showroom_updated", { userId: user.id, businessId: result.businessId, detail: { active: formData.get("active") === "on" } });
+    await audit("sponsor.showroom_updated", { userId: user.id, businessId: result.businessId, detail: { active: formData.get("active") === "on" } });});
   } catch (error) {
-    redirect(`/dashboard/admin/sponsors?error=${encodeURIComponent(sponsorAdminError(error))}`);
+    return {error:sponsorAdminError(error)};
   }
   revalidatePath("/featured");
   revalidatePath("/dashboard/admin/sponsors");
-  redirect("/dashboard/admin/sponsors?saved=showroom");
+  redirect(sponsorSavedPath(formData,'showroom'));
 }
 
-export async function updateFeaturedProgramPolicyAction(formData: FormData) {
-  const user = await requireUser();
-  if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
-  const dateIso = cleanText(formData.get("dateIso"), 10);
-  try {
-    const policy = featuredProgramPolicyFromForm({
-      morningStart: formData.get("morningStart"),
-      morningEnd: formData.get("morningEnd"),
-      afternoonStart: formData.get("afternoonStart"),
-      afternoonEnd: formData.get("afternoonEnd"),
-      changeoverMinutes: formData.get("changeoverMinutes"),
-      sponsorBreakEvery: formData.get("sponsorBreakEvery"),
-      sponsorBreakMinutes: formData.get("sponsorBreakMinutes"),
-      sponsorBreakLabel: formData.get("sponsorBreakLabel"),
-      intermissionLabel: formData.get("intermissionLabel"),
-    });
-    await updateFeaturedProgramPolicy(policy, user.id);
-    await audit("featured_program.policy_updated", { userId: user.id, detail: {
-      morningStartMinute: policy.morningStartMinute,
-      morningEndMinute: policy.morningEndMinute,
-      afternoonStartMinute: policy.afternoonStartMinute,
-      afternoonEndMinute: policy.afternoonEndMinute,
-      changeoverMinutes: policy.changeoverMinutes,
-      sponsorBreakEvery: policy.sponsorBreakEvery,
-      sponsorBreakMinutes: policy.sponsorBreakMinutes,
-    } });
-  } catch (error) {
-    const message = error instanceof FeaturedProgramSettingsError ? error.message : "Could not update the program policy.";
-    redirect(`/dashboard/admin/featured-schedule?date=${encodeURIComponent(dateIso)}&error=${encodeURIComponent(message)}`);
-  }
-  revalidatePath("/");
-  revalidatePath("/discover");
-  revalidatePath("/dashboard/admin/featured-schedule");
-  redirect(`/dashboard/admin/featured-schedule?date=${encodeURIComponent(dateIso)}&saved=policy`);
-}
-
-export async function saveFeaturedProgramDayAction(formData: FormData) {
+export async function saveFeaturedProgramDayAction(formData: FormData):Promise<import('@/lib/owner-edit-contract').OwnerEditResult> {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
   const dateIso = cleanText(formData.get("dateIso"), 10);
@@ -214,8 +181,11 @@ export async function saveFeaturedProgramDayAction(formData: FormData) {
     } });
   } catch (error) {
     const message = error instanceof FeaturedProgramSettingsError ? error.message : "Could not save the featured-showroom lineup.";
-    redirect(`/dashboard/admin/featured-schedule?date=${encodeURIComponent(dateIso)}&error=${encodeURIComponent(message)}`);
+    return {error:message};
   }
+  updateTag("public-featured");
+  updateTag("public-marketplace");
+  revalidatePath("/featured");
   revalidatePath("/");
   revalidatePath("/discover");
   revalidatePath("/dashboard/admin/featured-schedule");

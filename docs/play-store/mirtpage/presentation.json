@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "status": "NOT_UPLOAD_READY",
+  "brand": "MirtPage",
+  "packageName": "com.mirtpage.app",
+  "assetFilesCreated": [
+    "docs/play-store/mirtpage/assets/icon.png",
+    "docs/play-store/mirtpage/assets/feature-graphic-en.png",
+    "docs/play-store/mirtpage/assets/feature-graphic-am.png",
+    "docs/play-store/mirtpage/assets/feature-graphic-om-promo.png"
+  ],
+  "artworkStatus": "owner_approved_logo_and_feature_graphics_exported_actual_android_screenshots_pending",
+  "icon": {
+    "sourceCandidate": "apps/mobile/assets/icon.png",
+    "file": "docs/play-store/mirtpage/assets/icon.png",
+    "approved": true
+  },
+  "featureGraphic": {
+    "file": "docs/play-store/mirtpage/assets/feature-graphic-en.png",
+    "approved": true,
+    "ownerApprovedDirection": "charcoal",
+    "localeFiles": {
+      "en": "docs/play-store/mirtpage/assets/feature-graphic-en.png",
+      "am": "docs/play-store/mirtpage/assets/feature-graphic-am.png",
+      "omPromotionalOnly": "docs/play-store/mirtpage/assets/feature-graphic-om-promo.png"
+    },
+    "defaultSha256": "dd2fa1f993a1c61da9a9a76dacc53ea2397eb3a595b799d27d057ae3ea022b16",
+    "headlines": {
+      "en": "Digital showrooms. For every business.",
+      "am": "ለእያንዳንዱ ንግድ ዲጂታል ማሳያ።",
+      "om": "Agarsiisa dijitaalaa. Daldala hundaaf."
+    },
+    "artDirection": "Use the owner-approved charcoal layout with the canonical MirtPage logo, exact palette and central minimal headline. The abstract graphic does not depict an app screen."
+  },
+  "screens": [
+    {
+      "id": "01-showroom",
+      "route": "/shop/<approved-demo-handle>",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "Know the business.",
+        "am": "የንግዱን ታሪክ ይወቁ።",
+        "om": "Daldalicha beeki."
+      },
+      "alt": {
+        "en": "A digital showroom with business identity, its story and product range.",
+        "am": "የንግዱን መለያ፣ ታሪክና ምርቶች በአንድ ላይ የሚያሳይ ዲጂታል ማሳያ።",
+        "om": "Agarsiisa dijitaalaa maqaa daldalaa, seenaa fi oomishaalee isaa walitti qabu."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    },
+    {
+      "id": "02-collections",
+      "route": "/shop/<approved-demo-handle>",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "Explore the collection.",
+        "am": "ምርቶቹን በስብስብ ይመልከቱ።",
+        "om": "Tuuta oomishaalee ilaali."
+      },
+      "alt": {
+        "en": "A showroom product grid with named collection chips and short product descriptions.",
+        "am": "የምርት ስብስብ ምርጫዎችና አጭር መግለጫ ያላቸውን ምርቶች የሚያሳይ ገጽ።",
+        "om": "Oomishaalee garee isaanii filachuun ilaaluuf filannoo fi ibsa gabaabaa qabu."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    },
+    {
+      "id": "03-product",
+      "route": "/product?handle=<approved-demo-handle>&id=<approved-product>",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "See the details.",
+        "am": "የምርቱን ዝርዝር ይወቁ።",
+        "om": "Ibsa oomishaa ilaali."
+      },
+      "alt": {
+        "en": "Product photos, description, choices and availability listed by the business.",
+        "am": "የምርቱን ፎቶ፣ መግለጫ፣ ምርጫና ንግዱ ያስቀመጠውን የመገኘት መረጃ የሚያሳይ ገጽ።",
+        "om": "Suuraa, ibsa, filannoo fi odeeffannoo argama oomishaa daldalichi kaa'e."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    },
+    {
+      "id": "04-discovery",
+      "route": "/(tabs)?view=map",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "Find businesses near and far.",
+        "am": "ንግዶችን በካርታ ያግኙ።",
+        "om": "Daldala kaartaa irratti argadhu."
+      },
+      "alt": {
+        "en": "The business map with clear search controls and a business preview showing its city.",
+        "am": "የንግድ ካርታ፣ ግልጽ የፍለጋ ቁጥጥሮችና ከተማውን የሚያሳይ የንግድ ቅድመ እይታ።",
+        "om": "Kaartaa daldalaa, barbaacha fi dursee ilaaluu maqaa magaalaa agarsiisu."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    },
+    {
+      "id": "05-social",
+      "route": "/inquiry?handle=<approved-demo-handle>",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "Choose items. Ask directly.",
+        "am": "ምርት መርጠው በቀጥታ ይጠይቁ።",
+        "om": "Filadhu; kallattiin gaafadhu."
+      },
+      "alt": {
+        "en": "Selected products with a prepared inquiry, external contact channels and a manual copy option.",
+        "am": "የተመረጡ ምርቶች፣ የተዘጋጀ ጥያቄ፣ የንግዱ የውጭ አድራሻዎችና መልዕክት የመቅዳት ምርጫ።",
+        "om": "Oomishaalee filataman, ergaa gaaffii, karaa quunnamtii alaa fi filannoo waraabuu."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    },
+    {
+      "id": "06-transport",
+      "route": "/buying",
+      "captureFile": null,
+      "frameFile": null,
+      "captureStatus": "required_actual_app",
+      "headlines": {
+        "en": "Get help with transport.",
+        "am": "ለማጓጓዣ እርዳታ ይጠይቁ።",
+        "om": "Gargaarsa geejjibaa gaafadhu."
+      },
+      "alt": {
+        "en": "Transport chat intake with pickup and destination fields and a link to email-verified Shipment tracking.",
+        "am": "መነሻና መድረሻ የሚሞላበት የማጓጓዣ ቻትና በኢሜይል ኮድ ወደሚከፈት የጭነት ክትትል ገጽ የሚወስድ ሊንክ።",
+        "om": "Chaatii geejjibaa bakka kaʼumsaa fi gaʼumsaa galchan; liinkii Hordoffii feʼumsaa koodii imeeliin banamu."
+      },
+      "localeFiles": {
+        "en": null,
+        "am": null,
+        "om": null
+      }
+    }
+  ],
+  "capturePolicy": {
+    "source": "actual approved new MirtPage Android app",
+    "width": 1080,
+    "height": 1920,
+    "syntheticOrGeneratedScreensAllowed": false,
+    "privateDataAllowed": false,
+    "approvedDemoContentOnly": true,
+    "screenReview": "pending",
+    "newAppCapture": "pending",
+    "translationReview": {
+      "en": "pending",
+      "am": "pending_native_speaker",
+      "om": "pending_native_speaker"
+    },
+    "omUse": "promotional_only_not_a_documented_Console_listing_locale",
+    "optionalTabletAssets": "not_planned_no_tablet_listing_claim"
+  },
+  "sources": [
+    "preview-assets",
+    "listing-languages",
+    "listing-practice"
+  ]
+}

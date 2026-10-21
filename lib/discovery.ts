@@ -1,28 +1,28 @@
-import type { DatabaseSync } from "node:sqlite";
-import { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
-import { featuredBoothWalkthroughs, MAX_FEATURED_SHOWROOMS, type FeaturedProgramPolicy } from "./featured-program";
+import {normalizeMarketSearch,cityLocation,MARKET_MAP_LIMIT,MARKET_PRODUCT_BATCH_SIZE,type MarketScope} from './market-search';
+import { findSpellingMatches, type SpellingMatch } from './spelling-search';
+import {excludedBusinessIds} from './catalog-safety';
+import { platformEnvironment } from "./platform-environment.mjs";
+import { normalizePageRequest, pageWindow, pageResult, PUBLIC_PAGE_SIZE, type PageResult } from "./pagination";
+import { DISCOVERY_INDUSTRIES, PRODUCTION_SCALES, discoveryCategoryKey, normalizeDiscoveryPlaces, type ProductionScale } from "./discovery-contract";
+import { automaticFeaturedLineup, featuredBoothWalkthroughs, MAX_FEATURED_SHOWROOMS, type FeaturedProgramPolicy } from "./featured-program";
 import { getFeaturedProgramDaySelection, getFeaturedProgramPolicy, type FeaturedProgramDayMode } from "./featured-program-settings";
 import { validateLiveSettings, type LivePlatform } from "./live-showroom";
 import { runtimeAll, runtimeGet } from "./runtime-sql";
+import { parseShopPageContent } from "./owner-page-domain";
+import { publicPageContent } from "./business-profile";
+import { SEARCH_SEPARATORS, normalizeSearchText, searchTermGroups } from "./search-terms";
+import type {Product} from './types';
 
 export { PRODUCTION_SCALES, type ProductionScale } from "./discovery-contract";
 
-export const DISCOVERY_INDUSTRIES = [
-  { key: "electronics", label: "Electronics & electrical", shortLabel: "Electronics & electrical", icon: "circuit", code: "ELC" },
-  { key: "beauty-wellness", label: "Personal care & household", shortLabel: "Personal & home care", icon: "leaf", code: "BEA" },
-  { key: "agriculture-growers", label: "Farms, livestock & feed", shortLabel: "Farms, livestock & feed", icon: "sprout", code: "AGR" },
-  { key: "food-farming", label: "Food & drink", shortLabel: "Food & drink", icon: "bowl", code: "FOD" },
-  { key: "machinery-tools", label: "Tools, machinery & metalwork", shortLabel: "Tools & metalwork", icon: "tool", code: "MCH" },
-  { key: "home-living", label: "Furniture, art & building", shortLabel: "Furniture, art & building", icon: "frame", code: "HOM" },
-  { key: "fashion-textiles", label: "Clothing, textiles & leather", shortLabel: "Clothing & textiles", icon: "thread", code: "FSH" },
-] as const;
+export { DISCOVERY_INDUSTRIES } from "./discovery-contract";
 
 export type DiscoveryIndustry = (typeof DISCOVERY_INDUSTRIES)[number];
 export const ALL_DISCOVERY_INDUSTRIES = { key: "all", label: "All categories", shortLabel: "All categories", icon: "grid", code: "ALL" } as const;
 export const UNSELECTED_DISCOVERY_INDUSTRY = { key: "", label: "Choose a category", shortLabel: "Choose a category", icon: "grid", code: "" } as const;
 export const DISCOVERY_INDUSTRY_OPTIONS = [...DISCOVERY_INDUSTRIES, ALL_DISCOVERY_INDUSTRIES] as const;
 export type DiscoveryIndustryOption = DiscoveryIndustry | typeof ALL_DISCOVERY_INDUSTRIES;
-export type DiscoveryIndustrySelection = DiscoveryIndustry | typeof ALL_DISCOVERY_INDUSTRIES | typeof UNSELECTED_DISCOVERY_INDUSTRY;
+export type DiscoveryIndustrySelection = { key: string; label: string; shortLabel: string; icon: string; code: string };
 export const FEATURED_WEEK = [
   { weekday: 1, dayLabel: "Monday", industryKey: "electronics" },
   { weekday: 2, dayLabel: "Tuesday", industryKey: "beauty-wellness" },
@@ -46,6 +46,7 @@ export function featuredProgramAssignment(dateIso: string) {
 const ETHIOPIA_TIME_ZONE = "Africa/Addis_Ababa";
 
 type DiscoveryRow = {
+  is_demo?: number;
   id: number;
   handle: string;
   name: string;
@@ -53,7 +54,11 @@ type DiscoveryRow = {
   description: string;
   logo_path: string;
   hero_image_path: string;
+  published_profile_json?: string | null;
+  location_mode?: "area" | "storefront" | "legacy";
   booth_image_path: string;
+  country_code?: string;
+  city_id?: string;
   city: string;
   zone: string;
   region: string;
@@ -70,6 +75,9 @@ type DiscoveryRow = {
 };
 
 type DiscoveryProductResultRow = {
+  offering_kind:Product['offering_kind'];
+  availability:Product['availability'];
+  is_demo?: number;
   id: number;
   name: string;
   description: string;
@@ -96,6 +104,10 @@ type SponsorPlacementRow = {
 };
 
 export type DiscoveryShowroom = {
+  countryCode?:string;
+  cityId?:string;
+  isDemo?: boolean;
+  locationMode?: "area" | "storefront" | "legacy";
   id: number;
   handle: string;
   name: string;
@@ -153,6 +165,7 @@ export type DiscoveryNearbyGroup = {
 };
 
 export type DiscoveryPlaceOption = {
+  countryCode?:string;
   key: string;
   label: string;
   kind: "region" | "city";
@@ -169,6 +182,9 @@ export type DiscoverySearchSuggestion = {
 };
 
 export type DiscoveryProductResult = {
+  offeringKind:Product['offering_kind'];
+  availability:Product['availability'];
+  isDemo?: boolean;
   id: number;
   name: string;
   description: string;
@@ -213,11 +229,16 @@ export type WeeklyFeaturedProgram = {
 };
 
 export type DiscoveryView = {
+  countries?:{code:string;count:number}[];
   industry: DiscoveryIndustrySelection;
   industries: readonly DiscoveryIndustryOption[];
   query: string;
   suggestions: DiscoverySearchSuggestion[];
   searchProducts: DiscoveryProductResult[];
+  searchBusinesses: DiscoveryShowroom[];
+  searchOrder?: Array<Pick<SpellingMatch, 'kind' | 'id'>>;
+  resultCounts: { products: number; businesses: number };
+  resultPage: Omit<PageResult<never>, "items">;
   place: string;
   places: DiscoveryPlaceOption[];
   productionScale: ProductionScale | "";
@@ -238,9 +259,11 @@ function normalizeIndustry(key: string | undefined) {
   return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || DISCOVERY_INDUSTRIES[0];
 }
 
-function normalizeIndustrySelection(key: string | undefined): DiscoveryIndustrySelection {
-  if (key === ALL_DISCOVERY_INDUSTRIES.key) return ALL_DISCOVERY_INDUSTRIES;
-  return DISCOVERY_INDUSTRIES.find((industry) => industry.key === key) || UNSELECTED_DISCOVERY_INDUSTRY;
+function normalizeIndustrySelection(value: string | readonly string[] | undefined): DiscoveryIndustrySelection {
+  const key = discoveryCategoryKey(value);
+  if (key === "all") return ALL_DISCOVERY_INDUSTRIES;
+  return DISCOVERY_INDUSTRIES.find(industry => industry.key === key)
+    || { key, label: "Categories", shortLabel: "Categories", icon: "grid", code: "" };
 }
 
 function normalizeProductionScale(value: string | undefined): ProductionScale | "" {
@@ -254,7 +277,7 @@ function normalizeWeekday(value: string | number | undefined, fallback: number) 
 
 function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
   let live: { isLive: boolean; platform: LivePlatform | ""; url: string } = { isLive: false, platform: "", url: "" };
-  if (row.is_live) {
+  if (row.is_live && !row.is_demo) {
     try {
       live = validateLiveSettings({ isLive: true, platform: row.live_platform, url: row.live_url });
     } catch {
@@ -262,20 +285,26 @@ function toShowroom(row: DiscoveryRow): DiscoveryShowroom {
     }
   }
   const primaryIndustry = DISCOVERY_INDUSTRIES.find((industry) => industry.key === row.primary_industry_key)
-    || DISCOVERY_INDUSTRIES[0];
+    || ALL_DISCOVERY_INDUSTRIES;
   return {
     id: row.id,
     handle: row.handle,
+    isDemo: Boolean(row.is_demo),
     name: row.name,
     tagline: row.tagline,
     description: row.description,
     logoPath: row.logo_path,
-    heroImagePath: row.hero_image_path,
+    heroImagePath: row.published_profile_json
+      ? publicPageContent(row.id, parseShopPageContent(JSON.parse(row.published_profile_json))).heroImage
+      : row.hero_image_path,
+    countryCode:row.country_code,
+    cityId:row.city_id,
     city: row.city,
     zone: row.zone,
     region: row.region,
     latitude: row.latitude,
     longitude: row.longitude,
+    locationMode: row.location_mode || "legacy",
     fallbackStyle: row.fallback_style,
     sponsored: Boolean(row.is_sponsored),
     productionScale: row.production_scale,
@@ -308,8 +337,10 @@ function toSponsorPlacement(row: SponsorPlacementRow): SponsorPlacement {
 
 function toProductResult(row: DiscoveryProductResultRow): DiscoveryProductResult {
   const primaryIndustry = DISCOVERY_INDUSTRIES.find((industry) => industry.key === row.primary_industry_key)
-    || DISCOVERY_INDUSTRIES[0];
+    || ALL_DISCOVERY_INDUSTRIES;
   return {
+    offeringKind:row.offering_kind,
+    availability:row.availability,
     id: row.id,
     name: row.name,
     description: row.description,
@@ -317,6 +348,7 @@ function toProductResult(row: DiscoveryProductResultRow): DiscoveryProductResult
     categoryName: row.category_name,
     businessId: row.business_id,
     businessHandle: row.business_handle,
+    isDemo: Boolean(row.is_demo),
     businessName: row.business_name,
     city: row.city,
     region: row.region,
@@ -342,28 +374,35 @@ const PRIMARY_INDUSTRY_SQL = `COALESCE((
   LIMIT 1
 ),'all')`;
 
-function selectSql(extraWhere: string, suffix = "") {
+function selectSql(extraWhere: string, suffix = "", order = "is_sponsored DESC,sponsor_position,lower(b.name),b.id") {
+  // Latest public snapshot only; no draft join or per-card database requests.
+  const profile = platformEnvironment().SUQPAGE_OWNER_EDITOR_ENABLED !== "0";
   return `
     SELECT
-      b.id,b.handle,b.name,b.tagline,b.description,b.logo_path,b.hero_image_path,
-      p.booth_image_path,p.city,p.zone,p.region,p.latitude,p.longitude,
+      b.id,b.is_demo,b.handle,b.name,b.tagline,b.description,b.logo_path,b.hero_image_path,
+      ${profile ? "publication.content_json" : "NULL"} AS published_profile_json,
+      p.booth_image_path,p.city,p.zone,p.region,p.country_code,p.city_id,p.latitude,p.longitude,
+      COALESCE(location.location_mode,'legacy') AS location_mode,
       p.fallback_style,COALESCE(s.active,0) AS is_sponsored,
       COALESCE(s.position,999) AS sponsor_position,p.production_scale,
       b.is_live,b.live_platform,b.live_url,
       ${PRIMARY_INDUSTRY_SQL} AS primary_industry_key
     FROM businesses b
     JOIN business_discovery_profiles p ON p.business_id=b.id
+    LEFT JOIN owner_location_proposals location ON location.business_id=b.id
     LEFT JOIN discovery_sponsorships s ON s.business_id=b.id AND s.active=1
+    LEFT JOIN owner_page_publications publication ON publication.business_id=b.id
+      AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)
     WHERE (?='all' OR EXISTS(
         SELECT 1 FROM business_industries i
-        WHERE i.business_id=b.id AND i.industry_key=?
+        WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(?,','))
       ))
       AND b.status='active'
       AND p.is_excluded=0
       AND p.approved_at > 0
-      AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
+      AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1 AND product.offering_kind<>'service')
       ${extraWhere}
-    ORDER BY is_sponsored DESC,sponsor_position,lower(b.name),b.id
+    ORDER BY ${order}
     ${suffix}
   `;
 }
@@ -373,7 +412,7 @@ function selectSponsoredSql() {
     SELECT * FROM (
     SELECT
       'showroom' AS kind,b.id AS source_id,b.handle,b.name,
-      COALESCE(NULLIF(b.tagline,''),NULLIF(b.description,''),'AfricMade page') AS details,
+      COALESCE(NULLIF(b.tagline,''),NULLIF(b.description,''),'MirtPage page') AS details,
       COALESCE(NULLIF(p.booth_image_path,''),NULLIF(b.hero_image_path,''),NULLIF(b.logo_path,''),'') AS image_path,
       NULL AS website_url,NULL AS phone,s.position AS sponsor_position
     FROM discovery_sponsorships s
@@ -383,7 +422,7 @@ function selectSponsoredSql() {
       AND b.status='active'
       AND p.is_excluded=0
       AND p.approved_at > 0
-      AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1)
+      AND EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1 AND product.offering_kind<>'service')
     UNION ALL
     SELECT
       'external' AS kind,a.id AS source_id,'' AS handle,a.name,a.description AS details,
@@ -397,20 +436,34 @@ function selectSponsoredSql() {
   `;
 }
 
-const SEARCH_WHERE = `AND (
-  ?='' OR b.name LIKE ? ESCAPE '\\' OR b.tagline LIKE ? ESCAPE '\\'
-  OR b.description LIKE ? ESCAPE '\\' OR p.city LIKE ? ESCAPE '\\'
-  OR p.zone LIKE ? ESCAPE '\\' OR p.region LIKE ? ESCAPE '\\'
-  OR EXISTS(
-    SELECT 1 FROM products product
-    WHERE product.business_id=b.id AND product.is_published=1
-      AND (product.name LIKE ? ESCAPE '\\' OR product.description LIKE ? ESCAPE '\\')
-  )
-)`;
+// Every term must match one offering plus its business, never different products.
+const BUSINESS_SEARCH_TEXT = "concat_ws(' ',b.name,b.handle,b.tagline,COALESCE(publication.content_json::jsonb->>'about',b.description),p.city,p.zone,p.region)";
+const OFFERING_SEARCH_TEXT = `concat_ws(' ',product.name,product.description,${BUSINESS_SEARCH_TEXT})`;
+function wordMatch(document: string, terms = "?") {
+  const plain = `normalize(${document}, NFKC)`;
+  const folded = `translate(regexp_replace(normalize(${document}, NFKD), '[\u0300-\u036f]', '', 'g'), '${SEARCH_SEPARATORS}', '${' '.repeat(SEARCH_SEPARATORS.length)}')`;
+  const matches = (text: string) => `(${text} ILIKE ALL (ARRAY(SELECT jsonb_array_elements_text(m.terms->'all')))
+    AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(m.terms->'any') a(patterns)
+      WHERE NOT (${text} ILIKE ANY (ARRAY(SELECT jsonb_array_elements_text(a.patterns))))))`;
+  // Most searches use the existing literal path. Accent folding is evaluated only
+  // after that fails and the document contains characters that can need folding.
+  return `(SELECT NOT (m.terms->>'none')::boolean AND (${matches(plain)} OR
+    (${plain} ~ '[^ -~]' AND ${matches(folded)}))
+    FROM (SELECT ${terms}::jsonb AS terms) m)`;
+}
 
+const SEARCH_WHERE = `AND (
+  SELECT ${wordMatch(BUSINESS_SEARCH_TEXT, 'search.terms')} OR EXISTS (
+    SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1 AND product.offering_kind<>'service'
+      AND ${wordMatch(OFFERING_SEARCH_TEXT, 'search.terms')}
+  ) FROM (SELECT ?::jsonb AS terms) search
+)`;
+function searchTerms(query: string, originalsOnly = false) {
+  const groups = searchTermGroups(query).map(group => (originalsOnly ? group.slice(0, 1) : group).map(term => `%${escapeSearchPattern(term)}%`));
+  return JSON.stringify({ none: Boolean(query.trim()) && !normalizeSearchText(query), all: groups.filter(group => group.length === 1).map(group => group[0]), any: groups.filter(group => group.length > 1) });
+}
 function searchParameters(industryKey: string, query: string) {
-  const search = `%${escapeSearchPattern(query)}%`;
-  return [industryKey, industryKey, query, search, search, search, search, search, search, search, search];
+  return [industryKey, industryKey, searchTerms(query)];
 }
 
 function escapeSearchPattern(value: string) {
@@ -423,63 +476,66 @@ function productSuggestionSql(placeWhere: string) {
     FROM products product
     JOIN businesses b ON b.id=product.business_id
     JOIN business_discovery_profiles p ON p.business_id=b.id
+    LEFT JOIN owner_page_publications publication ON publication.business_id=b.id
+      AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)
     WHERE (?='all' OR EXISTS(
         SELECT 1 FROM business_industries i
-        WHERE i.business_id=b.id AND i.industry_key=?
+        WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(?,','))
       ))
       AND b.status='active'
       AND p.is_excluded=0
       AND p.approved_at > 0
       AND product.is_published=1
-      AND (product.name LIKE ? ESCAPE '\\' OR product.description LIKE ? ESCAPE '\\')
+      AND product.offering_kind<>'service'
+      AND ${wordMatch(OFFERING_SEARCH_TEXT)}
       ${placeWhere}
     GROUP BY product.name
     ORDER BY
       CASE
         WHEN lower(product.name)=lower(?) THEN 0
         WHEN lower(product.name) LIKE lower(?) ESCAPE '\\' THEN 1
-        ELSE 2
+        WHEN ${wordMatch('product.name')} THEN 2
+        ELSE 3
       END,
       lower(product.name)
     LIMIT 8
   `;
 }
 
-function productSearchResultSql(placeWhere: string) {
+function productSearchResultSql(placeWhere: string, suffix = "", countOnly = false, byId = false) {
   return `
-    SELECT
-      product.id,product.name,product.description,product.image_path,
+    SELECT ${countOnly ? "COUNT(*) AS total" : `      product.id,product.name,product.description,product.image_path,product.offering_kind,product.availability,
       COALESCE(category.name,'Product') AS category_name,
-      b.id AS business_id,b.handle AS business_handle,b.name AS business_name,
-      p.city,p.region,${PRIMARY_INDUSTRY_SQL} AS primary_industry_key
+      b.id AS business_id,b.is_demo,b.handle AS business_handle,b.name AS business_name,
+      p.city,p.region,${PRIMARY_INDUSTRY_SQL} AS primary_industry_key`}
     FROM products product
     JOIN businesses b ON b.id=product.business_id
     JOIN business_discovery_profiles p ON p.business_id=b.id
+    LEFT JOIN owner_page_publications publication ON publication.business_id=b.id
+      AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)
     LEFT JOIN categories category ON category.id=product.category_id AND category.business_id=b.id
     WHERE (?='all' OR EXISTS(
         SELECT 1 FROM business_industries i
-        WHERE i.business_id=b.id AND i.industry_key=?
+        WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(?,','))
       ))
       AND b.status='active'
       AND p.is_excluded=0
       AND p.approved_at > 0
       AND product.is_published=1
-      AND (
-        product.name LIKE ? ESCAPE '\\' OR product.description LIKE ? ESCAPE '\\'
-        OR b.name LIKE ? ESCAPE '\\' OR b.tagline LIKE ? ESCAPE '\\'
-        OR b.description LIKE ? ESCAPE '\\' OR p.city LIKE ? ESCAPE '\\'
-        OR p.zone LIKE ? ESCAPE '\\' OR p.region LIKE ? ESCAPE '\\'
-      )
+      AND product.offering_kind<>'service'
+      AND ${byId ? "product.id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)" : wordMatch(OFFERING_SEARCH_TEXT)}
       ${placeWhere}
-    ORDER BY
+    ${countOnly ? "" : `ORDER BY
       CASE
         WHEN lower(product.name)=lower(?) THEN 0
         WHEN lower(product.name) LIKE lower(?) ESCAPE '\\' THEN 1
-        WHEN lower(b.name)=lower(?) THEN 2
-        ELSE 3
+        WHEN ${wordMatch('product.name')} THEN 2
+        WHEN lower(b.name)=lower(?) THEN 3
+        WHEN ${wordMatch(OFFERING_SEARCH_TEXT)} THEN 4
+        ELSE 5
       END,
-      lower(product.name),lower(b.name),product.id
-    LIMIT 40
+      lower(product.name),lower(b.name),product.id`}
+    ${suffix}
   `;
 }
 
@@ -489,14 +545,15 @@ function buildSearchSuggestions(
   places: DiscoveryPlaceOption[],
   productRows: Array<{ label: string; detail: string }>,
 ): DiscoverySearchSuggestion[] {
-  const normalizedQuery = query.toLocaleLowerCase();
+  const normalizedQuery = normalizeSearchText(query);
   if (normalizedQuery.length < 2) return [];
+  const originalWords = searchTermGroups(query).map(group => group[0]);
   const candidates: Array<DiscoverySearchSuggestion & { score: number }> = [];
   const score = (value: string) => {
-    const normalized = value.toLocaleLowerCase();
+    const normalized = normalizeSearchText(value);
     if (normalized === normalizedQuery) return 0;
     if (normalized.startsWith(normalizedQuery)) return 1;
-    return normalized.includes(normalizedQuery) ? 2 : 3;
+    return originalWords.every(word => normalized.includes(word)) ? 2 : 3;
   };
   for (const product of productRows) {
     candidates.push({ kind: "offering", label: product.label, detail: `Offering from ${product.detail}`, query: product.label, score: score(product.label) });
@@ -604,7 +661,7 @@ function distanceKm(left: DiscoveryShowroom, right: DiscoveryShowroom) {
 }
 
 export function groupNearbyShowrooms(showrooms: DiscoveryShowroom[]): DiscoveryNearbyGroup[] {
-  const ordered = [...showrooms].sort((left, right) =>
+  const ordered = showrooms.filter(showroom => showroom.locationMode !== "area").sort((left, right) =>
     left.city.localeCompare(right.city)
     || left.latitude - right.latitude
     || left.longitude - right.longitude
@@ -689,13 +746,21 @@ export function groupNearbyShowrooms(showrooms: DiscoveryShowroom[]): DiscoveryN
 }
 
 type DiscoveryOptions = {
-  industry?: string;
+  scope?:MarketScope;
+  country?:string|readonly string[];
+  city?:string|readonly string[];
+  offeringType?:string;
+  madeToOrder?:boolean|string;
+  excludedBusinessIds?:readonly number[];
+  page?: string | number;
+  type?: string;
+  industry?: string | readonly string[];
   q?: string;
-  place?: string;
+  place?: string | readonly string[];
   featuredDay?: string | number;
   scale?: string;
   now?: Date;
-  db?: DatabaseSync;
+  readPort?: DiscoveryReadPort;
 };
 
 type DiscoveryReadPort = {
@@ -703,69 +768,156 @@ type DiscoveryReadPort = {
   all: <T>(sql: string, values?: Array<string | number>) => Promise<T[]>;
 };
 
-function discoveryReadPort(db?: DatabaseSync): DiscoveryReadPort {
-  return {
-    get: async <T>(sql: string, values: Array<string | number> = []) => db
-      ? db.prepare(sql).get(...values) as T | undefined
-      : runtimeGet<T>(sql, values),
-    all: async <T>(sql: string, values: Array<string | number> = []) => db
-      ? db.prepare(sql).all(...values) as T[]
-      : runtimeAll<T>(sql, values),
-  };
+function discoveryReadPort(port?: DiscoveryReadPort): DiscoveryReadPort {
+  return port || { all: runtimeAll, get: runtimeGet };
 }
 
 type MarketplaceBase = Omit<MarketplaceDiscoveryView, "featuredNowBusinessId">;
 
+async function buildIndependentMarketplace(options:DiscoveryOptions,port:DiscoveryReadPort):Promise<MarketplaceBase> {
+ const search=normalizeMarketSearch({q:options.q,category:options.industry,country:options.country,city:options.city,place:options.place,offeringType:options.offeringType,madeToOrder:options.scope==='products'?options.madeToOrder:false,page:options.page});
+ const industry=normalizeIndustrySelection(search.categories),query=search.query;
+ const excluded=excludedBusinessIds(options.excludedBusinessIds);
+ const excludeWhere=excluded.length?' AND NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint))':'';
+ const excludeParams=excluded.length?[JSON.stringify(excluded)]:[];
+ // Metadata is scoped to eligible published pages, independent of the current
+ // search. Never expose private location drafts or the whole city gazetteer.
+ const locations=await port.all<{country_code:string;city:string;city_key:string;count:number}>(`SELECT country_code,COALESCE(NULLIF(city_id,''),city) city_key,min(city) city,count(*) count FROM (${selectSql(excludeWhere)}) listed
+   WHERE country_code<>'' GROUP BY country_code,COALESCE(NULLIF(city_id,''),city) ORDER BY country_code,min(city)`,['all','all',...excludeParams]);
+ const countries=[...new Set(locations.map(l=>l.country_code))].map(code=>({code,count:locations.filter(l=>l.country_code===code).reduce((sum,l)=>sum+Number(l.count),0)}));
+ const places:DiscoveryPlaceOption[]=locations.map(l=>({key:`${l.country_code}:${l.city_key}`,label:l.city,kind:'city',countryCode:l.country_code,city:l.city,region:'',count:Number(l.count)}));
+ const locationsFilter=search.cities.map(cityLocation);
+ const geography=` AND (?::jsonb='[]'::jsonb OR p.country_code IN(SELECT jsonb_array_elements_text(?::jsonb)))
+   AND (?::jsonb='[]'::jsonb OR EXISTS(SELECT 1 FROM jsonb_to_recordset(?::jsonb) loc(country text,city text) WHERE p.country_code=loc.country AND (p.city_id=loc.city OR p.city=loc.city)))`;
+ const geoParams=[JSON.stringify(search.countries),JSON.stringify(search.countries),JSON.stringify(locationsFilter),JSON.stringify(locationsFilter)];
+ const kindWhere=search.madeToOrder?" AND product.offering_kind='made_to_order'":'';
+ const legacyLocations=(search.legacyPlaces||[]).map(key=>{const [kind,region,...city]=key.split(':');return {region,city:kind==='city'?city.join(':'):''};});
+ const legacyWhere=legacyLocations.length?` AND p.country_code='ET' AND EXISTS(SELECT 1 FROM jsonb_to_recordset(?::jsonb) loc(region text,city text) WHERE lower(p.region)=lower(loc.region) AND (loc.city='' OR lower(p.city)=lower(loc.city)))`:'';
+ const scopeWhere=geography+legacyWhere+excludeWhere,scopeParams=[...geoParams,...(legacyLocations.length?[JSON.stringify(legacyLocations)]:[]),...excludeParams];
+ let rows:DiscoveryRow[]=[],products:DiscoveryProductResultRow[]=[];
+ let total=0,searchOrder:{kind:'product'|'business';id:number}[]=[];
+ const request=normalizePageRequest({page:search.page},MARKET_PRODUCT_BATCH_SIZE);
+ {
+  const queryWhere=` AND ${wordMatch(BUSINESS_SEARCH_TEXT)}`;
+  const businessParams=[industry.key,industry.key,searchTerms(query),...scopeParams];
+  if(options.scope==='businesses')rows=await port.all<DiscoveryRow>(selectSql(queryWhere+scopeWhere,'LIMIT ?'),[...businessParams,MARKET_MAP_LIMIT]);
+  const productWhere=scopeWhere+kindWhere;
+  const productParams=[industry.key,industry.key,searchTerms(query),...scopeParams];
+  const normalCount=options.scope==='businesses'?Number((await port.get<{total:number}>(`SELECT count(*) total FROM (${selectSql(queryWhere+scopeWhere)}) matches`,businessParams))?.total||0):Number((await port.get<{total:number}>(productSearchResultSql(productWhere,'',true),productParams))?.total||0);
+  const spelling=options.scope==='businesses'&&normalCount>=MARKET_MAP_LIMIT?[]:await findSpellingMatches({query,industry:industry.key,city:'',region:'',locations:legacyLocations,scale:'',exactBusinessIds:rows.map(r=>r.id),excludedBusinessIds:excluded,
+   discovery:{scope:options.scope!,countries:search.countries,cities:locationsFilter.filter((l):l is {country:string;city:string}=>Boolean(l)),madeToOrder:search.madeToOrder,...(legacyLocations.length?{legacyCountry:'ET' as const}:{})}},port);
+  const approximate=spelling.filter(m=>m.kind===(options.scope==='businesses'?'business':'product'));
+  total=normalCount+approximate.length;
+  const window=pageWindow(total,request);
+  if(options.scope==='businesses') {
+   if(approximate.length)rows.push(...await port.all<DiscoveryRow>(selectSql(' AND b.id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)'+scopeWhere,'LIMIT ?'),[industry.key,industry.key,JSON.stringify(approximate.map(m=>m.id)),...scopeParams,MARKET_MAP_LIMIT-rows.length]));
+  } else {
+   const rank=[query,`${escapeSearchPattern(query)}%`,searchTerms(query,true),query,searchTerms(query,true)];
+   const limit=Math.max(0,Math.min(window.limit,normalCount-window.offset));
+   if(limit)products=await port.all<DiscoveryProductResultRow>(productSearchResultSql(productWhere,'LIMIT ? OFFSET ?'),[...productParams,...rank,limit,window.offset]);
+   const fuzzy=approximate.slice(Math.max(0,window.offset-normalCount),Math.max(0,window.offset+window.limit-normalCount));
+   if(fuzzy.length)products.push(...await port.all<DiscoveryProductResultRow>(productSearchResultSql(productWhere,'',false,true),[industry.key,industry.key,JSON.stringify(fuzzy.map(m=>m.id)),...scopeParams,...rank]));
+   searchOrder=products.map(p=>({kind:'product',id:p.id}));
+  }
+ }
+ const showrooms=rows.map(toShowroom);
+ const {items:_items,...resultPage}=pageResult(products,total,request);
+ return {industry,industries:DISCOVERY_INDUSTRY_OPTIONS,query,suggestions:[],searchProducts:products.map(toProductResult),searchBusinesses:[],searchOrder,
+  resultCounts:{products:options.scope==='products'?total:0,businesses:options.scope==='businesses'?total:0},resultPage,place:search.cities.join('|'),places,countries,
+  productionScale:'',total:showrooms.length,sponsoredCount:showrooms.filter(s=>s.sponsored).length,
+  locationCount:new Set(showrooms.map(s=>`${s.countryCode}:${s.city}`)).size,showrooms,nearbyGroups:groupNearbyShowrooms(showrooms)};
+}
+
 async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryReadPort): Promise<MarketplaceBase> {
-  const { all } = port;
-  const industry = normalizeIndustrySelection(options.industry);
-  const query = (options.q || "").trim().slice(0, 80);
+  if(options.scope)return buildIndependentMarketplace(options,port);
+  const { all, get } = port;
+  const rawQuery = (options.q || "").normalize("NFKC").trim().slice(0, 80);
+  const query = rawQuery;
+  const industry = normalizeIndustrySelection(options.industry || (query ? "all" : ""));
   const productionScale = normalizeProductionScale(options.scale);
   const projectionIndustryKey = industry.key || ALL_DISCOVERY_INDUSTRIES.key;
-  const where = discoveryWhere(productionScale);
-  const params = discoveryParameters(projectionIndustryKey, query, productionScale);
+  const excluded=excludedBusinessIds(options.excludedBusinessIds);
+  const excludeWhere=excluded.length?' AND NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint))':'';
+  const excludeParams=excluded.length?[JSON.stringify(excluded)]:[];
+  const where = discoveryWhere(productionScale)+excludeWhere;
+  const params = [...discoveryParameters(projectionIndustryKey, query, productionScale),...excludeParams];
   const locationRows = await all<DiscoveryRow>(selectSql(where), params);
-  const places = placeOptions(locationRows);
-  const requestedPlace = (options.place || "").trim().slice(0, 180);
-  const selectedPlace = places.find((place) => place.key === requestedPlace);
-  const placeWhere = selectedPlace?.kind === "city"
-    ? " AND lower(p.city)=lower(?) AND lower(p.region)=lower(?)"
-    : selectedPlace?.kind === "region"
-      ? " AND lower(p.region)=lower(?)"
-      : "";
-  const placeParams = selectedPlace?.kind === "city"
-    ? [selectedPlace.city, selectedPlace.region]
-    : selectedPlace?.kind === "region"
-      ? [selectedPlace.region]
-      : [];
+  const requestedPlaces = normalizeDiscoveryPlaces(options.place);
+  // Keep the selected geography available even when query/category has no matches.
+  let places = placeOptions(locationRows);
+  if (requestedPlaces.some(key => !places.some(place => place.key === key))) {
+    places = placeOptions(await all<DiscoveryRow>(selectSql(where), [...discoveryParameters("all", "", productionScale),...excludeParams]));
+  }
+  const selectedPlaces = places.filter(place => requestedPlaces.includes(place.key));
+  const locationScope = selectedPlaces.map(place => ({ city: place.kind === "city" ? place.city : "", region: place.region }));
+  const placeWhere = selectedPlaces.length ? ` AND EXISTS (
+    SELECT 1 FROM jsonb_to_recordset(?::jsonb) AS location(city text,region text)
+    WHERE lower(p.region)=lower(location.region)
+      AND (location.city='' OR lower(p.city)=lower(location.city)))` : "";
+  const placeParams = selectedPlaces.length ? [JSON.stringify(locationScope)] : [];
   const filteredWhere = `${where}${placeWhere}`;
   const filteredParams = [...params, ...placeParams];
-  const rows = selectedPlace
+  const rows = selectedPlaces.length
     ? await all<DiscoveryRow>(selectSql(filteredWhere), filteredParams)
     : locationRows;
   const escapedQuery = escapeSearchPattern(query);
-  const [productSuggestionRows, productResultRows] = query.length >= 2
-    ? await Promise.all([
-      all<{ label: string; detail: string }>(productSuggestionSql(placeWhere), [
-        projectionIndustryKey,
-        projectionIndustryKey,
-        `%${escapedQuery}%`,
-        `%${escapedQuery}%`,
-        ...placeParams,
-        query,
-        `${escapedQuery}%`,
-      ]),
-      all<DiscoveryProductResultRow>(productSearchResultSql(placeWhere), [
-        projectionIndustryKey,
-        projectionIndustryKey,
-        ...Array.from({ length: 8 }, () => `%${escapedQuery}%`),
-        ...placeParams,
-        query,
-        `${escapedQuery}%`,
-        query,
-      ]),
-    ])
-    : [[], []] as [Array<{ label: string; detail: string }>, DiscoveryProductResultRow[]];
+  // Rank what was actually typed before plural alternatives (e.g. gras -> gra).
+  // Title words need not occur at the beginning of a multiword product name.
+  const originalTerms = searchTerms(query, true);
+  const productRankParams = [query, `${escapedQuery}%`, originalTerms, query, originalTerms];
+  const productScopeWhere=placeWhere+excludeWhere;
+  const productScopeParams=[...placeParams,...excludeParams];
+  const productParams = [projectionIndustryKey, projectionIndustryKey,
+    searchTerms(query), ...productScopeParams];
+  const businessOrder = "CASE WHEN lower(b.name)=lower(?) THEN 0 WHEN lower(b.name) LIKE lower(?) ESCAPE '\\' THEN 1 ELSE 2 END,lower(b.name),b.id";
+  const businessResultParams = [...filteredParams, query, `${escapedQuery}%`];
+  const productCountRow = rows.length ? await get<{ total: number }>(productSearchResultSql(productScopeWhere, "", true), productParams) : undefined;
+  const productCount = Number(productCountRow?.total || 0);
+  // The map already loaded every eligible business using the same predicate.
+  // Reuse that server-side count instead of sorting/hydrating it a second time.
+  const businessCount = rows.length;
+  const spelling = await findSpellingMatches({query,industry:projectionIndustryKey,
+    city:"", region:"", locations:locationScope,scale:productionScale || "",exactBusinessIds:rows.map(row=>row.id),excludedBusinessIds:excluded},port);
+  const type = options.type === "products" || options.type === "businesses" ? options.type : "all";
+  const approximate = spelling.filter(match=>type === "all" || (type === "products" ? match.kind === "product" : match.kind === "business"));
+  const normalTotal = type === "products" ? productCount : type === "businesses" ? businessCount : productCount + businessCount;
+  const total = normalTotal + approximate.length;
+  const request = normalizePageRequest({ page: options.page }, PUBLIC_PAGE_SIZE);
+  const window = pageWindow(total, request);
+  const productLimit = type === "businesses" ? 0 : Math.max(0, Math.min(window.limit, productCount - window.offset));
+  const businessOffset = type === "businesses" ? window.offset : Math.max(0, window.offset - productCount);
+  const businessLimit = type === "products" ? 0 : Math.max(0,Math.min(window.limit - productLimit,businessCount-businessOffset));
+  // Only the bounded ranked references are sliced on the server; catalog rows
+  // remain in PostgreSQL and are hydrated for this five-item page only.
+  const approximatePage = approximate.slice(Math.max(0,window.offset-normalTotal),Math.max(0,window.offset+window.limit-normalTotal));
+  const approximateProducts = approximatePage.filter(match=>match.kind === "product").map(match=>match.id);
+  const normalBusinessIds = new Set(rows.map(row=>row.id));
+  const mapIds = [...new Set(spelling.map(match=>match.businessId))].filter(id=>!normalBusinessIds.has(id));
+  const [productSuggestionRows, productResultRows, businessResultRows, approximateProductRows, approximateMapRows] = await Promise.all([
+    query.length >= 2 && productCount > 0 ? all<{ label: string; detail: string }>(productSuggestionSql(productScopeWhere), [
+      projectionIndustryKey, projectionIndustryKey, searchTerms(query),
+      ...productScopeParams, query, `${escapedQuery}%`, originalTerms,
+    ]) : Promise.resolve([]),
+    productLimit ? all<DiscoveryProductResultRow>(productSearchResultSql(productScopeWhere, "LIMIT ? OFFSET ?"),
+      [...productParams, ...productRankParams, productLimit, window.offset]) : Promise.resolve([]),
+    businessLimit ? all<DiscoveryRow>(selectSql(filteredWhere, "LIMIT ? OFFSET ?", businessOrder),
+      [...businessResultParams, businessLimit, businessOffset]) : Promise.resolve([]),
+    approximateProducts.length ? all<DiscoveryProductResultRow>(productSearchResultSql(productScopeWhere,"",false,true),
+      [projectionIndustryKey,projectionIndustryKey,JSON.stringify(approximateProducts),...productScopeParams,...productRankParams]) : Promise.resolve([]),
+    mapIds.length ? all<DiscoveryRow>(selectSql("AND b.id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)"),
+      [projectionIndustryKey,projectionIndustryKey,JSON.stringify(mapIds)]) : Promise.resolve([]),
+  ]);
+  const searchOrder = [
+    ...productResultRows.map(row=>({kind:"product" as const,id:row.id})),
+    ...businessResultRows.map(row=>({kind:"business" as const,id:row.id})),
+    ...approximatePage.map(({kind,id})=>({kind,id})),
+  ];
+  const approximateBusinessIds = new Set(approximatePage.filter(match=>match.kind === "business").map(match=>match.id));
+  productResultRows.push(...approximateProductRows);
+  businessResultRows.push(...approximateMapRows.filter(row=>approximateBusinessIds.has(row.id)));
+  rows.push(...approximateMapRows);
+  if (!selectedPlaces.length) places=placeOptions(rows);
+  const { items: _items, ...resultPage } = pageResult(Array.from({ length: searchOrder.length }), total, request);
   const showrooms = rows.map(toShowroom);
   const nearbyGroups = groupNearbyShowrooms(showrooms);
   const suggestions = buildSearchSuggestions(query, rows, places, productSuggestionRows);
@@ -776,7 +928,11 @@ async function buildMarketplaceBase(options: DiscoveryOptions, port: DiscoveryRe
     query,
     suggestions,
     searchProducts: productResultRows.map(toProductResult),
-    place: selectedPlace?.key || "",
+    searchBusinesses: businessResultRows.map(toShowroom),
+    searchOrder,
+    resultCounts: { products: productCount + spelling.filter(match=>match.kind === "product").length, businesses: businessCount + spelling.filter(match=>match.kind === "business").length },
+    resultPage,
+    place: selectedPlaces.map(place => place.key).sort().join("|"),
     places,
     productionScale,
     total: showrooms.length,
@@ -794,17 +950,19 @@ async function buildFeaturedProjection(options: DiscoveryOptions, port: Discover
   const selectedWeekday = normalizeWeekday(options.featuredDay, schedule.todayWeekday);
   const selectedDay = schedule.days.find((entry) => entry.weekday === selectedWeekday) || schedule.days[0];
   const featuredIndustry = normalizeIndustry(selectedDay.industryKey);
-  const programPolicy = await getFeaturedProgramPolicy(port);
+  const programPolicy = await getFeaturedProgramPolicy();
   const featuredRowsForDay = async (day: WeeklyFeaturedDay) => {
-    const eligibleRows = await all<DiscoveryRow>(selectSql("AND b.hero_image_path LIKE '/%' "), [day.industryKey, day.industryKey]);
+    const excluded=excludedBusinessIds(options.excludedBusinessIds);
+    const extra=excluded.length?' AND NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint))':'';
+    const eligibleRows = await all<DiscoveryRow>(selectSql("AND b.hero_image_path LIKE '/%' "+extra), [day.industryKey, day.industryKey,...(excluded.length?[JSON.stringify(excluded)]:[])]);
     eligibleRows.sort((left, right) => left.name.localeCompare(right.name) || left.id - right.id);
     const selection = await getFeaturedProgramDaySelection(day.dateIso, port);
-    if (selection.mode !== "manual") return { rows: eligibleRows.slice(0, MAX_FEATURED_SHOWROOMS), mode: "automatic" as const };
+    if (selection.mode !== "manual") return { rows: automaticFeaturedLineup(day.dateIso, eligibleRows), mode: "automatic" as const };
     const byId = new Map(eligibleRows.map((row) => [row.id, row]));
     const manualRows = selection.businessIds.map((businessId) => byId.get(businessId)).filter((row): row is DiscoveryRow => Boolean(row)).slice(0, MAX_FEATURED_SHOWROOMS);
     return manualRows.length
       ? { rows: manualRows, mode: "manual" as const }
-      : { rows: eligibleRows.slice(0, MAX_FEATURED_SHOWROOMS), mode: "automatic" as const };
+      : { rows: automaticFeaturedLineup(day.dateIso, eligibleRows), mode: "automatic" as const };
   };
   const selectedProgram = await featuredRowsForDay(selectedDay);
   const revealFeatured = selectedDay.isToday;
@@ -853,7 +1011,10 @@ async function buildFeaturedProjection(options: DiscoveryOptions, port: Discover
 }
 
 export async function getMarketplaceDiscoveryView(options: DiscoveryOptions = {}): Promise<MarketplaceDiscoveryView> {
-  const port = discoveryReadPort(options.db);
+  normalizeMarketSearch({offeringType:options.offeringType,madeToOrder:options.madeToOrder});
+  const port = discoveryReadPort(options.readPort);
+  // Product batches do not render map/Featured presence. Avoid unrelated program reads.
+  if(options.scope==='products')return {...await buildMarketplaceBase(options,port),featuredNowBusinessId:null};
   const [marketplace, featured] = await Promise.all([
     buildMarketplaceBase(options, port),
     buildFeaturedProjection({ now: options.now }, port),
@@ -861,16 +1022,18 @@ export async function getMarketplaceDiscoveryView(options: DiscoveryOptions = {}
   return { ...marketplace, featuredNowBusinessId: featured.featuredNowBusinessId };
 }
 
-export async function getFeaturedShowroomsView(options: Pick<DiscoveryOptions, "featuredDay" | "now" | "db"> = {}): Promise<FeaturedShowroomsView> {
-  return buildFeaturedProjection(options, discoveryReadPort(options.db));
+export async function getFeaturedShowroomsView(options: Pick<DiscoveryOptions, "featuredDay" | "now" | "readPort" | "excludedBusinessIds"> = {}): Promise<FeaturedShowroomsView> {
+  return buildFeaturedProjection(options, discoveryReadPort(options.readPort));
 }
 
-export async function getSponsoredShowrooms(options: Pick<DiscoveryOptions, "db"> = {}): Promise<SponsorPlacement[]> {
-  return (await discoveryReadPort(options.db).all<SponsorPlacementRow>(selectSponsoredSql())).map(toSponsorPlacement);
+export async function getSponsoredShowrooms(options: Pick<DiscoveryOptions, "readPort" | "excludedBusinessIds"> = {}): Promise<SponsorPlacement[]> {
+  const excluded=excludedBusinessIds(options.excludedBusinessIds);
+  const sql=excluded.length?selectSponsoredSql().replace('WHERE s.active=1','WHERE s.active=1 AND NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint))'):selectSponsoredSql();
+  return (await discoveryReadPort(options.readPort).all<SponsorPlacementRow>(sql,excluded.length?[JSON.stringify(excluded)]:[])).map(toSponsorPlacement);
 }
 
 export async function getDiscoveryView(options: DiscoveryOptions = {}): Promise<DiscoveryView> {
-  const port = discoveryReadPort(options.db);
+  const port = discoveryReadPort(options.readPort);
   const [marketplace, featured, sponsoredShowrooms] = await Promise.all([
     buildMarketplaceBase(options, port),
     buildFeaturedProjection(options, port),

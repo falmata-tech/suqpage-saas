@@ -3,7 +3,7 @@ id: ADR-0004
 title: Managed-service requests and versioned publication
 status: accepted
 date: 2026-07-22
-deciders: [MirtPage]
+deciders: [Suqpage]
 related: [FE-003, BE-003, BE-025, DEP-003, ADR-0001, ADR-0002, ADR-0006]
 ---
 
@@ -12,7 +12,7 @@ related: [FE-003, BE-003, BE-025, DEP-003, ADR-0001, ADR-0002, ADR-0006]
 ## Context
 
 Before this decision, the controlled pilot gave business owners direct catalog,
-settings and inquiry controls. MirtPage moved to a managed-service model in
+settings and inquiry controls. Suqpage moved to a managed-service model in
 which clients describe onboarding or changes in their own words and authorized
 staff translate those requests into canonical business data and custom designs.
 
@@ -78,7 +78,7 @@ Adopt option 3.
 ## Cutover amendment — 2026-07-22
 
 The four current tenants are example clients, not external compatibility
-customers. MirtPage therefore completes the planned cutover now: authorized
+customers. Suqpage therefore completes the planned cutover now: authorized
 staff can create a client workspace without a lead, request type is derived from
 publication state, operations managers replace owner inquiry actions,
 and no account retains direct live catalog/settings/design authority. This

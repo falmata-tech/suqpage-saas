@@ -132,7 +132,7 @@ Scenario: Visitor returns from a city Expo to the country overview
 
 ## Domain language and invariants
 
-- **Bazaar:** a MirtPage discovery surface for a themed daily group of businesses.
+- **Bazaar:** a Suqpage discovery surface for a themed daily group of businesses.
 - **Bazaar floor:** the visual map for one active occurrence.
 - **Booth:** a positioned preview entry that links to one permanent showroom.
 - **Bazaar List:** the semantic directory equivalent of the map for the same

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MirtPage</title>
+  <desc id="desc">Two display panels form a clear M, separated by a narrow page gutter.</desc>
+  <rect width="512" height="512" rx="112" fill="#ff4b00"/>
+  <path fill="#ffffff" d="M120 368V144h52l76 80v88l-76-78v134zM264 224l76-80h52v224h-52V234l-76 78z"/>
+</svg>

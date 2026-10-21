@@ -1,3 +1,5 @@
+
+import { getUiText } from "@/lib/i18n/server";
 import Link from "next/link";
 import CollectionToolbar from "@/components/CollectionToolbar";
 import DashboardShell from "@/components/DashboardShell";
@@ -6,6 +8,7 @@ import ProductUpkeepList from "@/components/ProductUpkeepList";
 import { requireUser } from "@/lib/auth";
 import { resolveProductBusiness } from "@/lib/dashboard";
 import { listProductsPage } from "@/lib/scalable-queries";
+import {productListView,productEditorHref} from '@/lib/product-workspace-navigation';
 
 export const dynamic = "force-dynamic";
 
@@ -20,49 +23,45 @@ export default async function ProductsPage({
     q?: string;
   }>;
 }) {
+  const t = await getUiText();
   const user = await requireUser();
   const query = await searchParams;
   const business = await resolveProductBusiness(user, query.business);
   if (!business) return null;
   const products = await listProductsPage(business.id, query, true);
+  const listOrigin=productListView({q:query.q,page:products.page});
   return (
     <DashboardShell user={user} business={business}>
       <div className="navigation-trail">
-        <nav aria-label="Breadcrumb">
-          <Link href={`/dashboard?business=${business.id}`}>Overview</Link>
+        <nav aria-label={t("Breadcrumb")}>
+          <Link href={user.access_role==='client'?'/dashboard/profile':`/dashboard?business=${business.id}`}>{t(user.access_role==='client'?"Account":"Overview")}</Link>
           <span aria-hidden="true">/</span>
-          <span>My offerings</span>
+          <span>{t("Products")}</span>
         </nav>
       </div>
       <div className="dashboard-head">
         <div>
-          <p className="eyebrow">Your market offer</p>
-          <h1>Custom work, ready products &amp; wholesale supply</h1>
-          <p>
-            Keep every made-to-order capability, finished product, wholesale offer, and
-            production fact current without opening the page design system.
-          </p>
+          <h1>{t("Products")}</h1>
         </div>
-        <Link
+        <div className="inline-actions">{user.access_role!=='client'?<Link className="btn secondary" href={`/dashboard/catalog?business=${business.id}`}>{t("Categories")}</Link>:null}<Link
           className="btn brand"
-          href={`/dashboard/products/new?business=${business.id}`}
+          href={productEditorHref('new',business.id,listOrigin)}
         >
-          Add offering
-        </Link>
+          {t("Add product")}</Link></div>
       </div>
       {query.saved ? (
-        <p className="notice">Offering published in a retained page version.</p>
+        <p className="notice">{t("Item saved.")}</p>
       ) : null}
-      {query.error ? <p className="error">{query.error}</p> : null}
+      {query.error ? <p className="error">{t(query.error)}</p> : null}
       <CollectionToolbar
         action="/dashboard/products"
         search={query.q || ""}
-        placeholder="Name, category, type, or availability"
+        placeholder={t("Name, category, type, or availability")}
         hidden={{ business: business.id }}
       />
       {products.items.length ? (
         <>
-          <ProductUpkeepList products={products.items} businessId={business.id} />
+          <ProductUpkeepList products={products.items} businessId={business.id} listOrigin={listOrigin}/>
           <PaginationNav
             result={products}
             pathname="/dashboard/products"
@@ -71,14 +70,13 @@ export default async function ProductsPage({
         </>
       ) : (
         <section className="empty-state">
-          <h2>{query.q ? "No matching offerings" : "No offerings yet"}</h2>
-          <p>{query.q ? "Try a broader search." : "Add the first product or capability to this published page."}</p>
+          <h2>{query.q ? t("No matching items") : t("No products yet")}</h2>
+          <p>{query.q ? t("Try another name or category.") : t("Add the first product to your page.")}</p>
           <Link
             className="btn brand"
-            href={`/dashboard/products/new?business=${business.id}`}
+            href={productEditorHref('new',business.id,listOrigin)}
           >
-            Add first offering
-          </Link>
+            {t("Add first product")}</Link>
         </section>
       )}
     </DashboardShell>

@@ -2,7 +2,7 @@
 id: FE-001
 title: Public showroom discovery and inquiry experience
 status: done
-related: [BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012, FE-016, FE-020, FE-021]
+related: [FE-066, FE-041, BE-001, DEP-001, FE-006, FE-008, FE-010, FE-012, FE-016, FE-020, FE-021]
 owners: [product, frontend]
 last_updated: 2026-08-01
 change_level: L2
@@ -14,7 +14,7 @@ change_level: L2
 
 Customers need to discover a seller, select exact catalog options, preserve a
 shortlist, and either prepare one clear inquiry message without identity fields
-or send the structured inquiry into the business's MirtPage inbox with a usable
+or send the structured inquiry into the business's Suqpage inbox with a usable
 phone number for a reply.
 
 ## Scope and non-goals
@@ -22,7 +22,7 @@ phone number for a reply.
 Includes intentional directory discovery, distinct composed showrooms, product
 search, option selection, cart persistence, optional free-form desired quantity,
 copy-first message preparation, configured WhatsApp/Telegram handoff, and a
-phone-required `Send inquiry` action that saves to the tenant's MirtPage inbox.
+phone-required `Send inquiry` action that saves to the tenant's Suqpage inbox.
 Excludes payment, checkout, pricing guarantees, variant-combination inventory,
 automatic fulfillment, native share menus, TikTok handoff, and mandatory
 identity/contact/note capture for copy or social-app handoff.
@@ -64,7 +64,7 @@ Scenario: Configured direct handoff
   THEN only the configured WhatsApp and Telegram handoff actions are shown
   AND Copy inquiry remains available without requiring personal details
 
-Scenario: Customer sends through MirtPage
+Scenario: Customer sends through Suqpage
   GIVEN one or more inquiry-eligible offerings are selected
   WHEN the customer enters a usable phone number and activates Send inquiry
   THEN the structured inquiry is saved to that business's Customer inquiries inbox
@@ -112,7 +112,7 @@ Scenario: Customer returns to a growing inquiry while browsing
   characters so visitors may include units, packs, pallets, ranges, or another
   concise production quantity description.
 - Copy and social-app message preparation store no customer identity or contact
-  data. Direct MirtPage inquiry submission stores the submitted phone only in the
+  data. Direct Suqpage inquiry submission stores the submitted phone only in the
   canonical tenant-scoped inquiry.
 - Copy/share preparation is not represented as submission and does not create a
   canonical dashboard inquiry without an explicit customer reply path.
@@ -121,7 +121,7 @@ Scenario: Customer returns to a growing inquiry while browsing
 ## Test plan and evidence
 
 - Browser: `tests/acceptance/app.spec.ts` public, floating inquiry, direct
-  MirtPage submission, owner inbox, focus, and 320/390px mobile-sheet and
+  Suqpage submission, owner inbox, focus, and 320/390px mobile-sheet and
   persistent-trigger scenarios.
 - HTTP/security: `scripts/http-smoke.mjs`, `scripts/test-security.ts`.
 - Design contract: `scripts/validate-designs.ts`.
@@ -146,3 +146,21 @@ and visibility in the correct client inquiry inbox.
 Renderer/application changes ship together after browser and release gates.
 Rollback deploys the previous compatible build. Additive migration 19 may
 remain in place because it preserves the legacy numeric quantity column.
+
+## S2h public experience revision
+
+FE-041 now governs the shared profile's linked inline product view, simplified
+public features/unit presentation, single/group inquiry choice, progressive phone
+form and search panel beside the persistent map. It supersedes earlier public
+modal, production-fact, persistent empty-cart and map-replacement statements here.
+Retained data, canonical server security and legacy recovery contracts remain.
+Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+
+
+## S105 social-contact revision
+
+FE-066 / BE-055 supersede new customer messages to business inboxes. Only
+configured social accounts receive visitor handoffs; chosen products and the
+simple message follow the active UI language. Retained private history stays
+scoped. Public transport chat and authenticated owner support remain unchanged.
+Local implementation and review evidence are tracked in checklist S105.

@@ -2,12 +2,21 @@ import { Suspense } from "react";
 import FeaturedShowroomsWorkspace from "@/components/FeaturedShowroomsWorkspace";
 import { FeaturedWorkspaceLoading } from "@/components/PublicWorkspaceLoading";
 import { getPublicFeaturedView, getPublicSponsors } from "@/lib/public-discovery-cache";
+import { getUiText } from "@/lib/i18n/server";
+import { MARKET_STOREFRONT_COPY } from "@/lib/storefront-copy";
+import { BRAND_SOCIAL_IMAGE, publicSeoImageUrl, publicSeoUrl } from "@/lib/public-seo";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-export const metadata = {
-  title: "Daily Featured | AfricMade",
-  description: "Meet selected Ethiopian artisans, farms, workshops, and small manufacturers in AfricMade's daily live program.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getUiText();
+  const title = t("Featured"), description = t(MARKET_STOREFRONT_COPY.description);
+  const url = publicSeoUrl("/featured");
+  const image = publicSeoImageUrl(BRAND_SOCIAL_IMAGE);
+  return { title, description, alternates: { canonical: url },
+    openGraph: { title, description, url, siteName: "MirtPage", images: image ? [image] : [] },
+    twitter: { card: "summary_large_image", title, description, images: image ? [image] : [] } };
+}
 
 type FeaturedSearchParams = Promise<{ featuredDay?: string }>;
 

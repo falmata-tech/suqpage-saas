@@ -1,14 +1,14 @@
-# AfricMade agent operating contract
+# Suqpage agent operating contract
 
 This file is mandatory for every human or AI change in this repository. Read it
-with `MIRTPAGE-MASTER-PROMPT.md`, `specs/README.md`, and the relevant base and
+with `SUQPAGE-MASTER-PROMPT.md`, `specs/README.md`, and the relevant base and
 feature specs before editing code.
 
 ## Order of authority
 
 1. The user's newest explicit instruction.
 2. Security, tenant isolation, privacy, and data-integrity requirements.
-3. `MIRTPAGE-MASTER-PROMPT.md` product rules.
+3. `SUQPAGE-MASTER-PROMPT.md` product rules.
 4. Accepted specs and architecture decision records (ADRs).
 5. Existing implementation details.
 
@@ -21,18 +21,32 @@ silently change product behavior to match convenient code.
    architecture.
 2. Find the controlling specs with `npm run specs:list` or the traceability map.
 3. For a behavior change, create or update specs before production code and
-   identify every section of `MIRTPAGE-MASTER-PROMPT.md` whose statement of
+   identify every section of `SUQPAGE-MASTER-PROMPT.md` whose statement of
    current product behavior will be affected.
 4. Confirm Definition of Ready in `specs/README.md`.
 5. Write a short implementation plan linked to spec IDs and acceptance criteria.
+   Before feature work, record ordered, checkable steps in the active task
+   checklist (currently `docs/SUQPAGE-TRANSITION-CHECKLIST.md`). Mark the current
+   step, dependencies, verification, and approval gates. Add new user requests
+   where they belong before acting; do not silently replace earlier work.
+   Check items only when their stated evidence exists. Distinguish implemented,
+   tested, visually approved, and deployed; resume from the first incomplete
+   dependency instead of restarting or relying on conversation memory.
 6. Make the smallest coherent change. Preserve tenant isolation and custom
    showroom identity.
 7. Add tests that prove every changed acceptance criterion. Security and data
    integrity fixes require regression tests.
-8. For visual work, run focused tests and capture the affected desktop/phone
-   states first. Give the user the live local URL or focused screenshots and
-   wait for explicit visual approval before running expensive full-suite,
-   release, container, or remote CI gates. Security, data-integrity, and
+8. For UI, UX, layout, or navigation work, run focused tests and exercise the
+   affected tasks in actual Google Chrome using the mandatory
+   [browser workflow review](docs/operations/BROWSER-WORKFLOW-REVIEW.md).
+   Cover the affected visitor, owner, staff and admin roles on desktop/phone web
+   and the affected Expo mobile preview at localhost:8082. Click, type, navigate,
+   save/cancel and verify authoritative local API/database outcomes where
+   applicable; screenshots or mocked success alone are not workflow evidence.
+   Capture the affected desktop/phone states first. Give the user the live local
+   URL or focused screenshots and wait for explicit visual approval before
+   running expensive full-suite, release, container, or remote CI gates.
+   Security, data-integrity, and
    non-visual emergency fixes may proceed directly when delay would add risk.
 9. After visual approval, run `npm run check`; use `npm run release` for
    release-affecting changes and `npm run test:acceptance` for user workflows.
@@ -55,6 +69,21 @@ silently change product behavior to match convenient code.
 No implementation begins from a vague request when a material product,
 security, data, or deployment choice remains unresolved.
 
+## Project skills
+
+Load the matching project skill when the task calls for it. Existing rules and
+current specs retain authority; a skill grants no additional provider permission.
+
+| Task | Skill |
+| --- | --- |
+| Changed UI/UX/navigation or usability audit | `.agents/skills/mirtpage-browser-review/SKILL.md` |
+| Requested build, deployment, hosted change or release recovery | `.agents/skills/mirtpage-release/SKILL.md` |
+| Requested overall engineering/setup audit, housekeeping or workflow redesign | `.agents/skills/mirtpage-engineering-review/SKILL.md` |
+| Branch/PR/CI feedback work or an authorized merge/integration | `.agents/skills/mirtpage-github-workflow/SKILL.md` |
+
+Normal implicit selection is enabled by default; explicit `$skill-name` is also
+available. Actual discovery and selection require qualification in the host.
+
 ## Client showroom design commands
 
 When the user asks to design, redesign, or visually review a client showroom or
@@ -67,7 +96,7 @@ or treat generated illustrative media as a factual product photograph.
 ## Architecture and design rules
 
 - Use pragmatic hexagonal architecture: domain rules must not depend on Next.js,
-  HTTP, cookies, SQLite, email vendors, or filesystem details.
+  HTTP, cookies, database drivers, email vendors, or filesystem details.
 - Treat routes, server actions, database modules, media storage, and Resend as
   adapters around explicit application/domain contracts.
 - Apply DDD where the domain has identity or invariants: Tenant, Product,
@@ -82,7 +111,7 @@ or treat generated illustrative media as a factual product photograph.
 - Define a TypeScript interface or function contract at every real port. Define
   class contracts only when runtime polymorphism or stateful lifecycle requires
   classes.
-- Keep SQLite access server-only. UI renderers consume typed catalog/application
+- Keep PostgreSQL access server-only. UI renderers consume typed catalog/application
   data and callbacks, never database handles.
 - New external providers require an adapter, bounded failure behavior,
   idempotency where applicable, observability, and an ADR if the dependency is
@@ -104,6 +133,12 @@ or treat generated illustrative media as a factual product photograph.
   spec or roadmap outcome; it becomes current behavior only after implementation
   and mapped evidence pass. Preserve history in Git, immutable spec IDs, and
   ADRs rather than retaining obsolete narrative in the master prompt.
+- Maintain each fact in its owning document: current product rules in the master,
+  acceptance and invariants in specs, next work in the active checklist, and
+  concise evidence links once in traceability. Link rather than copy contracts
+  or release chronology between them. When updating current state, replace stale
+  prose instead of appending another dated transcript; Git and existing release
+  records preserve history. Keep unresolved tasks and qualification limits visible.
 
 ## Guardrails against drift and wasted work
 
@@ -133,7 +168,76 @@ or treat generated illustrative media as a factual product photograph.
 - Never expose `.env`, databases, generated credentials, customer data, uploads,
   backups, tokens, or provider secrets.
 
+## Recurring workflow improvement (DEP-002)
+
+- During active work, record meaningful gate/script/browser/provider timings and
+  classify failures as product, data, infrastructure or harness issues. Fix one
+  demonstrated cause in the current authorized scope; measure saved time/cost
+  and security outcomes. This is a working routine, not an automatic daily job.
+- Before running a new or changed public JS/MJS/CJS operational script under
+  `scripts/`, run
+  `npm run check:workflow-scripts -- scripts/<file> [...]`. Include its local
+  imports explicitly (`--include lib/<source>.ts` for a public source companion).
+  TypeScript entry scripts retain project typechecking and focused import tests.
+  Protected ignored one-off operations need equivalent syntax/binding checks;
+  do not relocate private artifacts or open secrets to satisfy the public selector.
+  Static checks never execute targets or prove runtime safety. Also exercise the
+  actual main entry with intended arguments and inert offline preflight before
+  external writes.
+- Read installed tool/provider contracts before constructing arguments and
+  fixtures; cover nullable and expected responses. Classify a first failure
+  before a bounded retry. External examples are evidence to verify against the
+  installed version, not new repository rules or permission to weaken guards.
+- Prefer finite one-time operations for finite work; extend a recurring helper
+  only when reuse is concrete. Batch findings, freeze a coherent source once,
+  run focused checks during iteration and reuse valid source-matched gate
+  evidence. Repeat broader gates only for changed inputs or unresolved failures.
+- Keep improvements small and reviewable. Do not inflate guards, invent approval
+  requirements, create duplicate frameworks or trade authorization, tenant
+  isolation, privacy or recovery for speed. Report both savings and remaining
+  correctness/security limits; preserve prior failures honestly.
+
+## Hosted configuration safety (DEP-029)
+
+- Never run `supabase config push` against a hosted project, including from a
+  temporary directory, ignored one-time script, or during recovery. A push is a
+  mutation, not a preview. Do not substitute a broad REST configuration write.
+- Routine production Auth changes must use `npm run ops:auth-config -- plan`
+  followed by the guarded apply command after the owner reviews its exact target,
+  fields, and digest. Producing a digest does not grant approval to apply it.
+  No raw-command fallback is permitted when the guard refuses an operation.
+- DEP-029 permits an explicitly selected `--credential-source cli` to reuse the
+  macOS default Supabase CLI Keychain login. This is a narrow credential-source
+  exception, not permission to discover arbitrary secrets, profiles or targets.
+  Keep credential bytes out of output/files; bind plans to the credential and
+  retain every project, backup, approval, drift and verification check.
+- Google client IDs/secrets, provider enablement, SMTP credentials, signing keys,
+  and other secret changes require separate explicit owner authorization and a
+  recoverable source. Make those changes in the provider dashboard; never copy
+  local provider credentials to Production or "repair" them by disabling or
+  replacing providers without that authorization.
+- Before any hosted configuration write, verify the account/project/environment
+  independently of the current directory, identify the exact fields being
+  changed, and retain a protected backup. Missing or masked credentials are not
+  a recoverable credential backup. Stop if backup/access/target verification is
+  blocked; do not try a more powerful or broader command.
+- After an unexpected remote mutation or ambiguous timeout, stop further writes,
+  report the incident, and obtain direction on an exact recovery plan. A backup
+  restore is another mutation, not an automatic safe fallback. Never use bulk
+  configuration sync to reverse an incident.
+- Keep linked Supabase database commands sequential: they may rotate the same
+  temporary login role. Keep production management tokens out of application
+  runtimes, builds, and routine CI; grant access only for the approved operation.
+- These repository controls do not sandbox a full-access shell or provider
+  administrator. Do not promise that direct commands are technically impossible.
+  Preserve the separation of credentials and use provider permissions as the
+  outer enforcement boundary.
+
 ## Git task isolation and commit discipline
+
+Use [the GitHub workflow](docs/operations/GITHUB-WORKFLOW.md) for new branch and
+commit names, PR bases/reviews, merge qualification and delivery boundaries.
+These conventions do not retroactively rename or rewrite existing work.
 
 - Record `git status --short` before editing. Treat every existing modification
   and untracked file as user-owned unless the current task clearly created it.

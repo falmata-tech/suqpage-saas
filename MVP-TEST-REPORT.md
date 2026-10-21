@@ -1,4 +1,4 @@
-# MirtPage SaaS MVP - Current Verification Report
+# Suqpage SaaS MVP - Current Verification Report
 
 **Release:** `1.0.0-mvp-launch`
 
@@ -36,7 +36,7 @@ a production deployment or a completed PostgreSQL cutover.
 
 - SQLite remains the only enabled database runtime and supports one application
   replica. PostgreSQL is a tested migration target, not yet the write authority.
-- MirtPage-owned bcrypt identities and opaque revocable sessions remain active.
+- Suqpage-owned bcrypt identities and opaque revocable sessions remain active.
   Supabase Auth is not configured or implied by Supabase Storage support.
 - Private Supabase Storage is available behind the media port, but a real bucket
   copy and reconciliation require deployment credentials and operator approval.

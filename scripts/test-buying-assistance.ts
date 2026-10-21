@@ -1,0 +1,137 @@
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import {NextRequest} from 'next/server';
+import {getDb,closeDbForTests} from './testing/postgres-fixture';
+import {GET,POST,DELETE} from '../app/api/public-support/route';
+import * as support from '../lib/support';
+import {joinAssignedSupportConversation} from './testing/support-join';
+import type {SessionUser} from '../lib/types';
+const base='http://127.0.0.1:3102';
+async function main(){
+ const db=await getDb();process.env.NEXT_PUBLIC_APP_URL=base;delete process.env.SUQPAGE_TELEGRAM_BOT_TOKEN;delete process.env.SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID;
+ try{
+ const user=async(name:string,role:SessionUser['access_role'])=>{
+  const row=await db.prepare("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES(?,'unused',?,'admin',0)").run(`${name}@example.test`,name);
+  await db.prepare('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)').run(row.insertedId,role);
+  return {id:row.insertedId,email:`${name}@example.test`,name,role:'admin',access_role:role,business_id:null,must_change_password:0} as SessionUser;
+ };
+ const admin=await user('manager','operations_manager'),help=await user('help','team_member'),buyer=await user('buyer','team_member'),other=await user('other','team_member');
+ await support.updateSupportAgentSetting(admin,{userId:help.id,enabled:true,maxOpenConversations:4,queueScope:'support'});
+ await support.updateSupportAgentSetting(admin,{userId:buyer.id,enabled:true,maxOpenConversations:1,queueScope:'transport'});
+ await support.updateSupportAgentSetting(admin,{userId:other.id,enabled:false,maxOpenConversations:1,queueScope:'transport'});
+ const jar=new Map<string,string>();
+ async function request(channel:string,method='GET',body?:Record<string,unknown>,cookies=jar){
+  const req=new NextRequest(`${base}/api/public-support?channel=${channel}`,{method,headers:{origin:base,cookie:[...cookies].map(([k,v])=>`${k}=${v}`).join('; '),...(body?{'content-type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
+  const response=await(method==='GET'?GET(req):method==='DELETE'?DELETE(req):POST(req));
+  for(const cookie of response.cookies.getAll())if(cookie.value)cookies.set(cookie.name,cookie.value);else cookies.delete(cookie.name);
+  return {status:response.status,body:await response.json()};
+ }
+ const oversized=await POST(new NextRequest(`${base}/api/public-support?channel=buying`,{method:'POST',headers:{origin:base,'content-type':'application/json'},body:JSON.stringify({message:'x'.repeat(33000)})}));
+ assert.equal(oversized.status,413);
+ for(const body of ['null','[]','{']) {
+  const response=await POST(new NextRequest(`${base}/api/public-support?channel=buying`,{method:'POST',headers:{origin:base,'content-type':'application/json'},body}));
+  assert.equal(response.status,400);assert.match(response.headers.get('cache-control')||'',/private, no-store/);
+ }
+ await request('help');await request('buying');await request('transport');
+ assert.equal(new Set(jar.values()).size,2);
+ const draft={action:'start',category:'buying_assistance',name:'Example buyer',phone:'+447700900999',message:'Please buy the listed table. Seller in Addis Ababa.',idempotencyKey:crypto.randomUUID()};
+ for(const invalid of [{service:'wrong'},{service:''},{name:' '},{phone:'12'},{message:' '},{message:'x'.repeat(4001)}])assert.equal((await request('buying','POST',{...draft,...invalid})).status,400);
+ assert.equal((await request('help','POST',draft)).status,410);
+ assert.equal((await request('transport','POST',draft)).status,400);
+ const first=await request('buying','POST',draft);assert.equal(first.status,201,JSON.stringify(first.body));
+ const id=(await db.prepare('SELECT id FROM support_conversations WHERE public_ref=?').get(first.body.conversation.publicRef)).id as number;
+ const stored=(await support.getSupportConversation(admin,id)).conversation;
+ assert.equal(stored.buyingService,null);assert.equal(stored.subject,'Buying assistance');assert.equal(stored.visitorEmail,null);assert.equal(stored.transportOrigin,null);assert.equal(stored.assignedUserId,buyer.id);
+ assert.equal((await request('buying','POST',draft)).body.conversation.publicRef,first.body.conversation.publicRef);
+ assert.equal((await request('buying','POST',{...draft,message:'Changed request details'})).status,400);
+ await assert.rejects(()=>db.prepare("UPDATE support_conversations SET buying_service='invalid' WHERE id=?").run(id));
+ await db.prepare('UPDATE support_conversations SET buying_service=NULL WHERE id=?').run(id);
+ await assert.rejects(()=>support.getSupportConversation(help,id));
+ assert.equal((await support.listSupportConversations(help,{queue:'transport'})).totalItems,0);
+ await support.postSupportMessage(buyer,id,{message:'Private purchase follow-up',idempotencyKey:crypto.randomUUID()});
+ const receipt=(await request('buying')).body.conversation;
+ assert.deepEqual(receipt.messages.map((m:{body:string})=>m.body),[draft.message]);
+ assert.equal(receipt.assignedUserName,null,'Automatic assignment is internal until explicit Join');
+ const replyKey=crypto.randomUUID();
+ await joinAssignedSupportConversation(buyer,id);
+ assert.equal((await request('buying')).body.conversation.assignedUserName,buyer.name);
+ await support.postSupportMessage(buyer,id,{message:'We can help. Which size?',audience:'reply',idempotencyKey:replyKey});
+ assert.equal((await support.postSupportMessage(buyer,id,{message:'We can help. Which size?',audience:'reply',idempotencyKey:replyKey})).duplicate,true);
+ await assert.rejects(()=>support.postSupportMessage(buyer,id,{message:'We can help. Which size?',audience:'note',idempotencyKey:replyKey}));
+ const publicMessages=(await request('buying')).body.conversation.messages;
+ assert.deepEqual(publicMessages.map((m:{body:string})=>m.body),[draft.message,'We can help. Which size?']);
+ const followup={action:'message',publicRef:first.body.conversation.publicRef,message:'The large one.',idempotencyKey:crypto.randomUUID()};
+ assert.equal((await request('buying','POST',{...followup,publicRef:'another-request'})).body.code,'conversation_changed');
+ assert.equal((await request('buying','POST',followup)).status,200);
+ assert.equal((await request('buying','POST',followup)).status,200);
+ assert.equal((await request('buying','POST',{...followup,message:'Changed'})).status,400);
+ assert.equal((await request('buying')).body.conversation.messages.length,3);
+ assert.equal((await request('buying','POST',{...followup,attachment:'bad'})).status,400);
+ assert.equal((await request('buying','POST',followup,new Map())).status,404);
+ await support.closeSupportConversation(buyer,id);
+ assert.equal((await request('buying')).body.conversation.status,'closed');
+ assert.equal((await request('buying','POST',{...followup,idempotencyKey:crypto.randomUUID()})).body.code,'closed');
+ await support.reopenSupportConversation(buyer,id);
+ assert.equal((await request('buying')).body.conversation.status,'open');
+ const close={action:'close',publicRef:first.body.conversation.publicRef};
+ assert.equal((await request('buying','POST',{action:'close'})).body.code,'conversation_changed');
+ assert.equal((await request('buying','POST',{...close,publicRef:'foreign'})).body.code,'conversation_changed');
+ assert.equal((await request('buying','POST',close,new Map())).status,404);
+ const csrf=await POST(new NextRequest(`${base}/api/public-support?channel=buying`,{method:'POST',headers:{origin:'https://untrusted.example','content-type':'application/json',cookie:[...jar].map(([k,v])=>`${k}=${v}`).join('; ')},body:JSON.stringify(close)}));
+ assert.ok(csrf.status>=400);
+ assert.equal((await request('buying')).body.conversation.status,'open');
+ const messageCount=Number((await db.prepare('SELECT COUNT(*) n FROM support_messages WHERE conversation_id=?').get(id)).n);
+ const ended=await Promise.all([request('buying','POST',close),request('buying','POST',close)]);
+ assert.ok(ended.every(result=>result.status===200&&result.body.conversation.status==='closed'));
+ assert.equal(Number((await db.prepare('SELECT COUNT(*) n FROM support_assignments WHERE conversation_id=? AND released_at IS NULL').get(id)).n),0);
+ assert.equal(Number((await db.prepare("SELECT COUNT(*) n FROM support_events WHERE conversation_id=? AND detail='visitor ended conversation'").get(id)).n),1);
+ assert.equal(Number((await db.prepare('SELECT COUNT(*) n FROM support_messages WHERE conversation_id=?').get(id)).n),messageCount);
+ assert.equal((await request('buying','POST',{...followup,idempotencyKey:crypto.randomUUID()})).body.code,'closed');
+ assert.equal((await support.getSupportConversation(buyer,id)).conversation.visitorPhone,draft.phone);
+ assert.equal((await support.getSupportConversation(buyer,id)).conversation.requestSummary,draft.message);
+ assert.equal((await support.listSupportConversations(buyer,{queue:'transport',status:'history'})).totalItems,1);
+ assert.equal((await support.listSupportConversations(buyer,{queue:'transport',status:'active'})).totalItems,0);
+ assert.equal((await support.listSupportConversations(buyer,{queue:'transport',status:'history',q:draft.phone})).totalItems,1);
+ const privateFollowup={message:'Called customer. No longer interested.',audience:'note',idempotencyKey:crypto.randomUUID()};
+ await support.postSupportMessage(buyer,id,privateFollowup);
+ assert.equal((await support.postSupportMessage(buyer,id,privateFollowup)).duplicate,true);
+ assert.ok(!(await request('buying')).body.conversation.messages.some((m:{body:string})=>m.body===privateFollowup.message));
+ await assert.rejects(()=>support.postSupportMessage(buyer,id,{...privateFollowup,audience:'reply',idempotencyKey:crypto.randomUUID()}));
+ await assert.rejects(()=>support.postSupportMessage(help,id,privateFollowup));
+ await assert.rejects(()=>support.closeSupportConversation(other,id));
+ const priorResolutions=Number((await db.prepare("SELECT COUNT(*) n FROM support_events WHERE conversation_id=? AND detail='request resolved'").get(id)).n);
+ await Promise.all([support.closeSupportConversation(buyer,id),support.closeSupportConversation(buyer,id)]);
+ const resolved=(await support.getSupportConversation(buyer,id)).conversation;
+ assert.ok(resolved.resolvedAt);assert.equal(resolved.visitorPhone,draft.phone);
+ assert.equal((await support.listSupportConversations(buyer,{queue:'transport',status:'resolved'})).totalItems,1);
+ assert.equal((await support.listSupportConversations(buyer,{queue:'transport',status:'history'})).totalItems,0);
+ assert.equal(Number((await db.prepare("SELECT COUNT(*) n FROM support_events WHERE conversation_id=? AND detail='request resolved'").get(id)).n),priorResolutions+1);
+ await assert.rejects(()=>db.prepare("UPDATE support_conversations SET status='open' WHERE id=?").run(id));
+ await support.reopenSupportConversation(buyer,id);
+ assert.equal((await support.getSupportConversation(buyer,id)).conversation.resolvedAt,null);
+ assert.equal((await support.listSupportConversations(buyer,{queue:'transport',status:'resolved'})).totalItems,0);
+
+ const token=jar.get('suqpage_public_buying')!;
+ await assert.rejects(()=>support.getPublicSupportConversation(token,Date.now()+support.PUBLIC_SUPPORT_SESSION_MS+1000));
+ assert.equal((await request('help','GET',undefined,new Map([['suqpage_public_help',jar.get('suqpage_public_buying')!]]))).status,410);
+ await support.updateSupportAgentSetting(admin,{userId:buyer.id,enabled:false,queueScope:'transport'});
+ for(const service of ['business_check','quality_check']){
+  await request('buying','DELETE');await request('buying');
+  const created=await request('buying','POST',{...draft,service,idempotencyKey:crypto.randomUUID()});assert.equal(created.status,201);
+ }
+ const waiting=await support.listSupportConversations(admin,{queue:'transport',status:'waiting'});assert.equal(waiting.totalItems,2);
+ await assert.rejects(()=>support.claimSupportConversation(help,waiting.items[0].id));
+ await assert.rejects(()=>support.claimSupportConversation(buyer,waiting.items[0].id));
+ await support.closeSupportConversation(buyer,id);await support.reopenSupportConversation(admin,id);
+ await support.updateSupportAgentSetting(admin,{userId:other.id,enabled:true,maxOpenConversations:1,queueScope:'transport'});
+ await support.reassignSupportConversation(admin,id,other.id);await assert.rejects(()=>support.getSupportConversation(buyer,id));
+ await support.updateSupportAgentSetting(admin,{userId:buyer.id,enabled:true,queueScope:'transport'});
+ await support.reassignSupportConversation(admin,waiting.items[0].id,null);
+ await support.claimSupportConversation(buyer,waiting.items[0].id);
+ assert.equal((await support.getSupportConversation(other,id)).conversation.assignedUserId,other.id);
+ assert.equal((await support.listSupportConversations(admin,{queue:'support'})).totalItems,0);
+ assert.equal(Number((await db.prepare('SELECT COUNT(*) n FROM support_conversations').get()).n),3);
+ console.log('PASS unclassified buying requests, legacy choices, validation, database constraints, replay, channel isolation, private historical notes, explicit live replies, closed/reopen state, retry conflicts and isolated API, paused queues, claim, close/reopen and reassignment.');
+ }finally{await closeDbForTests();}
+}
+main().catch(error=>{console.error(error);process.exitCode=1});

@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright";
+import { installMapTileFixture } from "./testing/map-tile-fixture.mjs";
 
-const baseUrl = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3001";
-const outputDir = process.env.MIRTPAGE_TEST_OUTPUT || "/tmp/mirtpage-market-performance";
+const baseUrl = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3001";
+const outputDir = process.env.SUQPAGE_TEST_OUTPUT || "/tmp/suqpage-market-performance";
 fs.mkdirSync(outputDir, { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -20,12 +21,13 @@ try {
     { name: "phone", viewport: { width: 390, height: 844 }, throttle: 6 },
     { name: "desktop", viewport: { width: 1440, height: 900 }, throttle: 4 },
   ]) {
-    const context = await browser.newContext({ viewport: target.viewport, reducedMotion: "reduce" });
+    const context = await browser.newContext({ viewport: target.viewport, reducedMotion: "reduce", serviceWorkers: "block" });
+    const tiles = await installMapTileFixture(context);
     const page = await context.newPage();
     await page.addInitScript(() => {
-      window.__mirtpageLongTasks = [];
+      window.__suqpageLongTasks = [];
       new PerformanceObserver((list) => {
-        window.__mirtpageLongTasks.push(...list.getEntries().map((entry) => entry.duration));
+        window.__suqpageLongTasks.push(...list.getEntries().map((entry) => entry.duration));
       }).observe({ type: "longtask", buffered: true });
     });
     const session = await context.newCDPSession(page);
@@ -42,7 +44,7 @@ try {
     const zoomButton = page.locator(target.name === "phone"
       ? ".discovery-mobile-map-toolbar button[aria-label='Zoom in']"
       : ".discovery-zoom button[aria-label='Zoom in']");
-    await page.evaluate(() => { window.__mirtpageLongTasks = []; });
+    await page.evaluate(() => { window.__suqpageLongTasks = []; });
     await session.send("Profiler.enable");
     await session.send("Profiler.start");
     const startedAt = performance.now();
@@ -73,18 +75,20 @@ try {
       markerCount: Number(element.getAttribute("data-map-marker-count") || 0),
       renderedMarkers: element.querySelectorAll(".leaflet-marker-pane > .leaflet-marker-icon").length,
       loadedTiles: element.querySelectorAll("img.leaflet-tile-loaded").length,
-      longTasks: window.__mirtpageLongTasks || [],
+      longTasks: window.__suqpageLongTasks || [],
       horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     }));
 
     await page.screenshot({ path: path.join(outputDir, `${target.name}.png`), fullPage: false });
-    const result = { target: target.name, durationMs: Math.round(durationMs), ...metrics, maxLongTaskMs: Math.round(Math.max(0, ...metrics.longTasks)), hottestFunctions };
+    tiles.assertNoExternalRequests();
+    const result = { target: target.name, durationMs: Math.round(durationMs), ...metrics, maxLongTaskMs: Math.round(Math.max(0, ...metrics.longTasks)), hottestFunctions,
+      tileFixture: { id: tiles.fixtureId, fulfilled: tiles.servedCount(), uncontrolledRequests: tiles.externalCount(), providerAvailabilityTested: false } };
     results.push(result);
     writeResults();
 
     assert.equal(errors.length, 0, `${target.name} map reports no page errors: ${errors.join("; ")}`);
     assert.ok(metrics.zoom >= 12, `${target.name} reaches detailed showroom zoom`);
-    assert.ok(metrics.loadedTiles > 0, `${target.name} loads visible OSM tiles`);
+    assert.ok(metrics.loadedTiles > 0 && tiles.servedCount() > 0, `${target.name} renders visible declared local fixture tiles`);
     assert.equal(metrics.renderedMarkers, metrics.markerCount, `${target.name} exposes an accurate mounted marker count`);
     assert.ok(metrics.horizontalOverflow <= 1, `${target.name} map does not create page-level horizontal overflow`);
     assert.ok(durationMs < 15_000, `${target.name} completes repeated throttled zoom commits within 15 seconds`);

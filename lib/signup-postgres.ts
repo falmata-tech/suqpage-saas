@@ -2,14 +2,15 @@ import crypto from "node:crypto";
 import { SignupError, parseSignupInput, type SignupIdentity } from "./signup";
 import type { PostgresTransactionRunner } from "./postgres-runtime";
 import { curatedManifestForLegacyDesign } from "./showroom-manifests";
+import { initializeBusinessStarter } from './business-starter-postgres';
 
 function signupFailure(error: unknown): never {
   if (error instanceof SignupError) throw error;
   if (error instanceof Error && "code" in error && error.code === "23505") {
     const detail = `${error.message} ${"constraint" in error ? String(error.constraint || "") : ""}`.toLowerCase();
-    if (detail.includes("provider_user_id") || detail.includes("auth_identity")) throw new SignupError("This account already has an AfricMade workspace.", 409, "already_linked");
+    if (detail.includes("provider_user_id") || detail.includes("auth_identity")) throw new SignupError("This account already has a MirtPage workspace.", 409, "already_linked");
     if (detail.includes("email")) throw new SignupError("An account already uses this email. Contact support if you cannot access it.", 409, "email_conflict");
-    if (detail.includes("handle")) throw new SignupError("A workspace address collision occurred. Try again.", 409, "handle_conflict");
+    if ((detail.includes("handle") || detail.includes("uq_businesses_2"))) throw new SignupError("This handle is already taken. Choose another.", 409, "handle_conflict");
   }
   throw new SignupError("Your private workspace could not be created.", 500, "unexpected");
 }
@@ -20,25 +21,27 @@ export async function createPostgresPublicClientWorkspace(
   identity: SignupIdentity,
 ) {
   const input = parseSignupInput(raw, identity);
+  const automaticHandle = !Object.hasOwn(raw, "handle");
   const passwordSentinel = `!supabase-passwordless:${crypto.randomBytes(24).toString("base64url")}`;
   try {
-    return await runner.transaction(async () => {
+    for(let attempt=0;attempt<5;attempt++){
+     try { return await runner.transaction(async () => {
       const existingLink = await runner.query("SELECT user_id FROM auth_identity_links WHERE provider='supabase' AND provider_user_id=? LIMIT 1", [identity.providerUserId]);
-      if (existingLink.rows.length) throw new SignupError("This account already has an AfricMade workspace.", 409, "already_linked");
+      if (existingLink.rows.length) throw new SignupError("This account already has a MirtPage workspace.", 409, "already_linked");
       const existingEmail = await runner.query("SELECT 1 FROM users WHERE lower(email)=lower(?) LIMIT 1", [input.email]);
       if (existingEmail.rows.length) throw new SignupError("An account already uses this email. Contact support if you cannot access it.", 409, "email_conflict");
-      const existingHandle = await runner.query("SELECT 1 FROM businesses WHERE lower(handle)=lower(?) LIMIT 1", [input.handle]);
-      if (existingHandle.rows.length) throw new SignupError("A workspace address collision occurred. Try again.", 409, "handle_conflict");
+      const existingHandle = await runner.query("SELECT 1 FROM business_handles WHERE handle=lower(?) LIMIT 1", [input.handle]);
+      if (existingHandle.rows.length) throw new SignupError("This handle is already taken. Choose another.", 409, "handle_conflict");
       const manifest = JSON.stringify(curatedManifestForLegacyDesign("novatech"));
       const business = await runner.query<{ id: number }>(
-        "INSERT INTO businesses(handle,name,design_key,design_manifest_json,status,site_title,contact_email,whatsapp) VALUES(?,?,'composition',?,'draft',?,?,?) RETURNING id",
-        [input.handle, input.businessName, manifest, input.businessName, input.email, input.phone],
+        "INSERT INTO businesses(handle,name,design_key,design_manifest_json,status,site_title,contact_email) VALUES(?,?,'composition',?,'draft',?,?) RETURNING id",
+        [input.handle, input.businessName, manifest, input.businessName, input.email],
       );
       const businessId = business.rows[0]?.id;
       if (!businessId) throw new Error("PostgreSQL did not return the created business identifier.");
       const user = await runner.query<{ id: number }>(
-        "INSERT INTO users(email,password_hash,name,role,business_id,must_change_password,password_updated_at,created_at) VALUES(?,?,?,'owner',?,0,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) RETURNING id",
-        [input.email, passwordSentinel, input.name, businessId],
+        "INSERT INTO users(email,password_hash,name,role,business_id,must_change_password,password_updated_at,created_at,account_phone) VALUES(?,?,?,'owner',?,0,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?) RETURNING id",
+        [input.email, passwordSentinel, input.name, businessId, input.phone],
       );
       const userId = user.rows[0]?.id;
       if (!userId) throw new Error("PostgreSQL did not return the created user identifier.");
@@ -49,8 +52,16 @@ export async function createPostgresPublicClientWorkspace(
         "INSERT INTO business_onboarding_profiles(business_id,declared_category_key,idempotency_key,created_at,updated_at) VALUES(?,?,?,?,?)",
         [businessId, input.businessCategory, input.idempotencyKey, now, now],
       );
+      await initializeBusinessStarter(runner, { businessId, actorUserId: userId, category: input.businessCategory, placeId: input.place.id, notificationEmail: input.email, accentColor: input.accentColor });
       return { userId, businessId };
-    });
+    }); } catch(error) {
+      const conflict = (error instanceof SignupError && error.code==='handle_conflict') ||
+        (error instanceof Error && 'code' in error && error.code==='23505' && /handle|uq_businesses_2/i.test(`${error.message} ${'constraint' in error?error.constraint:''}`));
+      if(!automaticHandle||!conflict||attempt===4)throw error;
+      input.handle=`shop-${crypto.randomBytes(8).toString('hex')}`;
+     }
+    }
+    throw new Error('Could not allocate an address.');
   } catch (error) {
     return signupFailure(error);
   }

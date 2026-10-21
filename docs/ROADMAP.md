@@ -1,4 +1,4 @@
-# MirtPage controlled-pilot roadmap
+# Suqpage controlled-pilot roadmap
 
 This roadmap controls sequencing; accepted specs control behavior. It prevents a
 valid-looking implementation from becoming the wrong next product investment.
@@ -19,10 +19,23 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
   outcome before starting an unrelated feature.
 - Roadmap entries link to specs rather than duplicating acceptance criteria.
 
+## Now - Suqpage self-service transition
+
+The product owner promoted the Suqpage transition on 2026-09-13. Its active
+sequence is `docs/SUQPAGE-TRANSITION-CHECKLIST.md`, controlled by FE-040, BE-032,
+DEP-030, and ADR-0018. This takes priority over older expansion entries below.
+Existing operations and security safeguards remain in force. No hosted rename,
+credential change, reset, or production migration is authorized by starting the
+implementation. Existing custom pages remain intact.
+The current approved direction is one simple business profile for all product
+sellers, not a template gallery or category-specific site builder. The private
+profile preview is awaiting visual approval; publishing and retailer demos follow
+the active checklist.
+
 ## Completed foundation — managed client request operations
 
 - Outcome: clients submit onboarding/change requests and approve private
-  previews while assigned MirtPage staff structure content and managers control
+  previews while assigned Suqpage staff structure content and managers control
   onboarding and publication.
 - Controlling specs: `FE-003`, `BE-003`, `DEP-003`, and `ADR-0004`.
 - Delivered: attachment-free legacy public interest, review-gated public client
@@ -60,7 +73,7 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
 
 ### Operate the mobile marketplace and Daily Featured program
 
-- Outcome: keep the Market as MirtPage's primary public application, with a
+- Outcome: keep the Market as Suqpage's primary public application, with a
   mobile-friendly geographic map, grouped City Markets, showroom inspectors,
   and a complete paginated List view that always leads visitors into permanent
   `/@handle` showrooms.

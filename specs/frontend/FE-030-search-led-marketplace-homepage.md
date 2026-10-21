@@ -1,14 +1,71 @@
 ---
 id: FE-030
 title: Search-led marketplace homepage
-status: done
-related: [FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023]
+status: in_progress
+related: [FE-058, FE-052, FE-041, FE-021, FE-022, FE-024, FE-027, FE-028, FE-029, FE-031, FE-033, FE-034, FE-036, FE-037, BE-021, BE-023, FE-042, FE-065]
 owners: [product, frontend, design]
-last_updated: 2026-09-12
+last_updated: 2026-10-07
 change_level: L2
 ---
 
 # FE-030 - Search-led marketplace homepage
+
+## S41 — visible, clearable multi-category filters (2026-09-26)
+
+Supersedes S40's category/place disclosure. Ready: L2; FE-042 pagination and
+BE-023 public eligibility remain controlling. No new provider or schema change.
+
+- GIVEN an open drawer THEN Category and Region or city are visible side by side
+  above one result list, without a Filters disclosure. Both controls fit 320px
+  phones and long translations; menus scroll without pushing results down.
+- GIVEN no category selection THEN all categories are searched, but “All
+  categories” is only an empty-state label, never a selectable category.
+- GIVEN multiple selected categories THEN map, exact/approximate results,
+  suggestions and counts match ANY selected category AND the selected location
+  and search query. Cross-listed businesses/products occur once.
+- WHEN selecting/unselecting categories or clearing either filter THEN reset
+  pagination and preserve other selections/query/result types. Removing the last
+  category returns the unrestricted category scope. All filters are clearable.
+- GIVEN a selected eligible place with no matches under new categories THEN
+  retain that place and show zero results. Never silently widen its scope.
+- GIVEN reload/history/legacy single-category links or repeated industry params
+  THEN the same canonical selections are restored. Malformed/unknown category
+  values cannot become SQL; valid values survive mixed input.
+
+Verify real isolated PostgreSQL union, de-duplication, privacy, typo and paging
+cases; browser phone/desktop clear/multi-select/reload/history/focus/overflow;
+localized copy/type/spec gates. Visual approval precedes full/build/release gates.
+Rollback reverts application selection behavior; no stored data changes.
+
+## Current refinement — S40, 2026-09-25
+
+This section supersedes older category-gating, map replacement and result-tab
+clauses below. FE-052 defines the accompanying showroom value proposition.
+Definition of Ready: L1 UI refinement; reuse existing BE-023/FE-042 URL and
+server pagination contracts. No schema, visibility, ranking, provider or tenant
+changes. No new dependency. Existing pending work and unrelated files remain.
+
+1. GIVEN the open search drawer WHEN choosing result types THEN Businesses and
+   Products & services are independently selectable filters above one result
+   list, without result tabs. Both selected means `type=all`; one selected uses
+   the existing `businesses` or `products` value. At least one remains selected.
+2. GIVEN a query/category/place and a later result page WHEN changing type THEN
+   the other filters remain, pagination resets and the backend returns only the
+   chosen types. Paging retains the type. Browser history restores URL state.
+3. GIVEN a phone, desktop or short landscape viewport WHEN opening filters or
+   categories THEN labels, choices and controls do not overlap, long localized
+   labels wrap, all choices are reachable and results remain scrollable. The buying
+   help launcher must not cover result pagination; use its accessible compact
+   icon beside an open drawer on narrow screens.
+4. GIVEN any supported locale WHEN arriving at Market THEN its compact intro
+   explains organized business showrooms and direct inquiries, including mobile.
+   About explains the owner benefit: story, media, offerings and contacts in one
+   shareable showroom alongside existing social channels. No checkout claims.
+
+Verification: focused type/localization/narrative checks plus live local browser
+filter, pagination, back-navigation and layout checks in five locales. Capture
+phone/desktop evidence before owner visual approval and full/release gates.
+Rollback is a UI revert; URLs/data and existing search contracts stay compatible.
 
 ## Problem and outcome
 
@@ -26,7 +83,7 @@ business search without being forced through one undifferentiated ranked directo
 
 - A compact product-led marketplace hero with truthful buyer and producer
   benefits that leads directly into the map command surface.
-- A coordinated, local AfricMade image set for the homepage, About story, and
+- A coordinated, local Suqpage image set for the homepage, About story, and
   signup/login context, with production-centered compositions tailored to each
   responsive surface.
 - A desktop and mobile hierarchy inspired by the supplied marketplace mockup
@@ -73,9 +130,9 @@ business search without being forced through one undifferentiated ranked directo
 
 ## Domain language and invariants
 
-- The homepage is the AfricMade marketplace application, not a marketing landing
+- The homepage is the Suqpage marketplace application, not a marketing landing
   page and not a tenant showroom.
-- A **reviewed location** is the location AfricMade uses for discovery. It does
+- A **reviewed location** is the location Suqpage uses for discovery. It does
   not imply business certification, quality verification, or precise distance.
 - Sponsored showrooms remain explicitly labeled **Sponsors** and never imply
   endorsement.
@@ -88,6 +145,17 @@ business search without being forced through one undifferentiated ranked directo
   the existing server-authoritative discovery projection.
 
 ## Contracts
+
+Current Market introduction (FE-052 scenario 8): Suqpage Market / Discover
+products and services. Supporting copy introduces online showrooms from local
+businesses and direct contact. This supersedes the historical hero wording below;
+existing functional labels and the compact mobile header remain unchanged.
+
+Current map previews (FE-052 scenario 9) supersede the historical non-modal
+inspector: single/nearby previews use the browser modal layer above the drawer,
+bounded scrolling, keyboard containment and restored focus. Search state and the
+open panel survive dismissal. Short landscape drawers scroll as one surface to
+keep business results reachable. Featured previews are unchanged by this fix.
 
 - Desktop opens with a restrained public header, one literal marketplace
   headline, short supporting copy, and a product-led production visual with no
@@ -133,7 +201,7 @@ business search without being forced through one undifferentiated ranked directo
 - The seven industries use one restrained, accessible accent system across the
   desktop industry menu, phone Filters sheet, and Shared Location booth borders
   and fascia. Numbered clusters and individual map markers remain one accessible
-  AfricMade orange. White and cool-gray remain the dominant
+  Suqpage orange. White and cool-gray remain the dominant
   booth content surfaces; color is a clearly visible identifier rather than a full-card wash, and an
   industry name or icon always accompanies it so meaning never depends on color
   alone.
@@ -216,7 +284,7 @@ business search without being forced through one undifferentiated ranked directo
   inspector becomes a bounded bottom sheet above app navigation rather than a
   full-screen takeover.
 - Valid merchant live state is visible on map aggregates, individual showroom
-  pins, Shared Location booths, and today's Daily Featured gallery. The current AfricMade Daily Featured
+  pins, Shared Location booths, and today's Daily Featured gallery. The current Suqpage Daily Featured
   walkthrough uses **Featured now** and overrides only that business's merchant
   live presentation for the duration of its slot.
 - Daily Featured retains the fixed weekly selector, truthful selected-day description,
@@ -281,7 +349,7 @@ Scenario: Visitor changes the selected marketplace industry
   WHEN the visitor opens the industry menu, scans individual map markers, or enters a Shared Location
   THEN the menu and Shared Location storefronts identify the selected industry
   AND the industry remains named or icon-labeled without relying on color alone
-  AND individual markers and numbered clusters retain the same AfricMade orange
+  AND individual markers and numbered clusters retain the same Suqpage orange
   AND additional Shared Location storefronts append vertically in stable bounded batches
   AND the separate Daily Featured Showrooms gallery is unchanged
 
@@ -323,7 +391,7 @@ Scenario: Forty featured showrooms remain readable
 
 Scenario: Marketplace data does not support a promotional claim
   GIVEN the visual reference contains ratings, verification, transaction, or scale claims
-  WHEN AfricMade renders its version of that composition
+  WHEN Suqpage renders its version of that composition
   THEN those claims are omitted
   AND only implemented platform benefits and authoritative discovery totals are shown
 
@@ -415,7 +483,7 @@ gates remain pending renewed visual approval.
 - `npm run test:discovery-visual` passed thirteen desktop/390px/320px homepage,
   map, City Showroom, List, Daily Featured, and preview-dialog states with no browser
   errors, document overflow, extra halls, hidden today booths, or exposed future
-  booth identities. Evidence is under `/tmp/mirtpage-home-redesign`.
+  booth identities. Evidence is under `/tmp/suqpage-home-redesign`.
 - Layered Daily Featured geometry passed deterministic uniqueness, no-overlap, safe-wall,
   and empty-center checks from 1 through 64 booths. Final browser evidence shows
   floor-contact shadows and one continuous venue.
@@ -442,8 +510,8 @@ test:discovery`, `npm run test:homepage`, and `npm run validate:specs`. The
 integration fixture proves omitted and explicit `all` filters return the same
 de-duplicated cross-industry projection while keeping five-row List pagination
 and the weekday program independent. Focused desktop and 390px captures are at
-`/tmp/mirtpage-all-industries-desktop.png` and
-`/tmp/mirtpage-all-industries-phone.png`; complete release gates remain pending
+`/tmp/suqpage-all-industries-desktop.png` and
+`/tmp/suqpage-all-industries-phone.png`; complete release gates remain pending
 visual approval.
 
 The 2026-08-10 autocomplete follow-up passes focused type, discovery,
@@ -453,8 +521,8 @@ exclusion of unpublished and excluded records. Focused Chromium interaction
 proves desktop and 390px pointer/touch rendering, zero phone overflow,
 keyboard Arrow/Enter selection, URL-backed application, and a phone list that
 stays above fixed navigation. Evidence is at
-`/tmp/mirtpage-search-suggestions-desktop.png` and
-`/tmp/mirtpage-search-suggestions-phone.png`; full release gates remain pending
+`/tmp/suqpage-search-suggestions-desktop.png` and
+`/tmp/suqpage-search-suggestions-phone.png`; full release gates remain pending
 visual approval.
 
 The 2026-09-12 Search workspace revision passes `npm run check`, `npm run
@@ -464,5 +532,244 @@ rules, deterministic ordering, URL-backed result-type controls, and preserved
 map state. Chromium evidence at 1440, 390, and 320 CSS pixels proves that Search
 replaces only the map canvas, All/Products/Businesses filters work, result cards
 open the existing inspector before navigation, and no viewport has horizontal
-overflow. Evidence is under `/tmp/africmade-search-review`; the user approved
+overflow. Evidence is under `/tmp/suqpage-search-review`; the user approved
 the focused visual result on 2026-09-09.
+
+## S2h public experience revision
+
+FE-041 now governs the shared profile's linked inline product view, simplified
+public features/unit presentation, single/group inquiry choice, progressive phone
+form and search panel beside the persistent map. It supersedes earlier public
+modal, production-fact, persistent empty-cart and map-replacement statements here.
+Retained data, canonical server security and legacy recovery contracts remain.
+Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+
+## S40 local evidence
+
+See `specs/TRACEABILITY.md` S40 for type, localization, 15 filter-flow combinations,
+landscape and three category/pagination/accessibility checks. Screenshots:
+`.local/market-filters-review/`. `scripts/capture-market-filters.mjs` maps current
+acceptance criteria; source composition/narrative checks guard the copy and tab
+removal. Current implementation is local, awaiting visual approval and release
+checks. One external tile-ready capture timeout and its passing isolated retry
+are distinguished from the passing filter-workflow evidence.
+
+## S41 local evidence
+
+See TRACEABILITY S41 for real PostgreSQL filtering/privacy/pagination tests and
+15 phone/desktop locale checks plus landscape and keyboard clearing. Evidence:
+`.local/multicategory-review/`; run `scripts/capture-multicategory-filters.mjs`.
+Type/localization/spec checks pass. Broader discovery assertions pass, but its
+fixture-cleanup timeout remains an unresolved test-infrastructure gate. Current
+changes await visual approval, full/build/release checks, commit and deployment.
+
+## S54 — offering-only public results (local verified, 2026-10-05)
+
+Supersedes mixed result lists and result-type controls. Definition of Ready:
+web/native public entry points reuse the existing products projection and SQL
+pagination; no migration, provider, ranking or eligibility change. Master sections
+5.2, 10 and 15 are affected. FE-030/FE-042 govern map/filter/pagination behavior;
+FE-053 and BE-044 cover the native public adapter.
+
+- GIVEN Market WHEN opening results THEN one visible Products & services heading
+  identifies the list; no Businesses checkbox/tab/card or redundant type toggle.
+- GIVEN a business search/category/location WHEN applied THEN eligible businesses
+  remain on the map with existing marker/nearby previews; listings contain only
+  matching products/services and retain direct product links.
+- GIVEN old type=businesses/all URLs or API calls THEN public boundaries normalize
+  to product/service results BEFORE counting/paginating, with full pages and no
+  business-only trailing pages. Internal reusable discovery projections may
+  retain legacy type support; no public client depends on it.
+- GIVEN Next/Previous or clearing filters THEN query/category/place remain scoped;
+  map membership is independent of result page. Empty lists keep the map intact.
+
+Focused evidence: public API and desktop/390/320 browser capture, typechecks,
+existing discovery pagination/multicategory tests. Existing localized Products &
+services label is reused. Visual approval precedes full/release gates.
+
+S54 focused evidence passes: both typechecks; test:discovery-pagination (including
+public legacy-type normalization and map/count regression); five actual web/native
+browser captures in .local/offering-results/ with capture-offering-results.mjs.
+Desktop/390/320 screenshots reviewed. Tile imagery is a controlled fixture;
+marker data/handlers are real. Physical native-device evidence, owner visual
+approval, full/release gates, commit and deployment are not claimed.
+
+## S55 — shared floating search and filters (local verified, 2026-10-05)
+
+Applies to desktop/mobile web and native. Reuse existing search/filter state and
+backend projection. No new package/schema/auth contract. Master §5.2, §10, §19
+affected. Definition of Ready: clear panel state independent from filter values.
+
+- GIVEN closed results WHEN typing/submitting search or selecting/clearing category
+  or region/city THEN controls remain visible on the map and only map results are
+  visible; panel stays closed. No duplicate focusable controls.
+- GIVEN open results THEN the same labeled/styled controls appear in the panel;
+  both map and product/service results reflect the same inputs.
+- WHEN opening/hiding results THEN values remain, map stays mounted, and controls
+  move with recognizable shapes/styles. An explicit results action opens the list.
+- GIVEN a closed-view web URL with filters WHEN reloaded THEN keep results closed;
+  Back and product-return retain query, location/categories and view choice.
+- GIVEN desktop/390/320 layouts THEN controls fit beside map tools without overlap;
+  menus and map previews remain usable above the controls, with existing keyboard/
+  reduced-motion behavior and localized labels.
+
+Focused browser checks/captures plus both typechecks precede visual approval.
+Native browser evidence does not replace physical-device testing.
+
+S55 evidence: both typechecks and homepage composition contract pass. Ten stable
+web/native-browser screenshots plus flow checks are recorded by
+scripts/capture-floating-discovery-controls.mjs in .local/floating-discovery-controls/.
+Closed search/filtering, reopening, clear actions, one active control set, map DOM
+persistence and immediate reload pass. Panel-only changes use native history
+integration without fetching data; this fixes the observed close/reload race.
+Controlled tile imagery; physical native-device tests remain separate. Visual
+approval and full/release/commit/deployment gates remain pending.
+
+## S56 — compact toolbar correction (in progress, 2026-10-05)
+
+Supersedes S55's stacked floating controls: one compact horizontal toolbar remains
+at the top in both modes, serving as the open drawer's shared header. Results toggle
+at far left, search, then category/location icon buttons. No inline filter labels
+or full selects consuming map height. Existing labels/titles expose purpose and
+selection; active indicators and menu clear actions preserve usability. At least
+44px touch areas; all fit at 320px, map zoom controls start below the toolbar.
+Category multiselect and location selection open existing pickers/popovers.
+Search/filter/view persistence and offering-only results remain as S54/S55.
+No backend/schema/provider change. Master §5.2/§10/§19 affected.
+Focused typechecks and desktop/phone/native-browser checks of layout, filtering,
+clearing and both panel states precede visual approval/full gates.
+
+S56 evidence: both typechecks and homepage composition pass. The focused
+scripts/capture-compact-discovery-toolbar.mjs checks pass in separate --web and
+--native runs: six desktop/phone web and four native-browser captures, horizontal
+alignment, far-left toggle, one search input, panel states, search, category/place
+selection and clearing; web closed-view reload retained. Reports and screenshots
+are in .local/compact-discovery-toolbar/. Tile images are controlled; catalog and
+markers are real local data. Native drawer captures wait for its final transform.
+Native-device testing, owner visual approval and full/release gates remain pending.
+Nothing committed or deployed by S56.
+
+## S57 multiple locations — in progress, 2026-10-05
+
+Master §5.2/§5.5/§10/§19 affected. GIVEN selected cities and/or regions WHEN
+searching THEN the map and paginated offerings match any selected location, AND
+the category/query scope. Overlapping region/city selections never duplicate
+results. Empty selection means all locations. Existing single-place URLs remain
+valid; repeated or pipe-separated place values normalize to a stable bounded
+set (at most 16). SQL values stay parameterized and spelling matches use the
+same union before ranking/pagination. Cache identity includes the normalized set.
+GIVEN either client WHEN opening the compact location button THEN regions/cities
+are checkable, selected values remain available during filtering, and individual
+unselect and clear-all work without opening results. Changing scope resets page.
+No database schema change is required. Test discovery pagination/spelling plus
+web/native filter flows at desktop/phone; retain existing S56 visual style.
+
+S57 focused evidence (local): search suites and test-multiple-locations.ts pass
+multi-region/city union, overlap deduplication, exact/fuzzy pagination, category/
+query intersections, legacy and repeated URL parameters. Support suites plus
+test-live-transport.ts pass both APIs, token/queue/tenant isolation, assignment
+capacity, retry, private notes/carrier data, chat ending/resolution/reopen, and
+bounds. Migration 59 is applied locally only. capture-multiple-locations.mjs
+records seven web and six native-browser states; capture-live-transport.ts,
+capture-transport-dispatch-staff.ts and capture-mobile-transport.ts exercise real
+handlers and staff server actions at desktop/phone sizes. Temporary staff fixtures
+are removed; controlled map tiles and isolated API fixtures are documented in
+scripts. Evidence: .local/multiple-location-review/ and .local/live-transport-review/.
+Both typechecks and localization checks pass. Owner visual/native-speaker review,
+physical device tests, build/full release gates and deployment remain pending.
+
+S59 release regression correction: the narrative test must assert the S54
+Products & services heading and absence of Businesses tabs, rather than requiring
+the superseded tabs. Existing result/map API and browser tests remain required.
+The legacy discovery source assertion also now requires the S56 compact chooser;
+it continues checking its category binding, accessible label and real SQL results.
+
+S59 browser regression alignment: category/search capture scripts explicitly open
+`view=search`, matching S55's map-only default. They retain real pagination, map
+DOM identity, typing races, detail/back and empty-result checks, reject the removed
+business result selector, and verify legacy type=businesses URLs still render
+offerings. No product behavior is changed to satisfy a retired test contract.
+
+## S64 — selection counts and product business links (2026-10-06)
+
+Ready, L1. Uses existing FE-042/BE-023 discovery data and FE-053 navigation;
+no API, schema, ranking, eligibility or tenant change. Master §5.2 is affected.
+- GIVEN zero, one or multiple selected locations WHEN viewing the closed or open
+  toolbar THEN the pin shows no badge, 1, or the selected count respectively.
+  Clearing, deselecting and restoring URL state update the count. Category and
+  location badges use the same treatment on web and native mobile.
+- GIVEN a product result THEN its business is identified by a localized
+  “From {business}” link, preserving the business name verbatim. WHEN following
+  that link THEN open that business's main showroom; WHEN opening the product
+  THEN open its product details. Links must not nest or trigger each other.
+- GIVEN a narrow phone, long business name or translated interface THEN controls
+  remain usable, names wrap, focus is visible, and the toolbar stays one row.
+
+Verify web/mobile typechecks, localization, spec validation and focused browser
+checks at desktop/390/320px: zero/one/two/clear/reload badge states, independent
+product/store navigation, and return-to-market state. Capture both clients.
+Native browser evidence is not device evidence. Visual approval precedes full
+release gates; rollout reverts these UI files with no data migration.
+
+S64 local evidence: web/mobile typechecks, eight localization tests (1,256
+messages per non-English catalog) and validation of 167 specs/ADRs pass.
+`capture-multiple-locations.mjs` passes 16 captures, including 0/1/2/clear,
+reload and open/closed-panel count checks. `capture-result-business-links.mjs`
+with --web, --native and --locales passes 15 captures: independent destinations,
+web keyboard order, 44px store targets, long-name wrapping and all five locales
+at desktop/390/320px. Web browser Back and the mobile app Back preserve search.
+Private evidence: `.local/multiple-location-review/` and
+`.local/result-business-links/`; basemap tiles are controlled fixtures, local
+catalog reads are real, long-name captures use a DOM-only display fixture.
+The initial duplicate-business locator was scoped to one card; Metro was
+restarted to refresh shared catalogs. Expo browser history navigation can reset
+Market state; the mobile app Back was verified instead. No physical-device or
+native-speaker signoff is claimed. Visual approval and full release gates remain
+pending; this change is not deployed or included in the existing S62 APK build.
+
+
+## S72 — visible product-results action
+
+Ready, L1. The existing panel icon is too ambiguous. Choose View products over
+Product view (ambiguous noun) or Results (missing subject); show Hide products
+when open. Keep the panel/arrow icon and a compact readable label on web/native.
+This changes no search/filter/pagination/backend behavior or list composition.
+
+GIVEN closed Market results WHEN viewing the toolbar THEN View products is visible
+and opens the offering-only Products & services panel without issuing a search
+or resetting filters/map. WHEN open THEN Hide products closes it while keeping
+search/category/location controls and state. Expanded/controls semantics, Escape
+and focus return remain. GIVEN 320/390/desktop screens in any of five locales THEN
+all toolbar controls stay aligned, labels are readable and no page overflows.
+
+Verify updated compact discovery browser capture plus focused localized label/
+toggle checks, types/catalogs and before/after screenshots; owner review precedes
+full/release gates. FE-049/FE-053 share authored labels. Master §§5/7/11/15 affected.
+
+Focused S72 review found React Native Web did not project expanded from the
+existing accessibilityState. Set its explicit web aria-expanded while retaining
+native accessibilityState; the UI capture must prove true/false rather than
+weakening that assertion. No search/panel behavior changes.
+
+S72 focused local evidence: types/locale/homepage tests and actual compact
+entry/toggle captures pass in web/Expo at desktop/phone widths across five
+languages. Visible actions retain input, query/filter scope, compact chat and
+expanded state; web focus returns on close. Test:
+scripts/capture-purchase-chat-and-products.mjs. TRACEABILITY S71/S72 records
+resolved cache/harness failures and pending owner visual/full/release rollout.
+
+S90 follows FE-019's heading and supporting transport-chat invitation on the same map launcher.
+The compact open-drawer control keeps the complete accessible question,
+reassurance and Live Chat label; expanded entries must not overlap the toolbar,
+attribution or product results. Search/filter/pagination behavior is unchanged.
+Verify using scripts/capture-purchase-chat-and-products.mjs before visual review.
+
+
+## S103 bounded browse and paired panels — local candidate
+
+FE-065 supersedes empty S102 starts and older drawer placement. Both scopes open
+with bounded results; a centered labeled switch and opposing edge handles select
+sliding map/product panels. Product scrolling appends server pages; previous/next
+buttons are retired for the independent UI. Independent filters, descriptions,
+brand links, marker/cluster styling and transport behavior remain unchanged.
+Focused browser evidence precedes explicit visual approval and full gates.

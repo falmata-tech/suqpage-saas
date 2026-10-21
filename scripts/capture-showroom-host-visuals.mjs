@@ -3,8 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
-const baseURL = process.env.MIRTPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
-const output = process.env.MIRTPAGE_VISUAL_OUTPUT || path.join("/tmp", "mirtpage-showroom-host-visuals");
+const baseURL = process.env.SUQPAGE_TEST_BASE_URL || "http://127.0.0.1:3000";
+const output = process.env.SUQPAGE_VISUAL_OUTPUT || path.join("/tmp", "suqpage-showroom-host-visuals");
 fs.mkdirSync(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 

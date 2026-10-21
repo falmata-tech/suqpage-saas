@@ -1,4 +1,7 @@
 "use client";
+import LoadingBar from "./LoadingBar";
+import { useUiText } from "@/lib/i18n/ui";
+
 
 import { useLinkStatus } from "next/link";
 import { createContext, useCallback, useContext, useEffect, useId, useState, type ReactNode } from "react";
@@ -23,14 +26,16 @@ export function NavigationPendingProvider({ children }: { children: ReactNode })
 }
 
 export function NavigationPendingMain({ children, className }: { children: ReactNode; className: string }) {
+  const t = useUiText();
   const state = useContext(PendingNavigationContext);
   return <main className={`${className} navigation-pending-main`} aria-busy={state?.pending ? "true" : undefined} data-navigation-pending={state?.pending ? "true" : undefined}>
     {children}
-    {state?.pending ? <div className="navigation-workspace-status" role="status"><i aria-hidden="true" /><span>Opening {state.pending.label}</span></div> : null}
+    {state?.pending ? <div className="navigation-workspace-status" role="status"><LoadingBar/><span>{t("Opening {value1}", { value1: state.pending.label })}</span></div> : null}
   </main>;
 }
 
 export default function NavigationPendingIndicator({ label }: { label: string }) {
+  const t = useUiText();
   const { pending } = useLinkStatus();
   const context = useContext(PendingNavigationContext);
   const report = context?.report;
@@ -41,6 +46,6 @@ export default function NavigationPendingIndicator({ label }: { label: string })
   }, [id, label, pending, report]);
   return <>
     <i className={`navigation-pending-indicator${pending ? " is-pending" : ""}`} aria-hidden="true" />
-    {pending ? <i className="navigation-pending-status" role="status" aria-label={`Loading ${label}`} /> : null}
+    {pending ? <i className="navigation-pending-status" role="status" aria-label={t("Loading {value1}", { value1: label })} /> : null}
   </>;
 }

@@ -2,9 +2,9 @@
 id: FE-033
 title: Automatic and adjustable Daily Featured scheduling
 status: in_progress
-related: [FE-021, FE-024, FE-026, FE-030, FE-037, BE-023, BE-027, BE-029, DEP-020, DEP-023, DEP-024]
+related: [FE-036, FE-052, FE-021, FE-024, FE-026, FE-030, FE-037, BE-023, BE-027, BE-029, DEP-020, DEP-023, DEP-024]
 owners: [product, frontend, operations]
-last_updated: 2026-08-14
+last_updated: 2026-10-05
 change_level: L3
 ---
 
@@ -12,17 +12,82 @@ change_level: L3
 
 ## Problem and outcome
 
-Daily Featured Showrooms currently schedules every participant inside one
-window and has no staff-owned schedule. MirtPage needs an all-day program with
-usable presentation time, deliberate changeovers, sponsor moments, a long
-midday break, and a safe way for staff to adjust a particular day's lineup.
+The official Daily Featured broadcast window is 8:30 PM–12:00 AM Ethiopia time.
+The prior two-session policy and 40-business capacity are superseded. Automatic
+lineups showcase at most six eligible businesses with four five-minute sponsor
+mentions. Staff can replace and order a date's lineup, then restore Automatic.
 
-The default schedule is generated automatically from that day's eligible
-showrooms. Platform administrators can edit the global timing policy or replace
-one date's participant order, while the public gallery continues to derive every
-time and active highlight from one authoritative agenda.
+## S36 — evening broadcast (implemented and focused-tested locally)
+
+- GIVEN six eligible businesses WHEN the agenda is generated THEN six 30-minute
+  presentations, four five-minute sponsor mentions and two five-minute changeovers
+  fill 8:30 PM through midnight, with no overlap or morning/intermission session.
+- GIVEN fewer than six businesses THEN use only eligible businesses, at most
+  30 minutes each; retain four sponsor mentions and finish within the official
+  window rather than invent businesses or stretch presentations. Zero businesses
+  yields an empty agenda. Adjacent sponsor mentions may share a boundary on small
+  lineups. Midnight belongs to the following date and displays 12:00 AM.
+- Automatic is the default without daily setup or a cron job. A deterministic
+  weekly rotation selects up to six from the category's eligible pool. Admin and
+  public use the same eligibility/order/selection contract. Sponsor mentions use
+  the ordered active placement pool, repeating when fewer than four are available;
+  absent placements leave clearly unassigned inventory, never invented sponsors.
+- Manual mode selects/reorders up to six for a date; save recalculates all times.
+  Returning to Automatic removes only that date's override. Stale/ineligible
+  candidates remain excluded; old oversized overrides expose at most six without
+  deleting stored history. Public cache invalidation makes manual edits visible.
+- The official time window and segment durations are fixed product rules; retire
+  the old morning/evening policy form and write action. Retain its historical DB
+  row without using it as current authority. No schema change is required.
+- Scheduling is a Suqpage rundown; it does not start or schedule TikTok itself.
+  Ads remain separate from editorial selection. Current sponsor and business
+  states must agree with the agenda at starts, transitions and midnight.
+
+Ready: bounded scheduling change under existing admin/eligibility ports. Tests
+cover capacity/totals/midnight/empty and small lineups, weekly rotation, manual
+save/revert and privacy/reveal rules. Capture public/admin at desktop and phone;
+visual approval precedes full release gates. Master §§3/5/19 and operations docs
+need current single-evening behavior. Older sections below are retained history
+where they describe morning/intermission/global-policy or 40-business behavior.
+
+## S36 verification
+
+Schedule/clock, discovery, localization, homepage composition and typecheck pass.
+Tests cover 0–6 participants, exact 210-minute full agendas, four mentions,
+midnight, deterministic rotating eligibility, manual transaction rejection and
+revert. A real browser save against a warmed cache exposed and verified a fix for
+stale public lineups; manual order and return to Automatic now display immediately.
+Seven public language/viewport states and admin at 320/390/1440 pass without
+horizontal overflow. Screenshots and receipt: `.local/evening-featured-review/`.
+The single-session agenda uses the full width; phone time ranges have more space.
+Original local schedule rows were restored after the test. Staff procedure:
+`docs/operations/FEATURED-SCHEDULE.md`. Owner visual approval, full gates, commit
+and deployment remain pending; status stays in_progress.
 
 ## Scope
+
+### 12-hour display refinement (2026-09-23, local candidate)
+
+GIVEN a public or dashboard schedule WHEN a clock time is displayed THEN it uses
+1–12 hours, two-digit minutes and explicit AM/PM, including noon and midnight.
+Ranges label both endpoints; the existing EAT timezone remains. Support/inquiry/
+invitation timestamps use the same 12-hour rule. Admin hour/minute/AM-PM controls
+submit the same validated HH:mm machine value, preserving authorization and
+persistence. All interface languages retain AM/PM. Date-only labels and elapsed
+durations are unaffected. ISO timestamps and agenda calculations never consume
+display labels. This supersedes the earlier native-time-control UI.
+
+DOR met: L1 display refinement; no schema/provider/timezone change. Focused tests
+cover noon/midnight/PM, agenda epoch boundaries and form round trips. Desktop/phone
+captures precede visual approval/full gates. Rollback restores source without
+migrating schedule data. Master §§5/19 affected.
+
+Demo-audit correction: GIVEN no valid platform TikTok destination WHEN any
+schedule phase renders THEN it shows Featured schedule/current/break/ended status
+without claiming a TikTok broadcast or offering a dead watch action. Configured
+provider links retain their existing behavior. Schedule timing never proves an
+external stream exists. Verify absent/configured destination states in browser;
+no new provider integration or production configuration mutation.
 
 ### In scope
 
@@ -64,8 +129,9 @@ time and active highlight from one authoritative agenda.
   resolves against the current ordered sponsor-placement pool, repeating only
   when a day contains more sponsor breaks than active placements. The admin
   agenda names the assigned sponsor and exact time. During that live segment,
-  the public status and sponsor rail bring the assigned placement forward and
-  label it **Sponsor spotlight** without changing showroom order or airtime.
+  the public status labels the assigned placement **Sponsor spotlight**, without
+  changing showroom order or airtime. FE-036 S51 keeps the sponsor carousel
+  rotating equally rather than pinning the broadcast sponsor.
 - Every participating booth receives one non-overlapping presentation window.
   A transition or sponsor break separates consecutive booths.
 - Each non-empty session is at least 60 minutes and targets no more than 30
@@ -146,7 +212,7 @@ Scenario: Sponsor segment reaches the live screen
   GIVEN today's agenda contains sponsor breaks and active sponsor placements
   WHEN the agenda and public Daily Featured workspace render
   THEN each sponsor break names its assigned placement and exact time
-  AND the currently active sponsor segment moves that placement to the front of the sponsor rail
+  AND the currently active sponsor segment identifies that placement without interrupting equal carousel rotation
   AND the live status identifies it as a paid sponsor spotlight
 
 Scenario: Administrator adjusts one day's lineup
@@ -232,3 +298,5 @@ ignores them and continues its prior deterministic schedule.
 ## Completion evidence
 
 Implementation and focused evidence are in progress.
+
+Focused local evidence and remaining gates: [2026-09-23 workflow audit](../../docs/SUQPAGE-DEMO-WORKFLOW-AUDIT-2026-09-23.md), mapped in TRACEABILITY.md.

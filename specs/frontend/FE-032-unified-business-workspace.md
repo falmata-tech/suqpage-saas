@@ -2,9 +2,9 @@
 id: FE-032
 title: Unified business directory and task-oriented workspace
 status: in_progress
-related: [FE-003, FE-017, FE-018, FE-026, FE-031, FE-035, BE-015, BE-017, BE-023, DEP-023]
+related: [FE-056, FE-003, FE-017, FE-018, FE-026, FE-031, FE-035, BE-015, BE-017, BE-023, DEP-023, FE-042]
 owners: [product, frontend, operations, design]
-last_updated: 2026-08-11
+last_updated: 2026-09-23
 change_level: L2
 ---
 
@@ -12,15 +12,19 @@ change_level: L2
 
 ## Problem and outcome
 
+Header refinement (2026-09-23, local L0): remove the redundant “Ethiopia Market”
+caption beside the public Suqpage logo in every locale. Keep the logo, navigation
+and useful header controls. Verify desktop/phone captures; no routing changes.
+
 The administration interface exposes Businesses, Clients, Discovery profiles,
 Monthly accounts, Client overview, and Account and insights as competing places.
 Those names mirror persistence records instead of the work an administrator is
 trying to complete. A business, its authorized people, its marketplace
 projection, its renewal record, and its visit aggregates must remain separate
 authoritative records, but staff should not have to understand those boundaries
-to manage one MirtPage customer.
+to manage one Suqpage customer.
 
-MirtPage needs one scalable Businesses directory and one task-oriented Business
+Suqpage needs one scalable Businesses directory and one task-oriented Business
 workspace. Cross-business queues remain global; business-specific work remains
 inside the selected business context.
 
@@ -150,7 +154,7 @@ Scenario: Staff distinguishes performance from renewal
 Scenario: Legacy administration link is followed
   GIVEN a saved Clients or Discovery administration URL
   WHEN an authorized administrator opens it
-  THEN MirtPage redirects to the equivalent Businesses or Marketplace context
+  THEN Suqpage redirects to the equivalent Businesses or Marketplace context
   AND no customer, access, or marketplace data is changed
 ```
 
@@ -191,3 +195,5 @@ user, discovery, subscription, analytics, request, or media data.
 - [x] Legacy-link behavior defined
 - [x] Responsive, performance, and rollback impacts defined
 - [x] Observable scenarios and evidence mapped
+
+Focused local evidence and remaining gates: [2026-09-23 workflow audit](../../docs/SUQPAGE-DEMO-WORKFLOW-AUDIT-2026-09-23.md), mapped in TRACEABILITY.md.

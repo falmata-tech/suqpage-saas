@@ -15,18 +15,27 @@ const grants: Record<AccessRole, ReadonlySet<Capability>> = {
   client: new Set(["basic-product:maintain", "client:workspace"]),
 };
 
+export function isQueueAgent(user: SessionUser) {
+  return user.access_role === "team_member" &&
+    (user.staff_queue_scope === "support" || user.staff_queue_scope === "transport");
+}
+
 export function hasCapability(user: SessionUser, capability: Capability) {
+  if (isQueueAgent(user)) return false;
   return grants[user.access_role].has(capability);
 }
 
 export function canViewBusiness(user: SessionUser, businessId: number, assigned = false) {
-  if (hasCapability(user, "operations:manage") || hasCapability(user, "platform:admin")) return true;
-  if (user.access_role === "team_member") return assigned;
-  return user.business_id === businessId;
+  if (!Number.isSafeInteger(businessId) || businessId < 1) return false;
+  if (user.access_role === "platform_admin") return true;
+  if (user.access_role === "team_member" || user.access_role === "operations_manager") return assigned;
+  return user.access_role === "client" && user.business_id === businessId;
 }
 
-export function canManageBusiness(user: SessionUser, businessId: number, _assigned = false) {
-  return businessId > 0 && hasCapability(user, "platform:admin");
+export function canManageBusiness(user: SessionUser, businessId: number, granted = false) {
+  return Number.isSafeInteger(businessId) && businessId > 0 &&
+    (user.access_role === "platform_admin" ||
+      ((user.access_role === "team_member" || user.access_role === "operations_manager") && granted));
 }
 
 export function canMaintainBasicProducts(
@@ -34,13 +43,10 @@ export function canMaintainBasicProducts(
   businessId: number,
   assigned = false,
 ) {
-  if (!hasCapability(user, "basic-product:maintain") || businessId < 1) return false;
+  if (!Number.isSafeInteger(businessId) || businessId < 1) return false;
   if (user.access_role === "client") return user.business_id === businessId;
-  if (user.access_role === "team_member") return assigned;
-  return (
-    user.access_role === "operations_manager" ||
-    user.access_role === "platform_admin"
-  );
+  if (user.access_role === "team_member" || user.access_role === "operations_manager") return assigned;
+  return user.access_role === "platform_admin";
 }
 
 export function canOperateBusiness(user: SessionUser, businessId: number) {
@@ -49,4 +55,12 @@ export function canOperateBusiness(user: SessionUser, businessId: number) {
 
 export function isClient(user: SessionUser) {
   return user.access_role === "client";
+}
+
+/** Navigation hint only; each workspace still enforces its own authorization. */
+export function workspaceHomeHref(user:SessionUser):string {
+  if(isQueueAgent(user))return `/dashboard/support?queue=${user.staff_queue_scope}`;
+  if(hasCapability(user,'platform:admin'))return '/dashboard/admin';
+  if(user.access_role==='client'&&user.business_id)return '/dashboard/profile';
+  return '/dashboard';
 }

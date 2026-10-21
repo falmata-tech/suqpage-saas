@@ -26,7 +26,7 @@ Who has which problem, why it matters, and the measurable outcome.
 
 ## Domain language and invariants
 
-- Define entities/value concepts and rules using MirtPage terminology.
+- Define entities/value concepts and rules using Suqpage terminology.
 
 ## Contracts
 

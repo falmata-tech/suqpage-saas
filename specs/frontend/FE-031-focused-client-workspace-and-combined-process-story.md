@@ -18,7 +18,7 @@ two chapters repeat the same explanation and make every showroom longer. In the
 operations workspace, staff can also lose the active client context because
 global destinations and repeated actions compete with the current request.
 
-MirtPage needs one concise story-and-process chapter and one persistent,
+Suqpage needs one concise story-and-process chapter and one persistent,
 task-oriented client workflow from instruction through publication.
 
 ## Scope

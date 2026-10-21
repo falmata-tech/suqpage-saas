@@ -1,9 +1,12 @@
+
+import { getUiText } from "@/lib/i18n/server";
+import { authDriver } from "@/lib/config";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createStaffAccountAction } from "@/app/staff-actions";
 import CollectionToolbar from "@/components/CollectionToolbar";
 import DashboardShell from "@/components/DashboardShell";
 import PaginationNav from "@/components/PaginationNav";
+import StaffWorkspaceNavigation from '@/components/StaffWorkspaceNavigation';
 import { requireUser } from "@/lib/auth";
 import { hasCapability } from "@/lib/capabilities";
 import { listStaffPage } from "@/lib/scalable-queries";
@@ -13,16 +16,29 @@ export const dynamic = "force-dynamic";
 export default async function AdminStaff({ searchParams }: {
   searchParams: Promise<{ error?:string; saved?:string; page?:string; q?:string; role?:string }>;
 }) {
+  const t = await getUiText();
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) redirect("/dashboard");
+  const managed = authDriver() === "supabase";
   const query = await searchParams;
   const staff = await listStaffPage(query);
   return <DashboardShell user={user} business={null}>
-    <nav className="workspace-breadcrumbs" aria-label="Breadcrumb"><Link href="/dashboard/admin">Platform overview</Link><span>/</span><strong>Staff &amp; access</strong></nav>
-    <div className="dashboard-head"><div><span className="eyebrow">Platform access</span><h1>Staff &amp; access</h1><p>Provision individual accounts and review role-scoped workload.</p></div><Link className="small-btn" href="/dashboard/support/agents">Support agents</Link></div>
-    {query.error ? <p className="error">{query.error}</p> : null}{query.saved ? <p className="notice">Staff account created.</p> : null}
-    <details className="admin-create-disclosure" open={Boolean(query.error)}><summary>Create staff account</summary><form action={createStaffAccountAction} className="form-grid"><div className="field"><label htmlFor="staff-name">Name</label><input id="staff-name" name="name" required maxLength={100}/></div><div className="field"><label htmlFor="staff-email">Email</label><input id="staff-email" name="email" type="email" required maxLength={160}/></div><div className="field"><label htmlFor="staff-role">Access role</label><select id="staff-role" name="accessRole"><option value="team_member">Team member</option><option value="operations_manager">Operations manager</option></select></div><div className="field"><label htmlFor="staff-password">Temporary password</label><input id="staff-password" name="temporaryPassword" type="password" minLength={12} required/></div><div className="field full"><button className="btn brand">Create staff account</button></div></form></details>
-    <CollectionToolbar action="/dashboard/admin/staff" search={query.q || ""} placeholder="Staff name or email" activeFilters={Boolean(query.q || query.role)}><label><span>Role</span><select name="role" defaultValue={query.role || ""}><option value="">All roles</option><option value="team_member">Team member</option><option value="operations_manager">Operations manager</option></select></label></CollectionToolbar>
-    {staff.items.length ? <><div className="table-wrap admin-data-surface"><table className="data-table"><thead><tr><th>Staff member</th><th>Role</th><th>Assignments</th><th>Open requests</th><th>Sign-in</th></tr></thead><tbody>{staff.items.map((member)=><tr key={member.id}><td data-label="Staff member"><strong>{member.name}</strong><br/><small>{member.email}</small></td><td data-label="Role">{member.access_role.replaceAll("_"," ")}</td><td data-label="Assignments">{member.active_assignments}</td><td data-label="Open requests">{member.open_requests}</td><td data-label="Sign-in"><span className={`badge ${member.must_change_password ? "draft" : "active"}`}>{member.must_change_password ? "Password change required" : "Ready"}</span></td></tr>)}</tbody></table></div><PaginationNav result={staff} pathname="/dashboard/admin/staff" params={{q:query.q,role:query.role}}/></> : <div className="empty-state">No staff accounts match this view.</div>}
+    <div className="dashboard-head"><div><h1>{t("Staff")}</h1><p>{t("Add staff and manage their access.")}</p></div><Link className="btn brand" href="/dashboard/admin/staff/new">{t("Create staff account")}</Link></div>
+    <StaffWorkspaceNavigation active="accounts" accountsLabel={t('Accounts')} workloadLabel={t('Workload & availability')}/>
+    {query.error ? <p className="error">{t(query.error)}</p> : null}{query.saved ? <p className="notice">{t(query.saved==='agent'?"Support agent settings saved.":"Staff account created.")}</p> : null}
+    <CollectionToolbar action="/dashboard/admin/staff" search={query.q || ""} placeholder={t("Staff name or email")} activeFilters={Boolean(query.q || query.role)}><label><span>{t("Role")}</span><select name="role" defaultValue={query.role || ""}><option value="">{t("All roles")}</option><option value="support_agent">{t("Support agent")}</option><option value="transport_agent">{t("Transport agent")}</option></select></label></CollectionToolbar>
+    {staff.items.length ? <>
+      <div className="table-wrap admin-data-surface"><table className="data-table"><thead><tr>
+        <th>{t('Staff member')}</th><th>{t('Role')}</th><th>{t('Open conversations')}</th><th>{t('Manage businesses')}</th><th>{t('Sign-in')}</th><th><span className="sr-only">{t('Manage')}</span></th>
+      </tr></thead><tbody>{staff.items.map(member=><tr key={member.id}>
+        <td data-label={t('Staff member')}><strong>{member.name}</strong><br/><small>{member.email}</small></td>
+        <td data-label={t('Role')}>{t(member.access_role==='operations_manager'?'Operations manager':member.queue_scope==='support'?'Support agent':member.queue_scope==='transport'?'Transport agent':'Team member')}</td>
+        <td data-label={t('Open conversations')}>{member.open_conversations}</td>
+        <td data-label={t('Manage businesses')}><span className={`badge ${member.manage_businesses?'active':'draft'}`}>{t(member.manage_businesses?'Business management is on':'Business management is off')}</span></td>
+        <td data-label={t('Sign-in')}><span className={`badge ${!managed&&member.must_change_password?'draft':'active'}`}>{!managed&&member.must_change_password?t('Password change required'):t('Ready')}</span></td>
+        <td data-label={t('Manage')}><Link className="small-btn" href={`/dashboard/admin/staff/${member.id}`}>{t('Manage')}</Link></td>
+      </tr>)}</tbody></table></div>
+      <PaginationNav result={staff} pathname="/dashboard/admin/staff" params={{q:query.q,role:query.role}}/>
+    </> : <div className="empty-state">{t('No staff accounts match this view.')}</div>}
   </DashboardShell>;
 }

@@ -1,3 +1,5 @@
+
+import { useUiText } from "@/lib/i18n/ui";
 import Link from "next/link";
 import type { PageResult } from "@/lib/pagination";
 import { pageHref } from "@/lib/pagination";
@@ -18,13 +20,14 @@ export default function PaginationNav({
   pageParam?: string;
   hash?: string;
 }) {
+  const t = useUiText();
   if (result.totalItems === 0) return null;
   const previous = Math.max(1, result.page - 1);
   const next = Math.min(result.totalPages, result.page + 1);
   return (
-    <nav className="workspace-pagination" aria-label="Result pages">
+    <nav className="workspace-pagination" aria-label={t("Result pages")}>
       <p aria-live="polite">
-        Showing <strong>{result.firstItem}-{result.lastItem}</strong> of{" "}
+        {t("Showing")}{" "}<strong>{result.firstItem}-{result.lastItem}</strong> {" "}{t("of")}{" "}
         <strong>{result.totalItems}</strong>
       </p>
       <div>
@@ -32,30 +35,26 @@ export default function PaginationNav({
           <Link
             className="small-btn"
             href={pageHref(pathname, { ...params, [pageParam]: previous }, hash)}
-            aria-label="Previous page"
+            aria-label={t("Previous page")}
           >
-            Previous
-          </Link>
+            {t("Previous")}</Link>
         ) : (
           <span className="small-btn disabled" aria-disabled="true">
-            Previous
-          </span>
+            {t("Previous")}</span>
         )}
         <span>
-          Page {result.page} of {result.totalPages}
+          {t("Page")}{" "}{result.page} {" "}{t("of")}{" "}{result.totalPages}
         </span>
         {result.page < result.totalPages ? (
           <Link
             className="small-btn"
             href={pageHref(pathname, { ...params, [pageParam]: next }, hash)}
-            aria-label="Next page"
+            aria-label={t("Next page")}
           >
-            Next
-          </Link>
+            {t("Next")}</Link>
         ) : (
           <span className="small-btn disabled" aria-disabled="true">
-            Next
-          </span>
+            {t("Next")}</span>
         )}
       </div>
     </nav>

@@ -2,25 +2,10 @@ import {
   DEFAULT_FEATURED_PROGRAM_POLICY,
   MAX_FEATURED_SHOWROOMS,
   validateFeaturedProgramDate,
-  validateFeaturedProgramPolicy,
-  type FeaturedProgramPolicy,
 } from "./featured-program";
-import { cleanText } from "./security";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction, type RuntimeSqlValue } from "./runtime-sql";
 
 export class FeaturedProgramSettingsError extends Error {}
-
-type PolicyRow = {
-  morning_start_minute: number;
-  morning_end_minute: number;
-  afternoon_start_minute: number;
-  afternoon_end_minute: number;
-  changeover_minutes: number;
-  sponsor_break_every: number;
-  sponsor_break_minutes: number;
-  sponsor_break_label: string;
-  intermission_label: string;
-};
 
 export type FeaturedProgramDayMode = "automatic" | "manual";
 
@@ -59,125 +44,8 @@ const runtimeWritePort: FeaturedProgramWritePort = {
   transaction: runtimeTransaction,
 };
 
-function mapPolicy(row: PolicyRow | undefined): FeaturedProgramPolicy {
-  if (!row) return DEFAULT_FEATURED_PROGRAM_POLICY;
-  return validateFeaturedProgramPolicy({
-    morningStartMinute: Number(row.morning_start_minute),
-    morningEndMinute: Number(row.morning_end_minute),
-    afternoonStartMinute: Number(row.afternoon_start_minute),
-    afternoonEndMinute: Number(row.afternoon_end_minute),
-    changeoverMinutes: Number(row.changeover_minutes),
-    sponsorBreakEvery: Number(row.sponsor_break_every),
-    sponsorBreakMinutes: Number(row.sponsor_break_minutes),
-    sponsorBreakLabel: row.sponsor_break_label,
-    intermissionLabel: row.intermission_label,
-  });
-}
-
-export function minuteToTimeInput(minute: number) {
-  if (!Number.isSafeInteger(minute) || minute < 0 || minute > 1439) throw new FeaturedProgramSettingsError("Program time is outside one day.");
-  return `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
-}
-
-function timeInputToMinute(value: unknown, label: string) {
-  const cleaned = cleanText(value, 5);
-  const match = /^(\d{2}):(\d{2})$/.exec(cleaned);
-  if (!match) throw new FeaturedProgramSettingsError(`${label} must use a valid time.`);
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  if (hour > 23 || minute > 59) throw new FeaturedProgramSettingsError(`${label} must use a valid time.`);
-  return hour * 60 + minute;
-}
-
-function integerInput(value: unknown, label: string) {
-  const parsed = Number.parseInt(cleanText(value, 10), 10);
-  if (!Number.isSafeInteger(parsed)) throw new FeaturedProgramSettingsError(`${label} must be a whole number.`);
-  return parsed;
-}
-
-export function featuredProgramPolicyFromForm(input: {
-  morningStart: unknown;
-  morningEnd: unknown;
-  afternoonStart: unknown;
-  afternoonEnd: unknown;
-  changeoverMinutes: unknown;
-  sponsorBreakEvery: unknown;
-  sponsorBreakMinutes: unknown;
-  sponsorBreakLabel: unknown;
-  intermissionLabel: unknown;
-}) {
-  try {
-    return validateFeaturedProgramPolicy({
-      morningStartMinute: timeInputToMinute(input.morningStart, "Morning start"),
-      morningEndMinute: timeInputToMinute(input.morningEnd, "Morning end"),
-      afternoonStartMinute: timeInputToMinute(input.afternoonStart, "Afternoon start"),
-      afternoonEndMinute: timeInputToMinute(input.afternoonEnd, "Afternoon end"),
-      changeoverMinutes: integerInput(input.changeoverMinutes, "Booth changeover"),
-      sponsorBreakEvery: integerInput(input.sponsorBreakEvery, "Sponsor-break frequency"),
-      sponsorBreakMinutes: integerInput(input.sponsorBreakMinutes, "Sponsor-break duration"),
-      sponsorBreakLabel: cleanText(input.sponsorBreakLabel, 60),
-      intermissionLabel: cleanText(input.intermissionLabel, 60),
-    });
-  } catch (error) {
-    throw new FeaturedProgramSettingsError(error instanceof Error ? error.message : "Featured program policy is invalid.");
-  }
-}
-
-export async function getFeaturedProgramPolicy(port: FeaturedProgramReadPort = runtimeReadPort) {
-  const sql = `
-    SELECT morning_start_minute,morning_end_minute,afternoon_start_minute,
-      afternoon_end_minute,changeover_minutes,sponsor_break_every,
-      sponsor_break_minutes,sponsor_break_label,intermission_label
-    FROM featured_program_policy WHERE id=1
-  `;
-  const row = await port.get<PolicyRow>(sql);
-  return mapPolicy(row);
-}
-
-export async function updateFeaturedProgramPolicy(policy: FeaturedProgramPolicy, actorUserId: number, port: FeaturedProgramWritePort = runtimeWritePort) {
-  let validated: FeaturedProgramPolicy;
-  try {
-    validated = validateFeaturedProgramPolicy(policy);
-  } catch (error) {
-    throw new FeaturedProgramSettingsError(error instanceof Error ? error.message : "Featured program policy is invalid.");
-  }
-  if (!Number.isSafeInteger(actorUserId) || actorUserId <= 0) throw new FeaturedProgramSettingsError("A valid administrator is required.");
-  const sql = `
-    INSERT INTO featured_program_policy(
-      id,morning_start_minute,morning_end_minute,afternoon_start_minute,
-      afternoon_end_minute,changeover_minutes,sponsor_break_every,
-      sponsor_break_minutes,sponsor_break_label,intermission_label,
-      updated_by_user_id,updated_at
-    ) VALUES(1,?,?,?,?,?,?,?,?,?,?,?)
-    ON CONFLICT(id) DO UPDATE SET
-      morning_start_minute=excluded.morning_start_minute,
-      morning_end_minute=excluded.morning_end_minute,
-      afternoon_start_minute=excluded.afternoon_start_minute,
-      afternoon_end_minute=excluded.afternoon_end_minute,
-      changeover_minutes=excluded.changeover_minutes,
-      sponsor_break_every=excluded.sponsor_break_every,
-      sponsor_break_minutes=excluded.sponsor_break_minutes,
-      sponsor_break_label=excluded.sponsor_break_label,
-      intermission_label=excluded.intermission_label,
-      updated_by_user_id=excluded.updated_by_user_id,
-      updated_at=excluded.updated_at
-  `;
-  const values = [
-    validated.morningStartMinute,
-    validated.morningEndMinute,
-    validated.afternoonStartMinute,
-    validated.afternoonEndMinute,
-    validated.changeoverMinutes,
-    validated.sponsorBreakEvery,
-    validated.sponsorBreakMinutes,
-    validated.sponsorBreakLabel,
-    validated.intermissionLabel,
-    actorUserId,
-    Date.now(),
-  ];
-  await port.run(sql, values);
-  return validated;
-}
+// The official window supersedes retained historical two-session policy rows.
+export async function getFeaturedProgramPolicy() { return DEFAULT_FEATURED_PROGRAM_POLICY; }
 
 export async function getFeaturedProgramDaySelection(dateIso: string, port: FeaturedProgramReadPort = runtimeReadPort): Promise<FeaturedProgramDaySelection> {
   try { validateFeaturedProgramDate(dateIso); } catch (error) { throw new FeaturedProgramSettingsError(error instanceof Error ? error.message : "Program date is invalid."); }
@@ -207,9 +75,8 @@ export async function listFeaturedProgramEligibleBusinesses(industryKey: string,
         WHERE product.business_id=b.id AND product.is_published=1
       )
     ORDER BY lower(b.name),b.id
-    LIMIT 100
   `;
-  return port.all<FeaturedProgramEligibleBusiness>(sql, [industryKey]);
+  return (await port.all<FeaturedProgramEligibleBusiness>(sql, [industryKey])).sort((a,b)=>a.name.localeCompare(b.name)||a.id-b.id);
 }
 
 export async function saveFeaturedProgramDay(input: {
@@ -252,4 +119,21 @@ export async function saveFeaturedProgramDay(input: {
     mode: input.mode,
     participantCount: input.mode === "manual" ? businessIds.length : Math.min(eligible.size, MAX_FEATURED_SHOWROOMS),
   };
+}
+
+// One bounded, indexed read keeps saved manual changes authoritative even when a
+// cache adapter delays tag invalidation. Include the EAT date for midnight rollover.
+export async function getFeaturedProgramCacheVersion(now = new Date(), port: FeaturedProgramReadPort = runtimeReadPort) {
+  const date = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  const today = date.toISOString().slice(0,10);
+  date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 6) % 7);
+  const monday = date.toISOString().slice(0,10);
+  date.setUTCDate(date.getUTCDate() + 6);
+  const sunday = date.toISOString().slice(0,10);
+  const rows = await port.all<{date_iso:string;mode:string;updated_at:number;business_id:number|null;position:number|null}>(`
+    SELECT d.date_iso,d.mode,d.updated_at,l.business_id,l.position
+    FROM featured_program_days d LEFT JOIN featured_program_lineup l ON l.date_iso=d.date_iso
+    WHERE d.date_iso BETWEEN ? AND ? ORDER BY d.date_iso,l.position,l.business_id
+  `,[monday,sunday]);
+  return JSON.stringify([today,rows]);
 }

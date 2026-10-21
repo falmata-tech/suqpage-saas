@@ -15,7 +15,7 @@ The launch build addresses the independent audit blockers as follows.
 | No admin onboarding | Businesses can create a review-gated private workspace; administrators can also accept a legacy public lead or create a referred-client workspace, issue a single-use invitation, and reset client passwords. |
 | Catalog structure cannot be corrected | Authorized staff correct structure inside retained request revisions; clients and routine product upkeep cannot restructure it. |
 | No migration path | Idempotent migration module and `npm run migrate` support existing databases. |
-| Inconsistent DB path | Setup, runtime, backup and restore all use `MIRTPAGE_DB_PATH`. |
+| Inconsistent DB path | Setup, runtime, backup and restore all use `SUQPAGE_DB_PATH`. |
 | No rate limiting | Login and public inquiries use persistent SQLite rate limits. |
 | Product writes not transactional | Full revisions and narrow basic product upkeep use immediate version-checked transactions with retained history. |
 | Inventory inconsistency | Numeric inventory was removed. Availability controls inquiry eligibility; requested quantity is bounded intent from 1–20 and is never treated as stock. |

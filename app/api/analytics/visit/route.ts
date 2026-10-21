@@ -1,10 +1,11 @@
+import { platformCookie, platformCookies } from "@/lib/platform-state";
 import crypto from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { recordShowroomVisit } from "@/lib/account-health";
 import { assertSameOrigin } from "@/lib/security";
 
 export const runtime = "nodejs";
-const COOKIE = "mirtpage_visitor";
+const COOKIE = platformCookies.visitor.current;
 const MAX_BODY = 2048;
 
 export async function POST(request: NextRequest) {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Request is too large." }, { status: 413 });
     }
     const body = JSON.parse(raw) as Record<string, unknown>;
-    const visitorToken = request.cookies.get(COOKIE)?.value || crypto.randomUUID();
+    const visitorToken = platformCookie(request.cookies, "visitor") || crypto.randomUUID();
     const result = await recordShowroomVisit({
       handle: body.handle,
       source: body.source,

@@ -1,24 +1,28 @@
+import createNextIntlPlugin from "next-intl/plugin";
+import { platformAssetRewrites } from "./lib/platform-assets";
+import { platformEnvironment } from "./lib/platform-environment.mjs";
 import type { NextConfig } from "next";
 import { trustedOriginPolicy } from "./lib/trusted-origins";
 
 const isDev = process.env.NODE_ENV !== "production";
-const distDir = process.env.MIRTPAGE_NEXT_DIST_DIR || ".next";
-if (distDir !== ".next" && !/^\.next-acceptance\/mirtpage-acceptance-[A-Za-z0-9_-]+$/.test(distDir)) {
-  throw new Error("MIRTPAGE_NEXT_DIST_DIR must identify a generated MirtPage acceptance directory");
+const distDir = platformEnvironment().SUQPAGE_NEXT_DIST_DIR || ".next";
+if (distDir !== ".next" && !/^\.next-acceptance\/(?:suqpage|mirtpage)-acceptance-[A-Za-z0-9_-]+$/.test(distDir)) {
+  throw new Error("SUQPAGE_NEXT_DIST_DIR must identify a generated Suqpage acceptance directory");
 }
-const tsconfigPath = process.env.MIRTPAGE_NEXT_TSCONFIG || "tsconfig.json";
-if (tsconfigPath !== "tsconfig.json" && !/^\.acceptance-tsconfig-mirtpage-acceptance-[A-Za-z0-9_-]+\.json$/.test(tsconfigPath)) {
-  throw new Error("MIRTPAGE_NEXT_TSCONFIG must identify a generated MirtPage acceptance config");
+const tsconfigPath = platformEnvironment().SUQPAGE_NEXT_TSCONFIG || "tsconfig.json";
+if (tsconfigPath !== "tsconfig.json" && !/^\.acceptance-tsconfig-(?:suqpage|mirtpage)-acceptance-[A-Za-z0-9_-]+\.json$/.test(tsconfigPath)) {
+  throw new Error("SUQPAGE_NEXT_TSCONFIG must identify a generated Suqpage acceptance config");
 }
-const serverActionOrigins = trustedOriginPolicy(process.env).serverActionHosts;
+const originPolicy = trustedOriginPolicy(process.env);
+const serverActionOrigins = originPolicy.serverActionHosts;
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://tile.openstreetmap.org",
   "font-src 'self' data:",
-  "connect-src 'self'",
-  "frame-src 'self' https://www.youtube-nocookie.com",
+  "connect-src 'self' https://tile.openstreetmap.org",
+  "frame-src 'self' https://www.youtube-nocookie.com https://www.tiktok.com https://www.facebook.com https://www.instagram.com",
   "form-action 'self'",
   "frame-ancestors 'none'",
   "base-uri 'self'",
@@ -36,12 +40,20 @@ const securityHeaders = [
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
 ];
 
+const publicEnvironment = platformEnvironment();
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_SUQPAGE_PWA_ENABLED: publicEnvironment.NEXT_PUBLIC_SUQPAGE_PWA_ENABLED ?? "true",
+    NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER: publicEnvironment.NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER ?? "osm-standard",
+    NEXT_PUBLIC_SUQPAGE_TIKTOK_URL: publicEnvironment.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL ?? "",
+    NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL: publicEnvironment.NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL ?? "",
+  },
   poweredByHeader: false,
   distDir,
   typescript: { tsconfigPath },
-  allowedDevOrigins: serverActionOrigins,
+  allowedDevOrigins: isDev ? originPolicy.devResourceHostnames : undefined,
   experimental: { serverActions: { bodySizeLimit: "6mb", allowedOrigins: serverActionOrigins } },
+  async rewrites() { return [...platformAssetRewrites]; },
   async redirects() {
     return [
       { source: "/discover", destination: "/", permanent: false },
@@ -50,6 +62,7 @@ const nextConfig: NextConfig = {
   },
   outputFileTracingIncludes: {
     "/*": [
+      "./lib/world-place-catalog.json",
       "./node_modules/next/dist/server/lib/source-maps.js",
       "./node_modules/next/dist/server/lib/lru-cache.js",
       "./node_modules/@img/sharp-linux-x64/**/*",
@@ -89,6 +102,26 @@ const nextConfig: NextConfig = {
       { key: "Cache-Control", value: "public, max-age=3600, must-revalidate" },
     ] },
     { source: "/(.*)", headers: securityHeaders },
+    ...["/tracking/:path*", "/api/tracking/:path*", "/api/mobile/v1/tracking/:path*"].map(source=>({source,headers:[
+      { key: "Cache-Control", value: "private, no-store" },
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+    ]})),
+    { source: "/transport-plan", headers: [
+      { key: "Cache-Control", value: "private, no-store" },
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+    ] },
+    { source: "/api/transport-plan", headers: [
+      { key: "Cache-Control", value: "private, no-store" },
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+    ] },
+    { source: "/api/mobile/v1/transport-plan", headers: [
+      { key: "Cache-Control", value: "private, no-store" },
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+    ] },
   ]; },
 };
-export default nextConfig;
+export default createNextIntlPlugin("./i18n/request.ts")(nextConfig);

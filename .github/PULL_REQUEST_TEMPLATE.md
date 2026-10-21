@@ -2,48 +2,29 @@
 
 What user/operator outcome changes? Keep implementation detail secondary.
 
-## Specification and architecture
+## Scope
 
-- Controlling spec IDs:
-- Spec status is `ready` or later: [ ]
-- Related FE/BE/DEP specs are reciprocal: [ ]
-- ADR added/updated if architecture changed: [ ] / N/A
-- Change level: L0 / L1 / L2 / L3 / L4
+Controlling specs and change level (L0–L4):
+Base/head and any unmerged dependency:
+Architecture decision, if changed:
 
 ## Acceptance evidence
 
-- Acceptance criteria changed:
-- Tests mapped to each criterion:
-- Commands and results:
-- Manual evidence, if required:
+Applicable acceptance criteria, commands/results and meaningful manual evidence:
+Current-head CI link/status; visual approval when required:
+Not run or unsupported checks, with reason:
 
-## Risk review
+## Risks and delivery
 
-- [ ] Tenant isolation evaluated
-- [ ] Authentication/authorization evaluated
-- [ ] Customer privacy and logging evaluated
-- [ ] Database/migration compatibility evaluated
-- [ ] Accessibility/mobile/localization evaluated
-- [ ] External provider failures/idempotency evaluated
-
-## Deployment
-
-- Rollout:
-- Rollback:
-- Backup/migration required: [ ] / N/A
-- Configuration/secrets changed: [ ] / N/A
-- Mocks and known limitations:
+Relevant security/tenant/privacy/data/UI/provider risks and known limitations:
+Rollout/rollback, migrations or configuration changes, if applicable:
+State whether this integrates source, deploys an artifact, or leaves delivery pending.
 
 ## Completion
 
-- [ ] Initial dirty-worktree state was recorded and preserved
-- [ ] Only explicit task files were staged and `check-staged-scope.mjs` passed
-- [ ] Staged diff was reviewed before the task commit
-- [ ] `npm run validate:specs`
-- [ ] Applicable focused tests
-- [ ] `npm run check`
-- [ ] `npm run test:acceptance` for user workflows
-- [ ] `npm run test:operations` for persistence/deployment
-- [ ] `npm run release` for release-affecting changes
-- [ ] Traceability and operator documentation updated
-- Task commit hash:
+- [ ] Only reviewed task files are committed; unrelated changes are preserved.
+- [ ] Evidence matches the change level and current inputs; required remote checks
+  apply, while docs-only work adds no unrelated local application rebuild.
+- [ ] Specs/current documentation and limitations are accurate.
+
+Task head commit:

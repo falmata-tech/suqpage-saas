@@ -69,7 +69,7 @@ unlimited capacity.
 Focused Chromium evidence used a 390 by 844 phone viewport at 6x CPU slowdown
 and desktop at 4x slowdown. The script performs repeated real cluster zooms and
 a pan, checks browser errors, overflow, DOM bounds, and long tasks, and records
-screenshots and metrics under `/tmp/mirtpage-market-performance`.
+screenshots and metrics under `/tmp/suqpage-market-performance`.
 
 | Probe | Result |
 | --- | --- |

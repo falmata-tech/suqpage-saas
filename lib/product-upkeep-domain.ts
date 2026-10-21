@@ -1,7 +1,9 @@
+import { productVideo } from './video/product-video';
+import { parseProductMedia, type ProductMedia } from "./product-media";
 import type { Product } from "./types";
 import {
   normalizeQuantityMode,
-  offeringKinds,
+  isActiveProductKind,
   quantityModes,
   type OfferingKind,
   type QuantityMode,
@@ -15,7 +17,15 @@ import {
 export type ProductUpkeepKind = "create" | "update";
 export type ProductImageAction = "keep" | "remove" | "replace";
 
+export type ProductOptionInput = { name: string; values: string[] };
+
 export type BasicProductCommand = {
+  preserveOfferingKind?: boolean;
+  media?: ProductMedia[];
+  preserveMetadata?: boolean;
+  updateListingState?: boolean;
+  optionGroups?: ProductOptionInput[];
+  isPublished?: boolean;
   kind: ProductUpkeepKind;
   businessId: number;
   productId: number | null;
@@ -49,6 +59,11 @@ export class ProductUpkeepError extends Error {
 }
 
 const commandKeys = new Set([
+  "media",
+  "preserveMetadata",
+  "updateListingState",
+  "optionGroups",
+  "isPublished",
   "kind",
   "businessId",
   "productId",
@@ -102,6 +117,26 @@ const optionalInteger = (value: unknown, label: string) => {
   return positiveInteger(value, label);
 };
 
+export function parseProductOptions(raw: unknown): ProductOptionInput[] {
+  if (!Array.isArray(raw) || raw.length > 4) throw new ProductUpkeepError("Use up to four option groups.");
+  const names = new Set<string>();
+  return raw.map(entry => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry) || Object.keys(entry).some(key => !["name", "values"].includes(key))) throw new ProductUpkeepError("Invalid product options.");
+    const name = boundedText(entry.name, 80, "Option name");
+    if (!name || names.has(name.toLowerCase())) throw new ProductUpkeepError("Give each option group a different name.");
+    names.add(name.toLowerCase());
+    if (!Array.isArray(entry.values) || !entry.values.length || entry.values.length > 50) throw new ProductUpkeepError("Each option needs 1–50 choices.");
+    const values = entry.values.map((value: unknown) => {
+      if (typeof value !== "string") throw new ProductUpkeepError("Option choices must be text.");
+      const text = boundedText(value, 100, "Option choice");
+      if (!text) throw new ProductUpkeepError("Remove empty option choices.");
+      return text;
+    });
+    if (new Set(values.map((v: string) => v.toLowerCase())).size !== values.length) throw new ProductUpkeepError("Option choices must be different.");
+    return { name, values };
+  });
+}
+
 export function parseBasicProductCommand(
   raw: Record<string, unknown>,
 ): BasicProductCommand {
@@ -112,6 +147,7 @@ export function parseBasicProductCommand(
       "unsupported_fields",
     );
   }
+  if (raw.preserveMetadata !== undefined && typeof raw.preserveMetadata !== "boolean") throw new ProductUpkeepError("Invalid metadata policy.");
   const kind = raw.kind;
   if (kind !== "create" && kind !== "update") {
     throw new ProductUpkeepError("Choose a valid product action.");
@@ -130,9 +166,10 @@ export function parseBasicProductCommand(
   if (!availabilityValues.has(availability)) {
     throw new ProductUpkeepError("Choose a valid availability.");
   }
-  const offeringKind = text(raw.offeringKind, 40) as OfferingKind;
-  if (!offeringKinds.includes(offeringKind)) {
-    throw new ProductUpkeepError("Choose a valid offering type.");
+  const omittedOfferingKind = raw.offeringKind === undefined;
+  const offeringKind = omittedOfferingKind ? "standard_product" : text(raw.offeringKind, 40);
+  if (!isActiveProductKind(offeringKind)) {
+    throw new ProductUpkeepError("Choose Ready to ship or Made to order for this product.", 400, "invalid_product_kind");
   }
   const submittedQuantityMode = text(raw.quantityMode, 20) as QuantityMode;
   if (!quantityModes.includes(submittedQuantityMode)) {
@@ -163,8 +200,16 @@ export function parseBasicProductCommand(
       error instanceof Error ? error.message : "The offering details are invalid.",
     );
   }
+  if (raw.isPublished !== undefined && typeof raw.isPublished !== "boolean") throw new ProductUpkeepError("Choose listed or hidden visibility.");
+  if (raw.updateListingState !== undefined && typeof raw.updateListingState !== "boolean") throw new ProductUpkeepError("Invalid listing update.");
   return {
+    ...(raw.media !== undefined ? {media: (() => {try {return parseProductMedia(raw.media);} catch(error) {throw new ProductUpkeepError(error instanceof Error ? error.message : "Invalid product media.");}})()} : {}),
+    ...(raw.preserveMetadata !== undefined ? { preserveMetadata: raw.preserveMetadata as boolean } : {}),
+    ...(raw.updateListingState !== undefined ? { updateListingState: raw.updateListingState as boolean } : {}),
+    ...(raw.optionGroups !== undefined ? { optionGroups: parseProductOptions(raw.optionGroups) } : {}),
+    ...(raw.isPublished !== undefined ? { isPublished: raw.isPublished as boolean } : {}),
     kind,
+    ...(kind === "update" && omittedOfferingKind ? { preserveOfferingKind: true } : {}),
     businessId: positiveInteger(raw.businessId, "Business"),
     productId,
     expectedContentVersion: positiveInteger(
@@ -185,9 +230,7 @@ export function parseBasicProductCommand(
     highlights,
     videoRef: (() => {
       const value = text(raw.videoRef, 40);
-      if (value && !/^youtube:[A-Za-z0-9_-]{11}$/.test(value)) {
-        throw new ProductUpkeepError("Use a supported YouTube video.");
-      }
+      if (value) { try { productVideo(value); } catch { throw new ProductUpkeepError("Use a supported video link."); } }
       return value;
     })(),
     categoryId: optionalInteger(raw.categoryId, "Category"),

@@ -1,0 +1,86 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { chromium, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+const base = process.env.SUQPAGE_TEST_BASE_URL || 'http://127.0.0.1:3102';
+assert.ok(['127.0.0.1','localhost'].includes(new URL(base).hostname));
+const dir = '.local/multicategory-review'; fs.mkdirSync(dir,{recursive:true});
+const browser = await chromium.launch(); const records=[];
+const onlyCase=process.argv.find(value=>value.startsWith('--case='))?.slice(7);
+try {
+ for (const width of [320,390,1440]) for (const locale of ['en','am','om','so','ti']) {
+  if(onlyCase && onlyCase!==`${width}:${locale}`)continue;
+  const context = await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce'});
+  await context.addCookies([{name:'suqpage-language',value:locale,url:base}]);
+  const page = await context.newPage(), errors=[]; page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(`${base}/?view=search`,{waitUntil:'domcontentloaded'});
+  const panel=page.locator('#discovery-search-panel'), summary=panel.locator('details summary');
+  const place=panel.locator('#discovery-place'), list=panel.locator('.discovery-search-results');
+  await expect(summary).toBeVisible(); await expect(place).toBeVisible();
+  await expect(panel.locator('.discovery-filter-toolbar')).toHaveCount(0);
+  await expect(list.locator('a,button').first()).toBeVisible();
+  const categoryBox=await summary.boundingBox(), placeBox=await place.boundingBox();
+  assert.ok(Math.abs(categoryBox.y-placeBox.y)<3,'Inputs share a row');
+  assert.ok(categoryBox.x+categoryBox.width<=placeBox.x,'Inputs do not overlap');
+  assert.ok(await list.evaluate(el=>el.clientHeight>250),'Results retain useful height');
+  const before=await list.boundingBox();
+  await summary.click(); const options=panel.locator('details [role=group] button');
+  await expect(options).toHaveCount(7); // Real categories only; no selectable All entry.
+  assert.equal((await list.boundingBox()).y,before.y,'Menu overlays instead of pushing results');
+  await options.nth(0).click();
+  await expect.poll(()=>new URL(page.url()).searchParams.get('industry')).toBe('electronics');
+  await expect(options.nth(0)).toHaveAttribute('aria-pressed','true');
+  await expect(options.nth(1)).toHaveAttribute('aria-disabled','false');
+  await options.nth(1).click();
+  await expect.poll(()=>new URL(page.url()).searchParams.get('industry')).toBe('electronics,beauty-wellness');
+  await expect(options.nth(1)).toHaveAttribute('aria-pressed','true');
+  await expect(panel.locator('details')).toHaveAttribute('open');
+  await options.nth(1).press('Escape');
+  await expect(summary).toBeFocused(); await expect(panel).toBeVisible();
+  const next=panel.locator('.discovery-pagination a').last(); await next.click();
+  await expect(page).toHaveURL(/page=2/);
+  assert.equal(new URL(page.url()).searchParams.get('industry'),'electronics,beauty-wellness');
+  await page.reload(); await expect(summary).toBeVisible();
+  await summary.click(); await expect(options.nth(0)).toHaveAttribute('aria-pressed','true');
+  await expect(options.nth(1)).toHaveAttribute('aria-pressed','true');
+  await options.nth(0).click();
+  await expect.poll(()=>new URL(page.url()).searchParams.get('industry')).toBe('beauty-wellness');
+  assert.equal(new URL(page.url()).searchParams.get('page'),null);
+  await options.nth(1).press('Escape');
+  const placeKey=await place.locator('optgroup option').first().getAttribute('value');
+  await place.selectOption(placeKey);
+  await expect.poll(()=>new URL(page.url()).searchParams.get('place')).toBe(placeKey);
+  await page.evaluate(()=>document.fonts.ready);
+  await page.screenshot({path:`${dir}/selected-${width}-${locale}.png`});
+  await panel.locator('details').locator('..').getByRole('button').last().click();
+  await expect.poll(()=>new URL(page.url()).searchParams.get('industry')).toBe('all');
+  assert.equal(new URL(page.url()).searchParams.get('place'),placeKey);
+  await panel.locator('.discovery-place-input button').click();
+  await expect.poll(()=>new URL(page.url()).searchParams.get('place')).toBe(null);
+  await expect(place).toHaveValue('');
+  await page.goBack(); await expect(place).toHaveValue(placeKey);
+  await page.goBack(); await expect.poll(()=>new URL(page.url()).searchParams.get('industry')).toBe('beauty-wellness');
+  await expect(place).toHaveValue(placeKey);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  if(locale==='en') {
+   const audit=await new AxeBuilder({page}).include('#discovery-search-panel').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
+   assert.deepEqual(audit.violations,[]);
+  }
+  assert.deepEqual(errors,[]); records.push({width,locale,multi:true,clear:true,history:true,paging:true});
+  fs.writeFileSync(`${dir}/${onlyCase?`case-${onlyCase.replace(':','-')}`:'cases'}.json`,JSON.stringify(records,null,2));
+  console.log(`PASS ${width}px ${locale}`); await context.close();
+ }
+ const page=await browser.newPage({viewport:{width:844,height:390},reducedMotion:'reduce'});
+ await page.goto(`${base}/?industry=electronics&industry=beauty-wellness&view=search`);
+ await page.locator('#discovery-filter-fields details summary').click();
+ const choices=page.locator('#discovery-filter-fields details button');
+ await expect(choices.nth(0)).toHaveAttribute('aria-pressed','true');
+ await expect(choices.nth(1)).toHaveAttribute('aria-pressed','true');
+ await choices.last().scrollIntoViewIfNeeded(); await expect(choices.last()).toBeInViewport();
+ await choices.last().press('Escape');
+ await page.locator('.discovery-search-results a, .discovery-search-results button').first().scrollIntoViewIfNeeded();
+ await page.screenshot({path:`${dir}/landscape.png`});
+ records.push({width:844,height:390,repeatedParameters:true,menuReachable:true});
+ fs.writeFileSync(`${dir}/${onlyCase?`case-${onlyCase.replace(':','-')}-verified`:'verified'}.json`,JSON.stringify(records,null,2));
+ console.log('PASS visible compact scopes, multiple categories, clearing, history, paging, keyboard and accessibility.');
+} finally {await browser.close();}

@@ -1,106 +1,119 @@
+import PublicMobileNavigation from "@/components/PublicMobileNavigation";
+
+import { getUiText } from "@/lib/i18n/server";
 import Link from "next/link";
 import { NavigationPendingMain, NavigationPendingProvider } from "@/components/NavigationPendingIndicator";
 import WorkspaceNavigation, { type WorkspaceNavGroup, type WorkspaceNavItem } from "@/components/WorkspaceNavigation";
-import { hasCapability, isClient } from "@/lib/capabilities";
-import { runtimeHasRetainedPublication } from "@/lib/catalog-runtime";
-import { hasClientReviewableRevision } from "@/lib/dashboard";
+import { canMaintainBasicProducts, hasCapability, isClient, isQueueAgent } from "@/lib/capabilities";
+import {currentBusinessAuthority,currentStaffBusinessGrant} from '@/lib/staff-business-authority';
 import { authDriver } from "@/lib/config";
 import type { Business, SessionUser } from "@/lib/types";
+import { ownerPageEditorEnabled, ownerPagePort } from "@/lib/owner-page-runtime";
+import { readOwnerPage } from "@/lib/owner-page-service";
+import { OwnerPageError } from "@/lib/owner-page-domain";
+import AttentionAlerts from './AttentionAlerts';
+import attentionStyles from './AttentionAlerts.module.css';
+import type { SupportQueue } from '@/lib/support-navigation';
+import BusinessWorkspaceNavigation, {type BusinessWorkspaceLink} from './BusinessWorkspaceNavigation';
+import {canUseStaffTracking} from '@/app/dashboard/tracking/navigation';
 
 const group = (label: string, items: Array<WorkspaceNavItem | null>): WorkspaceNavGroup | null => {
   const visible = items.filter((item): item is WorkspaceNavItem => Boolean(item));
   return visible.length ? { label, items: visible } : null;
 };
 
-export default async function DashboardShell({ user, business, children }: { user:SessionUser; business:Business|null; children:React.ReactNode }) {
+export default async function DashboardShell({ user, business, children, supportQueue }: { user:SessionUser; business:Business|null; children:React.ReactNode; supportQueue?:SupportQueue }) {
+  const t = await getUiText();
   const query = business ? `?business=${business.id}` : "";
   const client = isClient(user);
   const operations = hasCapability(user, "operations:manage");
   const platformAdmin = hasCapability(user, "platform:admin");
   const teamMember = user.access_role === "team_member";
-  const established = business ? await runtimeHasRetainedPublication(business.id) : false;
-  const canMaintainProducts = Boolean(business && established && hasCapability(user, "basic-product:maintain"));
-  const reviewable = Boolean(client && business && await hasClientReviewableRevision(user.id, business.id));
-  const dashboardHref = platformAdmin && !business ? "/dashboard/admin" : `/dashboard${query}`;
+  const queueAgent = isQueueAgent(user);
+  const staffGrant=teamMember||user.access_role==='operations_manager'?await currentStaffBusinessGrant(user):false;
+  const businessAuthority=business?await currentBusinessAuthority(user,business.id):null;
+  const tracking=canUseStaffTracking(user);
+  const canMaintainProducts = Boolean(business&&businessAuthority&&canMaintainBasicProducts(user,business.id,businessAuthority==='staff'));
+  let pageEditor = false;
+  if (business && ownerPageEditorEnabled()) {
+    try { await readOwnerPage(ownerPagePort, user, business.id); pageEditor = true; }
+    catch (error) { if (!(error instanceof OwnerPageError && error.status === 403)) throw error; }
+  }
+  const dashboardHref = client ? "/dashboard/profile" : queueAgent ? `/dashboard/support?queue=${user.staff_queue_scope}` : platformAdmin ? "/dashboard/admin" : `/dashboard${query}`;
   const identityContext = business
     ? business.name
+    : queueAgent ? user.staff_queue_scope === "transport" ? "Transport agent" : "Support agent"
     : platformAdmin
       ? "Platform administration"
       : operations
         ? "Operations workspace"
         : teamMember
-          ? "Assigned businesses"
+          ? "Business workspaces"
           : "Private workspace";
 
-  const globalGroups = platformAdmin && !business ? [
-    group("Platform", [
+  const globalGroups = platformAdmin ? [
+    group("Chats", [
+      { href: "/dashboard/support?queue=support", label: "Business support", icon: "support" },
+      { href: "/dashboard/support?queue=transport", label: "Transport", icon: "transport" },
+    ]),
+    group("Administration", [
       { href: "/dashboard/admin", label: "Overview", icon: "overview" },
-      { href: "/dashboard/admin/businesses", label: "Businesses", icon: "businesses" },
-      { href: "/dashboard/admin/staff", label: "Staff & access", icon: "staff" },
+      { href: "/dashboard/admin/businesses", label: "Businesses", icon: "businesses", activePaths:['/dashboard','/dashboard/products','/dashboard/settings','/dashboard/access','/dashboard/page-editor','/dashboard/catalog','/dashboard/admin/discovery',...(business?['/dashboard/admin/sponsors']:[])] },
+      { href: "/dashboard/tracking", label: "Shipment tracking", icon: "tracking" },
+      { href: "/dashboard/admin/staff", label: "Staff", icon: "staff", activePaths:["/dashboard/support/agents"] },
+      { href: "/dashboard/reports", label: "Listing reports", icon: "reports" },
     ]),
-    group("Operations", [
-      { href: "/dashboard/requests", label: "Page requests", icon: "requests" },
-      { href: "/dashboard/support", label: "Support inbox", icon: "support" },
-      { href: "/dashboard/account-health", label: "Renewals", icon: "renewal" },
-    ]),
-    group("Page system", [
+    group("Featured", [
       { href: "/dashboard/admin/featured-schedule", label: "Featured schedule", icon: "schedule" },
       { href: "/dashboard/admin/sponsors", label: "Sponsor placements", icon: "discovery" },
-      { href: "/dashboard/design-bank", label: "Design library", icon: "design" },
     ]),
   ].filter((item): item is WorkspaceNavGroup => Boolean(item)) : null;
-  const focusedStaffGroups = business && (operations || teamMember) ? [
-    group("Business workspace", [
-      { href: dashboardHref, label: "Overview", icon: "overview" },
-      platformAdmin ? { href: `/dashboard/settings${query}`, label: "Business details", icon: "settings" } : null,
-      { href: `/dashboard/requests${query}`, label: "Page project", icon: "requests" },
-      canMaintainProducts ? { href: `/dashboard/products${query}`, label: "Offerings", icon: "offerings" } : null,
-      { href: `/preview/@${business.handle}`, label: "View page", icon: "public", external: true },
+  const clientGroups = [
+    group('Your business',[
+      {href:'/dashboard/profile',label:'Account',icon:'account'},
+      {href:'/dashboard/profile/showroom',label:'Your page',icon:'pageEditor',activePaths:['/dashboard/page-editor','/dashboard/profile/cover','/dashboard/profile/handle']},
+      {href:'/dashboard/products',label:'Products',icon:'offerings',activePaths:['/dashboard/catalog']},
+      {href:'/dashboard/transport',label:'Transport chat',icon:'transport'},
+      {href:'/dashboard/support',label:'Support',icon:'support'},
     ]),
-    group("Customers & discovery", [
-      platformAdmin ? { href: `/dashboard/admin/discovery/${business.id}`, label: "Marketplace", icon: "discovery" } : null,
-      operations ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries", icon: "inquiries" } : null,
+    group('Settings',[
+      {href:'/dashboard/business',label:'Business details',icon:'businesses'},
+      {href:'/dashboard/account',label:'Account settings',icon:'account'},
     ]),
-    group("Business administration", [
-      operations ? { href: `/dashboard/account-health${query}`, label: "Renewal", icon: "renewal" } : null,
+    group('Explore',[
+      {href:'/',label:'Market',icon:'discovery'},
+      {href:'/featured',label:'Featured',icon:'schedule'},
+      {href:'/about',label:'About',icon:'library'},
     ]),
-    group("Leave business workspace", [
-      teamMember ? { href: "/dashboard/requests", label: "Assigned requests", icon: "requests" } : null,
-      { href: platformAdmin ? "/dashboard/admin/businesses" : "/dashboard", label: "Switch business", icon: "switch" },
-      platformAdmin ? { href: "/dashboard/admin", label: "Platform overview", icon: "overview" } : null,
-    ]),
-  ].filter((item): item is WorkspaceNavGroup => Boolean(item)) : null;
-  const standardGroups = [
-    group(business ? "Business workspace" : "Workspace", [
-      { href: dashboardHref, label: business ? "Overview" : teamMember ? "Assigned businesses" : "Business workspaces", icon: "overview" },
-      operations && business ? { href: "/dashboard", label: "Switch business", icon: "switch" } : null,
-      canMaintainProducts ? { href: `/dashboard/products${query}`, label: client ? "My offerings" : "Offerings", icon: "offerings" } : null,
-      client ? { href: "/dashboard/requests", label: "Page project", icon: "requests" } : null,
-      teamMember ? { href: "/dashboard/requests", label: "Assigned requests", icon: "requests" } : null,
-      operations && !business ? { href: "/dashboard/requests", label: "Page requests", icon: "requests" } : null,
-      (client || operations) && business ? { href: `/dashboard/inquiries${query}`, label: "Customer inquiries", icon: "inquiries" } : null,
-      (client || operations) && business ? { href: `/dashboard/account-health${operations ? query : ""}`, label: "Renewal", icon: "renewal" } : null,
-      reviewable ? { href: `/preview/@${business!.handle}`, label: "Review page", icon: "workspace" } : null,
-      (teamMember || operations) && business ? { href: `/preview/@${business.handle}`, label: "View page", icon: "public", external: true } : null,
-      { href: "/dashboard/support", label: client ? "AfricMade support" : "Support inbox", icon: "support" },
-    ]),
-    group("Customer operations", [
-      operations ? { href: "/dashboard/clients/new", label: "Add business", icon: "businesses" } : null,
-      operations && !business ? { href: "/dashboard/requests/on-behalf", label: "Record a request", icon: "requests" } : null,
-      operations ? { href: "/dashboard/support/agents", label: "Support agents", icon: "supportAgents" } : null,
-      operations && !business ? { href: "/dashboard/account-health", label: "Renewals", icon: "renewal" } : null,
-    ]),
-    group("Design", [
-      hasCapability(user, "design-bank:view") ? { href: "/dashboard/design-bank", label: "Design library", icon: "design" } : null,
-    ]),
-    group("Platform", [
-      platformAdmin ? { href: "/dashboard/admin", label: "Platform overview", icon: "overview" } : null,
-    ]),
-  ].filter((item): item is WorkspaceNavGroup => Boolean(item));
-  const groups = globalGroups || focusedStaffGroups || standardGroups;
+  ].filter((item):item is WorkspaceNavGroup=>Boolean(item));
+  const agentGroups = [group("Chats",[{href:dashboardHref,label:user.staff_queue_scope === "transport" ? "Transport" : "Business support",icon:user.staff_queue_scope === "transport" ? "transport" : "support"},...(user.staff_queue_scope==='support'?[{href:'/dashboard/reports',label:'Listing reports',icon:'reports' as const}]:[])]),group('Workspace',[staffGrant?{href:'/dashboard',label:'Business workspaces',icon:'businesses'}:null,tracking?{href:'/dashboard/tracking',label:'Shipment tracking',icon:'tracking'}:null])].filter((item): item is WorkspaceNavGroup => Boolean(item));
+  const operationsGroups = operations && !platformAdmin ? [group("Chats",[
+    {href:"/dashboard/support?queue=support",label:"Business support",icon:"support"},
+    {href:'/dashboard/reports',label:'Listing reports',icon:'reports'},
+    {href:"/dashboard/support?queue=transport",label:"Transport",icon:"transport"},
+    {href:"/dashboard/support/agents",label:"Workload & availability",icon:"staff"},
+  ])].filter((item): item is WorkspaceNavGroup => Boolean(item)) : [];
+  const staffHomeGroups=[group("Workspace",[
+    staffGrant?{href:'/dashboard',label:'Business workspaces',icon:'businesses'}:null,
+    tracking?{href:'/dashboard/tracking',label:'Shipment tracking',icon:'tracking'}:null,
+    !operations?{href:'/dashboard/support',label:'Support inbox',icon:'support'}:null,
+  ])].filter((entry):entry is WorkspaceNavGroup=>Boolean(entry));
+  const groups = client ? clientGroups : queueAgent ? agentGroups : globalGroups || [...operationsGroups,...staffHomeGroups];
+  const businessLinks:BusinessWorkspaceLink[]=business&&!client&&businessAuthority?[
+    {href:`/dashboard${query}`,label:t('Overview')},
+    ...(pageEditor?[{href:`/dashboard/page-editor${query}&view=preview`,label:t('Your page')}]:[]),
+    ...(canMaintainProducts?[{href:`/dashboard/products${query}`,label:t('Products'),activePaths:['/dashboard/catalog']}]:[]),
+    ...(platformAdmin||businessAuthority==='staff'?[
+      {href:`/dashboard/settings${query}`,label:t('Business details')},
+      {href:`/dashboard/admin/discovery/${business.id}`,label:t('Location & visibility'),activePaths:['/dashboard/admin/sponsors']},
+    ]:[]),
+    ...(platformAdmin?[
+      {href:`/dashboard/access${query}`,label:t('Access')},
+    ]:[]),
+  ]:[];
 
   return <NavigationPendingProvider><div className="dashboard">
-    <WorkspaceNavigation dashboardHref={dashboardHref} identity={user.name} context={identityContext} groups={groups} />
-    <NavigationPendingMain className="main">{authDriver() === "local" && user.must_change_password ? <div className="error temporary-password">Your password is temporary. <Link href="/dashboard/account?required=1">Change it now.</Link></div> : null}{children}</NavigationPendingMain>
-  </div></NavigationPendingProvider>;
+    <WorkspaceNavigation dashboardHref={dashboardHref} identity={user.name} context={business ? identityContext : t(identityContext)} groups={groups} clientNavigation={client} staffNavigation={operations||queueAgent} supportQueue={supportQueue}/>
+    <NavigationPendingMain className="main"><div className={attentionStyles.bar}><AttentionAlerts identity={'user-'+user.id}/></div>{authDriver() === "local" && user.must_change_password ? <div className="error temporary-password">{t("Your password is temporary.")}{" "}<Link href="/dashboard/account?required=1">{t("Change it now.")}</Link></div> : null}{business&&businessLinks.length>0?<BusinessWorkspaceNavigation name={business.name} handle={business.handle} actorId={user.id} businessId={business.id} parentHref={platformAdmin?'/dashboard/admin/businesses':'/dashboard'} parentLabel={t('Switch business')} label={t('Business workspace')} links={businessLinks}/>:null}{children}</NavigationPendingMain>
+  {client && <PublicMobileNavigation signedIn dashboardHref="/dashboard/profile"/>}</div></NavigationPendingProvider>;
 }
