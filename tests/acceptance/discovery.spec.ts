@@ -3,8 +3,9 @@ import {test,expect} from './fixtures';
 test('FE-065 business and product searches type live, retain independent filters and clear to default browsing',async({page,request})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/');
  const business=page.getByRole('searchbox',{name:'Search businesses',exact:true});
- await expect(business).toBeVisible();await expect.poll(async()=>Number(await page.locator('[data-map-marker-count]').getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
- await business.fill('selam');await expect.poll(async()=>Number(await page.locator('[data-map-marker-count]').getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
+ const map=page.getByRole('region',{name:'Interactive OpenStreetMap map with clustered MirtPage page locations',exact:true});
+ await expect(business).toBeVisible();await expect.poll(async()=>Number(await map.getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
+ await business.fill('selam');await expect.poll(async()=>Number(await map.getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
  await page.getByRole('button',{name:'Product listings',exact:true}).click();
  const product=page.getByRole('searchbox',{name:'Search products',exact:true});await expect(product).toHaveValue('');
  await expect(page.locator('.discovery-product-card').first()).toBeVisible();
@@ -19,7 +20,7 @@ test('FE-065 business and product searches type live, retain independent filters
  await page.getByRole('button',{name:'Country 1',exact:true}).click();await page.getByRole('checkbox',{name:'Ethiopia',exact:true}).uncheck();await page.getByRole('button',{name:'Done',exact:true}).click();await expect(page.getByRole('button',{name:'City',exact:true})).toBeDisabled();
  await page.getByRole('button',{name:'Business locations',exact:true}).click();await expect(business).toHaveValue('selam');
  await page.getByRole('button',{name:'Country',exact:true}).click();await expect(page.getByRole('checkbox',{name:'Ethiopia',exact:true})).not.toBeChecked();await page.getByRole('button',{name:'Done',exact:true}).click();
- await page.getByRole('button',{name:'Clear all',exact:true}).click();await expect(business).toHaveValue('');await expect.poll(async()=>Number(await page.locator('[data-map-marker-count]').getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
+ await page.getByRole('button',{name:'Clear all',exact:true}).click();await expect(business).toHaveValue('');await expect.poll(async()=>Number(await map.getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
  await page.getByRole('button',{name:'Product listings',exact:true}).click();await expect(product).toHaveValue('selam');
  await page.reload();await expect(product).toHaveValue('selam');await page.getByRole('button',{name:'Clear all',exact:true}).click();await expect(page.locator('.discovery-product-card').first()).toBeVisible();
 });

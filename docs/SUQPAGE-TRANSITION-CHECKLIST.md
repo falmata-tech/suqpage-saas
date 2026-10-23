@@ -48,6 +48,22 @@ test remain separate; none is inferred from web/Expo or static artifact checks.
 
 ## Ordered work
 
+### S171 — browser acceptance map selector (current CI harness defect)
+
+PR #38 run `40026235155` passed core, container, dependency and PostgreSQL but
+failed one FE-065 acceptance assertion. Its unscoped map-count locator matched
+the rendered Leaflet map and an inactive zero-count map node. The captured phone
+screen shows visible business markers; this is a test-target ambiguity, not
+evidence that the user-facing map is empty. Preserve that failed run.
+
+1. [x] Classify the failure from the CI trace and captured screen; do not change
+   discovery behavior or weaken the positive-marker assertion.
+2. [x] Scope the three marker-count assertions to the visible accessible map,
+   then run the focused FE-065 acceptance journey. The one-journey production-
+   mode Chrome run passes against disposable local PostgreSQL/Supabase.
+3. [ ] Push the isolated test correction and require all five current-head PR
+   checks before merging the release record into `main`.
+
 ### S161 — Shipment record terminology and future party access
 
 Owner direction: use **Shipment records** for the recipient's list and
