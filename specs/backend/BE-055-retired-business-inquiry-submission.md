@@ -2,13 +2,24 @@
 id: BE-055
 title: Retired public business-inquiry submission with preserved history
 status: in_progress
-related: [BE-032, FE-066, DEP-045, BE-001, BE-044, BE-050]
+related: [BE-062, FE-075, BE-032, FE-066, DEP-045, BE-001, BE-044, BE-050]
 owners: [backend, security]
 last_updated: 2026-10-17
 change_level: L2
 ---
 
 # BE-055 — Retired business inbox submission
+
+## S154 planned replacement — FE-075 / BE-062
+
+The owner now restores on-platform inquiries as the primary asynchronous business
+contact path. [FE-075](../frontend/FE-075-primary-business-inquiries-and-owner-inbox.md)
+and [BE-062](../backend/BE-062-canonical-inquiry-intake-and-owner-inbox.md) control
+that replacement. This retirement contract describes the currently deployed
+behavior until the coordinated new implementation is qualified and released;
+its older scenarios do not override the new accepted product intent. Preserve
+Transport, owner Support, contact validation and historical tenant isolation.
+
 
 ## S118 — public demo contact projection (ready)
 

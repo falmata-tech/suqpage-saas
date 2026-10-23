@@ -1,5 +1,7 @@
 import CountrySelector from "./CountrySelector";
 import CitySelector from "./CitySelector";
+import OwnerLocationPicker from "./OwnerLocationPicker";
+import LocationVisibilityChoices from "./LocationVisibilityChoices";
 import type {KnownPlace} from "../../../lib/place-search";
 import {countryName} from "../../../lib/countries";
 import {BUSINESS_CATEGORY_OPTIONS} from "../../../lib/business-categories";
@@ -62,7 +64,7 @@ function Form({ data, onSaved,onCancel }: { data: Details; onSaved?: () => void;
     [logo,setLogo]=useState<Awaited<ReturnType<typeof pickImages>>[number]|null>(null),
     [removeLogo,setRemoveLogo]=useState(false),
     [category, setCategory] = useState(data.category),
-    [mode, setMode] = useState(location?.location_mode || "area"),
+    [mode, setMode] = useState<"area" | "storefront">(location?.location_mode === "storefront" ? "storefront" : "area"),
     [placeId, setPlaceId] = useState(location?.place_id??data.place?.id??""),
     [countryCode,setCountryCode]=useState(location?.country_code||data.existing?.country_code||""),
     [city, setCity] = useState(
@@ -71,9 +73,9 @@ function Form({ data, onSaved,onCancel }: { data: Details; onSaved?: () => void;
     [region, setRegion] = useState(
       location?.region || data.existing?.region || "",
     ),
-    [latitude, setLatitude] = useState(String(location?.latitude ?? "")),
+    [latitude, setLatitude] = useState(String(location?.location_mode==='storefront' ? location.latitude ?? "" : "")),
     [longitude, setLongitude] = useState(
-      String(location?.longitude ?? ""),
+      String(location?.location_mode==='storefront' ? location.longitude ?? "" : ""),
     ),
     [selectedPlace,setSelectedPlace]=useState<Place|null>(data.place),
     [version, setVersion] = useState(data.business.content_version),
@@ -104,45 +106,17 @@ function Form({ data, onSaved,onCancel }: { data: Details; onSaved?: () => void;
           />
         ))}
       </View>
-      <CountrySelector value={countryCode} onChange={value=>{guard.changed();setCountryCode(value);setCity("");setRegion("");setPlaceId("");setSelectedPlace(null);}}/>
+      <CountrySelector value={countryCode} onChange={value=>{guard.changed();setCountryCode(value);setCity("");setRegion("");setPlaceId("");setSelectedPlace(null);setLatitude("");setLongitude("");}}/>
       <CitySelector key={`${countryCode}:${resetRevision}`} countryCode={countryCode} initialPlace={selectedPlace} onSelect={place=>{
         guard.changed();
         setSelectedPlace(place);setPlaceId(place?.id||"");setCity(place?.name||"");setRegion(place?.region||"");
-        if(place){setLatitude(String(place.latitude));setLongitude(String(place.longitude));}
+        setLatitude("");setLongitude("");
       }}/>
-      <View style={s.wrap}>
-        <Chip
-          label={t("General area")}
-          selected={mode === "area"}
-          onPress={() => {if(!action.isBusy()){guard.changed();setMode("area");}}}
-        />
-        <Chip
-          label={t("Public storefront")}
-          selected={mode === "storefront"}
-          onPress={() => {if(!action.isBusy()){guard.changed();setMode("storefront");}}}
-        />
-      </View>
-      {mode === "storefront" && (
-        <>
-          <Field
-            label={t("Latitude")}
-            value={latitude}
-            onChangeText={value=>{guard.changed();setLatitude(value);}}
-            keyboardType="numbers-and-punctuation"
-            editable={!action.busy}
-          />
-          <Field
-            label={t("Longitude")}
-            value={longitude}
-            onChangeText={value=>{guard.changed();setLongitude(value);}}
-            keyboardType="numbers-and-punctuation"
-            editable={!action.busy}
-          />
-        </>
-      )}
+      <LocationVisibilityChoices value={mode} t={t} onChange={next=>{if(!action.isBusy()){guard.changed();setMode(next);if(next==='area'){setLatitude("");setLongitude("");}}}}/>
+      {mode === "storefront" ? selectedPlace ? <OwnerLocationPicker key={selectedPlace.id} city={selectedPlace} point={latitude&&longitude?{latitude:Number(latitude),longitude:Number(longitude)}:null} disabled={action.busy} t={t} onChange={point=>{guard.changed();setLatitude(point?String(point.latitude):"");setLongitude(point?String(point.longitude):"");}}/> : <Copy muted>{t("Choose a city or town from the results to place an exact public pin.")}</Copy> : null}
       <ActionStatus state={action} />
       <View style={{flexDirection:'row',alignItems:'stretch',gap:10,flexWrap:'wrap'}}><View style={{flex:1,minWidth:120}}><Button
-        disabled={action.busy||!countryCode||!placeId}
+        disabled={action.busy||!countryCode||!placeId||(mode==='storefront'&&(!latitude||!longitude))}
         label={t("Save changes")}
         wrapLabel
         onPress={() =>

@@ -2,12 +2,15 @@ import Supercluster from 'supercluster';
 import {pointInMapViewport} from './map-display-location';
 
 /** Interaction zooms use a 256 CSS-pixel world, independently of tile size. */
-export const MAP_MAX_ZOOM = 18;
+export const MAP_MAX_ZOOM = 13;
+/** Fitting terminal circles appear at city scale; only dense overflow uses13. */
+export const MAP_CITY_ZOOM = 12;
 export const MAP_NATIVE_MAX_ZOOM = MAP_MAX_ZOOM - 1;
-/** Outer hierarchy radius in normalized256-world CSS pixels. */
-export const MAP_CLUSTER_RADIUS = 96;
+/** Tight outer radius in the normalized256-world map; reveals city regions early. */
+export const MAP_CLUSTER_RADIUS = 6;
 export const MAP_GROUP_DISTANCE_METERS = 3000;
-export const MAP_GROUP_MAX_DISPLACEMENT_METERS = 800;
+export const MAP_GROUP_MAX_DISPLACEMENT_METERS = 5000;
+export const MAP_GROUP_OVERFLOW_DISPLACEMENT_METERS = 10000;
 export const MAP_GROUP_MAX_MEMBERS = 6;
 export const MAP_GROUP_DEFAULT_CAPACITY = 3;
 export const MAP_GROUP_FANOUT_PITCH = 56;
@@ -24,6 +27,7 @@ export type MapClusterPoint = {
   id: number;
   latitude: number;
   longitude: number;
+  locationMode?: 'area' | 'storefront' | 'legacy';
   featured?: boolean;
   live?: boolean;
 };
@@ -207,7 +211,7 @@ export function mapClusterIndex(source: readonly MapClusterPoint[], requestedCap
     for (const partition of balancedSpatialGroups(nearest, distances, capacity)) {
       const members = partition.map(index => ordered[index]);
       const ids = members.map(member => member.id).sort((left, right) => left - right);
-      const kind = cohort.length > 1 ? 'cluster' : 'shop';
+      const kind = cohort.length > 1 || members.some(member => member.locationMode === 'area') ? 'cluster' : 'shop';
       const presence = members.some(member => member.featured) ? 'featured' : members.some(member => member.live) ? 'live' : '';
       groups.push(Object.freeze({key: `${kind}:${ids.join('-')}`, kind, ids: Object.freeze(ids),
         count: ids.length, anchor: Object.freeze(groupAnchor(members)), presence}));
@@ -293,8 +297,9 @@ function hierarchyMarkers(index: MapClusterIndex, zoom: number): MapClusterMarke
 export function mapExposedGroup(index: MapClusterIndex, ids: readonly number[], normalizedZoom: number): MapClusterMarker | null {
   const fixed = mapFixedGroup(index, ids);
   if (fixed?.kind !== 'cluster') return null;
-  return hierarchyMarkers(index, clampMapZoom(normalizedZoom))
-    .find(item => item.kind === 'cluster' && item.key === fixed.key) || null;
+  const exposed = layout(index, clampMapZoom(normalizedZoom))
+    .find(item => item.kind === 'cluster' && item.key === fixed.key);
+  return exposed ? {...exposed, ids: [...exposed.ids], anchor: [...exposed.anchor], center: [...exposed.center]} : null;
 }
 const spiral = (() => {
   const values: Pixel[] = [];
@@ -306,7 +311,7 @@ const spiral = (() => {
       if (turns % 2 === 0) length += 1;
     }
   }
-  return values;
+  return values.sort((left, right) => left.x ** 2 + left.y ** 2 - right.x ** 2 - right.y ** 2);
 })();
 
 function project(anchor: readonly [number, number], world: number): Pixel {
@@ -323,45 +328,65 @@ function wrappedPixel(value: number, world: number): number {
   return value >= 0 && value < world ? value : ((value % world) + world) % world;
 }
 
-function layout(index: MapClusterIndex, zoom: number): readonly MapClusterMarker[] {
-  const cached = layoutCache.get(index);
-  if (cached?.zoom === zoom) return cached.markers;
+type MarkerLayout = {markers: readonly MapClusterMarker[]; clear: boolean};
+const cityLayoutCache = new WeakMap<MapClusterIndex, MarkerLayout>();
+
+/** Place full-scope circles before filtering; never use display centers as addresses. */
+function placeMarkers(visible: readonly MapClusterMarker[], zoom: number, displacement: number, sharedGrid = false): MarkerLayout {
   const world = 256 * 2 ** zoom;
   const occupied: Footprint[] = [];
   const result: MapClusterMarker[] = [];
-  const visible = hierarchyMarkers(index, zoom);
+  let clear = true;
+  const phase = project(visible.find(item => item.kind === 'cluster')?.anchor || [0, 0], world);
+  phase.y = Math.max(28, Math.min(world - 28, phase.y));
   // Ordinary outer clusters remain at their public centroid and zoom in when
   // activated. Only final all-fit leaf circles receive bounded spacing.
   for (const item of visible.filter(item => item.kind === 'aggregate')) {
     occupied.push({...project(item.anchor, world), halfWidth: 28, halfHeight: 28});
     result.push(item);
   }
-  // Leave isolated shops at their true public point and reserve the existing
-  //94x86 name/glyph footprint (plus8px clearance) before placing group badges.
+  // Leave isolated shops at their true public point and reserve the shop
+  // glyph/name footprint (plus8px clearance) before placing group badges.
   for (const group of visible.filter(group => group.kind === 'shop')) {
     const anchor = project(group.anchor, world);
-    occupied.push({...anchor, y: anchor.y + 12, halfWidth: 51, halfHeight: 47});
+    const footprint = {...anchor, y: anchor.y + 12, halfWidth: 51, halfHeight: 47};
+    clear &&= occupied.every(other => {
+      const delta = Math.abs(footprint.x - other.x) % world;
+      return Math.min(delta, world - delta) >= footprint.halfWidth + other.halfWidth
+        || Math.abs(footprint.y - other.y) >= footprint.halfHeight + other.halfHeight;
+    });
+    occupied.push(footprint);
     result.push(group);
   }
   for (const group of visible.filter(group => group.kind === 'cluster')) {
     const anchor = project(group.anchor, world);
+    // City-only singleton pins show a compact glyph and locality chip instead
+    // of a long shop name. Reserve its 48px tap/visual footprint when spacing.
+    const halfWidth = group.count === 1 ? 24 : 28;
+    const halfHeight = group.count === 1 ? 25 : 28;
     const metersPerPixel = 2 * Math.PI * 6_371_000 * Math.cos(group.anchor[1] * Math.PI / 180) / world;
-    const maxOffset = MAP_GROUP_MAX_DISPLACEMENT_METERS / metersPerPixel;
+    const maxOffset = displacement / metersPerPixel;
+    const deltaX = anchor.x - phase.x;
+    const wrappedDelta = deltaX - world * Math.round(deltaX / world);
+    const origin = sharedGrid ? {x: phase.x + Math.round(wrappedDelta / MAP_GROUP_FANOUT_PITCH) * MAP_GROUP_FANOUT_PITCH,
+      y: phase.y + Math.round((anchor.y - phase.y) / MAP_GROUP_FANOUT_PITCH) * MAP_GROUP_FANOUT_PITCH} : anchor;
     const candidates = maxOffset < MAP_GROUP_FANOUT_PITCH ? [spiral[0]] : spiral;
     let chosen = {...anchor};
     let bestCount = Number.POSITIVE_INFINITY, bestArea = Number.POSITIVE_INFINITY;
     for (const step of candidates) {
-      if (Math.hypot(step.x, step.y) * MAP_GROUP_FANOUT_PITCH > maxOffset) continue;
-      const candidate = {x: wrappedPixel(anchor.x + step.x * MAP_GROUP_FANOUT_PITCH, world),
-        y: Math.max(28, Math.min(world - 28, anchor.y + step.y * MAP_GROUP_FANOUT_PITCH))};
+      if (Math.hypot(step.x, step.y) * MAP_GROUP_FANOUT_PITCH > maxOffset + (sharedGrid ? MAP_GROUP_FANOUT_PITCH : 0)) continue;
+      const proposedY = origin.y + step.y * MAP_GROUP_FANOUT_PITCH;
+      if (sharedGrid && (proposedY < 28 || proposedY > world - 28)) continue;
+      const candidate = {x: wrappedPixel(origin.x + step.x * MAP_GROUP_FANOUT_PITCH, world),
+        y: Math.max(28, Math.min(world - 28, proposedY))};
       const coordinate = unproject(candidate, world);
       if (distanceMeters({longitude: group.anchor[0], latitude: group.anchor[1]},
-        {longitude: coordinate[0], latitude: coordinate[1]}) > MAP_GROUP_MAX_DISPLACEMENT_METERS) continue;
+        {longitude: coordinate[0], latitude: coordinate[1]}) > displacement) continue;
       let count = 0, area = 0;
       for (const other of occupied) {
         const delta = Math.abs(candidate.x - other.x) % world;
-        const overlapX = 28 + other.halfWidth - Math.min(delta, world - delta);
-        const overlapY = 28 + other.halfHeight - Math.abs(candidate.y - other.y);
+        const overlapX = halfWidth + other.halfWidth - Math.min(delta, world - delta);
+        const overlapY = halfHeight + other.halfHeight - Math.abs(candidate.y - other.y);
         if (overlapX > 0 && overlapY > 0) {count += 1; area += overlapX * overlapY;}
       }
       if (count < bestCount || count === bestCount && area < bestArea) {
@@ -369,15 +394,111 @@ function layout(index: MapClusterIndex, zoom: number): readonly MapClusterMarker
       }
       if (count === 0) break;
     }
-    // At wide zoom honest locality takes precedence over badge separation.
-    // Keep the best placement within800m (or the true anchor if none qualifies),
-    //never silently merge/drop IDs or move shops across countries to make room.
-    occupied.push({...chosen, halfWidth: 28, halfHeight: 28});
+    // A failed city layout is not exposed: retain its ordinary outer hierarchy
+    // for one district-level expansion. At the bounded final level, keep every ID.
+    clear &&= bestCount === 0;
+    occupied.push({...chosen, halfWidth, halfHeight});
     const center: [number, number] = chosen.x === anchor.x && chosen.y === anchor.y
       ? [...group.anchor] : unproject(chosen, world);
     result.push({...group, center});
   }
   result.sort((left, right) => left.key < right.key ? -1 : left.key > right.key ? 1 : 0);
+  return {markers: result, clear};
+}
+
+function terminalLayout(index: MapClusterIndex, zoom: number): MarkerLayout {
+  const visible = index.groups.map(group => marker(group));
+  const ordinary = placeMarkers(visible, zoom, MAP_GROUP_MAX_DISPLACEMENT_METERS);
+  return ordinary.clear ? ordinary : placeMarkers(visible, zoom, MAP_GROUP_OVERFLOW_DISPLACEMENT_METERS, true);
+}
+
+function cityLayout(index: MapClusterIndex): MarkerLayout {
+  let result = cityLayoutCache.get(index);
+  if (!result) {result = terminalLayout(index, MAP_CITY_ZOOM); cityLayoutCache.set(index, result);}
+  return result;
+}
+
+/** Merge visible markers whose real tap/visual frames collide at this zoom. */
+function mergeScreenOverlaps(index: MapClusterIndex, source: readonly MapClusterMarker[], zoom: number): readonly MapClusterMarker[] {
+  if (zoom >= MAP_MAX_ZOOM) return source;
+  const world = 256 * 2 ** zoom;
+  const markers = [...source];
+  const sourceKeys = new Set(source.map(item => item.key));
+  const consumed = new Set<string>();
+  const mergedTargets = new Set<string>();
+  const footprint = (item: MapClusterMarker) => {
+    if (item.count > 1 || item.kind === 'aggregate') return {halfWidth: 28, halfHeight: 28};
+    const point = index.points.get(item.ids[0]);
+    return point?.locationMode === 'area' ? {halfWidth: 24, halfHeight: 25} : {halfWidth: 51, halfHeight: 47};
+  };
+  const overlaps = (left: MapClusterMarker, right: MapClusterMarker) => {
+    const a = project(left.center, world), b = project(right.center, world);
+    const x = Math.abs(a.x - b.x) % world;
+    const dx = Math.min(x, world - x), dy = Math.abs(a.y - b.y);
+    const l = footprint(left), r = footprint(right);
+    return dx < l.halfWidth + r.halfWidth && dy < l.halfHeight + r.halfHeight;
+  };
+  const separationZoom = (left: MapClusterMarker, right: MapClusterMarker) => {
+    const start = Math.min(MAP_MAX_ZOOM, Math.max(Math.floor(zoom) + 1,
+      left.expansionZoom || 0, right.expansionZoom || 0));
+    const l = footprint(left), r = footprint(right);
+    for (let candidate = start; candidate <= MAP_MAX_ZOOM; candidate += 1) {
+      const size = 256 * 2 ** candidate, a = project(left.center, size), b = project(right.center, size);
+      const delta = Math.abs(a.x - b.x) % size;
+      const dx = Math.min(delta, size - delta), dy = Math.abs(a.y - b.y);
+      if (dx >= l.halfWidth + r.halfWidth || dy >= l.halfHeight + r.halfHeight) return candidate;
+    }
+    return MAP_MAX_ZOOM;
+  };
+  const singletons = source.filter(item => item.count === 1);
+  for (const singleton of singletons) {
+    if (consumed.has(singleton.key)) continue;
+    const current = markers.find(item => item.key === singleton.key);
+    if (!current) continue;
+    const a = project(current.center, world);
+    const candidates = markers.filter(item => item.key !== current.key && !consumed.has(item.key)
+      && overlaps(current, item)
+      && (item.count === 1 || item.key.startsWith('aggregate:')
+        || sourceKeys.has(item.key) && item.count > 1 && !mergedTargets.has(item.key)))
+      .sort((left, right) => {
+        const l = project(left.center, world), r = project(right.center, world);
+        const dxl = Math.min(Math.abs(a.x - l.x), world - Math.abs(a.x - l.x));
+        const dxr = Math.min(Math.abs(a.x - r.x), world - Math.abs(a.x - r.x));
+        return Math.hypot(dxl, a.y - l.y) - Math.hypot(dxr, a.y - r.y) || left.key.localeCompare(right.key);
+      });
+    const neighbor = candidates[0];
+    if (!neighbor) continue;
+    const members = [...current.ids, ...neighbor.ids].sort((left, right) => left - right);
+    const anchor = groupAnchor(members.map(id => index.points.get(id)!).filter(Boolean));
+    const expansionZoom = separationZoom(current, neighbor);
+    const presence = members.some(id => index.points.get(id)?.featured) ? 'featured'
+      : members.some(id => index.points.get(id)?.live) ? 'live' : '';
+    consumed.add(current.key); consumed.add(neighbor.key);
+    if (sourceKeys.has(neighbor.key) && neighbor.count > 1) mergedTargets.add(neighbor.key);
+    for (let position = markers.length - 1; position >= 0; position -= 1) {
+      if (markers[position].key === current.key || markers[position].key === neighbor.key) markers.splice(position, 1);
+    }
+    markers.push({key: `aggregate:${members.join('-')}`, kind: 'aggregate', ids: members,
+      count: members.length, anchor, center: [...anchor], presence, expansionZoom});
+  }
+  return markers.sort((left, right) => left.key < right.key ? -1 : left.key > right.key ? 1 : 0);
+}
+
+function layout(index: MapClusterIndex, zoom: number): readonly MapClusterMarker[] {
+  const cached = layoutCache.get(index);
+  if (cached?.zoom === zoom) return cached.markers;
+  const city = cityLayout(index);
+  let result: readonly MapClusterMarker[];
+  if (zoom >= MAP_CITY_ZOOM && (city.clear || zoom >= MAP_MAX_ZOOM)) {
+    result = zoom === MAP_CITY_ZOOM ? city.markers : terminalLayout(index, zoom).markers;
+  } else {
+    const visible = hierarchyMarkers(index, zoom).map(item => item.kind === 'aggregate' && item.count === 1
+      ? {...item, kind: 'cluster' as const, expansionZoom: undefined}
+      : item.kind === 'aggregate'
+        ? {...item, expansionZoom: city.clear ? Math.min(item.expansionZoom!, MAP_CITY_ZOOM) : item.expansionZoom}
+        : item);
+    result = mergeScreenOverlaps(index, placeMarkers(visible, zoom, MAP_GROUP_MAX_DISPLACEMENT_METERS).markers, zoom);
+  }
   layoutCache.set(index, {zoom, markers: result});
   return result;
 }
@@ -386,7 +507,13 @@ export function mapClusterMarkers(index: MapClusterIndex, bounds: MapClusterBoun
   if (!bounds.every(Number.isFinite) || bounds[1] > bounds[3]) return [];
   return layout(index, clampMapZoom(normalizedZoom))
     .filter(item => pointInMapViewport(item.center[0], item.center[1], bounds))
-    .map(item => ({...item, ids: [...item.ids], anchor: [...item.anchor], center: [...item.center]}));
+    .map(item => {
+      if ((item.kind === 'cluster' || item.kind === 'aggregate') && item.count === 1) {
+        const {expansionZoom: _expansionZoom, ...single} = item;
+        return {...single, kind: 'shop' as const, ids: [...item.ids], anchor: [...item.anchor], center: [...item.center]};
+      }
+      return {...item, ids: [...item.ids], anchor: [...item.anchor], center: [...item.center]};
+    });
 }
 
 /**

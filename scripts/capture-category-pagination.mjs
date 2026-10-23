@@ -51,14 +51,14 @@ try {
       await expect(page.getByRole('button', {name: 'Category 1', exact: true})).toBeVisible();
       await expect(page.locator('.discovery-pagination,.discovery-business-results')).toHaveCount(0);
 
-      await page.getByRole('button', {name: 'Businesses', exact: true}).click();
+      await page.getByRole('button', {name: 'Business locations', exact: true}).click();
       await expect(page.getByRole('searchbox', {name: 'Search businesses', exact: true})).toHaveValue('Studio');
       const map = page.locator('.leaflet-container');
       await expect(map).toBeVisible();
       await expect.poll(() => tiles.servedCount()).toBeGreaterThan(0);
       const retained = `category-${width}`;
       await map.evaluate((element, value) => { element.dataset.categoryRetained = value; }, retained);
-      await page.getByRole('button', {name: 'Products', exact: true}).click();
+      await page.getByRole('button', {name: 'Product listings', exact: true}).click();
       const list = page.locator('.discovery-search-results');
       await expect.poll(() => productIds(page)).toEqual(firstIds);
       await list.evaluate(element => { element.scrollTop = element.scrollHeight; });
@@ -67,11 +67,11 @@ try {
       const scrollTop = await list.evaluate(element => element.scrollTop);
       assert.ok(scrollTop > 0, 'Products scroll inside their own pane');
 
-      await page.getByRole('button', {name: 'Businesses', exact: true}).click();
+      await page.getByRole('button', {name: 'Business locations', exact: true}).click();
       await expect(map).toBeVisible();
       await expect(map).toHaveAttribute('data-category-retained', retained);
       await expect(page.getByRole('searchbox', {name: 'Search businesses', exact: true})).toHaveValue('Studio');
-      await page.getByRole('button', {name: 'Products', exact: true}).click();
+      await page.getByRole('button', {name: 'Product listings', exact: true}).click();
       await expect.poll(() => productIds(page)).toEqual(twoPageIds);
       await expect.poll(() => list.evaluate(element => element.scrollTop)).toBe(scrollTop);
       await expect(map).toHaveAttribute('data-category-retained', retained);
@@ -80,7 +80,7 @@ try {
       await expect.poll(() => productIds(page)).toEqual(firstIds);
       await expect(page.getByRole('button', {name: 'Category 1', exact: true})).toBeVisible();
       assert.equal(new URL(page.url()).searchParams.get('p.category'), 'electronics');
-      await page.getByRole('button', {name: 'Businesses', exact: true}).click();
+      await page.getByRole('button', {name: 'Business locations', exact: true}).click();
       await expect(page.getByRole('searchbox', {name: 'Search businesses', exact: true})).toHaveValue('Studio');
 
       // A retired type hint cannot reintroduce the old mixed-result list.

@@ -4,11 +4,55 @@ title: Free exploration of the world map
 status: in_progress
 related: [FE-021, BE-041, FE-030, FE-053, DEP-042, ADR-0016, ADR-0023, BE-023]
 owners: [product, frontend]
-last_updated: 2026-10-17
+last_updated: 2026-10-22
 change_level: L1
 ---
 
 # FE-058 — Free exploration of the world map
+
+## S160 — canonical city-area pins and count groups (in progress)
+
+FE-021 S160 owns city-only map eligibility and count-circle behavior. A final
+marker representing one city-only business uses the shop glyph at its selected
+canonical city, never a numbered **1** circle or a one-member zoom-only
+aggregate. If that point would overlap another marker at a broad scale, combine
+it into a real multi-business count until the map separates them. Count circles
+represent two or more businesses; a singleton left by a bounded screen
+partition uses the shop glyph without a count. Never
+displace an area business to an invented sub-city coordinate; keep
+`locationMode: area` through the shared web/native projection as internal state;
+marker names and group previews show the business and city, without internal
+location-mode terminology. Existing world bounds,
+screen-sized final groups, zoom policy and exact storefront positions remain.
+Regress area/exact scope parity and business reachability on web and Expo.
+
+Focused S160 evidence: the shared map model and actual Chrome desktop, phone web,
+and Expo preview show a sole filtered city-area business as a shop glyph at the
+canonical city anchor and open its business preview directly. No single-business
+marker renders a count of 1. At a broad scale where
+the pin would overlap another marker, it participates in a count for two or more
+businesses until the map separates them. See FE-021 and
+`.local/s160-city-area-map-review/singleton-review.html`. Visual approval and
+full checks remain pending.
+
+## S154 — city and district camera bounds (implemented locally; physical/visual review pending)
+
+The newest owner explicitly permits bounded display-only group spacing. FE-021's
+city-scale policy supersedes the18/17 interaction limit below: expose fitting
+terminal groups at normalized12/native11, retain a dense overflow aggregate for
+one additional district step, and stop all interaction/restored/programmatic
+cameras at normalized13/native12. Global zoom-out remains1, initial/reset Ethiopia
+and provider tile capability19 stay unchanged. A final circle opens its current
+admitted previews without moving the camera. Aggregate expansion stops at city12
+when its terminal layout fits instead of obeying a needlessly higher raw source
+expansion. Count-circle glyphs may use reviewed5km/exceptional10km display-spacing
+bounds; these are visual hit-target positions only. A city-only business remains
+anchored to its canonical city and does not receive an invented sub-city point.
+Individual exact pins, saved/public coordinates and detail/directions authority
+never move. This is a UI/model-only correction, not a provider or data migration.
+The shared model, native controller and actual installed web/Expo Leaflet camera
+tests qualify the new bounds locally; FE-021 records their mapped contracts.
+Physical MapLibre and user visual review remain pending.
 
 S140 latest owner correction: FE-021 S140 supersedes the maximum-only preview
 guard below. Already-separated terminal groups open all admitted previews at
@@ -60,9 +104,10 @@ merchant onboarding expansion or change to database access/filter contracts.
 
 ## Quality and architecture
 
-Area-mode visual offsets use world projection bounds instead of national clamps,
-so a city anchor outside Ethiopia remains near its city; saved coordinates never
-change. No API/DB/schema or tenant permission changes: existing coordinates stay as saved.
+City-only locations use their selected canonical city anchor, and group glyph
+spacing uses world projection bounds instead of national clamps, so a city anchor
+outside Ethiopia remains near its city. No saved coordinates change. No
+database/schema or tenant permission change is expected.
 Reuse OSM/MapLibre with attribution, public-only tile requests and no bulk/offline
 downloads. World-copy handling prevents lost markers after crossing 180 degrees.
 Keep bounded cluster queries; normalize viewport longitude for wrapped worlds.

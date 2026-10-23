@@ -4,11 +4,21 @@ title: Restricted reusable store-review access
 status: in_progress
 related: [BE-052, DEP-044, FE-053]
 owners: [product, frontend, security]
-last_updated: 2026-10-09
+last_updated: 2026-10-20
 change_level: L2
 ---
 
 # FE-064 — Restricted store-review access
+
+FE-053 S153 clarifies the ordinary owner destination: after explicit reviewer
+sign-in and successful current application-session validation, Account remains
+the destination across the actor-keyed navigator reset. This does not redirect
+background/cold restoration or token refresh, bypass role checks, preserve
+another actor's private navigation or widen the reviewer exception. Failed or
+cancelled entry never becomes navigation authority.
+The mapped actual-root regression is `scripts/test-native-resource-loading.ts`
+under FE-053 S153. Its reviewer and ordinary OTP fixtures use controlled
+credentials/Auth ports; no new live reviewer repair or native-build proof is claimed.
 
 ## Problem
 

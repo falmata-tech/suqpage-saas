@@ -8,13 +8,16 @@ import {File as PickedFile} from 'expo-file-system';
 import {appendPickedImage} from './image-upload';
 import CitySelector from './CitySelector';
 import CountrySelector from './CountrySelector';
+import OwnerLocationPicker from './OwnerLocationPicker';
+import LocationVisibilityChoices from './LocationVisibilityChoices';
+import type {KnownPlace} from '../../../lib/place-search';
 import { HandleInput } from "./owner-handle";
 import StorefrontAccentPicker from "./StorefrontAccentPicker";
 import { ShowroomContent } from "./ShowroomContent";
 import {useOwnerEditGuard} from './owner-edit-navigation';
 import OwnerEditConfirmation from './OwnerEditConfirmation';
 import React, { useEffect, useRef, useState } from "react";
-import { View, Platform,Pressable,Text } from "react-native";
+import { View, ScrollView, Platform,Pressable,Text } from "react-native";
 import { router } from "expo-router";
 import * as Crypto from "expo-crypto";
 import * as ImagePicker from "expo-image-picker";
@@ -99,7 +102,8 @@ export function Setup() {
   const openLink = useOpenLink();
   const { t, ownerRequest, session } = useApp(),
     action = useAction();
-  const [placeId,setPlaceId]=useState(""),[countryCode,setCountryCode]=useState("");
+  const [selectedPlace,setSelectedPlace]=useState<KnownPlace|null>(null),[countryCode,setCountryCode]=useState("");
+  const [locationMode,setLocationMode]=useState<'area'|'storefront'>('area'),[point,setPoint]=useState<{latitude:number;longitude:number}|null>(null);
   const [name, setName] = useState(""),
     [phone, setPhone] = useState(""),
     [business, setBusiness] = useState(""),
@@ -129,8 +133,12 @@ export function Setup() {
         value={business}
         onChangeText={setBusiness}
       />
-      <CountrySelector value={countryCode} onChange={value=>{setCountryCode(value);setPlaceId("");}}/>
-      <CitySelector key={countryCode} countryCode={countryCode} onSelect={place=>setPlaceId(place?.id || "")}/>
+      <CountrySelector value={countryCode} onChange={value=>{setCountryCode(value);setSelectedPlace(null);setPoint(null);}}/>
+      <CitySelector key={countryCode} countryCode={countryCode} onSelect={place=>{setSelectedPlace(place);setPoint(null);}}/>
+      {selectedPlace ? <>
+        <LocationVisibilityChoices value={locationMode} t={t} onChange={next=>{setLocationMode(next);if(next==='area')setPoint(null);}}/>
+        {locationMode==='storefront' ? <OwnerLocationPicker key={selectedPlace.id} city={selectedPlace} point={point} disabled={action.busy} t={t} onChange={setPoint}/> : null}
+      </> : null}
       <HandleInput value={handle} onChange={setHandle} onReady={setHandleReady} refreshKey={handleRevision} />
       <Copy>{t("Category")}</Copy>
       <Status {...categories} retry={categories.reload} />
@@ -164,10 +172,12 @@ export function Setup() {
       <ActionStatus state={action} />
       <Button
         disabled={
-          action.busy || !consent || !category || !name || !phone || !business || !handleReady || !placeId
+          action.busy || !consent || !category || !name || !phone || !business || !handleReady || !selectedPlace || (locationMode==='storefront'&&!point)
         }
         label={t("Create your business page")}
-        onPress={() =>
+        onPress={() => {
+          const chosenPlace=selectedPlace;
+          if(!chosenPlace)return;
           void action.run(async () => {
             try { await ownerRequest("signup", {
               name,
@@ -175,8 +185,9 @@ export function Setup() {
               businessName: business,
               handle,
               businessCategory: category,
-              placeId,
+              placeId:chosenPlace.id,
               countryCode,
+              ...(locationMode==='storefront'&&point?{latitude:point.latitude,longitude:point.longitude}:{}),
               consent,
               idempotencyKey: key,
             }); } catch (error) { setHandleReady(false); setHandleRevision(v => v + 1); throw error; }
@@ -184,8 +195,8 @@ export function Setup() {
               pathname: "/owner/[section]",
               params: { section: "page", view: "preview" },
             });
-          }, "Your page is ready to edit")
-        }
+          }, "Your page is ready to edit");
+        }}
       />
     </>
   );
@@ -304,9 +315,42 @@ export function ProductEditor({
   const signature=JSON.stringify(values),guard=useOwnerEditGuard({dirty:signature!==JSON.stringify(baseline.current),signature,busy:action.busy,isBusy:action.isBusy,discard:()=>{
     const saved=baseline.current;setName(saved.name);setDescription(saved.description);setPrice(saved.price);setKind(saved.kind);setAvailability(saved.availability);setPublished(saved.published);setMedia(saved.media);setAssets(saved.assets);setVideo(saved.video);
   }});
+  const save = () => {
+    void action.run(async () => {
+      const checkpoint=guard.checkpoint();
+      if(!kind)throw Error('Choose Ready to ship or Made to order before saving.');
+      const value = price.trim() === "" ? null : Number(price);
+      if (value !== null && (!Number.isFinite(value) || value < 0))
+        throw Error("Enter a valid price.");
+      const form = new FormData();
+      form.append(
+        "details",
+        JSON.stringify({
+          name,
+          description,
+          priceMinor: value === null ? null : Math.round(value * 100),
+          ...(isActiveProductKind(kind)?{offeringKind:kind}:{}),
+          availability,
+          isPublished: published,
+          expectedContentVersion: home.shop.version,
+          idempotencyKey: key,
+          media,
+        }),
+      );
+      for (const asset of assets) await addAsset(form, "images", asset);
+      await ownerRequest(
+        "owner/products" + (id ? "/" + id : ""),
+        undefined,
+        form,
+      );
+      baseline.current=values;
+      guard.complete(onSaved,signature,checkpoint);
+    });
+  };
   if (id && !product) return <Copy>{t("Product not found.")}</Copy>;
   return (
-    <>
+    <View style={{flex:1,minHeight:0}}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={s.screen}>
       <Copy big heading>{t(product ? "Edit product" : "Add product")}</Copy>
       <Field label={t("Name")} value={name} onChangeText={value=>{guard.changed();setName(value);}} editable={!action.busy}/>
       <Copy>{t('How is this product supplied?')}</Copy>
@@ -424,45 +468,15 @@ export function ProductEditor({
         selected={published}
         onPress={() => {if(!action.isBusy()){guard.changed();setPublished(!published);}}}
       />
-      <ActionStatus state={action} />
-      <View style={{flexDirection:'row',alignItems:'stretch',gap:10,flexWrap:'wrap'}}><View style={{flex:1,minWidth:120}}><Button
-        disabled={action.busy || !name.trim()}
-        label={t("Save changes")}
-        wrapLabel
-        onPress={() =>
-          void action.run(async () => {
-            const checkpoint=guard.checkpoint();
-            if(!kind)throw Error('Choose Ready to ship or Made to order before saving.');
-            const value = price.trim() === "" ? null : Number(price);
-            if (value !== null && (!Number.isFinite(value) || value < 0))
-              throw Error("Enter a valid price.");
-            const form = new FormData();
-            form.append(
-              "details",
-              JSON.stringify({
-                name,
-                description,
-                priceMinor: value === null ? null : Math.round(value * 100),
-                ...(isActiveProductKind(kind)?{offeringKind:kind}:{}),
-                availability,
-                isPublished: published,
-                expectedContentVersion: home.shop.version,
-                idempotencyKey: key,
-                media,
-              }),
-            );
-            for (const asset of assets) await addAsset(form, "images", asset);
-            await ownerRequest(
-              "owner/products" + (id ? "/" + id : ""),
-              undefined,
-              form,
-            );
-            baseline.current=values;
-            guard.complete(onSaved,signature,checkpoint);
-          })
-        }
-      /></View><View style={{flex:1,minWidth:120}}><Button secondary wrapLabel disabled={action.busy} label={t('Cancel')} onPress={()=>guard.requestLeave(onCancel)}/></View></View>
+      </ScrollView>
+      <View testID="product-editor-actions" style={{paddingHorizontal:16,paddingVertical:12,borderTopWidth:1,borderColor:colors.line,backgroundColor:'white',gap:8}}>
+        <ActionStatus state={action}/>
+        <View style={{flexDirection:'row',alignItems:'stretch',gap:10,flexWrap:'wrap'}}>
+          <View style={{flex:1,minWidth:120}}><Button disabled={action.busy||!name.trim()} label={t('Save changes')} wrapLabel onPress={save}/></View>
+          <View style={{flex:1,minWidth:120}}><Button secondary wrapLabel disabled={action.busy} label={t('Cancel')} onPress={()=>guard.requestLeave(onCancel)}/></View>
+        </View>
+      </View>
       <OwnerEditConfirmation guard={guard}/>
-    </>
+    </View>
   );
 }

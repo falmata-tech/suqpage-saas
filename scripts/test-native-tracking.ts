@@ -6,15 +6,30 @@ const shipment=(version=1,ref=reference):TrackingShipmentDetail=>({reference:ref
 const session=()=>({token,expiresAt:Date.now()+60_000});
 function deferred<T>(){let resolve!:(value:T)=>void;const promise=new Promise<T>(yes=>{resolve=yes;});return{promise,resolve};}
 const settle=async()=>{for(let i=0;i<3;i++)await new Promise<void>(resolve=>setImmediate(resolve));};
+const storageKey=(origin:string)=>'suqpage-tracking-session.'+Buffer.from(new URL(origin).origin,'ascii').toString('hex');
+// Expo SecureStore validates this alphabet on get, set and delete, including an empty restore.
+function validStorageKey(key:string){assert.match(key,/^[\w.-]+$/,'SecureStore rejects this storage key');}
 test('FE-069 native tracking storage is origin-scoped and never accesses account/chat keys',async()=>{
- const values=new Map<string,string>(),calls:string[]=[];
- const storage={async getItem(key:string){calls.push(key);return values.get(key)||null;},async setItem(key:string,value:string){calls.push(key);values.set(key,value);},async removeItem(key:string){calls.push(key);values.delete(key);}};
+ const values=new Map<string,string>([['suqpage-owner-session','OWNER_UNCHANGED'],['suqpage-transport','CHAT_UNCHANGED']]),calls:string[]=[];
+ const storage={async getItem(key:string){validStorageKey(key);calls.push(key);return values.get(key)||null;},async setItem(key:string,value:string){validStorageKey(key);calls.push(key);values.set(key,value);},async removeItem(key:string){validStorageKey(key);calls.push(key);values.delete(key);}};
  const a=createTrackingStore(storage,'https://one.example'),b=createTrackingStore(storage,'https://two.example');
  assert.equal(await a.read(),null);await a.save(session());assert.equal((await a.read())?.token,token);assert.equal(await b.read(),null);await b.save({...session(),token:'b'.repeat(64)});await a.clear();assert.equal(await a.read(),null);assert.equal((await b.read())?.token,'b'.repeat(64));
- assert.ok(calls.every(key=>key.startsWith('suqpage-tracking-session:https://')));assert.ok(!calls.includes('suqpage-owner-session')&&!calls.includes('suqpage-transport'));
- values.set('suqpage-tracking-session:https://one.example','broken');assert.equal(await a.read(),null);assert.equal(values.has('suqpage-tracking-session:https://one.example'),false);
- values.set('suqpage-tracking-session:https://one.example',JSON.stringify({token,expiresAt:1}));assert.equal(await a.read(),null);
- const broken=createTrackingStore({getItem:async()=>{throw Error('storage');},setItem:async()=>{throw Error('storage');},removeItem:async()=>{throw Error('storage');}},'https://one.example');await assert.rejects(()=>broken.read());await assert.rejects(()=>broken.save(session()));await assert.rejects(()=>broken.clear());
+ assert.ok(calls.every(key=>/^suqpage-tracking-session\.[a-f0-9]+$/.test(key)));assert.ok(!calls.includes('suqpage-owner-session')&&!calls.includes('suqpage-transport'));
+ for(const raw of ['broken','null','[]',JSON.stringify({token:'owner-jwt',expiresAt:Date.now()+60000}),JSON.stringify({token,expiresAt:1}),JSON.stringify({token,expiresAt:'tomorrow'})]){values.set(storageKey('https://one.example'),raw);assert.equal(await a.read(),null);assert.equal(values.has(storageKey('https://one.example')),false);}
+ const count=calls.length;await assert.rejects(()=>a.save({token:'owner-jwt',expiresAt:Date.now()+60000}));await assert.rejects(()=>a.save({token,expiresAt:1}));assert.equal(calls.length,count);
+ assert.equal(values.get('suqpage-owner-session'),'OWNER_UNCHANGED');assert.equal(values.get('suqpage-transport'),'CHAT_UNCHANGED');
+ const failed=async(key:string)=>{validStorageKey(key);throw Error('storage');};
+ const broken=createTrackingStore({getItem:failed,setItem:failed,removeItem:failed},'https://one.example');await assert.rejects(()=>broken.read(),/storage/);await assert.rejects(()=>broken.save(session()),/storage/);await assert.rejects(()=>broken.clear(),/storage/);
+});
+test('BE-058 SecureStore keys encode the entire canonical origin without punctuation collisions',async()=>{
+ const origins=['https://api.example','http://api.example','https://api.example:8443','https://api-example','https://a-b.example','https://a_b.example','http://[::1]:3102','http://[::1]:3103','http://[::2]:3102'];
+ const values=new Map<string,string>(),seen=new Set<string>();
+ const storage={async getItem(key:string){validStorageKey(key);seen.add(key);return values.get(key)||null;},async setItem(key:string,value:string){validStorageKey(key);seen.add(key);values.set(key,value);},async removeItem(key:string){validStorageKey(key);seen.add(key);values.delete(key);}};
+ for(const origin of origins){const store=createTrackingStore(storage,origin);assert.equal(await store.read(),null);await store.save(session());assert.equal((await store.read())?.token,token);assert.ok(values.has(storageKey(origin)));}
+ assert.equal(seen.size,origins.length);
+ for(const key of seen)assert.ok(origins.some(origin=>Buffer.from(key.slice('suqpage-tracking-session.'.length),'hex').toString('ascii')===new URL(origin).origin));
+ for(const [original,equivalent] of [['https://api.example','HTTPS://API.EXAMPLE:443/path?ignored=1'],['http://[::1]:3102','http://[0:0:0:0:0:0:0:1]:3102/other']]){assert.equal((await createTrackingStore(storage,equivalent).read())?.token,token);await createTrackingStore(storage,equivalent).clear();assert.equal(await createTrackingStore(storage,original).read(),null);}
+ assert.equal((await createTrackingStore(storage,'http://[::1]:3103').read())?.token,token);
 });
 test('BE-058 native HTTP uses only tracking bearer, no cookies/query secrets/owner or visitor headers',async()=>{
  const calls:Array<{url:string;init:RequestInit}>=[];
@@ -27,8 +42,13 @@ test('BE-058 native HTTP uses only tracking bearer, no cookies/query secrets/own
 });
 test('BE-058 native tracking writes serialize so delayed save cannot resurrect a logged-out credential',async()=>{
  let stored:string|null=null;const gate=deferred<void>(),calls:string[]=[];
- const store=createTrackingStore({getItem:async()=>stored,setItem:async(_key,value)=>{calls.push('save');await gate.promise;stored=value;},removeItem:async()=>{calls.push('clear');stored=null;}},'https://api.example');
- const saving=store.save(session());await settle();const clearing=store.clear();assert.deepEqual(calls,['save']);gate.resolve();await Promise.all([saving,clearing]);assert.deepEqual(calls,['save','clear']);assert.equal(await store.read(),null);
+ const store=createTrackingStore({getItem:async key=>{validStorageKey(key);return stored;},setItem:async(key,value)=>{validStorageKey(key);calls.push('save');await gate.promise;stored=value;},removeItem:async key=>{validStorageKey(key);calls.push('clear');stored=null;}},'https://api.example');
+ const saving=store.save(session());await settle();const clearing=store.clear(),reading=store.read();assert.deepEqual(calls,['save']);gate.resolve();await Promise.all([saving,clearing]);assert.deepEqual(calls,['save','clear']);assert.equal(await reading,null);assert.equal(await store.read(),null);
+});
+test('BE-058 a delayed credential read cannot resurrect tracking after logout',async()=>{
+ const first=deferred<string|null>();let stored:string|null=JSON.stringify(session()),reads=0;
+ const store=createTrackingStore({getItem:async key=>{validStorageKey(key);return ++reads===1?first.promise:stored;},setItem:async(key,value)=>{validStorageKey(key);stored=value;},removeItem:async key=>{validStorageKey(key);stored=null;}},'https://api.example');
+ const reading=store.read();await settle();await store.clear();first.resolve(JSON.stringify(session()));assert.equal(await reading,null);assert.equal(reads,2);assert.equal(stored,null);
 });
 test('FE-069 native HTTP preserves304/401 and bounds stalled bodies with caller cancellation',async()=>{
  const noBody=createTrackingClient('https://api.example',async()=>new Response(null,{status:304,headers:{etag:'"same"'}}));assert.deepEqual(await noBody('shipments/'+reference,{token}),{value:null,etag:'"same"',notModified:true});

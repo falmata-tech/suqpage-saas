@@ -8,10 +8,14 @@ import { FeaturedProgramSettingsError, getFeaturedProgramDaySelection, getFeatur
 import {getFeaturedShowroomsView} from "../lib/discovery";
 import type { RuntimeSqlValue } from "../lib/runtime-sql";
 const featuredUiSource = fs.readFileSync(path.join(process.cwd(), "components/FeaturedShowroomsWorkspace.tsx"), "utf8");
+const featuredBroadcastHeaderSource = fs.readFileSync(path.join(process.cwd(), "lib/featured-broadcast-header.ts"), "utf8");
 const discoveryCssSource = fs.readFileSync(path.join(process.cwd(), "app/discovery.css"), "utf8");
 const lineupSelectorSource = fs.readFileSync(path.join(process.cwd(), "components/FeaturedLineupSelector.tsx"), "utf8");
 const featuredAdminSource = fs.readFileSync(path.join(process.cwd(), "app/dashboard/admin/featured-schedule/page.tsx"), "utf8");
 assert.match(featuredUiSource, /function TodayProgramSchedule/);
+assert.match(featuredUiSource, /featuredBroadcastHeader\(/, "the web header uses the shared scheduled-state presentation");
+assert.match(featuredBroadcastHeaderSource, /Scheduled TikTok Live window is open/);
+assert.doesNotMatch(featuredBroadcastHeaderSource, /Now broadcasting/);
 assert.match(featuredUiSource, /t\("Today's schedule"\)/);
 assert.match(featuredUiSource, /if \(!featured\.isToday\) return null/);
 assert.match(featuredUiSource, /featured\.booths\[slot - 1\]/, "public schedule names resolve from the same authoritative booth lineup");

@@ -4,11 +4,93 @@ title: Independent business-map and product-card discovery
 status: in_progress
 related: [FE-074, FE-026, BE-054, DEP-045, FE-030, FE-042, FE-049, FE-053, FE-059, BE-047, ADR-0027, FE-067, BE-044, FE-021, FE-052]
 owners: [product, frontend]
-last_updated: 2026-10-20
+last_updated: 2026-10-21
 change_level: L2
 ---
 
 # FE-065 — Independent business and product discovery
+
+## S158 — city-area pins and separate product discovery (in progress)
+
+The Business locations map includes businesses with an owner-selected exact
+public pin and businesses with a validated canonical city anchor. Co-located
+city businesses appear in numbered groups; visitor-facing labels and previews
+show business names and actual cities without location-mode terminology or an
+implied storefront or street address. Co-located city businesses are grouped
+using the map's numbered-circle policy. A legacy area without a validated
+canonical anchor stays off the map. Product listings continue to include
+eligible offerings and their source showroom.
+
+GIVEN a city-only business with listed products WHEN a visitor searches Product
+listings by country/city, product or business name THEN its products and source
+business remain available. GIVEN the same business WHEN a visitor searches
+Business locations THEN it appears at its canonical city anchor in a numbered
+group when there are multiple businesses, or as a named shop pin when alone.
+The preview names the business and city. Exact storefront records remain
+eligible and keep the existing grouped-preview and return behavior.
+
+## S157 — recover from an empty business map (local implementation pending review)
+
+GIVEN the current Business locations criteria match no businesses with an
+eligible exact pin or canonical city anchor WHEN the map is empty and Product listings are available THEN show a
+short, truthful empty state and one direct action that opens Product listings.
+The action must use the existing mode switch, keep each scope's independent
+search/filter state, and avoid implying that filtered-out businesses have map pins.
+The empty state remains useful when the product count is zero and must fit a
+phone viewport without blocking map controls.
+
+## S153 discovery preview context (implemented locally; visual review pending)
+
+## S153 discovery preview context (implemented locally; visual review pending)
+
+GIVEN a public product search result with merchant-authored grouping and business
+location WHEN a visitor browses Products at desktop or phone width THEN the card
+visibly presents its existing category label and literal city/location before
+opening details, alongside the bounded description, supply and separate business
+link. `categoryName` is the optional business-owned product grouping, not its
+industry; retain the existing API fallback for ungrouped products. Wrap long
+category/location text rather than hiding it or expanding the viewport width.
+
+GIVEN repeated city, zone or region display labels WHEN a product, map-business
+or Featured preview composes its current location fields THEN trim empty labels
+and omit case-insensitive Unicode-equivalent repetitions, retaining the first
+literal spelling and the existing field priority. Distinct locations remain
+distinct; a missing city retains the existing legacy region fallback. Do not
+derive a country, change stored geography or translate merchant location labels.
+
+Ordered plan: (1) preserve the deployed audit findings and reproduce hidden
+category/city using actual Workspace markup with production CSS at 1440/390;
+(2) add pure location equivalence/distinct/empty controls and actual map/Featured
+preview regressions; (3) expose the existing card context and reuse one small
+pure formatter in the existing discovery contract; (4) run focused checks and
+actual local Chrome search/filter/detail/Back at both widths, with synthetic map
+tiles declared; (5) obtain visual approval before full gates and rollout. Master
+§§7,8,10,19 already require these previews; this repairs their presentation without
+changing catalog, API, permissions, localization, native UI or hosted data.
+Focused component fixtures do not establish real local workflow or deployment.
+
+Focused evidence: the three affected workspace, Featured/sponsor and map-group
+suites pass 31 cases, including real-CSS category/city visibility and long-label
+geometry at 1440/390, literal/legacy location controls, actual preview deduplication
+and preserved navigation/exclusion fences. The preceding Chrome regressions
+reproduce hidden group labels at both widths and duplicate city/region text.
+TypeScript and all 219 spec/ADR validations pass. Real local journeys, combined
+visual approval, full gates and deployment remain pending with the parent batch.
+
+## S154 — city-level small-group discovery (implemented locally; physical/visual review pending)
+
+FE-021's city-scale terminal policy controls the owner's request to reveal
+small numbered groups without zooming into street detail. WHEN its finite bounds
+are qualified THEN web, phone web, Expo and native must share exact terminal
+membership, display-only separation and normalized camera limits. Clicking an
+already exposed final circle opens its all-fit preview without camera movement;
+zoom-out still merges into ordinary count-weighted aggregates. Keep independent
+searches/exclusions, saved view/filter context, current-group/capacity authority,
+product drawer/inert controls, attribution and the corrected native SDK dispatch.
+No saved location, shop address, API scope or dataset changes. Master §§10/19 and
+FE-058 must reflect the reviewed limits before production edits; current source
+still uses the previous policy. Reuse the existing map hierarchy/preview/return
+regressions and synthetic-map Chrome/physical workflows, not public tile traffic.
 
 ## S151 B07 — retain displayed results during scoped updates (implemented locally)
 

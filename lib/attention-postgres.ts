@@ -4,9 +4,8 @@ import { postgresRuntimeServices } from './postgres-runtime-services';
 import type { SessionUser } from './types';
 import { attentionPreferenceInput, defaultAttentionPreferences, type AttentionKind, type AttentionFeed, type AttentionItem, type AttentionPreferences } from './attention-contract';
 import {pushCapabilities,validatedPushSubscription} from './attention-push';
-import { SUPPORT_STAFF_REPLY_TARGET_MS } from './support-response-contract';
 import {supportReplyOverdueSource} from './support-assignment-response';
-import {SUPPORT_ACTIVE_ASSIGNMENT_JOIN,SUPPORT_RESPONSE_EPOCH_SQL,SUPPORT_RESPONSE_START_SQL} from './support-response-sql';
+import {SUPPORT_ACTIVE_ASSIGNMENT_JOIN,SUPPORT_RESPONSE_DEADLINE_SQL,SUPPORT_RESPONSE_EPOCH_SQL} from './support-response-sql';
 
 export class AttentionError extends Error { constructor(message: string, readonly code = 'not_found') { super(message); } }
 type Actor = { id: number; access_role: string; business_id: number | null; enabled: boolean | number | null; queue_scope: string | null };
@@ -71,8 +70,8 @@ export async function enqueueReplyOverdueAttention(conversationId:number,message
         (p.access_role='team_member' AND s.queue_scope IN ('all',CASE WHEN c.assistance_category IN ('buying_assistance','shipment_observation') THEN 'transport' ELSE 'support' END))))) assigned_staff
     FROM support_conversations c ${SUPPORT_ACTIVE_ASSIGNMENT_JOIN}
     WHERE c.id=? AND c.status IN ('waiting','open') AND c.resolved_at IS NULL
-      AND c.awaiting_staff_message_id=? AND ${SUPPORT_RESPONSE_START_SQL}<=? AND ${SUPPORT_RESPONSE_EPOCH_SQL}=?`,
-    [conversationId,messageId,now-SUPPORT_STAFF_REPLY_TARGET_MS,assignmentId])).rows[0];
+      AND c.awaiting_staff_message_id=? AND ${SUPPORT_RESPONSE_DEADLINE_SQL}<=? AND ${SUPPORT_RESPONSE_EPOCH_SQL}=?`,
+    [conversationId,messageId,now,assignmentId])).rows[0];
   if(!c)return 0;
   const targets=(await runner.query<{id:number}>(`SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id
     LEFT JOIN support_agent_settings s ON s.user_id=u.id
@@ -110,7 +109,7 @@ function currentAttentionSql(participant:boolean){
       AND c.staff_joined_user_id=c.assigned_user_id
       AND n.source_key='support-manual-joined:' || c.staff_joined_assignment_id::text))
     AND (n.kind<>'reply_overdue' OR (c.status IN ('waiting','open') AND c.resolved_at IS NULL
-      AND ${SUPPORT_RESPONSE_START_SQL}<=? AND c.awaiting_staff_message_id IS NOT NULL
+      AND ${SUPPORT_RESPONSE_DEADLINE_SQL}<=? AND c.awaiting_staff_message_id IS NOT NULL
       AND n.source_key='support-reply-overdue:' || c.id::text || ':' || c.awaiting_staff_message_id::text || ':' || ${SUPPORT_RESPONSE_EPOCH_SQL}::text
       AND (EXISTS(SELECT 1 FROM user_access_profiles p WHERE p.user_id=n.user_id AND p.access_role IN ('platform_admin','operations_manager')) OR
         (c.assigned_user_id=n.user_id AND EXISTS(SELECT 1 FROM user_access_profiles p JOIN support_agent_settings s ON s.user_id=p.user_id
@@ -121,7 +120,7 @@ async function feed(key:string, actorRow: Actor|null, visitorRow:Case|null):Prom
   const scope=actorRow?allowedRows(actorRow):{where:'n.visitor_conversation_id=?',values:[visitorRow!.id]};
   const indexedActor = actorRow ? 'n.user_id=?' : 'n.visitor_conversation_id=?';
   const from=`FROM attention_notifications n LEFT JOIN support_conversations c ON c.id=n.conversation_id ${SUPPORT_ACTIVE_ASSIGNMENT_JOIN} LEFT JOIN inquiries i ON i.id=n.inquiry_id WHERE ${indexedActor} AND n.recipient_key=? AND (${scope.where}) AND ${currentAttentionSql(!actorRow||actorRow.access_role==='client')}`;
-  const values=[actorRow?.id??visitorRow!.id,key,...scope.values,Date.now()-SUPPORT_STAFF_REPLY_TARGET_MS];
+  const values=[actorRow?.id??visitorRow!.id,key,...scope.values,Date.now()];
   const rows=(await executor().query<NotificationRow>(`SELECT n.*,c.assistance_category,i.business_id inquiry_business_id ${from} ORDER BY n.id DESC LIMIT 30`,values)).rows;
   const counts=(await executor().query<{unread:number}>(`SELECT COUNT(*) unread ${from} AND n.read_at IS NULL`,values)).rows[0];
   const items=rows.map((n):AttentionItem=>({id:n.id,kind:n.kind,channel:n.conversation_id?(transport(n.assistance_category||'')?'transport':'support'):null,createdAt:n.created_at,read:n.read_at!==null,
@@ -150,9 +149,10 @@ async function readAll(key:string,a:Actor|null,c:Case|null,through:unknown){
   const current=await feed(key,a,c);
   if(typeof through!=='number'||!Number.isSafeInteger(through)||through<1||through>current.latestId)throw new AttentionError('Choose an alert.','invalid');
   const scope=a?allowedRows(a):{where:'n.visitor_conversation_id=?',values:[c!.id]};
+  const now=Date.now();
   await executor().query(`UPDATE attention_notifications SET read_at=COALESCE(read_at,?) WHERE id IN (
     SELECT n.id FROM attention_notifications n LEFT JOIN inquiries i ON i.id=n.inquiry_id LEFT JOIN support_conversations c ON c.id=n.conversation_id ${SUPPORT_ACTIVE_ASSIGNMENT_JOIN}
-    WHERE n.recipient_key=? AND n.id<=? AND (${scope.where}) AND ${currentAttentionSql(!a||a.access_role==='client')})`,[Date.now(),key,through,...scope.values,Date.now()-SUPPORT_STAFF_REPLY_TARGET_MS]);
+    WHERE n.recipient_key=? AND n.id<=? AND (${scope.where}) AND ${currentAttentionSql(!a||a.access_role==='client')})`,[now,key,through,...scope.values,now]);
 }
 export async function readAllUserAttention(user:SessionUser,through:unknown){const a=await actor(user);await readAll('user:'+a.id,a,null,through);}
 export async function readAllVisitorAttention(token:unknown,through:unknown){const c=await visitor(token);await readAll('visitor:'+c.id,null,c,through);}

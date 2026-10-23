@@ -251,5 +251,5 @@ export async function saveTransportHandoffAction(formData: FormData) {
   const id = conversationId(formData);
   const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
   // Retained clients cannot append company records through a retired action.
-  redirect(supportThreadHref(id,origin,{error:'Create shipments in Shipment tracking.'}),RedirectType.replace);
+  redirect(supportThreadHref(id,origin,{error:'Manage shipment records in the Shipment records workspace.'}),RedirectType.replace);
 }

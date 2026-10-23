@@ -68,7 +68,7 @@ test('BE-050/DEP-043 S126 private escalation outbox uses isolated PostgreSQL lea
    for(const change of cases){const item=await seed();await change(item);let sends=0;const result=await run(async()=>{sends++;return {state:'accepted'};});assert.equal(sends,0);assert.equal(result.ignored,1);assert.equal((await state(item.delivery)).error_category,'no_longer_actionable');await reset();}
    const scoped=await seed(agent);const result=await run(async()=>{throw Error('A scoped agent must not receive escalation email');});assert.equal(result.ignored,1);assert.equal((await state(scoped.delivery)).state,'ignored');await reset();
   });
-  await t.test('current assignment gets its own ten-minute reply window',async()=>{
+  await t.test('current assignment gets its own two-minute reply window',async()=>{
    const item=await seed();await db.prepare('UPDATE support_assignments SET assigned_at=? WHERE id=?').run(now-60_000,item.assignment);
    let sends=0;const result=await run(async()=>{sends++;return {state:'accepted'};});assert.equal(sends,0);assert.equal(result.ignored,1);await reset();
   });

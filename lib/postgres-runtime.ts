@@ -132,7 +132,7 @@ export function createPostgresPool(config: PostgresRuntimeConfig) {
   // and timestamps are bounded safe integers, so normalize them at this adapter.
   types.setTypeParser(20, Number);
   types.setTypeParser(1700, Number);
-  return new Pool({
+  const pool = new Pool({
     connectionString: config.connectionString,
     max: config.poolMax,
     idleTimeoutMillis: 30_000,
@@ -140,6 +140,12 @@ export function createPostgresPool(config: PostgresRuntimeConfig) {
     statement_timeout: config.statementTimeoutMs,
     query_timeout: config.statementTimeoutMs,
   });
+  // The driver has already removed an errored idle client. Contain its event
+  // without logging Error/client data or changing active-operation failures.
+  pool.on("error", () => {
+    console.error("PostgreSQL idle connection failed.", { category: "postgres_idle_connection_failure" });
+  });
+  return pool;
 }
 
 export class PostgresTransactionRunner {

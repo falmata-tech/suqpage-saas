@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { test } from 'node:test';
-import {TRANSPORT_COPY,OWNER_TRANSPORT_COPY} from '../lib/i18n/transport-copy';
+import {TRANSPORT_COPY,OWNER_TRANSPORT_COPY,LOGISTICS_PROVIDER_COPY} from '../lib/i18n/transport-copy';
 import {REPORT_REASONS} from '../lib/catalog-safety';
+import {credentialStorageKeys} from '../apps/mobile/src/credential-storage-keys';
 import { createUiText, languageNames, locales, enabledLocales, messageKey, parseLocale, type UiMessages } from '../lib/i18n/core';
 
 const catalogs = Object.fromEntries(locales.map(locale => [locale, locale === 'en' ? {} : JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`, 'utf8')) as UiMessages]));
@@ -33,11 +34,57 @@ test('FE-070: active MirtPage labels preserve the literal brand and compatibilit
   }
   const runtime=fs.readFileSync('apps/mobile/src/runtime.tsx','utf8');
   assert.ok(runtime.includes('X-Suqpage-Buying-Session'));
-  assert.ok(runtime.includes('suqpage-owner-session'));
+  assert.deepEqual(credentialStorageKeys(false,'https://mirtpage.com'),{
+    owner:'suqpage-owner-session',transport:'suqpage-transport',
+  });
   const channels=fs.readFileSync('apps/mobile/src/attention-platform.native.ts','utf8');
   for(const id of ['suqpage-alerts','suqpage-alerts-quiet'])assert.ok(channels.includes(id));
   assert.ok(channels.includes("name:'MirtPage'"));
   assert.ok(fs.readFileSync('lib/i18n/core.ts','utf8').includes('suqpage-language'));
+});
+test('FE-070/BE-044: brand compatibility follows the scoped credential port and rejects legacy runtime wiring', () => {
+  const runtime=fs.readFileSync('apps/mobile/src/runtime.tsx','utf8');
+  const assertScopedConsumer=(source:string)=>{
+    assert.match(source,/import\s*\{\s*credentialStorageKeys\s*\}\s*from\s*["']\.\/credential-storage-keys["']/);
+    assert.match(source,/const credentialKeys\s*=\s*credentialStorageKeys\(typeof __DEV__ !== ["']undefined["'] && __DEV__, API, authUrl\)/);
+    assert.match(source,/export const ownerStorageKey\s*=\s*credentialKeys\.owner/);
+    assert.match(source,/export const transportStorageKey\s*=\s*credentialKeys\.transport/);
+    assert.match(source,/storageKey:\s*ownerStorageKey/);
+  };
+  assertScopedConsumer(runtime);
+  // A producer export alone is insufficient: reject an SDK or storage consumer
+  // that quietly returns to the old shared production key.
+  for(const [from,to] of [
+    ['storageKey: ownerStorageKey','storageKey: "suqpage-owner-session"'],
+    ['ownerStorageKey = credentialKeys.owner','ownerStorageKey = "suqpage-owner-session"'],
+    ['transportStorageKey = credentialKeys.transport','transportStorageKey = "suqpage-transport"'],
+  ]){
+    assert.ok(runtime.includes(from),'The negative fixture must alter the actual runtime consumer');
+    assert.throws(()=>assertScopedConsumer(runtime.replace(from,to)),assert.AssertionError);
+  }
+  const local=credentialStorageKeys(true,'http://127.0.0.1:3102','http://127.0.0.1:54321');
+  const production=credentialStorageKeys(false,'https://mirtpage.com');
+  assert.notEqual(local.owner,production.owner);assert.notEqual(local.transport,production.transport);
+  assert.notEqual(local.owner,credentialStorageKeys(true,'http://127.0.0.1:3102','https://other-auth.example.test').owner);
+  assert.notEqual(local.transport,credentialStorageKeys(true,'http://127.0.0.1:3112','http://127.0.0.1:54321').transport);
+});
+test('FE-049/FE-070 S154: sign-in entry is role-neutral on web and native',async()=>{
+  const {clientMessages}=await import('../lib/i18n/client-messages');
+  for(const path of ['app/(public)/login/page.tsx','apps/mobile/app/(tabs)/account.tsx']){
+    const source=fs.readFileSync(path,'utf8');
+    assert.match(source,/Sign in to MirtPage\./);
+    assert.match(source,/Use your email to sign in or create an account\./);
+    assert.doesNotMatch(source,/Your business\. Your digital showroom\.|Create a showroom for your business story|New business\? Enter your email/);
+  }
+  assert.match(fs.readFileSync('app/(public)/login/page.tsx','utf8'),/Enter your email to get started\./);
+  for(const locale of ['am','om'] as const){
+    const t=createUiText(clientMessages(catalogs[locale]));
+    for(const label of ['Sign in to MirtPage.','Use your email to sign in or create an account.']){
+      assert.notEqual(t(label),label,`${locale}: role-neutral native entry is authored`);
+      assert.doesNotMatch(t(label),/ንግድ|daldal|showroom/i,'Entry copy does not restrict account access to business owners');
+    }
+    assert.notEqual(createUiText(catalogs[locale])('Enter your email to get started.'),'Enter your email to get started.');
+  }
 });
 test('FE-070 S146: active account-deletion and staff notices keep MirtPage in Amharic and Afaan Oromo', async () => {
   const {clientMessages}=await import('../lib/i18n/client-messages');
@@ -161,11 +208,15 @@ test('FE-052: both storefront audiences and Market use complete client-safe cata
   }
   // FE-070 supersedes the internet-page gloss with a digital showroom concept.
   // Coverage checks authored meaning and client delivery, not independent fluency.
-  assert.ok(MARKET_STOREFRONT_COPY.title.includes('digital showroom'));
+  assert.match(MARKET_STOREFRONT_COPY.title,/local makers and suppliers/i);
+  assert.match(MARKET_STOREFRONT_COPY.description,/digital showrooms from farms, workshops, factories and shops/i);
+  assert.match(MARKET_STOREFRONT_COPY.description,/large orders or made-to-order items/i);
   for (const locale of ['am','om'] as const) {
     const t=createUiText(catalogs[locale]), title=t(MARKET_STOREFRONT_COPY.title);
     assert.doesNotMatch(title,/ኢንተርኔት|intarneet|interneet/i);
-    assert.match(title,locale==='am'?/ዲጂታል/:/dijitaalaa/);
+    assert.match(title,locale==='am'?/አካባቢ.*አምራቾች/:/oomishtootaa.*naannoo/);
+    assert.match(t(MARKET_STOREFRONT_COPY.description),locale==='am'?/ዲጂታል.*ማሳያ/:/agarsiisa.*dijitaalaa/);
+    assert.match(t(MARKET_STOREFRONT_COPY.description),locale==='am'?/ብዛት.*ትዕዛዝ/:/ajaja guddaa/);
     assert.notEqual(t(MARKET_STOREFRONT_COPY.description),MARKET_STOREFRONT_COPY.description);
     for(const section of ABOUT_STOREFRONT_SECTIONS){
       assert.notEqual(t(section.description),section.description);
@@ -262,8 +313,8 @@ test('FE-041/FE-036 S113: floating selections and transport chat have distinct l
 
 test('FE-019/FE-053/FE-056 S114: owner transport introduction and Account task reach localized clients',async()=>{
   const {clientMessages}=await import('../lib/i18n/client-messages');
-  const ownerLabels=[OWNER_TRANSPORT_COPY.invitation,OWNER_TRANSPORT_COPY.description,'Arrange transport with our team.'];
-  for(const locale of locales.filter(value=>value!=='en')){
+  const ownerLabels=[OWNER_TRANSPORT_COPY.invitation,OWNER_TRANSPORT_COPY.description,...Object.values(LOGISTICS_PROVIDER_COPY)];
+  for(const locale of enabledLocales.filter(value=>value!=='en')){
     const client=clientMessages(catalogs[locale]),t=createUiText(client);
     for(const label of [...ownerLabels,'Transport chat','Chat history','Back to account','Transport request was not found.','A client account is required.','No conversations yet.']){
       assert.ok(client[messageKey(label)],`${locale}: owner transport wording must reach the client`);
@@ -275,22 +326,24 @@ test('FE-019/FE-053/FE-056 S114: owner transport introduction and Account task r
 });
 
 
-test('FE-019/FE-049 S71: transport invitation keeps a recognizable Live Chat label', () => {
+test('FE-076 S162: transport chat copy offers route help and names the selected provider only in the active chat', () => {
   for (const locale of locales) {
     const t = createUiText(catalogs[locale]);
-    const label = t('Live Chat');
-    if (locale === 'en') assert.equal(label, 'Live Chat');
-    else {
-      assert.ok(label.endsWith(' (Live Chat)'), locale);
-      assert.ok(label.length > ' (Live Chat)'.length, 'Native chat wording stays visible');
-    }
-    assert.equal(TRANSPORT_COPY.launcherTitle, 'Want help with transport/shipping?');
+    assert.equal(TRANSPORT_COPY.launcherTitle, 'Need Transport?');
     assert.ok(t(TRANSPORT_COPY.launcherTitle).trim());
-    if (locale !== 'en') assert.notEqual(t(TRANSPORT_COPY.launcherTitle), TRANSPORT_COPY.launcherTitle);
-    assert.ok(t('Live chat').trim());
+    if (locale !== 'en' && enabledLocales.some(enabled=>enabled===locale)) assert.notEqual(t(TRANSPORT_COPY.launcherTitle), TRANSPORT_COPY.launcherTitle);
+    assert.match(TRANSPORT_COPY.launcherSubtitle,/live transport agent/i);
+    assert.match(TRANSPORT_COPY.description,/pickup and destination/i);
+    assert.match(TRANSPORT_COPY.description,/live transport agent/i);
+    assert.doesNotMatch([TRANSPORT_COPY.launcherTitle,TRANSPORT_COPY.launcherSubtitle,TRANSPORT_COPY.description].join(' '),/Shared Trucks Freight|SharedTrucks Logistics|MirtPage.?s transport team/i);
+    assert.match(TRANSPORT_COPY.waiting,/live agent/i);
+    assert.match(TRANSPORT_COPY.waiting,/SharedTrucks live agent/i);
+    assert.match(TRANSPORT_COPY.busy,/helping other customers/i);
+    assert.match(TRANSPORT_COPY.callbackDescription,/contact details/i);
+    assert.match(TRANSPORT_COPY.callbackSubmit,/contact details/i);
     for (const source of [...Object.values(TRANSPORT_COPY), 'Goods or transport details (optional)', 'View products', 'Hide products']) {
       assert.ok(t(source).trim());
-      if (locale !== 'en') assert.notEqual(t(source), source, locale + ': contextual wording');
+      if (locale !== 'en' && enabledLocales.some(enabled=>enabled===locale)) assert.notEqual(t(source), source, locale + ': contextual wording');
     }
   }
 });
@@ -309,14 +362,44 @@ test('FE-049/FE-052 S132/S133: active copy explains products, social inquiry and
   const am=createUiText(catalogs.am),om=createUiText(catalogs.om);
   // Check the authored concepts independently of sentence order; these are
   // meaning/coverage regressions, not a claim of native-language human review.
-  assert.match(am(MARKET_STOREFRONT_COPY.title),/ለእያንዳንዱ ንግድ.*ዲጂታል/);
-  assert.match(om(MARKET_STOREFRONT_COPY.title),/Daldala hundaaf.*agarsiisa dijitaalaa/);
-  for(const term of ['የሚሸጡትን','የሚሠሩትን','የሚያበቅሉትን','አማራጮቻቸውን','ታሪካቸውን','ካስቀመጡት መረጃ','የማኅበራዊ ሚዲያ ልጥፎችን ሳይፈትሹ','በቀጥታ'])assert.ok(am(MARKET_STOREFRONT_COPY.description).includes(term),`am: ${term}`);
-  for(const term of ['gurguran','hojjetan','qonnaan oomishan','filannoowwan','seenaa','argamuu oomishaa isaan ibsan','Maxxansa miidiyaa hawaasaa','osoo hin barbaadin','kallattiin'])assert.ok(om(MARKET_STOREFRONT_COPY.description).includes(term),`om: ${term}`);
-  assert.match(am(TRANSPORT_COPY.launcherTitle),/ዕቃ.*ማጓጓዝ/);
-  assert.match(om(TRANSPORT_COPY.launcherTitle),/Meeshaa geejjibsiisuuf/);
-  assert.match(am(TRANSPORT_COPY.description),/ከየት.*ወዴት/);
-  assert.match(om(TRANSPORT_COPY.description),/eessaa.*eessatti/);
+  assert.match(am(MARKET_STOREFRONT_COPY.title),/አካባቢ.*አምራቾች.*አቅራቢዎች/);
+  assert.match(om(MARKET_STOREFRONT_COPY.title),/oomishtootaa.*dhiheessitoota.*naannoo/);
+  for(const term of ['ምርቶች','ቅጦች','መገኘት','ማኅበራዊ ሚዲያ','በቀጥታ','ብዛት'])assert.ok(am(MARKET_STOREFRONT_COPY.description).includes(term),`am: ${term}`);
+  for(const term of ['oomishaalee','Bifa','argamaa','miidiyaa hawaasaa','kallattiin','ajaja guddaa'])assert.ok(om(MARKET_STOREFRONT_COPY.description).includes(term),`om: ${term}`);
+  // Detailed sectors/availability move to About so the hero does not take map room.
+  const amAbout=ABOUT_STOREFRONT_SECTIONS.map(section=>[section.description,...section.benefits.map(benefit=>benefit.description)].map(text=>am(text)).join(' ')).join(' ');
+  const omAbout=ABOUT_STOREFRONT_SECTIONS.map(section=>[section.description,...section.benefits.map(benefit=>benefit.description)].map(text=>om(text)).join(' ')).join(' ');
+  for(const term of ['ሱቆች','ወርክሾፖች','እርሻ','ፋብሪካ','አስመጪ','መገኘት','በትዕዛዝ'])assert.ok(amAbout.includes(term),`am About: ${term}`);
+  for(const term of ['suuqii','manneen hojii harkaa','qonna','warshaa','galchitaniiti','argamaa','ajajaan'])assert.ok(omAbout.includes(term),`om About: ${term}`);
+  assert.match(am(TRANSPORT_COPY.launcherTitle),/ማጓጓዣ/);
+  assert.match(om(TRANSPORT_COPY.launcherTitle),/geejjiba/i);
+  for(const locale of ['am','om'] as const){
+    const localized=createUiText(catalogs[locale]);
+    assert.ok(localized(TRANSPORT_COPY.description).length>40);
+    assert.doesNotMatch(localized(TRANSPORT_COPY.description),/Shared Trucks Freight|MirtPage.?s transport team/i);
+    const waiting=localized(TRANSPORT_COPY.waiting);
+    assert.ok(waiting.length>30);
+    assert.match(waiting,/SharedTrucks/);
+    assert.doesNotMatch(waiting,/MirtPage.?s transport team/i);
+  }
+});
+
+test('FE-075/FE-076/FE-049 S154: received inquiries and partner interest have distinct active client copy',async()=>{
+  const {clientMessages}=await import('../lib/i18n/client-messages');
+  const labels=['Send an inquiry','Choose how to contact','Send on WhatsApp','Send on Telegram','Copy contact','Select and copy the contact details.','Send to MirtPage Inbox','Your name','Phone number','Your message','Inbox','Open inquiry','Inquiry sent to the business.','The business can contact you using the phone number you provided.','Other ways to contact','For independent logistics service providers','Get listed on MirtPage','Freight brokerages, parcel express companies, and hub-and-spoke logistics operators can ask to be listed on MirtPage. Tell us about your company and we’ll contact you.','Logistics service providers: Ask to be listed','Company name','Contact name','About your company','Phone (optional)','Request received. We’ll contact you about the next steps.',"Check your name.","Check a message.","Check desired quantity.","Enter your name.","Enter a message.","A selected product is not available.","A selected product option is not available.","Choose all available product options.","Too many inquiries. Please try again later.","Too many inquiry attempts. Please try again later.","This inquiry key was already used for a different request."];
+  for(const locale of ['am','om'] as const){
+    const t=createUiText(clientMessages(catalogs[locale]));
+    for(const label of labels)assert.notEqual(t(label),label,`${locale}: ${label}`);
+    assert.notEqual(t('Open inquiry'),t('View inquiry list'),'Opening one received inquiry is distinct from the visitor selection list');
+    assert.notEqual(t('Send inquiry'),t('Start chat'),'Async business inquiry does not borrow live support chat wording');
+    assert.notEqual(t('Inbox'),t('Support'),'Business inquiries remain separate from platform Support');
+    assert.notEqual(t('Company name'),t('Contact name'),'Applicant company and human contact remain distinct');
+    const channels=['Send on WhatsApp','Send on Telegram','Send to MirtPage Inbox'];
+    assert.equal(new Set(channels.map(label=>t(label))).size,3,'Equal choices name distinct destinations');
+    channels.forEach((label,index)=>assert.ok(t(label).includes(['WhatsApp','Telegram','MirtPage'][index]),'Destination brands stay recognizable'));
+    const complete=createUiText(catalogs[locale]);
+    assert.notEqual(complete('Inquiry details'),'Inquiry details','Server-rendered web inquiry detail remains localized');
+  }
 });
 
 test('FE-026/FE-056/FE-053 S115: focused management sections and unsaved actions reach every client catalog',async()=>{

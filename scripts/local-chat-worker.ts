@@ -1,3 +1,5 @@
+import {dispatchPartnerInterestEmails,partnerInterestSchemaReady} from '../lib/transport-partner-email-delivery';
+import {cleanupPartnerInterests} from '../lib/transport-partner-interest';
 import {platformEnvironment} from '../lib/platform-environment.mjs';
 import {postgresRuntimeServices} from '../lib/postgres-runtime-services';
 import {sweepSupportInactivity,sweepWaitingSupportAssignments,sweepSupportReplyOverdue} from '../lib/support';
@@ -58,6 +60,14 @@ export async function runLocalChatWorker(once=false){
           catch{console.error('Local tracking identity cleanup failed',{category:'tracking_cleanup_failure'});}
         }
       }catch{console.error('Local tracking readiness failed',{category:'tracking_readiness_failure'});}
+      if(stopped)break;
+      try{
+        if(await partnerInterestSchemaReady()){
+          const{processed,accepted,ignored,failed,pending,configured}=await dispatchPartnerInterestEmails({mode:'local-mailpit',limit:2});
+          console.log('Local logistics partner email',{processed,accepted,ignored,failed,pending,configured});
+          if(!stopped)await cleanupPartnerInterests();
+        }
+      }catch{console.error('Local logistics partner email failed',{category:'partner_email_failure'});}
       if(once||stopped)break;
       await new Promise<void>(resolve=>{wake=resolve;timer=setTimeout(resolve,60_000);});
       wake=undefined;timer=undefined;

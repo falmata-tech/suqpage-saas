@@ -1,4 +1,3 @@
-import {categoryExampleVideo} from "../lib/category-starter";
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import {getDb,getUserById,closeDbForTests} from './testing/postgres-fixture';
@@ -24,7 +23,9 @@ async function main(){
  await updateSupportAgentSetting(staff,{userId:staff.id,enabled:true,maxOpenConversations:10,queueScope:'support'});
  const command={kind:'create',businessId:a,productId:null,expectedContentVersion:1,idempotencyKey:crypto.randomUUID(),name:'Example item',description:'Original description',availability:'available',offeringKind:'standard_product',quantityMode:'optional',categoryId:null,imageAction:'keep',videoRef:''};
  const created=await executeBasicProductUpkeep(postgresProductUpkeepPort,owner,command,null);
- let product=await db.prepare('SELECT * FROM products WHERE id=?').get(created.productId);assert.equal(product.video_ref,categoryExampleVideo("other-manufacturing"));
+ let product=await db.prepare('SELECT * FROM products WHERE id=?').get(created.productId);
+ assert.equal(product.video_ref,'','An unclassified business has no unrelated example video');
+ assert.deepEqual(JSON.parse(String(product.media_json)),[],'An absent example never becomes a blank gallery item');
  await executeBasicProductUpkeep(postgresProductUpkeepPort,owner,{...command,kind:'update',productId:created.productId,expectedContentVersion:created.contentVersion,idempotencyKey:crypto.randomUUID(),videoRef:'youtube:aqz-KE-bpKQ'},null);
  assert.equal((await db.prepare('SELECT video_ref FROM products WHERE id=?').get(created.productId)).video_ref,'youtube:aqz-KE-bpKQ','Own valid video saves directly');
  const input={target:'product',productId:created.productId,sourceUrl:'https://example.com/video',note:'Please use this product demonstration.',idempotencyKey:crypto.randomUUID()};

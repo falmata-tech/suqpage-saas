@@ -1,3 +1,4 @@
+import {usePublicScrollInset} from './public-scroll-inset';
 import LoadingBar from "./LoadingBar";
 import {File,Paths} from 'expo-file-system';
 import {randomUUID} from 'expo-crypto';
@@ -49,6 +50,7 @@ export function Icon({
     down: "m5 9 7 7 7-7",
     menu: "M4 5h16 M4 12h16 M4 19h16",
     grid: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
+    list: "M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01",
     globe: "M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0 M2 12h20 M12 2c-5 5-5 15 0 20 M12 2c5 5 5 15 0 20",
     package: "m3 7 9-5 9 5v10l-9 5-9-5V7 M3 7l9 5 9-5 M12 12v10 M7 4l10 5",
     tag: "M3 3h8l10 10-8 8L3 11V3 M7 7h.01",
@@ -64,7 +66,9 @@ export function Icon({
     star: "m12 3 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6",
     user: "M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0 M4 22v-3a8 8 0 0 1 16 0v3",
     info: "M12 11v6 M12 7v1 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0",
+    truck: "M1 3h14v13H1V3 M15 8h4l3 4v4h-7 M8 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0 M20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0",
     chat: "M21 11a9 9 0 0 1-9 9H3l2-4a9 9 0 1 1 16-5",
+    send: "M22 2 11 13 M22 2 15 22 11 13 2 9 22 2",
     bell: 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9 M10 21h4',
     headphones: 'M3 14h3v7H3z M18 14h3v7h-3z M3 14v-3a9 9 0 0 1 18 0v3',
     eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12 M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
@@ -224,6 +228,7 @@ export function Screen({
   children: React.ReactNode;
   scroll?: boolean;
 }) {
+  const bottomInset=usePublicScrollInset();
   return (
     <KeyboardAvoidingView
       style={s.fill}
@@ -232,7 +237,7 @@ export function Screen({
       {scroll ? (
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={s.screen}
+          contentContainerStyle={[s.screen,{paddingBottom:Math.max(36,bottomInset)}]}
         >
           {children}
         </ScrollView>

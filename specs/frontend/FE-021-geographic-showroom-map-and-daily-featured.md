@@ -4,11 +4,318 @@ title: Geographic Showroom map and Daily Featured Showrooms
 status: in_progress
 related: [FE-074, FE-053, FE-058, FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, FE-048, BE-019, BE-020, BE-021, BE-023, BE-029, BE-041, DEP-016, DEP-017, DEP-024, DEP-026, DEP-049, ADR-0011, ADR-0016, FE-065]
 owners: [product, frontend, design]
-last_updated: 2026-10-20
+last_updated: 2026-10-22
 change_level: L3
 ---
 
 # FE-021 - Geographic Showroom map and Daily Featured Showrooms
+
+## S159 — truthful Daily Featured broadcast header (in progress)
+
+The current system has an authoritative EAT program schedule and optional
+public TikTok/YouTube destinations, but no provider integration or operator
+signal that verifies whether an external stream has actually started. The web
+and Expo headers must make the scheduled state easy to understand without
+presenting schedule time as proof of broadcasting.
+
+GIVEN today's program has businesses WHEN its scheduled window has not begun
+THEN the header names TikTok Live and says when its scheduled window begins in
+EAT, whether or not a destination is configured. GIVEN the scheduled window is
+underway THEN the header identifies the scheduled window and offers
+**Check TikTok Live** only when a validated TikTok destination exists; it does
+not assert that the external stream is live. The phone status spans the content
+width so the state and start time are readable. GIVEN the selected program
+day has ended THEN the header says the scheduled program has ended and offers
+YouTube recordings only when that destination is configured. GIVEN no businesses
+are scheduled or a destination is absent/invalid THEN show the schedule state
+without a dead link or an invented broadcast claim.
+
+Web desktop, phone web and Expo use the same phase, EAT range and localized
+meaning. A selected future weekday shows its scheduled date/time without
+revealing future business identities. A verified **Now broadcasting** status is
+out of scope until an authorized operator status or provider signal exists.
+
+Definition of Ready: the no-integration boundary is explicit in BE-029 and the
+owner asked for the program state in the header. Test schedule transitions,
+empty and missing/invalid channel cases, localization in Amharic/Afaan Oromo,
+and actual Chrome 1440/390 plus Expo. Visual approval precedes full gates. No
+database change, provider integration or external write is required.
+
+Focused evidence: `scripts/test-featured-broadcast-header.ts` passes all five
+scheduled, in-window, ended, empty, link-validation and future/past date cases
+in English, Amharic and Afaan Oromo, including a missing-link scheduled state.
+Actual Chrome review covers 1440px web in the upcoming state, 390px web in the
+scheduled-window state, and 390px Expo in the scheduled-window state. The
+source-bound capture receipt and screenshots are in
+`.local/featured-header-s159/receipt.json`; visual approval and applicable full
+gates remain pending.
+
+## S158 — optional exact public map pins (superseded by S160)
+
+Country and city are required for a business listing; a public map pin is
+optional. **City only** remains eligible for country/city and product discovery
+but is not rendered as a business marker. **Show on map** requires the owner to
+place an exact public point after selecting its canonical city. Unknown legacy
+coordinates and city-centroid/area projections do not qualify as exact pins and
+must not create public map markers. Search scope, counts and location filters for
+Business locations describe businesses that can actually be opened on its map;
+Product listings continue to include eligible goods from city-only pages.
+
+GIVEN a map response containing both exact storefront pins and city-only
+businesses WHEN web or Expo renders its map THEN every marker/group member comes
+from an exact-public storefront pin, with no hidden city-only member in a cluster.
+GIVEN a city-only business with listed products WHEN a visitor searches Product
+listings by its country/city or product name THEN its product cards and source
+business remain discoverable.
+
+Definition of Ready: the owner chose the exact-public meaning for every
+owner-created pin and approved setup without a pin. FE-059/FE-056 define the
+visual choice; BE-041 owns saved projection and server validation. Regress map
+eligibility, result counts, exact pin grouping/preview, and city-only product
+discovery. Cluster geometry may use isolated synthetic locations but may not
+pretend unpinned businesses have map coordinates. Capture Chrome and Expo after
+implementation; obtain visual approval before full/release checks. No migration
+or change to canonical country/city is expected.
+
+## S160 — city-area map pins and counted groups (in progress)
+
+The owner explicitly changed the empty-map decision: businesses with only a
+canonical city location should still appear on the map. Use that validated city
+anchor as a **city-area pin**, distinct from an exact storefront pin. Preserve
+`locationMode: area` internally through web and Expo; visitor-facing markers,
+group cards, previews and accessible names show the business name and actual city,
+without the internal location-mode label or an implied street address. A final
+marker representing exactly one business uses the shop glyph and opens that
+business preview at every zoom, including when it would otherwise appear as a
+one-business outer aggregate; never render a numbered circle containing **1**.
+Numbered count circles represent two or more businesses. When a singleton city
+anchor overlaps another marker at a broad scale, include it in a zoomable count
+of the overlapping businesses until the markers separate. Once alone, and after
+a city filter that leaves one result, show its shop glyph at the canonical city
+anchor. Preserve bounded display spacing without changing a city's canonical
+anchor. Do not apply per-business
+geographic jitter, reuse stale exact coordinates, or infer sub-city positions.
+At terminal zoom the existing counted-group/modal-capacity policy remains
+authoritative; every eligible business remains reachable. Business search counts
+and city filters include exact pins and city-only pages with validated canonical
+city anchors. Product search retains its existing city-only eligibility. Legacy
+locations without a validated canonical city anchor remain absent from the map.
+
+GIVEN an eligible published city-only business with a canonical city anchor WHEN
+it is the only business represented by a final marker THEN show its shop glyph and
+business name at the city anchor, with the actual city in its accessible name,
+and open that business preview directly; do not
+replace the business name with the location detail, show a numbered **1** circle,
+or imply an exact address. The same hierarchy applies on web and Expo.
+GIVEN several businesses in one city WHEN the visitor zooms to city scale THEN
+groups of two or more resolve through the existing numbered circles; a singleton
+left by a bounded screen partition uses the shop glyph without a count. The map never
+displays fabricated business positions or an oversized/unreachable preview.
+GIVEN the city cluster preview opens THEN each card names the business and city;
+no internal location-mode label, exact coordinate or address is presented.
+GIVEN one city-only business has a valid canonical anchor WHEN the map reaches
+its terminal level THEN it remains a shop glyph at its city anchor, without a
+count circle, and opens its preview directly.
+GIVEN an exact-pin business WHEN it is included in the same map scope THEN its
+owner-selected coordinate and existing grouping/isolated-pin behavior are kept.
+GIVEN a legacy or invalid city anchor WHEN map data is queried THEN it contributes
+neither a marker nor a business map count.
+
+Definition of Ready: the owner chose to include city-only businesses as map pins,
+with exact storefront pins still opt-in. FE-058 controls map grouping; BE-041
+owns the validated canonical anchor; FE-065 keeps business and product scopes
+independent. Regression coverage proves country/city counts, city filters and
+business search include valid area anchors; invalid legacy points remain
+excluded; multi-business area groups use numbered circles, singleton area groups
+use a shop glyph and accessible business/city name, and previews omit internal
+location-mode labels; product search is unchanged. Exercise web desktop, phone web and Expo from the
+same source/API revision; actual visual approval precedes full/release gates.
+This is a query/UI change without a database migration or hosted-data write.
+
+Local evidence (visual approval and full gates pending):
+`test-independent-discovery.ts` proves valid canonical city anchors remain
+eligible when the legacy proposal country is blank, while invalid/legacy anchors
+remain excluded. `test-map-group-picker-web.ts` and
+`test-mobile-map-groups.ts` verify city-area preview labels/accessibility;
+focused discovery, clustering, typecheck and localization checks pass. Actual
+Chrome desktop, phone web and Expo preview all return the same 57 city-only
+businesses across eight cities. The final-marker rule prevents a one-business
+group from rendering a numbered **1**. The browser journey filters to Bishoftu,
+confirms **Green Terrace Farm** is a single shop marker at its canonical city
+anchor, opens its direct preview, and verifies the same result
+on all three client surfaces. At regional overview, the same business is
+included in a real overlapping multi-business count while it would otherwise
+occlude nearby markers. Source-matched captures and receipt are in
+`.local/s160-city-area-map-review/singleton-review.html` and
+`singleton-receipt.json`. Visual approval and full gates remain pending. The
+walkthrough does not tap every overlapping regional marker. Synthetic grid
+tiles were used, so this does not verify public basemap availability or hosted
+data.
+
+## S155 — regional overview clusters and explicit discovery modes (in progress)
+
+The bounded local map API historically returned 66 public demo businesses across
+multiple Ethiopian cities. At web opening zoom 5, the old 96px outer hierarchy
+turned all 66 into one badge; one click only then separated it into regions. The
+seed path also replaced each demo's distinct approximate map point with its
+city-center point, so dense cities such as Addis started from one shared anchor.
+S160 supersedes the exact-pin-only map scope: keep this 66-point geometry case as
+a synthetic clustering regression, and show only owner-selected exact pins or
+validated canonical city-area pins. Never replace a real owner's selected
+location with demo coordinates.
+
+GIVEN multiple geographic concentrations are present in the current public map
+scope WHEN the Market opens at its default regional overview THEN nearby final
+groups may form counted regional clusters, but one country-spanning aggregate
+must not hide those distinct concentrations. As visitors zoom in, each aggregate
+continues to split into its geographic children; at the existing city/terminal
+level, exact nearby-group membership, fit limits and preview behavior stay as
+specified below. Zooming out may merge nearby regional groups normally. Keep
+every eligible business represented exactly once at every zoom and leave its
+public coordinate unchanged.
+
+The primary discovery tabs are labelled **Business locations** and **Product
+listings** in web, phone web and Expo. Their native-language labels must name
+the search scope clearly without adding explanatory copy that takes map height.
+The current tab remains selected and independently controls the existing map or
+product results.
+
+Definition of Ready: the historical 66-point reproduction identifies the shared
+city anchors, source radius and initial zoom. A synthetic 66-point regression
+requires at least ten opening city markers, then more groups at zoom 9 and 10,
+conserving every ID. S160 supersedes the prior actual-map eligibility rule:
+eligible city-only businesses enter only as canonical city-count groups, while
+legacy/unanchored locations remain excluded. Test the cluster hierarchy,
+localized tab names and independent tab selection. Capture Chrome desktop/phone
+and Expo before the existing visual-approval gate. Do not run full release gates
+or deploy before approval.
+
+## S154 — city-scale terminal circles (implemented locally; physical/visual review pending)
+
+The latest owner permits display-only spacing for counted circle targets so a
+dense city need not remain one large circle until street-detail zoom. Current local
+public data has 21 Addis businesses at one canonical city anchor. S160 keeps these
+records at that anchor; terminal groups may fan out as count circles for reachable
+tap targets, but the businesses themselves get no synthetic sub-city coordinates.
+Preserve this distinction from exact storefront pins and the already-qualified
+native SDK touch correction.
+
+Acceptance, with finite bounds reviewed before implementation:
+
+- GIVEN normal zoom-out THEN weighted outer circles merge nearby groups and count
+  businesses; clicking one advances toward its actual expansion, never opens an
+  oversized modal. GIVEN city-level normalized 12/native 11 THEN the current small
+  terminal groups are exposed, even when their saved city anchors coincide.
+- GIVEN exposed terminal groups THEN clicking opens exactly their screen-admitted
+  previews in place, with no additional zoom. Retain up to 3 phone/up to 6 large
+  screen cards, reduced for height/text scale, no inner paging/scroll, and only
+  truly isolated shops use individual glyphs. Membership remains independent of
+  display displacement and cannot be inferred from saved/foreign subsets.
+- Use deterministic, bounded circle-only screen separation over the complete
+  public scope before viewport filtering. Keep true/public anchors and stored
+  coordinates intact; do not apply per-business area jitter or use displayed
+  circle centers as a business address. No lines, extra dots, database change or
+  forced shop movement.
+  Try minimal-shift-first spacing within 5km of each public group centroid;
+  only when no collision-free position fits there, permit a finite 10km fallback.
+  That fallback shares one stable full-scope lattice phase: near-coincident
+  anchors cannot waste packing space through separately shifted56px grids.
+  At normalized 12/native 11 expose terminals only when the full-scope layout fits.
+  A denser overflow retains the ordinary aggregate and advances one level to 13,
+  where bounded 200-point/capacity-1 coincident fixtures must fit without overlap.
+  No store is dropped or hidden behind an unreachable target. The interaction
+  ceiling is normalized 13/native 12; optional district detail is not street zoom.
+- Preserve 56px pitch/48px targets, input-order/pan determinism, dateline/polar
+  validity, count/ID conservation and current scope/capacity validation. Keep
+  normal global pan, initial/reset Ethiopia, one native normalized zoom offset,
+  source capability 19, SDK dispatch/accessibility and current camera/Back state.
+
+This supersedes the prior late 18/17 reveal and800m-only spacing. FE-058 records
+its matching camera change before production edits. Aggregate activation must
+stop at 12 when that layout fits, even if the underlying hierarchy's expansion is 13.
+Current-group admission must consult the actual displayed layout: a saved terminal
+hidden in a retained dense aggregate cannot open a modal. Master §§10/19 are also
+affected; root owns their planned/current reconciliation and the ordered checklist.
+There is no provider, API, database, marker hit-frame or dependency
+change. Reuse installed Supercluster 8.0.1 over weighted final groups. Its pixel
+radius, source maxZoom and expansion zoom are clustering controls, not proof of
+MirtPage's modal policy. Sources: [Supercluster options](https://github.com/mapbox/supercluster#options)
+and [MapLibre clustering example](https://maplibre.org/maplibre-gl-js/docs/examples/create-and-style-clusters/).
+
+Verification plan: preserve the actual 21-city-coordinate old-policy failure;
+shared pure tests for 2..200/dense/coincident/capacity 1/3/6 and retained IDs;
+current-group authority plus native/Leaflet aggregate→terminal/camera tests;
+installed-SDK 48dp regressions; actual synthetic-map web/Expo and parent-owned
+physical tap/pan/zoom/preview/Back review before the existing visual/full gates.
+Implemented in the existing shared model. The captured 66-point public snapshot
+now conserves every ID and exposes Addis as seven phone/four desktop groups at
+city zoom, both alone and in the complete scope. Focused pure tests cover the
+coincident and near-coincident 200-target overflow, equator/dateline/polar bounds,
+retained coordinates, cache-copy safety and current displayed-group authority.
+Native controller/SDK-host tests retain 48dp dispatch and matched zoom bounds.
+Actual Chrome tests use installed web/Expo Leaflet at 390/1440, with external
+requests blocked; all 21 area businesses open exactly once without camera moves.
+These are synthetic UI/model and captured-public-snapshot checks, not a physical
+MapLibre, live data mutation, deployment or visual-approval claim. Parent-owned
+physical tap/preview/Back and visual review remain pending.
+
+## S153 local native map fixture (in progress)
+
+The owner requests physical Android development-client audits. Automated native
+map gestures must not contact public tile servers. This JS-only L1 addition uses
+a synthetic background-only MapLibre style, without a tile server or dependency.
+
+GIVEN a development runtime explicitly sets EXPO_PUBLIC_NATIVE_MAP_FIXTURE=1
+WHEN native MapLibre mounts THEN render the declared synthetic background with
+empty sources and no tile, sprite or glyph URLs while retaining real local
+business data, markers, camera, gestures and previews. GIVEN release runtime or
+an invalid fixture flag WHEN fixture mode is requested THEN stop before mounting
+a map; never fall back to public tiles. An unset flag preserves the existing
+ordinary map. Expo/Leaflet behavior remains unchanged. The fixture establishes
+native UI/gesture behavior only, not real basemap/provider availability.
+
+Ordered steps: spec/RED wiring regression → small pure style selector/native
+binding → focused fail-closed/type checks → reviewed delta transfer after the
+combined source checkpoint → physical device evidence under the separately
+admitted development client. No Android build, key use, install, provider change
+or full release gate is part of this source change. Master §§5/10/19/22 retain
+ordinary map behavior; this explicit synthetic test mode is not production UX.
+
+Test: `scripts/test-mobile-map-groups.ts`; real-device proof remains pending.
+
+## S153 installed native marker dispatch (in progress)
+
+The installed MapLibre 11.4 Android SDK consumes a marker hit through the SDK
+Marker onPress and computes its rectangle from the full measured child, regardless
+of descendant pointerEvents. Counted markers omitted that SDK callback and used a
+96px layout frame, so a real Android tap could be swallowed while child-callback
+tests passed. This is an L1 native adapter correction, not a clustering change.
+
+GIVEN an exposed final circle WHEN the installed native SDK dispatches its marker
+press THEN open its current admitted preview once without camera movement. GIVEN
+an outer aggregate THEN one SDK press advances the existing expansion camera
+once; an isolated shop still selects its own preview. A counted native host is
+48×48dp, centered on the unchanged circle position, with no invisible 96px SDK
+hit rectangle. Its decorative badge and retained legacy nearby artwork do not
+expand the host. Android keeps its map-level SDK hit dispatch; iOS keeps its annotation host
+targetable for the installed native tap recognizer. One accessible child action
+remains available without a second
+physical Pressable hit route. Expo/Leaflet retains its 96px transparent layout and
+48px child target; marker geography, glyph/badge pixels, grouping and labels stay.
+
+Ordered verification:
+- [x] Read installed Android/iOS SDK dispatch and measured-hit contracts; preserve
+      an SDK-boundary RED regression before production edits.
+- [x] Correct native SDK dispatch and bounded group host with unchanged web path.
+- [x] Run focused adapter/marker regressions and web/mobile typechecks; retain
+      terminal/aggregate/single, pixel-offset and single-action evidence.
+- [ ] Transfer only reviewed source to the combined batch. Installed Android touch
+      and accessibility proof remain pending a separately authorized device test;
+      Expo or direct callback tests cannot establish native rendering behavior.
+
+Test: `scripts/test-mobile-map-groups.ts`. Master §§5/10/19/22 existing map behavior
+is affected only by restoring its stated activation contract. No API, database,
+provider, dependency, Android build or full release gate is included here.
 
 ## S151 B10 — readable category choices in Featured (implemented locally)
 
@@ -731,8 +1038,11 @@ Scenario: Sunday presents the seventh industry Daily Featured
 
 Scenario: Daily Daily Featured broadcast changes state truthfully
   GIVEN the selected date uses two active sessions around a four-hour intermission
-  WHEN the program has not started, is active, is on break, or has ended
-  THEN the UI respectively shows the schedule, live booth or break, intermission, or Livestream ended
+  WHEN the program has not started, its scheduled window is underway, is on a
+  program break, or has ended
+  THEN the UI shows the EAT start time, scheduled-window status, active program
+  detail, or ended status, respectively
+  AND scheduled time alone never claims that TikTok confirms an external stream
   AND the ended state directs visitors to configured YouTube recordings
   AND an unconfigured provider destination never renders as an invented link
 
@@ -807,7 +1117,7 @@ attribute `directory` and `expo` showroom entries.
 | S128/S136 size-only changes preserve the raw SDK camera within half a projected pixel and retain geographical intent without compounded quantization | focused/browser | `scripts/test-web-map-lifecycle.ts`, `scripts/test-mobile-map-lifecycle.ts`, `scripts/test-leaflet-resize-center.ts`; shared weak map-instance intent, independent raw SDK/persisted-view assertions, fractional parity/remount, pan/zoom takeover, zero-size and disposal guards; FE-065 S136 controls Ready and actual-return proof |
 | S128 combined search/filter/reload/clear → final group → full showroom → Back | browser | `.local/market-toolbar-s128/workflows-verified/outcome.json`; actual local API outcomes and full-precision SDK camera readback; visual/full gates pending |
 | Group activation, all-fit list, preview and full-page return | browser | Actual installed Chrome/Expo29checks/59states; `.local/map-groups-s127/actual/final-platform-verified.json`; visual approval pending |
-| Desktop/390px/320px map, nearby viewer, and Daily Featured layout | visual/browser | `scripts/capture-discovery-visuals.mjs` |
+| Desktop/390px/320px map, nearby viewer, and Daily Featured layout | visual/browser | `scripts/capture-discovery-visuals.mjs`; S159 requires actual Chrome and Expo review |
 | Exact tile provider, attribution, CSP, no proxy/prefetch/cache | contract | `scripts/test-discovery-geography.mjs` |
 | Basemap failure and Daily Featured recovery | browser | `tests/acceptance/app.spec.ts` |
 

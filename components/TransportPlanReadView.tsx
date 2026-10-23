@@ -28,7 +28,7 @@ function ProviderTrackingDetails({leg}:{leg:TrackableLeg}){
 /** Public plan fields only. Ordinal stages never imply completed travel. */
 export default function TransportPlanReadView({plan}:{plan:TransportPlan}){
  const t=useUiText();
- return <section className={styles.plan} aria-label={t('Shipment tracking')}>
+ return <section className={styles.plan} aria-label={t('Shipment record')}>
   <p className={styles.count}>{plan.legs.length===1?t('1 transport stage'):t('{count} transport stages',{count:plan.legs.length})}</p>
   <ol className={styles.legs} aria-label={t('Providers in travel order')}>
    {plan.legs.map((leg,index)=>{

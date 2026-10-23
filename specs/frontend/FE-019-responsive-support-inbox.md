@@ -4,11 +4,203 @@ title: Responsive client and staff support inbox
 status: in_progress
 related: [FE-060, BE-048, FE-049, FE-053, FE-056, ADR-0023, FE-024, FE-026, FE-036, BE-018, BE-024, DEP-015, DEP-026, ADR-0009, ADR-0012, BE-032, BE-040, BE-042, DEP-039, FE-057, FE-062, DEP-043, BE-050, FE-068]
 owners: [frontend, customer-support]
-last_updated: 2026-10-17
+last_updated: 2026-10-23
 change_level: L3
 ---
 
 # FE-019 - Responsive client and staff support inbox
+
+## S168 — stable live-chat phase after a timely reply
+
+Web and Expo use the server's first public staff-reply timestamp to decide
+whether Transport became a live conversation before the 3:30 handoff. A later
+staff reply or a long transcript must not hide the initial timely reply and
+replace the live composer with a callback form. A solely late reply does not
+reopen the live portal. The authorized participant receipt contains only this
+timestamp, not private staff notes or assignment history. Cover guest and
+business-owner conversations in the affected UI state checks.
+
+## S162 — timed transport wait and offline follow-up (implemented locally; full release review pending)
+
+For visitor and owner Transport requests, the initial copy names the selected
+provider and says its live agents will join to arrange the shipment. Until
+provider-owned staff accounts exist, MirtPage staff operate the provider's
+internal queue on its behalf; provider-owned routing remains future work. Do not
+call the agent a coordinator. At two minutes without Join or a staff reply, say
+that the provider's team is helping other customers and show elapsed wait. At
+three minutes thirty seconds, stop the live session and replace the transcript,
+composer and chat utilities with a short callback form. Say: “The team is helping
+other customers right now. Leave your contact details and they’ll get in touch
+as soon as possible.” Keep this un-timed; do not expose assignments, staff
+identity or an ETA.
+
+The initial intake already captures name and phone. Prefill and show those
+details in the callback form; let the visitor correct the phone and optionally
+add an email. At least one valid contact method is required. Do not ask for
+information already present. Submitting creates one idempotent offline
+follow-up in the existing Transport staff case and stores the selected contact
+details on that record. Staff retain the open case for phone/email follow-up; it
+is not resolved, blamed on staff or treated as a new shipment. After success,
+show a static receipt naming the contact channel(s). Remove the live transcript,
+reply box and chat controls from the visitor view. Stop conversation and
+unread-alert polling after the 3:30 transition; make no background requests
+while the callback form or receipt is displayed. One submit and bounded retry
+are allowed, fenced by an idempotency key. Retain the reference for the receipt
+and staff case; never keep a live-message portal mounted after timeout.
+The callback form also offers a quiet Cancel request action, which closes the
+same case and reveals Send another request. After a callback has been submitted,
+the static receipt offers Send another request directly; this leaves the prior
+follow-up available to staff. Web and Expo use the same distinction.
+
+Explicit Join or a public staff reply before 3:30 ends the wait and retains the
+active live conversation. The selected-provider routing language is consistent
+for visitor and owner entry. Reconnect, resume or switching pages recomputes
+from the original server-created timestamp; reassignment cannot reset it. The
+offline transition is enforced by the server as well as the UI so a stale client
+cannot continue sending live replies after the deadline. Other owner/visitor
+idle rules remain unchanged.
+
+GIVEN a new visitor or owner Transport request is waiting THEN show the selected
+provider's live-agent message and elapsed time. GIVEN two minutes pass without
+Join/reply THEN show the localized busy message and elapsed time. GIVEN three
+minutes thirty seconds pass without Join/reply THEN stop live polling and show
+the callback form with the existing phone prefilled and email optional. GIVEN
+the visitor submits at least one valid contact method THEN save one follow-up
+request to the same staff case, retain staff access, and show a static receipt;
+the visitor receives no live transcript, reply composer or polling afterward.
+GIVEN an authorized agent joins before the deadline THEN retain the live
+conversation. Sleep, reconnect or stale responses cannot return a visitor from
+offline follow-up to a live session.
+GIVEN the callback form is open WHEN the participant cancels THEN show the ended
+state with a new-request action and do not submit callback details. GIVEN a
+callback receipt is shown WHEN the participant starts another request THEN open
+a fresh intake while the earlier case and follow-up remain intact. A stale
+pre-timeout End chat action must settle to the authoritative ended state.
+GIVEN a business owner starts a request from a fresh intake and then ends it
+WHEN they select Send another request THEN display a fresh intake in the same
+account, without reopening, replacing or deleting the ended case. The address
+bar and client router must agree on the selected case versus new-intake route;
+changing only browser history must not leave the old chat mounted under the new
+URL. Reopening Chat history still finds the ended case by its original reference.
+On the Expo owner intake, keep Account, Chat history and Shipment records in a
+compact accessible utility row that wraps only when the localized labels need
+more room. Do not stack three full-width actions above the first route field;
+the main intake and Start chat remain the visual priority at phone widths.
+
+The user suggested a later phone-assisted live return. Treat it as a separate
+future capability, not part of S162: staff may invite a caller to re-enter one
+specific case with a short-lived, single-use code. Any implementation must bind
+the code to that case, expire it, limit attempts, avoid exposing other records,
+and activate polling only for the redeemed live session. Never use a
+static/reusable shared code or keep polling open while idle.
+
+Test exact 119,999/120,000ms and 209,999/210,000ms boundaries, Join/reply stop
+paths, late events, invalid/future timestamps, reassignment, offset clock,
+remount/reconnect, repeated submit/lost response, phone correction, optional
+email, invalid/missing contact, owner and guest scopes, same-case staff
+follow-up, server rejection of post-deadline live replies and proof that both
+public pollers stop at timeout. Actual Chrome desktop/phone and Expo must
+exercise the complete workflow before visual approval/full gates.
+
+S162 local evidence before this correction (2026-10-22) verified an earlier
+same-thread composer at 2:00/3:30 in isolated Chrome and local PostgreSQL. That
+direction is superseded and does not qualify the new callback flow. The old run
+also exposed an Expo post-send clock race; retain its fixture only if it still
+proves monotonic phase changes. A fifth shared-preview start was rate-limited
+before creating a row; no limit was bypassed. Three cancelled GETs remain
+unclassified. No new shared-preview starts are authorized by this spec. Callback
+behavior, poll-stop assertions, owner/staff follow-up, visual approval and full
+gates remain pending. Prior evidence is retained at `.local/s162-transport-review/`.
+
+## S153 N12 — compact native transport conversation (focused checks pass; phone review pending)
+
+The physical development-client audit confirms excessive utilities/status height
+before the first message and an End chat control clipped by persistent navigation.
+GIVEN an active guest or owner transport conversation WHEN opened at 320/390px,
+landscape or with enlarged en/am/om labels THEN present tracking/alerts and concise
+reply/join state/reference in a compact, wrapping utility area. The transcript
+and composer are the primary task; Send and End remain reachable above navigation
+and keyboard, with at least48dp touch targets. Keep intake unchanged and retain
+all owner return/history, tracking, alerts, end/resume/start-another and idle/error
+controls. Do not hide controls or truncate meaningful status to meet a height goal.
+
+Reuse the existing presentation and actions; keep transcript identity/read
+sentinels, actual visibility, draft, request fences, Join/assignment/idle clocks,
+credentials and API authority unchanged. Test waiting/joined/reconnecting/idle/
+closed states, draft/send failure/retry and every retained action in the existing
+native transport and chat-state suites. Verify actual Expo phone/landscape and
+physical Android keyboard/safe-area geometry before the existing visual gate.
+Master §§13/19 already control this task-first contract. Root authorized layout
+work after the N15 focused polling correction. Keep its exact polling body intact.
+Use one wrapping utility row, a normal-size response status/reference, and the
+single existing End action near that status rather than below the transcript.
+Keep one Screen scroll container and its existing read-sentinel boundaries.
+When the available viewport is too short to fit status, transcript and composer
+(including phone landscape), the screen scrolls vertically while retaining a
+visible transcript area; End remains above the first message and no content
+overlaps. Normal portrait keeps the bounded transcript scroll.
+Do not change shared response wording or add a new localized state in this batch.
+The joined/awaiting-first-reply English ambiguity remains an open copy finding.
+
+Focused evidence: the installed-RNWeb check uses actual Buying, UI primitives
+and Alerts trigger across18 language/role/viewport states plus enlarged-text/long
+identity stress. The single End action precedes the first message, utility targets
+remain48px, labels wrap, and Send scrolls above navigation with only one scroll
+container. The prior source fails the End-placement assertion. Five chat/state/
+owner/storage suites qualify38 tests in composite:34 passed initially, and all4
+race tests pass after their raw-div native port is corrected to flatten legitimate
+style arrays; the failed attempt is retained. N15 function body and intake bytes
+are unchanged; mobile/scoped test types and219 specs pass. These controlled ports
+are not ordinary API delivery, physical keyboard or final visual approval.
+
+
+## S153 N07 — useful owner history empty states (focused checks pass; review pending)
+
+GIVEN owner Support finishes a successful empty history load THEN keep its new
+chat form and show the existing localized “No support conversations yet.”
+GIVEN owner Support or Transport history has zero or one result page THEN omit
+Previous/Next; show them only for multiple pages with the existing bounds and
+authorized page requests. Never show an empty explanation during loading or an
+error, hide retained records/drafts on refresh, or change conversation authority.
+Keep Support and Transport separate. Existing FE-053/FE-056 owner tasks and
+master §§13/19 already require clear private tasks and honest empty/error states;
+no navigation, backend or language behavior changes are introduced.
+
+Verify actual source with `scripts/test-mobile-owner-transport.ts` and actual
+React DOM with `scripts/test-client-chat-state-ui.ts`: empty/single/multiple
+pages, paging bounds, refresh/error retention and unchanged Support fields.
+Actual Expo and the corrected Android client remain separate review evidence.
+Both suites pass 24 tests, including retained composer/history and paging bounds;
+mobile/scoped test types and specification validation pass. No chat or email was
+created by these controlled component checks.
+
+## S153 phone composer clearance (in progress)
+
+The local actual-user audit found that the transcript's 220px minimum plus the
+reply form pushed Send beneath persistent phone navigation. This corrects layout
+only; FE-026 workspace destinations, FE-035 labels/touch targets and all existing
+Join, audience, assignment, receipt and persistence authority remain unchanged.
+Master §19's transcript/reply-first statement is affected only by this refinement.
+
+GIVEN assigned staff has joined an open conversation WHEN it is viewed at 390×844,
+320×568 or 844×390 THEN the full reply audience, message field and Send action are
+reachable above persistent navigation without horizontal overflow; controls keep
+48px targets. The transcript has its own bounded scroll area. Long authored labels
+remain readable. Desktop management and phone Details/Back retain their existing
+behavior, draft and selected Reply/Internal note audience.
+
+Ordered verification:
+- [x] Preserve original actual 390px failure and reproduce with real page markup,
+      actual global/module CSS and persistent dashboard phone shell.
+- [x] Make the smallest staff-only responsive layout correction.
+- [x] Verify computed action/navigation geometry, short/landscape, long labels,
+      draft/audience retention and desktop regression in the focused test.
+- [ ] Exercise actual Chrome on the isolated local preview using existing case 69
+      and exact local staff/admin fixtures; retain API/DB outcomes for any action.
+- [ ] Present combined visual review; full gates, commit and rollout remain pending.
+
+Test: `scripts/test-support-compact-ui.ts`; local review evidence remains protected
+under `.local/mirtpage-user-journey-audit-s153/staff-composer/`.
 
 ## S142 compact staff conversation and retired company handoff (ready)
 

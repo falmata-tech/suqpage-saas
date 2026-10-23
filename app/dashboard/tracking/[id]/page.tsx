@@ -1,3 +1,4 @@
+import TransportCoordinator from "@/components/TransportCoordinator";
 import Link from 'next/link';
 import {notFound,redirect} from 'next/navigation';
 import DashboardShell from '@/components/DashboardShell';
@@ -19,12 +20,13 @@ export default async function StaffShipmentPage({params,searchParams}:{params:Pr
  const query=await searchParams,view=trackingStaffView(query),readHref=trackingStaffHref(view,id),editing=query.edit==='1'&&shipment.revokedAt===null,t=await getUiText();
  const manager=actor.access_role==='platform_admin'||actor.access_role==='operations_manager';
  return <DashboardShell user={actor} business={null}><div className={styles.workspace} data-staff-shipment>
-  <Link className="support-back-link" href={trackingStaffHref(view)}>{t('Back to shipments')}</Link>
-  <header className={styles.heading}><div><span className="eyebrow">{shipment.reference}</span><h1>{shipment.label||t('Shipment tracking')}</h1></div>{!editing&&shipment.revokedAt===null?<Link className="btn brand" href={trackingStaffHref(view,id,{edit:true})}>{t('Edit shipment')}</Link>:null}</header>
+  <Link className="support-back-link" href={trackingStaffHref(view)}>{t('Back to shipment records')}</Link>
+  <header className={styles.heading}><div><span className="eyebrow">{shipment.reference}</span><h1>{shipment.label||t('Shipment record')}</h1></div>{!editing&&shipment.revokedAt===null?<Link className="btn brand" href={trackingStaffHref(view,id,{edit:true})}>{t('Edit shipment record')}</Link>:null}</header>
   {editing?<ShipmentEditor shipment={shipment} navigation={view} cancelHref={readHref}/>:<>
-   {query.created==='1'||query.saved==='1'?<p className="notice" role="status">{t('Shipment saved.')}</p>:null}
+   {query.created==='1'||query.saved==='1'?<p className="notice" role="status">{t('Shipment record saved.')}</p>:null}
    {shipment.revokedAt!==null?<p className="notice" role="status">{t('Shipment access revoked.')}</p>:null}
    <dl className={styles.facts}><div><dt>{t('Recipient email')}</dt><dd>{shipment.recipientEmail}</dd></div><div><dt>{t('Email status')}</dt><dd>{t(trackingDeliveryKey[shipment.deliveryState])}</dd></div></dl>
+   <TransportCoordinator/>
    <TransportPlanReadView plan={{version:shipment.version,legs:shipment.legs}}/>
    <ShipmentStaffActions shipment={shipment} navigation={view} canRevoke={manager}/>
   </>}

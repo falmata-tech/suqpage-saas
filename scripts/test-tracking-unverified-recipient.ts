@@ -13,7 +13,7 @@ const denied=(run:()=>Promise<unknown>,code:TrackingError['code'])=>assert.rejec
 async function main(){
  process.env.SUQPAGE_POSTGRES_POOL_MAX='4';const db=await getDb(),now=1_800_000_000_000;
  try{
-  assert.match(String((await db.prepare('SELECT current_schema() value').get()).value),/^suqpage_test_[a-f0-9]{32}$/);assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,77);
+  assert.match(String((await db.prepare('SELECT current_schema() value').get()).value),/^suqpage_test_[a-f0-9]{32}$/);assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,79);
   async function actor(name:string,role:SessionUser['access_role'],scope?:string){const id=(await db.prepare("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES(?,'unused',?,'admin',0)").run(name+'@example.test',name)).insertedId;await db.prepare('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)').run(id,role);if(scope)await db.prepare('INSERT INTO support_agent_settings(user_id,enabled,queue_scope,updated_at) VALUES(?,0,?,?)').run(id,scope,now);return(await runtimeUserById(id))!;}
   const staff=await actor('s141-transport','team_member','transport'),team=await actor('s141-all','team_member','all'),support=await actor('s141-support','team_member','support'),owner=await actor('s141-owner','client');
   const tables=(await db.prepare("SELECT tablename FROM pg_tables WHERE schemaname=current_schema() AND tablename NOT LIKE 'tracking_%' AND tablename<>'rate_limits' ORDER BY tablename").all()).map(row=>String(row.tablename));

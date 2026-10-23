@@ -36,7 +36,8 @@ export type OwnerTransportHistory = {
 export type OwnerTransportRead = OwnerTransportState | OwnerTransportHistory;
 
 export type OwnerTransportCommand =
-  | { action: 'start'; name: string; phone: string; origin: string; destination: string; message?: string; idempotencyKey: string }
+  | { action: 'start'; coordinatorId?: 'shared-trucks-logistics'; name: string; phone: string; origin: string; destination: string; message?: string; idempotencyKey: string }
   | { action: 'message'; conversationId: number; publicRef: string; message: string; idempotencyKey: string }
+  | { action: 'callback'; conversationId: number; publicRef: string; phone: string; email?: string; idempotencyKey: string }
   | { action: 'read'; conversationId: number; publicRef: string; messageId: number }
   | { action: 'close' | 'resume'; conversationId: number; publicRef: string };

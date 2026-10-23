@@ -2,9 +2,9 @@
 id: BE-031
 title: Passwordless identity and authenticated business onboarding
 status: in_progress
-related: [BE-049, FE-059, BE-047, BE-045, FE-054, BE-043, BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017, BE-060, FE-072, FE-073, BE-061, DEP-050]
+related: [BE-018, BE-049, FE-059, BE-047, BE-045, FE-054, BE-043, BE-039, DEP-033, BE-032, FE-040, BE-002, BE-020, BE-030, FE-038, FE-039, DEP-026, DEP-027, DEP-028, ADR-0014, ADR-0017, BE-060, FE-072, FE-073, BE-061, DEP-050]
 owners: [backend, security, operations]
-last_updated: 2026-09-21
+last_updated: 2026-10-21
 change_level: L3
 ---
 

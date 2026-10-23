@@ -79,7 +79,9 @@ test('FE-070 manifest, metadata and shell preloads use the same new art without 
  const manifest=JSON.parse(fs.readFileSync('public/manifest.webmanifest','utf8'))as{icons:Array<{src:string}>;shortcuts:Array<{icons:Array<{src:string}>}>};
  assert.deepEqual(manifest.icons.map(icon=>icon.src),[PLATFORM_BRAND.assets.icon192,PLATFORM_BRAND.assets.icon512,PLATFORM_BRAND.assets.maskable512]);for(const shortcut of manifest.shortcuts)assert.ok(shortcut.icons.every(icon=>icon.src===PLATFORM_BRAND.assets.icon192));
  const layout=fs.readFileSync('app/layout.tsx','utf8');for(const icon of[PLATFORM_BRAND.assets.mark,PLATFORM_BRAND.assets.favicon,PLATFORM_BRAND.assets.apple])assert.ok(layout.includes(icon));
- const sw=fs.readFileSync('public/sw.js','utf8');for(const icon of[PLATFORM_BRAND.assets.mark,PLATFORM_BRAND.assets.icon192,PLATFORM_BRAND.assets.icon512,PLATFORM_BRAND.assets.maskable512])assert.ok(sw.includes(icon));assert.match(sw,/const CACHE_PREFIX = "suqpage-pwa-"/);assert.match(fs.readFileSync('apps/mobile/src/runtime.tsx','utf8'),/storageKey: "suqpage-owner-session"/);
+ const sw=fs.readFileSync('public/sw.js','utf8');for(const icon of[PLATFORM_BRAND.assets.mark,PLATFORM_BRAND.assets.icon192,PLATFORM_BRAND.assets.icon512,PLATFORM_BRAND.assets.maskable512])assert.ok(sw.includes(icon));assert.match(sw,/const CACHE_PREFIX = "suqpage-pwa-"/);
+ const runtime=fs.readFileSync('apps/mobile/src/runtime.tsx','utf8');assert.match(runtime,/storageKey: ownerStorageKey/);assert.match(runtime,/credentialStorageKeys\(/);
+ const storageKeys=fs.readFileSync('apps/mobile/src/credential-storage-keys.ts','utf8');assert.match(storageKeys,/owner: "suqpage-owner-session"/);
  assert.doesNotMatch(fs.readFileSync('lib/brand.ts','utf8'),/process\.env|https?:\/\/|SecureStore|cookie|packageName/);
 });
 

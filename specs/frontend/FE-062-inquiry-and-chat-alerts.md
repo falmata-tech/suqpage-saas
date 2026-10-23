@@ -2,13 +2,35 @@
 id: FE-062
 title: Inquiry and chat alerts with truthful read receipts
 status: in_progress
-related: [FE-069, FE-066, BE-050, DEP-043, ADR-0026, FE-019, FE-026, FE-049, FE-053, FE-068]
+related: [FE-069, FE-066, BE-050, DEP-043, ADR-0026, FE-019, FE-026, FE-049, FE-053, FE-068, FE-075, BE-062]
 owners: [frontend, customer-support]
-last_updated: 2026-10-17
+last_updated: 2026-10-22
 change_level: L3
 ---
 
 # FE-062 — Inquiry and chat alerts with truthful read receipts
+
+## S162 — transport wait notice and asynchronous handoff (implementation under Expo clock regression repair; full review pending)
+
+Transport customers see an elapsed wait, not the internal Overdue state or staff
+assignment. At two minutes without explicit Join or public reply, show a concise
+busy message. At three minutes thirty seconds, end the live wait and change the
+same conversation composer into a message for later in the existing Transport
+inbox. A sent message is stored once, keeps normal public read receipts, and can
+receive a later staff reply. No new inquiry, conversation or end/resolution event
+is created. Recompute from the server-created conversation timestamp on resume;
+Join/reply before the threshold stops the live timer. Admin escalation continues
+at the two-minute assigned response deadline under BE-018/050, with its bounded
+worker cadence and privacy safeguards.
+
+Local visitor workflow evidence is recorded under FE-019 S162 and
+`.local/s162-transport-review/review.html`. The first shared-preview run
+verified same-thread message persistence and the open/unresolved state, but
+reviewing its screenshots exposed an Expo post-send render that can briefly
+return to the live-reply composer. An isolated Chrome/API-fixture run reproduced
+the client-clock mismatch; repair and immediate regression retest remain
+pending. Owner and staff follow-up, due-worker/admin email delivery, observed
+read receipts, visual approval and full gates are not established.
 
 S142 FE-019 compact staff workspace adds an explicit phone Details view. Its chat
 DOM/draft may remain mounted but hidden; read observers must be inactive in that

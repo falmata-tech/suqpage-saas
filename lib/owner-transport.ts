@@ -1,7 +1,7 @@
 import type {SessionUser} from './types';
 import type {OwnerTransportConversation,OwnerTransportDefaults,OwnerTransportRead,OwnerTransportState} from './owner-transport-contract';
 import {runtimeGet} from './runtime-sql';
-import {assertOwnerTransport,createOwnerTransportConversation,getSupportConversation,listSupportConversations,postSupportMessage,acknowledgeSupportRead,closeSupportConversation,reopenSupportConversation,SupportError} from './support';
+import {assertOwnerTransport,createOwnerTransportConversation,getSupportConversation,listSupportConversations,postSupportMessage,acknowledgeSupportRead,closeSupportConversation,reopenSupportConversation,submitOwnerTransportCallback,SupportError} from './support';
 
 function fields(raw:Record<string,unknown>,allowed:readonly string[]){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)||Object.keys(raw).some(key=>!allowed.includes(key)))throw new SupportError('Request could not be accepted.','invalid_request');
@@ -26,9 +26,10 @@ async function defaults(actor:SessionUser):Promise<OwnerTransportDefaults>{
 async function receipt(actor:SessionUser,conversationId:number):Promise<OwnerTransportConversation>{
   await assertOwnerTransport(actor,conversationId);
   const {conversation:c,messages}=await getSupportConversation(actor,conversationId);
-  return {id:c.id,publicRef:c.publicRef,subject:c.subject,category:c.assistanceCategory,status:c.status,resolvedAt:c.resolvedAt,assignedUserName:c.assignedUserName,agentJoined:c.agentJoined,
+  return {id:c.id,publicRef:c.publicRef,subject:c.subject,category:c.assistanceCategory,status:c.status,createdAt:c.createdAt,serverNow:Date.now(),transportWaitStartedAt:c.transportWaitStartedAt,agentJoinedAt:c.agentJoinedAt,firstStaffReplyAt:c.firstStaffReplyAt,resolvedAt:c.resolvedAt,assignedUserName:c.assignedUserName,agentJoined:c.agentJoined,
     idleWarningAt:c.idleWarningAt??null,idleEndsAt:c.idleEndsAt??null,idleEndedAt:c.idleEndedAt??null,
     replyState:c.replyState??null,staffReplyDueAt:c.staffReplyDueAt??null,
+    ...(c.transportCallback?{transportCallback:c.transportCallback}:{}),
     ...(c.transportPlan?{transportPlan:c.transportPlan,transportPlanLink:c.transportPlanLink}:{}),
     messages:messages.map(message=>{const participant=message.senderRole==='client'||message.senderRole==='visitor';return{id:message.id,sender:participant?'visitor':'staff',senderName:participant&&message.senderUserId===actor.id?'You':message.senderName,body:message.body,createdAt:message.createdAt,read:message.read};})};
 }
@@ -52,14 +53,15 @@ export async function commandOwnerTransport(actor:SessionUser,body:Record<string
   if(!body||typeof body!=='object'||Array.isArray(body))throw new SupportError('Request could not be accepted.','invalid_request');
   let conversationId:number;
   if(body.action==='start'){
-    fields(body,['action','name','phone','origin','destination','message','idempotencyKey']);
-    conversationId=(await createOwnerTransportConversation(actor,{name:body.name,phone:body.phone,origin:body.origin,destination:body.destination,message:body.message,idempotencyKey:body.idempotencyKey})).id;
+    fields(body,['action','name','phone','origin','destination','message','idempotencyKey','coordinatorId']);
+    conversationId=(await createOwnerTransportConversation(actor,{name:body.name,phone:body.phone,origin:body.origin,destination:body.destination,message:body.message,idempotencyKey:body.idempotencyKey,coordinatorId:body.coordinatorId})).id;
   }else{
-    const allowed=body.action==='message'?['action','conversationId','publicRef','message','idempotencyKey']:body.action==='read'?['action','conversationId','publicRef','messageId']:['action','conversationId','publicRef'];
+    const allowed=body.action==='message'?['action','conversationId','publicRef','message','idempotencyKey']:body.action==='callback'?['action','conversationId','publicRef','phone','email','idempotencyKey']:body.action==='read'?['action','conversationId','publicRef','messageId']:['action','conversationId','publicRef'];
     fields(body,allowed);conversationId=id(body.conversationId);
     if(typeof body.publicRef!=='string'||!body.publicRef)throw new SupportError('Request could not be accepted.','conversation_changed');
     await assertOwnerTransport(actor,conversationId,body.publicRef);
     if(body.action==='message')await postSupportMessage(actor,conversationId,{audience:'reply',message:body.message,idempotencyKey:body.idempotencyKey});
+    else if(body.action==='callback')await submitOwnerTransportCallback(actor,conversationId,{publicRef:body.publicRef,phone:body.phone,email:body.email,idempotencyKey:body.idempotencyKey});
     else if(body.action==='read')await acknowledgeSupportRead(actor,conversationId,{messageId:body.messageId,publicRef:body.publicRef});
     else if(body.action==='close')await closeSupportConversation(actor,conversationId);
     else if(body.action==='resume')await reopenSupportConversation(actor,conversationId);

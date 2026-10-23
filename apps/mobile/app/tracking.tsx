@@ -4,6 +4,7 @@ import {useFocusEffect,useLocalSearchParams} from 'expo-router';
 import {isTrackingChallengeId,trackingEmail,TrackingError} from '../../../lib/tracking-contract';
 import {API,secure,useApp} from '../src/runtime';
 import {Button,Card,Copy,Field,Screen,Status} from '../src/ui';
+import TransportCoordinator from '../src/TransportCoordinator';
 import TransportPlanView from '../src/TransportPlanView';
 import {createTrackingClient,createTrackingStore,createTrackingDetailLive,trackingReference,TrackingFailure,type TrackingSession,type TrackingChallenge,type TrackingShipmentList,type TrackingShipmentSummary,type TrackingShipmentDetail,type TrackingDetailState} from '../src/tracking-client';
 
@@ -70,7 +71,7 @@ export default function Tracking(){
   finally{busyRef.current=false;if(live.current)setBusy(false);}
  }
  const remaining=Math.max(0,Math.ceil((resendAt-now)/1000));
- return <Screen><Copy big heading>{t('Shipment tracking')}</Copy>
+ return <Screen><Copy big heading>{t('Shipment records')}</Copy>
   <Status loading={restoring} error={error}/>
   {storageBlocked?<Button label={t('Retry')} disabled={busy||restoring} onPress={()=>void(cleanupToken.current?signOut():restore())}/>:!restoring&&!session?<Card>
    <Copy>{t('Enter your email to view your shipments.')}</Copy>
@@ -79,9 +80,9 @@ export default function Tracking(){
    <Status loading={busy}/><Button label={t(challenge?'Verify code':'Send code')} disabled={busy||!email.trim()||Boolean(challenge&&!/^\d{6}$/.test(code.trim()))} onPress={()=>void authenticate()}/>
    {challenge&&<><Button secondary label={remaining?t('Resend code in {seconds}s',{seconds:remaining}):t('Resend code')} disabled={busy||remaining>0} onPress={()=>void authenticate(true)}/><Button secondary label={t('Change email')} disabled={busy} onPress={()=>{invalidate();setChallenge(null);setCode('');setError('');}}/></>}
   </Card>:session&&selected?<TrackingDetail key={session.token+':'+selected} token={session.token} reference={selected} onBack={()=>setSelected('')} onExpired={expire}/>:session?<>
-   <Copy heading>{t('Your shipments')}</Copy><Button secondary label={t('Sign out')} disabled={busy} onPress={()=>void signOut()}/><Status loading={listLoading} error={listError} retry={()=>void loadList()}/>
-   {!listLoading&&!listError&&!items.length&&<Copy>{t('No shipments yet. Your transport agent can add a shipment for this email.')}</Copy>}
-   {items.map(item=><Card key={item.reference}><Copy heading>{item.label||item.reference}</Copy>{Boolean(item.label)&&<Copy muted>{item.reference}</Copy>}<View style={{flexDirection:'row',flexWrap:'wrap',gap:16}}><View style={{flex:1,minWidth:100}}><Copy muted>{t('From')}</Copy><Copy>{item.firstOrigin}</Copy></View><View style={{flex:1,minWidth:100}}><Copy muted>{t('To')}</Copy><Copy>{item.lastDestination}</Copy></View></View><Copy muted>{item.legCount===1?t('1 transport stage'):t('{count} transport stages',{count:item.legCount})}</Copy><Button secondary label={t('Open')} onPress={()=>setSelected(item.reference)}/></Card>)}
+   <Copy heading>{t('Your shipment records')}</Copy><Button secondary label={t('Sign out')} disabled={busy} onPress={()=>void signOut()}/><Status loading={listLoading} error={listError} retry={()=>void loadList()}/>
+   {!listLoading&&!listError&&!items.length&&<Copy>{t('No shipment records yet. When a record is created for this email, it will appear here.')}</Copy>}
+   {items.map(item=><Card key={item.reference}><TransportCoordinator compact/><Copy heading>{item.label||item.reference}</Copy>{Boolean(item.label)&&<Copy muted>{item.reference}</Copy>}<View style={{flexDirection:'row',flexWrap:'wrap',gap:16}}><View style={{flex:1,minWidth:100}}><Copy muted>{t('From')}</Copy><Copy>{item.firstOrigin}</Copy></View><View style={{flex:1,minWidth:100}}><Copy muted>{t('To')}</Copy><Copy>{item.lastDestination}</Copy></View></View><Copy muted>{item.legCount===1?t('1 transport stage'):t('{count} transport stages',{count:item.legCount})}</Copy><Button secondary label={t('Open')} onPress={()=>setSelected(item.reference)}/></Card>)}
    {cursor&&<Button secondary label={t('Load more')} disabled={listLoading} onPress={()=>void loadList(cursor)}/>}
   </>:null}
  </Screen>;
@@ -97,5 +98,5 @@ function TrackingDetail({token,reference,onBack,onExpired}:{token:string;referen
  },[token,reference,updateActive]);
  useFocusEffect(useCallback(()=>{focused.current=true;updateActive();return()=>{focused.current=false;updateActive();};},[updateActive]));
  useEffect(()=>{if(state.unauthenticated)void onExpired();},[state.unauthenticated,onExpired]);
- return <><Button secondary label={t('Back to shipments')} onPress={onBack}/><Status loading={state.loading} error={state.error} retry={()=>void controller.current?.refresh()}/>{state.missing&&<Copy>{t('This shipment is unavailable.')}</Copy>}{state.shipment&&<><Copy heading>{state.shipment.label||state.shipment.reference}</Copy>{Boolean(state.shipment.label)&&<Copy muted>{state.shipment.reference}</Copy>}<TransportPlanView plan={state.shipment}/></>}</>;
+ return <><Button secondary label={t('Back to shipment records')} onPress={onBack}/><Status loading={state.loading} error={state.error} retry={()=>void controller.current?.refresh()}/>{state.missing&&<Copy>{t('This shipment record is unavailable.')}</Copy>}{state.shipment&&<><Copy heading>{state.shipment.label||state.shipment.reference}</Copy>{Boolean(state.shipment.label)&&<Copy muted>{state.shipment.reference}</Copy>}<TransportCoordinator/><TransportPlanView plan={state.shipment}/></>}</>;
 }

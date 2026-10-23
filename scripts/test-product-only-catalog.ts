@@ -53,6 +53,7 @@ async function main(){
   async function business(handle:string,country='ET',city='Town A',state='active'){
    const id=(await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES(?,?,'composition',?)").run(handle,handle,state)).insertedId;
    await db.prepare("INSERT INTO business_discovery_profiles(business_id,city,zone,region,country_code,city_id,latitude,longitude,approved_at,updated_at) VALUES(?,?,'','',?,?,9,38,1,1)").run(id,city,country,'city-'+id);
+   await db.prepare("INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,latitude,longitude,reviewed_version,updated_at) VALUES(?,1,'fashion-textiles',?,'Test region','storefront',9,38,0,1)").run(id,city);
    await db.prepare("INSERT INTO business_industries(business_id,industry_key) VALUES(?,'fashion-textiles')").run(id);
    return id;
   }

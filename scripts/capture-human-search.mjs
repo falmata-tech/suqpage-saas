@@ -65,12 +65,12 @@ try {
   await expect(page.getByRole('checkbox',{name:'Businesses',exact:true})).toHaveCount(0);
   await expect(market(page).locator('.discovery-business-results')).toHaveCount(0);
   await expect(page.getByRole('heading',{name:'Products',exact:true,level:2})).toBeVisible();
-  await page.getByRole('button',{name:'Businesses',exact:true}).click();
+  await page.getByRole('button',{name:'Business locations',exact:true}).click();
   await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('');
   await expect(page.getByRole('button',{name:'Category',exact:true})).toBeVisible();
   await expect(market(page).locator('.leaflet-container')).toBeVisible();
   await expect.poll(()=>tileFixture.servedCount()).toBeGreaterThan(0);
-  await page.getByRole('button',{name:'Products',exact:true}).click();
+  await page.getByRole('button',{name:'Product listings',exact:true}).click();
   await expect(input).toHaveValue('lotion');
   await expect(page.getByRole('button',{name:'Category 1',exact:true})).toBeVisible();
   await page.screenshot({path:`${out}/lotion-${width}.png`,fullPage:true,caret:'initial'});

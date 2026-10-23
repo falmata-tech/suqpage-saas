@@ -168,7 +168,10 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
         : command.imageAction === "remove" ? "" : existing?.image_path || "";
       let media = command.media ?? updateLegacyMedia(existing || null, imageRef, command.videoRef);
       const currentVideos = existing ? productMedia(existing).filter(item => item.kind === "video").map(item => item.ref) : [];
-      if (!existing && !media.some(item => item.kind === "video")) media = [...media, {kind:"video", ref:await runtimeCategoryExampleVideo(command.businessId)}];
+      if (!existing && !media.some(item => item.kind === "video")) {
+        const exampleVideo = await runtimeCategoryExampleVideo(command.businessId);
+        if (exampleVideo) media = [...media, {kind:"video", ref:exampleVideo}];
+      }
       const ownedImages = new Set([
         ...(existing ? productMedia(existing).filter(item=>item.kind==='image').map(item=>item.ref) : []),
         ...(stagedImage ? [stagedImage.imageRef] : []), ...stagedGallery.map(image=>image.imageRef),

@@ -51,7 +51,7 @@ async function actionFixture(){
 
 test('FE-069 S141 stale chat-plan save/replace actions authenticate but never mutate or redirect historical plans',async()=>{
  const{state,actions,form}=await actionFixture();
- const expected={error:'Create shipments in Shipment tracking.'};
+ const expected={error:'Manage shipment records in the Shipment records workspace.'};
  for(const action of[actions.saveTransportPlanAction,actions.replaceTransportPlanLinkAction]){
   for(const data of[form(),new FormData(),(()=>{const value=form();value.set('legs','{');value.append('conversationId','72');return value;})()]){
    const before=[...data.entries()];assert.deepEqual(JSON.parse(JSON.stringify(await action(data))),expected);assert.deepEqual([...data.entries()],before);

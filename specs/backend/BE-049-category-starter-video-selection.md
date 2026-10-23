@@ -4,11 +4,29 @@ title: Persist category-specific example videos atomically
 status: in_progress
 related: [BE-047, BE-041, FE-061, BE-039, BE-031, BE-042, BE-048, FE-046, FE-050, DEP-039, DEP-042]
 owners: [backend, security, operations]
-last_updated: 2026-10-07
+last_updated: 2026-10-21
 change_level: L2
 ---
 
 # BE-049 — Category example video selection
+
+## S154 proposed selection correction — ready for root review
+
+Use explicit product/category identity and known family context ahead of weak
+incidental description matches. Unknown context yields an empty video ref; it
+must not fabricate a metal or ceramics example. Preserve the existing string-ref
+port so an empty selection creates no video media while image/content defaults
+remain atomic. Category validation remains the workspace authority, with no
+network request during selection or signup. Owner-entered media always wins.
+
+Canonical seed, page-draft/live publication and product legacy/gallery references
+are separate persistence locations. Changing the pure selector does not repair
+existing data. Any one-time demo correction must compare all relevant current
+versions/refs, preserve unrelated images/order/contacts/private accounts and real
+businesses, and append normal publication records rather than silently editing
+only one projection. Do not execute the existing broad apply-demo-process-videos
+script as a shortcut. Root reviews the finite source closure before production
+edits; this section does not qualify any database write.
 
 ## Problem
 

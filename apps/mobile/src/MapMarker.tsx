@@ -3,15 +3,16 @@ import { Pressable, View, Text, StyleSheet } from "react-native";
 import Svg, { Path, Rect } from "react-native-svg";
 import { markerNameLines, type MarkerItem } from "./map-markers";
 
-export function MapMarker({ item, selected, label, badge, nearby, onPress }: {
-  item: MarkerItem; selected: boolean; label: string; badge: string; nearby: string; onPress: () => void;
+export function MapMarker({ item, selected, label, badge, nearby, onPress, nativeMarker = false }: {
+  item: MarkerItem; selected: boolean; label: string; badge: string; nearby: string; onPress: () => void; nativeMarker?: boolean;
 }) {
+  const nativeGroup = nativeMarker && item.kind !== "shop";
   const color = selected ? "#c93600" : "#fa4b00";
   return <Pressable accessibilityRole="button" accessibilityLabel={label}
     accessibilityState={{ selected }} onPress={onPress}
-    pointerEvents="box-none"
-    style={[s.touch, item.kind === "shop" ? s.shopTouch:s.groupTouch]}>
-    {badge !== "" && <Text pointerEvents="none" style={[s.badge, { backgroundColor: item.presence === "featured" ? "#c04a1d" : "#a92f00" }]}>{badge}</Text>}
+    pointerEvents={nativeGroup ? "none" : "box-none"}
+    style={[s.touch, item.kind === "shop" ? s.shopTouch:s.groupTouch, nativeGroup && s.nativeGroupTouch]}>
+    {badge !== "" && <Text pointerEvents="none" style={[s.badge, nativeGroup && s.nativeGroupBadge, { backgroundColor: item.presence === "featured" ? "#c04a1d" : "#a92f00" }]}>{badge}</Text>}
     {item.kind === "shop" ? <>
       <View style={s.shopHit}>
       <Svg width={36} height={34} viewBox="0 0 36 34" aria-hidden>
@@ -21,7 +22,7 @@ export function MapMarker({ item, selected, label, badge, nearby, onPress }: {
       </Svg>
       </View>
       <Text numberOfLines={3} style={[s.name, selected && s.selectedName]}>{markerNameLines(item.shop?.name || "")}</Text>
-    </> : <View pointerEvents="auto" style={s.groupHit}><View pointerEvents="none" style={[s.cluster, item.kind === "nearby" && s.nearby]}>
+    </> : <View pointerEvents={nativeGroup ? "none" : "auto"} style={s.groupHit}><View pointerEvents="none" style={[s.cluster, item.kind === "nearby" && s.nearby]}>
       <Text style={s.count}>{item.count}</Text>
       {item.kind === "nearby" && <Text style={s.small}>{nearby}</Text>}
     </View></View>}
@@ -32,6 +33,10 @@ const s = StyleSheet.create({
   // The 44px hit frame adds 10px; these offsets keep the existing glyph/name pixels.
   shopTouch: { paddingTop: 9 },
   groupTouch:{paddingTop:13},
+  // Android hit-tests this measured host, not descendant pointerEvents. SDK
+  // dispatch owns physical taps; the single Pressable retains its accessible action.
+  nativeGroupTouch:{width:48,minHeight:48,paddingTop:0,paddingBottom:0},
+  nativeGroupBadge:{top:-13},
   groupHit:{width:48,height:48,alignItems:'center',justifyContent:'center'},
   shopHit: { width: 44, height: 44, alignItems: "center", justifyContent: "center", marginBottom: -5 },
   name: { maxWidth: 94, backgroundColor: "#fff4e9", borderColor: "#c93600", borderWidth: 1,

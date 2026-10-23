@@ -2,13 +2,24 @@
 id: FE-066
 title: External business contact with localized product messages
 status: in_progress
-related: [FE-040, BE-055, DEP-045, FE-001, FE-041, FE-049, FE-052, FE-053, FE-056, FE-062, FE-067]
+related: [BE-062, FE-075, FE-040, BE-055, DEP-045, FE-001, FE-041, FE-049, FE-052, FE-053, FE-056, FE-062, FE-067]
 owners: [product, frontend, security]
 last_updated: 2026-10-17
 change_level: L2
 ---
 
 # FE-066 — External business contact; no Suqpage inbox
+
+## S154 planned replacement — FE-075 / BE-062
+
+The owner now restores on-platform inquiries as the primary asynchronous business
+contact path. [FE-075](../frontend/FE-075-primary-business-inquiries-and-owner-inbox.md)
+and [BE-062](../backend/BE-062-canonical-inquiry-intake-and-owner-inbox.md) control
+that replacement. This retirement contract describes the currently deployed
+behavior until the coordinated new implementation is qualified and released;
+its older scenarios do not override the new accepted product intent. Preserve
+Transport, owner Support, contact validation and historical tenant isolation.
+
 
 ## Problem, scope and readiness
 

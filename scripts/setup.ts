@@ -209,7 +209,7 @@ async function runPostgresFixture() {
             ...product,
             slug: product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
             image: product.image ? `/uploads/seed/benchmarks/${handle}/product-${product.image}.jpg` : "",
-            options: [{ name: "Request", values: ["Standard", "Custom inquiry"] }],
+            options: [],
         })));
     }
     await benchmarkCatalog("selam-weave", ["Wear", "Table", "Carry"], [
@@ -320,7 +320,7 @@ async function runPostgresFixture() {
             description,
             slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
             image: `/uploads/seed/expo/${handle}/product-${index + 1}.webp`,
-            options: [{ name: "Request", values: ["Standard", "Custom inquiry"] }],
+            options: [],
         })));
     }
     function denseOfferingProfile(kind: DenseDemoOfferingKind) {
@@ -366,9 +366,7 @@ async function runPostgresFixture() {
             offeringKind: offering.kind,
             quantityMode: "optional",
             ...denseOfferingProfile(offering.kind),
-            options: offering.kind === "manufacturing_capability"
-                ? []
-                : [{ name: "Request", values: ["Standard", "Custom inquiry"] }],
+            options: [],
         })));
     }
     const seededGroupQuery = db.prepare("SELECT * FROM option_groups WHERE product_id=? ORDER BY position,id");
@@ -447,7 +445,10 @@ async function runPostgresFixture() {
         const industryKey = industryKeys[0];
         const productionScale = SCALE_DEMO_BUSINESSES.find((business) => business.handle === handle)?.productionScale ?? "workshop";
         const place = findKnownPlaceByName(profile.city, profile.region);
-        await seedDiscoveryProfile.run(businessId, seededMarketplaceBoothPath(handle), profile.city, profile.zone, profile.region, place ? Math.round(place.latitude*10)/10 : profile.latitude, place ? Math.round(place.longitude*10)/10 : profile.longitude, fallbackByIndustry[industryKey], productionScale, isSeededFeatured(handle) ? 1 : 0, seededAt, seededAt);
+        // Demo fixtures carry distinct approximate public map points. Keep those
+        // points for discovery; the owner proposal below stays city-area only,
+        // with no exact storefront coordinates.
+        await seedDiscoveryProfile.run(businessId, seededMarketplaceBoothPath(handle), profile.city, profile.zone, profile.region, profile.latitude, profile.longitude, fallbackByIndustry[industryKey], productionScale, isSeededFeatured(handle) ? 1 : 0, seededAt, seededAt);
         await db.prepare(`INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,place_id,place_latitude,place_longitude,reviewed_version,updated_at)
           VALUES(?,1,?,?,?,'area',?,?,?,1,?)`).run(businessId,industryKey,profile.city,profile.region,place?.id||null,place?.latitude??null,place?.longitude??null,seededAt);
         for (const key of industryKeys)
@@ -708,7 +709,7 @@ async function runPostgresFixture() {
           await db.prepare("UPDATE business_discovery_profiles SET country_code='ET',city_id=? WHERE business_id=?").run(place.id,businessId);
         }
         const catalog: Catalog = { business, collections: [], categories: [], products: [] };
-        const contacts = demoPublicContacts(business.public_email || `hello+${handle}@example.test`, business.public_phone || '+447700900123');
+        const contacts = demoPublicContacts(business.public_email || `hello+${handle}@example.test`, business.public_phone || '+447700900123', process.env.SUQPAGE_DEMO_INQUIRY_PHONE);
         const content = JSON.stringify(parseShopPageContent({...initialBusinessProfile(catalog), introduction:'', contacts}));
         const ownerId = clientUsersByHandle.get(handle)!;
         await db.prepare("UPDATE businesses SET public_email=?,public_phone=?,whatsapp=?,telegram=?,tiktok=? WHERE id=?").run(contacts.email,contacts.phone,contacts.whatsapp!.replace(/^\+/,''),contacts.telegram,contacts.tiktok,businessId);

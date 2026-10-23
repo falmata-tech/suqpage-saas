@@ -1,3 +1,5 @@
+import {currentBusinessAuthority} from "../staff-business-authority";
+import {handlePartnerInterest,partnerInterestHttpPort,type PartnerInterestHttpPort} from '../transport-partner-http';
 import {trackingHttpHandler} from '../tracking-http-runtime';
 import {createTrackingHttpHandler,type TrackingHttpPorts} from '../tracking-http';
 import {isCountryCode} from '../countries';
@@ -32,6 +34,7 @@ import {
   getSponsoredShowrooms,
 } from "../discovery";
 import { featuredProgramTimeLabel } from "../featured-program";
+import { publicLiveLink } from "../public-live-link";
 import { runtimeCatalogByHandle } from "../catalog-runtime";
 import { initialBusinessProfile } from "../business-profile";
 import {
@@ -44,7 +47,7 @@ import { parseBusinessHandle } from "../business-handle";
 import { parseAccountPhone, parseAccountName, saveAccountProfile } from "../account-contacts";
 import { getHandleAvailability } from "../handle-availability";
 import { InquiryError } from "../inquiries";
-import { RETIRED_BUSINESS_INQUIRY } from "../business-inquiry-policy";
+import {handlePublicInquiry,publicInquiryHttpPort,type PublicInquiryHttpPort} from "../inquiry-http";
 import { hashPrivateValue, requestIpFromHeaders } from "../security";
 import { consumeRuntimeRateLimit } from "../rate-limit-runtime";
 import { createPublicClientWorkspace, SignupError } from "../signup";
@@ -64,7 +67,7 @@ import { ProductUpkeepError } from "../product-upkeep-domain";
 import { accountContactPort } from "../account-contact-runtime";
 import { saveAccountPhone } from "../account-contacts";
 import { listInquiriesPage } from "../scalable-queries";
-import { updateInquiryStatus } from "../inquiry-status-runtime";
+import {updateInquiryStatus,markInquiryRead} from "../inquiry-status-runtime";
 import { createVideoRequest } from "../support-video-requests";
 import { channelConversation } from "../public-support-channel";
 import {scheduleAttentionDelivery} from '../attention-after';
@@ -83,6 +86,7 @@ import {
   SupportError,
   acknowledgePublicRead,
   acknowledgeSupportRead,
+  submitPublicTransportCallback,
 } from "../support";
 import {
   readCoverUpload,
@@ -117,7 +121,6 @@ async function dispatch(
     url = new URL(request.url),
     key = path.join("/"),
     q = url.searchParams;
-  if (method === "POST" && key === "inquiries") return json(RETIRED_BUSINESS_INQUIRY, 410);
   const ip = hashPrivateValue(requestIpFromHeaders(request.headers));
   const rate = await consumeRuntimeRateLimit(
     `mobile:${method === "GET" ? "read" : "write"}:${ip}`,
@@ -164,6 +167,8 @@ async function dispatch(
     });
     return {
       title: v.featured.title,
+      tiktokUrl: publicLiveLink(process.env.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL, "tiktok"),
+      youtubeUrl: publicLiveLink(process.env.NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL, "youtube"),
       broadcastLabel:
         featuredProgramTimeLabel(
           v.featured.programPolicy.startMinute,
@@ -248,11 +253,14 @@ async function dispatch(
         "idempotencyKey",
         "publicRef",
         "messageId",
+        "coordinatorId",
+        "email",
       ]);
       if (b.action === "start") {
         const created = await createPublicSupportConversation(
           {
             category: channel === "transport" ? "shipment_observation" : "buying_assistance",
+            coordinatorId:b.coordinatorId,
             origin: b.origin,
             destination: b.destination,
             name: b.name,
@@ -275,6 +283,7 @@ async function dispatch(
       if (b.action === 'read') await acknowledgePublicRead(token, { messageId: b.messageId, publicRef: b.publicRef });
       else if (b.action === "close") await closePublicSupportConversation(token);
       else if (b.action === 'resume') await resumePublicSupportConversation(token,b.publicRef);
+      else if (b.action === 'callback') {await submitPublicTransportCallback(token,{phone:b.phone,email:b.email,idempotencyKey:b.idempotencyKey},ip);scheduleAttentionDelivery();}
       else if (b.action === "message")
         await postPublicSupportMessage(
           token,
@@ -306,6 +315,8 @@ async function dispatch(
       "businessCategory",
       "placeId",
       "countryCode",
+      "latitude",
+      "longitude",
       "accentColor",
       "handle",
       "consent",
@@ -332,7 +343,11 @@ async function dispatch(
       const query:Record<string,unknown>={};for(const[key,value]of q){if(key in query)throw new MobileError('Request could not be accepted.');query[key]=value;}
       return readOwnerTransport(actor,query);
     }
-    if(method==='POST')return commandOwnerTransport(actor,await jsonBody(request));
+    if(method==='POST'){
+      const body=await jsonBody(request),state=await commandOwnerTransport(actor,body);
+      if(body.action==='callback')scheduleAttentionDelivery();
+      return state;
+    }
     throw new MobileError('Method not allowed.',405);
   }
   if (method === "GET" && route === "home") return ownerHome(actor);
@@ -341,6 +356,7 @@ async function dispatch(
   if (method === "GET" && route === "handle")
     return readHandleSettings(actor, bid);
   if (method === "GET" && route === "inquiries") {
+    if(!await currentBusinessAuthority(actor,bid))throw new MobileError("Inquiry access required.",403);
     const p = await listInquiriesPage(bid, {
       page: q.get("page"),
       status: q.get("status"),
@@ -355,6 +371,8 @@ async function dispatch(
         contactMethod: i.contact_method,
         note: i.note,
         status: i.status,
+        createdAt: i.created_at,
+        readAt: i.read_at,
         items: i.items.map((p) => ({
           name: p.product_name_snapshot,
           quantity: p.quantity_intent || String(p.quantity || ""),
@@ -555,7 +573,9 @@ async function dispatch(
     });
   }
   if (path[1] === "inquiries" && path.length === 3) {
-    allowFields(b, ["status"]);
+    allowFields(b, ["status","action"]);
+    if(b.action==='read'){if(b.status!==undefined)throw new MobileError('Invalid inquiry update.');return markInquiryRead(actor,{businessId:bid,inquiryId:numericId(path[2])});}
+    if(b.action!==undefined)throw new MobileError('Invalid inquiry update.');
     return updateInquiryStatus(actor, {
       businessId: bid,
       inquiryId: numericId(path[2]),
@@ -598,7 +618,7 @@ async function dispatch(
 export async function handleMobileRequest(
   request: Request,
   path: string[],
-  dependencies?: { identity?: NativeIdentityPort; invalidate?: () => void; market?: typeof getMarketplaceDiscoveryView; transportPlan?:TransportPlanHttpPorts; tracking?:TrackingHttpPorts },
+  dependencies?: { identity?: NativeIdentityPort; invalidate?: () => void; market?: typeof getMarketplaceDiscoveryView; transportPlan?:TransportPlanHttpPorts; tracking?:TrackingHttpPorts; inquiry?:PublicInquiryHttpPort; partnerInterest?:PartnerInterestHttpPort },
 ) {
   let response: Response;
   const planRoute=path.length===1&&path[0]==='transport-plan';
@@ -612,7 +632,11 @@ export async function handleMobileRequest(
       if (!cors) throw new MobileError("Origin not allowed.", 403);
       response = new Response(null, { status: 204 });
     } else {
-      const value = trackingRoute
+      const value = path.length===1&&path[0]==='transport-partners'
+        ? await handlePartnerInterest(request,hashPrivateValue(requestIpFromHeaders(request.headers)),dependencies?.partnerInterest||partnerInterestHttpPort)
+        : request.method==='POST'&&path.length===1&&path[0]==='inquiries'
+        ? await handlePublicInquiry(request,hashPrivateValue(requestIpFromHeaders(request.headers)),dependencies?.inquiry||publicInquiryHttpPort)
+        : trackingRoute
         ? await (dependencies?.tracking?createTrackingHttpHandler(dependencies.tracking,'native'):trackingHttpHandler('native'))(request,path.slice(1))
         : planRoute
         ? await createTransportPlanHttpHandler(dependencies?.transportPlan||{
@@ -622,7 +646,7 @@ export async function handleMobileRequest(
         : await dispatch(request, path, dependencies?.identity, dependencies?.market);
       response =
         value instanceof Response ? value : json(value ?? { saved: true });
-      if(request.method==='POST' && (path[0]==='transport'||path[0]==='buying'||path[0]==='owner'&&['support','transport'].includes(path[1]))){
+      if(request.method==='POST' && (path[0]==='inquiries'||path[0]==='transport'||path[0]==='buying'||path[0]==='owner'&&['support','transport'].includes(path[1]))){
         try{scheduleAttentionDelivery();}catch{/* Direct adapter tests have no Next request lifecycle; scheduled delivery remains durable. */}
       }
       if (

@@ -43,12 +43,16 @@ silently change product behavior to match convenient code.
    and the affected Expo mobile preview at localhost:8082. Click, type, navigate,
    save/cancel and verify authoritative local API/database outcomes where
    applicable; screenshots or mocked success alone are not workflow evidence.
-   Capture the affected desktop/phone states first. Give the user the live local
-   URL or focused screenshots and wait for explicit visual approval before
-   running expensive full-suite, release, container, or remote CI gates.
+   Capture the affected desktop/phone states first. Inspect the real journeys,
+   screenshots, active-language fit, errors and authoritative outcomes yourself;
+   record a source-bound pass/fail visual decision. Fix material issues before
+   running expensive full-suite, release, container, or remote CI gates. Share
+   focused evidence with the user, but do not pause for routine visual approval.
+   DEP-002 S165 governs this agent-owned visual checkpoint; separately guarded
+   hosted, signing, recovery and GitHub actions retain their own boundaries.
    Security, data-integrity, and
    non-visual emergency fixes may proceed directly when delay would add risk.
-9. After visual approval, run `npm run check`; use `npm run release` for
+9. After a passing agent visual review, run `npm run check`; use `npm run release` for
    release-affecting changes and `npm run test:acceptance` for user workflows.
 10. Update spec status, traceability, ADRs, operational documentation, and every
    affected master-prompt section so they describe the verified implementation
@@ -76,6 +80,7 @@ current specs retain authority; a skill grants no additional provider permission
 
 | Task | Skill |
 | --- | --- |
+| User-facing interface, interaction, copy or localization design | `.agents/skills/mirtpage-interface-design/SKILL.md` |
 | Changed UI/UX/navigation or usability audit | `.agents/skills/mirtpage-browser-review/SKILL.md` |
 | Requested build, deployment, hosted change or release recovery | `.agents/skills/mirtpage-release/SKILL.md` |
 | Requested overall engineering/setup audit, housekeeping or workflow redesign | `.agents/skills/mirtpage-engineering-review/SKILL.md` |
@@ -83,6 +88,8 @@ current specs retain authority; a skill grants no additional provider permission
 
 Normal implicit selection is enabled by default; explicit `$skill-name` is also
 available. Actual discovery and selection require qualification in the host.
+For UI work, load the design skill before implementation and the browser-review
+skill for real workflow evidence; the feature spec remains authoritative.
 
 ## Client showroom design commands
 
@@ -95,6 +102,10 @@ or treat generated illustrative media as a factual product photograph.
 
 ## Architecture and design rules
 
+- Before changing transport intake, queue routing, staff assignment or its
+  customer-facing copy, read FE-076/BE-063 and master prompt §4. They own the
+  current MirtPage-queue/selected-provider boundary and the deferred provider-
+  tenant routing work; do not imply provider employees handle today's chats.
 - Use pragmatic hexagonal architecture: domain rules must not depend on Next.js,
   HTTP, cookies, database drivers, email vendors, or filesystem details.
 - Treat routes, server actions, database modules, media storage, and Resend as

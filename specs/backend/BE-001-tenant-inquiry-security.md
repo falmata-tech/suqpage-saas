@@ -2,7 +2,7 @@
 id: BE-001
 title: Tenant-scoped canonical inquiry workflow
 status: done
-related: [BE-055, FE-052, FE-041, FE-001, DEP-001, BE-009, BE-011, BE-014, BE-017, BE-033, BE-050]
+related: [BE-055, FE-052, FE-041, FE-001, DEP-001, BE-009, BE-011, BE-014, BE-017, BE-033, BE-050, FE-075, BE-062]
 owners: [backend, security]
 last_updated: 2026-08-01
 change_level: L2

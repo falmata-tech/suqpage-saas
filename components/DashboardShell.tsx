@@ -59,7 +59,7 @@ export default async function DashboardShell({ user, business, children, support
     group("Administration", [
       { href: "/dashboard/admin", label: "Overview", icon: "overview" },
       { href: "/dashboard/admin/businesses", label: "Businesses", icon: "businesses", activePaths:['/dashboard','/dashboard/products','/dashboard/settings','/dashboard/access','/dashboard/page-editor','/dashboard/catalog','/dashboard/admin/discovery',...(business?['/dashboard/admin/sponsors']:[])] },
-      { href: "/dashboard/tracking", label: "Shipment tracking", icon: "tracking" },
+      { href: "/dashboard/tracking", label: "Shipment records", icon: "tracking" },
       { href: "/dashboard/admin/staff", label: "Staff", icon: "staff", activePaths:["/dashboard/support/agents"] },
       { href: "/dashboard/reports", label: "Listing reports", icon: "reports" },
     ]),
@@ -73,6 +73,7 @@ export default async function DashboardShell({ user, business, children, support
       {href:'/dashboard/profile',label:'Account',icon:'account'},
       {href:'/dashboard/profile/showroom',label:'Your page',icon:'pageEditor',activePaths:['/dashboard/page-editor','/dashboard/profile/cover','/dashboard/profile/handle']},
       {href:'/dashboard/products',label:'Products',icon:'offerings',activePaths:['/dashboard/catalog']},
+      {href:'/dashboard/inquiries',label:'Inbox',icon:'support'},
       {href:'/dashboard/transport',label:'Transport chat',icon:'transport'},
       {href:'/dashboard/support',label:'Support',icon:'support'},
     ]),
@@ -86,7 +87,7 @@ export default async function DashboardShell({ user, business, children, support
       {href:'/about',label:'About',icon:'library'},
     ]),
   ].filter((item):item is WorkspaceNavGroup=>Boolean(item));
-  const agentGroups = [group("Chats",[{href:dashboardHref,label:user.staff_queue_scope === "transport" ? "Transport" : "Business support",icon:user.staff_queue_scope === "transport" ? "transport" : "support"},...(user.staff_queue_scope==='support'?[{href:'/dashboard/reports',label:'Listing reports',icon:'reports' as const}]:[])]),group('Workspace',[staffGrant?{href:'/dashboard',label:'Business workspaces',icon:'businesses'}:null,tracking?{href:'/dashboard/tracking',label:'Shipment tracking',icon:'tracking'}:null])].filter((item): item is WorkspaceNavGroup => Boolean(item));
+  const agentGroups = [group("Chats",[{href:dashboardHref,label:user.staff_queue_scope === "transport" ? "Transport" : "Business support",icon:user.staff_queue_scope === "transport" ? "transport" : "support"},...(user.staff_queue_scope==='support'?[{href:'/dashboard/reports',label:'Listing reports',icon:'reports' as const}]:[])]),group('Workspace',[staffGrant?{href:'/dashboard',label:'Business workspaces',icon:'businesses'}:null,tracking?{href:'/dashboard/tracking',label:'Shipment records',icon:'tracking'}:null])].filter((item): item is WorkspaceNavGroup => Boolean(item));
   const operationsGroups = operations && !platformAdmin ? [group("Chats",[
     {href:"/dashboard/support?queue=support",label:"Business support",icon:"support"},
     {href:'/dashboard/reports',label:'Listing reports',icon:'reports'},
@@ -95,7 +96,7 @@ export default async function DashboardShell({ user, business, children, support
   ])].filter((item): item is WorkspaceNavGroup => Boolean(item)) : [];
   const staffHomeGroups=[group("Workspace",[
     staffGrant?{href:'/dashboard',label:'Business workspaces',icon:'businesses'}:null,
-    tracking?{href:'/dashboard/tracking',label:'Shipment tracking',icon:'tracking'}:null,
+    tracking?{href:'/dashboard/tracking',label:'Shipment records',icon:'tracking'}:null,
     !operations?{href:'/dashboard/support',label:'Support inbox',icon:'support'}:null,
   ])].filter((entry):entry is WorkspaceNavGroup=>Boolean(entry));
   const groups = client ? clientGroups : queueAgent ? agentGroups : globalGroups || [...operationsGroups,...staffHomeGroups];
@@ -103,6 +104,7 @@ export default async function DashboardShell({ user, business, children, support
     {href:`/dashboard${query}`,label:t('Overview')},
     ...(pageEditor?[{href:`/dashboard/page-editor${query}&view=preview`,label:t('Your page')}]:[]),
     ...(canMaintainProducts?[{href:`/dashboard/products${query}`,label:t('Products'),activePaths:['/dashboard/catalog']}]:[]),
+    {href:`/dashboard/inquiries${query}`,label:t('Inbox')},
     ...(platformAdmin||businessAuthority==='staff'?[
       {href:`/dashboard/settings${query}`,label:t('Business details')},
       {href:`/dashboard/admin/discovery/${business.id}`,label:t('Location & visibility'),activePaths:['/dashboard/admin/sponsors']},

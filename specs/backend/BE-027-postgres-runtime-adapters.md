@@ -4,7 +4,7 @@ title: PostgreSQL runtime adapters and persistence parity
 status: in_progress
 related: [BE-035, BE-028, BE-029, BE-030, FE-033, DEP-023, DEP-024, DEP-026, DEP-027, ADR-0013, ADR-0014, ADR-0015]
 owners: [backend, security, operations]
-last_updated: 2026-08-05
+last_updated: 2026-10-20
 change_level: L4
 ---
 
@@ -15,6 +15,33 @@ Current persistence contract: BE-035/DEP-031 and ADR-0020 supersede every retain
 SQLite fixture, fallback and copy-tool exception in this specification. Only native
 PostgreSQL setup/tests/archives are executable. Earlier migration-parity evidence
 below is historical; current acceptance uses PostgreSQL-only fixtures.
+
+## S153 — contain idle pool disconnects (focused checks pass; rollout pending)
+
+GIVEN an idle PostgreSQL client loses its backend connection WHEN the installed
+driver emits its pool error event THEN the runtime factory handles that event
+without an uncaught process error and records only a fixed sanitized diagnostic.
+Never log the Error, client, connection URL, credentials, SQL, row or authored data.
+The driver owns closing/removing the failed client; a later operation may acquire
+a fresh client. Register one handler per pool, with no global exception handler,
+pool shutdown, automatic write retry or fabricated successful query.
+
+GIVEN an active query or transaction fails THEN its original rejection and
+rollback/release behavior remain intact. Verify the actual factory and installed
+pg-pool lifecycle with a controlled non-network Client port: idle-event containment,
+safe diagnostic, failed-client eviction/fresh query, and active failures. The
+existing controlled old-source RED is retained. It does not prove why the earlier
+local web/worker process disappeared, because that process log is unavailable.
+Master §§16/17 already require private failure handling and bounded adapters;
+no database, tenant, schema or product contract changes are introduced.
+
+Focused regression: `scripts/test-postgres-pool-errors.ts`, included in the
+existing native-PostgreSQL check and disposable PostgreSQL CI sequence. Real
+database outage qualification and the batch's full gates remain separate.
+All three focused cases and scoped types pass. The same regression with the
+frozen old adapter fails at actual idle-event dispatch; its two active-failure
+cases still pass. The [driver's Pool documentation](https://node-postgres.com/apis/pool#error)
+confirms this lifecycle; no application retry or global error suppression is used.
 
 ## Problem and outcome
 

@@ -20,7 +20,8 @@ import {
 } from "../../src/ui";
 export default function Account() {
   const {next}=useLocalSearchParams<{next?:string}>();
-  const { session, ready, t, ownerRequest, signOut, authIssue, logoutIssue, logoutPending, authRetryAvailable, retryAuth, clearAuthIssue } = useApp();
+  const { session, ready, t, ownerRequest, signOut, authIssue, logoutIssue, logoutPending, authRetryAvailable, retryAuth, clearAuthIssue, requestAccountEntry, cancelAccountEntry } = useApp();
+  useEffect(()=>cancelAccountEntry,[cancelAccountEntry]);
   const openLink = useOpenLink();
   const [email, setEmail] = useState(""),
     [code, setCode] = useState(""),
@@ -48,6 +49,7 @@ export default function Account() {
     clearAuthIssue();
     try {
       if (!auth) throw Error("Sign-in is not configured.");
+      if(sent)requestAccountEntry();
       if (!sent) {
         const mode = await request<{mode:'otp'|'password'}>('auth/mode',{body:{email:email.trim()}});
         if (mode.mode === 'password') {setPasswordMode(true);setSent(true);return;}
@@ -72,6 +74,7 @@ export default function Account() {
       if (result.error) throw result.error;
       setSent(true);
     } catch (e) {
+      cancelAccountEntry();
       setError(e instanceof Error ? e.message : "Please try again.");
     } finally {
       setBusy(false);
@@ -93,10 +96,10 @@ export default function Account() {
     <Screen>
       {!session ? (
         <>
-          <Copy big heading>{t("Your business. Your digital showroom.")}</Copy>
+          <Copy big heading>{t("Sign in to MirtPage.")}</Copy>
           <Copy muted>
             {t(
-              "Create a showroom for what you sell, make or grow. Already have one? Sign in to manage your page.",
+              "Use your email to sign in or create an account.",
             )}
           </Copy>
           <Status error={authIssue} />
@@ -146,6 +149,7 @@ export default function Account() {
                 label={t("Change email")}
                 disabled={busy}
                 onPress={() => {
+                  cancelAccountEntry();
                   setSent(false);
                   setCode("");
                   setPassword('');setPasswordMode(false);
@@ -153,6 +157,7 @@ export default function Account() {
               />
             )}
           </Card>}
+          <Button secondary label={t("Logistics service providers: Ask to be listed")} onPress={()=>router.push("/transport-partners")}/>
         </>
       ) : (
         <>

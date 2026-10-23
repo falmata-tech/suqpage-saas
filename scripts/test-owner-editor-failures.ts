@@ -13,7 +13,7 @@ for(const component of ['OwnerBusinessForm','HandleSettingsForm','AccountProfile
   const state={values:[] as unknown[],refs:[] as {current:unknown}[],cursor:0,refCursor:0};
   const built=await build({entryPoints:[`components/${component}.tsx`],bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'editor-ports',setup(b){
     b.onResolve({filter:/^next\/navigation$/},()=>({path:path.resolve('node_modules/next/dist/client/components/unstable-rethrow.browser.js')}));
-    b.onResolve({filter:/^(react(?:\/jsx-runtime)?|next\/link|@\/lib\/i18n\/ui|\.\/(CountrySelect|PlaceSearch|CategorySelect|HandleField|LoadingBar|useFormExitGuard))$/},a=>({path:a.path,namespace:'ports'}));
+    b.onResolve({filter:/^(react(?:\/jsx-runtime)?|next\/link|@\/lib\/i18n\/ui|\.\/(CountrySelect|PlaceSearch|CategorySelect|HandleField|OwnerLocationPicker|LocationVisibilityChoices|LoadingBar|useFormExitGuard))$/},a=>({path:a.path,namespace:'ports'}));
     b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'js',contents:a.path==='react'?`export const useState=initial=>{const i=state.cursor++;if(!(i in state.values))state.values[i]=initial;return[state.values[i],value=>state.values[i]=value]},useRef=initial=>{const i=state.refCursor++;return state.refs[i]||(state.refs[i]={current:initial})};`
       :a.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
       :a.path==='@/lib/i18n/ui'?`export const useUiText=()=>s=>s;`

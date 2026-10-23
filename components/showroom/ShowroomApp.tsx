@@ -14,7 +14,7 @@ import {
   Home,
   LayoutGrid,
   MessageCircle,
-  ShoppingBag, Copy, MessageSquare, X, PackageOpen,
+  ShoppingBag, Copy, MessageSquare, Send, X, PackageOpen,
 } from "lucide-react";
 import {
   useEffect,
@@ -53,6 +53,7 @@ import { InquiryFloatingAction } from "@/components/PublicActionDock";
 import inquiryStyles from "./InquiryComposer.module.css";
 import { legacyPublicContacts, type PublicContacts, type PublicContactLink } from "@/lib/business-profile-contacts";
 import { canOpenPublicContact } from "@/lib/demo-inquiry-policy";
+import {publicContactIsPhone,publicContactDisplay} from "@/lib/public-contact-device";
 import { buildInquiryMessage, inquiryHandoffs, inquiryEligible, linkedProduct, MAX_INQUIRY_SELECTIONS, restoreInquiry, selectionKey, selectionOptions, type InquirySelection } from "@/lib/product-inquiry";
 import type { ShopPageContent } from "@/lib/owner-page-domain";
 import { showroomTokenVariables } from "./bank/tokens";
@@ -399,9 +400,10 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         style={runtimeTokenVariables as CSSProperties | undefined}
       >
       {!embedded && !businessProfile ? <h1 className="sr-only">{catalog.business.name} {" "}{t("on MirtPage")}</h1> : null}
+      {catalog.business.is_demo && !businessProfile ? <p className="showroom-example-note" role="note">{t("Example showroom. This business and its products are fictional.")}</p> : null}
       {businessProfile ? <BusinessProfile {...designProps} profile={businessProfile} previewMode={previewMode} embedded={embedded}
         selectedIds={savedCart.map(line => line.product.id)} onBackToProducts={backToProducts} onContact={contactWithSelections}
-        productDetail={selected || routedProduct ? <ProductPage ready={previewMode || hydratedKey === storageKey} catalogLabel={catalogOfferingLabel(catalog.products.filter(product => product.is_published))} key={selected?.id || "unavailable"} product={selected ? {...selected, category_name: showroomProductCategory(catalog.business.id, categories, selected)?.name} : null}
+        productDetail={selected || routedProduct ? <ProductPage isDemo={Boolean(catalog.business.is_demo)} ready={previewMode || hydratedKey === storageKey} catalogLabel={catalogOfferingLabel(catalog.products.filter(product => product.is_published))} key={selected?.id || "unavailable"} product={selected ? {...selected, category_name: showroomProductCategory(catalog.business.id, categories, selected)?.name} : null}
           backHref={`/@${catalog.business.handle}`} onBack={backToProducts}
           onAdd={options => selected && add(selected, options)} onInquire={options => selected && inquireNow(selected, options)}
           isAdded={options => Boolean(selected && savedCart.some(line => selectionKey(line.product.id, line.options) === selectionKey(selected.id, options)))}
@@ -530,6 +532,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         contacts={businessProfile?.contacts || legacyPublicContacts(catalog.business)}
         setDesiredQuantity={(index, value) => activeDirectLine ? setDirectLine({ ...activeDirectLine, quantity: value.replace(/\s+/g, " ").slice(0, 80) }) : setDesiredQuantity(index, value)}
         remove={(index) => activeDirectLine ? setDirectLine(null) : removeSavedSelection(index)}
+        submitted={lines=>{if(!directLine){const sent=new Set(lines.map(line=>selectionKey(line.product.id,line.options)));setCart(current=>current.filter(line=>!sent.has(selectionKey(line.product.id,line.options))));}}}
         clear={() => setCart([])}
         show={show}
         previewOnly={previewMode}
@@ -581,6 +584,7 @@ function InquiryDrawer({
   previewOnly = false,
   contacts,
   directOnly = false,
+  submitted,
 }: {
   open: boolean;
   close: () => void;
@@ -594,15 +598,24 @@ function InquiryDrawer({
   previewOnly?: boolean;
   contacts: PublicContacts;
   directOnly?: boolean;
+  submitted:(lines:CartLine[])=>void;
 }) {
   const t = useUiText();
+  const [name,setName]=useState(""),[phone,setPhone]=useState(""),[inboxMessage,setInboxMessage]=useState(""),[busy,setBusy]=useState(false),[receipt,setReceipt]=useState<number|null>(null);
+  const [phoneDevice,setPhoneDevice]=useState(false),[showPlatform,setShowPlatform]=useState(false);
+  const submission=useRef<{payload:string;key:string}|null>(null);
+  useEffect(()=>{setPhoneDevice(publicContactIsPhone("web",navigator.userAgent));},[]);
+  useEffect(()=>{if(!open){setName("");setPhone("");setInboxMessage("");setReceipt(null);setShowPlatform(false);submission.current=null;}},[open]);
   const [preparedMessage, setPreparedMessage] = useState("");
   const [openError, setOpenError] = useState("");
   const [fallbackLink, setFallbackLink] = useState<{href:string;label:string} | null>(null);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "manual">("idle");
+  const [contactCopyState, setContactCopyState] = useState<string | null>(null);
+  const [contactCopyNotice, setContactCopyNotice] = useState("");
   const panel = useRef<HTMLElement>(null);
   const closeAction = useRef(close);
-  closeAction.current = close;
+  closeAction.current = ()=>{if(!busy)close();};
+  useEffect(()=>{if(openError)panel.current?.querySelector<HTMLElement>('[role="alert"]')?.focus();},[openError]);
   const signature = JSON.stringify(cart.map((line) => [line.product.id, line.quantity, line.options]));
 
   useEffect(() => {
@@ -645,12 +658,22 @@ function InquiryDrawer({
   }, [open, opener]);
 
   const message = buildInquiryMessage(catalog.business, cart, typeof window === "undefined" ? "" : window.location.origin, t);
+  useEffect(()=>{setInboxMessage(message);},[message]);
+  async function sendInquiry(event:React.FormEvent<HTMLFormElement>){
+    event.preventDefault();if(busy||previewOnly)return;setBusy(true);setOpenError("");
+    const body={businessId:catalog.business.id,customerName:name,contact:phone,contactMethod:"phone",note:inboxMessage,items:cart.map(line=>({productId:line.product.id,quantity:line.quantity,options:line.options}))};
+    try{
+      const payload=JSON.stringify(body);if(submission.current?.payload!==payload)submission.current={payload,key:Array.from(crypto.getRandomValues(new Uint8Array(16)),byte=>byte.toString(16).padStart(2,"0")).join("")};
+      const result=await fetch("/api/inquiries",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...body,idempotencyKey:submission.current.key})});
+      const value:unknown=await result.json();
+      if(!value||typeof value!=="object"||Array.isArray(value))throw new Error("Your inquiry could not be sent. Please try again.");
+      const parsed=value as {inquiryId?:unknown;error?:unknown;status?:unknown};
+      if(!result.ok||typeof parsed.inquiryId!=="number"||!Number.isSafeInteger(parsed.inquiryId)||parsed.inquiryId<1||parsed.status!=="received")throw new Error(typeof parsed.error==="string"?parsed.error:"Your inquiry could not be sent. Please try again.");
+      setReceipt(parsed.inquiryId);setName("");setPhone("");setInboxMessage("");submitted(cart);
+    }catch(error){setOpenError(error instanceof Error?error.message:"Your inquiry could not be sent. Please try again.");}finally{setBusy(false);}
+  }
   const handoffs = inquiryHandoffs(contacts, message);
   async function copyInquiry() {
-    if (!cart.length) {
-      show("Choose at least one product.");
-      return;
-    }
     setPreparedMessage(message);
     const copied = await copyText(message);
     setCopyState(copied ? "copied" : "manual");
@@ -658,7 +681,7 @@ function InquiryDrawer({
   }
   async function openSocial(event: React.MouseEvent<HTMLAnchorElement>, link: ReturnType<typeof inquiryHandoffs>[number]) {
     event.preventDefault();
-    if (!canOpenPublicContact(catalog.business.is_demo, catalog.business.approvedDemoContactMethods, link.kind)) return;
+    if (!phoneDevice || !canOpenPublicContact(catalog.business.is_demo, catalog.business.approvedDemoContactMethods, link.kind)) return;
     setPreparedMessage(message);
     setOpenError("");
     setFallbackLink(null);
@@ -670,8 +693,9 @@ function InquiryDrawer({
     }
   }
 
+  const inquiryChannels=handoffs.filter(link=>link.kind!=='phone'&&canOpenPublicContact(catalog.business.is_demo,catalog.business.approvedDemoContactMethods,link.kind));
+
   if (!open || typeof document === "undefined") return null;
-  const busy = false;
   const item = (line: CartLine, index: number, grouped: boolean) => <div className={inquiryStyles.summary}>
     {line.product.image_path ? <img src={line.product.image_path} alt="" /> : <span className={inquiryStyles.thumb}><PackageOpen size={24} aria-hidden="true" /></span>}
     <div className={inquiryStyles.itemCopy}><h3>{line.product.name}</h3><p>{Object.entries(line.options).filter(([name]) => (line.product.option_groups?.find(group => group.name === name)?.values.length || 0) > 1).map(([name, value]) => `${name}: ${value}`).join(" · ")}</p>
@@ -680,27 +704,41 @@ function InquiryDrawer({
     {grouped ? <button type="button" className={inquiryStyles.remove} disabled={busy} onClick={() => remove(index)} aria-label={t("Remove {value1} from inquiry", { value1: line.product.name })}><X size={18} aria-hidden="true" /></button> : null}
   </div>;
   return createPortal(<div className={inquiryStyles.overlay}>
-    <div className={inquiryStyles.backdrop} onClick={close} />
+    <div className={inquiryStyles.backdrop} onClick={()=>{if(!busy)close();}} />
     <aside ref={panel} className={inquiryStyles.panel} role="dialog" aria-modal="true" aria-label={t("Business inquiry")} tabIndex={-1}>
-      <header className={inquiryStyles.head}><div><h2>{cart.length > 1 ? t("Inquire about {value1} items", { value1: cart.length }) : t("Inquire about this {value1}", { value1: t(cart[0] ? offeringNoun(cart[0].product.offering_kind) : "item") })}</h2><p>{catalog.business.name}</p></div><button type="button" className={inquiryStyles.close} aria-label={t("Close inquiry")} onClick={close}><X size={20} aria-hidden="true" /></button></header>
+      <header className={inquiryStyles.head}><div><h2>{!cart.length ? t("Contact this business") : cart.length > 1 ? t("Inquire about {value1} items", { value1: cart.length }) : t("Inquire about this {value1}", { value1: t(cart[0] ? offeringNoun(cart[0].product.offering_kind) : "item") })}</h2><p>{catalog.business.name}</p></div><button type="button" className={inquiryStyles.close} aria-label={t("Close inquiry")} disabled={busy} onClick={close}><X size={20} aria-hidden="true" /></button></header>
       <div className={inquiryStyles.scroll}>
-        {!cart.length ? <div className={inquiryStyles.empty}><ShoppingBag size={32} aria-hidden="true" /><p>{t("Choose a product to start an inquiry.")}</p><button type="button" className={inquiryStyles.platformButton} onClick={close}>{t("Browse products")}</button></div> : <>
-          {cart.length > 1 ? <ul className={inquiryStyles.list} aria-label={t("Inquiry items")}>{cart.map((line, index) => <li key={selectionKey(line.product.id, line.options)}>{item(line, index, true)}</li>)}</ul> : item(cart[0], 0, !directOnly)}
-          {previewOnly ? <p className={inquiryStyles.note}>{t("Preview only. No inquiry will be sent.")}</p> : <div className={inquiryStyles.methods}>
-            <h3>{t("Message the business")}</h3>
-            <p className={inquiryStyles.note}>{t("Your message and selected products are copied before the conversation opens. Paste them if needed.")}</p>
-            <div className={inquiryStyles.channels}>{handoffs.map(link => !canOpenPublicContact(catalog.business.is_demo, catalog.business.approvedDemoContactMethods, link.kind) ? <button key={link.kind} type="button" disabled><MessageSquare size={18} aria-hidden="true" />{link.label}</button> : <a key={link.kind} href={link.href} target={link.external ? "_blank" : undefined} rel={link.external ? "noopener noreferrer" : undefined} onClick={event => void openSocial(event, link)}><MessageSquare size={18} aria-hidden="true" />{link.label}{link.external && <span className="sr-only"> {t("(new tab)")}</span>}</a>)}
-            </div><div className={inquiryStyles.manualCopy}>
-              <button type="button" onClick={copyInquiry}><Copy size={18} aria-hidden="true" />{copyState === "copied" ? t("Copied") : t("Copy message")}</button>
-            </div>
-            {!handoffs.length && <p className={inquiryStyles.note}>{t("No social contact is available here. You can still copy the message.")}</p>}
-            {copyState === "copied" && <p role="status" className={inquiryStyles.success}>{t("Message copied. Paste it in the conversation if needed.")}</p>}
-            {copyState === "manual" && <p role="status">{t("Select and copy your message")}</p>}
-            {openError && <p role="alert">{t(openError)}</p>}
-            {fallbackLink && <a href={fallbackLink.href} target="_blank" rel="noopener noreferrer">{fallbackLink.label} ↗</a>}
-            <details className={inquiryStyles.preview} open={preparedMessage ? true : undefined}><summary>{t("Your message")}</summary><textarea aria-label={t("Inquiry message")} readOnly value={message} onFocus={e => e.target.select()} /></details>
-          </div>}
-          {cart.length > 1 ? <button className={inquiryStyles.clear} disabled={busy} type="button" onClick={clear}>{t("Clear inquiry list")}</button> : null}
+        {directOnly&&!cart.length?<p role="alert">{t("This product is not available for inquiry.")}</p>:receipt ? <div className={inquiryStyles.platform}><p role="status" className={inquiryStyles.success}>{t("Inquiry sent to the business.")}</p><p>{t("The business can contact you using the phone number you provided.")}</p><button type="button" className={inquiryStyles.platformButton} onClick={close}>{t("Done")}</button></div> : <>
+          {cart.length > 1 ? <ul className={inquiryStyles.list} aria-label={t("Inquiry items")}>{cart.map((line,index)=><li key={selectionKey(line.product.id,line.options)}>{item(line,index,true)}</li>)}</ul> : cart[0]?item(cart[0],0,!directOnly):null}
+          {previewOnly ? <p className={inquiryStyles.note}>{t("Preview only. No inquiry will be sent.")}</p> : <>
+            <section className={inquiryStyles.methods} aria-label={t("Choose how to contact")}>
+              <h3>{t("Choose how to contact")}</h3>
+              <div className={inquiryStyles.channelChoices} role="group" aria-label={t("Contact this business")}>
+                {inquiryChannels.map(link=>{
+                  const value=publicContactDisplay(link.kind,contacts),label=link.kind==="whatsapp"?t("Send on WhatsApp"):t("Send on Telegram"),channelClass=link.kind==="whatsapp"?inquiryStyles.channelWhatsapp:inquiryStyles.channelTelegram,icon=link.kind==="whatsapp"?<MessageCircle size={22} aria-hidden="true"/>:<Send size={20} aria-hidden="true"/>;
+                  const content=<><span className={inquiryStyles.channelIcon}>{icon}</span><span className={inquiryStyles.channelIdentity}><strong>{link.label}</strong><small>{value}</small></span></>;
+                  return phoneDevice
+                    ? <a key={link.kind} className={`${inquiryStyles.channelCard} ${channelClass}`} href={link.href} target="_blank" rel="noopener noreferrer" onClick={event=>void openSocial(event,link)}>{content}<span className={inquiryStyles.channelAction}>{label}<span aria-hidden="true"> ↗</span></span></a>
+                    : <div key={link.kind} className={`${inquiryStyles.channelCard} ${channelClass}`}>{content}<button type="button" className={`${inquiryStyles.copyContact} ${contactCopyState===link.kind?inquiryStyles.copied:""}`} aria-label={`${t(contactCopyState===link.kind?"Copied":"Copy contact")} ${link.label}`} onClick={()=>void copyText(value).then(copied=>{setContactCopyState(copied?link.kind:null);setContactCopyNotice(copied?"":t("Select and copy the contact details."));})}><Copy size={16} aria-hidden="true"/>{t(contactCopyState===link.kind?"Copied":"Copy contact")}</button></div>;
+                })}
+                <button type="button" className={`${inquiryStyles.channelCard} ${inquiryStyles.inboxChoice}`} aria-expanded={showPlatform} aria-controls="mirtpage-inquiry-details" onClick={()=>{if(!showPlatform)setInboxMessage(message);setShowPlatform(value=>!value);}}><span className={inquiryStyles.channelIcon}><MessageSquare size={22} aria-hidden="true"/></span><span className={inquiryStyles.channelIdentity}><strong>{t("Send to MirtPage Inbox")}</strong></span><span className={inquiryStyles.inboxArrow} aria-hidden="true">→</span></button>
+              </div>
+              {contactCopyNotice&&<p role="status" className={inquiryStyles.note}>{contactCopyNotice}</p>}
+            </section>
+            {showPlatform&&<form id="mirtpage-inquiry-details" className={inquiryStyles.platform} onSubmit={sendInquiry}>
+              <p>{t("Ask about products, quantities or a general question. The business will receive your message and phone number.")}</p>
+              <label>{t("Your name")}<input autoComplete="name" value={name} onChange={e=>setName(e.target.value)} maxLength={80} required disabled={busy}/></label>
+              <label>{t("Phone number")}<input type="tel" autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)} maxLength={60} required disabled={busy}/></label>
+              <label>{t("Your message")}<textarea aria-label={t("Your message")} value={inboxMessage} onChange={e=>setInboxMessage(e.target.value)} maxLength={10000} disabled={busy} rows={6}/></label>
+              <button type="submit" className={inquiryStyles.platformButton} disabled={busy||!name.trim()||!phone.trim()||!inboxMessage.trim()}>{t(busy?"Sending…":"Send inquiry")}</button>
+            </form>}
+            {openError&&<p role="alert" tabIndex={-1} className={inquiryStyles.error}>{t(openError)}</p>}
+            {phoneDevice&&handoffs.some(link=>link.kind==="phone"&&canOpenPublicContact(catalog.business.is_demo,catalog.business.approvedDemoContactMethods,link.kind))&&<section className={inquiryStyles.methods}><h3>{t("Other ways to contact")}</h3>{handoffs.filter(link=>link.kind==="phone"&&canOpenPublicContact(catalog.business.is_demo,catalog.business.approvedDemoContactMethods,link.kind)).map(link=><a key={link.kind} href={link.href} onClick={event=>void openSocial(event,link)}>{link.label}</a>)}</section>}
+            <div className={inquiryStyles.manualCopy}><button type="button" onClick={copyInquiry}>{copyState==="copied"?t("Copied"):t("Copy message")}</button></div>
+            {copyState==="manual"&&<textarea aria-label={t("Copy message")} readOnly value={preparedMessage} onFocus={e=>e.target.select()}/>}
+            {fallbackLink&&phoneDevice&&<a href={fallbackLink.href} target="_blank" rel="noopener noreferrer">{fallbackLink.label} ↗</a>}
+          </>}
+          {cart.length>1?<button className={inquiryStyles.clear} disabled={busy} type="button" onClick={clear}>{t("Clear inquiry list")}</button>:null}
         </>}
       </div>
     </aside>

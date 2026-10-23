@@ -65,7 +65,17 @@ async function main() {
         const selected=findPlaceSuggestions('Hawassa')[0];
         const location=await db.prepare('SELECT * FROM owner_location_proposals WHERE business_id=?').get(created.businessId);
         assert.equal(location.city,selected.name);assert.equal(location.region,selected.region);assert.equal(location.place_id,selected.id);assert.equal(location.reviewed_version,1);
+        assert.equal(location.location_mode,'area');assert.equal(location.latitude,null);assert.equal(location.longitude,null,'skipping a map pin preserves the city-area location');
         const anchor=await db.prepare('SELECT * FROM business_discovery_profiles WHERE business_id=?').get(created.businessId);assert.equal(anchor.city,selected.name);assert.equal(anchor.latitude,Math.round(selected.latitude*10)/10);assert.equal(anchor.longitude,Math.round(selected.longitude*10)/10);
+        const exactPoint={latitude:7.06231,longitude:38.47652},exactIdentity={providerUserId:'66666666-6666-4666-8666-666666666666',email:'exact-pin@example.test'};
+        assert.deepEqual(parseSignupInput({...valid,...exactPoint},exactIdentity).storefrontPoint,exactPoint);
+        for(const malformed of [{latitude:9},{longitude:38},{latitude:91,longitude:38},{latitude:9,longitude:181},{latitude:'bad',longitude:38}])
+            assert.throws(()=>parseSignupInput({...valid,...malformed},exactIdentity),error=>error instanceof SignupError&&error.code==='invalid_location');
+        const exactWorkspace=await createPublicClientWorkspace({...valid,...exactPoint,idempotencyKey:'signup-exact-map-pin-0001'},exactIdentity);
+        const exactProposal=await db.prepare('SELECT location_mode,latitude,longitude,place_id,reviewed_version FROM owner_location_proposals WHERE business_id=?').get(exactWorkspace.businessId);
+        assert.deepEqual({...exactProposal},{location_mode:'storefront',latitude:exactPoint.latitude,longitude:exactPoint.longitude,place_id:selected.id,reviewed_version:1});
+        const exactAnchor=await db.prepare('SELECT latitude,longitude,city_id FROM business_discovery_profiles WHERE business_id=?').get(exactWorkspace.businessId);
+        assert.deepEqual({...exactAnchor},{latitude:exactPoint.latitude,longitude:exactPoint.longitude,city_id:selected.id},'map-selected public coordinates survive server canonicalization and signup persistence');
         for(const placeId of [undefined,'','forged-place',500,'x'.repeat(81)])assert.throws(()=>parseSignupInput({...valid,placeId},identity),error=>error instanceof SignupError&&error.code==='city_required');
         const counts = async () => ({
             businesses: Number((await db.prepare("SELECT COUNT(*) count FROM businesses").get() as {

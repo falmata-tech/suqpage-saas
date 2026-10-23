@@ -29,8 +29,8 @@ function ProviderTrackingDetails({leg}:{leg:TrackableLeg}){
 export function TransportPlanSummary({plan,onPress}:{plan:TransportPlan;onPress:()=>void}){
  const{t}=useApp();
  return <Card><View testID="transport-plan-summary" style={s.summary}>
-  <View style={{flex:1,minWidth:120,gap:4}}><Copy heading>{t('Shipment tracking')}</Copy><Copy muted>{plan.legs.length===1?t('1 transport stage'):t('{count} transport stages',{count:plan.legs.length})}</Copy></View>
-  <View style={{maxWidth:'100%'}}><Button secondary wrapLabel label={t('View shipment tracking')} onPress={onPress}/></View>
+  <View style={{flex:1,minWidth:120,gap:4}}><Copy heading>{t('Shipment record')}</Copy><Copy muted>{plan.legs.length===1?t('1 transport stage'):t('{count} transport stages',{count:plan.legs.length})}</Copy></View>
+  <View style={{maxWidth:'100%'}}><Button secondary wrapLabel label={t('View shipment record')} onPress={onPress}/></View>
  </View></Card>;
 }
 

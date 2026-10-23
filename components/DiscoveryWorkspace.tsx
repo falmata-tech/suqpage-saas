@@ -6,7 +6,7 @@ import {useBlockedBusinesses} from './useBlockedBusinesses';
 import {excludedBusinessIds} from '@/lib/catalog-safety';
 import {emptyMarketSearch,marketSearchParams,marketWorkspaceParams,MarketSearchError,type MarketSearch,type MarketScope} from '@/lib/market-search';
 import {hasExplicitMarketIntent,marketWorkspaceFromParams,parseMarketWorkspaceSnapshot,serializeMarketWorkspaceSnapshot,type MarketWorkspaceState} from '@/lib/market-workspace';
-import { normalizeDiscoveryPlaces, discoveryPlaceKey } from "@/lib/discovery-contract";
+import { normalizeDiscoveryPlaces, discoveryPlaceKey, discoveryLocationLabel } from "@/lib/discovery-contract";
 import launchStyles from "./LaunchClarity.module.css";
 import previewStyles from "./MapPreviewDialog.module.css";
 import LoadingBar from "./LoadingBar";
@@ -158,7 +158,7 @@ function MarketplaceSearchResults({discovery,items,loading,hasMore,loadingMore,m
   const renderProduct = (product: MarketplaceDiscoveryView["searchProducts"][number]) => <article key={product.id} className="discovery-product-card" data-industry={product.primaryIndustryKey}>
     <Link className="discovery-product-link" href={`${productHref(product.businessHandle, product.id)}&ref=discovery`} onClick={rememberCurrentPublicWorkspace} aria-label={t("{value1} from {value2}, {value3}. View details.", { value1: product.name, value2: product.businessName, value3: product.city })}>
       <span className="discovery-product-result-media"><ProductResultImage product={product} /></span>
-      <span className="discovery-product-result-copy"><small>{product.categoryName}</small><strong>{product.name}</strong>{product.isDemo ? <span className={launchStyles.example}>{t("Demo")}</span> : null}<span className={independentStyles.supply}>{t(productSupplyLabel(product.offeringKind || '', product.availability || 'available'))}</span><p>{product.description}</p><em>{product.city}, {product.region}</em></span>
+      <span className="discovery-product-result-copy"><small>{product.categoryName}</small><strong>{product.name}</strong>{product.isDemo ? <span className={launchStyles.example}>{t("Example product")}</span> : null}<span className={independentStyles.supply}>{t(productSupplyLabel(product.offeringKind || '', product.availability || 'available'))}</span><p>{product.description}</p><em>{discoveryLocationLabel([product.city, product.region])}</em></span>
     </Link>
     <Link className="discovery-product-business" href={`/@${encodeURIComponent(product.businessHandle)}?ref=discovery`} onClick={rememberCurrentPublicWorkspace}>{t("From {business}", { business: product.businessName })}</Link>
   </article>;
@@ -243,7 +243,7 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
  const mapData=businesses.data,groupViewport=useMapGroupViewport();
  const groupIndex=useMemo(()=>mapClusterIndex(mapData.showrooms.map(showroom=>{
   const displayed=mapDisplayLocation(showroom);
-  return {id:showroom.id,latitude:displayed.latitude,longitude:displayed.longitude,featured:showroom.id===mapData.featuredNowBusinessId,live:showroom.isLive};
+  return {id:showroom.id,latitude:displayed.latitude,longitude:displayed.longitude,locationMode:showroom.locationMode,featured:showroom.id===mapData.featuredNowBusinessId,live:showroom.isLive};
  }),groupViewport.capacity),[mapData.showrooms,mapData.featuredNowBusinessId,groupViewport.capacity]);
  // A child SDK effect can report its default view before the parent restores
  // a newly settled projection. Fence that entire render, including old callbacks.
@@ -311,8 +311,8 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
   <div className={'discovery-workbench discovery-workbench-map discovery-drawer-workbench '+independentStyles.stage} data-panel-open={panelOpen}>
    <div className={independentStyles.modeBar}>
    <nav className={independentStyles.switch} aria-label={t('Search for')}>
-    <button ref={businessButton} type="button" disabled={!ready} aria-pressed={!panelOpen} onClick={()=>setPanelOpen(false)}><MapIcon size={17}/><span>{t('Businesses')}</span></button>
-    <button type="button" disabled={!ready} aria-pressed={panelOpen} onClick={()=>setPanelOpen(true)}><Package size={17}/><span>{t('Products')}</span></button>
+    <button ref={businessButton} type="button" disabled={!ready} aria-pressed={!panelOpen} onClick={()=>setPanelOpen(false)}><MapIcon size={17}/><span>{t('Business locations')}</span></button>
+    <button type="button" disabled={!ready} aria-pressed={panelOpen} onClick={()=>setPanelOpen(true)}><Package size={17}/><span>{t('Product listings')}</span></button>
    </nav>
    </div>
    <div className={independentStyles.activeControls}>
@@ -328,7 +328,7 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
    <span className="sr-only" aria-live="polite">{t(nearMeStatus)}</span>
    <div className={'discovery-map-shell '+independentStyles.mapPanel} data-open={!panelOpen} data-snapshot-current={businesses.snapshotCurrent} aria-busy={businesses.pending} style={moving?{transform:`translateX(${-progress*(paneWidth-16)}px)`,transition:'none'}:undefined} aria-hidden={panelOpen} inert={panelOpen}><div className="discovery-map-stage">
    {!panelOpen&&businesses.pending&&<div className={independentStyles.mapUpdating}><MarketUpdating/></div>}
-   {!businesses.pending&&!businesses.error&&mapData.showrooms.length===0&&<p className={independentStyles.emptyMap}>{t('No businesses match these filters.')}</p>}
+   {!businesses.pending&&!businesses.error&&mapData.showrooms.length===0&&<div className={independentStyles.emptyMap} role="status"><p>{t('No businesses with public map locations match these filters.')}</p><button type="button" onClick={()=>setPanelOpen(true)}>{t('Browse product listings')}</button></div>}
    {mapData.resultCounts.businesses>mapData.showrooms.length&&<p className={independentStyles.mapLimit}>{t('Showing {count} businesses. Search or filter to see more.',{count:mapData.showrooms.length})}</p>}
     <div className="discovery-floating-tools"><div className="discovery-floating-buttons" aria-label={t('Map controls')}>
      <button type="button" onClick={nearMe} aria-label={t('Center the map near me')}><LocateFixed/></button>
@@ -392,7 +392,7 @@ function MapPreviewDialog({ labelledBy, onClose, children, wide = false, restore
 function ShowroomPreview({ showroom, source, onClose, onOpen, label, presence }: { showroom: DiscoveryShowroom; source: "discovery" | "featured"; onClose: () => void; onOpen?: () => void; label?: string; presence?: ShowroomPresence }) {
   const t = useUiText();
   const status = presence?.label || label || (showroom.sponsored ? "Sponsored" : showroom.primaryIndustryShortLabel);
-  return <MapPreviewDialog labelledBy={`showroom-preview-${showroom.id}`} onClose={onClose} restoreShowroomId={showroom.id}><aside className="discovery-preview" data-hero-image={showroom.heroImagePath || undefined}><button className="discovery-preview-close" type="button" onClick={onClose} aria-label={t("Close page preview")}><X aria-hidden="true" /></button><article><ShowroomImage showroom={showroom} /><div className="discovery-preview-copy"><span className={presence?.kind ? `presence-${presence.kind}` : undefined}>{t(status)}</span><h3 id={`showroom-preview-${showroom.id}`}>{showroom.name}</h3>{showroom.isDemo ? <span className={launchStyles.example}>{t("Demo")}</span> : null}<p>{showroom.tagline}</p><small>{showroom.city} · {showroom.region}{showroom.locationMode === "area" ? t("· Approximate area") : ""}</small><Link href={`/@${showroom.handle}?ref=${source}`} onClick={onOpen}>{t("Open page")}{" "}<b aria-hidden="true">→</b></Link></div></article></aside></MapPreviewDialog>;
+  return <MapPreviewDialog labelledBy={`showroom-preview-${showroom.id}`} onClose={onClose} restoreShowroomId={showroom.id}><aside className="discovery-preview" data-hero-image={showroom.heroImagePath || undefined}><button className="discovery-preview-close" type="button" onClick={onClose} aria-label={t("Close page preview")}><X aria-hidden="true" /></button><article><ShowroomImage showroom={showroom} /><div className="discovery-preview-copy"><span className={presence?.kind ? `presence-${presence.kind}` : undefined}>{t(status)}</span><h3 id={`showroom-preview-${showroom.id}`}>{showroom.name}</h3>{showroom.isDemo ? <span className={launchStyles.example}>{t("Example showroom")}</span> : null}<p>{showroom.tagline}</p><small>{discoveryLocationLabel([showroom.city, showroom.region])}</small><Link href={`/@${showroom.handle}?ref=${source}`} onClick={onOpen}>{t("Open page")}{" "}<b aria-hidden="true">→</b></Link></div></article></aside></MapPreviewDialog>;
 }
 
 export function NearbyShowroomsViewer({group,showrooms:sourceShowrooms,featuredNowBusinessId,selectedShowroomId,onSelect,onBack,onClose,onOpen,viewport:providedViewport}: {
@@ -409,7 +409,7 @@ export function NearbyShowroomsViewer({group,showrooms:sourceShowrooms,featuredN
  return <MapPreviewDialog labelledBy="nearby-showroom-title" onClose={onClose} restoreGroupKey={group.key} wide><aside className={`nearby-showroom-viewer${selected?' detail-open':''}`} data-compact={layout.compact} data-paginated="false" data-capacity={viewport.capacity}>
   <header>{selected?<button ref={backRef} className="nearby-showroom-back" type="button" onClick={onBack}><ArrowLeft aria-hidden="true"/><span>{t('Back to businesses')}</span></button>:<div className="nearby-showroom-heading"><h2 id="nearby-showroom-title">{t('Choose a business')}</h2><p>{showrooms.length===1?t('1 business'):t('{count} businesses',{count:showrooms.length})}</p></div>}<button ref={closeRef} type="button" onClick={onClose} aria-label={t('Close business list')}><X aria-hidden="true"/></button></header>
   {selected?<NearbyShowroomDetail showroom={selected} presence={showroomPresence(selected,featuredNowBusinessId,t)} onOpen={onOpen}/>:<div ref={listRef} className="nearby-showroom-grid" style={{'--group-row-height':`${layout.rowHeight}px`,'--group-columns':viewport.width>=600?2:1} as CSSProperties}>
-   {showrooms.map(showroom=>{const presence=showroomPresence(showroom,featuredNowBusinessId,t);return <button key={showroom.id} type="button" data-showroom-id={showroom.id} data-industry={showroom.primaryIndustryKey} data-presence={presence.kind||undefined} className={presence.kind||undefined} onClick={()=>onSelect(showroom.id)} aria-label={t('{value1}, {value2}, {value3}.{value4} View details.',{value1:showroom.name,value2:showroom.primaryIndustryLabel,value3:showroom.city,value4:presence.label?` ${presence.label}.`:''})}><span className="nearby-showroom-media"><ShowroomImage showroom={showroom}/>{presence.kind?<i>{presence.shortLabel}</i>:null}</span><span className="nearby-showroom-copy"><small>{t(showroom.primaryIndustryShortLabel)}</small><strong>{showroom.name}</strong>{showroom.isDemo?<span className={launchStyles.example}>{t('Demo')}</span>:null}<em>{t('View details')}</em></span></button>;})}
+   {showrooms.map(showroom=>{const presence=showroomPresence(showroom,featuredNowBusinessId,t),location=showroom.city||showroom.zone||showroom.region||t(showroom.primaryIndustryShortLabel);return <button key={showroom.id} type="button" data-showroom-id={showroom.id} data-industry={showroom.primaryIndustryKey} data-presence={presence.kind||undefined} className={presence.kind||undefined} onClick={()=>onSelect(showroom.id)} aria-label={t('{value1}, {value2}, {value3}.{value4} View details.',{value1:showroom.name,value2:showroom.primaryIndustryLabel,value3:[location,presence.label].filter(Boolean).join('. '),value4:''})}><span className="nearby-showroom-media"><ShowroomImage showroom={showroom}/>{presence.kind?<i>{presence.shortLabel}</i>:null}</span><span className="nearby-showroom-copy"><small className="nearby-showroom-location">{location}</small><strong>{showroom.name}</strong>{showroom.isDemo?<span className={launchStyles.example}>{t('Example showroom')}</span>:null}<em>{t('View details')}</em></span></button>;})}
   </div>}
  </aside></MapPreviewDialog>;
 }
@@ -423,7 +423,7 @@ function NearbyShowroomDetail({ showroom, presence, onOpen }: { showroom: Discov
       <span className={presence.kind ? `presence-${presence.kind}` : undefined}>{t(status)}</span>
       <h2 id="nearby-showroom-title">{showroom.name}</h2>
       <p>{showroom.tagline}</p>
-      <small>{showroom.city} · {showroom.region}{showroom.locationMode === "area" ? t("· Approximate area") : ""}</small>
+      <small>{discoveryLocationLabel([showroom.city, showroom.region])}</small>
       <Link href={`/@${showroom.handle}?ref=discovery`} onClick={onOpen}>{t("Open page")}{" "}<b aria-hidden="true">→</b></Link>
     </div>
   </article>;

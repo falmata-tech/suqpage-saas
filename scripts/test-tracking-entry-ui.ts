@@ -21,10 +21,11 @@ const bundled=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
  b.onResolve({filter:/^(?:react(?:\/jsx(?:-dev)?-runtime)?|react-dom(?:\/client)?)$/},a=>({path:require.resolve(a.path)}));
  b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));
  b.onLoad({filter:/.*/,namespace:'css'},a=>{const css=readFileSync('components/'+a.path.split('/').at(-1),'utf8'),classes=Object.fromEntries([...css.matchAll(/\.([A-Za-z_][\w-]*)/g)].map(match=>[match[1],match[1]]));return{loader:'js',contents:`const style=document.createElement('style');style.textContent=${JSON.stringify(css)};document.head.append(style);export default ${JSON.stringify(classes)};`};});
- b.onResolve({filter:/^(?:next\/(?:link|navigation)|@\/lib\/i18n\/ui|\.\/(?:AttentionAlerts|ChatReadObserver))$/},a=>({path:a.path,namespace:'ports'}));
+ b.onResolve({filter:/^(?:next\/(?:link|navigation)|next-intl|@\/lib\/i18n\/ui|\.\/(?:AttentionAlerts|ChatReadObserver))$/},a=>({path:a.path,namespace:'ports'}));
  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:a.path==='next/link'?`import React from'react';export default({children,href,onClick,...props})=><a {...props} href={href} onClick={event=>{event.preventDefault();onClick?.(event);window.fixture.routes.push(href);}}>{children}</a>;`
  :a.path==='next/navigation'?`const search=new URLSearchParams();export const usePathname=()=>'/';export const useSearchParams=()=>search;export const useRouter=()=>({push:url=>window.fixture.routes.push(url)});`
  :a.path==='@/lib/i18n/ui'?`export const useUiText=()=>((key,values={})=>key.replace(/\\{([^}]+)\\}/g,(_,name)=>String(values[name]??name)));`
+ :a.path==='next-intl'?`export const useLocale=()=> 'en';`
  :a.path==='./ChatReadObserver'?`export const useVisibleChatRead=()=>{};`:`export default()=>null;`}));
  }}]});
 type Fixture={mount:(kind:'public'|'owner',state:'intake'|'recovered'|'ended')=>void;unmount:()=>void;routes:string[];calls:Array<{url:string;method:string;body?:string}>};
@@ -32,13 +33,13 @@ type Fixture={mount:(kind:'public'|'owner',state:'intake'|'recovered'|'ended')=>
 test('FE-069 S141 one shell-owned Tracking entry across public/owner intake, recovered and ended chat',{timeout:120000},async t=>{
  const browser=await chromium.launch({channel:process.env.SUQPAGE_BROWSER_CHANNEL||undefined,headless:true,timeout:20000});
  try{for(const kind of ['public','owner']as const)for(const state of ['intake','recovered','ended']as const)await t.test(kind+' '+state,async()=>{
-  const page=await browser.newPage({viewport:{width:390,height:844}}),errors:string[]=[];page.setDefaultTimeout(6000);page.on('pageerror',error=>errors.push(error.message));page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
+  const page=await browser.newPage({viewport:{width:390,height:844}}),errors:string[]=[];page.setDefaultTimeout(6000);page.on('pageerror',error=>errors.push(error.message));page.on('console',message=>{if(message.type()==='error'&&!message.text().includes('net::ERR_BLOCKED_BY_CLIENT.Inspector'))errors.push(message.text());});
   try{
    await page.route('**/*',route=>route.request().url()==='http://localhost:41841/'?route.fulfill({contentType:'text/html',body:'<!doctype html><style>*{box-sizing:border-box}body{margin:0}button,input,textarea{font:inherit}</style><main id="root"></main>'}):route.abort('blockedbyclient'));
    await page.goto('http://localhost:41841/');await page.addScriptTag({content:(await bundled).outputFiles[0].text});
    const mount=()=>page.evaluate(({kind,state})=>(window as unknown as{fixture:Fixture}).fixture.mount(kind,state),{kind,state});await mount();
-   const launcher=page.getByRole('button',{name:/Want help with transport\/shipping\?/});if(kind==='public')await launcher.click();
-   const tracking=page.getByRole('link',{name:/^Shipment tracking(?: →)?$/});await tracking.waitFor();
+   const launcher=page.getByRole('button',{name:/Need Transport\?/});if(kind==='public')await launcher.click();
+   const tracking=page.getByRole('link',{name:/^Shipment records(?: →)?$/});await tracking.waitFor();
    assert.equal(await tracking.count(),1,'The real nested conversation must never add a second Tracking entry');
    assert.ok((await tracking.boundingBox())!.height>=48,'The single quiet entry remains a48px target');
    const href=await tracking.getAttribute('href');assert.ok(href);const destination=new URL(href,'http://localhost:41841');assert.equal(destination.pathname,'/tracking');

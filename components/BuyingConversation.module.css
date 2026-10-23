@@ -1,4 +1,5 @@
 .conversation { display:flex; flex-direction:column; min-height:0; height:min(620px,65dvh); }
+.fitViewport { flex:1 1 0%; height:auto; min-height:0; }
 .status { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; column-gap:12px; gap:4px; padding:12px 16px; border-bottom:1px solid #dde4e4; font-size:14px; }
 .status small { color:#526366; overflow-wrap:anywhere; }
 .status[data-waiting=true] { background:#fff3e9; }
@@ -7,6 +8,7 @@
 .waitingHint { margin:0; padding:10px 16px 0; color:#526366; font-size:13px; line-height:1.4; }
 .status > span:not(.connection) { color:#9a3300; grid-column:1/-1; }
 .history { flex:1; min-height:90px; overflow-y:auto; overscroll-behavior:contain; padding:12px 16px; display:flex; flex-direction:column; gap:10px; }
+.fitViewport .history { min-height:0; }
 .history article { max-width:90%; align-self:flex-start; border-radius:10px; padding:10px 12px; background:#eef3f3; overflow-wrap:anywhere; flex:none; font-size:14px; }
 .history article[data-sender=visitor] { align-self:flex-end; background:#fff0e7; }
 .history p { white-space:pre-wrap; margin:6px 0; }
@@ -30,6 +32,20 @@
 .messageMeta { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:flex-end; }
 .messageMeta > span { display:flex; align-items:center; gap:2px; font-size:11px; color:#526366; }
 .messageMeta svg { width:12px; height:12px; }
+
+.callback { display:grid; align-content:start; gap:12px; min-height:0; flex:1 1 auto; overflow-y:auto; padding:20px 16px; }
+.callback h3,.callback p { margin:0; }
+.callback h3 { font-size:1.15rem; line-height:1.35; }
+.callback p { color:#526366; line-height:1.5; }
+.callback ul { display:grid; gap:6px; margin:0; padding:12px 14px; border:1px solid #dde4e4; border-radius:10px; list-style:none; overflow-wrap:anywhere; }
+.callback form { display:grid; grid-template-columns:minmax(0,1fr); gap:8px; }
+.callback label { margin-top:4px; font-size:.9rem; font-weight:650; }
+.callback input { box-sizing:border-box; width:100%; min-height:48px; padding:10px 12px; border:1px solid #bac8c8; border-radius:8px; color:#222; background:#fff; font:inherit; font-size:16px; }
+:global(.public-support-dialog) .callback form > button { grid-column:1; display:flex; align-items:center; justify-content:center; width:100%; min-width:0; min-height:48px; margin-top:8px; padding:10px 14px; border:0; border-radius:8px; color:#fff; background:#b83200; font:inherit; font-weight:700; cursor:pointer; }
+.cancelRequest { display:flex; align-items:center; justify-content:center; min-height:48px; padding:10px 14px; border:1px solid #bac8c8; border-radius:8px; background:#fff; color:#344a52; font:inherit; font-weight:650; cursor:pointer; }
+.cancelRequest:not(:disabled):hover { background:#f5f8f8; border-color:#6f858b; }
+.callback button:disabled { opacity:.55; cursor:wait; }
+.callback button:focus-visible,.callback input:focus-visible { outline:3px solid #263c42; outline-offset:2px; }
 
 .status .connection { grid-column:1; grid-row:2; }
 .endChat { grid-column:2; grid-row:1 / span 2; min-height:44px; align-self:center; border:1px solid #becaca; border-radius:6px; background:#fff; color:#344a52; font:inherit; font-size:13px; font-weight:650; padding:8px 10px; cursor:pointer; }

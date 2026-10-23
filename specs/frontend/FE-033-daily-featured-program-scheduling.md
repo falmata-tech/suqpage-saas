@@ -82,12 +82,25 @@ cover noon/midnight/PM, agenda epoch boundaries and form round trips. Desktop/ph
 captures precede visual approval/full gates. Rollback restores source without
 migrating schedule data. Master §§5/19 affected.
 
-Demo-audit correction: GIVEN no valid platform TikTok destination WHEN any
-schedule phase renders THEN it shows Featured schedule/current/break/ended status
-without claiming a TikTok broadcast or offering a dead watch action. Configured
-provider links retain their existing behavior. Schedule timing never proves an
-external stream exists. Verify absent/configured destination states in browser;
-no new provider integration or production configuration mutation.
+Demo-audit correction: the schedule never proves an external stream exists.
+GIVEN the schedule has not started WHEN its header renders THEN it gives the
+EAT start time and names TikTok Live even if the public destination is missing;
+it does not claim that TikTok is already live. GIVEN the scheduled window is
+underway THEN show that the program window is open and offer **Check TikTok Live**
+only when the public destination is valid, with wording that tells visitors to
+check whether the stream has started. The app does not
+claim the external stream is verified. Ended/empty states do not claim a
+livestream ended and never offer a dead link. Verify absent/configured destination
+states in actual Chrome and Expo; no new provider integration or production
+configuration mutation is part of this change.
+
+Focused evidence: `scripts/test-featured-broadcast-header.ts` passes all five
+schedule, destination and date cases in English, Amharic and Afaan Oromo.
+Actual Chrome review covers 1440px web in the upcoming state, 390px web in the
+scheduled-window state, and 390px Expo in the scheduled-window state. The
+source-bound capture receipt and screenshots are in
+`.local/featured-header-s159/receipt.json`; visual approval and applicable full
+gates remain pending.
 
 ### In scope
 
@@ -276,7 +289,7 @@ provider links, or credentials.
 |---|---|---|
 | Two-session agenda and breaks | unit | `scripts/test-featured-schedule.ts` |
 | Automatic/manual eligibility and atomic replacement | integration/security | `scripts/test-featured-schedule.ts`, `scripts/test-security.ts` |
-| Public status, booth labels, and phone layout | browser/visual | focused Playwright capture, `scripts/capture-discovery-visuals.mjs` |
+| Public status, booth labels, and phone layout | focused/browser/visual | `scripts/test-featured-broadcast-header.ts`; focused Playwright capture, `scripts/capture-discovery-visuals.mjs` |
 | Admin workflow | acceptance | `tests/acceptance/app.spec.ts` |
 
 ## Rollout and rollback

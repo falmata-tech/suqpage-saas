@@ -4,11 +4,40 @@ title: Category-relevant starter and multi-provider demo videos
 status: in_progress
 related: [BE-049, FE-046, BE-039, FE-060, BE-048, FE-050, FE-053, DEP-039, DEP-042]
 owners: [product, frontend, backend, operations]
-last_updated: 2026-10-07
+last_updated: 2026-10-21
 change_level: L3
 ---
 
 # FE-061 — Category-relevant video examples
+
+## S154 proposed correction — ready for root review, source not changed
+
+Example selection must respect the actual product/category and the known business
+family before incidental words in prose. A coffee cup is ceramics, a coffee scrub
+is soap, a fruit bag is produce, a backpack with a device pocket is textiles, and
+an injera stove is equipment rather than prepared food. Animal feed must never
+receive garment footage; use only a specifically relevant admitted milling/feed
+example, otherwise leave video empty. A crop tour is not an animal-feed example.
+
+No recognized family means no video, never an unrelated metal fallback. An invalid
+business category must not silently become a ceramics example. A recognized
+business family may supply its related example to an otherwise unclassified
+product only where no explicit conflicting product/category identity exists.
+Preserve owner-entered media and all existing farm-tour references pending a
+separate exact demo-only correction; no runtime merchant-content substitution.
+
+Third-party examples must identify the creator and related/example purpose, never
+claim that the creator's factory, methods, capacity or certifications belong to a
+demo merchant. The owner-liked existing farm tour remains a crop/grower example;
+its foreign-language/profit title does not substantiate local earnings or methods.
+Replacement candidates require a primary creator source and actual basic playback;
+intro playback is not whole-film, process-safety, captions or embed qualification.
+Unqualified electronics/metal candidates remain proposals, not admitted defaults.
+
+Before production edits, root reviews the semantic regression cases and source
+closure. Any later database correction is a finite exact local-demo operation with
+current target/version/before-image checks; hosted writes are a separate review.
+No new sync utility, provider account, downloads or change to merchant media.
 
 ## Problem
 

@@ -8,7 +8,7 @@ import {normalizeDiscoveryCategories} from './discovery-contract';
 
 /** Runs in the creation transaction; safe to retry, never backfills existing content. */
 export async function initializeBusinessStarter(runner: PostgresTransactionRunner, input: {
-  businessId: number; actorUserId: number; category: BusinessCategoryKey; notificationEmail: string; accentColor?: string; placeId?:string;
+  businessId: number; actorUserId: number; category: BusinessCategoryKey; notificationEmail: string; accentColor?: string; placeId?:string; storefrontPoint?:{latitude:number;longitude:number};
 }): Promise<boolean> {
   if (!Number.isSafeInteger(input.businessId) || input.businessId < 1 || !Number.isSafeInteger(input.actorUserId)
     || !isBusinessCategoryKey(input.category)) throw new Error('Invalid starter workspace.');
@@ -67,15 +67,17 @@ export async function initializeBusinessStarter(runner: PostgresTransactionRunne
     await runner.query(`INSERT INTO owner_page_drafts(business_id,version,content_json,assistance_enabled,updated_by,updated_at) VALUES(?,1,?,0,?,?)`,
       [input.businessId, JSON.stringify({ ...sample.page, ...(accentColor ? { accentColor } : {}) }), input.actorUserId, now]);
     await runner.query("INSERT INTO owner_page_events(business_id,version,actor_user_id,kind,created_at) VALUES(?,1,?,'created',?)", [input.businessId, input.actorUserId, now]);
+    const storefrontPoint=input.storefrontPoint;
+    const reviewedVersion=input.placeId?1:0;
     await runner.query(`INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,latitude,longitude,place_id,place_latitude,place_longitude,country_code,reviewed_version,updated_at)
-      VALUES(?,1,?,?,?,'area',NULL,NULL,?,?,?,?,0,?)`, [input.businessId, input.category, place.name, place.region, place.id, place.latitude, place.longitude, place.countryCode, now]);
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [input.businessId, 1, input.category, place.name, place.region, storefrontPoint?'storefront':'area', storefrontPoint?.latitude??null, storefrontPoint?.longitude??null, place.id, place.latitude, place.longitude, place.countryCode, reviewedVersion, now]);
     if(input.placeId) {
-      // New public signup supplied a server-known city. Map placement remains an
-      // approximate area; the private sample does not become public automatically.
+      // New signup supplies a server-known city; a chosen point remains the exact
+      // public storefront location, while skipping it keeps the city-area anchor.
       for(const category of normalizeDiscoveryCategories(input.category))
         await runner.query('INSERT INTO business_industries(business_id,industry_key) VALUES(?,?)',[input.businessId,category]);
       await runner.query(`INSERT INTO business_discovery_profiles(business_id,city,zone,region,latitude,longitude,approved_at,updated_at,country_code,city_id)
-        VALUES(?,?,?,?,?,?,?,?,?,?)`,[input.businessId,place.name,place.name,place.region,Math.round(place.latitude*10)/10,Math.round(place.longitude*10)/10,now,now,place.countryCode,place.id]);
+        VALUES(?,?,?,?,?,?,?,?,?,?)`,[input.businessId,place.name,place.name,place.region,storefrontPoint?.latitude??Math.round(place.latitude*10)/10,storefrontPoint?.longitude??Math.round(place.longitude*10)/10,now,now,place.countryCode,place.id]);
       await runner.query('UPDATE owner_location_proposals SET reviewed_version=version WHERE business_id=?',[input.businessId]);
     }
     return true;

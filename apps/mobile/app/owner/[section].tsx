@@ -58,9 +58,9 @@ export default function OwnerScreen() {
   const done=returnTo === "profile" ? backToProfile : backToShowroom;
   return (
     <View style={{ flex: 1 }}>
-      <Screen key={`${screen}:${screen==='page'?'':view||''}:${id||''}`}>
+      <Screen key={`${screen}:${screen==='page'?'':view||''}:${id||''}`} scroll={screen!=='product'}>
         <ResourceLoading load={load} variant={screen==='products'?'list':screen==='settings'||screen==='showroom'?'profile':screen==='chat'?'thread':'editor'}/>
-        {screen!=='page'&&<Button secondary label={t(screen==='product'?'Products':returnTo==='showroom'?'Back to your page':returnTo==='settings'?'Account settings':returnTo==='business'?'Business details':'Back to account')} onPress={()=>navigate(screen==='product'?backToProducts:returnTo==='showroom'?backToShowroom:returnTo==='settings'?backToSettings:returnTo==='business'?backToBusiness:backToProfile)}/>}
+        {screen!=='page'&&<View style={screen==='product'?{paddingHorizontal:16,paddingTop:12}:undefined}><Button secondary label={t(screen==='product'?'Products':returnTo==='showroom'?'Back to your page':returnTo==='settings'?'Account settings':returnTo==='business'?'Business details':'Back to account')} onPress={()=>navigate(screen==='product'?backToProducts:returnTo==='showroom'?backToShowroom:returnTo==='settings'?backToSettings:returnTo==='business'?backToBusiness:backToProfile)}/></View>}
         {load.data && (
           <>
             {screen === "showroom" ? <ShowroomMenu/> : screen === "cover" ? <CoverEditor home={load.data} onSaved={done} onCancel={done}/> : screen === "handle" ? <HandleEditor initialHandle={load.data.shop.handle} onSaved={done} onCancel={done}/> : screen === "page" ? (
@@ -102,18 +102,21 @@ export default function OwnerScreen() {
                 />
                 {load.data.shop.products.map((p) => (
                   <Card key={p.id}>
-                    <Photo
+                    <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+                    <View style={{width:72,flexShrink:0}}><Photo
                       refPath={
                         p.media.find((m) => m.kind === "image")?.ref || ""
                       }
                       privateImage
-                      height={150}
-                    />
-                    <Copy>{p.name}</Copy>
+                      height={72}
+                    /></View>
+                    <View style={{flex:1,minWidth:0,gap:4}}><Copy>{p.name}</Copy>
                     <Copy muted>{t(p.kind==='service'?'Retired listing':p.published ? "Published" : "Draft")}</Copy>
                     <ProductSupply kind={p.kind} availability={p.availability}/>
-                    <Button
+                    </View>
+                    <View style={{maxWidth:90,flexShrink:0}}><Button
                       secondary
+                      wrapLabel
                       label={t("Edit")}
                       onPress={() =>
                         router.push({
@@ -121,7 +124,7 @@ export default function OwnerScreen() {
                           params: { section: "product", id: p.id },
                         })
                       }
-                    />
+                    /></View></View>
                   </Card>
                 ))}
               </>

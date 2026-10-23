@@ -4,11 +4,110 @@ title: MirtPage identity and inclusive digital showroom experience
 status: in_progress
 related: [BE-059, DEP-029, DEP-049, FE-071, ADR-0029]
 owners: [product, frontend, localization]
-last_updated: 2026-10-20
+last_updated: 2026-10-23
 change_level: L2
 ---
 
 # FE-070 — MirtPage identity and digital showrooms
+
+## S167 — keep unpublished store drafts aligned with current contact and shipment language
+
+The MirtPage Play listing and campaign captions are drafts, not published copy.
+Before a new Android artifact is qualified, describe the available business
+Inbox alongside configured messaging channels, name the independent selected
+logistics service provider rather than MirtPage's team, and call the separate
+email-verified organizer **Shipment records**. A record shows entered route
+stages and optional external provider links; do not promise live movement,
+automatic scans or delivery dates. English, Amharic and Afaan Oromo drafts use
+their current interface terms and natural local grammar. Preserve the draft
+and native-speaker-review status; do not claim a Play publication.
+
+GIVEN a visitor reads a draft listing or transport caption in any active
+language WHEN they compare it with the app THEN the contact choices, provider
+role and Shipment records name match the current web/native journey. GIVEN no
+external tracking link is supplied WHEN the record is described THEN the copy
+does not imply real-time tracking. Focused draft-schema/copy tests enforce the
+terms and the absence of retired promises before release checks.
+
+## S154 — customer-first showroom story and examples (local implementation)
+
+The English Market copy under review leads with “Find local makers and suppliers
+for your next order.” Its supporting line names digital showrooms from farms,
+workshops, factories and shops, explains that visitors can browse product options
+and listed availability, and invites questions about larger orders or made-to-order
+items without searching social posts. This prioritizes buyers sourcing from local
+producers while preserving a clear path for ordinary shoppers and retailers or
+importers. About names workshops, farms, factories, local shops and importers and
+explains the same journey from both sides: customers browse before contacting;
+businesses that grow, make, source, import or sell goods can bring their story and
+products into one shareable digital showroom. Verify demo messaging links against
+the already-approved shared contact destination under FE-066/DEP-045; keep the
+contact visible only when exact-match approval succeeds and never send a message
+during review.
+The business handles the final sale; do
+not imply MirtPage checkout, verified inventory, delivery promises or online-only
+eligibility. Keep a concise headline, readable type, existing plain background
+and audience navigation. Sign-in is role-neutral across web/native:
+‘Sign in to MirtPage.’ with email sign-in/account-creation instructions replaces
+the earlier business-showroom login heading. Existing Auth and business-onboarding
+behavior remains unchanged; future transport-provider accounts are not implied.
+Active languages explain this idea naturally; preserve merchant identity/content
+and inactive locale availability. Shared Market/About/SEO sources stay consistent.
+
+The candidate English wording and authored active-language equivalents remain
+pending actual desktop/phone/Expo visual review; earlier logo/layout approvals do
+not approve revised copy. Preserve explicit digital-showroom meaning and the
+social-post discovery context in each active language without literal word-order
+translation or a long sector list in the hero.
+
+Fictional demo businesses are intentional product examples as well as QA
+fixtures. Across the Market, Featured and showroom pages, give each one a
+believable, business-specific story and catalog representing shops, makers,
+workshops, farms, manufacturers or suppliers. Label every fictional showroom
+and product visibly as an example, including handles that do not contain the
+word “demo”. A no-results public directory may direct visitors to example
+showrooms in the Market, but the directory itself and canonical sitemap continue
+to include eligible real businesses only. Do not imply that examples are real
+merchants, that illustrative media is documentary, or that listed availability
+and capacity are verified live promises. Remove generic fixture text/options
+that make a sample storefront read like a database record. Headline, About,
+examples, product details, contact choices and transport entry should explain
+the same customer journey in English, Amharic and Afaan Oromo.
+
+GIVEN a visitor lands on Market in an active language WHEN the introduction
+renders THEN its headline identifies local makers and suppliers as places to
+find products for an order; its supporting line names farms, workshops, factories
+and shops, explains browsing products and listed availability, and invites
+questions about larger orders or made-to-order items without searching social
+posts. It remains welcoming to shoppers buying smaller quantities and does not
+imply that MirtPage negotiates, checks inventory, provides checkout or promises
+delivery.
+
+GIVEN an owner or customer opens About in an active language WHEN they select
+their audience THEN the customer view explains the browse-then-ask journey and
+the business view includes shops, workshops, growers, makers, importers and
+suppliers without promising checkout or verified stock.
+
+GIVEN a fictional example appears in Market, Featured, or a showroom WHEN its
+name or products render THEN it is identified as an example and its distinct
+story/catalog avoids generic option or database-test wording.
+
+GIVEN the public business directory has no eligible real showrooms WHEN its
+empty state renders THEN it says no public business showrooms are listed and
+offers a clearly labelled link to example showrooms in Market; examples remain
+excluded from directory results, canonical metadata and sitemap entries.
+
+FE-075/BE-062 supersede the external-only inquiry positioning for the coordinated
+local implementation: visitors submit their name/phone, question and selected
+products to a business Inbox; the owner follows up to discuss the sale. Configured
+WhatsApp, Telegram and MirtPage Inbox remain equally prominent adjacent choices.
+This is asynchronous inquiry, not live business chat,
+onsite replies, checkout or verified stock. Source copy may precede its coordinated
+local review, but cannot be claimed as deployed until its workflow gates pass.
+
+Focused narrative/localization and empty-state checks plus actual web/native
+review precede the batch visual/full-gate boundary. Existing approved artwork
+remains intact; root owns the combined master/checklist/traceability update.
 
 ## S146 active-language account-copy correction (local focused evidence)
 
@@ -141,7 +240,7 @@ and any subsequent full release gate remain separate.
 ## S146 shared public canvas (ready)
 
 The shared public shell currently puts decorative venue photography behind
-information and task pages, including Shipment tracking. Use a solid MirtPage
+information and task pages, including Shipment records. Use a solid MirtPage
 theme canvas for that shell so headings and content retain clear contrast on
 desktop and phone. Preserve page-owned About hero media, Market content, real
 business/product imagery and tenant showroom identity. Native task pages keep

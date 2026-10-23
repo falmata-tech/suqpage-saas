@@ -2,23 +2,78 @@
 id: FE-069
 title: Independent tracking portal and staff tracking workspace
 status: in_progress
-related: [FE-074, BE-058, FE-068, FE-049, FE-053, FE-062, DEP-048]
+related: [FE-074, BE-058, BE-064, FE-068, FE-049, FE-053, FE-062, DEP-048, FE-076, FE-077]
 owners: [product, frontend, mobile, security]
-last_updated: 2026-10-18
+last_updated: 2026-10-21
 change_level: L2
 ---
 
 # FE-069 — Tracking for visitors, owners and transport staff
 
-## S146 presentation correction — quiet Shipment tracking canvas (ready)
+## S161 terminology and provider identity direction
 
-The shared public-shell photograph sits behind the Shipment tracking heading and
+The owner approved **Shipment records** for the visitor/owner list and
+**Shipment record** for one arranged journey, with the selected arranging
+company's identity shown on each record. Current local web and Expo source use
+these labels, and the supplied SharedTrucks Logistics wordmark is shown on the
+record list and detail; `/tracking`, APIs and persisted tracking contracts stay
+stable. Focused tests and actual Chrome/Expo review remain open. This change does
+not add party fields: FE-077/BE-064 record the future shipper/receiver details
+and independently verified, shipment-scoped access. Until that work is ready,
+the existing recipient-only access, provider legs and internal staff queue stay
+authoritative. Do not imply live carrier status, booking, payment or delivery.
+
+## Android credential-storage correction (ready)
+
+Physical version 2 opens public showrooms and transport intake, but Shipment
+tracking fails before email entry: its origin-scoped key contains `:` and `/`,
+which the installed Expo SecureStore rejects. A network error is misleading here;
+the API is not contacted on an empty-device restore. Keep the existing form and
+verification flow; correct only the storage identifier and enforcing fixtures.
+Master §§12 and16 remain the product boundary. BE-058 owns credential isolation.
+
+1. GIVEN no tracking credential on Android WHEN Shipment tracking opens THEN
+   SecureStore accepts its key and the existing email form appears without a
+   connection error, account login or email/API request.
+2. GIVEN origins differing by scheme, host or nondefault port WHEN tracking
+   credentials are saved, restored or cleared THEN their keys remain distinct,
+   use only nonempty `[A-Za-z0-9._-]` identifiers, and never touch owner/chat keys.
+   Equivalent canonical origins reuse the same key; punctuation substitution
+   must not collapse different origins.
+3. GIVEN absent, expired, corrupt or valid tracking storage WHEN opening or
+   signing out THEN the existing validation, serialized-write and recipient
+   checks remain effective. No fallback to plaintext storage or swallowed
+   SecureStore failure is permitted.
+
+Plan: specify the key contract; add a strict native-storage regression that fails
+on version 2; implement a reversible hexadecimal canonical-origin identifier;
+run storage/component/type/spec checks, then applicable release gates. Retain the
+physical failure and label browser component ports separately from device proof.
+No layout, API, database, email or provider setting changes. A new APK/AAB requires
+its own admission and device rerun. Invalid old keys could never persist on native;
+Expo browser memory is transient, so no private-store migration is introduced.
+
+Focused local evidence: the strengthened storage fixture rejects version 2's
+key in both origin cases; the actual Tracking React component also reproduces
+the missing email form under the same key restriction. The corrected source
+passes all 9 storage/HTTP/lifecycle and 6 controlled-component cases, including
+empty restore with no API calls, canonical/distinct origins and ports/IPv6,
+corrupt/expired state, save/clear/read races and unchanged owner/chat credentials.
+Mobile and focused-test strict typechecks plus specification validation pass.
+The first sandbox Chrome launch stop is retained as infrastructure evidence,
+separate from the permission-corrected red/green component results. Component
+ports are not Expo or a physical Android rerun; full gates and new binary/device
+admission remain open. Protected evidence: `.local/mirtpage-user-journey-audit-s153/tracking-storage-fix/`.
+
+## S146 presentation correction — quiet Shipment records canvas (ready)
+
+The shared public-shell photograph sits behind the Shipment records heading and
 can obscure its text. The recipient task needs a plain, MirtPage-themed canvas
 on phone and desktop. This is presentation only: email verification, recipient
 scope, shipment data, provider links and staff editing remain unchanged. FE-070
 owns the shared-shell treatment; no migration or hosted configuration is needed.
 
-1. GIVEN a visitor or business owner opens Shipment tracking on desktop or phone
+1. GIVEN a visitor or business owner opens Shipment records on desktop or phone
    WHEN email entry, code entry, shipment list or detail renders THEN the page
    heading, instructions, forms and shipment records appear on a uniform theme
    background without a decorative image behind them.
@@ -43,10 +98,11 @@ stopped on an overly specific phone RGB assertion after those Tracking actions;
 About/Featured screenshots from that run show transitional loading, so settled
 cross-page interaction remains open. This is not visual approval or a full gate.
 
-## S145 follow-on — Shipment tracking and provider references (local implementation)
+## S145 follow-on — Shipment records and provider references (local implementation)
 
-The newest owner direction names this active feature **Shipment tracking**.
-It remains an organizer for the arranged route and ordered providers, until a
+The newest owner direction names this active feature **Shipment record(s)**.
+The technical portal, routes and persisted contract retain tracking names. It
+remains an organizer for the arranged route and ordered providers, until a
 separate integration is specified. BE-058 owns the Tracking-only leg contract;
 DEP-048 owns additive75, preserved snapshots and rollout. Master sections13,
 15,17,18,19 and22 are affected. Root accepted this Ready proposal before feature
@@ -228,3 +284,8 @@ separate authorized cleanup removed4local obsolete plans and9allowlisted events
 with rehearsed recovery and70protected-table fingerprints unchanged. Live schema63
 had no plan table and zero matching events, a verified no-op. This is neither a
 Tracking rollout nor permission to remove other chat/account/shipment history.
+
+S153 actual Expo/Google Chrome additionally follows visitor Account→Market→
+transport→Shipment tracking. Empty restore exposes Email with no Retry/error and
+no tracking API request. This is the real Expo route with its web memory adapter;
+it does not qualify Android SecureStore or the corrected installed binary.

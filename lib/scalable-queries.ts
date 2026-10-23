@@ -509,6 +509,7 @@ export type InquiryListRow = {
   status: string;
   created_at: string;
   item_count: number;
+  read_at: string | null;
   items: InquiryListItem[];
 };
 

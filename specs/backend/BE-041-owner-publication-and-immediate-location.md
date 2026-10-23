@@ -4,7 +4,7 @@ title: Owner publication and immediate location
 status: in_progress
 related: [BE-049, BE-048, FE-059, BE-047, FE-058, FE-056, FE-054, FE-048, DEP-038, BE-033, BE-038, BE-040, BE-056, FE-021]
 owners: [product, backend, operations]
-last_updated: 2026-10-17
+last_updated: 2026-10-21
 change_level: L3
 ---
 
@@ -25,11 +25,24 @@ while public map/search stay responsive and predictable on phones.
   publication history. Staff assistance remains consented and draft-only; owners
   retain publication authority. Stale versions, tenant/role checks, media guards,
   same-origin validation and atomic failure behavior remain.
-- Location Save applies a valid selected city centroid or explicitly public GPS
-  storefront directly to the marketplace profile and business category. Area mode
-  never publishes exact/home coordinates. Unknown manual areas may save text but
-  have no map pin until a known place is selected; no review is required. Admin
+- Location Save keeps the canonical country/city searchable when the owner
+  chooses **City only**. Its validated canonical city anchor appears on the
+  public map as a city-area marker; it is not an exact storefront location. An
+  owner may opt into **Show on
+  map** and place an exact-public storefront point. The concise disclosure appears
+  beside this choice before the map interaction; map-selected coordinates are
+  paired, finite, world-bounded and stored as storefront coordinates. Area mode
+  never publishes or retains exact/home coordinates. Changing canonical city invalidates the
+  selected point. Unknown manual areas may save text but have no map pin until a
+  known place is selected; no review is required. Admin
   exclusions/suspensions are preserved and cannot be bypassed by saving.
+- Discovery's Business locations projection includes owner-selected storefront
+  points with paired, validated coordinates and city-only pages with a validated
+  canonical city anchor. City-only pages appear as numbered city-area pins at
+  that city point and carry `locationMode: area`; they never become storefront
+  icons or exact-address previews. Do not fan out or otherwise invent a business
+  location. City-only pages remain eligible in product search and retain canonical
+  country/city filtering. Legacy coordinates are not promoted to public pins.
 - Owner navigation centers on setup/overview, business details, page, products &
   services, inquiries, support and account security. Remove redundant categories,
   review and renewal navigation from the owner flow; retain staff operations and
@@ -69,6 +82,9 @@ while public map/search stay responsive and predictable on phones.
 3. GIVEN selected area or public storefront WHEN location is saved THEN map coordinates
    reflect that choice immediately after publication; switching to area removes exact
    coordinates, and admin exclusion remains. Forged place anchors are ignored.
+   Signup and owner editing may submit a paired map point only with a canonical
+   city; the server validates bounds and treats the point as exact-public. No
+   selection keeps city-area behavior. Changing city discards the old point.
 4. GIVEN owner/admin on desktop and 390/320 WHEN navigating THEN retired review tasks
    are absent, live support/security/inquiries remain accessible and scoped.
 5. GIVEN admitted demos WHEN corrected THEN simpler fields and descriptions are
@@ -95,20 +111,16 @@ visual approval, then full/release gates, scoped commit and verified rollout.
 Rollback code restores prior workflow while preserving publication/history; demo
 rollback uses the protected exact before-state. No hosted Auth/config changes.
 
-## City marker separation — accepted 2026-09-20
+## Former area display offsets — superseded by FE-021 S160
 
-City/general-area shops use stable business-ID-based display offsets within 1.5 km
-of their public city anchor, so identical default coordinates do not share one
-point. Exact storefront and unclassified legacy positions are unchanged. Offsets
-never replace saved city/GPS coordinates or imply street addresses. Search/filter/
-pagination do not change an individual shop's offset. Apply the display offset
-once before FE-021 S127 screen-sized fixed grouping. Dense display points remain
-counted groups through normalized zoom18/native raw17. Only points with no other
-eligible shop within3km become individual markers; forced one-card partitions
-stay numbered circles. Screen-admitted final groups never rewrite source
-coordinates or use the retained legacy six-member/800-meter payload as visual
-authority. Mark area positions as approximate. Tests cover distinct same-city
-points, bounded display offset, stable filtered subsets and untouched GPS.
+The earlier implementation assigned each city-only business a stable synthetic
+coordinate near its city anchor. FE-021 S160 retires those per-business offsets.
+City-only records now share the validated canonical city point and appear only in
+numbered groups. Circle-target spacing remains a visual layout detail and does
+not change business coordinates or imply a storefront. Exact pins retain their
+owner-selected coordinates. Regression coverage proves co-located city-only
+businesses remain counted circles, while an isolated exact pin may retain its
+existing individual-marker behavior.
 
 ## Focused local evidence — 2026-09-20
 

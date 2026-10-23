@@ -28,15 +28,6 @@ function currentSurfaceRole(
   return role;
 }
 
-function contactLabel(props: DesignProps): string {
-  const business = props.catalog.business;
-  if (business.whatsapp) return `WhatsApp ${business.whatsapp}`;
-  if (business.telegram) return `Telegram @${business.telegram}`;
-  if (business.contact_email) return business.contact_email;
-  if (business.tiktok) return `TikTok @${business.tiktok}`;
-  return "Build an inquiry and the business will confirm the next step.";
-}
-
 function toBankProduct(product: Product): BankProductView {
   return {
     key: String(product.id),
@@ -65,6 +56,7 @@ export function CompositionShowroom({
   manifest: ShowroomDesignProposal | ShowroomDesignProposalV2;
   contentBlocks?: ShowroomContentBlocksDocument;
 }) {
+  const t=useUiText();
   let bank;
   try {
     bank = resolveShowroomComponentBank(manifest.bankRelease);
@@ -104,7 +96,7 @@ export function CompositionShowroom({
       heroSubtitle: props.catalog.business.hero_subtitle,
       logoRef: props.catalog.business.logo_path,
       heroImageRef: props.catalog.business.hero_image_path,
-      contactLabel: contactLabel(props),
+      contactLabel:t("Send an inquiry to this business."),
       processVideoRef: props.catalog.business.process_video_ref,
       isLive: Boolean(props.catalog.business.is_live),
       livePlatform: props.catalog.business.live_platform,

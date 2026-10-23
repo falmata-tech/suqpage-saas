@@ -71,17 +71,19 @@ function validate(set){
  assert.match(c.captions.en.visitor,/without digging through social posts/);
  assert.match(c.captions.am.visitor,/ልጥፎችን ሳይፈትሹ/);
  assert.match(c.captions.om.visitor,/Maxxansa miidiyaa hawaasaa.*osoo hin barbaadin/);
- const english=l.listings['en-US'].fullDescription;for(const idea of ['digital showroom','brand','story','collections','retailers','workshops','factories','farms','suppliers','social','ready to ship','made to order','Availability','email','Shipment tracking'])assert.ok(english.includes(idea),'Narrative: '+idea);
+ const english=l.listings['en-US'].fullDescription;for(const idea of ['digital showroom','brand','story','collections','retailers','workshops','factories','farms','suppliers','social','ready to ship','made to order','Availability','email','MirtPage Inbox','Shipment records'])assert.ok(english.includes(idea),'Narrative: '+idea);
  for(const [locale,entry] of [['en',l.listings['en-US']],['am',l.listings.am],['om',l.promotionalOnlyLocales.om]]){
   const texts=[entry.fullDescription,c.captions[locale].transport,p.screens.find(screen=>screen.id==='06-transport').alt[locale]];
-  const activeName={en:'Shipment tracking',am:'የጭነት ክትትል',om:'Hordoffii feʼumsaa'}[locale];
+  const activeName={en:'Shipment records',am:'ጭነት መዝገቦች',om:'Galmeewwan feʼumsaa'}[locale];
   for(const text of texts)assert.ok(text.includes(activeName),locale+' uses active tracking name');
+  assert.ok(entry.fullDescription.includes('MirtPage Inbox'),locale+' names the direct business inquiry');
+  assert.doesNotMatch(texts.join('\n'),/Shipment tracking|የጭነት ክትትል|Hordoffii feʼumsaa|Ask our transport team|ከቡድናችን ጋር|garee keenya|አስተባባሪ|qindeessaan/i,locale+' retired transport or tracking copy');
   assert.doesNotMatch(texts.join('\n'),/shipment plans?|የጭነት ዕቅድ|karoora fe['’ʼ]umsaa/i,locale+' retired plan wording');
  }
  assert.deepEqual(l.featureClaims.map(claim=>claim.id),['digital-showrooms','map-and-product-search','listed-availability','external-social-handoff','transport-chat','independent-email-tracking']);
  for(const claim of l.featureClaims){assert.ok(claim.evidence.length);for(const file of claim.evidence)assert.ok(fs.existsSync(file),'Evidence file '+file);}
  const authorityHash=crypto.createHash('sha256').update(fs.readFileSync('lib/storefront-copy.ts')).digest('hex');
- for(const authority of [l.narrativeAuthority,c.narrativeAuthority]){assert.equal(authority.file,'lib/storefront-copy.ts');assert.equal(authority.sha256,authorityHash,'Narrative source changed; review these drafts.');assert.equal(authority.headline,'A professional digital showroom for every business.');}
+ for(const authority of [l.narrativeAuthority,c.narrativeAuthority]){assert.equal(authority.file,'lib/storefront-copy.ts');assert.equal(authority.sha256,authorityHash,'Narrative source changed; review these drafts.');assert.equal(authority.headline,'Find local makers and suppliers for your next order.');}
 }
 
 test('FE-070/DEP-049 MirtPage listing, artwork plan and campaign schemas remain honest unuploaded drafts',()=>validate(material));

@@ -57,7 +57,7 @@ export async function sendGmailSmtpEmail(
 ):Promise<TransactionalEmailResult>{
   const config=gmailSmtpConfiguration(options.env??process.env);
   if(!config)return{state:'deferred',category:'missing_configuration'};
-  if(!address(message.recipientEmail)||!/^suqpage-(?:tracking|support-overdue)-[1-9]\d*$/.test(message.deliveryKey)||
+  if(!address(message.recipientEmail)||!/^(?:suqpage-(?:tracking|support-overdue)|mirtpage-partner-interest)-[1-9]\d*$/.test(message.deliveryKey)||
     !message.subject||message.subject.length>300||/[\u0000-\u001f\u007f]/.test(message.subject)||
     !message.text||message.text.length>60_000||/[\u0000\u007f]/.test(message.text))
     return{state:'failed',category:'invalid_message',retryable:false};

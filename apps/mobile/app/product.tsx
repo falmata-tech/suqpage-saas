@@ -74,6 +74,7 @@ export default function Product() {
       {shop && product ? (
         <CatalogSafety business={shop} productId={product.id}>
           <Gallery media={product.media} />
+          {shop.isDemo&&<Copy muted>{t("Example product")}</Copy>}
           <Copy big>{product.name}</Copy>
           <Copy muted>{shop.name}</Copy>
           <ProductSupply kind={product.kind} availability={product.availability}/>

@@ -4,14 +4,18 @@ import type { FormEvent } from "react";
 import { Truck, MapPin, UserRound, Phone, MessageCircle } from "lucide-react";
 import { useUiText } from "@/lib/i18n/ui";
 import { OWNER_TRANSPORT_COPY, TRANSPORT_COPY } from "@/lib/i18n/transport-copy";
+import type {TransportCoordinator as Coordinator} from '@/lib/transport-coordinator';
+import TransportCoordinator from "./TransportCoordinator";
 import styles from "./TransportSupport.module.css";
 
-export type TransportDraft = { name: string; phone: string; origin: string; destination: string; message: string };
+export type TransportDraft = { name: string; phone: string; origin: string; destination: string; message: string; coordinatorId:Coordinator['id']|null };
+export type TransportTextField = Exclude<keyof TransportDraft,'coordinatorId'>;
 
 /** One presentation for visitor and account-owned requests; adapters own authority. */
-export default function TransportIntake({ draft, onChange, onSubmit, busy, ready, error, owner = false }: {
+export default function TransportIntake({ draft, onChange, onSelectCoordinator, onSubmit, busy, ready, error, owner = false }: {
   draft: TransportDraft;
-  onChange: (field: keyof TransportDraft, value: string) => void;
+  onChange: (field: TransportTextField, value: string) => void;
+  onSelectCoordinator:(id:Coordinator['id'])=>void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   busy: boolean;
   ready: boolean;
@@ -25,6 +29,7 @@ export default function TransportIntake({ draft, onChange, onSubmit, busy, ready
       <h3>{owner ? t(OWNER_TRANSPORT_COPY.invitation) : t(TRANSPORT_COPY.invitation)}</h3>
       <p>{owner ? t(OWNER_TRANSPORT_COPY.description) : t(TRANSPORT_COPY.description)}</p>
     </div>
+    <TransportCoordinator selection selectedId={draft.coordinatorId} onSelect={onSelectCoordinator}/>
     <form className={styles.intake} onSubmit={onSubmit}>
       <div className={`public-support-contact-fields ${styles.routePair}`}>
         <label htmlFor="transport-origin"><span className={styles.fieldLabel}><MapPin size={16} aria-hidden="true" />{t("From")}</span><input id="transport-origin" value={draft.origin} onChange={event => onChange("origin", event.target.value)} maxLength={120} disabled={busy} required placeholder={t("City or area")} /></label>
@@ -36,9 +41,8 @@ export default function TransportIntake({ draft, onChange, onSubmit, busy, ready
       </div>
       <label htmlFor="public-buying-message">{t("Goods or transport details (optional)")}</label>
       <textarea id="public-buying-message" value={draft.message} onChange={event => onChange("message", event.target.value)} maxLength={3700} rows={2} disabled={busy} placeholder={t("What are you sending? You can add a product link.")} />
-      <p>{t("We’ll reply here or call if you leave the chat.")}</p>
       {error ? <p className="public-support-error" role="alert">{t(error)}</p> : null}
-      <button type="submit" className={styles.submit} disabled={!ready || busy || !draft.name.trim() || !draft.phone.trim() || !draft.origin.trim() || !draft.destination.trim()} aria-busy={busy}><MessageCircle aria-hidden="true" /><span>{t(busy ? "Sending…" : "Start chat")}</span></button>
+      <button type="submit" className={styles.submit} disabled={!ready || busy || !draft.coordinatorId || !draft.name.trim() || !draft.phone.trim() || !draft.origin.trim() || !draft.destination.trim()} aria-busy={busy}><MessageCircle aria-hidden="true" /><span>{t(busy ? "Sending…" : "Start chat")}</span></button>
     </form>
   </>;
 }

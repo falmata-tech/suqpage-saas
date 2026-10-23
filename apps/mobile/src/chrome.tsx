@@ -156,7 +156,7 @@ export function AppHeader({ back = false }: { back?: boolean }) {
           onPress={() => setLanguage(true)}
           style={c.language}
         >
-          <Text numberOfLines={1} style={{ fontSize: 12, color: colors.ink }}>
+          <Text numberOfLines={1} style={{ fontSize: 12, color: colors.ink, flexShrink: 1, minWidth: 0 }}>
             {languageNames[locale]}
           </Text>
           <Icon name="down" size={15} />
@@ -228,7 +228,7 @@ export function BuyingLauncher({ compact = false }: { compact?: boolean }) {
       onPress={() => {if(!overlayIsOpen())router.push("/buying");}}
       style={[c.buying, compact && { padding: 8 },unread>0&&{paddingRight:26}]}
     >
-      <Icon name="chat" color="white" size={compact?18:20} />
+      <Icon name="truck" color="white" size={compact?20:22} />
       {unread>0&&<Text accessibilityElementsHidden style={{position:'absolute',right:4,top:3,backgroundColor:'white',color:colors.brand,borderRadius:12,minWidth:20,paddingHorizontal:5,fontSize:12,fontWeight:'700',textAlign:'center'}}>{unread>99?'99+':unread}</Text>}
       <View style={{flex:1,minWidth:0,gap:3}}>
         <Text style={[c.buyingText,{lineHeight:17},compact&&{fontSize:12}]}>{t(TRANSPORT_COPY.launcherTitle)}</Text>
@@ -240,22 +240,25 @@ export function BuyingLauncher({ compact = false }: { compact?: boolean }) {
 export const c = StyleSheet.create({
   header: {
     height: 52,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 4,
     borderBottomWidth: 1,
     borderColor: colors.line,
   },
   language: {
     flexDirection: "row",
-    gap: 10,
+    gap: 4,
     alignItems: "center",
-    padding: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
     borderWidth: 1,
     borderColor: colors.line,
     borderRadius: 6,
     maxWidth: 126,
+    minWidth: 64,
+    flexShrink: 1,
     minHeight: 48,
   },
   iconButton: {
@@ -309,15 +312,16 @@ export const c = StyleSheet.create({
     marginTop: 12,
   },
   buying: {
-    maxWidth: 280,
+    maxWidth: 240,
     minWidth: 48,
     minHeight: 48,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     backgroundColor: colors.brand,
-    borderRadius: 7,
-    padding: 11,
+    borderRadius: 28,
+    paddingVertical: 9,
+    paddingHorizontal: 16,
     boxShadow: "0 3px 12px #0002",
   },
   buyingText: { fontSize: 13, fontWeight: "700", color: "white" },

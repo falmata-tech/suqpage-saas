@@ -62,9 +62,9 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
   const id = useId();
   const productsId = `${id}-products`;
   const BusinessHeading = p.embedded ? "h2" : "h1";
-  const contacts = publicContactLinks(profile.contacts || legacyPublicContacts(business));
+  const contacts = publicContactLinks(profile.contacts || legacyPublicContacts(business)).filter(contact=>["website","tiktok","instagram","facebook"].includes(contact.kind));
   return <div className={styles.profile} data-business-profile data-store-accent={profile.accentColor || undefined} style={storefrontAccentVariables(profile.accentColor) as CSSProperties}>
-    {Boolean(business.is_demo) && !business.handle.toLowerCase().includes("demo") ? <div className={launchStyles.notice}>{t("Demo business — products and contact details are examples.")}</div> : null}
+    {Boolean(business.is_demo) ? <div className={launchStyles.notice}>{t("Example showroom. This business and its products are fictional.")}</div> : null}
     <section className={styles.cover} aria-label={t("Business introduction")}>
       <CoverMedia key={`${business.id}:${profile.heroImage}:${profile.videoUrl}`} image={profile.heroImage} video={profile.videoUrl} name={business.name} />
       <div className={styles.identity}>
@@ -107,6 +107,7 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
             {product.image_path ? <img src={product.image_path} alt="" loading="lazy" decoding="async" /> : <PackageOpen size={32} aria-hidden="true" />}
           </a>
           <div className={styles.productCopy}>
+            {business.is_demo ? <span className={launchStyles.example}>{t("Example product")}</span> : null}
             {category ? <span className={styles.productCategory} data-product-category>{category.name}</span> : null}
             <h3><a href={productHref(business.handle, product.id)} onClick={e => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); p.openProduct(product); } }}>{product.name}</a></h3>
             {product.description ? <p>{product.description}</p> : null}
@@ -127,7 +128,7 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
     <section className={styles.contacts} aria-label={t("Connect with this business")}>
       <div className={styles.contactHeading}><h2>{t("Stay in touch")}<ArrowUpRight size={22} aria-hidden="true" /></h2><p>{business.name}</p></div>
       <div className={styles.contactLinks}>
-        <button type="button" className={styles.contactInquiry} onClick={p.cartCount ? p.openCart : () => { p.onBackToProducts?.(); document.getElementById(productsId)?.scrollIntoView({ block: "start" }); }}><ClipboardList size={18} aria-hidden="true" />{p.cartCount > 1 ? t("Inquire about selected items") : p.cartCount ? t("Inquire about selected item") : t("Explore {value1}", { value1: catalogLabel.toLowerCase() })}</button>
+        <button type="button" className={styles.contactInquiry} onClick={p.openCart}><ClipboardList size={18} aria-hidden="true" />{p.cartCount > 1 ? t("Inquire about selected items") : p.cartCount ? t("Inquire about selected item") : t("Contact this business")}</button>
         {contacts.map((contact) => {
           const Icon = contactIcons[contact.kind];
           const content = <><Icon size={18} aria-hidden="true" /><span>{t(contact.label)}</span></>;

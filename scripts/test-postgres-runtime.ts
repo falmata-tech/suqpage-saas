@@ -97,8 +97,9 @@ async function main() {
           customerName: "PostgreSQL rehearsal visitor",
           contact: "+251911123456",
           contactMethod: "phone",
+          note: "Rehearsal inquiry",
           idempotencyKey: key,
-          items: [{ productId: product.id, options }],
+          items: [{ productId: product.id, quantity: "20 kg", options }],
         }, "postgres-rehearsal-ip", async () => undefined);
         assert.equal(repeated.duplicate, true);
         assert.equal(repeated.inquiryId, first.inquiryId);

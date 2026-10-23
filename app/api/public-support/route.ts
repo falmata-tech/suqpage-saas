@@ -16,6 +16,7 @@ import {
   PUBLIC_SUPPORT_SESSION_MS,
   SupportError,
   acknowledgePublicRead,
+  submitPublicTransportCallback,
 } from "@/lib/support";
 // Buying conversations are text-only; private attachments remain in authenticated support.
 const MAX_BODY_BYTES = 32_000;
@@ -101,12 +102,13 @@ export async function POST(request: NextRequest) {
     const ipHash = hashPrivateValue(requestIpFromHeaders(request.headers));
     const { token, cookieName, channel } = await publicSupportSession(request.cookies, request.nextUrl.searchParams.get("channel"));
     if (body.attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
-    if (body.action === "message" || body.action === "close" || body.action === 'read' || body.action === 'resume') {
+    if (body.action === "message" || body.action === "close" || body.action === 'read' || body.action === 'resume' || body.action === 'callback') {
       const current = await channelConversation(token, channel);
       if (body.publicRef !== current.publicRef) throw new SupportError("Request could not be accepted.", "conversation_changed");
       if (body.action === 'read') await acknowledgePublicRead(token, { messageId: body.messageId, publicRef: body.publicRef });
       else if (body.action === "close") await closePublicSupportConversation(token);
       else if (body.action === 'resume') await resumePublicSupportConversation(token,body.publicRef);
+      else if (body.action === 'callback') await submitPublicTransportCallback(token,{phone:body.phone,email:body.email,idempotencyKey:body.idempotencyKey},ipHash);
       else await postPublicSupportMessage(token, { message: body.message, idempotencyKey: body.idempotencyKey }, ipHash);
       if(body.action!=='read')scheduleAttentionDelivery();
       return privateJson({ conversation: await channelConversation(token, channel) });
@@ -114,6 +116,7 @@ export async function POST(request: NextRequest) {
     if (body.action !== "start" || body.category !== (channel === "transport" ? "shipment_observation" : "buying_assistance")) throw new SupportError("Choose how MirtPage can help.", "invalid_channel");
     const created = await createPublicSupportConversation({
       category: body.category,
+      coordinatorId:body.coordinatorId,
       name: body.name,
       service: body.service,
       origin: body.origin,

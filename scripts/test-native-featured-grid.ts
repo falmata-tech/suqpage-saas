@@ -9,12 +9,12 @@ type Element={type:string;props:Record<string,unknown>&{children?:unknown}};
 const source=build({entryPoints:['apps/mobile/app/(tabs)/featured.tsx'],bundle:true,write:false,platform:'node',format:'cjs',plugins:[{name:'featured-grid-ports',setup(b){
  b.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|react-native|expo-router|(?:\.\.\/\.\.\/src\/|\.\/)(?:runtime|ui|chrome|SponsorCarousel|blocked-businesses))$/},a=>({path:a.path,namespace:'ports'}));
  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'js',contents:
-  a.path==='react'?`export const useState=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return[fixture.states[i],value=>fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value];};export const useRef=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]={current:initial};return fixture.states[i];};export const useCallback=fn=>fn,useEffect=()=>{};export default {};`
+  a.path==='react'?`export const createContext=initial=>({Provider:'ContextProvider',initial}),useContext=context=>context.initial;export const useState=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return[fixture.states[i],value=>fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value];};export const useRef=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]={current:initial};return fixture.states[i];};export const useCallback=fn=>fn,useEffect=()=>{};export default {};`
   :a.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
   :a.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',ScrollView='ScrollView',Platform={OS:'android'},StyleSheet={create:value=>value},useWindowDimensions=()=>fixture.dimensions;`
   :a.path==='expo-router'?`export const router={push:value=>fixture.routes.push(value)},useFocusEffect=()=>{};`
   :a.path.endsWith('/runtime')?`export const useApp=()=>({t:key=>key}),request=()=>{throw Error('Unexpected network request');},useLoad=()=>fixture.load;`
-  :a.path.endsWith('/ui')?`export const Screen='Screen',Copy='Copy',Photo='Photo',Status='Status',Icon='Icon',colors={ink:'#222',muted:'#667',brand:'#c43a00',line:'#ddd',soft:'#fff1e9',background:'#fff'};`
+  :a.path.endsWith('/ui')?`export const Screen='Screen',Copy='Copy',Photo='Photo',Status='Status',Icon='Icon',useOpenLink=()=>async()=>true,colors={ink:'#222',muted:'#667',brand:'#c43a00',line:'#ddd',soft:'#fff1e9',background:'#fff'};`
   :a.path.endsWith('/blocked-businesses')?`export const useBlockedBusinesses=()=>({ready:true,list:[]});`
   :a.path.endsWith('/SponsorCarousel')?`export const SponsorCarousel='SponsorCarousel';`
   :`export const CategoryArt='CategoryArt';`
@@ -25,7 +25,7 @@ const style=(node:Element)=>Object.assign({},...[node.props.style].flat(Infinity
 const plain=<T>(value:T):T=>JSON.parse(JSON.stringify(value));
 async function setup(){
  const slots=Array.from({length:5},(_,index)=>({slot:index+1,shop:{handle:'fixture-shop-'+(index+1),name:'Business '+(index+1),heroImagePath:'',city:'Fixture city',isDemo:true}}));
- const fixture={cursor:0,states:[] as unknown[],routes:[] as unknown[],dimensions:{width:390,height:844,fontScale:1},load:{loading:false,error:'',reload(){},data:{exclude:'',program:{date:'2026-10-20',schedule:[{weekday:2,dayLabel:'Tuesday',dateLabel:'20 Oct',industryKey:'retail',industryLabel:'Retail',isToday:true}],broadcastLabel:'Today',sponsors:[],slots}}}};
+ const fixture={cursor:0,states:[] as unknown[],routes:[] as unknown[],dimensions:{width:390,height:844,fontScale:1},load:{loading:false,error:'',reload(){},data:{exclude:'',program:{date:'2026-10-20',schedule:[{weekday:2,dayLabel:'Tuesday',dateIso:'2026-10-20',dateLabel:'20 Oct',industryKey:'retail',industryLabel:'Retail',isToday:true}],broadcastLabel:'Today',tiktokUrl:'',youtubeUrl:'',policy:{startMinute:1230,endMinute:1440,presentationMinutes:30,changeoverMinutes:5,sponsorMentionCount:4,sponsorMentionMinutes:5},sponsors:[],slots}}}};
  const module={exports:{} as{default:()=>Element}};vm.runInNewContext((await source).outputFiles[0].text,{module,exports:module.exports,fixture});
  const render=()=>{fixture.cursor=0;return nodes(module.exports.default());};return{fixture,render};
 }

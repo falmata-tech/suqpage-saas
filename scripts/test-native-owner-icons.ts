@@ -6,7 +6,7 @@ type Element={type:string;props:Record<string,unknown>&{children?:Element}};
 test('FE-053 B03 actual native Support and preview icons have distinct 24px outlines instead of the unknown-name arrow',async()=>{
  const result=await build({entryPoints:['apps/mobile/src/ui.tsx'],bundle:true,write:false,platform:'node',format:'cjs',loader:{'.png':'dataurl'},plugins:[{name:'native-icon-platform-ports',setup(b){
   b.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|react-native|react-native-svg|expo-file-system|expo-crypto|\.\/(?:runtime|LoadingBar|open-link))$/},a=>({path:a.path,namespace:'port'}));
-  b.onLoad({filter:/.*/,namespace:'port'},a=>({loader:'js',contents:a.path==='react'?`export default {};`
+  b.onLoad({filter:/.*/,namespace:'port'},a=>({loader:'js',contents:a.path==='react'?`export const createContext=()=>({}),useContext=()=>0;export default {};`
    :a.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
    :a.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',TextInput='TextInput',ScrollView='ScrollView',Image='Image',ActivityIndicator='ActivityIndicator',KeyboardAvoidingView='KeyboardAvoidingView',Platform={OS:'android'},StyleSheet={create:value=>value},Alert={};`
    :a.path==='react-native-svg'?`export default 'Svg';export const Path='Path',SvgUri='SvgUri';`

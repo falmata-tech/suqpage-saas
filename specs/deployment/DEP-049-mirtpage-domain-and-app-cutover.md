@@ -2,7 +2,7 @@
 id: DEP-049
 title: MirtPage domain, managed services and app release cutover
 status: draft
-related: [FE-021, FE-070, FE-071, BE-059, DEP-029, ADR-0029, FE-072, BE-060, DEP-050, DEP-044]
+related: [FE-021, FE-070, FE-071, BE-059, DEP-029, ADR-0029, FE-072, BE-060, DEP-050, DEP-044, FE-075, BE-062]
 owners: [operations, security, mobile]
 last_updated: 2026-10-20
 change_level: L4

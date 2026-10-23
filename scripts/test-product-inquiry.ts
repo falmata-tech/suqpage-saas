@@ -71,6 +71,19 @@ test("all five locales produce literal selections with a contextual message", ()
   }
   assert.equal(seen.size, 5);
 });
+test("general inquiry gets a localized prepared message and showroom link without selected products",()=>{
+  const seen=new Set<string>();
+  for(const locale of ["en","am","om","so","ti"]){
+    const t=createUiText(locale==="en"?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,"utf8")));
+    const message=buildInquiryMessage(business,[],"https://mirtpage.com/",t);
+    assert.ok(message.startsWith(t("Hello {value1},",{value1:business.name})));
+    assert.ok(message.includes(t("Could you tell me what products are available and how I can order?")));
+    assert.ok(message.includes("https://mirtpage.com/@fixture-shop"));
+    assert.ok(!message.includes("Are these available"));
+    seen.add(message);
+  }
+  assert.equal(seen.size,5);
+});
 test("only inbox providers prepare drafts; social profiles remain ordinary public links", () => {
   const contacts={phone:"+447700900002", email:"owner@example.test", website:"https://example.com", whatsapp:"+447700900001", telegram:"fixture_shop", instagram:"fixture_shop", tiktok:"fixture_shop", facebook:"fixture_shop"};
   const links=inquiryHandoffs(contacts, "Hello & ሰላም");

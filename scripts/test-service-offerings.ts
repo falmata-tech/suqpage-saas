@@ -47,7 +47,7 @@ async function main() {
     assert.equal(productSellingUnit({ quantity_unit: '', offering_kind: 'service' }), '');
     assert.equal(availabilityLabel('service', 'limited'), 'Limited availability');
     assert.equal(productHref(business.handle, productId), `/@service-fixture?product=${productId}`);
-    const input = { businessId, customerName: 'Fixture visitor', contact: '+447700900123', contactMethod: 'phone', idempotencyKey: 'service_inquiry_001', items: [{ productId: service.id, quantity: null, options: {} }] };
+    const input = { businessId, customerName: 'Fixture visitor', note:'Please contact me about this offering.', contact: '+447700900123', contactMethod: 'phone', idempotencyKey: 'service_inquiry_001', items: [{ productId: service.id, quantity: null, options: {} }] };
     const inquiryId=Number((await db.prepare("INSERT INTO inquiries(business_id,customer_name,contact,contact_method,status,source,idempotency_key,ip_hash) VALUES(?,'Historical visitor','+447700900123','phone','new','showroom','legacy_service_history','fixture')").run(businessId)).insertedId);
     await db.prepare("INSERT INTO inquiry_items(inquiry_id,product_id,product_name_snapshot,quantity,quantity_intent,offering_kind_snapshot,quantity_mode_snapshot,options_json) VALUES(?,?,?,NULL,'','service','optional','{}')").run(inquiryId,service.id,service.name);
     const line = await db.prepare('SELECT offering_kind_snapshot,quantity,quantity_intent FROM inquiry_items WHERE inquiry_id=?').get(inquiryId);

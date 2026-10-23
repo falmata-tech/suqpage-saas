@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {supportEscalationEmailContent,supportEscalationEmailKey,supportEscalationEmailOrigin,supportEscalationEmailReadiness,sendSupportEscalationEmail,type SupportEscalationEmail} from '../lib/support-escalation-email';
 import {dispatchSupportEscalationEmails,supportEscalationEmailPayload} from '../lib/support-escalation-email-delivery';
+import {SUPPORT_STAFF_REPLY_TARGET_MS} from '../lib/support-assignment-response';
 import {createUiText,parseLocale,type Locale} from '../lib/i18n/core';
 import {parse as parsePgConnection} from 'pg-connection-string';
 import {notifySupportQueue} from '../lib/support-notifications';
@@ -108,8 +109,9 @@ test('DEP-043 S126 actual fetch signal aborts an unsettled provider request afte
 
 test('BE-050 S126 fresh private projection requires admin role, current assignment and assignment-aware unanswered cycle',()=>{
  const start=Date.UTC(2026,9,17),row={id:81,source_key:'support-reply-overdue:42:99:7',kind:'reply_overdue',user_id:1,recipient_key:'user:1',conversation_id:42,email:'current-admin@example.test',access_role:'platform_admin',language:'so',public_ref:'SUP-QA126',case_status:'open',resolved_at:null,assigned_user_id:8,assistance_category:'shipment_observation',awaiting_staff_since:start,awaiting_staff_message_id:99,assignment_id:7,assignment_user_id:8,assigned_at:start+5*60_000,released_at:null,assigned_staff_name:'Current agent',assigned_staff_role:'team_member',assigned_staff_scope:'transport'};
- assert.equal(supportEscalationEmailPayload(row,start+15*60_000-1,'https://suqpage.example'),null);
- const message=supportEscalationEmailPayload(row,start+15*60_000,'https://suqpage.example');assert.equal(message?.recipientEmail,'current-admin@example.test');assert.equal(message?.language,'en','Inactive saved language falls back only in presentation');assert.equal(row.language,'so','Saved preference stays untouched');assert.equal(message?.assignedStaffName,'Current agent');assert.match(message!.dashboardUrl,/queue=transport&status=overdue/);
+ const dueAt=row.assigned_at+SUPPORT_STAFF_REPLY_TARGET_MS;
+ assert.equal(supportEscalationEmailPayload(row,dueAt-1,'https://suqpage.example'),null);
+ const message=supportEscalationEmailPayload(row,dueAt,'https://suqpage.example');assert.equal(message?.recipientEmail,'current-admin@example.test');assert.equal(message?.language,'en','Inactive saved language falls back only in presentation');assert.equal(row.language,'so','Saved preference stays untouched');assert.equal(message?.assignedStaffName,'Current agent');assert.match(message!.dashboardUrl,/queue=transport&status=overdue/);
  for(const patch of [{access_role:'client'},{access_role:'team_member'},{recipient_key:'user:7'},{kind:'message'},{case_status:'closed'},{resolved_at:start},{assigned_user_id:null},{assignment_id:8},{assignment_user_id:9},{released_at:start},{awaiting_staff_message_id:100},{awaiting_staff_since:null},{assigned_at:null},{assigned_staff_role:'client'},{assigned_staff_scope:'support'},{source_key:'support-reply-overdue:42:99:0'}])assert.equal(supportEscalationEmailPayload({...row,...patch},start+20*60_000,'https://suqpage.example'),null);
  assert.equal(supportEscalationEmailPayload({...row,access_role:'operations_manager',assigned_staff_role:'operations_manager',assigned_staff_scope:null,language:'invalid'},start+20*60_000,'https://suqpage.example')?.language,'en');
 });

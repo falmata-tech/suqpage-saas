@@ -65,4 +65,6 @@ test('DEP-046: scale demos replace repair work with image-matched goods while re
   assert.equal(contacts.phone,'+447700900123');assert.equal(contacts.whatsapp,'+447700900123');
   assert.equal(contacts.website,'https://example.invalid/');
   for(const field of ['tiktok','instagram','telegram','facebook'] as const)assert.equal(contacts[field],'');
+  const routed=demoPublicContacts('hello+demo-test@gmail.com','+251911111111','+14155550123');
+  for(const field of ['phone','whatsapp','telegram'] as const)assert.equal(routed[field],'+14155550123');
 });

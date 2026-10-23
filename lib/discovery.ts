@@ -381,7 +381,9 @@ function selectSql(extraWhere: string, suffix = "", order = "is_sponsored DESC,s
     SELECT
       b.id,b.is_demo,b.handle,b.name,b.tagline,b.description,b.logo_path,b.hero_image_path,
       ${profile ? "publication.content_json" : "NULL"} AS published_profile_json,
-      p.booth_image_path,p.city,p.zone,p.region,p.country_code,p.city_id,p.latitude,p.longitude,
+      p.booth_image_path,p.city,p.zone,p.region,p.country_code,p.city_id,
+      CASE WHEN location.location_mode='area' THEN location.place_latitude ELSE p.latitude END AS latitude,
+      CASE WHEN location.location_mode='area' THEN location.place_longitude ELSE p.longitude END AS longitude,
       COALESCE(location.location_mode,'legacy') AS location_mode,
       p.fallback_style,COALESCE(s.active,0) AS is_sponsored,
       COALESCE(s.position,999) AS sponsor_position,p.production_scale,
@@ -780,9 +782,15 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
  const excluded=excludedBusinessIds(options.excludedBusinessIds);
  const excludeWhere=excluded.length?' AND NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint))':'';
  const excludeParams=excluded.length?[JSON.stringify(excluded)]:[];
+ const mapPinWhere=options.scope==='businesses' ? ` AND (
+   (location.location_mode='storefront' AND p.latitude IS NOT NULL AND p.longitude IS NOT NULL)
+   OR (location.location_mode='area' AND location.place_id IS NOT NULL
+     AND location.place_latitude IS NOT NULL AND location.place_longitude IS NOT NULL
+     AND p.country_code<>'' AND location.place_id=p.city_id)
+  )` : '';
  // Metadata is scoped to eligible published pages, independent of the current
  // search. Never expose private location drafts or the whole city gazetteer.
- const locations=await port.all<{country_code:string;city:string;city_key:string;count:number}>(`SELECT country_code,COALESCE(NULLIF(city_id,''),city) city_key,min(city) city,count(*) count FROM (${selectSql(excludeWhere)}) listed
+ const locations=await port.all<{country_code:string;city:string;city_key:string;count:number}>(`SELECT country_code,COALESCE(NULLIF(city_id,''),city) city_key,min(city) city,count(*) count FROM (${selectSql(excludeWhere+mapPinWhere)}) listed
    WHERE country_code<>'' GROUP BY country_code,COALESCE(NULLIF(city_id,''),city) ORDER BY country_code,min(city)`,['all','all',...excludeParams]);
  const countries=[...new Set(locations.map(l=>l.country_code))].map(code=>({code,count:locations.filter(l=>l.country_code===code).reduce((sum,l)=>sum+Number(l.count),0)}));
  const places:DiscoveryPlaceOption[]=locations.map(l=>({key:`${l.country_code}:${l.city_key}`,label:l.city,kind:'city',countryCode:l.country_code,city:l.city,region:'',count:Number(l.count)}));
@@ -793,7 +801,7 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
  const kindWhere=search.madeToOrder?" AND product.offering_kind='made_to_order'":'';
  const legacyLocations=(search.legacyPlaces||[]).map(key=>{const [kind,region,...city]=key.split(':');return {region,city:kind==='city'?city.join(':'):''};});
  const legacyWhere=legacyLocations.length?` AND p.country_code='ET' AND EXISTS(SELECT 1 FROM jsonb_to_recordset(?::jsonb) loc(region text,city text) WHERE lower(p.region)=lower(loc.region) AND (loc.city='' OR lower(p.city)=lower(loc.city)))`:'';
- const scopeWhere=geography+legacyWhere+excludeWhere,scopeParams=[...geoParams,...(legacyLocations.length?[JSON.stringify(legacyLocations)]:[]),...excludeParams];
+ const scopeWhere=geography+legacyWhere+excludeWhere+mapPinWhere,scopeParams=[...geoParams,...(legacyLocations.length?[JSON.stringify(legacyLocations)]:[]),...excludeParams];
  let rows:DiscoveryRow[]=[],products:DiscoveryProductResultRow[]=[];
  let total=0,searchOrder:{kind:'product'|'business';id:number}[]=[];
  const request=normalizePageRequest({page:search.page},MARKET_PRODUCT_BATCH_SIZE);
@@ -805,7 +813,7 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
   const productParams=[industry.key,industry.key,searchTerms(query),...scopeParams];
   const normalCount=options.scope==='businesses'?Number((await port.get<{total:number}>(`SELECT count(*) total FROM (${selectSql(queryWhere+scopeWhere)}) matches`,businessParams))?.total||0):Number((await port.get<{total:number}>(productSearchResultSql(productWhere,'',true),productParams))?.total||0);
   const spelling=options.scope==='businesses'&&normalCount>=MARKET_MAP_LIMIT?[]:await findSpellingMatches({query,industry:industry.key,city:'',region:'',locations:legacyLocations,scale:'',exactBusinessIds:rows.map(r=>r.id),excludedBusinessIds:excluded,
-   discovery:{scope:options.scope!,countries:search.countries,cities:locationsFilter.filter((l):l is {country:string;city:string}=>Boolean(l)),madeToOrder:search.madeToOrder,...(legacyLocations.length?{legacyCountry:'ET' as const}:{})}},port);
+   discovery:{scope:options.scope!,countries:search.countries,cities:locationsFilter.filter((l):l is {country:string;city:string}=>Boolean(l)),madeToOrder:search.madeToOrder,...(options.scope==='businesses'?{publicMapLocations:true}:{}),...(legacyLocations.length?{legacyCountry:'ET' as const}:{})}},port);
   const approximate=spelling.filter(m=>m.kind===(options.scope==='businesses'?'business':'product'));
   total=normalCount+approximate.length;
   const window=pageWindow(total,request);

@@ -2,13 +2,198 @@
 id: FE-053
 title: Native visitor and business-owner app
 status: in_progress
-related: [FE-074, FE-066, FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062, FE-063, FE-064, FE-065, DEP-043, BE-018, FE-067, FE-041, FE-047, BE-050, BE-023, FE-068, FE-069, BE-058, DEP-048, FE-072, BE-060, FE-073]
+related: [FE-074, FE-066, FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062, FE-063, FE-064, FE-065, DEP-043, BE-018, FE-067, FE-041, FE-047, BE-050, BE-023, FE-068, FE-069, BE-058, DEP-048, FE-072, BE-060, FE-073, FE-076, FE-075]
 owners: [product, frontend, backend, security]
 last_updated: 2026-10-20
 change_level: L3
 ---
 
 # FE-053 — Native visitor and business-owner app
+
+## S166 — compact localized owner transport entry and header (in progress)
+
+GIVEN an owner opens a fresh transport intake at 320 or 390px WHEN the Account,
+Chat history and Shipment records actions render THEN they form a compact,
+accessible utility row instead of three stacked full-width buttons. Long active
+language labels may wrap to a second row; the route fields and Start chat remain
+the primary content. Existing back/history/record destinations, disabled states
+and 44px minimum touch height remain.
+
+GIVEN Afaan Oromo is selected at 320px WHEN the shared app header renders THEN
+its language control shrinks within the viewport without covering the wordmark
+or losing its accessible label/touch size. Verify the actual Expo browser screen
+at 320/390 in English, Amharic and Afaan Oromo, and retain installed Android
+qualification as a separate release gate.
+
+## S153 N15 — polling survives cancelled reads after a mutation (focused checks pass; physical pending)
+
+GIVEN a focused current guest or owner transport conversation WHEN Send/End/Resume
+invalidates an in-flight read and its write settles THEN the current polling loop
+continues at its admitted cadence without leaving the route. A cancelled older
+request must not retain ownership of later reads even if its adapter settles late;
+its success, failure or cleanup cannot publish stale messages, read state, errors
+or clear a newer request. Keep one admitted read per current generation, existing
+open/closed backoff, foreground gates and no hidden/background request growth.
+
+GIVEN blur/unmount, a different owner/token/reference or a closed transition THEN
+old work cannot publish or restart the departed scope. Re-entry performs ordinary
+recovery. Preserve message idempotency, draft/failure retry, visible-only reads,
+join/idle/end authority and production/development storage isolation. No backend
+mutation, timer relaxation or global error suppression is part of this correction.
+
+First extend the actual Buying React/lifecycle fixture with signal-aware settling
+and nonsettling cancelled reads and deterministic virtual time. Classify old-source
+results for post-Send refresh, renewed poll, focus return and closed cadence, then
+seek root GO for the smallest diagnosed correction. Source remains frozen during
+paired chat. Existing race/idle/owner/storage suites and physical same-case Send→
+staff reply/read updates must qualify the fix separately. Master §§13/19 already
+require live reply/read correctness and current-scope authority.
+
+The diagnosed correction binds the in-flight lease and cleanup/reschedule to its
+generation, checks activity before starting, and wakes the existing open/closed
+cadence after settled mutations. Both actual React paused-clock abort cases pass,
+including stale completion while a newer read is pending. The four existing race,
+idle, owner and storage suites pass26 tests with no skips; mobile/scoped types and
+219 spec links pass. The old source fails only the held-abort refresh after the
+initial fixture clock issue is classified. This qualifies cancellation ownership,
+not the actual native fetch cause or release-build reproduction; DEV Fast Refresh
+and same-case physical continuous-update verification remain separately recorded.
+
+## S153 N13 — isolate inactive Market panes (focused and Chrome checks pass; visual pending)
+
+GIVEN Businesses or Products is selected WHEN the inactive pane remains mounted
+for map/search return state THEN its controls are hidden from accessibility and
+sequential keyboard focus. Preserve native hidden-descendant flags and pointer
+gating; explicitly expose matching `aria-hidden` and web-only `inert` through the
+installed React Native Web adapter. The active pane must lose inert immediately
+on selection. Keep the mode switch and drag handle outside both hidden regions;
+no route, copy, data, animation, map or native accessibility behavior changes.
+
+Reuse `scripts/test-mobile-market-layout.ts` to verify actual-source toggles,
+Android Back/retained state, native flags and installed RNWeb markup. Require
+actual Chrome Tab/Shift+Tab plus mode/handle return before visual/full gates;
+SSR forwarding alone does not prove real keyboard traversal. Android verbose
+UIAutomator nodes alone do not establish a TalkBack defect; verify separately.
+FE-065 and master §19 already require inert hidden controls, so their product
+statements remain unchanged. N12 native conversation density is planned in FE-019;
+no conversation implementation is authorized while its paired audit is active.
+
+The existing Market component suite passes23 cases, including actual-source
+Android/iOS/Web selection and installed RNWeb markup; the new regression fails
+on the prior source. Mobile/scoped test types and219 spec links pass. Native
+flags and mounted state remain unchanged. This proves forwarding and source
+selection. Separately, actual Expo Chrome390/1440 passes272 sequential Tab and
+Shift+Tab steps, true accessibility-tree exclusion and keyboard mode/edge/return
+journeys with restored Products and camera/zoom. Prior map-remount harness stops
+remain preserved. Physical screen-reader behavior and the combined visual/full
+gates remain separate pending qualifications.
+
+
+## S153 — expose the selected main navigation tab (focused checks pass; actual review pending)
+
+GIVEN an existing Market, Featured, About or Account destination is active WHEN
+its tab renders in Expo web THEN the actual DOM exposes `aria-selected=true`
+only on that tab and false on its siblings. Preserve native accessibility selected
+state, current route matching, visitor Login/owner Account labels, touch bounds,
+layout and guarded navigation. The installed React Native Web mapping requires
+the explicit selected attribute; visual color alone is insufficient.
+Reuse `scripts/test-mobile-account-hub.ts` for native state and installed RNWeb
+markup across current routes/locales, then actual ordinary-code Account/task
+navigation. Master §§13/19 already require current-location and accessible state.
+No navigation, copy, backend or native dependency change is introduced.
+The existing Account-hub suite passes nine cases, including 14 native-state and
+42 installed-web route/locale/session combinations. Both new selected-state
+regressions fail on the old source; mobile and scoped test types pass. The ordinary
+local-code owner journey supplies separate actual navigation evidence.
+
+## S153 P1 — DEV credentials belong to their API/Auth origins (focused security checks pass; release pending)
+
+GIVEN the development client shares the production Android package WHEN it uses
+a different API or Auth origin THEN owner restoration, SDK storage/suffixes,
+logout, guest transport and its unread badge use only development keys scoped
+to those canonical origins. Owner keys include both API and Auth; guest keys
+include API. Encode HTTP(S) origins losslessly using SecureStore-valid ASCII;
+reject invalid or opaque origins without reading storage. URL user information,
+paths and query strings never enter a key. Missing Auth configuration keeps
+public browsing available without selecting a legacy owner key.
+
+GIVEN legacy production owner/guest credentials and SDK suffix bytes already
+exist WHEN the DEV client restores, starts/ends chat, polls attention or logs out
+THEN none of those legacy values is read, replayed, overwritten or deleted; no
+legacy fallback/migration is allowed. GIVEN the production client THEN its exact
+existing owner/guest keys, SDK suffix behavior and restoration remain unchanged.
+Tracking retains its independently origin-scoped key. Verify actual Runtime and
+Buying/unread storage ports plus the installed Auth SDK with synthetic values;
+pure-key tests alone do not qualify device installation. No identity, role, API
+or hosted Auth change. Master §§11/13/17 and BE-044 control the shared boundary.
+
+Plan: specify → red actual-port regressions → one pure key selector and narrow
+call-site wiring → focused security/affected-port/types/spec checks. Actual
+DEV-client installation remains blocked until these security regressions pass;
+no production credential access or new native build is part of this correction.
+
+Focused evidence: `scripts/test-mobile-logout-ui.ts` and
+`scripts/test-transport-storage-ui.ts` pass16 actual Runtime/Buying/unread, pure
+key and installed-SDK cases after their legacy-key negative controls fail. The
+seven affected resource/chat/plan fixture suites pass41 cases; mobile and scoped
+test types and219 spec links pass. These use synthetic credential/HTTP ports,
+not real provider, email or device credentials. Installation, ordinary local
+email delivery and the later combined release gates remain separate.
+
+## S153 N09 — floating public actions without an opaque viewport strip (ready)
+
+Actual Expo and the installed version 2 Featured screen expose a full-width blank
+strip behind the floating transport action. Keep measured floating actions and
+48dp targets, but reserve their variable height inside scrollable content, not
+the Stack viewport. GIVEN Featured, About, a showroom, Product or inquiry WHEN
+public actions render THEN content remains visible/scrollable to the bottom
+navigation and no opaque fixed band extends beyond the actual controls. GIVEN
+long labels or a business inquiry count WHEN the measured dock height changes
+THEN the final content can scroll fully above it. Private Account/editor and
+Market placement keep their existing layouts; no copy, role or API change.
+
+Plan: retain the existing measured root height in a presentation-only inset
+context; clear Stack viewport padding; append the measured inset to the existing
+default/custom public scroll content; extend dock/root regressions and actual
+320/390/landscape Chrome geometry before the combined visual gate. FE-041 owns
+inquiry isolation. Master §19 remains the current accessibility/layout authority.
+
+
+## S153 — interactive owner entry and focused product tasks (focused and Expo checks pass; visual approval pending)
+
+The physical audit confirms successful reviewer login resets the actor-keyed
+navigator to Market. Preserve that private-navigation reset, but retain explicit
+interactive Account sign-in intent above it. GIVEN successful reviewer-password
+or ordinary email-code entry WHEN the current owner session is validated and
+navigation is ready THEN replace with Account and its normal setup/hub. Failed,
+cancelled, stale or denied entry must not navigate. Cold session restoration on
+Market and same-owner token refresh must not force Account. Clear transient
+entry intent on cancellation/logout; never persist credentials or route payloads.
+
+FE-056 owns the paired product-management presentation: compact private rows and
+one persistent Save/Cancel bar outside a product-specific scrolling body. Keep
+global navigation, tenant/version/idempotency, dirty exits and public cards intact.
+Test the actual actor-keyed root boundary, not Account alone, plus existing
+runtime/owner guard negatives. Focused tests/types precede actual Expo/Chrome
+review and the existing visual gate; no new native artifact or device pass is
+implied. Master §§11/13/19 and FE-064 are affected. No provider/API change.
+
+Focused local evidence: `scripts/test-native-resource-loading.ts` passes eight
+actual React/Chrome cases. The production root Layout, RuntimeProvider and Account
+run across an actor-keyed controlled navigator reset: password and OTP success,
+server-validation/navigation readiness, cold restore, token refresh, cancelled or
+denied entry, different/reappearing actors and logout/late responses. The unchanged
+Layout control fails both interactive destination cases. Existing logout UI/SDK
+regressions pass five cases; mobile and scoped test types pass. These controlled
+router/Auth ports establish neither actual Expo routing nor installed Android
+behavior. Actual source-bound Google Chrome Expo review now passes five bounded journeys:
+visitor Account→Market→transport→Tracking, local SDK fixture owner entry→Account,
+compact Products→Edit/Keep/Discard, en/am/om phone/landscape action geometry and
+failed Save→retry→exact UI restore with authoritative local API checks. Ordinary
+interactive email entry remains blocked by local Auth 429; fixture entry does not
+prove this destination in real Expo, which retains the actual-root controlled
+regression and needs the next binary's physical login check. The active checklist
+retains visual/full/build/device steps.
 
 ## S151 B10 — category-first Featured choices (implemented locally)
 

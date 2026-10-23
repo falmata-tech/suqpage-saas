@@ -17,7 +17,7 @@ export default async function NewShipmentPage({searchParams}:{searchParams:Promi
  await listStaffTrackingShipments(actor).catch(error=>{if(error instanceof TrackingError&&error.code==='forbidden')redirect('/dashboard');throw error;});
  const t=await getUiText(),view=trackingStaffView(await searchParams),back=trackingStaffHref(view);
  return <DashboardShell user={actor} business={null}><div className={styles.workspace}>
-  <Link className="support-back-link" href={back}>{t('Back to shipments')}</Link><header className={styles.heading}><h1>{t('New shipment')}</h1></header>
+  <Link className="support-back-link" href={back}>{t('Back to shipment records')}</Link><header className={styles.heading}><h1>{t('New shipment record')}</h1></header>
   <ShipmentEditor shipment={null} idempotencyKey={crypto.randomUUID()} navigation={view} cancelHref={back}/>
  </div></DashboardShell>;
 }

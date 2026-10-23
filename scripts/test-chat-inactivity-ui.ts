@@ -19,11 +19,12 @@ const bundle=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
 `},bundle:true,write:false,format:'iife',platform:'browser',plugins:[{name:'idle-ui-ports',setup(builder){
  builder.onResolve({filter:/^react(?:\/jsx(?:-dev)?-runtime)?$/},args=>({path:require.resolve(args.path)}));
  builder.onResolve({filter:/\.css$/},args=>({path:args.path,namespace:'css-port'}));builder.onLoad({filter:/.*/,namespace:'css-port'},()=>({loader:'js',contents:'export default {};'}));
- builder.onResolve({filter:/^(?:@\/lib\/i18n\/ui|react-native|expo-router|expo-crypto|\.\.\/src\/(runtime|ui|ChatReadSentinel|AttentionAlerts|TransportPlanView)|\.\/(runtime|ui|owner-forms|support-files|ChatReadSentinel|ChatReadObserver|AttentionAlerts))$/},args=>({path:args.path,namespace:'ports'}));
+ builder.onResolve({filter:/^(?:@\/lib\/i18n\/ui|next-intl|react-native|expo-router|expo-crypto|\.\.\/src\/(runtime|ui|ChatReadSentinel|AttentionAlerts|TransportPlanView|TransportCoordinator)|\.\/(runtime|ui|owner-forms|support-files|ChatReadSentinel|ChatReadObserver|AttentionAlerts))$/},args=>({path:args.path,namespace:'ports'}));
  builder.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'jsx',resolveDir:process.cwd(),contents:
   args.path==='@/lib/i18n/ui'?`export const useUiText=()=>window.fixture.t;`:
+  args.path==='next-intl'?`export const useLocale=()=> 'en';`:
   args.path==='react-native'?`import React from 'react';const style=value=>Object.assign({},...[value].flat(Infinity).filter(Boolean));
-   export const AppState={get currentState(){return window.fixture.appState;}},View=({children,style:s})=><div style={style(s)}>{children}</div>,Text=({children,style:s})=><span style={style(s)}>{children}</span>,StyleSheet={create:v=>v},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`:
+   export const AppState={get currentState(){return window.fixture.appState;}},View=({children,style:s})=><div style={style(s)}>{children}</div>,ScrollView=View,Text=({children,style:s})=><span style={style(s)}>{children}</span>,Pressable=({children,onPress,accessibilityLabel,disabled,style:s})=><button type='button' aria-label={accessibilityLabel} disabled={disabled} style={style(s)} onClick={onPress}>{children}</button>,StyleSheet={create:v=>v},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`:
   args.path==='expo-router'?`export const router={push:()=>{},replace:()=>{}};import {useEffect} from 'react';
           // Every focus hook owns its cleanup; route focus/blur fans out to all mounted subscriptions.
           const subscriptions=new Set();let focused=true;
@@ -33,7 +34,7 @@ const bundle=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
           export const useFocusEffect=fn=>useEffect(()=>{const entry={run:fn,cleanup:undefined};subscriptions.add(entry);window.fixture.blur=blur;window.fixture.focus=focus;if(focused)entry.cleanup=fn()||undefined;return()=>{subscriptions.delete(entry);stop(entry);};},[fn]);`:
   args.path==='expo-crypto'?`export const randomUUID=()=>crypto.randomUUID();`:
   /(?:^\.\/|src\/)runtime$/.test(args.path)?`
-   export const useApp=()=>({t:window.fixture.t,locale:'en',ownerRequest:window.fixture.call});export const useLoad=()=>{throw Error('Owner chat must have one authoritative loader');};
+   export const transportStorageKey='suqpage-transport';export const useApp=()=>({t:window.fixture.t,locale:'en',ownerRequest:window.fixture.call});export const useLoad=()=>{throw Error('Owner chat must have one authoritative loader');};
    export const request=(path,options={})=>window.fixture.call(path,options.body);export const secure={getItem:async()=> 'local-token',setItem:async()=>window.fixture.storage.push('set'),removeItem:async()=>window.fixture.storage.push('remove')};export class ApiFailure extends Error{};
   `:
   /(?:^\.\/|src\/)ui$/.test(args.path)?`
@@ -83,7 +84,7 @@ test('FE-019 actual web/native guest chats warn, retain drafts across automatic 
   const field=page.getByLabel(kind==='web'?'Reply':'Message',{exact:true});await field.fill('Keep this draft');
   await page.clock.fastForward(5000);const old=(await pending(page))[0];await page.clock.fastForward(60000);assert.equal((await pending(page)).length,1,'One in-flight read even beyond a deadline');
   await resolve(page,old.id,view({status:'closed',idleEndedAt:now}));await page.getByText(ended,{exact:true}).waitFor();assert.equal((await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pending)).filter(v=>v.method==='POST').length,0,'Client deadline never writes close');
-  assert.equal(await page.getByRole('button',{name:kind==='web'?'Send another request':'Start another chat',exact:true}).getAttribute('data-secondary'),'true','A new request stays secondary while Resume is available');
+  assert.equal(await page.getByRole('button',{name:'Send another request',exact:true}).getAttribute('data-secondary'),'true','A new request stays secondary while Resume is available');
   await page.clock.fastForward(29999);assert.equal((await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pending)).length,0);await page.clock.fastForward(1);const stale=(await pending(page))[0];
   await page.getByRole('button',{name:'Resume chat',exact:true}).click();const first=(await pending(page,'POST'))[0];assert.equal(first.body?.action,'resume');assert.equal(first.body?.publicRef,'LOCAL-IDLE');assert.equal(await page.getByRole('button',{name:'Resuming…',exact:true}).isDisabled(),true);
   await reject(page,first.id);await page.getByRole('button',{name:'Resume chat',exact:true}).waitFor();await page.getByText('Support could not be updated.',{exact:true}).or(page.getByText('fixture unavailable',{exact:true})).waitFor();
@@ -97,7 +98,7 @@ test('FE-019 actual web/native guest chats warn, retain drafts across automatic 
 test('FE-019 actual native owner chat fences earlier reads and keeps its draft through automatic ending and explicit reopen', {timeout:90000},async()=>{
  const browser=await chromium.launch({timeout:20000});const errors:string[]=[];
  try{const page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));const now=Date.now(),open=view({idleWarningAt:now-100,idleEndsAt:now+3600000});await boot(page,'owner',open);await resolve(page,(await pending(page))[0].id,open);await page.getByText(warning,{exact:true}).waitFor();await page.getByLabel('Message',{exact:true}).fill('Owner draft kept');
-  await page.clock.fastForward(5000);const stale=(await pending(page))[0];await page.getByRole('button',{name:'End chat',exact:true}).click();const close=(await pending(page,'POST'))[0];assert.equal(close.body?.action,'close');await reject(page,close.id);await resolve(page,stale.id,view({status:'closed'}));
+  await page.clock.fastForward(5000);const stale=(await pending(page))[0];await page.getByRole('button',{name:'End chat',exact:true}).click();const close=(await pending(page,'POST'))[0];assert.equal(close.body?.action,'close');await reject(page,close.id);await page.getByText('fixture unavailable',{exact:true}).waitFor();await resolve(page,stale.id,view({status:'closed'}));
   await page.clock.fastForward(5000);await resolve(page,(await pending(page))[0].id,view({status:'closed',idleEndedAt:now}));await page.getByText(ended,{exact:true}).waitFor();await page.clock.fastForward(29999);assert.equal((await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pending)).length,0);await page.clock.fastForward(1);const older=(await pending(page))[0];
   await page.getByRole('button',{name:'Resume chat',exact:true}).click();const resume=(await pending(page,'POST'))[0];assert.equal(resume.body?.action,'reopen');await resolve(page,resume.id,view());
   await page.getByRole('button',{name:'Resume chat',exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Resume chat',exact:true}).isDisabled(),true);await page.clock.runFor(32);

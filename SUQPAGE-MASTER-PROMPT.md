@@ -28,7 +28,7 @@ Use the task to choose the next detailed reading; do not load every spec:
 | Map, product search, Featured or SEO | §10 | FE-021/FE-033/FE-065/FE-071, BE-054 |
 | Account/security/onboarding | §§11,16 | BE-031/BE-053/BE-061, DEP-050 |
 | Staff/workspaces/chat | §§13,19 | FE-026/FE-056/FE-072, BE-018/BE-050/BE-060 |
-| Shipment tracking | §§12,16 | FE-069, BE-058, DEP-048 |
+| Shipment records | §§12,16 | FE-069, BE-058, DEP-048 |
 | Runtime/data/release | §§15,17,22–23 | Relevant DEP-029/DEP-044/DEP-049 section |
 | Engineering/documentation workflow | §24 | AGENTS.md, DEP-002, ENGINEERING-READINESS.md |
 
@@ -93,6 +93,49 @@ business owners. Write inviting, professional copy rather than hype or literal
 translations of internal brainstorming. FE-070 and FE-049 control authored copy.
 
 ## 4. What Suqpage is—and is not
+
+### S154 local implementation (awaiting acceptance and release)
+
+The current local working tree restores asynchronous visitor inquiries and a
+owner Inbox (FE-075/BE-062), alongside equally prominent configured WhatsApp
+and Telegram inquiry actions. SMS remains secondary. Approved WhatsApp/Telegram
+numbers or usernames remain visible in the inquiry modal on desktop, where the
+visitor can copy the contact; phone/native actions can open the destination with
+the prepared draft. Desktop does not launch external messaging links.
+FE-076/BE-063 locally offer one independent logistics service provider:
+SharedTrucks Logistics, a freight brokerage. Its approved navy/blue wordmark
+appears in provider choices and shipment records, distinct from MirtPage's
+orange identity. New visitor and owner transport
+intakes start without a company selected; opening the choice reveals its name,
+type and arranging role, and chat starts only after selection. Its stable
+internal ID remains `shared-trucks-logistics` for older conversations. Parcel
+express delivery and hub-and-spoke logistics are future service types, not
+currently selectable companies. The company name is shown in its specific
+choice and shipment record; general site copy does not advertise it. Transport
+chat names SharedTrucks Logistics and says its live agents will help arrange the
+shipment; MirtPage staff operate the internal queue on its behalf until provider-
+owned staff accounts exist. After a 3:30 no-agent wait, local web and Expo
+replace live chat with a callback form, prefilled phone, optional email and a
+static receipt. The participant can cancel the waiting case or start a separate
+request; submitting a callback leaves the original case available for staff
+follow-up. Callback screens do not keep live-message polling open. Provider-owned
+accounts and direct routing remain deferred. Provider interest is presented on
+its own page and grants no operating access.
+FE-021/FE-065 expose bounded map groups at city scale without altering saved
+business locations. Exact public storefront pins remain optional and owner
+selected. Local FE-021 S160 adds city-area map markers for eligible city-only
+businesses at their canonical city anchor. One business uses the shop marker;
+numbered circles represent multiple businesses. Visitor markers and previews show
+the business name and city, without internal location-mode terms or an implied
+street address. Agent-led browser review passed; rollout remains pending, so
+hosted map behavior has not changed.
+FE-070/FE-049 shorten the business-story/product narrative while explicitly
+retaining the benefit of avoiding social-media clutter in English, Amharic and
+Afaan Oromo. Local and production schema79 are verified. The changed web/Expo
+journeys passed agent-led browser review, complete local checks, clean web release
+and 20/20 acceptance; this batch is not yet published or compiled into a new
+Android release. The transition checklist owns its GitHub, deployment and device
+qualification state.
 
 ### Suqpage is
 
@@ -178,8 +221,11 @@ Details: FE-029/FE-036/FE-040/FE-053/FE-054/FE-056 and the relevant current spec
 
 Marked fictional demo businesses exercise varied product counts, industries,
 optional categories, media and supply types. They are fixtures, not real clients
-or authority for merchant facts. Generated demo illustrations are illustrative,
-not documentary product photographs; use honest no-photo placeholders when genuine
+or authority for merchant facts, and intentionally demonstrate the range of
+businesses MirtPage serves to first-time visitors. Keep examples clearly marked;
+never present them as real merchants or as factual availability, capacity or
+production evidence. Generated demo illustrations are illustrative, not
+documentary product photographs; use honest no-photo placeholders when genuine
 media is absent. Never fill a real business with unrelated demo logos or videos.
 
 Private sign-in aliases and account contacts stay separate from public showroom
@@ -242,10 +288,12 @@ Other businesses retain their own lists. The list is capped at 20 items and is
 rehydrated against the latest eligible canonical products/options before use.
 
 Contact prepares a short inquiry in the current interface language, with literal
-merchant data, optional quantity intent and each canonical product link. Offer only
-validated effective public WhatsApp, Telegram and SMS destinations, then the manual
-copy/selectable-text fallback. No visitor phone capture or platform Send form is
-required. Repeated taps must not create duplicate in-flight copy/open operations.
+merchant data, optional quantity intent and each canonical product link. Offer
+validated, policy-approved WhatsApp and Telegram actions alongside MirtPage Inbox.
+Show the approved public contact identity on desktop with a separate Copy contact
+action; desktop uses Copy message or MirtPage Inbox and does not launch messaging
+apps. Phone/native actions may open the supported channel with the prepared draft.
+SMS remains secondary. No external message is sent automatically.
 
 New first-party business-inbox submissions and their primary owner navigation,
 metrics and alerts are retired. Stale creation APIs return 410 before body parsing,
@@ -292,6 +340,16 @@ results. Products searches eligible physical products with source-business conte
 Each scope owns its query, optional category, country/city and other filters.
 Made to order belongs only to product search; there is no Product/Service filter.
 Search updates while typing, with debounce/cancellation and no Enter requirement.
+The local FE-021 S160 implementation includes businesses with an owner-selected
+exact public pin and businesses with a valid city-only anchor. A city-only
+business represented by a final marker appears at its canonical city point as a
+shop marker with the business name;
+numbered area circles represent multiple businesses. If an overview marker
+overlaps another, the businesses share a multi-business count until separated.
+The city is shown in previews without inferring a street location.
+Visual approval and rollout remain pending.
+City-only businesses and their products remain searchable through country/city
+filters.
 
 Start with bounded default results. Products use 12-card server pages with incremental
 scroll loading only while open, single-flight requests, ID deduplication, retry and
@@ -326,8 +384,13 @@ navigation remains available within FE-058 limits; initial/reset geography remai
 Ethiopia and must not move an existing exact storefront pin. Current nearby-group
 compactness uses the shared three-kilometer neighborhood and viewport limits
 (up to six large-screen/three phone cards, reduced for short/enlarged layouts), not
-a global fixed three. Only a business without an eligible nearby peer uses an
-individual icon. Exact/current zoom and offset bounds remain in FE-021/FE-058.
+a global fixed three. Any final marker representing one business uses the shop
+icon, including city-only businesses, and opens that business directly; no map
+zoom may display a numbered **1** circle. City-only markers stay at their
+canonical city point; public previews and accessibility labels show the business
+name and city, not its internal location mode. Count circles represent two or
+more businesses. Exact/current zoom and
+group-spacing bounds remain in FE-021/FE-058.
 
 The centralized OSM basemap supplies visual context only; server catalog/location
 authority remains separate. Request visible tiles with attribution and normal cache
@@ -359,11 +422,21 @@ The separately authorized store-review exception binds one ordinary marked demo
 owner; it grants no staff or other-tenant access and exposes no credential in UI,
 source, logs or builds. Google login remains disabled until explicitly qualified.
 
+Planned FE-053/FE-064 correction: explicit native sign-in returns to Account only
+after current owner validation, while retaining the private actor-navigation reset.
+Cold restoration on Market and same-owner token refresh do not force navigation.
+
 Account/business/handle setup requires canonical Country and City and private
 account details, including the account phone. Validate selected IDs before writes;
 an inconsistent city/country is not silently broadened. Private phone/email never
-become public contacts implicitly. Exact storefront coordinates and approximate
-home-area placement remain distinct. Handle changes retain uniqueness, cooldown,
+become public contacts implicitly. City-area pins show a business's canonical
+city, while exact storefront coordinates remain owner-selected and exact-public.
+Under FE-059/BE-041, **Show my city** is the default city-area pin choice;
+**Show on map** is optional and an owner-placed pin is exact-public, with concise
+disclosure and invalidation when city changes. Local FE-021 S160 groups
+co-located city-only pins into counted circles; a final singleton is a shop
+marker without a “1” count and displays the business name. Handle
+changes retain uniqueness, cooldown,
 historical aliases and actor/version audit under BE-043.
 
 Verified signup or an individual invitation atomically creates a complete private
@@ -386,17 +459,26 @@ Details: BE-030/BE-031/BE-038/BE-039/BE-043/BE-045/BE-047/BE-052/BE-053/BE-061.
 ## 12. Fulfillment boundary
 
 Customers and businesses agree purchases/payment directly. Visitors and authenticated
-business owners can ask the human transport team for help with origin/destination
-and transport/shipping questions. Owner transport is bound to the current business;
+business owners can share an origin and destination to arrange transport with
+SharedTrucks Logistics. A live transport agent helps with the request; MirtPage
+staff currently operate the internal queue, and provider-owned routing is future
+work. If no agent joins or replies, the live wait closes after three minutes
+thirty seconds and offers a short callback form. Submitting it leaves one
+follow-up on the existing staff case and shows a static receipt; it does not
+keep a public chat or message portal open. The visitor or owner can cancel a
+timed-out request and start a separate one. Owner transport is bound to the current business;
 it does not adopt a guest browser token or merge with private owner Support.
+The first public staff reply before that cutoff keeps the case live even after
+later replies or reassignment; a first reply after the cutoff cannot reopen it.
 
-Shipment tracking is an **independent organizer of an arranged journey**, not live
-carrier tracking. Authorized transport staff may create it for a valid requested
-email before that recipient verifies access. No chat ID, assignment, active case
-or prior recipient verification is required. One recipient may own several shipments
-across different or absent conversations.
+Shipment records are an **independent organizer of an arranged journey**, not live
+carrier tracking. The customer-facing list is **Shipment records**; one arranged
+journey is a **Shipment record**. Authorized transport staff may create a record
+for a valid requested email before that recipient verifies access. No chat ID,
+assignment, active case or prior recipient verification is required. One
+recipient may own several records across different or absent conversations.
 
-A shipment contains 1–12 ordered stable-ID legs with provider name, From/To and
+A shipment record contains 1–12 ordered stable-ID legs with provider name, From/To and
 one admitted transport method: air, truck, van, car or motorcycle. Each leg may
 have a validated public HTTPS tracking URL and literal provider code. Opening/copying
 those external details is explicit; never fetch, embed or scrape them server-side,
@@ -408,11 +490,22 @@ A provider code is not the recipient email-verification code.
 Staff can edit/reorder with version guards; ordinary edits do not send new email.
 There are no dates/ETA, scan events, bookings, current-custody or completion claims.
 
-The recipient verifies their email themselves in the separate tracking portal and
-sees only their shipments. A locator, account JWT or chat credential grants no access.
+The selected arranging company and its brand are shown on the shipment record;
+each leg's carrier remains separately identified. The recipient verifies their
+email themselves in the separate Shipment records portal and sees only records
+for that email. A locator, account JWT or chat credential grants no access.
 The former company-handoff form and conversation-bound plan workflow stay retired;
 new provider details belong to independent shipments. BE-058/FE-069/DEP-048 own this
 contract; external scan integration remains future work.
+
+Planned FE-077/BE-064 adds a named shipper and receiver to a shipment record, each
+optionally linked to a published MirtPage
+business or entered as a custom party. Both selected emails will require separate
+verification and receive read access only to that shipment. A business's published
+contact email may be the default; private sign-in/notification email is never
+inferred. This plan does not change today's recipient-only access or internal chat
+routing. Any repeat-business discount must be a logistics provider's explicit offer;
+MirtPage does not calculate or promise one.
 
 ## 13. User roles and standard page workspaces
 
@@ -441,6 +534,10 @@ Save/Cancel, preview and publication show truthful pending/error states and pres
 unsaved inputs according to the focused editor contract. Legacy inbox history is
 private compatibility access, not a primary incoming-inquiries destination.
 
+Planned FE-056 native correction: product management uses compact private rows,
+while a product editor keeps one reachable Save/Cancel bar outside its scrolling
+form. Public showroom cards and existing guarded save/discard behavior stay intact.
+
 ### Operations managers and team members
 
 A separate administrator-controlled, versioned business-management grant authorizes
@@ -460,14 +557,21 @@ Support and Transport keep separate scoped queues and private histories. Automat
 routing uses eligible receiving staff, lowest current open workload and longest
 since saved assignment, without a numerical per-agent capacity cap. Pausing receiving
 stops new routing, not existing access; unassignment returns work to automatic pickup.
+Under Supabase Auth, new automatic/manual assignees also need their immutable
+Supabase application identity link. Never infer readiness from email or provider
+metadata; unlinked receivers cannot consume bounded queue candidates. Legacy Auth
+keeps its existing eligibility, and this rule does not rewrite assigned history.
 Only the current assignee's explicit **Join chat** announces joining and permits
 public reply. Claim, assignment, reading or an inspecting manager does not join.
 
 Needs staff reply/Overdue/Waiting for customer describe response work separately
 from assignment. The unanswered cycle is cleared only by a public staff reply;
-join/read/note events do not reset it. Assignment-scoped overdue alerts/admin mail
-use BE-018's fair deadlines and privacy rules, including no blame email for an
-unassigned agent. Private notes/attachments never enter participant projections.
+join/read/note events do not reset it. An assigned staff reply becomes overdue
+two minutes after the later of the unanswered participant message or current
+assignment; the existing bounded alert and admin-email path follows its next
+worker sweep. Unassigned work keeps its ten-minute queue alert and is never
+blamed on an absent agent. These are internal targets, not public response
+promises. Private notes/attachments never enter participant projections.
 Only visible incoming-message acknowledgement establishes Read; fetching, opening
 or inspecting another assignee's case does not. Retain original author side and
 assignment epoch so later role changes cannot recast history.
@@ -531,6 +635,10 @@ persistence, media and mail are adapters. Use narrow typed ports and cohesive
 modules; do not create classes/containers/repositories without a concrete need.
 Keep critical business mutations canonical, tenant-bound, versioned, idempotent
 and transactional, including audit/publication/outbox work as applicable.
+Pending rollout under BE-027, the focused-verified PostgreSQL adapter contains
+idle connection error events with a fixed diagnostic while the driver evicts
+the failed client. Active query and transaction failures still reject; this
+adds neither automatic write replay nor a global exception handler.
 
 Managed Supabase Auth owns session validity; the application maps immutable UUIDs
 to current roles/tenants. Web uses its authorized cookie/origin adapters; native
@@ -539,6 +647,11 @@ version, destination and entity IDs from clients are hints to validate, not auth
 Native supports visitor/owner tasks only; staff stays on web. API origin, Auth/data
 target, Firebase public client identity, package, signer and permissions require
 actual artifact/configuration admission under DEP-044/DEP-049 and BE-044/BE-059.
+Local development uses separate owner and guest credential keys bound to the
+canonical API/Auth origins; it never restores or deletes production keys as a
+fallback. Production keys remain compatible with existing installations. This
+boundary has focused regression evidence; the current physical development-client
+installation and release qualification remain pending under FE-053/BE-044.
 Private signing and provider-management credentials never belong in clients,
 public build outputs or ordinary application runtimes. Explicitly authorized
 delivery credentials, such as the server-only FCM sender, stay within their
@@ -705,6 +818,22 @@ usable scroll region, safe areas, focus containment/restoration and an accessibl
 close/back route. Avoid document overflow, clipped buttons and unnecessary vertical
 chrome that steals map/chat space. Respect reduced motion.
 
+Solve confusion through page structure and interaction before adding more copy.
+Related tasks belong together; choices, progress, saved state and recovery should
+be visible where they matter. Text names meaningful choices and communicates
+privacy or consequences, but does not narrate obvious controls or compensate for
+scattered navigation. Apply the same clarity standard across visitor, owner,
+staff and admin journeys, with layouts adapted to web, phone web and Expo.
+
+Planned S158 owner map placement must keep the chosen city visible, make exact
+public disclosure clear, allow direct touch placement and provide keyboard
+controls to zoom and place a pin at map center. Test the installed native map
+event path separately from the web map-click path; no typed coordinate field is
+the only way to choose a location.
+
+The planned native product-action layout keeps 48dp controls, keyboard/safe-area
+clearance and wrapping en/am/om labels in phone and landscape views (FE-056).
+
 Keep useful same-resource content visible during refresh, focus return and safe
 filter transitions with quiet local status. Initial/new-resource loading uses
 layout-matched, inert skeletons inside the content region; known navigation and
@@ -755,7 +884,9 @@ business into goods or apply demo corrections to unmarked tenants.
 4. First Publish needs no staff approval. It atomically validates current content
    and an eligible listed product, activates the draft business and applies the
    pending canonical location/category with publication history. Location Save
-   applies a known public area or explicit storefront directly; public discovery
+   currently applies a known public area or explicit storefront coordinates;
+   planned S158 replaces manual coordinates with an exact-public map tap after
+   city selection. Public discovery
    still requires active, non-excluded status and listed goods. Location edits
    retain their first-change/30-day cooldown and audited administrator exception;
    admin corrections advance the version fence so stale forms cannot revert pins.

@@ -2,6 +2,7 @@
 import SponsorCarousel from "./SponsorCarousel";
 import launchStyles from "./LaunchClarity.module.css";
 import { useUiText } from "@/lib/i18n/ui";
+import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 
 
 import Image from "next/image";
@@ -14,30 +15,20 @@ import { createPortal } from "react-dom";
 import type { DiscoveryShowroom, FeaturedShowroomsView, SponsorPlacement, WeeklyFeaturedProgram } from "@/lib/discovery";
 import {
   buildFeaturedProgramAgenda,
-  featuredBroadcastPhase,
   featuredProgramDisplayOrder,
   featuredProgramTimeLabel,
   resolveFeaturedProgramSessions,
   type FeaturedBoothWalkthrough,
-  type FeaturedBroadcastPhase,
   type FeaturedProgramAgendaEntry,
 } from "@/lib/featured-program";
-import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
+import { featuredBroadcastHeader } from "@/lib/featured-broadcast-header";
+import { publicLiveLink } from "@/lib/public-live-link";
+import { discoveryLocationLabel } from "@/lib/discovery-contract";
 
 const DISCOVERY_RETURN_KEY = "suqpage:last-marketplace-url:v1";
 
 function socialProfileUrl(value: string | undefined, provider: "tiktok" | "youtube") {
-  if (!value) return "";
-  try {
-    const url = new URL(value);
-    const host = url.hostname.toLowerCase().replace(/^www\./, "");
-    if (url.protocol !== "https:") return "";
-    if (provider === "tiktok" && host !== "tiktok.com") return "";
-    if (provider === "youtube" && !["youtube.com", "youtu.be"].includes(host)) return "";
-    return url.toString();
-  } catch {
-    return "";
-  }
+  return publicLiveLink(value, provider);
 }
 
 const SUQPAGE_TIKTOK_URL = socialProfileUrl(process.env.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL, "tiktok");
@@ -82,7 +73,7 @@ function ShowroomPreview({ showroom, onClose, onOpen, presence }: { showroom: Di
   }, [onClose, portalRoot, showroom.id]);
   if (!portalRoot) return null;
   const status = presence.label || (showroom.sponsored ? "Sponsored" : showroom.primaryIndustryShortLabel);
-  return createPortal(<div className="discovery-preview-layer"><button className="discovery-preview-scrim" type="button" tabIndex={-1} onClick={onClose} aria-label={t("Dismiss page preview")} /><aside ref={previewRef} className="discovery-preview" role="dialog" aria-modal="false" aria-labelledby={`showroom-preview-${showroom.id}`} data-hero-image={showroom.heroImagePath || undefined} tabIndex={-1}><article><button className="discovery-preview-close" type="button" onClick={onClose} aria-label={t("Close page preview")}><X aria-hidden="true" /></button><ShowroomImage showroom={showroom} /><div className="discovery-preview-copy"><span className={presence.kind ? `presence-${presence.kind}` : undefined}>{t(status)}</span><h3 id={`showroom-preview-${showroom.id}`}>{showroom.name}</h3>{showroom.isDemo ? <span className={launchStyles.example}>{t("Demo")}</span> : null}<p>{showroom.tagline}</p><small>{showroom.city} · {showroom.zone} · {showroom.region}</small><Link href={`/@${showroom.handle}?ref=featured`} onClick={onOpen}>{t("Open page")}{" "}<b aria-hidden="true">→</b></Link></div></article></aside></div>, portalRoot);
+  return createPortal(<div className="discovery-preview-layer"><button className="discovery-preview-scrim" type="button" tabIndex={-1} onClick={onClose} aria-label={t("Dismiss page preview")} /><aside ref={previewRef} className="discovery-preview" role="dialog" aria-modal="false" aria-labelledby={`showroom-preview-${showroom.id}`} data-hero-image={showroom.heroImagePath || undefined} tabIndex={-1}><article><button className="discovery-preview-close" type="button" onClick={onClose} aria-label={t("Close page preview")}><X aria-hidden="true" /></button><ShowroomImage showroom={showroom} /><div className="discovery-preview-copy"><span className={presence.kind ? `presence-${presence.kind}` : undefined}>{t(status)}</span><h3 id={`showroom-preview-${showroom.id}`}>{showroom.name}</h3>{showroom.isDemo ? <span className={launchStyles.example}>{t("Example showroom")}</span> : null}<p>{showroom.tagline}</p><small>{discoveryLocationLabel([showroom.city, showroom.zone, showroom.region])}</small><Link href={`/@${showroom.handle}?ref=featured`} onClick={onOpen}>{t("Open page")}{" "}<b aria-hidden="true">→</b></Link></div></article></aside></div>, portalRoot);
 }
 
 function featuredHref(featuredDay: number, hash = "daily-featured-title") {
@@ -111,7 +102,7 @@ function FeaturedGallery({ featured, walkthroughs, featuredNowBusinessId, now }:
       if (!booth.revealed) return <article key={booth.reference} data-featured-slot={booth.slot} className="featured-card featured-card-preview" aria-label={t("{value1}, upcoming business, {value2}", { value1: booth.reference, value2: walkthroughLabel })}><span className="featured-card-media"><span className="featured-card-placeholder" aria-hidden="true"><i /><i /><i /></span>{SUQPAGE_TIKTOK_URL ? <b>{booth.reference}</b> : null}</span><span className="featured-card-copy"><small>{t("Featured schedule")}</small><strong>{t("Participant announced that day")}</strong><span>{walkthroughLabel}</span></span></article>;
       const showroom = booth.showroom;
       const presence = showroomPresence(showroom, featuredNowBusinessId, t);
-      return <button disabled={!ready} key={showroom.id} data-business-id={showroom.id} data-hero-image={showroom.heroImagePath || undefined} data-walkthrough-current={isCurrent || undefined} data-presence={presence.kind || undefined} type="button" className={`featured-card${isCurrent ? " walkthrough-current" : presence.kind === "live" ? " merchant-live" : ""}${selected?.id === showroom.id ? " selected" : ""}`} onClick={() => setSelected(showroom)} aria-label={SUQPAGE_TIKTOK_URL ? t("{value1}, {value2}, {value3}, walkthrough {value4}{value5}", { value1: booth.reference, value2: showroom.name, value3: showroom.city, value4: walkthroughLabel, value5: presence.label ? `, ${t(presence.label)}` : "" }) : t("{value1}, {value2}, {value3}. View details.", {value1:showroom.name,value2:t(showroom.primaryIndustryLabel),value3:showroom.city})}><span className="featured-card-media"><ShowroomImage showroom={showroom} />{SUQPAGE_TIKTOK_URL ? <b>{booth.reference}</b> : null}{presence.kind ? <i className={`featured-card-presence featured-card-presence-${presence.kind}`}>{t(presence.shortLabel)}</i> : null}</span><span className="featured-card-copy"><small>{showroom.city} · {t(showroom.primaryIndustryShortLabel)}</small><strong>{showroom.name}</strong>{showroom.isDemo ? <span className={launchStyles.example}>{t("Demo")}</span> : null}<span>{presence.label || (SUQPAGE_TIKTOK_URL ? walkthroughLabel : t("Explore this business"))}</span></span></button>;
+      return <button disabled={!ready} key={showroom.id} data-business-id={showroom.id} data-hero-image={showroom.heroImagePath || undefined} data-walkthrough-current={isCurrent || undefined} data-presence={presence.kind || undefined} type="button" className={`featured-card${isCurrent ? " walkthrough-current" : presence.kind === "live" ? " merchant-live" : ""}${selected?.id === showroom.id ? " selected" : ""}`} onClick={() => setSelected(showroom)} aria-label={SUQPAGE_TIKTOK_URL ? t("{value1}, {value2}, {value3}, walkthrough {value4}{value5}", { value1: booth.reference, value2: showroom.name, value3: showroom.city, value4: walkthroughLabel, value5: presence.label ? `, ${t(presence.label)}` : "" }) : t("{value1}, {value2}, {value3}. View details.", {value1:showroom.name,value2:t(showroom.primaryIndustryLabel),value3:showroom.city})}><span className="featured-card-media"><ShowroomImage showroom={showroom} />{SUQPAGE_TIKTOK_URL ? <b>{booth.reference}</b> : null}{presence.kind ? <i className={`featured-card-presence featured-card-presence-${presence.kind}`}>{t(presence.shortLabel)}</i> : null}</span><span className="featured-card-copy"><small>{showroom.city} · {t(showroom.primaryIndustryShortLabel)}</small><strong>{showroom.name}</strong>{showroom.isDemo ? <span className={launchStyles.example}>{t("Example showroom")}</span> : null}<span>{presence.label || (SUQPAGE_TIKTOK_URL ? walkthroughLabel : t("Explore this business"))}</span></span></button>;
     })}
   </div>{selected ? <ShowroomPreview showroom={selected} onClose={() => setSelected(null)} onOpen={rememberCurrentPublicWorkspace} presence={showroomPresence(selected, featuredNowBusinessId, t)} /> : null}</div>;
 }
@@ -176,25 +167,30 @@ function TodayProgramSchedule({ featured, agenda, sponsorPlacements }: { feature
 
 function FeaturedBroadcastStatus({ featured, selectedDay, now, agenda, sponsorPlacements }: { featured: WeeklyFeaturedProgram; selectedDay: WeeklyFeaturedProgram["schedule"][number] | undefined; now: number | null; agenda: FeaturedProgramAgendaEntry[]; sponsorPlacements: SponsorPlacement[] }) {
   const t = useUiText();
-  if (!selectedDay || !SUQPAGE_TIKTOK_URL) return null;
-  const sessions = resolveFeaturedProgramSessions(featured.boothCount, featured.programPolicy);
-  const phase: FeaturedBroadcastPhase = now === null ? "scheduled" : featuredBroadcastPhase(selectedDay.dateIso, featured.boothCount, now, featured.programPolicy);
+  if (!selectedDay) return null;
+  const status = featuredBroadcastHeader({
+    day: selectedDay,
+    boothCount: featured.boothCount,
+    now: now ?? Date.parse(`${selectedDay.dateIso}T00:00:00+03:00`),
+    policy: featured.programPolicy,
+    tiktokUrl: SUQPAGE_TIKTOK_URL,
+    youtubeUrl: SUQPAGE_YOUTUBE_URL,
+    t,
+  });
   const activeEntry = agenda.find((entry) => entry.current);
   const activeWalkthrough = activeEntry?.kind === "booth" ? activeEntry : null;
   const activeBooth = activeWalkthrough ? featured.booths[activeWalkthrough.slot - 1] : null;
   const activeBusiness = activeBooth?.revealed ? activeBooth.showroom.name : null;
   const activeSponsor = activeEntry?.kind === "sponsor_break" ? sponsorForSlot(sponsorPlacements, activeEntry.sponsorSlot) : null;
-  const sessionSummary = `${featuredProgramTimeLabel(sessions.evening.startMinute, sessions.evening.endMinute)} EAT`;
-  const content = phase === "live"
+  const currentActivity = status.phase === "window"
     ? activeWalkthrough
-      ? { title: `TikTok Live · ${activeBooth?.reference || "Featured business"}`, detail: `${activeBusiness ? `Now visiting ${activeBusiness} · ` : ""}${activeWalkthrough.label} EAT`, action: "Watch live", href: SUQPAGE_TIKTOK_URL }
-      : activeEntry && (activeEntry.kind === "changeover" || activeEntry.kind === "sponsor_break")
-        ? { title: activeSponsor ? `Sponsor spotlight · ${activeSponsor.name}` : `${activeEntry.label} · ${activeEntry.timeLabel} EAT`, detail: activeSponsor ? `${activeEntry.timeLabel} EAT · Paid placement` : "The next presentation begins shortly.", action: "Watch live", href: SUQPAGE_TIKTOK_URL }
-        : { title: t("TikTok Live program"), detail: sessionSummary, action: "Watch live", href: SUQPAGE_TIKTOK_URL }
-    : phase === "ended"
-        ? { title: t("Livestream ended"), detail: "Watch the business recordings on YouTube.", action: "View recordings", href: SUQPAGE_YOUTUBE_URL }
-        : { title: featured.isToday ? "Live on TikTok today" : `Live on ${selectedDay.dayLabel}`, detail: sessionSummary, action: "TikTok", href: SUQPAGE_TIKTOK_URL };
-  return <aside className={`featured-program featured-program-${phase}`} aria-label={t("Daily Featured status")}><span><Radio aria-hidden="true" />{featured.isToday ? t(SUQPAGE_TIKTOK_URL ? "Today’s broadcast" : "Today's schedule") : t("Program preview")}</span><strong>{content.title}</strong><small>{content.detail}</small>{content.href ? <a href={content.href} target="_blank" rel="noreferrer">{t(content.action)}<ExternalLink aria-hidden="true" /></a> : null}</aside>;
+      ? t("Now featuring {value1}", { value1: activeBusiness || activeBooth?.reference || t("Featured business") })
+      : activeSponsor
+        ? t("Sponsor spotlight: {value1}", { value1: activeSponsor.name })
+        : ""
+    : "";
+  const detail = [currentActivity, status.detail, status.note].filter(Boolean).join(" · ");
+  return <aside className={`featured-program featured-program-${status.phase}`} aria-label={t("Daily Featured status")}><span><Radio aria-hidden="true" />{status.label}</span><strong>{status.title}</strong>{detail ? <small>{detail}</small> : null}{status.href ? <a href={status.href} target="_blank" rel="noreferrer">{status.actionLabel}<ExternalLink aria-hidden="true" /></a> : null}</aside>;
 }
 
 function WeeklyFeatured({ featured, sponsorPlacements, featuredNowBusinessId }: { featured: WeeklyFeaturedProgram; sponsorPlacements: SponsorPlacement[]; featuredNowBusinessId: number | null }) {

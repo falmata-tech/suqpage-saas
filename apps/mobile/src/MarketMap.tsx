@@ -1,14 +1,16 @@
 import React, {forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react';
-import {View} from 'react-native';
+import {Platform, View} from 'react-native';
 import {Map, Camera, Marker,TransformRequestManager, type CameraRef} from '@maplibre/maplibre-react-native';
 import type {MapProps, MapControls} from './map-contract';
-import {initialMapView, osmStyle, shopCoordinate, nextMapZoom} from './native-map-model';
+import {initialMapView, nativeMapStyle, shopCoordinate, nextMapZoom} from './native-map-model';
 import {Button} from './ui';
 import LoadingBar from './LoadingBar';
 import {useApp} from './runtime';
 import {markerIndex, visibleMarkers, type MapBounds, type MarkerItem} from './map-markers';
 import {MapMarker} from './MapMarker';
 import {MAP_NATIVE_MAX_ZOOM,MAP_GROUP_DEFAULT_CAPACITY} from '../../../lib/map/map-clustering';
+
+const mapStyle = nativeMapStyle(__DEV__, process.env.EXPO_PUBLIC_NATIVE_MAP_FIXTURE);
 
 // Public tile requests only: never attach Supabase tokens or application cookies.
 TransformRequestManager.addHeader({id: 'suqpage-osm-client', match: '^https://tile\\.openstreetmap\\.org/',
@@ -48,14 +50,14 @@ export default forwardRef<MapControls, MapProps>(function MarketMap({shops,group
     return () => clearTimeout(timer);
   }, [ready, error, revision]);
   return <View style={{height, backgroundColor: '#dfe9e8'}}>
-    {!error && <Map key={revision} style={{flex: 1}} mapStyle={osmStyle} androidView="texture"
+    {!error && <Map key={revision} style={{flex: 1}} mapStyle={mapStyle} androidView="texture"
       accessibilityLabel={t('Business map')} attribution={false} compass={false} touchRotate={false} touchPitch={false}
       onRegionDidChange={event => {const {center} = event.nativeEvent,zoom=Math.max(1,Math.min(MAP_NATIVE_MAX_ZOOM,event.nativeEvent.zoom)); viewport.current = {center, zoom}; setView({bounds: event.nativeEvent.bounds, zoom});onZoomChange?.(zoom);onViewChange?.(viewport.current);}}
       onDidFinishRenderingMapFully={() => setReady(true)} onDidFailLoadingMap={() => setError(true)}>
       <Camera ref={camera} initialViewState={viewport.current} minZoom={1} maxZoom={MAP_NATIVE_MAX_ZOOM}/>
-      {markers.map(item => <Marker key={item.key} id={item.key} lngLat={item.center} anchor="top" offset={[0, -31]} pointerEvents="box-none" onPress={item.kind==='shop'?event => {event.stopPropagation(); select(item);}:undefined}>
-        <MapMarker item={item} selected={item.shop?.id === selectedId}
-          label={item.shop ? `${item.shop.name}. ${t('Open page preview')}` : item.expansionZoom!==undefined?item.count===1?t('1 business. Zoom in.'):t('{count} businesses. Zoom in.',{count:item.count}):item.count===1?t('1 business. View business.'):t('{count} businesses. View businesses.', {count: item.count})}
+      {markers.map(item => <Marker key={item.key} id={item.key} lngLat={item.center} anchor="top" offset={[0, item.kind === 'shop' ? -31 : -18]} pointerEvents={Platform.OS === 'ios' && item.kind !== 'shop' ? 'box-only' : 'box-none'} onPress={event => {event.stopPropagation(); select(item);}}>
+        <MapMarker nativeMarker item={item} selected={item.shop?.id === selectedId}
+          label={item.shop ? `${item.shop.name}. ${item.shop.city}. ${t('Open page preview')}` : item.expansionZoom!==undefined?item.count===1?t('1 business. Zoom in.'):t('{count} businesses. Zoom in.',{count:item.count}):t('{count} businesses. View businesses.', {count: item.count })}
           badge={item.presence ? t(item.presence === 'featured' ? 'Featured' : 'Live') : ''}
           nearby={t('Nearby')} onPress={() => select(item)}/>
       </Marker>)}

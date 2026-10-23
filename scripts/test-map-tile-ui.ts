@@ -5,6 +5,7 @@ import {readFile} from 'node:fs/promises';
 import {build} from 'esbuild';
 import {chromium,type Page,type Route} from 'playwright';
 import type {Map as LeafletMap} from 'leaflet';
+import {MAP_MAX_ZOOM} from '../lib/map/map-clustering';
 
 // Actual React, installed Leaflet and production browser adapters/loader. Only
 // translations, the Expo marker glyph and ALL external HTTP are fixture ports.
@@ -17,12 +18,13 @@ type Probe={maps:LeafletMap[];selected:number[];errors:number;created:string[];r
 const svg='<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#dcebd7"/><path d="M0 128H256" stroke="#fff" stroke-width="6"/></svg>';
 const deniedPng=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a7WQAAAAASUVORK5CYII=','base64');
 const tileURL=/^https:\/\/tile\.openstreetmap\.org\/\d+\/\d+\/\d+\.png$/;
+const baseZoom=MAP_MAX_ZOOM-2;
 const sortedURLs=(values:readonly {url:string}[])=>[...new Set(values.map(value=>value.url))].sort();
 
 async function bundle(adapter:Adapter){
  const resolver=adapter==='web'?rootRequire:nativeRequire;
  const component=adapter==='web'?'./components/MarketplaceMap':'./apps/mobile/src/MarketMap.web';
- const mount=adapter==='web'?`<Map showrooms={[shop]} groupCapacity={3} featuredNowBusinessId={null} selectedShowroomId={null} requestedView={{center:[9.03,39.7],zoom:14}} onViewChange={()=>{}} onOpenNearbyGroup={()=>{}} onSelectShowroom={value=>f.selected.push(value.id)} onError={()=>f.errors++}/>`:`<Map shops={[shop]} height={500} initialView={{center:[39.7,9.03],zoom:14}} onSelect={value=>f.selected.push(value.id)}/>`;
+ const mount=adapter==='web'?`<Map showrooms={[shop]} groupCapacity={3} featuredNowBusinessId={null} selectedShowroomId={null} requestedView={{center:[9.03,39.7],zoom:${baseZoom}}} onViewChange={()=>{}} onOpenNearbyGroup={()=>{}} onSelectShowroom={value=>f.selected.push(value.id)} onError={()=>f.errors++}/>`:`<Map shops={[shop]} height={500} initialView={{center:[39.7,9.03],zoom:${baseZoom}}} onSelect={value=>f.selected.push(value.id)}/>`;
  const compiled=await build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
   import React from 'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';import * as L from'leaflet';import Map from '${component}';
   const f=window.fixture;L.Map.addInitHook(function(){f.maps.push(this);});
@@ -93,15 +95,15 @@ for(const adapter of ['web','expo'] as const)test(`FE-021/FE-053 S139 ${adapter}
   // pending. TileLayer's private image-cancellation hook must not overwrite
   // the custom asynchronous loader's completion handlers or orphan a timer.
   const rapidHeld=held.length;mode='hold';await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.redraw());await waitHeld(rapidHeld);
-  await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];m.setZoom(15,{animate:false});m.setZoom(16,{animate:false});});
+  await page.evaluate(({middle,highest})=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];m.setZoom(middle,{animate:false});m.setZoom(highest,{animate:false});},{middle:MAP_MAX_ZOOM-1,highest:MAP_MAX_ZOOM});
   mode='ok';await Promise.all(held.splice(0).map(route=>route.fulfill({status:200,headers:{'access-control-allow-origin':'*'},contentType:'image/svg+xml',body:svg}).catch(error=>{if(!/closed|handled|canceled/i.test(String(error)))throw error;})));
   await page.waitForFunction(()=>document.querySelector('.leaflet-container')?.getAttribute('data-tile-status')==='ready');
   await page.waitForTimeout(10_100); // the real loader deadline, not an injected short clock.
   assert.equal(await map.getAttribute('data-tile-status'),'ready','Rapid pending-tile zoom cannot later trip a stale ten-second failure timer');
   assert.equal(await page.getByRole('button',{name:'Retry map',exact:true}).count(),0);
   assert.deepEqual(await page.evaluate(()=>{const f=(window as unknown as{fixture:Probe}).fixture;return f.requests.map(value=>value.url).filter(url=>!f.expectedURLs.includes(url));}),[],'Every request URL must use its own actual createTile coordinates, including the original zoom');
-  await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];m.setView([9.03,39.7],14,{animate:false});});
-  await page.waitForFunction(()=>document.querySelector('.leaflet-container')?.getAttribute('data-tile-status')==='ready'&&document.querySelector('.leaflet-container')?.getAttribute('data-map-zoom')==='14');
+  await page.evaluate(zoom=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];m.setView([9.03,39.7],zoom,{animate:false});},baseZoom);
+  await page.waitForFunction(expected=>document.querySelector('.leaflet-container')?.getAttribute('data-tile-status')==='ready'&&document.querySelector('.leaflet-container')?.getAttribute('data-map-zoom')===expected,String(baseZoom));
   const originalCamera=await camera(page);
   assert.equal(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.maps.length),1);
   assert.equal(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.rasterCount()),1);
@@ -126,10 +128,13 @@ for(const adapter of ['web','expo'] as const)test(`FE-021/FE-053 S139 ${adapter}
   const beforeRetryCamera=await camera(page);
   const retry=page.getByRole('button',{name:'Retry map',exact:true});
   assert.ok((await retry.boundingBox())!.height>=48,'Actual Retry control retains its48px target');
-  mode='ok';const retryStart=(await requests(page)).length;await retry.click();
+  mode='ok';const retryStart=(await requests(page)).length,expectedRetryStart=await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.expectedURLs.length);await retry.click();
   await page.waitForFunction(()=>document.querySelector('.leaflet-container')?.getAttribute('data-tile-status')==='ready');
   await page.waitForFunction(()=>[...document.querySelectorAll<HTMLImageElement>('.leaflet-tile-pane img')].some(image=>image.complete&&image.naturalWidth===256));
-  assert.deepEqual(sortedURLs((await requests(page)).slice(retryStart)),blockedURLs,'Explicit retry uses the exact same provider URLs without cache busting');
+  const retryURLs=sortedURLs((await requests(page)).slice(retryStart));
+  const expectedRetryURLs=await page.evaluate(start=>[...new Set((window as unknown as{fixture:Probe}).fixture.expectedURLs.slice(start))].sort(),expectedRetryStart);
+  assert.deepEqual(retryURLs,expectedRetryURLs,'Explicit retry uses the current grid coordinates without cache busting after marker selection');
+  assert.ok(retryURLs.every(url=>tileURL.test(url)),'Retry keeps exact provider tile paths');
   assert.equal(await page.getByRole('button',{name:'Retry map',exact:true}).count(),0);
   assert.equal(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.maps.length),1,'Retry never creates a replacement Map');
   assert.equal(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.rasterCount()),1);

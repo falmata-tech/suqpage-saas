@@ -13,96 +13,37 @@ import { supportIdlePresentation } from '../../../lib/support-idle-contract';
 import {clientChatPresentation,type ClientChatSnapshot} from '../../../lib/support-client-state';
 import ResourceLoading from './ResourceLoading';
 export function Inquiries({focusId}:{focusId?:string}={}) {
-  const { t, ownerRequest } = useApp(),
-    action = useAction();
-  const [page, setPage] = useState(1),
-    [status, setStatus] = useState("");
-  const [focus,setFocus]=useState(focusId||'');useEffect(()=>{setFocus(focusId||'');setPage(1);},[focusId]);
-  const load = useLoad(
-    () =>
-      ownerRequest<Page<Inquiry>>(
-        `owner/inquiries?page=${page}&status=${status}&inquiry=${encodeURIComponent(focus)}`,
-      ),
-    [page, status,focus],
-  );
-  return (
-    <>
-      <Copy big>{t("Inquiry history")}</Copy>
-      <Copy muted>{t("Saved inquiries from before social-only contact.")}</Copy>
-      {Boolean(focus)&&<Button secondary label={t('All inquiries')} onPress={()=>setFocus('')}/>}
-      <View style={s.wrap}>
-        {["", "new", "contacted", "confirmed", "closed", "cancelled"].map(
-          (v) => (
-            <Chip
-              key={v}
-              label={t(v ? v[0].toUpperCase() + v.slice(1) : "All")}
-              selected={v === status}
-              onPress={() => {
-                setStatus(v);
-                setPage(1);
-              }}
-            />
-          ),
-        )}
-      </View>
-      <ResourceLoading load={load} variant="rows"/>
-      <ActionStatus state={action} />
-      {load.data?.items.map((i) => (
-        <Card key={i.id}>
-          <Copy big>{i.customerName}</Copy>
-          <Copy>{i.contact}</Copy>
-          {i.items.map((item, j) => (
-            <Copy key={j}>
-              {item.name}
-              {item.quantity ? " · " + item.quantity : ""}
-            </Copy>
-          ))}
-          {i.items.map((item,j)=>Object.keys(item.options||{}).length>0&&<Copy key={`options-${j}`}>{Object.entries(item.options).map(([k,v])=>`${k}: ${v}`).join(" · ")}</Copy>)}
-          {Boolean(i.note) && <Copy>{i.note}</Copy>}
-          {inquiryContactLinks(i.contactMethod,i.contact).map(link=><Button key={link.label} secondary label={t(link.label)} onPress={()=>void action.run(()=>openLink(link.href))}/>)}
-          <View style={s.wrap}>
-            {["new", "contacted", "confirmed", "closed", "cancelled"].map(
-              (v) => (
-                <Chip
-                  key={v}
-                  label={t(v[0].toUpperCase() + v.slice(1))}
-                  selected={v === i.status}
-                  onPress={() =>
-                    void action.run(async () => {
-                      await ownerRequest(`owner/inquiries/${i.id}`, {
-                        status: v,
-                      });
-                      load.reload();
-                    })
-                  }
-                />
-              ),
-            )}
-          </View>
-        </Card>
-      ))}
-      {load.data && !load.data.items.length && (
-        <Copy>{t("No inquiries yet.")}</Copy>
-      )}
-      <View style={s.row}>
-        <Button
-          secondary
-          label={t("Previous")}
-          disabled={page <= 1}
-          onPress={() => setPage((p) => p - 1)}
-        />
-        <Copy>
-          {load.data?.page || page} / {load.data?.pages || 1}
-        </Copy>
-        <Button
-          secondary
-          label={t("Next")}
-          disabled={!load.data || page >= load.data.pages}
-          onPress={() => setPage((p) => p + 1)}
-        />
-      </View>
-    </>
-  );
+  const {t,ownerRequest}=useApp(),action=useAction();
+  const [page,setPage]=useState(1),[query,setQuery]=useState(""),[status,setStatus]=useState(""),[focus,setFocus]=useState(focusId||""),[focused,setFocused]=useState(false);
+  const acknowledged=useRef(new Set<number>());
+  useEffect(()=>{setFocus(focusId||"");},[focusId]);
+  useFocusEffect(useCallback(()=>{setFocused(true);return()=>setFocused(false);},[]));
+  const load=useLoad(()=>ownerRequest<Page<Inquiry>>(`owner/inquiries?page=${focus?1:page}&q=${focus?"":encodeURIComponent(query)}&status=${focus?"":status}&inquiry=${encodeURIComponent(focus)}`),[page,query,status,focus]);
+  const detail=focus?load.data?.items.find(item=>String(item.id)===focus):undefined;
+  useEffect(()=>{
+    if(!focused||!detail||detail.readAt||acknowledged.current.has(detail.id))return;
+    let disposed=false;
+    const frame=requestAnimationFrame(()=>{
+      if(disposed||AppState.currentState!=="active"&&AppState.currentState!==null)return;
+      acknowledged.current.add(detail.id);
+      void ownerRequest(`owner/inquiries/${detail.id}`,{action:"read"}).then(()=>{if(!disposed)load.reload();}).catch(()=>{acknowledged.current.delete(detail.id);});
+    });
+    return()=>{disposed=true;cancelAnimationFrame(frame);};
+  },[focused,detail?.id,detail?.readAt]);
+  return <>
+    <Copy big heading>{t("Inbox")}</Copy><Copy muted>{t("Customer inquiries, selected products and contact details.")}</Copy>
+    {focus?<Button secondary label={t("Back to inbox")} onPress={()=>setFocus("")}/>:<View style={s.wrap}>{["","new","contacted","confirmed","closed","cancelled"].map(value=><Chip key={value} label={t(value?value[0].toUpperCase()+value.slice(1):"All")} selected={value===status} onPress={()=>{setStatus(value);setPage(1);}}/>)}</View>}
+    {!focus&&<Field label={t("Customer, phone or product")} value={query} maxLength={120} onChangeText={value=>{setQuery(value);setPage(1);}}/>}
+    <ResourceLoading load={load} variant="rows"/><ActionStatus state={action}/>
+    {detail?<Card><Copy big heading>{detail.customerName}</Copy><Copy muted>{new Date(detail.createdAt).toLocaleString()}</Copy><Copy selectable>{detail.contact}</Copy>
+      <View style={s.wrap}>{inquiryContactLinks(detail.contactMethod,detail.contact).map(link=><Button key={link.label} secondary label={t(link.label)} onPress={()=>void action.run(()=>openLink(link.href))}/>)}</View>
+      <Copy big>{t("Customer message")}</Copy><Copy selectable>{detail.note}</Copy>
+      {detail.items.map((item,index)=><View key={index} style={{gap:6}}><Copy big>{item.name}</Copy><Copy>{t("Quantity:")} {item.quantity||t("Open for discussion")}</Copy>{Object.keys(item.options||{}).length>0&&<Copy>{Object.entries(item.options).map(([k,v])=>`${k}: ${v}`).join(" · ")}</Copy>}</View>)}
+      <Copy>{t("Inquiry status")}</Copy><View style={s.wrap}>{["new","contacted","confirmed","closed","cancelled"].map(value=><Chip key={value} label={t(value[0].toUpperCase()+value.slice(1))} selected={value===detail.status} onPress={()=>void action.run(async()=>{await ownerRequest(`owner/inquiries/${detail.id}`,{status:value});load.reload();})}/>)}</View>
+    </Card>:!focus?load.data?.items.map(item=><Card key={item.id}><Copy big>{item.customerName}</Copy><View style={s.wrap}>{!item.readAt&&<Copy>{t("Unread")}</Copy>}<Copy>{t(item.status)}</Copy></View><Copy>{item.note.slice(0,140)}</Copy><Copy muted>{new Date(item.createdAt).toLocaleString()}</Copy><Button secondary label={t("Open inquiry")} onPress={()=>setFocus(String(item.id))}/></Card>):null}
+    {!load.loading&&!load.error&&load.data&&!load.data.items.length&&<Copy>{t(focus?"Inquiry not found.":"No inquiries yet.")}</Copy>}
+    {!focus&&load.data&&load.data.pages>1&&<View style={s.row}><Button secondary label={t("Previous")} disabled={page<=1} onPress={()=>setPage(p=>p-1)}/><Copy>{load.data.page} / {load.data.pages}</Copy><Button secondary label={t("Next")} disabled={page>=load.data.pages} onPress={()=>setPage(p=>p+1)}/></View>}
+  </>;
 }
 export function SupportList() {
   const { t, ownerRequest } = useApp(),
@@ -167,7 +108,8 @@ export function SupportList() {
           />
         </Card>
       ))}
-      <View style={s.row}>
+      {!load.loading&&!load.error&&load.data?.items.length===0&&<Copy muted>{t("No support conversations yet.")}</Copy>}
+      {load.data&&load.data.pages>1&&<View style={s.row}>
         <Button
           secondary
           label={t("Previous")}
@@ -180,7 +122,7 @@ export function SupportList() {
           disabled={!load.data || page >= load.data.pages}
           onPress={() => setPage((p) => p + 1)}
         />
-      </View>
+      </View>}
     </>
   );
 }

@@ -4,7 +4,7 @@ import { getDb, closeDbForTests } from './testing/postgres-fixture';
 import { runtimeUserById } from '../lib/catalog-runtime';
 import type { SessionUser } from '../lib/types';
 import * as support from '../lib/support';
-import { SUPPORT_STAFF_REPLY_TARGET_MS as target } from '../lib/support-response-contract';
+import { SUPPORT_STAFF_REPLY_TARGET_MS as target,SUPPORT_UNASSIGNED_QUEUE_TARGET_MS as unassignedTarget } from '../lib/support-response-contract';
 import { userAttentionFeed, visitorAttentionFeed } from '../lib/attention-postgres';
 import { dispatchAttention } from '../lib/attention-delivery';
 import { createPostgresPool, postgresRuntimeConfig } from '../lib/postgres-runtime';
@@ -91,6 +91,9 @@ async function main() {
     assert.equal((await userAttentionFeed(a)).items.some(x=>x.kind==='reply_overdue'),false,'Previous assignee loses overdue access');
     await join(c.id,t+2*target+4);await db.prepare('UPDATE support_agent_settings SET enabled=0 WHERE user_id=?').run(replacement.id);
     await reply(c.id,t+2*target+5); // Pausing new work never blocks the existing assignee.
+    const afterLateReply=await support.getPublicSupportConversation(c.token,t+2*target+6);
+    assert.equal(afterLateReply.firstStaffReplyAt,t+target+1,'The first timely public reply remains authoritative after reassignment and a later reply');
+    assert.ok(afterLateReply.messages.length>0,'The active transcript remains visible after a later reply');
     const pausedMsg=await support.postPublicSupportMessage(c.token,{message:'Current paused agent still owns this request',idempotencyKey:key()},'response-paused',t+2*target+6);
     assert.equal((await support.sweepSupportReplyOverdue(t+3*target+6)).notified,1);
     assert.ok((await alerts(c.id)).some(x=>x.user_id===replacement.id&&x.source_key.startsWith(`support-reply-overdue:${c.id}:${pausedMsg.id}:`)));
@@ -127,8 +130,10 @@ async function main() {
     await support.closeSupportConversation(admin,claimed.id,t+3);
 
     // An unassigned request escalates only to managers, without assigning or joining.
-    const waiting=await guest();await support.reassignSupportConversation(admin,waiting.id,null,t+1);
-    const waitingBefore=await state(waiting.id);assert.equal((await support.sweepSupportReplyOverdue(t+target)).notified,1);
+    const waitingStartedAt=Date.now()-unassignedTarget-1_000;
+    const waiting=await guest(waitingStartedAt);await support.reassignSupportConversation(admin,waiting.id,null,waitingStartedAt+1);
+    const waitingBefore=await state(waiting.id);assert.equal((await support.sweepSupportReplyOverdue(waitingStartedAt+target)).notified,0,'Unassigned work is not overdue at the assigned-staff target');
+    assert.equal((await support.sweepSupportReplyOverdue(waitingStartedAt+unassignedTarget)).notified,1);
     assert.deepEqual((await alerts(waiting.id)).map(x=>x.user_id),[admin.id,manager.id]);
     assert.equal((await state(waiting.id)).assigned_user_id,null);assert.equal((await state(waiting.id)).awaiting_staff_since,waitingBefore.awaiting_staff_since);
     const needs=(await support.listSupportConversations(admin,{status:'overdue',queue:'transport'})).items;assert.ok(needs.some(x=>x.id===waiting.id));
@@ -168,10 +173,10 @@ async function main() {
     // No authorized recipient means durable pending work, recovered when a manager returns.
     const noRecipient=await guest();await support.reassignSupportConversation(admin,noRecipient.id,null,t+1);
     await db.prepare("UPDATE user_access_profiles SET access_role='team_member' WHERE user_id IN (?,?)").run(admin.id,manager.id);
-    assert.equal((await support.sweepSupportReplyOverdue(t+target)).notified,0);assert.equal((await state(noRecipient.id)).overdue_notified_message_id,null);
+    assert.equal((await support.sweepSupportReplyOverdue(t+unassignedTarget)).notified,0);assert.equal((await state(noRecipient.id)).overdue_notified_message_id,null);
     await db.prepare("UPDATE user_access_profiles SET access_role='platform_admin' WHERE user_id=?").run(admin.id);
     await db.prepare("UPDATE user_access_profiles SET access_role='operations_manager' WHERE user_id=?").run(manager.id);
-    const parallel=await Promise.all([support.sweepSupportReplyOverdue(t+target),support.sweepSupportReplyOverdue(t+target)]);
+    const parallel=await Promise.all([support.sweepSupportReplyOverdue(t+unassignedTarget),support.sweepSupportReplyOverdue(t+unassignedTarget)]);
     assert.equal(parallel.reduce((sum,result)=>sum+result.notified,0),1);assert.equal((await alerts(noRecipient.id)).length,2);
     await support.closeSupportConversation(admin,noRecipient.id,t+target+1);
 
@@ -190,7 +195,7 @@ async function main() {
     for(let i=0;i<3;i++)await guest();let ticks=-1000;assert.equal((await support.sweepSupportReplyOverdue(t+target,()=>ticks+=1000)).notified,1);
     assert.deepEqual(await settings(),beforeSettings);
     const plan=await db.prepare(`EXPLAIN ${support.SUPPORT_REPLY_OVERDUE_QUERY}`).all(t+target-target);assert.ok(JSON.stringify(plan).length>0);
-    console.log('PASS S125 real PostgreSQL response/join contract: first/next oldest anchor,10-minute boundary, Join-before-public-reply, read/Claim/assignment non-join, notes/joins preserve clock, current epoch/role/tenant fences, all-queue staff resolution, owner End/reopen semantics, recipient/stale feed+delivery privacy, legacy suppression, exact-once/concurrency, no-recipient recovery, batch/budget/trylock/rollback and LOCAL timeout restoration.');
+    console.log('PASS S162 real PostgreSQL response/join contract: 2-minute assigned and10-minute unassigned boundaries, first/next oldest anchor, Join-before-public-reply, read/Claim/assignment non-join, notes/joins preserve clock, current epoch/role/tenant fences, all-queue staff resolution, owner End/reopen semantics, recipient/stale feed+delivery privacy, legacy suppression, exact-once/concurrency, no-recipient recovery, batch/budget/trylock/rollback and LOCAL timeout restoration.');
   } finally {await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

@@ -3,6 +3,7 @@ import { test } from "node:test";
 import vm from "node:vm";
 import { build } from "esbuild";
 import { createClient } from "@supabase/supabase-js";
+import { credentialStorageKeys } from "../apps/mobile/src/credential-storage-keys";
 import { createUiText } from "../lib/i18n/core";
 import am from "../lib/i18n/messages/am.json";
 import om from "../lib/i18n/messages/om.json";
@@ -18,18 +19,28 @@ type App = {
 };
 const ownerSession = { access_token: "local_bearer_fixture_only", user: { id: "local-owner" } };
 const settle = () => new Promise<void>(resolve => setImmediate(resolve));
+type StoragePort = { getItem: (key: string) => Promise<string | null>; setItem: (key: string, value: string) => Promise<void>; removeItem: (key: string) => Promise<void> };
+const originHex = (value: string) => Array.from(new URL(value).origin, character => character.charCodeAt(0).toString(16).padStart(2, "0")).join("");
+const devOwnerKey = `suqpage-owner-session.dev.${originHex("https://suqpage.com")}.${originHex("https://auth.example.invalid")}`;
 function fixture() {
   const state = {
     states: [] as unknown[], refs: [] as { current: unknown }[], effects: [] as Effect[], pendingEffects: [] as (() => void)[],
     stateCursor: 0, refCursor: 0, effectCursor: 0, providerSession: ownerSession as typeof ownerSession | null,
     callback: undefined as ((event: string, session: unknown) => void) | undefined,
+    development: false, restoreFromStorage: false, storage: new Map<string,string>(), readKeys: [] as string[], writtenKeys: [] as string[], removedKeys: [] as string[],
     sdkError: null as Error | null, deleteFailure: false, deleteCalls: 0, sdkCalls: 0, sessionStatus: 200,
     requests: [] as string[], routes: [] as string[], app: {} as Record<string, unknown>,
     t: createUiText({}), auth: {} as Record<string, unknown>,
-    authOptions: undefined as { auth?: { lock?: unknown } } | undefined,
+    authOptions: undefined as { auth?: { lock?: unknown; storageKey: string; storage: StoragePort } } | undefined,
   };
   state.auth = { auth: {
-    getSession: async () => ({ data: { session: state.providerSession } }),
+    getSession: async () => {
+      if (state.restoreFromStorage) {
+        const options = state.authOptions!.auth!, stored = await options.storage.getItem(options.storageKey);
+        state.providerSession = stored ? JSON.parse(stored) as typeof ownerSession : null;
+      }
+      return { data: { session: state.providerSession } };
+    },
     onAuthStateChange: (callback: typeof state.callback) => { state.callback = callback; return { data: { subscription: { unsubscribe() {} } } }; },
     stopAutoRefresh() {}, startAutoRefresh() {},
     signOut: async (options: { scope: string }) => { assert.equal(options.scope, "local"); state.sdkCalls++; return { error: state.sdkError }; },
@@ -42,7 +53,7 @@ const bundled = build({
   define: { "process.env.EXPO_PUBLIC_SUPABASE_URL": '"https://auth.example.invalid"', "process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": '"public-test-key"', "process.env.EXPO_PUBLIC_API_ORIGIN": '"https://suqpage.com"', "process.env.EXPO_PUBLIC_OWNER_EMAIL_CHANGE_ENABLED": '"0"' },
   plugins: [{ name: "logout-platform-ports", setup(builder) {
     builder.onResolve({ filter: /^(react(?:\/jsx-runtime)?|react-native|expo-router|expo-secure-store|@supabase\/supabase-js)$/ }, args => ({ path: args.path, namespace: "ports" }));
-    builder.onResolve({ filter: /(?:^|\/)(runtime|ui|owner-forms|owner-profile|CountrySelector|CitySelector|AttentionAlerts|owner-edit-navigation|OwnerEditConfirmation)$/ }, args => ({ path: args.path.split("/").at(-1)!, namespace: "ports" }));
+    builder.onResolve({ filter: /(?:^|\/)(runtime|ui|owner-forms|owner-profile|CountrySelector|CitySelector|OwnerLocationPicker|LocationVisibilityChoices|AttentionAlerts|owner-edit-navigation|OwnerEditConfirmation)$/ }, args => ({ path: args.path.split("/").at(-1)!, namespace: "ports" }));
     builder.onLoad({ filter: /.*/, namespace: "ports" }, args => ({ loader: "js", contents:
       args.path === "react" ? `
         export const useState=initial=>{const i=fixture.stateCursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return [fixture.states[i],value=>{fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value;}];};
@@ -52,7 +63,7 @@ const bundled = build({
       ` : args.path === "react/jsx-runtime" ? `export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
         : args.path === "react-native" ? `export const Platform={OS:'android'},View='View',Text='Text',Pressable='Pressable',AppState={addEventListener:()=>({remove(){}})},StyleSheet={create:value=>value},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`
         : args.path === "expo-router" ? `export const useFocusEffect=()=>{},useLocalSearchParams=()=>({}),router={push(){},navigate(){},replace:path=>fixture.routes.push(path)};`
-        : args.path === "expo-secure-store" ? `export const getItemAsync=async()=>null,setItemAsync=async()=>{},deleteItemAsync=async()=>{fixture.deleteCalls++;if(fixture.deleteFailure)throw Error('private device failure');fixture.providerSession=null;};`
+        : args.path === "expo-secure-store" ? `export const getItemAsync=async key=>{fixture.readKeys.push(key);return fixture.storage.get(key)||null;},setItemAsync=async(key,value)=>{fixture.writtenKeys.push(key);fixture.storage.set(key,value);},deleteItemAsync=async key=>{fixture.removedKeys.push(key);fixture.deleteCalls++;if(fixture.deleteFailure)throw Error('private device failure');fixture.storage.delete(key);fixture.providerSession=null;};`
         : args.path === "@supabase/supabase-js" ? `export const createClient=(_url,_key,options)=>{fixture.authOptions=options;return fixture.auth;};`
         : args.path === "runtime" ? `export const useApp=()=>fixture.app,useLoad=()=>({data:null,error:'',loading:false,reload(){}}),request=async()=>{throw Error('Unexpected login request');},auth=fixture.auth,API='https://suqpage.com';`
         : args.path === "ui" ? `export const Screen='Screen',Copy='Copy',Card='Card',Field='Field',Button='Button',Status='Status',Chip='Chip',Photo='Photo',Icon='Icon',s={},colors={},useOpenLink=()=>()=>{};`
@@ -67,8 +78,8 @@ const bundled = build({
 
 async function component(entry: "runtime" | "account" | "owner-business", state: ReturnType<typeof fixture>) {
   const output = (await bundled).outputFiles.find(file => file.path.endsWith(`/${entry}.js`))!;
-  const module = { exports: {} as { RuntimeProvider: (props: { children: string }) => Element; default: () => Element; Settings: (props: Record<string, unknown>) => Element } };
-  vm.runInNewContext(output.text, { module, exports: module.exports, fixture: state, URL, URLSearchParams, Request, Response, AbortController, Uint8Array, setTimeout, clearTimeout, fetch: async (input: string) => {
+  const module = { exports: {} as { RuntimeProvider: (props: { children: string }) => Element; ownerStorageKey: string; transportStorageKey: string; default: () => Element; Settings: (props: Record<string, unknown>) => Element } };
+  vm.runInNewContext(output.text, { module, exports: module.exports, fixture: state, __DEV__: state.development, URL, URLSearchParams, Request, Response, AbortController, Uint8Array, setTimeout, clearTimeout, fetch: async (input: string) => {
     const path = new URL(input).pathname; state.requests.push(path);
     return Response.json(state.sessionStatus === 403 && path.endsWith("/session") ? { error: "Staff accounts sign in on the website.", code: "staff_web_only" } : {}, { status: path.endsWith("/session") ? state.sessionStatus : 200 });
   } });
@@ -77,7 +88,7 @@ async function component(entry: "runtime" | "account" | "owner-business", state:
     const root = entry === "runtime" ? module.exports.RuntimeProvider({ children: "screen" }) : entry === "account" ? module.exports.default() : module.exports.Settings({ home: { user: { name: "Local Owner", email: "local@example.test", phone: "" } } });
     state.pendingEffects.splice(0).forEach(run => run()); return root;
   }
-  return { render, value: () => render().props.value as App, unmount: () => state.effects.forEach(effect => effect.cleanup?.()) };
+  return { render, ownerStorageKey: module.exports.ownerStorageKey, transportStorageKey: module.exports.transportStorageKey, value: () => render().props.value as App, unmount: () => state.effects.forEach(effect => effect.cleanup?.()) };
 }
 async function admitted(state: ReturnType<typeof fixture>) {
   const mounted = await component("runtime", state); mounted.render(); await settle(); mounted.render(); await settle(); mounted.render();
@@ -164,4 +175,99 @@ test("BE-044 installed SDK propagates failed logout storage deletion without a s
   // Node's test runner fails on an unhandled rejection; allow all queued SDK
   // work to settle after the caller has handled the storage failure.
   await settle(); await settle();
+});
+
+
+test("BE-044 actual DEV Runtime never reads, replays or deletes seeded legacy owner credentials", async () => {
+  const state = fixture(); state.development = true; state.restoreFromStorage = true;
+  const legacy = new Map([
+    ["suqpage-owner-session", JSON.stringify(ownerSession)],
+    ["suqpage-owner-session-code-verifier", "synthetic-production-verifier"],
+    ["suqpage-owner-session-user", "synthetic-production-user"],
+    ["suqpage-transport", "synthetic-production-guest"],
+  ]);
+  for (const [key,value] of legacy) state.storage.set(key,value);
+  const mounted = await component("runtime",state); mounted.render(); await settle(); mounted.render(); await settle();
+  assert.equal(state.authOptions?.auth?.storageKey, devOwnerKey);
+  assert.equal(mounted.ownerStorageKey,devOwnerKey);
+  assert.equal(mounted.transportStorageKey,`suqpage-transport.dev.${originHex("https://suqpage.com")}`);
+  assert.equal(mounted.value().session,null,"DEV may not restore the production session");
+  assert.ok(state.readKeys.length>0); assert.ok(state.readKeys.filter(key=>key.startsWith("suqpage-owner-session")).every(key=>key===devOwnerKey));
+  assert.deepEqual(state.requests,[],"No legacy bearer is sent to the DEV API");
+  await mounted.value().signOut();
+  assert.deepEqual(state.removedKeys,[devOwnerKey]);
+  for(const [key,value] of legacy) assert.equal(state.storage.get(key),value);
+  mounted.unmount();
+});
+
+test("BE-044 actual DEV Runtime restores and logs out only its selected owner partition; production retains exact restoration", async () => {
+  for (const development of [true,false]) {
+    const state=fixture();state.development=development;state.restoreFromStorage=true;
+    const selected=development?devOwnerKey:"suqpage-owner-session";
+    state.storage.set(selected,JSON.stringify(ownerSession));
+    if(development)state.storage.set("suqpage-owner-session","untouched-production-bytes");
+    const mounted=await admitted(state);
+    assert.equal(state.authOptions?.auth?.storageKey,selected);
+    assert.ok(state.readKeys.filter(key=>key.startsWith("suqpage-owner-session")).every(key=>key===selected));
+    await mounted.value().signOut();assert.deepEqual(state.removedKeys,[selected]);
+    assert.equal(state.storage.has(selected),false);
+    if(development)assert.equal(state.storage.get("suqpage-owner-session"),"untouched-production-bytes");
+    mounted.unmount();
+  }
+});
+
+test("BE-044 installed SDK preserves selected base and PKCE/user suffixes without touching legacy production values", async () => {
+  const state=fixture();state.development=true;await component("runtime",state);
+  const selected=state.authOptions!.auth!.storageKey;
+  assert.equal(selected,devOwnerKey);
+  const legacy=new Map([["suqpage-owner-session","synthetic-legacy-session"],["suqpage-owner-session-code-verifier","synthetic-legacy-verifier"],["suqpage-owner-session-user","synthetic-legacy-user"]]);
+  const memory=new Map(legacy),read:string[]=[],written:string[]=[],removed:string[]=[];
+  const storage={getItem:async(key:string)=>{read.push(key);return memory.get(key)||null;},setItem:async(key:string,value:string)=>{written.push(key);memory.set(key,value);},removeItem:async(key:string)=>{removed.push(key);memory.delete(key);}};
+  const client=createClient("https://auth.example.invalid","public-test-key",{auth:{storageKey:selected,storage,userStorage:storage,persistSession:true,autoRefreshToken:false,detectSessionInUrl:false,flowType:"pkce"},global:{fetch:async()=>Response.json({})}});
+  assert.equal((await client.auth.getSession()).data.session,null);
+  const result=await client.auth.signInWithOtp({email:"synthetic@example.test"});assert.equal(result.error,null);
+  assert.ok(written.includes(selected+"-code-verifier"),"SDK suffix is appended unchanged to selected base");
+  await client.auth.signOut({scope:"local"});
+  assert.ok(removed.includes(selected));assert.ok(removed.includes(selected+"-code-verifier"));assert.ok(removed.includes(selected+"-user"));
+  for(const key of [...read,...written,...removed])assert.ok(key===selected||key.startsWith(selected+"-"));
+  for(const [key,value] of legacy)assert.equal(memory.get(key),value);
+});
+
+
+test("BE-044 DEV credential keys isolate API/Auth origins losslessly with SecureStore-safe characters; production stays exact", () => {
+  const first=credentialStorageKeys(true,"http://127.0.0.1:3112","http://127.0.0.1:54321");
+  const otherApi=credentialStorageKeys(true,"http://127.0.0.1:3113","http://127.0.0.1:54321");
+  const otherAuth=credentialStorageKeys(true,"http://127.0.0.1:3112","http://127.0.0.1:54322");
+  assert.notEqual(first.owner,otherApi.owner);assert.notEqual(first.transport,otherApi.transport);
+  assert.notEqual(first.owner,otherAuth.owner);assert.equal(first.transport,otherAuth.transport);
+  assert.deepEqual(credentialStorageKeys(true,"HTTPS://MIRTPAGE.COM:443/catalog?x=1","https://auth.example.test/path"),credentialStorageKeys(true,"https://mirtpage.com","https://auth.example.test"));
+  const unicode=credentialStorageKeys(true,"https://mïrt.example/","https://auth.example.test");
+  const encoded=unicode.transport.split(".dev.")[1];assert.equal(Buffer.from(encoded,"hex").toString("utf8"),new URL("https://mïrt.example").origin);
+  const userInfo=credentialStorageKeys(true,"https://synthetic:never-in-key@mirtpage.com/private?token=not-a-credential","https://auth.example.test");
+  assert.deepEqual(userInfo,credentialStorageKeys(true,"https://mirtpage.com","https://auth.example.test"));
+  for(const keys of [first,otherApi,otherAuth,unicode,userInfo,credentialStorageKeys(true,"https://mirtpage.com")])for(const key of [keys.owner,keys.transport])assert.match(key,/^[A-Za-z0-9._-]+$/);
+  assert.notEqual(credentialStorageKeys(true,"https://mirtpage.com").owner,"suqpage-owner-session");
+  for(const bad of ["", "not-an-origin", "file:///local", "data:text/plain,opaque", "ftp://example.test", "javascript:invalid"]){
+    assert.throws(()=>credentialStorageKeys(true,bad,"https://auth.example.test"),/^Error: A valid HTTP\(S\) credential origin is required\.$/);
+    if(bad)assert.throws(()=>credentialStorageKeys(true,"https://mirtpage.com",bad),/^Error: A valid HTTP\(S\) credential origin is required\.$/);
+  }
+  assert.deepEqual(credentialStorageKeys(false,"ignored-invalid-origin","also-invalid"),{owner:"suqpage-owner-session",transport:"suqpage-transport"});
+});
+
+test("BE-044 installed production SDK still restores exact legacy key while a different DEV partition stays empty", async () => {
+  const encode=(data:unknown)=>Buffer.from(JSON.stringify(data)).toString("base64url"),expiry=Math.floor(Date.now()/1000)+3600;
+  const token=[encode({alg:"HS256",typ:"JWT"}),encode({sub:"00000000-0000-4000-8000-000000000001",exp:expiry}),"synthetic_signature"].join(".");
+  const legacy="suqpage-owner-session",value=JSON.stringify({access_token:token,refresh_token:"synthetic_refresh",token_type:"bearer",expires_in:3600,expires_at:expiry,user:{id:"00000000-0000-4000-8000-000000000001",email:"synthetic@example.test"}});
+  const memory=new Map([[legacy,value]]),read:string[]=[],removed:string[]=[];let network=0;
+  const storage={getItem:async(key:string)=>{read.push(key);return memory.get(key)||null;},setItem:async(key:string,data:string)=>{memory.set(key,data);},removeItem:async(key:string)=>{removed.push(key);memory.delete(key);}};
+  const production=createClient("https://auth.example.invalid","public-test-key",{auth:{storageKey:credentialStorageKeys(false,"https://mirtpage.com").owner,storage,persistSession:true,autoRefreshToken:false,detectSessionInUrl:false},global:{fetch:async()=>{network++;throw Error("Unexpected network");}}});
+  assert.equal((await production.auth.getSession()).data.session?.access_token,token);assert.ok(read.includes(legacy));assert.equal(network,0);
+  const firstDev=credentialStorageKeys(true,"http://127.0.0.1:3112","https://auth.example.invalid").owner;
+  memory.set(firstDev,value);read.length=0;
+  for(const selected of [credentialStorageKeys(true,"http://127.0.0.1:3113","https://auth.example.invalid").owner,credentialStorageKeys(true,"http://127.0.0.1:3112","https://other-auth.example.invalid").owner]) {
+  const development=createClient("https://auth.example.invalid","public-test-key",{auth:{storageKey:selected,storage,persistSession:true,autoRefreshToken:false,detectSessionInUrl:false},global:{fetch:async()=>{network++;throw Error("Unexpected network");}}});
+  assert.equal((await development.auth.getSession()).data.session,null);assert.ok(read.every(key=>key===selected||key.startsWith(selected+"-")));assert.equal(network,0);
+  assert.equal(memory.get(legacy),value);assert.equal(memory.get(firstDev),value);assert.ok(!removed.includes(legacy));
+  read.length=0;
+  }
 });

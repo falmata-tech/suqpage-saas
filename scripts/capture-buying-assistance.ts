@@ -15,9 +15,9 @@ async function main() {
   process.env.NEXT_PUBLIC_APP_URL = base;
   process.env.SUQPAGE_TELEGRAM_BOT_TOKEN = "";
   process.env.SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID = "";
-  const staffRow = await db.prepare("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES('live-capture@example.test','unused','Suqpage team','admin',0)").run();
+  const staffRow = await db.prepare("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES('live-capture@example.test','unused','MirtPage transport team','admin',0)").run();
   await db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'operations_manager')").run(staffRow.insertedId);
-  const staff: SessionUser = {id:staffRow.insertedId,email:'live-capture@example.test',name:'Suqpage team',role:'admin',access_role:'operations_manager',business_id:null,must_change_password:0};
+  const staff: SessionUser = {id:staffRow.insertedId,email:'live-capture@example.test',name:'MirtPage transport team',role:'admin',access_role:'operations_manager',business_id:null,must_change_password:0};
   await support.updateSupportAgentSetting(staff,{userId:staff.id,enabled:true,maxOpenConversations:10,queueScope:'transport'});
   const dir = ".local/live-buying-review";
   fs.mkdirSync(dir,{recursive:true});
@@ -69,7 +69,7 @@ async function main() {
         await page.locator('button[data-channel=buying]').click();
       }
       await expect(dialog.getByRole('log')).toContainText('Please buy the listed table in Addis Ababa.');
-      await expect(dialog.getByRole('status')).toContainText('Waiting for our team');
+      await expect(dialog.getByRole('status')).toContainText('Waiting for a SharedTrucks live agent');
       await expect(dialog.getByText('Replies appear here automatically. You can return to this chat in this browser.')).toBeVisible();
       await page.screenshot({path:`${dir}/waiting-${width}.png`,style:'nextjs-portal {visibility:hidden}'});
       await expect(dialog.getByRole('status')).toContainText('Chat connected');
@@ -79,7 +79,7 @@ async function main() {
       await support.postSupportMessage(staff,id,{message:'We can help. Which size do you need?',audience:'reply',idempotencyKey:crypto.randomUUID()});
       await expect(dialog.getByRole('log')).toContainText('Which size do you need?',{timeout:15000});
       await expect(dialog).not.toContainText('Internal supplier margin');
-      await expect(dialog.getByRole('status')).toContainText('Assigned to Suqpage team');
+      await expect(dialog.getByRole('status')).toContainText('Assigned to MirtPage transport team');
       await expect(dialog).not.toContainText('Replies appear here automatically.');
       if(width===390){failLoad=true;await expect(dialog.getByRole('status')).toContainText('Connection interrupted. Retrying…',{timeout:15000});await expect(dialog.getByRole('status')).not.toContainText('Connection interrupted. Retrying…',{timeout:20000});}
       if(width===390)loseResponse=true;
