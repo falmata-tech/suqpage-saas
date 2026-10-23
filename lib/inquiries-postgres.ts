@@ -1,100 +1,53 @@
-import { PostgresCatalogRepository } from "./postgres-catalog-repository";
-import { InquiryError, type InquiryInput } from "./inquiries";
-import { notifyNewInquiry } from "./notifications";
-import { enqueueInquiryAttention } from './attention-postgres';
-import { normalizeOfferingKind, normalizeQuantityMode } from "./offerings";
-import type { PostgresTransactionRunner } from "./postgres-runtime";
-import { consumePostgresRateLimit } from "./rate-limit-postgres";
-import { cleanText } from "./security";
-import type { Business } from "./types";
+import {createHash} from "node:crypto";
+import {InquiryError,type InquiryInput} from "./inquiries";
+import {normalizeInquiry,normalizedInquiryAction} from "./inquiry-contract";
+import {enqueueInquiryAttention} from "./attention-postgres";
+import {normalizeOfferingKind,normalizeQuantityMode} from "./offerings";
+import type {PostgresTransactionRunner} from "./postgres-runtime";
+import {consumePostgresRateLimit} from "./rate-limit-postgres";
+import type {Business} from "./types";
 
-type RawItem = { productId?: unknown; quantity?: unknown; options?: unknown };
-type InquiryNotifier = (business: Business, inquiryId: number, customerName: string) => Promise<unknown>;
-
-function normalizePhone(value: unknown) {
-  const raw = cleanText(value, 40);
-  if (!/^\+?[\d\s().-]+$/.test(raw)) throw new InquiryError("Enter a valid phone number.");
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length < 7 || digits.length > 15) throw new InquiryError("Enter a phone number with 7 to 15 digits.");
-  return `${raw.startsWith("+") ? "+" : ""}${digits}`;
-}
-
-export async function createPostgresPublicInquiry(
-  runner: PostgresTransactionRunner,
-  input: InquiryInput,
-  ipHash: string,
-  notify: InquiryNotifier = notifyNewInquiry,
-) {
-  if (cleanText(input.website, 100)) return { inquiryId: null, duplicate: false, trapped: true };
-  const businessId = Number(input.businessId);
-  const catalog = new PostgresCatalogRepository(runner);
-  const business = Number.isInteger(businessId) ? await catalog.getBusinessById(businessId) : undefined;
-  if (!business || business.status !== "active") throw new InquiryError("Business not found.", 404);
-
-  const rate = await consumePostgresRateLimit(runner, `inquiry:${businessId}:${ipHash}`, 10, 10 * 60 * 1000, 30 * 60 * 1000);
-  if (!rate.allowed) throw new InquiryError("Too many inquiry attempts. Please try again later.", 429, rate.retryAfterSeconds);
-
-  const customerName = cleanText(input.customerName, 80);
-  const note = cleanText(input.note, 1000);
-  const contactMethod = cleanText(input.contactMethod, 20).toLowerCase() || "phone";
-  const idempotencyKey = cleanText(input.idempotencyKey, 100);
-  const rawItems = Array.isArray(input.items) ? input.items as RawItem[] : [];
-  if (!customerName) throw new InquiryError("A visitor label is required.");
-  if (contactMethod !== "phone") throw new InquiryError("A phone number is required to send an inquiry.");
-  const contact = normalizePhone(input.contact);
-  if (rawItems.length < 1 || rawItems.length > 20) throw new InquiryError("An inquiry must contain between 1 and 20 items.");
-  if (!/^[a-zA-Z0-9_-]{10,100}$/.test(idempotencyKey)) throw new InquiryError("A valid inquiry key is required.");
-
-  const validated = [] as Array<{ productId: number; quantityIntent: string; name: string; offeringKind: string; quantityMode: string; options: Record<string, string> }>;
-  for (const raw of rawItems) {
-    const productId = Number(raw.productId);
-    if (!Number.isInteger(productId)) throw new InquiryError("Invalid offering.");
-    const product = (await runner.query<{ name: string; availability: string; offering_kind: string; quantity_mode: string }>(
-      "SELECT name,availability,offering_kind,quantity_mode FROM products WHERE id=? AND business_id=? AND is_published=1 AND offering_kind<>'service'",
-      [productId, businessId],
-    )).rows[0];
-    if (!product || !["available", "limited"].includes(product.availability)) throw new InquiryError("A selected offering is not available.");
-    if (raw.quantity !== null && raw.quantity !== undefined && typeof raw.quantity !== "string" && typeof raw.quantity !== "number") throw new InquiryError("Enter desired quantity as text.");
-    const quantityIntent = raw.quantity === null || raw.quantity === undefined ? "" : cleanText(raw.quantity, 81).replace(/\s+/g, " ");
-    if (quantityIntent.length > 80) throw new InquiryError("Desired quantity must be 80 characters or fewer.");
-    const options = raw.options && typeof raw.options === "object" && !Array.isArray(raw.options) ? raw.options as Record<string, unknown> : {};
-    const groups = (await runner.query<{ id: number; name: string }>("SELECT id,name FROM option_groups WHERE product_id=? ORDER BY position,id", [productId])).rows;
-    const allowedNames = new Set(groups.map((group) => group.name));
-    for (const key of Object.keys(options)) if (!allowedNames.has(key)) throw new InquiryError(`Invalid option for ${product.name}.`);
-    const normalized: Record<string, string> = {};
-    for (const group of groups) {
-      const selected = cleanText(options[group.name], 100);
-      const values = new Set((await runner.query<{ value: string }>("SELECT value FROM option_values WHERE option_group_id=?", [group.id])).rows.map((value) => value.value));
-      if (!selected || !values.has(selected)) throw new InquiryError(`Choose a valid ${group.name} for ${product.name}.`);
-      normalized[group.name] = selected;
-    }
-    validated.push({ productId, quantityIntent, name: product.name, offeringKind: normalizeOfferingKind(product.offering_kind), quantityMode: normalizeQuantityMode(product.quantity_mode), options: normalized });
+type InquiryNotifier=(business:Business,inquiryId:number,customerName:string)=>Promise<unknown>;
+/** Canonical intake. Optional notifier is an explicit test/integration port, never dormant email. */
+export async function createPostgresPublicInquiry(runner:PostgresTransactionRunner,input:InquiryInput,ipHash:string,notify?:InquiryNotifier){
+ const value=normalizeInquiry(input);
+ if(value.website)return {inquiryId:null,duplicate:false,trapped:true};
+ const rate=await consumePostgresRateLimit(runner,`inquiry:${value.businessId}:${ipHash}`,10,10*60*1000,30*60*1000);
+ if(!rate.allowed)throw new InquiryError("Too many inquiry attempts. Please try again later.",429,rate.retryAfterSeconds);
+ const fingerprint=createHash("sha256").update(normalizedInquiryAction(value)).digest("hex");
+ let target:Business|undefined;
+ const created=await runner.transaction(async()=>{
+  // Serializes concurrent same-key submissions without catching errors in an aborted transaction.
+  await runner.query("SELECT pg_advisory_xact_lock(hashtextextended(?,0))",[`inquiry:${value.businessId}:${value.idempotencyKey}`]);
+  const existing=(await runner.query<{id:number;request_fingerprint:string|null}>("SELECT id,request_fingerprint FROM inquiries WHERE business_id=? AND idempotency_key=? FOR UPDATE",[value.businessId,value.idempotencyKey])).rows[0];
+  if(existing){if(existing.request_fingerprint!==fingerprint)throw new InquiryError("This inquiry key was already used for a different request.",409);return {inquiryId:existing.id,duplicate:true};}
+  target=(await runner.query<Business>("SELECT b.* FROM businesses b WHERE b.id=? AND b.status='active' AND EXISTS(SELECT 1 FROM business_handles h WHERE h.business_id=b.id) FOR SHARE",[value.businessId])).rows[0];
+  if(!target)throw new InquiryError("Business not found.",404);
+  await runner.query("SELECT business_id FROM business_handles WHERE business_id=? FOR SHARE",[value.businessId]);
+  // Option editors may add/remove rows: lock the set as well as existing rows until snapshots commit.
+  if(value.items.length)await runner.query("LOCK TABLE option_groups,option_values IN SHARE MODE");
+  const validated=[] as Array<{productId:number;quantityIntent:string;name:string;offeringKind:string;quantityMode:string;options:Record<string,string>}>;
+  for(const item of value.items){
+   const product=(await runner.query<{name:string;availability:string;offering_kind:string;quantity_mode:string}>("SELECT name,availability,offering_kind,quantity_mode FROM products WHERE id=? AND business_id=? AND is_published=1 AND offering_kind<>'service' FOR SHARE",[item.productId,value.businessId])).rows[0];
+   if(!product||!["available","limited"].includes(product.availability))throw new InquiryError("A selected product is not available.");
+   const groups=(await runner.query<{id:number;name:string}>("SELECT id,name FROM option_groups WHERE product_id=? ORDER BY position,id",[item.productId])).rows;
+   const names=new Set(groups.map(g=>g.name));
+   if(Object.keys(item.options).some(k=>!names.has(k)))throw new InquiryError("A selected product option is not available.");
+   const pairs:Array<[string,string]>=[];
+   for(const group of groups){
+    const selected=Object.hasOwn(item.options,group.name)?item.options[group.name]:"";
+    const values=(await runner.query<{value:string}>("SELECT value FROM option_values WHERE option_group_id=?",[group.id])).rows;
+    if(!selected||!values.some(v=>v.value===selected))throw new InquiryError("Choose all available product options.");
+    pairs.push([group.name,selected]);
+   }
+   validated.push({productId:item.productId,quantityIntent:item.quantity,name:product.name,offeringKind:normalizeOfferingKind(product.offering_kind),quantityMode:normalizeQuantityMode(product.quantity_mode),options:Object.fromEntries(pairs)});
   }
-
-  const created = await runner.transaction(async () => {
-    const existing = await runner.query<{ id: number }>("SELECT id FROM inquiries WHERE business_id=? AND idempotency_key=? FOR UPDATE", [businessId, idempotencyKey]);
-    if (existing.rows[0]) return { inquiryId: existing.rows[0].id, duplicate: true };
-    let inquiryId: number;
-    try {
-      const inserted = await runner.query<{ id: number }>(
-        "INSERT INTO inquiries(business_id,customer_name,contact,contact_method,note,status,source,idempotency_key,ip_hash,updated_at) VALUES(?,?,?,?,?,'new','showroom',?,?,CURRENT_TIMESTAMP) RETURNING id",
-        [businessId, customerName, contact, contactMethod, note, idempotencyKey, ipHash],
-      );
-      inquiryId = inserted.rows[0]?.id || 0;
-    } catch (error) {
-      if (!(error instanceof Error) || !("code" in error) || error.code !== "23505") throw error;
-      const raced = await runner.query<{ id: number }>("SELECT id FROM inquiries WHERE business_id=? AND idempotency_key=?", [businessId, idempotencyKey]);
-      if (!raced.rows[0]) throw error;
-      return { inquiryId: raced.rows[0].id, duplicate: true };
-    }
-    if (!inquiryId) throw new Error("PostgreSQL did not return the created inquiry identifier.");
-    for (const item of validated) await runner.query(
-      "INSERT INTO inquiry_items(inquiry_id,product_id,product_name_snapshot,quantity,quantity_intent,offering_kind_snapshot,quantity_mode_snapshot,options_json) VALUES(?,?,?,?,?,?,?,?)",
-      [inquiryId, item.productId, item.name, null, item.quantityIntent, item.offeringKind, item.quantityMode, JSON.stringify(item.options)],
-    );
-    await enqueueInquiryAttention(runner,businessId,inquiryId);
-    return { inquiryId, duplicate: false };
-  });
-  if (!created.duplicate) await notify(business, created.inquiryId, customerName);
-  return { ...created, trapped: false };
+  const inserted=await runner.query<{id:number}>("INSERT INTO inquiries(business_id,customer_name,contact,contact_method,note,status,source,idempotency_key,ip_hash,request_fingerprint,updated_at) VALUES(?,?,?,?,?,'new','showroom',?,?,?,CURRENT_TIMESTAMP) RETURNING id",[value.businessId,value.customerName,value.contact,"phone",value.note,value.idempotencyKey,ipHash,fingerprint]);
+  const inquiryId=inserted.rows[0]?.id;if(!inquiryId)throw new Error("Missing inquiry identifier.");
+  for(const item of validated)await runner.query("INSERT INTO inquiry_items(inquiry_id,product_id,product_name_snapshot,quantity,quantity_intent,offering_kind_snapshot,quantity_mode_snapshot,options_json) VALUES(?,?,?,?,?,?,?,?)",[inquiryId,item.productId,item.name,null,item.quantityIntent,item.offeringKind,item.quantityMode,JSON.stringify(item.options)]);
+  await enqueueInquiryAttention(runner,value.businessId,inquiryId);
+  return {inquiryId,duplicate:false};
+ });
+ if(!created.duplicate&&notify&&target)try{await notify(target,created.inquiryId,value.customerName);}catch{/* Delivery cannot undo a durable inquiry. */}
+ return {...created,trapped:false};
 }

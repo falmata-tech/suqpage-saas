@@ -59,7 +59,7 @@ async function main(){
   await reassignSupportConversation(admin,v.id,null);const staffFeed=await userAttentionFeed(transport);assert.ok(staffFeed.items.some(n=>n.kind==='reassigned'&&n.destination.screen==='support-queue'));assert.ok(staffFeed.items.some(n=>n.kind==='waiting_chat'));
   await assert.rejects(()=>visitorAttentionFeed(v.token,v.expiresAt+1),AttentionError);
   const pid=Number((await db.prepare("INSERT INTO products(business_id,name,slug,image_path,is_published,availability) VALUES(?,'Alert product','alert-product','/seed/alert.svg',1,'available')").run(bid)).insertedId);
-  const inquiry={businessId:bid,customerName:'LOCAL QA inquiry',contactMethod:'phone',contact:'+251911443322',idempotencyKey:crypto.randomUUID(),items:[{productId:pid,options:{}}]};
+  const inquiry={businessId:bid,customerName:'LOCAL QA inquiry',note:'Please contact me about this product.',contactMethod:'phone',contact:'+251911443322',idempotencyKey:crypto.randomUUID(),items:[{productId:pid,options:{}}]};
   const q=await createPostgresPublicInquiry(db.runner,inquiry,'alert-inquiry',async()=>undefined);assert.equal(q.duplicate,false);
   assert.equal((await userAttentionFeed(owner)).items[0].kind,'inquiry');assert.equal((await userAttentionFeed(foreign)).unread,0);
   assert.ok(q.inquiryId);

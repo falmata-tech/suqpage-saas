@@ -8,7 +8,7 @@ export interface SpellingSearchPort {
   all<T extends Record<string, unknown>>(sql: string, values?: Array<string | number>): Promise<T[]>;
 }
 export type SpellingScope = { query: string; industry: string; city: string; region: string; locations?: readonly { city: string; region: string }[]; scale: string; exactBusinessIds: readonly number[];excludedBusinessIds?:readonly number[];
- discovery?:{scope:'businesses'|'products';countries:readonly string[];cities:readonly {country:string;city:string}[];madeToOrder:boolean;legacyCountry?:'ET'} };
+ discovery?:{scope:'businesses'|'products';countries:readonly string[];cities:readonly {country:string;city:string}[];madeToOrder:boolean;publicMapLocations?:boolean;legacyCountry?:'ET'} };
 const CANDIDATES_PER_FIELD = 32;
 export const MAX_SPELLING_MATCHES = 100;
 const MIN_SIMILARITY = 0.25;
@@ -101,6 +101,10 @@ export async function findSpellingMatches(scope: SpellingScope, port: SpellingSe
    sql=sql.replace('SELECT ?::', 'SELECT ?::jsonb discovery,?::');
    sql=sql.replaceAll("b.status='active'",`(scope.discovery->>'legacyCountry' IS NULL OR p.country_code=scope.discovery->>'legacyCountry') AND (jsonb_array_length(scope.discovery->'countries')=0 OR p.country_code IN(SELECT jsonb_array_elements_text(scope.discovery->'countries')))
     AND (jsonb_array_length(scope.discovery->'cities')=0 OR EXISTS(SELECT 1 FROM jsonb_to_recordset(scope.discovery->'cities') loc(country text,city text) WHERE p.country_code=loc.country AND (p.city_id=loc.city OR p.city=loc.city))) AND b.status='active'`);
+   if(scope.discovery.publicMapLocations)sql=sql.replaceAll("b.status='active'",`EXISTS(SELECT 1 FROM owner_location_proposals map_location WHERE map_location.business_id=b.id AND (
+    (map_location.location_mode='storefront' AND p.latitude IS NOT NULL AND p.longitude IS NOT NULL) OR
+    (map_location.location_mode='area' AND map_location.place_id IS NOT NULL AND map_location.place_latitude IS NOT NULL AND map_location.place_longitude IS NOT NULL AND p.country_code<>'' AND map_location.place_id=p.city_id)
+   )) AND b.status='active'`);
    if(scope.discovery.scope==='businesses')sql=sql.replace("WHERE NOT(s.business_id=ANY(scope.exact_businesses))", "WHERE s.kind='business' AND NOT(s.business_id=ANY(scope.exact_businesses))");
    if(scope.discovery.scope==='products'&&scope.discovery.madeToOrder) {
     sql=sql.replaceAll('product.is_published=1',"product.is_published=1 AND product.offering_kind='made_to_order'")

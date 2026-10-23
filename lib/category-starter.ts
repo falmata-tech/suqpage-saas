@@ -22,7 +22,7 @@ export function categoryStarter(category:BusinessCategoryKey,city='Addis Ababa')
  const page=parseShopPageContent({template:'profile-v1',coverStyle:'blended',introduction:'',about:`Sample page: ${example.description} Based in ${city}, we welcome questions about our collection and made-to-order products. Replace this example with your own story.`,heroImage:`${root}/hero.jpg`,videoUrl:productVideoWatchUrl(example.video),contacts:starterContacts});
  return {videoRef:example.video,page,offerings};
 }
-export function categoryExampleVideo(category:unknown):string{return examples[typeof category==='string'&&isBusinessCategoryKey(category)?category:'other-manufacturing'].video;}
+export function categoryExampleVideo(category:unknown):string{return typeof category==='string'&&isBusinessCategoryKey(category)?examples[category].video:'';}
 const allSamples=[...starterOfferings,...Object.keys(examples).flatMap(category=>categoryStarter(category as BusinessCategoryKey).offerings)];
 const sampleNames=new Set(allSamples.map(sample=>sample.name)),sampleDescriptions=new Set(allSamples.map(sample=>sample.description));
 // Retained private starter records must still fail publication readiness after

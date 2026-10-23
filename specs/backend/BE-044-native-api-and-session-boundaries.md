@@ -2,13 +2,32 @@
 id: BE-044
 title: Native API and session boundaries
 status: in_progress
-related: [BE-058, BE-055, BE-032, BE-048, BE-047, BE-045, FE-056, FE-054, FE-053, FE-026, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023, BE-046, BE-050, BE-051, BE-052, BE-054, BE-056, FE-041, FE-065, BE-057, FE-068, FE-072, BE-060, FE-073, BE-061]
+related: [BE-058, BE-055, BE-032, BE-048, BE-047, BE-045, FE-056, FE-054, FE-053, FE-026, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023, BE-046, BE-050, BE-051, BE-052, BE-054, BE-056, FE-041, FE-065, BE-057, FE-068, FE-072, BE-060, FE-073, BE-061, FE-075, BE-062]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-17
+last_updated: 2026-10-20
 change_level: L3
 ---
 
 # BE-044 — Native API and session boundaries
+
+## S153 P1 — development credential origin boundary (focused security checks pass)
+
+FE-053 defines DEV-only lossless canonical HTTP(S) storage partitions: owner
+credentials bind API plus Auth origin, guest transport binds API. SDK reads,
+writes, code-verifier/user suffixes, explicit logout removal and guest unread
+polling must all use the selected partition. DEV never consults or deletes the
+legacy production namespace, even when its current partition is empty or fails.
+Production uses the exact existing keys and retains ordinary restoration. This
+changes client credential selection only; tenant checks, identity, native staff
+denial and hosted provider configuration remain intact. Test the actual client
+ports and installed SDK with seeded synthetic legacy bytes, alternate origins,
+logout/error paths and malformed/opaque origins. No real credential is required.
+
+Tests: `scripts/test-mobile-logout-ui.ts` and
+`scripts/test-transport-storage-ui.ts` pass16 cases; source-bound negative
+controls preserve the old constant-key failures. Affected resource/chat/plan
+ports pass41 cases, with mobile/scoped types and specification links passing.
+This is local controlled-port evidence, not a hosted or installed-device claim.
 
 ## Planned S146 — retire native owner assistance
 

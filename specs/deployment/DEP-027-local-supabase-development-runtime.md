@@ -2,9 +2,9 @@
 id: DEP-027
 title: Local Supabase development runtime
 status: in_progress
-related: [DEP-042, DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015, DEP-050]
+related: [DEP-042, DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015, DEP-050, BE-062]
 owners: [development, backend, operations]
-last_updated: 2026-10-19
+last_updated: 2026-10-20
 change_level: L3
 ---
 
@@ -15,6 +15,35 @@ Current persistence contract: BE-035/DEP-031 and ADR-0020 supersede every retain
 SQLite fixture, fallback and copy-tool exception in this specification. Only native
 PostgreSQL setup/tests/archives are executable. Earlier migration-parity evidence
 below is historical; current acceptance uses PostgreSQL-only fixtures.
+
+## S153 — finite local mail-catcher quota (implemented; runtime qualification pending)
+
+GIVEN the permanent local development project uses only its internal Docker mail
+catcher WHEN its reviewed configuration is started THEN its project email quota
+is 120 per hour. Keep the one-second resend interval, six-digit codes, 3600-second
+expiry, confirmation, verification/refresh/IP limits and application role checks.
+GIVEN disposable browser acceptance WHEN it derives its separate configuration
+THEN it accepts only that exact 120/hour source baseline and sets its own quota
+to six per hour; an unexpected or duplicate source quota fails before writing
+the disposable configuration. Its project, ports and mail catcher stay isolated.
+Hosted Auth and the web application's four/email and eight/IP hourly limits are
+outside this correction; no counters are reset and no relay is enabled.
+
+Changing the source does not reconfigure an already running stack. A separately
+coordinated restart must preserve the developer database and requalify the exact
+local project, SMTP destination and generated magic-link/signup template bodies
+before any real email test. Both served bodies and Content-Length must match the
+complete source bytes/hash. The observed truncated template and quota failures
+remain retained evidence; if truncation remains after restart, stop before
+requesting another code. No Go parser result is claimed without an installed Go
+tool. This task authorizes no restart, provisioning, email or hosted write.
+
+Focused mapping: `scripts/test-local-supabase-readiness.mjs` executes the actual
+disposable-config preparation with isolated filesystem ports and tests finite
+quota/SMTP/security preservation plus malformed-baseline rejection. Existing
+launcher and readiness tests retain local-target and service-isolation coverage.
+These focused tests and specification validation pass. No stack restart or real
+email-code workflow has been performed for this correction.
 
 ## Problem and outcome
 

@@ -158,7 +158,8 @@ async function main(){
   await db.prepare(`INSERT INTO support_conversations(public_ref,participant_kind,visitor_token_hash,visitor_session_expires_at,assistance_category,requester_label,visitor_phone,transport_origin,transport_destination,subject,status,created_at,updated_at,last_message_at)
    SELECT 'SUP-IDLE-PLAN-'||g,'visitor','fixture-plan-'||g,?,'shipment_observation','Plan fixture','+447700900999','Town A','Town B','Plan fixture','closed',?,?,? FROM generate_series(1,1500) g`).run(t+support.PUBLIC_SUPPORT_SESSION_MS,t,t,t);
   const indexed=await guest();await reply(indexed.id);const indexedOwner=await own();await reply(indexedOwner.id);
-  const mixedGuest=await guest();await reply(mixedGuest.id,t+ownerWindow-guestWindow-10*60_000);
+  const mixedGuestReplyAt=t+ownerWindow-guestWindow-10*60_000;
+  const mixedGuest=await guest(mixedGuestReplyAt);await reply(mixedGuest.id,mixedGuestReplyAt);
   const mixedOwner=await support.createSupportConversation(owner,{subject:'Mixed overdue owner',message:'Fixture deadline-order case',idempotencyKey:crypto.randomUUID()},t-10*60_000);await reply(mixedOwner.id,t-5*60_000);
   await db.prepare(`INSERT INTO support_conversations(public_ref,participant_kind,business_id,opened_by_user_id,assistance_category,requester_label,subject,status,assigned_user_id,created_at,updated_at,last_message_at,awaiting_participant_since)
    SELECT 'SUP-IDLE-OWNER-BACKLOG-'||g,'client',?,?,'general','Owner backlog fixture','Not yet due owner request','open',?,?,?,?,? FROM generate_series(1,1500) g`).run(businessId,owner.id,helper.id,t,t,t,t+60*60_000);

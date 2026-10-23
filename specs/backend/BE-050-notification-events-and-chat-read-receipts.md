@@ -2,7 +2,7 @@
 id: BE-050
 title: Scoped notification events and confirmed chat reads
 status: in_progress
-related: [BE-055, FE-062, DEP-043, ADR-0026, BE-001, BE-018, BE-044, FE-019, FE-053, BE-057, ADR-0031]
+related: [BE-055, FE-062, DEP-043, ADR-0026, BE-001, BE-018, BE-044, FE-019, FE-053, BE-057, ADR-0031, FE-075, BE-062]
 owners: [backend, security]
 last_updated: 2026-10-17
 change_level: L3
@@ -24,13 +24,20 @@ the app nor logs expose the Gmail app password. DEP-043 owns activation evidence
 
 Newest owner steering adds operational email alongside the existing in-app alert;
 this is not account email editing. Keep S125 explicit Join and inactivity proof.
-GIVEN assigned work has an unanswered participant cycle WHEN ten minutes pass
+GIVEN assigned work has an unanswered participant cycle WHEN two minutes pass
 after the later of the oldest unanswered message or current assignment time THEN
 show Overdue and alert current authorized assignee/managers. Join/read/note events
 do not count as replies. Reassignment grants the next staff member their own
 response window without rewriting the original customer wait or history.
 Unassigned queue work retains a ten-minute queue-overdue alert, without an email
 blaming an unassigned staff member. No public timing promise or numerical cap.
+
+S162 changes only the assigned staff response target from ten to two minutes;
+unassigned queue work remains ten minutes. Keep bounded, exact-once and
+assignment-scoped alert/email delivery, manager privacy, stale-job suppression,
+worker cadence and legacy-cycle protection. The target is due at two minutes;
+the scheduled bounded worker persists its notice on the next sweep. This is not
+a public response promise and requires no schema migration.
 
 GIVEN an assigned cycle first becomes overdue for the current assignment THEN
 atomically persist one per-admin/operations-manager email job alongside the
@@ -86,7 +93,7 @@ command creates customer joined attention, exactly once per current assignment.
 Legacy implicit joins do not satisfy explicit acceptance. Preserve read cursors,
 transcript/event history, tenant/queue isolation and stale-assignment fences.
 
-GIVEN an unanswered cycle exceeds the BE-018 ten-minute internal target THEN a
+GIVEN an unanswered cycle exceeds the applicable BE-018 internal target THEN a
 new reply_overdue kind alerts the current authorized assignee and managers once
 per cycle, with generic private notification copy and no contact/transcript data.
 GIVEN the cycle is answered, ended, replaced or authorization changes before feed

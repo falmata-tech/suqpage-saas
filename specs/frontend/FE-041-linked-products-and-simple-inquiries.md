@@ -2,13 +2,25 @@
 id: FE-041
 title: Linked product pages and simple single or grouped inquiries
 status: in_progress
-related: [FE-074, FE-066, FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042, FE-049, FE-053, BE-044]
+related: [FE-074, FE-066, FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042, FE-049, FE-053, BE-044, FE-075]
 owners: [product, frontend, security]
 last_updated: 2026-10-20
 change_level: L2
 ---
 
 # FE-041 — Linked products, simpler inquiries and search beside the map
+
+## S153 N09 — reachable floating inquiry actions without viewport obstruction
+
+FE-053 N09 moves the variable measured shell-dock clearance into scroll content.
+GIVEN a current business has saved selections WHEN its inquiry action increases
+the dock height THEN the last product/content can scroll above both actions,
+without a full-width opaque viewport band. Preserve distinct per-business lists,
+count/quantity/options, direct inquiry behavior, public contact handoff and
+48dp localized controls. Market keeps its existing own feed clearance; private
+Account/editor screens gain no public inset or launcher. Actual source/component
+and 320/390/landscape Chrome checks precede the existing visual/full/build gates.
+
 
 ## S151 — native showroom grid survives pixel-rounded layout widths (local correction; review pending)
 

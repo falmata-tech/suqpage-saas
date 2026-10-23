@@ -1,6 +1,6 @@
 /** Internal work targets only. These are not response-time promises to customers. */
 import {supportAssignmentReplyDueAt} from './support-assignment-response';
-export {SUPPORT_STAFF_REPLY_TARGET_MS} from './support-assignment-response';
+export {SUPPORT_STAFF_REPLY_TARGET_MS,SUPPORT_UNASSIGNED_QUEUE_TARGET_MS} from './support-assignment-response';
 export const SUPPORT_REPLY_SWEEP_LIMIT = 25;
 export type SupportReplyState = 'needs_reply' | 'overdue' | 'waiting_customer' | null;
 

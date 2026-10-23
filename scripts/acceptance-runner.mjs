@@ -70,11 +70,15 @@ function required(values, name) {
 function prepareBrowserSupabaseProject() {
   fs.mkdirSync(supabaseConfigRoot, { recursive: true });
   let config = fs.readFileSync(path.join(process.cwd(), "supabase/config.toml"), "utf8");
+  const sourceEmailLimits = config.match(/^email_sent = .*$/gm);
+  if (sourceEmailLimits?.length !== 1 || sourceEmailLimits[0] !== "email_sent = 120") {
+    throw new Error("Unexpected developer email limit; disposable browser configuration was not written.");
+  }
   config = remapBrowserSupabaseConfigPorts(config, browserPorts)
     .replace(/^project_id = ".*"$/m, `project_id = "${browserSupabaseProjectId}"`)
     // Three independent sign-ins run in one disposable browser suite. Keep the
     // developer and hosted Auth limits unchanged.
-    .replace(/^email_sent = 2$/m, "email_sent = 6")
+    .replace(/^email_sent = 120$/m, "email_sent = 6")
     .replaceAll("supabase_inbucket_mirtpage", `supabase_inbucket_${browserSupabaseProjectId}`)
     .replace(/^site_url = .*$/m, `site_url = "${baseURL}"`)
     .replace(/^additional_redirect_urls = .*$/m, `additional_redirect_urls = ["${baseURL}", "${baseURL}/auth/callback"]`);

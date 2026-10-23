@@ -56,6 +56,28 @@ async function main() {
         { identity: port, invalidate() {} },
       );
     }
+    const previousTikTok = process.env.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL;
+    const previousYouTube = process.env.NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL;
+    try {
+      process.env.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL = "https://www.tiktok.com/@mirtpage";
+      process.env.NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL = "https://www.youtube.com/@mirtpage";
+      let featuredResponse = await call("featured");
+      assert.equal(featuredResponse.status, 200);
+      let featured = await featuredResponse.json();
+      assert.equal(featured.tiktokUrl, "https://www.tiktok.com/@mirtpage");
+      assert.equal(featured.youtubeUrl, "https://www.youtube.com/@mirtpage");
+      assert.ok(featured.schedule.some((entry: { dateIso?: string }) => /^\d{4}-\d{2}-\d{2}$/.test(entry.dateIso || "")));
+      assert.equal(featured.policy.startMinute, 1230);
+      process.env.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL = "https://www.tiktok.com.evil.example/@mirtpage";
+      featuredResponse = await call("featured");
+      featured = await featuredResponse.json();
+      assert.equal(featured.tiktokUrl, "", "invalid public channel configuration is omitted from the native API");
+    } finally {
+      if (previousTikTok === undefined) delete process.env.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL;
+      else process.env.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL = previousTikTok;
+      if (previousYouTube === undefined) delete process.env.NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL;
+      else process.env.NEXT_PUBLIC_SUQPAGE_YOUTUBE_URL = previousYouTube;
+    }
     let r = await call("owner/home", undefined, false);
     assert.equal(r.status, 401);
     assert.equal(r.headers.get("cache-control"), "private, no-store");
@@ -67,16 +89,15 @@ async function main() {
     assert.equal(home.shop.status, "draft");
     assert.equal(home.draft.assistanceEnabled,false);
     const beforeConsent=JSON.stringify(home.draft.content);
-    r=await call('owner/page',{action:'assistance',version:home.draft.version,enabled:true,content:home.draft.content});assert.equal(r.status,400);
-    r=await call('owner/page',{action:'assistance',version:home.draft.version,enabled:'true'});assert.equal(r.status,400);
-    r=await call('owner/page',{action:'assistance',version:home.draft.version,enabled:true,businessId:b.businessId});assert.equal(r.status,400);
-    r=await call('owner/page',{action:'assistance',version:home.draft.version,enabled:true});assert.equal(r.status,200);
-    const enabledConsent=await r.json();assert.equal(enabledConsent.assistanceEnabled,true);assert.equal(JSON.stringify(enabledConsent.content),beforeConsent);
-    r=await call('owner/page',{action:'assistance',version:home.draft.version,enabled:false});assert.equal(r.status,409);
-    r=await call('owner/home');assert.equal((await r.json()).draft.assistanceEnabled,true);
-    r=await call('owner/page',{action:'assistance',version:enabledConsent.version,enabled:false});assert.equal(r.status,200);
-    const disabledConsent=await r.json();assert.equal(disabledConsent.assistanceEnabled,false);assert.equal(JSON.stringify(disabledConsent.content),beforeConsent);
-    home.draft.version=disabledConsent.version;
+    for(const body of [
+      {action:'assistance',version:home.draft.version,enabled:true,content:home.draft.content},
+      {action:'assistance',version:home.draft.version,enabled:'true'},
+      {action:'assistance',version:home.draft.version,enabled:true,businessId:b.businessId},
+      {action:'assistance',version:home.draft.version,enabled:true},
+      {action:'assistance',version:home.draft.version,enabled:false},
+    ]){r=await call('owner/page',body);assert.equal(r.status,410);}
+    r=await call('owner/home');const unchangedConsent=(await r.json()).draft;
+    assert.equal(unchangedConsent.assistanceEnabled,false);assert.equal(unchangedConsent.version,home.draft.version);assert.equal(JSON.stringify(unchangedConsent.content),beforeConsent);
     r=await call('owner/video-link',{url:'https://youtu.be/aqz-KE-bpKQ'},false);assert.equal(r.status,401);
     for(const [url,ref] of [
       ['https://youtu.be/aqz-KE-bpKQ','youtube:aqz-KE-bpKQ'],
@@ -165,18 +186,19 @@ async function main() {
     // Multipart support files use the same scoped domain/storage workflow.
     const fileKey=crypto.randomUUID();
     const pdf=new Blob(["%PDF-1.4\nmobile fixture\n%%EOF"],{type:"application/pdf"});
-    async function attach(bodyFile:Blob=pdf,identity=port){
+    async function attach(bodyFile:Blob=pdf,identity=port,credential=token){
       const form=new FormData();form.set("message","Attached fixture");form.set("idempotencyKey",fileKey);form.set("attachment",bodyFile,"fixture.pdf");
-      return handleMobileRequest(new Request(`https://suqpage.com/api/mobile/v1/owner/support/${support.id}/attachments`,{method:"POST",headers:{authorization:`Bearer ${token}`},body:form}),["owner","support",String(support.id),"attachments"],{identity,invalidate(){}});
+      return handleMobileRequest(new Request(`https://suqpage.com/api/mobile/v1/owner/support/${support.id}/attachments`,{method:"POST",headers:{authorization:`Bearer ${credential}`},body:form}),["owner","support",String(support.id),"attachments"],{identity,invalidate(){}});
     }
     r=await attach();assert.equal(r.status,200);
     r=await attach();assert.equal(r.status,200);assert.equal((await r.json()).duplicate,true);
     r=await call("owner/support/"+support.id);const thread=await r.json();
     const attachment=thread.messages.find((m:{attachment:unknown})=>m.attachment)?.attachment;assert.ok(attachment?.id);assert.equal(attachment.originalName,"fixture.pdf");assert.equal(attachment.storageKey,undefined);
     r=await call(`owner/support/${support.id}/attachments/${attachment.id}`);assert.equal(r.status,200);assert.equal(r.headers.get("content-type"),"application/pdf");assert.equal(r.headers.get("cache-control"),"private, no-store");assert.match(await r.text(),/^%PDF-/);
-    const otherPort={...port,user:async()=>runtimeUserById(b.userId)};
-    r=await handleMobileRequest(new Request(`https://suqpage.com/api/mobile/v1/owner/support/${support.id}/attachments/${attachment.id}`,{headers:{authorization:`Bearer ${token}`}}),["owner","support",String(support.id),"attachments",String(attachment.id)],{identity:otherPort});assert.equal(r.status,404);
-    r=await attach(pdf,otherPort);assert.equal(r.status,404);
+    const otherActor=(await runtimeUserById(b.userId))!,otherToken='local_mobile_test_other_owner_token_12345';
+    const otherPort:NativeIdentityPort={verify:async value=>value===otherToken?{id:'other-subject',email:otherActor.email}:null,linked:async()=>otherActor.id,user:async()=>runtimeUserById(otherActor.id)};
+    r=await handleMobileRequest(new Request(`https://suqpage.com/api/mobile/v1/owner/support/${support.id}/attachments/${attachment.id}`,{headers:{authorization:`Bearer ${otherToken}`}}),["owner","support",String(support.id),"attachments",String(attachment.id)],{identity:otherPort});assert.equal(r.status,404);
+    r=await attach(pdf,otherPort,otherToken);assert.equal(r.status,404);
     r=await attach(new Blob(["not a pdf"],{type:"application/pdf"}));assert.equal(r.status,400);
     const stored=await db.prepare("SELECT storage_key FROM support_attachments WHERE id=?").get(attachment.id);
     const {getMediaObjectStore}=await import("../lib/media-storage");await getMediaObjectStore().remove("support",[stored.storage_key]);
@@ -284,6 +306,7 @@ async function main() {
       {
         businessId: a.businessId,
         customerName: "Visitor",
+        note:"Please contact me about this product.",
         contactMethod: "phone",
         contact: "+251911222335",
         idempotencyKey: inquiryKey,
@@ -291,10 +314,8 @@ async function main() {
       },
       false,
     );
-    assert.equal(r.status, 410);
-    assert.equal((await r.json()).code, "inquiry_retired");
-    // History fixture is created internally; public clients cannot create it.
-    const inquiry = await createPublicInquiry({businessId:a.businessId,customerName:"Historical visitor",contactMethod:"phone",contact:"+251911222335",idempotencyKey:inquiryKey,items:[{productId:offering.productId,quantity:"",options:{}}]}, "history-fixture");
+    assert.equal(r.status,201);
+    const inquiry=await r.json() as {inquiryId:number};
     assert.ok(inquiry.inquiryId);
     r = await call("owner/inquiries");
     assert.equal(r.status, 200);

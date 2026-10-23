@@ -1,7 +1,7 @@
 import {useCallback,useState} from 'react';
 import {useFocusEffect} from 'expo-router';
 import {AppState} from 'react-native';
-import {secure,request} from './runtime';
+import {secure,request,transportStorageKey} from './runtime';
 
 /** Map badge needs only scoped attention, never a background transcript read. */
 export function useTransportUnread(){
@@ -11,7 +11,7 @@ export function useTransportUnread(){
     async function poll(){
       if(stopped)return;
       if(AppState.currentState===null||AppState.currentState==='active')try{
-        const token=await secure.getItem('suqpage-transport');
+        const token=await secure.getItem(transportStorageKey);
         if(!token){setCount(0);return;}
         const feed=await request<{unread:number}>('transport/attention',{buyingToken:token});
         if(!stopped)setCount(feed.unread);failures=0;

@@ -118,7 +118,7 @@ async function main() {
     assert.equal((await db.prepare('SELECT COUNT(*) total FROM support_messages WHERE sender_side IS NOT NULL').get()).total,0,'Migration leaves historical sides unknown');
     assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);
     assert.deepEqual(await db.prepare('SELECT * FROM support_conversations WHERE id=?').get(guest.id),stable);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,77);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,79);
     console.log('PASS real PostgreSQL confirmed reads/joins, read-only GET, owner/guest privacy, stale/foreign/self/private/expired denial, reassignment/reopen, monotonic and migration preservation.');
   } finally { await closeDbForTests(); }
 }

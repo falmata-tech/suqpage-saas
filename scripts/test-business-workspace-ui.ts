@@ -36,7 +36,7 @@ test('FE-026 business context keeps one global menu and permission-filtered loca
   assert.match(html,/href="\/dashboard\/products\?business=18" aria-current="page"/);
   assert.match(html,/@qa-showroom/);assert.match(html,/Location &amp; visibility/);
   const localLinks=Array.from(html.matchAll(/<nav[^>]*aria-label="Business workspace"[^>]*>(.*?)<\/nav>/g))[0]?.[1]||'';
-  assert.deepEqual(Array.from(localLinks.matchAll(/<a[^>]*>([^<]+)<\/a>/g),item=>item[1]),['Overview','Your page','Products','Business details','Location &amp; visibility','Access']);
+  assert.deepEqual(Array.from(localLinks.matchAll(/<a[^>]*>([^<]+)<\/a>/g),item=>item[1]),['Overview','Your page','Products','Inbox','Business details','Location &amp; visibility','Access']);
   fixture.pathname='/dashboard/catalog';html=renderToStaticMarkup(await module.exports.default({user:principal,business,children:'Categories'}));assert.match(html,/href="\/dashboard\/products\?business=18" aria-current="page"/);
   fixture.pathname='/dashboard/access';html=renderToStaticMarkup(await module.exports.default({user:principal,business,children:'Access'}));assert.match(html,/href="\/dashboard\/access\?business=18" aria-current="page"/);
   fixture.pathname='/dashboard/admin/sponsors';html=renderToStaticMarkup(await module.exports.default({user:principal,business,children:'Sponsors'}));assert.match(html,/href="\/dashboard\/admin\/discovery\/18" aria-current="page"/);

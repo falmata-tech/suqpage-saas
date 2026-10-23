@@ -26,7 +26,8 @@ export function OwnerProfile({home}: {home: OwnerHome}) {
     <View style={{borderWidth:1,borderColor:colors.line,borderRadius:12,overflow:'hidden',backgroundColor:'white'}}>{[
       {label:'Your page',section:'showroom',icon:'shop',description:'Preview and edit your showroom.'},
       {label:'Products',section:'products',icon:'package',description:'Add and update your products.'},
-      {label:'Transport chat',section:'transport',icon:'chat',description:'Arrange transport with our team.'},
+      {label:'Inbox',section:'inquiries',icon:'chat',description:'Read customer inquiries and follow up.'},
+      {label:'Transport chat',section:'transport',icon:'chat',description:'Discuss transport options in live chat.'},
       {label:'Business details',section:'business',icon:'shop',description:'Name, category and business location.'},
       {label:'Account settings',section:'settings',icon:'user',description:'Private details and sign-in.'},
       {label:'Support',section:'support',icon:'headphones',description:'Chat with the MirtPage support team.'},

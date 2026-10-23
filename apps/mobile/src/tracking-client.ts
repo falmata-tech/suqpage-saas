@@ -10,7 +10,9 @@ const validSession=(value:unknown):value is TrackingSession=>{
  return Boolean(candidate&&isTrackingToken(candidate.token)&&typeof candidate.expiresAt==='number'&&Number.isFinite(candidate.expiresAt));
 };
 export function createTrackingStore(storage:TrackingStorage,origin:string){
- const key='suqpage-tracking-session:'+new URL(origin).origin;
+ // Canonical URL origins are ASCII; lossless hex preserves scheme, host and port.
+ const encodedOrigin=Array.from(new URL(origin).origin,character=>character.charCodeAt(0).toString(16).padStart(2,'0')).join('');
+ const key='suqpage-tracking-session.'+encodedOrigin;
  let pending:Promise<void>=Promise.resolve();
  const write=(operation:()=>Promise<void>)=>{const result=pending.then(operation);pending=result.catch(()=>{});return result;};
  async function read():Promise<TrackingSession|null>{

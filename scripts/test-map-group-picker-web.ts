@@ -3,7 +3,7 @@ import {test} from 'node:test';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {build} from 'esbuild';
-import {mapClusterIndex,MAP_MAX_ZOOM,mapClusterMarkers} from '../lib/map/map-clustering';
+import {mapClusterIndex,MAP_CITY_ZOOM,MAP_MAX_ZOOM,mapClusterMarkers} from '../lib/map/map-clustering';
 import {currentMapGroup,mapGroupMembers,mapGroupLayout,mapGroupViewport} from '../components/map-group-view';
 import type {DiscoveryShowroom} from '../lib/discovery';
 
@@ -14,7 +14,7 @@ const click=(node:Node|undefined)=>{assert.ok(node);(node.props.onClick as()=>vo
 const bundled=build({entryPoints:['components/DiscoveryWorkspace.tsx'],bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'controlled-renderer-ports',setup(b){
  b.onLoad({filter:/components\/DiscoveryWorkspace\.tsx$/},async a=>({loader:'tsx',contents:fs.readFileSync(a.path,'utf8')+'\nexport {MapPreviewDialog};'}));
  b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({contents:'export default new Proxy({}, {get:(_,key)=>key});'}));
- b.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|next\/(?:image|link|navigation)|lucide-react|@\/lib\/(?:i18n\/ui|use-market-feed|market-search|market-workspace|discovery-contract|platform-state|product-inquiry|live-showroom|offerings)|\.\/(?:MarketSearchControls|LoadingBar|CategoryChooser|useBlockedBusinesses)|@\/components\/MarketplaceMap)$/},a=>({path:a.path,namespace:'ports'}));
+ b.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|next\/(?:image|link|navigation)|lucide-react|@\/lib\/(?:i18n\/ui|use-market-feed|market-search|market-workspace|platform-state|product-inquiry|live-showroom|offerings)|\.\/(?:MarketSearchControls|LoadingBar|CategoryChooser|useBlockedBusinesses)|@\/components\/MarketplaceMap)$/},a=>({path:a.path,namespace:'ports'}));
  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'js',contents:
  a.path==='react'?`const slot=initial=>{const index=fixture.cursor++;if(!(index in fixture.slots))fixture.slots[index]=typeof initial==='function'?initial():initial;return index;};export const useState=initial=>{const index=slot(initial);return[fixture.slots[index],value=>{fixture.slots[index]=typeof value==='function'?value(fixture.slots[index]):value;}];};export const useRef=initial=>fixture.slots[slot(()=>({current:initial}))];export const useEffect=(fn,deps)=>{const index=fixture.cursor++,prior=fixture.dependencies[index];if(!prior||!deps||deps.some((value,i)=>!Object.is(value,prior[i]))){fixture.dependencies[index]=deps;fixture.effects.push(fn);}};export const useLayoutEffect=()=>{},useMemo=fn=>fn(),useTransition=()=>[false,fn=>fn()];`
  :a.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
@@ -24,7 +24,6 @@ const bundled=build({entryPoints:['components/DiscoveryWorkspace.tsx'],bundle:tr
  :a.path==='@/lib/live-showroom'?`export const LIVE_PLATFORM_LABELS={};`
  :a.path==='@/lib/market-search'?`export const emptyMarketSearch=()=>({}),marketSearchParams=()=>new URLSearchParams(),marketWorkspaceParams=()=>new URLSearchParams(),MarketSearchError=Error;`
  :a.path==='@/lib/market-workspace'?`export const hasExplicitMarketIntent=()=>false,marketWorkspaceFromParams=()=>({}),parseMarketWorkspaceSnapshot=()=>null,serializeMarketWorkspaceSnapshot=()=>'';`
- :a.path==='@/lib/discovery-contract'?`export const normalizeDiscoveryPlaces=()=>[],discoveryPlaceKey=()=>'';`
  :a.path==='@/lib/platform-state'?`export const readPlatformState=()=>null;`
  :a.path==='./useBlockedBusinesses'?`export const useBlockedBusinesses=()=>({list:[],save:async()=>{throw new Error('Preference writes are outside the helper renderer scope');}});`
  :a.path==='@/lib/use-market-feed'?`export const useMarketFeed=()=>({});`
@@ -36,8 +35,10 @@ const bundled=build({entryPoints:['components/DiscoveryWorkspace.tsx'],bundle:tr
 async function component(){const fixture={slots:[] as unknown[],cursor:0,dependencies:[] as unknown[][],effects:[] as Array<()=>void|(()=>void)>};const module={exports:{} as {default:(props:Record<string,unknown>)=>Node;NearbyShowroomsViewer:(props:Record<string,unknown>)=>Node;MapPreviewDialog:(props:Record<string,unknown>)=>Node}};const globals:Record<string,unknown>={module,exports:module.exports,fixture,URLSearchParams};vm.runInNewContext((await bundled).outputFiles[0].text,globals);return{fixture,module,globals,render:(name:keyof typeof module.exports,props:Record<string,unknown>)=>{fixture.cursor=0;return tree(module.exports[name](props));},effects:()=>{const effects=fixture.effects.splice(0);return effects.map(effect=>effect());}};}
 
 test('FE-021 current terminal authority rejects enclosed aggregate, foreign member and stale resize keys',()=>{
- for(const capacity of[1,3,6]){const index=mapClusterIndex(shops,capacity),fixed=mapClusterMarkers(index,[-180,-85,180,85],MAP_MAX_ZOOM).find(item=>item.kind==='cluster')!;assert.ok(fixed);assert.ok(fixed.count>=1&&fixed.count<=capacity);
-  for(const zoom of[1,5,14,17]){assert.ok(mapClusterMarkers(index,[-180,-85,180,85],zoom).some(item=>item.kind==='aggregate'&&fixed.ids.every(id=>item.ids.includes(id))));assert.equal(currentMapGroup(index,shops,fixed.key,zoom),null,'A known terminal key enclosed in the current outer aggregate cannot open a picker');}
+ for(const capacity of[1,3,6]){const index=mapClusterIndex(shops,capacity),terminal=mapClusterMarkers(index,[-180,-85,180,85],MAP_MAX_ZOOM);
+  if(capacity===1){assert.ok(terminal.every(item=>item.kind==='shop'&&item.count===1),'A one-business final marker is a shop icon, not a numbered one-circle');continue;}
+  const fixed=terminal.find(item=>item.kind==='cluster')!;assert.ok(fixed);assert.ok(fixed.count>=2&&fixed.count<=capacity);
+  for(const zoom of[1,5,11]){assert.ok(mapClusterMarkers(index,[-180,-85,180,85],zoom).some(item=>item.kind==='aggregate'&&fixed.ids.every(id=>item.ids.includes(id))));assert.equal(currentMapGroup(index,shops,fixed.key,zoom),null,'A known terminal key enclosed in the current outer aggregate cannot open a picker');}
   for(const zoom of[18,99]){const group=currentMapGroup(index,shops,fixed.key,zoom)!;assert.ok(group);assert.equal(group.count,fixed.count);assert.deepEqual(group.showroomIds,fixed.ids);assert.equal(group.longitude,fixed.anchor[0]);}
   const aggregate=mapClusterMarkers(index,[-180,-85,180,85],1).find(item=>item.kind==='aggregate');if(aggregate)assert.equal(currentMapGroup(index,shops,aggregate.key,18),null,'An aggregate is never modal membership authority');
   assert.equal(currentMapGroup(index,shops.filter(shop=>shop.id!==fixed.ids[0]),fixed.key,18),null);
@@ -47,7 +48,7 @@ test('FE-021 current terminal authority rejects enclosed aggregate, foreign memb
 });
 test('FE-021 S140 separated current groups admit all cards below maximum without trusting hidden or changed keys',()=>{
  const source=shops.slice(0,6).map((shop,index)=>({...shop,longitude:index<3?38.75:38.77})),index=mapClusterIndex(source,3);
- const outer=mapClusterMarkers(index,[-180,-85,180,85],6)[0];assert.equal(outer.kind,'aggregate');assert.equal(outer.expansionZoom,13);
+ const outer=mapClusterMarkers(index,[-180,-85,180,85],6)[0];assert.equal(outer.kind,'aggregate');assert.ok(outer.expansionZoom!==undefined&&outer.expansionZoom<MAP_CITY_ZOOM,'Regional aggregates separate before final city-scale groups open their previews');
  for(const fixed of index.groups)assert.equal(currentMapGroup(index,source,fixed.key,6),null);
  for(const item of mapClusterMarkers(index,[-180,-85,180,85],13)){
   const group=currentMapGroup(index,source,item.key,13);assert.ok(group);assert.deepEqual(group.showroomIds,item.ids);assert.equal(group.count,3);
@@ -71,6 +72,16 @@ test('FE-021 adaptive S127 actual modal shows desktop6 together, detail Back and
  const render=()=>{let value=c.render('NearbyShowroomsViewer',props());c.effects();return c.render('NearbyShowroomsViewer',props());};let nodes=render();const cards=()=>nodes.filter(node=>node.type==='button'&&node.props['data-showroom-id']);assert.deepEqual(cards().map(node=>node.props['data-showroom-id']),[1,2,3,4,5,6]);assert.equal(nodes.some(node=>['Next','Previous'].includes(String(node.props['aria-label']))),false);
  click(cards()[4]);nodes=render();assert.equal(selected,5);assert.ok(nodes.some(node=>node.props.className==='nearby-showroom-back'));click(nodes.find(node=>node.props.className==='nearby-showroom-back'));nodes=render();assert.deepEqual(cards().map(node=>node.props['data-showroom-id']),[1,2,3,4,5,6]);
  viewport=mapGroupViewport(296,448);nodes=render();assert.deepEqual(nodes,[]);assert.equal(closed,1,'An old desktop group closes instead of losing phone cards');
+});
+test('FE-021 S164 city-area map preview names each business and city without internal mode text',async()=>{
+ const c=await component(),members=shops.slice(0,2).map(shop=>({...shop,locationMode:'area' as const})),group={key:'city:fixture',count:2,showroomIds:members.map(shop=>shop.id),city:'Fixture city',region:'',latitude:9.03,longitude:38.75};
+ const nodes=c.render('NearbyShowroomsViewer',{group,showrooms:members,viewport:mapGroupViewport(390,844),featuredNowBusinessId:null,selectedShowroomId:null,onSelect(){},onBack(){},onClose(){},onOpen(){}});
+ for(const member of members){
+  const card=nodes.find(node=>node.type==='button'&&node.props['data-showroom-id']===member.id)!;assert.ok(card);
+  assert.match(String(card.props['aria-label']),new RegExp(`${member.name}.*Fixture city`));
+  assert.doesNotMatch(String(card.props['aria-label']),/City only/,'Accessible names must not expose internal mode text');
+  const location=tree(card).find(node=>node.props.className==='nearby-showroom-location');assert.equal(location?.props.children,'Fixture city');
+ }
 });
 test('FE-021 adaptive S127 actual modal rejects oversized or stale group content rather than showing extra cards',async()=>{
  for(const group of[{key:'old-large',count:11,showroomIds:shops.map(shop=>shop.id)},{key:'missing-current',count:2,showroomIds:[1,999]},{key:'duplicate',count:2,showroomIds:[1,1]}]){

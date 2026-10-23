@@ -7,7 +7,7 @@ async function main(){
  const db=await getDb();
  try{
   const schema=String((await db.prepare('SELECT current_schema() value').get()).value);assert.match(schema,/^suqpage_test_[a-f0-9]{32}$/);
-  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,77);
+  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,79);
   const tracking=['tracking_recipients','tracking_challenges','tracking_sessions','tracking_shipments','tracking_events','tracking_email_deliveries'];
   for(const table of tracking)assert.equal((await db.prepare(`SELECT COUNT(*) n FROM ${table}`).get()).n,0,'Only an empty disposable fixture may reconstruct schema71');
   await db.exec('ALTER TABLE tracking_recipients ALTER COLUMN verified_at SET NOT NULL');await db.exec('DELETE FROM schema_migrations WHERE version IN (72,73,74,75)');

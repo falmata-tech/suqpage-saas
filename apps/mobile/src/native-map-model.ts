@@ -10,6 +10,20 @@ export const osmStyle = {
     attribution: '© OpenStreetMap contributors'}},
   layers: [{id: 'osm', type: 'raster' as const, source: 'osm'}],
 };
+const nativeFixtureStyle = {
+  version: 8 as const,
+  metadata: {'mirtpage:fixture': 'mirtpage-native-background-v1'},
+  sources: {},
+  layers: [{id: 'fixture-background', type: 'background' as const, paint: {'background-color': '#f5f2e8'}}],
+};
+/** Explicit synthetic native review; malformed/release requests never use public tiles. */
+export function nativeMapStyle(development: boolean, fixtureFlag: string | undefined) {
+  if (fixtureFlag === undefined || fixtureFlag === '') return osmStyle;
+  if (fixtureFlag !== '1') throw new Error('Invalid native map fixture flag.');
+  if (!development) throw new Error('Native map fixture is development-only.');
+  return nativeFixtureStyle;
+}
+
 export function shopCoordinate(shop: MapShop): [number, number] | null {
   if (!Number.isSafeInteger(shop.id) || shop.id <= 0 || !Number.isFinite(shop.latitude) ||
       !Number.isFinite(shop.longitude) || Math.abs(shop.latitude) > 85.051129 || Math.abs(shop.longitude) > 180) return null;

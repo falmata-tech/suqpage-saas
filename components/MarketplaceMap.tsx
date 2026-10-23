@@ -128,7 +128,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
   const callbackRef = useRef({ onViewChange, onOpenNearbyGroup, onSelectShowroom, onError });
   const dataRef = useRef({ showrooms, featuredNowBusinessId, selectedShowroomId });
   const clusterIndex = useMemo(() => mapClusterIndex(showrooms.map(showroom=>({
-    id:showroom.id,latitude:showroom.latitude,longitude:showroom.longitude,
+    id:showroom.id,latitude:showroom.latitude,longitude:showroom.longitude,locationMode:showroom.locationMode,
     featured:showroom.id===featuredNowBusinessId,live:showroom.isLive,
   })),groupCapacity), [featuredNowBusinessId,showrooms,groupCapacity]);
   const clusterIndexRef = useRef(clusterIndex);
@@ -305,12 +305,13 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
             mountedGroupCount++;
             continue;
           }
-          if(item.kind==='cluster'){
+          if(item.kind==='cluster'&&item.count>1){
             const members=item.ids.flatMap(id=>showroomById.get(id)?[showroomById.get(id)!]:[]);
             if(members.length!==item.count||members.length<1||members.length>Math.min(MAP_GROUP_MAX_MEMBERS,clusterIndexRef.current.capacity))continue;
             const status=item.presence?`<span class="mp-map-status mp-map-status-${item.presence}">${escapeHtml(t(item.presence==='featured'?'Featured':'Live'))}</span>`:'';
             const icon=L.divIcon({className:'mp-map-div-icon',html:`<span class="mp-map-cluster${item.presence?` is-${item.presence}`:''}" data-map-group-kind="cluster" data-map-group-key="${escapeHtml(item.key)}" data-map-group-count="${item.count}" data-map-member-ids="${item.ids.join(',')}"><b>${item.count}</b>${status}</span>`,iconSize:[48,48],iconAnchor:[23,23]});
-            const label=item.count===1?t('1 business. View business.'):t('{count} businesses. View businesses.',{count:item.count});
+            const labelBase=item.count===1?t('1 business. View business.'):t('{count} businesses. View businesses.',{count:item.count});
+            const label=labelBase;
             const group:DiscoveryNearbyGroup={key:item.key,latitude:item.anchor[1],longitude:item.anchor[0],count:item.count,showroomIds:item.ids,
               city:members.every(shop=>shop.city===members[0].city)?members[0].city:'',
               region:members.every(shop=>shop.region===members[0].region)?members[0].region:''};
@@ -329,14 +330,15 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
           const lines=markerLabelLines(showroom.name).map(line=>`<span>${escapeHtml(line)}</span>`).join('');
           const status=presence.kind?`<em class="mp-map-status mp-map-status-${presence.kind}">${escapeHtml(t(presence.kind==='featured'?'Featured':'Live'))}</em>`:'';
           const icon=L.divIcon({className:'mp-map-div-icon',
-            html:`<span class="mp-map-showroom${data.selectedShowroomId===showroom.id?' is-selected':''}${presence.kind?` is-${presence.kind}`:''}" data-showroom-id="${showroom.id}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind?` data-presence="${presence.kind}"`:''}>${STOREFRONT_GLYPH}<b>${lines}</b>${status}</span>`,iconSize:[44,44],iconAnchor:[22,25]});
-          const marker=L.marker([latitude,longitude],{icon,keyboard:true,title:showroom.name,
-            alt:`${showroom.name}, ${t(showroom.primaryIndustryLabel)}, ${showroom.city}`,riseOnHover:true})
+            html:`<span class="mp-map-showroom${data.selectedShowroomId===showroom.id?' is-selected':''}${presence.kind?` is-${presence.kind}`:''}" data-showroom-id="${showroom.id}" data-location-mode="${showroom.locationMode}" data-latitude="${showroom.latitude}" data-longitude="${showroom.longitude}"${presence.kind?` data-presence="${presence.kind}"`:''}>${STOREFRONT_GLYPH}<b>${lines}</b>${status}</span>`,iconSize:[44,44],iconAnchor:[22,25]});
+          const markerLabel=`${showroom.name}, ${t(showroom.primaryIndustryLabel)}, ${showroom.city}. ${t('Open page preview')}.`;
+          const marker=L.marker([latitude,longitude],{icon,keyboard:true,title:markerLabel,
+            alt:markerLabel,riseOnHover:true})
             .on('click',()=>{
               if((map?.getZoom()||0)<SHOWROOM_DETAIL_ZOOM)map?.setView([latitude,longitude],clampMapZoom(SHOWROOM_DETAIL_ZOOM),{animate:true});
               callbackRef.current.onSelectShowroom(showroom);
             });
-          addMarker(marker,`${showroom.name}, ${t(showroom.primaryIndustryLabel)}, ${showroom.city}. ${showroom.locationMode==='area'?t('Approximate city area')+'. ':''}${t('Open page preview')}.`);
+          addMarker(marker,markerLabel);
         }
 
         if((focusedGroup||focusedShop)&&!restoredMarkerFocus){

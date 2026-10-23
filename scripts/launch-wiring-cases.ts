@@ -59,7 +59,7 @@ export async function launchWiringCases(port:BasicProductUpkeepPort,owner:Sessio
  // A local fixture has no notification destination, so valid inbox writes cannot send email.
  const before=await runtimeGet<{status:string;contact_email:string}>('SELECT status,contact_email FROM businesses WHERE id=?',[bid]);
  await runtimeRun("UPDATE businesses SET status='active',contact_email='' WHERE id=?",[bid]);
- const input={businessId:bid,customerName:'Fixture buyer',contact:'+447700900999',contactMethod:'phone',items:[{productId,options:{Color:'Blue',Size:'Small'}}],idempotencyKey:randomUUID()};
+ const input={businessId:bid,customerName:'Fixture buyer',note:'Please contact me about these products.',contact:'+447700900999',contactMethod:'phone',items:[{productId,options:{Color:'Blue',Size:'Small'}}],idempotencyKey:randomUUID()};
  const inquiry=await createPublicInquiry(input,randomUUID());assert.ok(inquiry.inquiryId);
  await assert.rejects(()=>createPublicInquiry({...input,idempotencyKey:randomUUID(),items:[{productId,options:{Color:'Invalid',Size:'Small'}}]},randomUUID()),/option|Choose|selection/i);
  await save({isPublished:false});

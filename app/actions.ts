@@ -324,7 +324,7 @@ export async function basicProductUpkeepEditAction(formData:FormData):Promise<Ow
 export async function updateInquiryStatusAction(formData:FormData){
   const user=await requireUser();
   const businessId=int(formData,"businessId");
-  const params={business:businessId,q:text(formData,"returnQ",120)||undefined,status:text(formData,"returnStatus",20)||undefined,page:int(formData,"returnPage")||undefined};
+  const params={business:businessId,q:text(formData,"returnQ",120)||undefined,status:text(formData,"returnStatus",20)||undefined,inquiry:int(formData,"returnInquiry")||undefined,page:int(formData,"returnPage")||undefined};
   try { await updateInquiryStatus(user,{businessId,inquiryId:int(formData,"inquiryId"),status:text(formData,"status",20)}); }
   catch { go("/dashboard/inquiries",{...params,error:"The inquiry could not be updated. Refresh and try again."}); }
   revalidatePath("/dashboard/inquiries");revalidatePath("/dashboard");

@@ -37,3 +37,14 @@ export function normalizeDiscoveryPlaces(value?: string | readonly string[]): st
 export function discoveryPlaceKey(value?: string | readonly string[]): string {
   return normalizeDiscoveryPlaces(value).join("|");
 }
+
+/** Presentation only: retain literal geography and the caller's field priority. */
+export function discoveryLocationLabel(parts: readonly string[]): string {
+  const seen = new Set<string>();
+  return parts.map(part => part.trim()).filter(part => {
+    const key = part.normalize('NFC').toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).join(' · ');
+}

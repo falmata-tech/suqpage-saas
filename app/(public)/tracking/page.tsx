@@ -2,5 +2,5 @@ import type {Metadata} from 'next';
 import TrackingPortal from '@/components/TrackingPortal';
 import {getUiText} from '@/lib/i18n/server';
 export const dynamic='force-dynamic';
-export async function generateMetadata():Promise<Metadata>{const t=await getUiText();return{title:t('Your shipments'),robots:{index:false,follow:false,nocache:true,noarchive:true},referrer:'no-referrer'};}
+export async function generateMetadata():Promise<Metadata>{const t=await getUiText();return{title:t('Shipment records'),robots:{index:false,follow:false,nocache:true,noarchive:true},referrer:'no-referrer'};}
 export default async function TrackingPage({searchParams}:{searchParams:Promise<{return?:string}>}){return <TrackingPortal returnHref={(await searchParams).return}/>;}

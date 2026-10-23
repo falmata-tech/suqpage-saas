@@ -3,16 +3,20 @@ import crypto from 'node:crypto';
 import { getDb, closeDbForTests } from './testing/postgres-fixture';
 import { migratePostgresDatabase } from '../lib/postgres-migrations';
 import { removeEmptyTrackingSchema } from './testing/tracking-migration-compat';
-import { SUPPORT_STAFF_REPLY_TARGET_MS, SUPPORT_REPLY_SWEEP_LIMIT, supportReplyState } from '../lib/support-response-contract';
+import { SUPPORT_STAFF_REPLY_TARGET_MS, SUPPORT_UNASSIGNED_QUEUE_TARGET_MS, SUPPORT_REPLY_SWEEP_LIMIT, supportReplyState } from '../lib/support-response-contract';
 
 function policy() {
-  const start = 1_800_000_000_000, target = 10 * 60_000;
-  assert.equal(SUPPORT_STAFF_REPLY_TARGET_MS, target);
+  const start = 1_800_000_000_000, target = SUPPORT_STAFF_REPLY_TARGET_MS, queueTarget=SUPPORT_UNASSIGNED_QUEUE_TARGET_MS;
+  assert.equal(target, 2 * 60_000);
+  assert.equal(queueTarget, 10 * 60_000);
   assert.equal(SUPPORT_REPLY_SWEEP_LIMIT, 25);
   const open = { status: 'open', awaitingStaffSince: start };
-  assert.deepEqual(supportReplyState(open, start + target - 1), { replyState: 'needs_reply', staffReplyDueAt: start + target });
-  assert.deepEqual(supportReplyState(open, start + target), { replyState: 'overdue', staffReplyDueAt: start + target });
-  assert.deepEqual(supportReplyState({ ...open, status: 'waiting' }, start + target), { replyState: 'overdue', staffReplyDueAt: start + target });
+  assert.deepEqual(supportReplyState(open, start + queueTarget - 1), { replyState: 'needs_reply', staffReplyDueAt: start + queueTarget });
+  assert.deepEqual(supportReplyState(open, start + queueTarget), { replyState: 'overdue', staffReplyDueAt: start + queueTarget });
+  const assigned={...open,assignedAt:start};
+  assert.deepEqual(supportReplyState(assigned, start + target - 1), { replyState: 'needs_reply', staffReplyDueAt: start + target });
+  assert.deepEqual(supportReplyState(assigned, start + target), { replyState: 'overdue', staffReplyDueAt: start + target });
+  assert.deepEqual(supportReplyState({ ...open, status: 'waiting' }, start + queueTarget), { replyState: 'overdue', staffReplyDueAt: start + queueTarget });
   for (const terminal of [{ ...open, status: 'closed' }, { ...open, resolvedAt: start }]) {
     assert.deepEqual(supportReplyState(terminal, start + target), { replyState: null, staffReplyDueAt: null });
   }
@@ -21,11 +25,12 @@ function policy() {
   for (const invalid of [-1, NaN, Infinity, Number.MAX_SAFE_INTEGER,8_640_000_000_000_000,9_000_000_000_000_000]) {
     assert.deepEqual(supportReplyState({ status: 'open', awaitingStaffSince: invalid }, start), { replyState: null, staffReplyDueAt: null });
   }
-  assert.deepEqual(supportReplyState({ status: 'waiting', awaitingStaffSince: 0 }, target), { replyState: 'overdue', staffReplyDueAt: target });
+  assert.deepEqual(supportReplyState({ status: 'waiting', awaitingStaffSince: 0 }, queueTarget), { replyState: 'overdue', staffReplyDueAt: queueTarget });
 }
 
 async function main() {
   policy();
+  if (process.argv.includes("--pure")) return;
   const db = await getDb(), t = 1_780_000_000_000;
   try {
     const schema = (await db.prepare('SELECT current_schema() name').get()).name as string;
@@ -138,7 +143,7 @@ async function main() {
     const index = (await db.prepare("SELECT indexdef FROM pg_indexes WHERE schemaname=current_schema() AND indexname='support_staff_reply_pending'").get()).indexdef as string;
     for (const token of ['awaiting_staff_since, id', 'resolved_at IS NULL', 'overdue_notified_message_id IS DISTINCT FROM awaiting_staff_message_id']) assert.ok(index.includes(token), token);
     assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version, 75);
-    console.log('PASS S125/S126 pure10-minute state boundaries and isolated schema66→71 migration compatibility: conservative original-side/opener backfill, no legacy push, explicit-join reset, history/read/contact preservation, atomic rollback, CHECK/index and no-op replay.');
+    console.log('PASS S162 pure assigned/unassigned response boundaries and isolated schema66→71 migration compatibility: conservative original-side/opener backfill, no legacy push, explicit-join reset, history/read/contact preservation, atomic rollback, CHECK/index and no-op replay.');
   } finally { await closeDbForTests(); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

@@ -3,6 +3,7 @@ import {test} from "node:test";
 import vm from "node:vm";
 import {build} from "esbuild";
 import type {Offering,Shop} from "@suqpage/contracts";
+import {TRANSPORT_COPY} from "../lib/i18n/transport-copy";
 import {publicTransportPlacement} from "../lib/public-transport-placement";
 
 type Node = {type: string | ((props: Record<string, unknown>) => unknown);props: Record<string, unknown> & {children?: unknown}};
@@ -34,11 +35,11 @@ async function shell(entry: string) {
     b.onResolve({filter: /^(react(?:\/jsx-runtime)?|react-native|react-native-safe-area-context|expo-router|expo-status-bar|react-native-svg|next\/navigation|next\/link|lucide-react)$/}, args => ({path: args.path, namespace: "ports"}));
     b.onResolve({filter: /(?:^|\/)(?:runtime|ui|main-navigation|AttentionAlerts|blocked-businesses|use-business-inquiry|use-transport-unread|overlay-visibility|LanguageSelector|SuqpageBrand|NavigationPendingIndicator|PublicMobileNavigation|PublicSupportChat|i18n\/ui|owner-edit-navigation)$/}, args => ({path: args.path.endsWith('/i18n/ui')?'uiText':args.path.split("/").at(-1)!, namespace: "ports"}));
     b.onLoad({filter: /.*/,namespace: "ports"}, args => ({loader: "jsx",contents:
-      args.path === "react" ? "export const useState=value=>[value,()=>{}],useEffect=()=>{};export default {};"
+      args.path === "react" ? "export const useState=value=>[value,()=>{}],useEffect=()=>{},createContext=initial=>({Provider:props=>({type:'ScrollInsetProvider',props}),initial}),useContext=context=>context.initial;export default {};"
       : args.path === "react/jsx-runtime" ? "export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';"
       : args.path === "react-native" ? "export const View='View',Text='Text',Pressable='Pressable',Modal='Modal',ScrollView='ScrollView',StyleSheet={create:value=>value},useWindowDimensions=()=>({width:fixture.width,height:fixture.height});"
       : args.path === "react-native-safe-area-context" ? "export const SafeAreaProvider=props=>props.children,useSafeAreaInsets=()=>({bottom:fixture.bottom,top:0,left:0,right:0});"
-      : args.path === "expo-router" ? "export const router={push:path=>fixture.routes.push(path)},usePathname=()=>fixture.path,useGlobalSearchParams=()=>fixture.params||{},Stack=Object.assign(props=>({type:'Stack',props}),{Screen:'StackScreen'});"
+      : args.path === "expo-router" ? "export const router={push:path=>fixture.routes.push(path)},usePathname=()=>fixture.path,useGlobalSearchParams=()=>fixture.params||{},useRootNavigationState=()=>({key:'test-root'}),Stack=Object.assign(props=>({type:'Stack',props}),{Screen:'StackScreen'});"
       : args.path === "expo-status-bar" ? "export const StatusBar='StatusBar';"
       : args.path === "react-native-svg" ? "export const SvgXml='SvgXml';"
       : args.path === "next/navigation" ? "export const usePathname=()=>fixture.path;"
@@ -87,16 +88,17 @@ test("FE-053 actual native root uses one48px transport entry above navigation an
     Object.assign(fixture,{signedIn,height,bottom});
     for (const path of nativePublic) {
       fixture.path=path;const nodes=render(),entries=nodes.filter(node=>node.type==='Pressable'&&node.props.testID==='public-transport-launcher');
-      assert.equal(entries.length,1,path);assert.equal(entries[0].props.accessibilityLabel,'Want help with transport/shipping? · Chat live with our agents');
+      assert.equal(entries.length,1,path);assert.equal(entries[0].props.accessibilityLabel,`${TRANSPORT_COPY.launcherTitle} · ${TRANSPORT_COPY.launcherSubtitle}`);
       assert.equal(style(entries[0]).minWidth,48);assert.equal(style(entries[0]).minHeight,48,'The Pressable itself is48px, not just its wrapper');
       const overlay=nodes.find(node=>node.props.testID==='public-transport-overlay')!;
       assert.equal(style(overlay).bottom,60+bottom+12);assert.equal(style(overlay).right,12);
       assert.equal(style(overlay).pointerEvents,'box-none');assert.ok(!Object.hasOwn(overlay.props,'pointerEvents'),'Supported style hit testing leaves the map and content reachable without RNWeb warnings');
       const stack=nodes.find(node=>node.type==='Stack')!;
-      assert.ok((stack.props.screenOptions as {contentStyle:{paddingBottom:number}}).contentStyle.paddingBottom>=72,'Public primary actions have reserved space above the overlay');
+      assert.equal((stack.props.screenOptions as {contentStyle:{paddingBottom?:number}}).contentStyle.paddingBottom,undefined,'Dock clearance must not reserve an opaque viewport band');
+      assert.ok(Number(nodes.find(node=>node.type==='ScrollInsetProvider')?.props.value)>=72,'Measured public dock clearance reaches the scrolling-content boundary');
       (entries[0].props.onPress as ()=>void)();assert.equal(fixture.routes.at(-1),'/buying');
     }
-    for (const path of ['/',...excluded]) {fixture.path=path;const nodes=render();assert.equal(nodes.filter(node=>node.props.testID==='public-transport-overlay').length,0,path);assert.equal((nodes.find(node=>node.type==='Stack')!.props.screenOptions as {contentStyle:{paddingBottom:number}}).contentStyle.paddingBottom,0);}
+    for (const path of ['/',...excluded]) {fixture.path=path;const nodes=render();assert.equal(nodes.filter(node=>node.props.testID==='public-transport-overlay').length,0,path);assert.equal((nodes.find(node=>node.type==='Stack')!.props.screenOptions as {contentStyle:{paddingBottom?:number}}).contentStyle.paddingBottom,undefined);assert.equal(nodes.find(node=>node.type==='ScrollInsetProvider')?.props.value,0);}
   }
 });
 

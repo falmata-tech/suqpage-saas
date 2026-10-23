@@ -2,7 +2,7 @@
 id: DEP-043
 title: Verified notification delivery rollout
 status: in_progress
-related: [DEP-048, BE-050, FE-062, ADR-0026, DEP-042, DEP-044, BE-018, FE-019, FE-036, FE-053, DEP-047, ADR-0031]
+related: [DEP-048, BE-050, FE-062, ADR-0026, DEP-042, DEP-044, BE-018, FE-019, FE-036, FE-053, DEP-047, ADR-0031, BE-063]
 owners: [operations, security]
 last_updated: 2026-10-20
 change_level: L3
@@ -88,13 +88,20 @@ made before this owner-selected new package.
 
 Newest owner steering adds operational email alongside the existing in-app alert;
 this is not account email editing. Keep S125 explicit Join and inactivity proof.
-GIVEN assigned work has an unanswered participant cycle WHEN ten minutes pass
+GIVEN assigned work has an unanswered participant cycle WHEN two minutes pass
 after the later of the oldest unanswered message or current assignment time THEN
 show Overdue and alert current authorized assignee/managers. Join/read/note events
 do not count as replies. Reassignment grants the next staff member their own
 response window without rewriting the original customer wait or history.
 Unassigned queue work retains a ten-minute queue-overdue alert, without an email
 blaming an unassigned staff member. No public timing promise or numerical cap.
+
+S162 shortens the assigned-work target to two minutes while retaining the
+ten-minute unassigned queue target, existing bounded worker cadence, private
+manager-email payload, exact-once assignment/cycle keys and stale suppression.
+The worker records a due notice on its next sweep; the customer UI has a separate
+three-minute-thirty-second live-wait handoff. No schema or provider setting
+changes are required.
 
 GIVEN an assigned cycle first becomes overdue for the current assignment THEN
 atomically persist one per-admin/operations-manager email job alongside the

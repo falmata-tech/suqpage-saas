@@ -3,12 +3,13 @@ import crypto from 'node:crypto';
 import {getDb,closeDbForTests} from './testing/postgres-fixture';
 import {migratePostgresDatabase} from '../lib/postgres-migrations';
 import {removeEmptyTrackingSchema} from './testing/tracking-migration-compat';
-import {supportAssignmentReplyDueAt,supportReplyOverdueSource,SUPPORT_STAFF_REPLY_TARGET_MS} from '../lib/support-assignment-response';
+import {supportAssignmentReplyDueAt,supportReplyOverdueSource,SUPPORT_STAFF_REPLY_TARGET_MS,SUPPORT_UNASSIGNED_QUEUE_TARGET_MS} from '../lib/support-assignment-response';
 
 function policy(){
- const t=1_800_000_000_000,target=10*60_000;
+ const t=1_800_000_000_000,target=SUPPORT_STAFF_REPLY_TARGET_MS,queueTarget=SUPPORT_UNASSIGNED_QUEUE_TARGET_MS;
  assert.equal(SUPPORT_STAFF_REPLY_TARGET_MS,target);
- assert.equal(supportAssignmentReplyDueAt(t,null),t+target);
+ assert.equal(queueTarget,10*60_000);
+ assert.equal(supportAssignmentReplyDueAt(t,null),t+queueTarget);
  assert.equal(supportAssignmentReplyDueAt(t,t-1),t+target);
  assert.equal(supportAssignmentReplyDueAt(t,t+100),t+100+target);
  assert.equal(supportAssignmentReplyDueAt(t+100,t),t+100+target);
@@ -18,7 +19,7 @@ function policy(){
  assert.equal(supportReplyOverdueSource(1,2,3),'support-reply-overdue:1:2:3');
  assert.equal(supportReplyOverdueSource(1,2,0),'support-reply-overdue:1:2:0');
  for(const invalid of [NaN,-1,1.2])assert.throws(()=>supportReplyOverdueSource(1,2,invalid));
- console.log('PASS S126 pure assignment-aware10-minute deadline and epoch-scoped escalation identity.');
+ console.log('PASS S162 pure2-minute assigned and10-minute unassigned deadlines with epoch-scoped escalation identity.');
 }
 async function main(){
  policy();if(process.argv.includes('--pure'))return;

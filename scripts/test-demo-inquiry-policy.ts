@@ -55,7 +55,7 @@ test('FE-066 official profile examples are selective public links and never conf
   assert.deepEqual(publicBusinessCatalog(forged,{email:'fixture@example.invalid',website:'https://example.invalid',facebook:'unverified_shop'},phone).business.approvedDemoContactMethods,[]);
 });
 
-test('FE-066 actual web footer exposes approved messaging links and keeps fake demo contacts inert',async()=>{
+test('FE-066 web footer keeps messaging in the inquiry chooser and fake demo contacts inert',async()=>{
   const result=await build({stdin:{loader:'tsx',resolveDir:process.cwd(),contents:`import React from 'react';import{renderToStaticMarkup}from'react-dom/server';import Profile from './components/showroom/BusinessProfile';export function render(catalog,contacts,previewMode=false){return renderToStaticMarkup(<Profile catalog={catalog} products={[]} categories={[]} filter='all' setFilter={()=>{}} query='' setQuery={()=>{}} cartCount={0} openCart={()=>{}} openProduct={()=>{}} addProduct={()=>{}} profile={{template:'profile-v1',coverStyle:'blended',about:'Fixture description',introduction:'',heroImage:'',videoUrl:'',contacts}} previewMode={previewMode}/>);}`},bundle:true,write:false,platform:'node',format:'cjs',external:['react','react-dom/server','lucide-react'],plugins:[{name:'footer-presentation-ports',setup(b){
     b.onResolve({filter:/\.css$/},args=>({path:args.path,namespace:'ports'}));
     b.onResolve({filter:/^(?:@\/lib\/i18n\/ui|\.\.\/SocialVideoFrame)$/},args=>({path:args.path,namespace:'ports'}));
@@ -65,7 +65,8 @@ test('FE-066 actual web footer exposes approved messaging links and keeps fake d
   vm.runInNewContext(result.outputFiles[0].text,{module:mod,exports:mod.exports,require:createRequire(import.meta.url),URL,URLSearchParams,process});
   const allContacts={...contacts,tiktok:'fixture_shop',instagram:'fixture_shop',facebook:'fixture_shop'};
   const approved=publicBusinessCatalog(catalog,allContacts,phone),html=mod.exports.render(approved,allContacts);
-  for(const href of ['https://wa.me/447700900123','https://t.me/+447700900123','tel:+447700900123'])assert.ok(html.includes(`href="${href}"`),href);
+  assert.ok(html.includes('Contact this business'));
+  for(const href of ['https://wa.me/447700900123','https://t.me/+447700900123','tel:+447700900123'])assert.ok(!html.includes(`href="${href}"`),`Messaging belongs in the inquiry chooser: ${href}`);
   for(const fragment of ['href="mailto:','href="https://example.invalid','href="https://www.tiktok.com','href="https://www.instagram.com','href="https://www.facebook.com'])assert.ok(!html.includes(fragment),fragment);
   const unapproved=mod.exports.render(publicBusinessCatalog(catalog,allContacts),allContacts);
   assert.ok(!unapproved.includes('href="https://wa.me/')&&!unapproved.includes('href="https://t.me/'));

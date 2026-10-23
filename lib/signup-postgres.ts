@@ -52,7 +52,7 @@ export async function createPostgresPublicClientWorkspace(
         "INSERT INTO business_onboarding_profiles(business_id,declared_category_key,idempotency_key,created_at,updated_at) VALUES(?,?,?,?,?)",
         [businessId, input.businessCategory, input.idempotencyKey, now, now],
       );
-      await initializeBusinessStarter(runner, { businessId, actorUserId: userId, category: input.businessCategory, placeId: input.place.id, notificationEmail: input.email, accentColor: input.accentColor });
+      await initializeBusinessStarter(runner, { businessId, actorUserId: userId, category: input.businessCategory, placeId: input.place.id, notificationEmail: input.email, accentColor: input.accentColor, storefrontPoint: input.storefrontPoint });
       return { userId, businessId };
     }); } catch(error) {
       const conflict = (error instanceof SignupError && error.code==='handle_conflict') ||

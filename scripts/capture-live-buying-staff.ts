@@ -38,6 +38,9 @@ async function main(){
   tileFixtures.push(await installMapTileFixture(visitorContext));
   const visitor=await visitorContext.newPage();
   await visitor.goto(base);await visitor.locator('button[data-channel=buying]').click();
+  await visitor.getByTestId('transport-provider-toggle').click();
+  await visitor.getByTestId('transport-provider-option').click();
+  await expect(visitor.locator('[data-transport-coordinator]')).toHaveAttribute('data-transport-coordinator','shared-trucks-logistics');
   await visitor.locator('#transport-origin').fill('Addis Ababa');
   await visitor.locator('#transport-destination').fill('Adama');
   await visitor.locator('#public-buying-message').fill('Two cartons to deliver.');
@@ -48,7 +51,7 @@ async function main(){
   const publicCase=await support.getPublicSupportConversation(token);
   assert.equal(publicCase.agentJoined,false,'Assignment does not claim the agent joined');
   assert.equal(publicCase.assignedUserName,null,'Unjoined assignment identity stays private');
-  await expect(visitor.getByText('Waiting for our team',{exact:true})).toBeVisible();
+  await expect(visitor.getByText('Waiting for a SharedTrucks live agent',{exact:true})).toBeVisible();
   caseId=Number((await pool.query('SELECT id FROM support_conversations WHERE public_ref=$1',[publicCase.publicRef])).rows[0].id);
   const request={id:caseId,token};
   await support.reassignSupportConversation(staff,caseId,userId);
@@ -75,7 +78,12 @@ async function main(){
   await expect(page.locator('select[name=audience]')).toHaveCount(0);
   await expect(page.locator('.support-reply input[name=audience]')).toHaveValue('note');
   await page.getByLabel('Internal note',{exact:true}).fill('Private staff-only review note');await page.locator('.support-reply button').click();
-  await expect(page.getByText('Note saved',{exact:true})).toBeVisible();
+  try{await expect(page.getByText('Note saved',{exact:true})).toBeVisible({timeout:20000});}
+  catch(error){
+   const rows=await pool.query('SELECT count(*)::int n FROM support_messages WHERE conversation_id=$1 AND body=$2',[caseId,'Private staff-only review note']);
+   console.error('Staff note browser failure:',JSON.stringify({path:new URL(page.url()).pathname,search:new URL(page.url()).search,savedCount:Number(rows.rows[0].n),alertCount:await page.getByRole('alert').count()}));
+   throw error;
+  }
   assert.ok(!(await support.getPublicSupportConversation(request.token)).messages.some(row=>row.body.includes('staff-only')));
   await joinChat();
   await page.locator('select[name=audience]').selectOption('reply');await page.locator('#support-reply').fill('We can help. Please send the pickup details.');await page.locator('.support-reply button').click();

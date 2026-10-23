@@ -113,6 +113,6 @@ test('FE-041 direct product inquiry does not alter saved items; A and B Add reta
 
 test('FE-041 native showroom removes only redundant inline list access and retains configured contact links',async()=>{
   const{fixture,render}=await component('ShowroomContent'),ready=product(1),business={...shop([ready]),isDemo:false,contacts:{whatsapp:'+12025550123',telegram:'test_business'}};fixture.basket={shop:business,items:[item(ready)]};
-  const tree=render({shop:business},'ShowroomContent');assert.ok(!tree.some(node=>String(node.props.label).startsWith('View inquiry list')));assert.ok(tree.some(node=>node.props.accessibilityLabel==='Product 1'));assert.ok(tree.some(node=>node.props.accessibilityLabel==='WhatsApp'),'Configured social contact is preserved');
+  const tree=render({shop:business},'ShowroomContent');assert.ok(!tree.some(node=>String(node.props.label).startsWith('View inquiry list')));assert.ok(tree.some(node=>node.props.accessibilityLabel==='Product 1'));assert.ok(tree.some(node=>node.props.label==='Contact this business'),'The showroom opens the shared inquiry chooser for configured messaging contacts');assert.ok(!tree.some(node=>node.props.accessibilityLabel==='WhatsApp'),'Messaging contacts are not duplicated beside showroom social pages');
   const preview=render({shop:business,preview:true},'ShowroomContent');assert.ok(!preview.some(node=>node.props.testID==='public-action-dock'||String(node.props.label).startsWith('View inquiry list')));
 });

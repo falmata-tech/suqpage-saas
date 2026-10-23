@@ -16,17 +16,17 @@ const bundled=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
  L.Map.addInitHook(function(){window.fixture.maps.push(this);});
  const root=createRoot(document.getElementById('root')),controls=React.createRef();
  window.fixture.mount=shop=>flushSync(()=>root.render(<MarketMap ref={controls} shops={[shop]} height={500} onSelect={value=>window.fixture.selected.push(value.id)}/>));
- function CallbackFreshness({shops}){
+ function CallbackFreshness({shops,capacity=3}){
   const [zoom,setZoom]=React.useState(6),[generation,setGeneration]=React.useState(0);
-  const index=React.useMemo(()=>markerIndex(shops),[shops]);
+  const index=React.useMemo(()=>markerIndex(shops,capacity),[shops,capacity]);
   window.fixture.replaceHandlers=()=>flushSync(()=>setGeneration(value=>value+1));
-  return <><output id="parent-zoom">{zoom}</output><MarketMap shops={shops} height={500} onZoomChange={setZoom}
+  return <><output id="parent-zoom">{zoom}</output><MarketMap shops={shops} groupCapacity={capacity} height={500} onZoomChange={setZoom}
     onGroup={members=>{window.fixture.groupAttempts.push({zoom,generation});if(currentGroupMembers(index,shops,members.map(value=>value.id),zoom).length)window.fixture.openedGroups.push({ids:members.map(value=>value.id),generation});}}
     onSelect={value=>window.fixture.selectedHandlers.push({id:value.id,zoom,generation})}/></>;
  }
- window.fixture.mountFreshness=shops=>flushSync(()=>root.render(<CallbackFreshness shops={shops}/>));
+ window.fixture.mountFreshness=(shops,capacity)=>flushSync(()=>root.render(<CallbackFreshness shops={shops} capacity={capacity}/>));
  window.fixture.mountFlex=shop=>flushSync(()=>root.render(<MarketMap shops={[shop]} height={100} onSelect={value=>window.fixture.selected.push(value.id)} onViewChange={value=>window.fixture.viewpoints.push(value)}/>));
- const fractional=L.CRS.EPSG3857.pointToLatLng(L.point(41363957.584632345,31755378.063858584),18);window.fixture.fractionalView={center:[fractional.lng,fractional.lat],zoom:18};
+ const fractional=L.CRS.EPSG3857.pointToLatLng(L.point(1292623.674519761,992355.5644955807),13);window.fixture.fractionalView={center:[fractional.lng,fractional.lat],zoom:13};
  window.fixture.mountCamera=view=>flushSync(()=>root.render(<MarketMap shops={[]} height={300} initialView={view} onSelect={()=>{}} onViewChange={value=>window.fixture.viewpoints.push(value)}/>));
  window.fixture.unmount=()=>flushSync(()=>root.render(null));window.fixture.controls=controls;
 `},bundle:true,write:false,platform:'browser',format:'iife',define:{'process.env.NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER':'"osm-standard"'},plugins:[{name:'map-lifecycle-ports',setup(builder){
@@ -118,23 +118,47 @@ test('FE-053 S140 actual Expo Leaflet opens exposed groups below maximum with cu
   await page.evaluate(rows=>(window as unknown as{fixture:Probe}).fixture.mountFreshness(rows),shops);
   await page.waitForFunction(()=>(window as unknown as{fixture:Probe}).fixture.maps[0]?._loaded);
   await page.waitForFunction(()=>Boolean(document.querySelector('.leaflet-container[data-map-zoom]')));
-  await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.maps[0].setView([9.03,39.7],13,{animate:false}));
-  await page.waitForFunction(()=>document.getElementById('parent-zoom')?.textContent==='13').catch(async error=>{
+  await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.maps[0].setView([9.03,39.7],12,{animate:false}));
+  await page.waitForFunction(()=>document.getElementById('parent-zoom')?.textContent==='12').catch(async error=>{
    console.error('S140 Expo controlled fixture diagnosis',await page.evaluate(()=>{const map=(window as unknown as{fixture:Probe}).fixture.maps[0];return{sdkZoom:map.getZoom(),sdkCenter:map.getCenter(),parentZoom:document.getElementById('parent-zoom')?.textContent,mapZoom:document.querySelector<HTMLElement>('.leaflet-container')?.dataset.mapZoom};}),errors);throw error;
   });
   const view=()=>page.evaluate(()=>{const map=(window as unknown as{fixture:Probe}).fixture.maps[0],center=map.getCenter();return{zoom:map.getZoom(),center:[center.lat,center.lng]};});const before=await view();
   await page.getByRole('button',{name:'2 businesses. View businesses.',exact:true}).click();
-  assert.deepEqual(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.groupAttempts),[{zoom:13,generation:0}],'The first click after SDK zoom must reach the current parent callback');
+  assert.deepEqual(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.groupAttempts),[{zoom:12,generation:0}],'The first click after SDK zoom must reach the current parent callback');
   assert.deepEqual(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.openedGroups),[{ids:[41,42],generation:0}]);
   assert.deepEqual(await view(),before,'Opening an already exposed final group cannot change the raw SDK camera');
   await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.maps[0].panTo([9.1,39.8],{animate:false}));
   await page.getByRole('button',{name:'Isolated freshness',exact:true}).waitFor();
   await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.replaceHandlers());
   await page.getByRole('button',{name:'Isolated freshness',exact:true}).click();
-  assert.deepEqual(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.selectedHandlers),[{id:43,zoom:13,generation:1}],'A retained marker must dispatch the replaced current selection callback');
+  assert.deepEqual(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.selectedHandlers),[{id:43,zoom:12,generation:1}],'A retained marker must dispatch the replaced current selection callback');
   await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.unmount());
  }finally{await browser.close();}
  assert.deepEqual(errors,[]);
+});
+
+test('FE-021 S154 actual Expo Leaflet21 area businesses reach fitting city groups at phone and desktop widths',{timeout:45000},async()=>{
+ const browser=await chromium.launch({channel:'chrome',headless:true,timeout:20000}),errors:string[]=[];
+ try{for(const[width,capacity,expected]of[[390,3,7],[1440,6,4]]){
+  const page=await browser.newPage({viewport:{width,height:844}});page.setDefaultTimeout(8000);page.on('pageerror',error=>errors.push(error.stack||error.message));
+  await page.route('https://**',route=>route.abort('blockedbyclient'));
+  await page.setContent('<main id="root" style="width:'+width+'px;height:600px"></main>');
+  await page.addStyleTag({path:nativeRequire.resolve('leaflet/dist/leaflet.css')});
+  await page.addScriptTag({content:'window.fixture={maps:[],selected:[],markerUnmounts:0,groupAttempts:[],openedGroups:[],selectedHandlers:[]};'});await page.addScriptTag({content:(await bundled).outputFiles[0].text});
+  const shops=Array.from({length:21},(_,i)=>({id:i+1,handle:'city-'+i,name:'City business '+i,description:'',heroImagePath:'',city:'Addis Ababa',region:'',latitude:9.03,longitude:38.75,locationMode:'area'}));
+  type Probe={maps:Array<{_loaded:boolean;getZoom:()=>number;getCenter:()=>{lat:number;lng:number};setView:(center:number[],zoom:number,options:{animate:boolean})=>void}>;mountFreshness:(rows:typeof shops,capacity:number)=>void;openedGroups:Array<{ids:number[]}>;unmount:()=>void};
+  await page.evaluate(({shops,capacity})=>(window as unknown as{fixture:Probe}).fixture.mountFreshness(shops,capacity),{shops,capacity});
+  await page.waitForFunction(()=>(window as unknown as{fixture:Probe}).fixture.maps[0]?._loaded);
+  await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.maps[0].setView([9.03,38.75],6,{animate:false}));
+  await page.getByRole('button',{name:'21 businesses. Zoom in.',exact:true}).click();
+  await page.waitForFunction(()=>document.getElementById('parent-zoom')?.textContent==='12');
+  const buttons=page.getByRole('button',{name:/businesses\. View businesses\./});await buttons.nth(expected-1).waitFor();assert.equal(await buttons.count(),expected);
+  const before=await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return{zoom:m.getZoom(),center:m.getCenter()};});
+  for(let i=0;i<expected;i++){const button=buttons.nth(i);assert.equal(await button.evaluate(el=>{const r=el.getBoundingClientRect();return el===document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);}),true,'Each current circle has its own exposed pointer target');await button.click();}
+  const opened=await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.openedGroups);assert.deepEqual(opened.flatMap(item=>item.ids).sort((a,b)=>a-b),shops.map(item=>item.id));assert.ok(opened.every(item=>item.ids.length<=capacity));
+  assert.deepEqual(await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return{zoom:m.getZoom(),center:m.getCenter()};}),before,'Every terminal click opens in place');
+  await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.unmount());await page.close();
+ }}finally{await browser.close();}assert.deepEqual(errors,[]);
 });
 
 test('FE-053 actual Expo Leaflet observes initial zero-width flex layout without window resize and cleans pending container work',{timeout:45000},async()=>{
@@ -187,7 +211,7 @@ test('FE-065 S136 actual Expo Leaflet saves exact fractional intent while raw re
   type CameraMap=import('leaflet').Map&{_loaded:boolean};
   type CameraProbe={maps:CameraMap[];fractionalView:View;viewpoints:View[];mountCamera:(view:View)=>void;unmount:()=>void};
   let saved=await page.evaluate(()=>(window as unknown as{fixture:CameraProbe}).fixture.fractionalView);
-  const original={x:41363957.584632345,y:31755378.063858584};
+  const original={x:1292623.674519761,y:992355.5644955807};
   for(let cycle=0;cycle<3;cycle++){
    await page.evaluate(view=>(window as unknown as{fixture:CameraProbe}).fixture.mountCamera(view),saved);
    await page.waitForFunction(()=>(window as unknown as{fixture:CameraProbe}).fixture.maps.at(-1)?._loaded);await page.waitForTimeout(80);
@@ -207,8 +231,8 @@ test('FE-065 S136 actual Expo Leaflet saves exact fractional intent while raw re
   await page.waitForFunction(()=>(window as unknown as{fixture:CameraProbe}).fixture.maps.at(-1)?._loaded);await page.waitForTimeout(80);
   const panned=await page.evaluate(()=>{const f=(window as unknown as{fixture:CameraProbe}).fixture,m=f.maps.at(-1)!;f.viewpoints=[];m.panBy([17,-9],{animate:false});const actual=m.getCenter();return{actual:[actual.lng,actual.lat],view:f.viewpoints.at(-1)!};});
   assert.deepEqual(panned.view.center,panned.actual,'Genuine SDK pan replaces the previous resize-only intent');
-  const zoomed=await page.evaluate(()=>{const f=(window as unknown as{fixture:CameraProbe}).fixture,m=f.maps.at(-1)!;m.setZoom(17,{animate:false});const actual=m.getCenter();return{actual:[actual.lng,actual.lat],view:f.viewpoints.at(-1)!};});
-  assert.equal(zoomed.view.zoom,17);assert.deepEqual(zoomed.view.center,zoomed.actual);
+  const zoomed=await page.evaluate(()=>{const f=(window as unknown as{fixture:CameraProbe}).fixture,m=f.maps.at(-1)!;m.setZoom(12,{animate:false});const actual=m.getCenter();return{actual:[actual.lng,actual.lat],view:f.viewpoints.at(-1)!};});
+  assert.equal(zoomed.view.zoom,12);assert.deepEqual(zoomed.view.center,zoomed.actual);
   await page.evaluate(()=>(window as unknown as{fixture:CameraProbe}).fixture.unmount());await page.waitForTimeout(260);assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });

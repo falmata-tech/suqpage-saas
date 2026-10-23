@@ -17,6 +17,7 @@ import {
   type Offering,
 } from "@suqpage/contracts";
 import { PUBLIC_ORIGIN } from "./public-origin";
+import { credentialStorageKeys } from "./credential-storage-keys";
 import {useResourceLoad} from './use-resource-load';
 import { createUiText, languageNames, locales, enabledLocales, parseLocale } from "../../../lib/i18n/core";
 import am from "../../../lib/i18n/messages/am.json";
@@ -42,13 +43,16 @@ export const secure = {
 };
 const authUrl = process.env.EXPO_PUBLIC_SUPABASE_URL,
   authKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const credentialKeys = credentialStorageKeys(typeof __DEV__ !== "undefined" && __DEV__, API, authUrl);
+export const ownerStorageKey = credentialKeys.owner;
+export const transportStorageKey = credentialKeys.transport;
 export const auth =
   authUrl && authKey
     ? createClient(authUrl, authKey, {
         global: { fetch: boundedAuthFetch() },
         auth: {
           storage: secure,
-          storageKey: "suqpage-owner-session",
+          storageKey: ownerStorageKey,
           persistSession: true,
           autoRefreshToken: true,
           detectSessionInUrl: false,
@@ -122,6 +126,10 @@ type Runtime = {
   authRetryAvailable: boolean;
   retryAuth: () => void;
   clearAuthIssue: () => void;
+  requestAccountEntry: () => void;
+  cancelAccountEntry: () => void;
+  accountEntryReady: boolean;
+  consumeAccountEntry: () => void;
   locale: Locale;
   setLocale: (v: Locale) => void;
   t: ReturnType<typeof createUiText>;
@@ -143,10 +151,15 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
     [authIssue, setAuthIssue] = useState(""),
     [logoutState, setLogoutState] = useState<"pending" | "failed" | null>(null),
     [validationRevision, setValidationRevision] = useState(0),
+    [accountEntryActor, setAccountEntryActor] = useState<string | null>(null),
     [ready, setReady] = useState(!auth),
     [locale, setLanguage] = useState<Locale>("en"),
     [basket, setBasket] = useState<Runtime["basket"]>(null);
   const logoutFence = useRef(false), logoutTask = useRef<Promise<void> | null>(null);
+  const accountEntryRequested = useRef(false);
+  const requestAccountEntry = useCallback(() => {accountEntryRequested.current = true;}, []);
+  const cancelAccountEntry = useCallback(() => {accountEntryRequested.current = false;}, []);
+  const consumeAccountEntry = useCallback(() => setAccountEntryActor(null), []);
   useEffect(() => {
     let active = true;
     secure.getItem("suqpage-language").then((v) => {
@@ -162,6 +175,8 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
       // Never await Auth or API work inside this callback: Supabase holds its lock.
       if (logoutFence.current) return;
       setCandidate(s);
+      if(!s)accountEntryRequested.current=false;
+      setAccountEntryActor(actor=>actor===s?.user.id?actor:null);
       setSession(current=>current?.user.id===s?.user.id?current:null);
       setReady(!s);
     });
@@ -182,6 +197,7 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback((preserveAuthIssue = false) => {
     if (logoutTask.current) return logoutTask.current;
     logoutFence.current = true;
+    accountEntryRequested.current = false;setAccountEntryActor(null);
     setSession(null);setCandidate(null);setBasket(null);setReady(true);
     setLogoutState("pending");if (!preserveAuthIssue) setAuthIssue("");
     auth?.auth.stopAutoRefresh();
@@ -197,7 +213,7 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
         setCandidate(null);
         setBasket(null);
       },
-      removeStoredSession: () => secure.removeItem("suqpage-owner-session"),
+      removeStoredSession: () => secure.removeItem(ownerStorageKey),
     }).then(() => {
       logoutFence.current = false;
       setLogoutState(null);if (!preserveAuthIssue) setAuthIssue("");
@@ -217,13 +233,17 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
     setReady(false);
     request("session", {token: candidate.access_token, signal: controller.signal})
       .then(() => {
-        if (current && !logoutFence.current) {setSession(candidate);setAuthIssue("");}
+        if (current && !logoutFence.current) {
+          setSession(candidate);setAuthIssue("");
+          if(accountEntryRequested.current){accountEntryRequested.current=false;setAccountEntryActor(candidate.user.id);}
+        }
       })
       .catch(async error => {
         if (!current || logoutFence.current) return;
         setSession(null);
         const denied = error instanceof ApiFailure && (error.status === 401 ||
           error.code === "staff_web_only" || error.code === "owner_only");
+        if(denied){accountEntryRequested.current=false;setAccountEntryActor(null);}
         setAuthIssue(error instanceof ApiFailure && error.status === 403
           ? "Staff accounts sign in on the website."
           : denied ? "Sign in to MirtPage." : "Unable to connect. Please try again.");
@@ -263,6 +283,10 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
         authRetryAvailable: Boolean(candidate && authIssue),
         retryAuth: () => setValidationRevision(v => v + 1),
         clearAuthIssue: () => {if (!logoutFence.current) setAuthIssue("");},
+        requestAccountEntry,
+        cancelAccountEntry,
+        accountEntryReady: accountEntryActor !== null && accountEntryActor === session?.user.id,
+        consumeAccountEntry,
         locale,
         setLocale: (v) => {
           const next = parseLocale(v);

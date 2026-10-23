@@ -63,8 +63,10 @@ export function buildSocialInquiryMessage(
   business: Pick<Business, "name" | "handle">,
   items: SocialInquiryItem[], origin: string, t: UiText = createUiText({}),
 ): string {
+  const products=items.filter(item=>!item.service);
+  if(products.length===0)return [t("Hello {value1},",{value1:business.name}),"",t("Could you tell me what products are available and how I can order?"),"",`${origin.replace(/\/$/,"")}/@${encodeURIComponent(business.handle)}`].join("\n");
   return [t("Hello {value1},", { value1: business.name }), "",
-    t("I'd like to ask about:"), ...items.filter(item=>!item.service).flatMap((item, index) => [
+    t("I'd like to ask about:"), ...products.flatMap((item, index) => [
       `${index + 1}. ${item.name}`,
       ...Object.entries(item.options).map(([name, value]) => `   ${name}: ${value}`),
       ...(item.quantity.trim() ? [`   ${t(item.service ? "Request" : "Quantity")}: ${item.quantity.trim()}`] : []),

@@ -3,6 +3,7 @@ import { test } from "node:test";
 import vm from "node:vm";
 import {createRequire} from 'node:module';
 import { build } from "esbuild";
+import {ABOUT_STOREFRONT_SECTIONS} from "../lib/storefront-copy";
 
 type Element = { type: string | ((props: Record<string, unknown>) => Element); props: Record<string, unknown> & { children?: unknown } };
 type Gesture = { dx: number; dy: number; vx: number };
@@ -25,7 +26,7 @@ const bundled = build({ entryPoints: ["apps/mobile/app/(tabs)/index.tsx", "apps/
     b.onResolve({ filter: /(?:^|\/)(runtime|ui|chrome|blocked-businesses|MarketMap|MapGroupPicker|use-market-feed|PublicActionDock)$/ }, args => ({ path: args.path.split("/").at(-1)!, namespace: "ports" }));
     b.onLoad({ filter: /.*/, namespace: "ports" }, args => ({ loader: "js", contents:
       args.path === "react" ? `
-        export const useState=initial=>{const i=fixture.stateCursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return [fixture.states[i],value=>{fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value;}];};
+        export const createContext=initial=>({Provider:'ContextProvider',initial}),useContext=context=>context.initial;export const useState=initial=>{const i=fixture.stateCursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return [fixture.states[i],value=>{fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value;}];};
         export const useRef=initial=>{const i=fixture.refCursor++;return fixture.refs[i]||(fixture.refs[i]={current:initial});};
         export const useEffect=(create,deps)=>{const i=fixture.effectCursor++,old=fixture.effects[i];if(!old||deps.some((value,j)=>value!==old.deps[j]))fixture.pendingEffects.push(()=>{old?.cleanup?.();fixture.effects[i]={deps,cleanup:create()};});};
         export const useCallback=fn=>fn,useMemo=fn=>fn();export default {};
@@ -187,6 +188,30 @@ test("FE-053 actual Market component preserves the mounted panes and follows onl
   assert.ok(!tree.some(node=>node.props.accessibilityLabel==='About MirtPage'||node.type==='Sheet'&&node.props.title==='About MirtPage'),'Market leaves its narrative on the dedicated About page');
 });
 
+test('FE-053 S153 inactive Market panes preserve native hiding and explicitly isolate installed Web controls',async()=>{
+ const require=createRequire(import.meta.url),React=require('react'),{renderToStaticMarkup}=require('react-dom/server'),{View,Pressable,Text}=require('react-native-web');
+ for(const platform of['android','ios','web']){
+  const state=fixture();state.platform=platform;const render=await component('index',state);let tree=render();
+  for(const products of[false,true,false]){
+   selectMode(tree,products);tree=render();
+   const map=tree.find(node=>node.type==='AnimatedView'&&style(node).left===0)!,drawer=tree.find(node=>node.props.testID==='search-drawer')!;
+   for(const[pane,hidden,label]of[[map,products,'Map control'],[drawer,!products,'Product control']] as const){
+    assert.equal(pane.props.accessibilityElementsHidden,hidden);assert.equal(pane.props.importantForAccessibility,hidden?'no-hide-descendants':'auto');
+    assert.equal(pane.props['aria-hidden'],hidden,'The installed Web adapter needs explicit hidden state');assert.equal(pane.props.inert,platform==='web'?hidden:undefined,'Only Web receives the DOM inert property');
+    assert.equal(style(pane).pointerEvents,hidden?'none':'auto');
+    if(platform==='web'){
+     const markup=renderToStaticMarkup(React.createElement(View,{...pane.props,children:undefined,style:undefined},React.createElement(Pressable,{accessibilityRole:'button',onPress(){}},React.createElement(Text,null,label))));
+     const wrapper=markup.slice(0,markup.indexOf('>')+1);assert.equal(wrapper.includes('aria-hidden="true"'),hidden,'Installed RNWeb omits false hidden state on the active pane');assert.equal(/\binert(?:="[^"]*")?(?=[\s>])/.test(wrapper),hidden,'Inert must block browser Tab traversal only while the pane is inactive');
+     assert.ok(markup.includes('tabindex="0"'),'The regression contains a real normally keyboard-focusable descendant');
+    }
+   }
+   const handle=tree.find(node=>node.type==='Pressable'&&['Map only','View products'].includes(String(node.props.accessibilityLabel)))!;
+   assert.ok(handle);assert.ok(!nodes(map).includes(handle)&&!nodes(drawer).includes(handle),'The dedicated switch handle stays outside either inert subtree');
+   assert.equal(tree.filter(node=>node.type==='MarketMap').length,1);assert.equal(tree.filter(node=>node.type==='FlatList').length,1,'Selection never unmounts the retained panes');
+  }
+ }
+});
+
 test("FE-065 actual native controls keep four balanced wrapping filters visible with48px targets", async () => {
   const state = fixture(), render = await component("MarketSearchControls", state);
   const tree = render({ scope: "products", value: { query: "chairs", categories: [], countries: ["ET"], cities: [], madeToOrder: false, page: 1 }, onChange() {}, metadata: { categories: [], countries: [], places: [] } });
@@ -325,21 +350,21 @@ test('FE-053 S127 Market group preview preserves map/selection and zoom controls
   Object.assign(state.feed.batch.data,{showrooms:shops});let tree=render();tree=render();
   const map=()=>tree.find(node=>node.type==='MarketMap')!,picker=()=>tree.find(node=>node.type==='MapGroupPicker')!;
   const cameraCalls:unknown[]=[];(map().props.ref as{current:unknown}).current={focus:(value:unknown)=>cameraCalls.push(value)};
-  (map().props.onZoomChange as(value:number)=>void)(17);(map().props.onViewChange as(value:unknown)=>void)({center:[38.75,9.03],zoom:17});tree=render();(map().props.onGroup as(value:typeof shops)=>void)(shops);tree=render();assert.equal(picker().props.visible,true);assert.deepEqual(Array.from(picker().props.shops as typeof shops,shop=>shop.id),[1,2,3]);
+  (map().props.onZoomChange as(value:number)=>void)(12);(map().props.onViewChange as(value:unknown)=>void)({center:[38.75,9.03],zoom:12});tree=render();(map().props.onGroup as(value:typeof shops)=>void)(shops);tree=render();assert.equal(picker().props.visible,true);assert.deepEqual(Array.from(picker().props.shops as typeof shops,shop=>shop.id),[1,2,3]);
   (picker().props.onSelect as(value:typeof shops[number])=>void)(shops[2]);tree=render();assert.equal(picker().props.visible,false);assert.ok(tree.some(node=>node.type==='Sheet'&&node.props.title==='Business'&&node.props.visible===true));assert.deepEqual(cameraCalls,[],'Picking a grouped business never pans or zooms');
   (tree.find(node=>node.type==='Button'&&node.props.label==='Back to businesses')!.props.onPress as()=>void)();tree=render();assert.equal(picker().props.visible,true);assert.deepEqual(cameraCalls,[]);
   (picker().props.onSelect as(value:typeof shops[number])=>void)(shops[2]);tree=render();(tree.find(node=>node.type==='Button'&&node.props.label==='Explore this business')!.props.onPress as()=>void)();tree=render();assert.equal(picker().props.visible,false,'Retained Market modal must not overlay the full business route');assert.equal(tree.find(node=>node.type==='Sheet'&&node.props.title==='Business')?.props.visible,false);assert.equal((state.routes.at(-1)as{pathname:string}).pathname,'/shop/[handle]');state.focused=true;tree=render();assert.equal(picker().props.visible,true,'Actual route return restores the group, without reopening individual detail');
-  (map().props.onZoomChange as(value:number)=>void)(17);tree=render();assert.equal(tree.find(node=>node.type==='IconButton'&&node.props.label==='Zoom in')?.props.disabled,true);
-  state.platform='web';tree=render();assert.equal(tree.find(node=>node.type==='IconButton'&&node.props.label==='Zoom in')?.props.disabled,false);(map().props.onZoomChange as(value:number)=>void)(18);tree=render();assert.equal(tree.find(node=>node.type==='IconButton'&&node.props.label==='Zoom in')?.props.disabled,true);
+  (map().props.onZoomChange as(value:number)=>void)(12);tree=render();assert.equal(tree.find(node=>node.type==='IconButton'&&node.props.label==='Zoom in')?.props.disabled,true);
+  state.platform='web';tree=render();assert.equal(tree.find(node=>node.type==='IconButton'&&node.props.label==='Zoom in')?.props.disabled,false);(map().props.onZoomChange as(value:number)=>void)(13);tree=render();assert.equal(tree.find(node=>node.type==='IconButton'&&node.props.label==='Zoom in')?.props.disabled,true);
   (map().props.onZoomChange as(value:number)=>void)(1);tree=render();assert.equal(tree.find(node=>node.type==='IconButton'&&node.props.label==='Zoom out')?.props.disabled,true);
   assert.ok(tree.some(node=>node.type==='MapGroupPicker'&&node.props.visible===true),'S140 keeps a sole current terminal group open without a needless maximum zoom');
-  Object.assign(state.feed.batch.data,{showrooms:shops.map((s,i)=>i===0?{...s,name:'Fresh eligible name'}:s)});(map().props.onZoomChange as(value:number)=>void)(18);(map().props.onViewChange as(value:unknown)=>void)({center:[38.75,9.03],zoom:18});tree=render();(map().props.onGroup as(value:typeof shops)=>void)(shops);tree=render();assert.equal((picker().props.shops as typeof shops)[0].name,'Fresh eligible name','Current scoped rows rehydrate fixed group identity without snapshots');
+  Object.assign(state.feed.batch.data,{showrooms:shops.map((s,i)=>i===0?{...s,name:'Fresh eligible name'}:s)});(map().props.onZoomChange as(value:number)=>void)(13);(map().props.onViewChange as(value:unknown)=>void)({center:[38.75,9.03],zoom:13});tree=render();(map().props.onGroup as(value:typeof shops)=>void)(shops);tree=render();assert.equal((picker().props.shops as typeof shops)[0].name,'Fresh eligible name','Current scoped rows rehydrate fixed group identity without snapshots');
 });
 
 test('FE-053 S127 full business navigation restores scoped group context after Market remount',async()=>{
   const state=fixture(),render=await component('index',state),shops=[1,2,3].map(id=>({id,handle:'remount-'+id,name:'Remount business '+id,city:'Fixture city',region:'',heroImagePath:'',description:'',latitude:9.03,longitude:38.75,locationMode:'storefront'}));Object.assign(state.feed.batch.data,{showrooms:shops});
-  let tree=render();tree=render();(tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[37.6,9.1],zoom:17});(tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(17);tree=render();(tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)(shops);tree=render();(tree.find(n=>n.type==='MapGroupPicker')!.props.onPositionChange as(value:unknown)=>void)({page:1,anchor:2});tree=render();(tree.find(n=>n.type==='MapGroupPicker')!.props.onSelect as(value:typeof shops[number])=>void)(shops[1]);tree=render();(tree.find(n=>n.type==='Button'&&n.props.label==='Explore this business')!.props.onPress as()=>void)();tree=render();assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true),'No off-route modal while the full business is open');
-  resetHooks(state);state.focused=true;tree=render();tree=render();const picker=tree.find(n=>n.type==='MapGroupPicker');assert.equal(picker?.props.visible,true,'New Market screen must restore its saved current group after ordinary Back');assert.deepEqual(Array.from(picker!.props.shops as typeof shops,s=>s.id),[1,2,3]);assert.equal(picker!.props.initialPage,0);assert.equal(picker!.props.initialAnchor,2,'Restored selection identity chooses its containing page at the current capacity');assert.deepEqual(JSON.parse(JSON.stringify(tree.find(n=>n.type==='MarketMap')!.props.initialView)),{center:[37.60000000000002,9.1],zoom:17});
+  let tree=render();tree=render();(tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[37.6,9.1],zoom:12});(tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(12);tree=render();(tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)(shops);tree=render();(tree.find(n=>n.type==='MapGroupPicker')!.props.onPositionChange as(value:unknown)=>void)({page:1,anchor:2});tree=render();(tree.find(n=>n.type==='MapGroupPicker')!.props.onSelect as(value:typeof shops[number])=>void)(shops[1]);tree=render();(tree.find(n=>n.type==='Button'&&n.props.label==='Explore this business')!.props.onPress as()=>void)();tree=render();assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true),'No off-route modal while the full business is open');
+  resetHooks(state);state.focused=true;tree=render();tree=render();const picker=tree.find(n=>n.type==='MapGroupPicker');assert.equal(picker?.props.visible,true,'New Market screen must restore its saved current group after ordinary Back');assert.deepEqual(Array.from(picker!.props.shops as typeof shops,s=>s.id),[1,2,3]);assert.equal(picker!.props.initialPage,0);assert.equal(picker!.props.initialAnchor,2,'Restored selection identity chooses its containing page at the current capacity');assert.deepEqual(JSON.parse(JSON.stringify(tree.find(n=>n.type==='MarketMap')!.props.initialView)),{center:[37.60000000000002,9.1],zoom:12});
   Object.assign(state.feed.batch.data,{showrooms:shops.filter(shop=>shop.id!==2)});resetHooks(state);tree=render();tree=render();assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true),'A removed member or repartition invalidates the complete old group, while retaining camera context');
   const controls=marketControls(tree);(controls.props.onChange as(value:Record<string,unknown>)=>void)({...controls.props.value as Record<string,unknown>,query:'Different scope'});tree=render();tree=render();assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true),'Changing business filters clears the old group return context');
 });
@@ -349,7 +374,7 @@ test('FE-053 S127 retained blurred map callbacks cannot overwrite the return cam
   const render=await component('index',state),shops=[1,2].map(id=>({id,handle:'blur-'+id,name:'Blur business '+id,city:'Fixture city',region:'',heroImagePath:'',description:'',latitude:9.03,longitude:38.75,locationMode:'storefront'}));
   Object.assign(state.feed.batch.data,{showrooms:shops});let tree=render();tree=render();
   const staleView=tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void;
-  staleView({center:[37.6,9.1],zoom:18});(tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(18);tree=render();
+  staleView({center:[37.6,9.1],zoom:13});(tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(13);tree=render();
   (tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)(shops);tree=render();
   (tree.find(n=>n.type==='MapGroupPicker')!.props.onSelect as(value:typeof shops[number])=>void)(shops[0]);tree=render();
   (tree.find(n=>n.type==='Button'&&n.props.label==='Explore this business')!.props.onPress as()=>void)();tree=render();
@@ -358,7 +383,7 @@ test('FE-053 S127 retained blurred map callbacks cannot overwrite the return cam
   staleView({center:[39.715576171875,9.037],zoom:6});
   assert.equal(state.storageWrites.length,writes,'Neither current nor previously retained SDK callback may write while Market is blurred');
   resetHooks(state);state.focused=true;tree=render();tree=render();
-  assert.deepEqual(JSON.parse(JSON.stringify(tree.find(n=>n.type==='MarketMap')!.props.initialView)),{center:[37.60000000000002,9.1],zoom:18},'Remount must recover the last visible camera, not a hidden-layout observation');
+  assert.deepEqual(JSON.parse(JSON.stringify(tree.find(n=>n.type==='MarketMap')!.props.initialView)),{center:[37.60000000000002,9.1],zoom:13},'Remount must recover the last visible camera, not a hidden-layout observation');
   (tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[38.7,9.2],zoom:12});
   assert.ok(state.storageWrites.length>writes,'Visible route camera updates resume normally');
 });
@@ -367,20 +392,20 @@ test('FE-053 adaptive Market passes one modal capacity to its map and clears inv
   const state=fixture();state.dimensions={width:1440,height:1000,fontScale:1};
   const shops=Array.from({length:6},(_,i)=>({id:i+1,handle:'capacity-'+i,name:'Capacity business '+i,city:'Fixture city',region:'',heroImagePath:'',description:'',latitude:9.03,longitude:38.75,locationMode:'storefront'}));Object.assign(state.feed.batch.data,{showrooms:shops});const render=await component('index',state);let tree=render();tree=render();
   assert.equal(tree.find(n=>n.type==='MarketMap')!.props.groupCapacity,6);
-  (tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[37.6,9.1],zoom:17});(tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(17);tree=render();
+  (tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[37.6,9.1],zoom:12});(tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(12);tree=render();
   (tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)(shops);tree=render();assert.equal((tree.find(n=>n.type==='MapGroupPicker')!.props.shops as typeof shops).length,6);
   (tree.find(n=>n.type==='MapGroupPicker')!.props.onSelect as(value:typeof shops[number])=>void)(shops[2]);tree=render();assert.ok(tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true));
-  state.dimensions={width:320,height:480,fontScale:2};tree=render();tree=render();assert.equal(tree.find(n=>n.type==='MarketMap')!.props.groupCapacity,1);assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true));assert.ok(!tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true),'Resize cannot leave a stale detail portal');assert.deepEqual(JSON.parse(JSON.stringify(tree.find(n=>n.type==='MarketMap')!.props.initialView)),{center:[37.6,9.1],zoom:17},'Capacity changes do not move the map');
+  state.dimensions={width:320,height:480,fontScale:2};tree=render();tree=render();assert.equal(tree.find(n=>n.type==='MarketMap')!.props.groupCapacity,1);assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true));assert.ok(!tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true),'Resize cannot leave a stale detail portal');assert.deepEqual(JSON.parse(JSON.stringify(tree.find(n=>n.type==='MarketMap')!.props.initialView)),{center:[37.6,9.1],zoom:12},'Capacity changes do not move the map');
   (tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)([shops[0]]);tree=render();assert.equal((tree.find(n=>n.type==='MapGroupPicker')!.props.shops as typeof shops).length,1,'A current forced single remains an admissible group');assert.equal(tree.find(n=>n.type==='MapGroupPicker')!.props.visible,true);
 });
 
 test('FE-053 S140 group picker and retained detail require a current terminal representation, while isolated preview remains available',async()=>{
   const state=fixture();state.platform='web';const shops=[1,2,3].map(id=>({id,handle:'maximum-'+id,name:'Maximum business '+id,city:'Fixture city',region:'',heroImagePath:'',description:'',latitude:id===3?10:9.03,longitude:id===3?40:38.75,locationMode:'storefront'}));Object.assign(state.feed.batch.data,{showrooms:shops});let render=await component('index',state),tree=render();tree=render();
-  (tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)(shops.slice(0,2));tree=render();assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true),'An obsolete subgroup callback enclosed by an outer aggregate cannot open a modal');
-  (tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(18);(tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[38.75,9.03],zoom:18});tree=render();(tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)(shops.slice(0,2));tree=render();assert.equal(tree.find(n=>n.type==='MapGroupPicker')!.props.visible,true);
+  (tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)([shops[0],shops[2]]);tree=render();assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true),'A non-terminal set cannot open a modal merely because a stale marker callback fired');
+  (tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(13);(tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[38.75,9.03],zoom:13});tree=render();(tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)(shops.slice(0,2));tree=render();assert.equal(tree.find(n=>n.type==='MapGroupPicker')!.props.visible,true);
   const key='suqpage:mobile-map-return:v1',saved=JSON.parse(state.storage.get(key)!);
   (tree.find(n=>n.type==='MapGroupPicker')!.props.onSelect as(value:typeof shops[number])=>void)(shops[0]);tree=render();assert.ok(tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true));
-  (tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(17);(tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[38.75,9.03],zoom:17});tree=render();assert.ok(tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true),'Separated terminal detail stays available below maximum');
+  (tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(12);(tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[38.75,9.03],zoom:12});tree=render();assert.ok(tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true),'Separated terminal detail stays available below maximum');
   (tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(1);(tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[38.75,9.03],zoom:1});tree=render();assert.ok(!tree.some(n=>(n.type==='MapGroupPicker'||n.type==='Sheet'&&n.props.title==='Business')&&n.props.visible===true),'A subgroup hidden inside an outer aggregate cannot retain its detail');tree=render();assert.deepEqual(JSON.parse(state.storage.get(key)!).ids,[]);
   state.storage.set(key,JSON.stringify({...saved,camera:{...saved.camera,zoom:1}}));resetHooks(state);render=await component('index',state);tree=render();tree=render();assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true),'Legacy cached IDs cannot bypass the current outer aggregate');
   (tree.find(n=>n.type==='MarketMap')!.props.onSelect as(value:typeof shops[number])=>void)(shops[2]);tree=render();assert.ok(tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true),'An isolated shop keeps its existing preview behavior at every zoom');
@@ -444,7 +469,7 @@ test('FE-065 S143 actual Market keeps only compact centered modes and one non-la
     assert.equal(headings.length,1);assert.equal(style(headings[0]).position,'absolute');assert.equal(style(headings[0]).width,1);assert.equal(style(headings[0]).height,1);
     const row=tree.find(n=>n.props.testID==='market-mode-row')!,children=nodes(row).filter(node=>node.props.accessibilityRole==='tablist');
     assert.equal(children.length,1);assert.equal(style(row).justifyContent,'center');assert.equal(style(row).paddingBottom,undefined);assert.equal(style(children[0]).padding,undefined);assert.equal(style(children[0]).width,undefined,'The switch uses its needed width rather than a framed full-width bar');
-    const tabs=nodes(row).filter(n=>n.props.accessibilityRole==='tab');assert.deepEqual(tabs.map(n=>nodes(n).find(c=>c.type==='Text')!.props.children),['Businesses','Products']);
+    const tabs=nodes(row).filter(n=>n.props.accessibilityRole==='tab');assert.deepEqual(tabs.map(n=>nodes(n).find(c=>c.type==='Text')!.props.children),['Business locations','Product listings']);
     assert.ok(tabs.every(n=>Number(style(n).minHeight)>=48));assert.equal(nodes(row).filter(n=>n.type==='Icon'&&['map','package'].includes(String(n.props.name))).length,width<=360?0:2,'Only decorative mode icons disappear on the smallest phones');
     assert.equal(tree.filter(n=>n.type==='Status').length,0,'A settled empty status does not allocate a toolbar gap');
     state.feed.loading=true;tree=render();assert.equal(tree.filter(n=>n.type==='Status'&&n.props.refreshing===true).length,1,'Actual loading remains visible');
@@ -459,8 +484,8 @@ test('FE-052 S143 native About selects one audience and preserves its deliberate
  assert.equal(tabs().length,2);assert.deepEqual(tabs().map(node=>(node.props.accessibilityState as {selected:boolean}).selected),[true,false]);assert.ok(tabs().every(node=>Number(style(node).minHeight)>=48));
  assert.ok(tree.some(node=>node.props.testID==='about-customers'));assert.ok(!tree.some(node=>node.props.testID==='about-businesses'));
  (tabs()[1].props.onPress as()=>void)();tree=render();assert.deepEqual(tabs().map(node=>(node.props.accessibilityState as {selected:boolean}).selected),[false,true]);assert.ok(!tree.some(node=>node.props.testID==='about-customers'));assert.ok(tree.some(node=>node.props.testID==='about-businesses'));
- (tree.find(node=>node.type==='Button'&&node.props.label==='Create your business page')!.props.onPress as()=>void)();assert.equal(state.routes.at(-1),'/account');
- (tabs()[0].props.onPress as()=>void)();tree=render();(tree.find(node=>node.type==='Button'&&node.props.label==='Explore the Market')!.props.onPress as()=>void)();assert.equal(state.routes.at(-1),'/');assert.ok(tree.some(node=>node.type==='Button'&&node.props.label==='Explore the map'));
+ (tree.find(node=>node.type==='Button'&&node.props.label===ABOUT_STOREFRONT_SECTIONS[1].action)!.props.onPress as()=>void)();assert.equal(state.routes.at(-1),'/account');
+ (tabs()[0].props.onPress as()=>void)();tree=render();(tree.find(node=>node.type==='Button'&&node.props.label===ABOUT_STOREFRONT_SECTIONS[0].action)!.props.onPress as()=>void)();assert.equal(state.routes.at(-1),'/');assert.ok(tree.some(node=>node.type==='Button'&&node.props.label==='Explore the map'));
 });
 
 test('FE-065 S128 native controls share a measured wide row and retain visible wrapping phone/enlarged filters',async()=>{

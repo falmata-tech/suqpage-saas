@@ -19,7 +19,7 @@ async function main(){
   const field=(name:string)=>p.getByRole('textbox',{name,exact:true});const button=(name:string)=>p.getByRole('button',{name,exact:true});
   await field('From').fill('Addis Ababa');await field('To').fill('Adama');await field('Name').fill('Mobile visitor');await field('Phone').fill('+447700900999');await field('Goods or transport details (optional)').fill('Two chairs');
   await button('Start chat').scrollIntoViewIfNeeded();assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await p.screenshot({path:`${dir}/mobile-intake-${width}.png`});
-  await button('Start chat').click();await expect(p.getByText('Waiting for our transport team',{exact:true})).toBeVisible();
+  await button('Start chat').click();await expect(p.getByText('Waiting for a SharedTrucks live agent',{exact:true})).toBeVisible();
   const row=await db.prepare('SELECT max(id) id FROM support_conversations').get();await support.postSupportMessage(staff,row.id,{audience:'reply',message:'We can arrange collection.',idempotencyKey:crypto.randomUUID()});
   await expect(p.getByText('We can arrange collection.',{exact:true})).toBeVisible({timeout:15000});
   await field('Message').fill('Tomorrow please');await button('Send reply').click();await expect(p.getByText('Tomorrow please',{exact:true})).toBeVisible();await p.screenshot({path:`${dir}/mobile-chat-${width}.png`});

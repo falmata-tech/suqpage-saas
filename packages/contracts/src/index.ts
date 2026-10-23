@@ -90,6 +90,8 @@ export type Market = {
 };
 export type Featured = {
   broadcastLabel: string;
+  tiktokUrl: string;
+  youtubeUrl: string;
   sponsors: Array<{
     id: string;
     name: string;
@@ -99,6 +101,23 @@ export type Featured = {
   }>;
   title: string;
   date: string;
+  policy: {
+    startMinute: number;
+    endMinute: number;
+    presentationMinutes: number;
+    changeoverMinutes: number;
+    sponsorMentionCount: number;
+    sponsorMentionMinutes: number;
+  };
+  schedule: Array<{
+    weekday: number;
+    dayLabel: string;
+    dateIso: string;
+    dateLabel: string;
+    industryKey: string;
+    industryLabel: string;
+    isToday: boolean;
+  }>;
   slots: Array<{ slot: number; revealed: boolean; shop: MapShop | null }>;
   nowBusinessId: number | null;
 };
@@ -121,8 +140,11 @@ export type OwnerHome = {
   publicationRevision: number;
   issues: Array<{ label: string }>;
 };
+export type InquiryReceipt={inquiryId:number;duplicate:boolean;status:"received"};
 export type Inquiry = {
   id: number;
+  createdAt: string;
+  readAt: string | null;
   customerName: string;
   contact: string;
   contactMethod: string;
@@ -174,6 +196,11 @@ export type Message = {
 };
 export type Buying = {
   publicRef: string;
+  createdAt?: number;
+  serverNow?: number;
+  transportWaitStartedAt?: number;
+  agentJoinedAt?: number | null;
+  firstStaffReplyAt?: number | null;
   status: string;
   assignedUserName: string | null;
   agentJoined?: boolean;
@@ -185,6 +212,7 @@ export type Buying = {
   idleEndedAt?: number | null;
   transportPlan?: TransportPlan;
   transportPlanLink?: string;
+  transportCallback?: { phone: string | null; email: string | null; submitted: boolean };
   messages: Array<Message & { sender: "visitor" | "staff" }>;
 };
 export type ApiError = { error: string; code?: string };

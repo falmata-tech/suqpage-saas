@@ -2,7 +2,7 @@
 id: FE-068
 title: Ordered transport plan editor and live requester view
 status: ready
-related: [FE-069, BE-057, BE-044, FE-019, FE-049, FE-053, FE-062, DEP-047]
+related: [FE-069, BE-057, BE-044, FE-019, FE-049, FE-053, FE-062, DEP-047, FE-076]
 owners: [product, frontend, mobile, security]
 last_updated: 2026-10-17
 change_level: L2

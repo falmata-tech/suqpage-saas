@@ -54,7 +54,7 @@ export default async function DiscoveryProfilePage({ params, searchParams }: {
     <div className={query.edit==='profile'?"split focused-marketplace-layout":undefined}>
       {query.edit==='profile'?<section className="panel">
         <h2>{t("Edit discovery profile")}</h2>
-        {pending?<p className="notice">{t("Owner location:")}{" "}{proposal.city}, {proposal.region}. {proposal.location_mode === "area"?t("General area only: the marker is approximate. Do not use a home address."):t("Public storefront coordinates supplied by the owner.")} {" "}{t("Saved by the owner.")}</p>:!proposal?<p className="hint">{t("The owner has not saved a location yet.")}</p>:null}
+        {pending?<p className="notice">{t("Owner location:")} {" "}{proposal.city}, {proposal.region}. {proposal.location_mode === "area"?t("The map shows your city, not your exact address."):t("Public storefront coordinates supplied by the owner.")} {" "}{t("Saved by the owner.")}</p>:!proposal?<p className="hint">{t("The owner has not saved a location yet.")}</p>:null}
         <FocusedEditForm action={updateDiscoveryProfileAction} cancelHref={`/dashboard/admin/discovery/${businessId}`} submitLabel="Save discovery profile" className="form-grid">
           <input type="hidden" name="businessId" value={profile.businessId} /><input type="hidden" name="proposalVersion" value={proposal?.version||0}/>
           <DiscoveryGeographyFields countryCode={geography.countryCode} city={geography.city} place={selectedPlace}/>

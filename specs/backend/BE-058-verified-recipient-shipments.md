@@ -2,9 +2,9 @@
 id: BE-058
 title: Email-verified recipients and independent shipment plans
 status: in_progress
-related: [BE-057, BE-044, FE-049, FE-053, FE-069, DEP-048, ADR-0031]
+related: [BE-057, BE-044, FE-049, FE-053, FE-069, FE-077, DEP-048, ADR-0031, BE-063, BE-064]
 owners: [backend, security, operations]
-last_updated: 2026-10-18
+last_updated: 2026-10-21
 change_level: L3
 ---
 
@@ -25,8 +25,10 @@ stable identity and unchanged recipient authorization. DEP-048 owns hosted rollo
 
 ## S145 follow-on — provider tracking details (backend locally verified; UI/rollout pending)
 
-The latest owner direction names the active feature **Shipment tracking**.
-FE-069 owns visible terminology and web/native tasks; DEP-048 owns additive75
+The customer-facing feature is **Shipment records** (list) and **Shipment record**
+(one arranged journey). Database, API, route and contract identifiers retain
+their stable tracking terminology. FE-069 owns visible terminology and
+web/native tasks; DEP-048 owns additive75
 and rollout. These are optional authored carrier details, not an integration.
 Root reviewed and accepted this controlling contract before implementation.
 
@@ -183,8 +185,14 @@ physical custody claims, payments or outbound social messages are introduced.
   disclosure and distributed brute force. Session is random opaque, hash stored,
   absolute7day expiry; logout revokes it. Web cookie HttpOnly/SameSiteLax/Secure
   in production, path /api/tracking; native separate SecureStore key and bearer
-  adapter. Neither may overwrite account/chat credentials. Fresh session and
+  adapter. Native keys encode the complete canonical origin without collisions
+  using only SecureStore-supported alphanumeric/dot/dash/underscore characters;
+  read/write/delete use the same identifier. Neither may overwrite account/chat credentials. Fresh session and
   recipient authorization on every list/detail, before any304/cache handling.
+
+Native SecureStore key and serialized lifecycle regressions map to
+`scripts/test-native-tracking.ts` and `scripts/test-native-tracking-ui.ts`;
+FE-069 records their source-level evidence and remaining device/release limits.
 
 ## Shipment aggregate and staff workflow
 

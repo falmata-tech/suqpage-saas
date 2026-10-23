@@ -2,7 +2,7 @@
   "id": "/",
   "name": "MirtPage",
   "short_name": "MirtPage",
-  "description": "Explore business digital showrooms. Browse products and listed availability, then message the business directly.",
+  "description": "Business stories and products, clearly organized—without social media clutter. Find what interests you and ask the business directly.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

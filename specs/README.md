@@ -39,6 +39,12 @@ docs/adr/          accepted architectural decisions
 
 ## Definition of Done
 
+DEP-002 S165 lets the agent record a source-bound visual pass/fail decision
+after real browser journeys. Older specs that say to wait for routine owner
+visual approval use this checkpoint instead, unless the owner explicitly asks
+to review a particular design. Separate hosted, signing, recovery and GitHub
+authorization requirements are unchanged.
+
 - Acceptance criteria have automated evidence or an explicitly justified manual
   check.
 - Unit/integration/browser/operations tests appropriate to change level pass.

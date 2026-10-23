@@ -51,7 +51,7 @@ export default async function ShowroomDirectory({ searchParams }: { searchParams
           </span>
         </Link>
       </article>;
-    })}</div> : <p className={styles.empty}>{t("No businesses match this view.")}</p>}
+    })}</div> : <div className={styles.empty}><p>{t("No public business showrooms are listed yet.")}</p><Link className={styles.open} href="/?view=search">{t("Browse product listings")} <span aria-hidden="true">→</span></Link></div>}
     {nextCursor ? <nav className={styles.pagination} aria-label={t("Businesses")}>
       <Link href={`/showrooms?after=${nextCursor}`}>{t("Next")} <span aria-hidden="true">→</span></Link>
     </nav> : null}

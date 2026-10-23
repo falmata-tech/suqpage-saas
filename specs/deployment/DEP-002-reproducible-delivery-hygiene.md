@@ -4,7 +4,7 @@ title: Reproducible delivery and repository hygiene
 status: in_progress
 related: [FE-035, BE-003, BE-025, DEP_BASE, ADR-0002, ADR-0003, DEP-010, DEP-022, DEP-025]
 owners: [operations, security]
-last_updated: 2026-10-20
+last_updated: 2026-10-21
 change_level: L3
 ---
 
@@ -630,3 +630,73 @@ Current dependency and release checkpoint on 2026-09-12:
   66-page scale fixtures.
 - Replacement remote checks remain required for the exact release commit, so
   the deployment spec remains in progress.
+
+
+## S165 — agent-owned visual review gate (in progress, L0)
+
+The owner authorized the agent to complete MirtPage visual review without
+requesting a separate sign-off on every UI iteration. This changes only the
+visual checkpoint: full and release gates may follow a documented agent review
+of the actual affected desktop web, phone web and Expo tasks. Screenshots alone
+are insufficient; the browser journey and authoritative outcomes still apply.
+
+GIVEN a UI change affects a visitor, owner, staff or admin task WHEN focused
+tests and real Chrome journeys finish THEN the agent inspects settled captures,
+interaction results, active-language fit, errors and known limits, records a
+pass/fail decision bound to the source, and fixes any material issue before
+running the full gates. The agent reports the visual decision and evidence to
+the owner without asking for routine visual approval. GIVEN a required journey
+cannot be exercised or a visual defect remains WHEN the review is assessed THEN
+it is not self-approved; the limit is reported and the dependent gate waits or
+the defect is repaired. This does not self-approve hosted configuration, signing,
+production recovery, protected-branch review, or any other separately guarded
+external mutation.
+
+Qualification: validate the updated workflow docs and use the S163/S164 Chrome
+and Expo receipts to record the first agent-owned visual decision. No app API,
+database, dependency or provider setting changes for this policy alone.
+
+## S157 — meaning-first, mobile-first interface design skill (in progress, L0)
+
+The owner requests a reusable UI-development guardrail: localized meaning,
+mobile clarity and a complete useful experience are design inputs, not cleanup
+work after an English-first layout. This improves MirtPage interfaces without
+assuming one language, device or buying pattern for all African users. User
+instructions and FE-049/FE-053 plus the active feature specs remain authoritative.
+No app behavior, dependency, plugin, CI provider or release setting changes here.
+
+```gherkin
+Scenario: An agent changes a user-facing MirtPage experience
+  GIVEN a UI, copy, localization or navigation task
+  WHEN implementation begins
+  THEN the agent uses the project interface-design skill with the feature spec
+  AND designs each control and explanation for the actual task in each affected locale
+  AND checks translated text in the real responsive web or Expo interface
+  AND reports human language-review limits separately from automated coverage
+
+Scenario: A request is backend-only
+  GIVEN a change does not alter user-facing behavior, text or navigation
+  WHEN task skills are selected
+  THEN the interface-design skill adds no unrelated review work
+```
+
+Implementation and qualification:
+
+1. Add a concise project skill for meaning-first, mobile-first, locale-aware
+   interface design; connect it through `AGENTS.md` and the actual-browser guide.
+2. Keep feature-spec authority and provider boundaries unchanged; visual
+   qualification now follows S165.
+3. Validate the skill structure/references, specs and workflow docs; review
+   positive UI/copy/mobile requests and negative backend-only/release-only cases.
+4. Use the skill on the current map and discovery controls, reviewing active
+   Amharic/Afaan Oromo labels at real phone sizes. Refine it only from demonstrated
+   user or test evidence.
+
+The design criteria draw on W3C guidance to allow for different text lengths and
+language metadata, and Android guidance to adapt to available window space and
+maintain accessible interactive targets. Sources: [W3C internationalization
+layout guidance](https://www.w3.org/wiki/GeoGettingStartedwithI18n), [Android
+adaptive layouts](https://developer.android.com/develop/adaptive-apps/guides/support-different-display-sizes)
+and [Android touch targets](https://developer.android.com/guide/topics/ui/accessibility/views/apps-views).
+These standards inform the skill; they do not substitute for MirtPage user testing
+or language review.

@@ -1,3 +1,5 @@
+import {dispatchPartnerInterestEmails,partnerInterestSchemaReady} from '../../lib/transport-partner-email-delivery.ts';
+import {cleanupPartnerInterests} from '../../lib/transport-partner-interest.ts';
 import {dispatchSupportEscalationEmails} from '../../lib/support-escalation-email-delivery.ts';
 import {dispatchAttention,checkExpoAttentionReceipts} from '../../lib/attention-delivery.ts';
 import {sweepSupportInactivity,sweepWaitingSupportAssignments,sweepSupportReplyOverdue} from '../../lib/support.ts';
@@ -50,6 +52,14 @@ export default async()=>{
     const {processed,accepted,ignored,failed,pending,configured}=await dispatchSupportEscalationEmails({limit:2});
     console.log('Admin email escalation',{processed,accepted,ignored,failed,pending,configured});
   }catch{console.error('Admin email escalation failed',{category:'email_escalation_failure'});}
+  if(Date.now()-started>=20_000){console.log('Tracking email deferred',{category:'worker_time_budget'});return;}
+  try{
+    if(await partnerInterestSchemaReady()){
+      const{processed,accepted,ignored,failed,pending,configured}=await dispatchPartnerInterestEmails({limit:2});
+      console.log('Logistics partner email',{processed,accepted,ignored,failed,pending,configured});
+      if(Date.now()-started<20_000)await cleanupPartnerInterests();
+    }
+  }catch{console.error('Logistics partner email failed',{category:'partner_email_failure'});}
   if(Date.now()-started>=20_000){console.log('Tracking email deferred',{category:'worker_time_budget'});return;}
   let trackingReady=false;
   try{trackingReady=await isTrackingSchemaReady();}catch{console.error('Tracking readiness failed',{category:'tracking_readiness_failure'});}

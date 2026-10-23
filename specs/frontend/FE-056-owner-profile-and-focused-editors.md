@@ -2,13 +2,73 @@
 id: FE-056
 title: Owner Profile and focused editing
 status: in_progress
-related: [FE-074, FE-026, FE-036, FE-066, FE-034, FE-032, FE-040, FE-051, FE-053, FE-019, BE-018, BE-032, BE-041, BE-044, BE-045, DEP-042, FE-067, FE-047, FE-072, BE-060, FE-073]
+related: [FE-074, FE-026, FE-036, FE-066, FE-034, FE-032, FE-040, FE-051, FE-053, FE-059, FE-019, BE-018, BE-032, BE-038, BE-041, BE-044, BE-045, DEP-042, FE-067, FE-047, FE-072, BE-060, FE-073, FE-075]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-17
+last_updated: 2026-10-21
 change_level: L2
 ---
 
 # FE-056 — Owner Profile and focused editing
+
+## S158 — city visibility and optional exact public map pin
+
+GIVEN an owner opens Business details on web or Expo WHEN they choose a canonical
+city THEN show two clear visual choices: **Show my city** (the map shows its
+canonical city, not its exact address) and **Show on map** (an exact public
+storefront pin). Show my city is the default for new setup and never blocks Save.
+Selecting **Show on map** recenters/zooms to the city; a map tap places or moves
+the exact public pin. Keep city and map context connected, place the concise
+public-location notice beside the choices, and clear a pin when country/city
+changes. Do not use instructional paragraphs to explain the map. Provide usable
+phone touch, accessible keyboard controls, loading/error/retry and reachable
+Save/Cancel. The same selection applies during first-time signup under FE-059;
+canonical place ID, tenant authority and versioned save remain server-owned under
+BE-038/BE-041. No schema or map provider change.
+
+Plan: update FE-059/BE-041/master/checklist first; refine the hierarchy and
+selection affordance across web and Expo; retain signup/owner payload validation
+and regression tests; capture actual Chrome desktop/phone and Expo owner/signup
+screens; obtain visual approval before full checks. Master §§11,19,21 are
+affected. Existing stored locations remain unchanged until the owner saves.
+
+## S153 — compact native product management and reachable actions (focused and Expo checks pass; visual approval pending)
+
+1. GIVEN owner Products WHEN records render THEN use compact management rows
+   with a bounded 64–80dp private thumbnail, wrapping name, publication/supply
+   state and one clear Edit action. Keep Add product separate, preserve retired
+   rows/IDs and normal Edit/Back routes; public showroom/gallery cards do not change.
+2. GIVEN the native product editor WHEN its long media/details form is scrolled
+   or the keyboard opens THEN one persistent Save/Cancel action bar remains
+   reachable outside its single scrolling body. Fit safe areas, landscape and
+   long en/am/om labels with 48dp targets; avoid nested scroll roots or duplicate
+   Save handlers. Existing exact payload/version/idempotency remains authoritative.
+3. GIVEN dirty input, pending/failed saves or Cancel/Back/tab exits THEN retain
+   the same busy lock and Keep editing/Discard behavior. Successful Save returns
+   to Products; failure keeps every draft value. Layout cannot bypass the guard.
+
+Plan: record contracts and master/checklist impact; implement the bounded native
+layout and interactive-entry correction under FE-053/FE-064; extend existing
+root-navigation/runtime, account-hub and owner-edit regressions; run focused
+types/spec checks; coordinate actual Expo/Chrome states and visual approval before
+full gates. Physical proof needs a separately admitted binary. Master §§13/19
+are affected. No schema, provider, new product action or dependency is introduced.
+
+Focused evidence: `scripts/test-mobile-account-hub.ts` passes eight cases,
+including bounded 72dp private thumbnails, publication/supply labels, exact Edit
+routes and product-owned scrolling. `scripts/test-mobile-owner-edit-navigation.ts`
+passes fifteen actual React/Chrome cases with installed removal hooks: one fixed
+bar outside the overflowing body, 48px actions at 320/390 and landscape widths
+with real en/am/om labels, failure/retry, Keep/Discard, duplicate/busy locks,
+stale/queued acknowledgements and unmounted callbacks. HTTP/media and native
+primitives are controlled ports and do not establish device keyboard/safe-area
+behavior. Actual Google Chrome on Expo8082 now confirms compact
+rows, dirty Keep/Discard without a write, en/am/om at 390px and 844px landscape actions
+above bottom navigation, and failed Save→retry→UI restore of the exact original
+local demo product. API readback confirms Cancel/failed Save retain the version,
+then successful save/restore advance it twice. One deliberately aborted POST is
+retained as expected failure evidence. The first review helper's incorrect
+translation lookup stopped before writes; it is preserved separately from the
+corrected five-journey pass. No public-gallery geometry or API contract changes.
 
 ## Planned S146 — retire owner Team editing
 

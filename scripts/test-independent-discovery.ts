@@ -8,6 +8,7 @@ import {migratePostgresDatabase} from '../lib/postgres-migrations';
 import {createPublicClientWorkspace} from '../lib/signup';
 import {saveOwnerBusiness,readOwnerBusiness} from '../lib/owner-business-runtime';
 import {demoPublicContacts} from './demo-public-contacts';
+import {approvedDemoContactMethods} from '../lib/demo-inquiry-policy';
 import {publicContactLinks} from '../lib/business-profile-contacts';
 import {handleMobileRequest} from '../lib/mobile/router';
 import {publicationReadiness} from '../lib/publication-readiness';
@@ -27,6 +28,10 @@ async function main() {
  const demo=demoPublicContacts('someone@real-domain.com','+251911234567');
  assert.match(demo.email!,/@example\.invalid$/);assert.match(demo.phone!,/^\+447700900\d{3}$/);assert.equal(demo.whatsapp,demo.phone);
  assert.equal(demo.website,'https://example.invalid/');assert.ok(publicContactLinks(demo).every(c=>!/(tiktok|instagram|facebook|t\.me)/.test(c.href)));
+ const approvedDemo=demoPublicContacts('someone@real-domain.com','+251911234567','+14155550123');
+ assert.equal(approvedDemo.phone,'+14155550123');assert.equal(approvedDemo.whatsapp,'+14155550123');assert.equal(approvedDemo.telegram,'+14155550123');
+ assert.deepEqual(approvedDemoContactMethods(true,approvedDemo,'+14155550123'),['phone','whatsapp','telegram']);
+ assert.deepEqual(approvedDemoContactMethods(true,approvedDemo,'+14155550124'),[],'Demo contact actions require the exact configured destination');
  for(const contacts of [{email:'hello@example.test'},{email:'demo@example.invalid'},{website:'https://example.com'},{phone:'+447700900999'},{whatsapp:'447700900123'},{tiktok:'your_business_example'}])assert.equal(publicationReadiness({...starterPage,contacts},[],true).find(c=>c.key==='contacts')?.ready,false,'Historic and new examples remain publication blockers');
  assert.equal(publicationReadiness({...starterPage,contacts:{email:'contact@business-domain.com'}},[],true).find(c=>c.key==='contacts')?.ready,true);
  assert.equal(hasMarketCriteria(normalizeMarketSearch({})),false);
@@ -35,20 +40,30 @@ async function main() {
  const url=marketWorkspaceParams('products',b,p);assert.deepEqual(readMarketSearch(url,'b.'),b);assert.deepEqual(readMarketSearch(url,'p.'),p);
  const db=await getDb();
  try {
-  async function add(handle:string,country:string,city:string,state='active',excluded=0) {
+  async function add(handle:string,country:string,city:string,state='active',excluded=0,mode:'area'|'storefront'='storefront',canonicalPlaceId?:string) {
+   const anchor=canonicalPlaceId?findKnownPlace(canonicalPlaceId):undefined;
    const id=Number((await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES(?,?,'composition',?)").run(handle,handle,state)).insertedId);
-   await db.prepare("INSERT INTO business_discovery_profiles(business_id,city,zone,region,country_code,city_id,latitude,longitude,approved_at,is_excluded,updated_at) VALUES(?,?,'',?,?,?,1,36,1,?,1)").run(id,city,city,country,'gn-test-'+id,excluded);
+   await db.prepare("INSERT INTO business_discovery_profiles(business_id,city,zone,region,country_code,city_id,latitude,longitude,approved_at,is_excluded,updated_at) VALUES(?,?,'',?,?,?,?,?,1,?,1)").run(id,city,anchor?.region??city,country,anchor?.id??'gn-test-'+id,anchor?Math.round(anchor.latitude*10)/10:9.01,anchor?Math.round(anchor.longitude*10)/10:38.71,excluded);
+   await db.prepare("INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,latitude,longitude,place_id,place_latitude,place_longitude,country_code,reviewed_version,updated_at) VALUES(?,1,'fashion-textiles',?,?,?,?,?,?,?,?,?,1,1)").run(id,city,anchor?.region??city,mode,mode==='storefront'?9.01:null,mode==='storefront'?38.71:null,anchor?.id??null,anchor?.latitude??null,anchor?.longitude??null,country);
    await db.prepare("INSERT INTO business_industries(business_id,industry_key) VALUES(?,'fashion-textiles')").run(id);
    for(const [name,kind] of [['Grass','standard_product'],['Woven basket','made_to_order'],['Grass cutting','service']] as const)await db.prepare('INSERT INTO products(business_id,name,slug,description,offering_kind,is_published) VALUES(?,?,?,?,?,1)').run(id,name,name.toLowerCase().replaceAll(' ','-'),'Detailed offering from '+handle,kind);
    return id;
   }
-  const et=await add('s102-business-a','ET','Shared City'),ke=await add('s102-business-b','KE','Shared City');
+  const et=await add('s102-business-a','ET','Shared City'),ke=await add('s102-business-b','KE','Shared City'),cityOnly=await add('s102-business-city-only','ET','City-only City','active',0,'area'),cityPin=await add('s102-business-city-pin','ET',addis.name,'active',0,'area',addis.id);
+  await db.prepare("UPDATE owner_location_proposals SET country_code='' WHERE business_id=?").run(cityPin);
   const blocked=await add('s102-business-blocked','SO','Secret City');await add('s102-draft','UG','Private City','draft');await add('s102-excluded','TZ','Hidden City','active',1);
   const get=(scope:'products'|'businesses',extra:Parameters<typeof getMarketplaceDiscoveryView>[0]={})=>getMarketplaceDiscoveryView({scope,excludedBusinessIds:[blocked],...extra});
   for(const scope of ['products','businesses'] as const) {
-   const empty=await get(scope);assert.equal(empty.resultPage.totalItems,scope==='businesses'?2:4);assert.equal(empty.showrooms.length,scope==='businesses'?2:0);assert.equal(empty.searchProducts.length,scope==='products'?4:0);
-   assert.deepEqual(empty.countries?.map(c=>c.code),['ET','KE']);assert.equal(empty.places.length,2);
+   const empty=await get(scope);assert.equal(empty.resultPage.totalItems,scope==='businesses'?3:8);assert.equal(empty.showrooms.length,scope==='businesses'?3:0);assert.equal(empty.searchProducts.length,scope==='products'?8:0);
+   assert.deepEqual(empty.countries?.map(c=>c.code),['ET','KE']);assert.equal(empty.places.length,scope==='products'?4:3);
   }
+  assert.equal((await get('businesses',{q:'city-only'})).showrooms.length,0,'Area records without a validated city anchor remain off the map');
+  assert.equal((await get('businesses',{q:'city-onl'})).showrooms.length,0,'Spelling fallback cannot restore an unanchored area as a map result');
+  const cityPinResult=await get('businesses',{q:'city-pin'}),cityPinRow=cityPinResult.showrooms.find(shop=>shop.id===cityPin);
+  assert.ok(cityPinRow,'A saved, applied city pin stays discoverable when a legacy proposal country field is blank but the published canonical city ID and country agree');
+  assert.equal(cityPinRow?.locationMode,'area');assert.equal(cityPinRow?.latitude,addis.latitude);assert.equal(cityPinRow?.longitude,addis.longitude,'City-only map pins use the validated canonical anchor, not rounded or guessed coordinates');
+  const cityPinFuzzy=await get('businesses',{q:'city-pinn'});assert.ok(cityPinFuzzy.showrooms.some(shop=>shop.id===cityPin),'Business spelling fallback retains eligible city-area pins');
+  const cityOnlyProducts=await get('products',{q:'Grass',country:'ET',city:'ET:City-only City'});assert.equal(cityOnlyProducts.searchProducts.length,1);assert.equal(cityOnlyProducts.searchProducts[0].businessId,cityOnly,'City-only businesses remain discoverable through product listings');
   assert.equal((await get('businesses',{q:'Grass'})).showrooms.length,0,'Offering-only query must not match businesses');
   assert.equal((await get('businesses',{q:'business-a'})).showrooms[0]?.id,et);
   assert.equal((await get('businesses',{q:'busines-a'})).showrooms[0]?.id,et,'Business spelling fallback');
@@ -57,15 +72,18 @@ async function main() {
    const one=await get('products',{q,country:['KE'],city:['KE:Shared City'],offeringType:'products'});
    assert.equal(one.resultPage.totalItems,1);assert.equal(one.searchProducts[0].businessId,ke);assert.equal(one.searchProducts[0].name,'Grass');
   }
-  const union=await get('products',{country:['ET','KE'],madeToOrder:true});assert.equal(union.resultPage.totalItems,2);assert.ok(union.searchProducts.every(x=>x.name==='Woven basket'));
+  const union=await get('products',{country:['ET','KE'],madeToOrder:true});assert.equal(union.resultPage.totalItems,4);assert.ok(union.searchProducts.every(x=>x.name==='Woven basket'));
   await assert.rejects(()=>get('products',{offeringType:'services'}),/Check your search filters/);
   const api=async(path:string)=>handleMobileRequest(new Request('https://suqpage.com/api/mobile/v1/'+path),path.split('?')[0].split('/'));
   assert.equal((await api('market?scope=products&offeringType=services')).status,400);
+  const mobileCityOnlyMap=await(await api('market?scope=businesses&q=city-only')).json();assert.equal(mobileCityOnlyMap.showrooms.some((shop:{id:number})=>shop.id===cityOnly),false,'Native map excludes an area record without a canonical city anchor');
+  const mobileCityPinMap=await(await api('market?scope=businesses&q=city-pin')).json();assert.ok(mobileCityPinMap.showrooms.some((shop:{id:number;locationMode:string;latitude:number})=>shop.id===cityPin&&shop.locationMode==='area'&&shop.latitude===addis.latitude),'Native map includes the same canonical city-area pin as web');
+  const mobileCityOnlyProducts=await(await api('market?scope=products&country=ET&city=ET:City-only%20City&q=Grass')).json();assert.ok(mobileCityOnlyProducts.items.some((item:{businessName:string})=>item.businessName==='s102-business-city-only'),'Native product search still includes city-only businesses');
   const wire=await api('market?scope=products&q=Woven&country=KE&madeToOrder=true');assert.equal(wire.status,200);
   const body=await wire.json();assert.equal(body.total,1);assert.equal(body.items[0].name,'Woven basket');assert.equal(body.items[0].businessName,'s102-business-b');assert.match(body.items[0].description,/Detailed offering/);assert.deepEqual(body.showrooms,[]);
   assert.equal((await api('market?scope=products&country=NOT-A-COUNTRY')).status,400);
   assert.equal((await api('market?scope=unknown')).status,400);
-  const emptyWire=await (await api('market?scope=businesses&exclude='+blocked)).json();assert.equal(emptyWire.showrooms.length,2);assert.equal(emptyWire.total,2);assert.deepEqual(emptyWire.items,[]);
+  const emptyWire=await (await api('market?scope=businesses&exclude='+blocked)).json();assert.equal(emptyWire.showrooms.length,3);assert.equal(emptyWire.total,3);assert.deepEqual(emptyWire.items,[]);
   const placesWire=await (await api('places?country=KE&q=Nairobi')).json();assert.equal(placesWire.places[0].countryCode,'KE');
   assert.equal((await get('products',{country:'ET',city:'KE:Shared City'})).resultPage.totalItems,0,'Do not broaden incompatible filters');
   assert.equal((await get('products',{city:'ET:Missing City'})).resultPage.totalItems,0);
@@ -75,6 +93,7 @@ async function main() {
   await db.prepare("INSERT INTO business_discovery_profiles(business_id,city,zone,region,country_code,city_id,latitude,longitude,approved_at,updated_at) SELECT id,'Cap City','','Cap City','KE','cap-city',1,36,1,1 FROM businesses WHERE id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)").run(capIds);
   await db.prepare("INSERT INTO business_industries(business_id,industry_key) SELECT id,'fashion-textiles' FROM businesses WHERE id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)").run(capIds);
   await db.prepare("INSERT INTO products(business_id,name,slug,description,is_published) SELECT id,'Cap item','cap-item','Public item',1 FROM businesses WHERE id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)").run(capIds);
+  await db.prepare("INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,latitude,longitude,country_code,reviewed_version,updated_at) SELECT id,1,'fashion-textiles','Cap City','Cap City','storefront',9.01,38.71,'KE',1,1 FROM businesses WHERE id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)").run(capIds);
   const capped=await get('businesses',{q:'s103-cap'});assert.equal(capped.showrooms.length,MARKET_MAP_LIMIT);assert.equal(capped.resultCounts.businesses,210);assert.equal(capped.resultPage.totalItems,210);
   const cappedWire=await (await api('market?scope=businesses&q=s103-cap')).json();assert.equal(cappedWire.showrooms.length,200);assert.equal(cappedWire.total,210);
   const seen=new Set<number>();let pages=0;
@@ -84,7 +103,7 @@ async function main() {
    if(page===pages)break;
   }
   assert.equal(seen.size,210);assert.equal(pages,18);
-  const boundedInitial=await get('products');assert.equal(boundedInitial.searchProducts.length,12);assert.equal(boundedInitial.resultPage.totalItems,214);
+  const boundedInitial=await get('products');assert.equal(boundedInitial.searchProducts.length,12);assert.equal(boundedInitial.resultPage.totalItems,218);
   await db.prepare("DELETE FROM businesses WHERE id IN(SELECT jsonb_array_elements_text(?::jsonb)::bigint)").run(capIds);
   const count=Number((await db.prepare('SELECT count(*) n FROM users').get()).n);
   await assert.rejects(()=>createPublicClientWorkspace({...signup,countryCode:'ET'},identity),/selected country/);
@@ -131,7 +150,7 @@ async function main() {
   await db.prepare("UPDATE owner_location_proposals SET location_mode='area',latitude=NULL,longitude=NULL").run();
   await db.prepare("UPDATE owner_location_proposals SET place_id=NULL,place_latitude=NULL,place_longitude=NULL WHERE country_code<>'ET'").run();
   await db.prepare('UPDATE business_discovery_profiles SET city=?,region=? WHERE business_id=?').run(addis.name,addis.region,et);
-  await db.prepare("INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,place_id,place_latitude,place_longitude,updated_at) VALUES(?,1,'fashion-textiles',?,?,'area',?,?,?,1)").run(et,addis.name,addis.region,addis.id,addis.latitude,addis.longitude);
+  await db.prepare("UPDATE owner_location_proposals SET version=1,category_key='fashion-textiles',city=?,region=?,location_mode='area',latitude=NULL,longitude=NULL,place_id=?,place_latitude=?,place_longitude=?,country_code='ET',reviewed_version=1,updated_at=1 WHERE business_id=?").run(addis.name,addis.region,addis.id,addis.latitude,addis.longitude,et);
   const coordinates=await db.prepare('SELECT business_id,latitude,longitude FROM business_discovery_profiles ORDER BY business_id').all();
   const privateRows=await db.prepare('SELECT id,email,password_hash,account_phone FROM users ORDER BY id').all();
   await db.exec(`ALTER TABLE business_discovery_profiles DROP CONSTRAINT discovery_world_coordinates_check,DROP COLUMN country_code,DROP COLUMN city_id;

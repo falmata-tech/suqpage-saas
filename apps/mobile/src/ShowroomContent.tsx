@@ -99,6 +99,7 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
   if (preview && previewProduct) return <View style={{ gap: 14 }}>
     <Button secondary label={t("Back")} onPress={() => setSelected(null)} />
     <Gallery media={previewProduct.media} privateImage />
+    {shop.isDemo&&<Text style={v.demo}>{t("Example product")}</Text>}
     <Text style={v.title}>{previewProduct.name}</Text>
     <ProductSupply kind={previewProduct.kind} availability={previewProduct.availability}/>
     {previewProduct.priceMinor !== null && <Text style={v.price}>{(previewProduct.priceMinor / 100).toLocaleString()} ETB</Text>}
@@ -122,11 +123,9 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
       >
         {shop && (
           <>
-            {shop.isDemo && !shop.handle.toLowerCase().includes("demo") && (
+            {shop.isDemo && (
               <Text style={v.demo}>
-                {t(
-                  "Demo business — products and contact details are examples.",
-                )}
+                {t("Example showroom. This business and its products are fictional.")}
               </Text>
             )}
             <View style={accent ? { borderBottomWidth: 4, borderColor: accent.accent } : undefined}>
@@ -206,6 +205,7 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
                     />
                     <View style={{ padding: 10, gap: 6 }}>
                       {categories.some(category=>category.id===p.categoryId)&&<Text testID={`showroom-product-category-${p.id}`} style={v.description}>{categories.find(category=>category.id===p.categoryId)!.name}</Text>}
+                      {shop.isDemo&&<Text style={v.demo}>{t("Example product")}</Text>}
                       <Text style={v.productName}>{p.name}</Text>
                       {Boolean(p.description)&&<Text testID={`showroom-product-description-${p.id}`} numberOfLines={2} style={v.description}>{p.description}</Text>}
                       <ProductSupply kind={p.kind} availability={p.availability}/>
@@ -240,7 +240,8 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
               <Text style={[v.title, { color: accent ? colors.ink : "white" }]}>
                 {t("Stay in touch")}
               </Text>
-              {publicContactLinks(shop.contacts).map((c) => (
+              {!preview&&<Button accentColor={shop.accentColor} wrapLabel disabled={!catalogReady||!inquiry.ready} label={t("Contact this business")} onPress={()=>router.push({pathname:"/inquiry",params:{handle:shop.handle}})}/>}
+              {publicContactLinks(shop.contacts).filter(c=>["website","tiktok","instagram","facebook"].includes(c.kind)).map((c) => (
                 <Pressable
                   key={c.kind}
                   accessibilityRole="link"

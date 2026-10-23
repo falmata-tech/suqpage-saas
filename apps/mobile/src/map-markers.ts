@@ -17,7 +17,7 @@ export type MarkerItem = {
 export function markerIndex(shops: MapShop[],capacity=MAP_GROUP_DEFAULT_CAPACITY) {
   return mapClusterIndex(shops.flatMap(shop => {
     const coordinates = shopCoordinate(shop);
-    return coordinates?[{id:shop.id,longitude:coordinates[0],latitude:coordinates[1],featured:shop.isFeatured,live:shop.isLive}]:[];
+    return coordinates?[{id:shop.id,longitude:coordinates[0],latitude:coordinates[1],locationMode:shop.locationMode,featured:shop.isFeatured,live:shop.isLive}]:[];
   }),capacity);
 }
 export function visibleMarkers(index: ReturnType<typeof markerIndex>, shops: MapShop[], _groups: NearbyGroup[], bounds: MapBounds, zoom: number): MarkerItem[] {
@@ -26,9 +26,10 @@ export function visibleMarkers(index: ReturnType<typeof markerIndex>, shops: Map
   return mapClusterMarkers(index,bounds,zoom).flatMap(marker=>{
     const members=marker.ids.flatMap(id=>byId.has(id)?[byId.get(id)!]:[]);
     if(!members.length)return [];
-    return [{key:marker.key,kind:marker.kind,center:marker.center,anchor:marker.anchor,count:members.length,...(marker.expansionZoom===undefined?{}:{expansionZoom:marker.expansionZoom}),
+    const kind=marker.kind==='cluster'&&members.length===1?'shop':marker.kind;
+    return [{key:marker.key,kind,center:marker.center,anchor:marker.anchor,count:members.length,...(marker.expansionZoom===undefined?{}:{expansionZoom:marker.expansionZoom}),
       presence:members.some(s=>s.isFeatured)?'featured' as const:members.some(s=>s.isLive)?'live' as const:'' as const,
-      ...(marker.kind==='shop'?{shop:members[0]}:{shops:members})}];
+      ...(kind==='shop'?{shop:members[0]}:{shops:members})}];
   });
 }
 export function currentGroupMembers(index:ReturnType<typeof markerIndex>,shops:MapShop[],ids:readonly number[],normalizedZoom:number):MapShop[]{

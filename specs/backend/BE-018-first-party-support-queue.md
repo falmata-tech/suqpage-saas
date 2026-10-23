@@ -2,13 +2,124 @@
 id: BE-018
 title: First-party customer support queue
 status: in_progress
-related: [BE-046, BE-044, ADR-0023, FE-019, FE-026, FE-056, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039, BE-050, DEP-043, FE-036, FE-053, BE-057, ADR-0031]
+related: [BE-046, BE-044, ADR-0023, FE-019, FE-026, FE-056, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, BE-031, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039, BE-050, DEP-043, FE-036, FE-053, BE-057, ADR-0031, BE-063]
 owners: [backend, security, customer-support]
-last_updated: 2026-10-17
+last_updated: 2026-10-23
 change_level: L3
 ---
 
 # BE-018 - First-party customer support queue
+
+## S168 — retain a timely live reply across later messages (release-blocking defect)
+
+The first public staff reply to a Transport case is the evidence that a live
+agent answered within the 3:30 window. Later replies, reassignment and the
+100-message transcript window cannot replace or erase that evidence. Use the
+same server-authoritative first reply for deadline enforcement and authorized
+participant receipts. Private notes, participant messages, future timestamps
+and replies first sent at or after 3:30 do not qualify. Keep assignment Join
+authorization, callback idempotency and closed-case behavior unchanged.
+
+GIVEN a public staff reply before 3:30 WHEN staff replies again after 3:30 or
+the case is reassigned THEN the authorized participant can still read and reply
+in that live case; the server and both clients show the same phase. GIVEN the
+first public staff reply occurs at or after 3:30 THEN the callback handoff
+remains authoritative and the late reply cannot reopen live chat. Test these
+paths with the PostgreSQL adapter and the shared wait model.
+
+## S162 — timed transport callback handoff (implemented locally; full release review pending)
+
+The customer-facing live wait lasts at most three minutes thirty seconds when
+no authorized staff member joins or replies. At two minutes, the server-derived
+wait state is busy and the existing assigned-staff overdue escalation remains
+independent. At 3:30 the visitor no longer has a live chat session. A callback
+submission updates the already captured phone, optional validated email and
+creates one idempotent participant follow-up in the same Transport support
+record. Require at least one reachable contact. Use existing channel-bound
+participant authorization, rate limits, text bounds, and private no-store
+responses; do not expose internal notes, assignment, staff identity or unrelated
+records. Staff retains the open support record for phone/email contact. The
+follow-up does not create another shipment, resolve the record, or count as a
+staff reply. After the timeout, reject stale public live-message/read writes and
+stop client transcript/unread polling. One form POST and bounded retry are
+allowed; no timer-driven API write or background polling is introduced.
+An explicit participant close remains valid after the timeout. It closes that
+same case and releases any assignment, even if the client still shows the
+pre-timeout End chat button. A submitted callback remains open for staff
+follow-up when the participant merely starts another request.
+
+GIVEN a valid visitor or owner participant submits callback details after the
+server-calculated 3:30 no-agent deadline THEN validate the phone/email pair,
+persist the contact update and follow-up atomically, and return only the static
+receipt contract. Repeating the same idempotency key and payload returns the
+same outcome; reusing it with changed contact/message data is denied. GIVEN the
+deadline has passed WHEN an old client posts a live reply or read receipt THEN
+reject it without mutation. GIVEN staff joined before the deadline THEN retain
+normal live-support authorization and read behavior. Cross-channel tokens,
+missing contacts, invalid email/phone, oversized input, replay conflict, rate
+limit, concurrent duplicate and database failure must not disclose or duplicate
+the follow-up. Contact fields remain private to authorized staff and the
+participant's own receipt.
+GIVEN the no-agent deadline has passed WHEN the authorized visitor explicitly
+ends the request THEN close that case once; a repeated close is idempotent and
+another visitor or channel cannot close it. A closed case cannot accept a later
+callback. Starting a new request after a submitted callback clears only the
+current visitor session and retains the earlier staff follow-up.
+
+No new realtime provider or polling path is permitted. Existing visitor pollers
+must stop at the 3:30 boundary in both web and Expo. Existing bounded staff
+response/admin alert workers remain unchanged, including the two-minute assigned
+overdue and ten-minute unassigned queue rules. Any code-based return to live
+chat is future work under a separate reviewed contract.
+
+
+## S153 N14 — staff sign-in readiness for new assignments (focused verification)
+
+A physical audit found an enabled application staff row without its immutable
+Supabase identity link. OTP correctly opened onboarding under BE-031, but queue
+routing had already assigned work to that unreachable staff workspace. The fix
+adds the missing eligibility boundary; it does not create or repair identities.
+Master §13 describes the new selection rule; §§11,15,16,22 retain their existing
+identity, architecture, security and evidence boundaries.
+
+- GIVEN Supabase Auth is selected WHEN choosing a new assignee THEN require an
+  existing `auth_identity_links` row for that application user and provider
+  `supabase`, in addition to current receiving setting, role and queue scope.
+  Immediate creation/resume, worker pickup and explicit queue recovery share this
+  condition. Manual claim, reassignment and staff reopen reject an unready
+  assignee through the existing unavailable/not-enabled outcomes.
+- GIVEN more than100 older Support cases have only unlinked receiving staff AND
+  linked Transport staff can accept a newer Transport case WHEN the bounded
+  worker or explicit recovery selects candidates THEN unavailable Support work
+  cannot consume the eligible candidate prefix or starve Transport. Preserve FIFO,
+  least-open workload, longest-since-assignment/user-ID tie-breaks and existing
+  transaction/lock/budget limits. No per-agent cap is introduced.
+- GIVEN local legacy Auth is selected THEN retain existing assignment eligibility;
+  a Supabase link is not required. Read the configured Auth driver for each
+  command, rather than freezing it when the module is imported.
+- GIVEN no linked eligible agent exists in managed mode THEN retain waiting work.
+  Do not infer links from matching email, provider metadata, role or settings;
+  do not call the provider or change users, links, grants or credentials while
+  selecting an assignee. A durable link is a necessary application boundary,
+  not a remote provider-health probe.
+- GIVEN an existing assigned/closed conversation THEN do not shuffle it or rewrite
+  its transcript/history because this selection rule changed. Explicit Join,
+  participant privacy, read receipts and existing participant authorization remain.
+
+Definition of Ready: selected Auth modes, missing-link behavior, all new-assignment
+boundaries, candidate fairness and immutable-history scope are explicit. Ordered
+work is tracked in the S153 N14 checklist. The paired case70 audit released its
+pinned adapter before this source change. Focused isolated PostgreSQL verification
+passes all nine new criteria; existing routing/automatic-routing and strict
+TypeScript checks pass. This does not qualify the running preview or deployment.
+
+Focused regressions use `scripts/test-support-signin-readiness.ts` with isolated
+PostgreSQL schemas and application identity-link fixtures only; no provider user,
+shared preview row or real email is changed. Existing routing/automatic-routing
+regressions retain legacy fairness, queue/role/availability exclusions, >100 loads,
+race/idempotency and explicit-Join coverage. Actual new-case assignment and paired
+staff sign-in/Join remain separate local workflow evidence after the source fix.
+
 
 ## Transactional Gmail option (ready; ADR-0031)
 
@@ -41,13 +152,21 @@ new Tracking data, accounts and active chats are explicitly outside that deletio
 
 Newest owner steering adds operational email alongside the existing in-app alert;
 this is not account email editing. Keep S125 explicit Join and inactivity proof.
-GIVEN assigned work has an unanswered participant cycle WHEN ten minutes pass
+GIVEN assigned work has an unanswered participant cycle WHEN two minutes pass
 after the later of the oldest unanswered message or current assignment time THEN
 show Overdue and alert current authorized assignee/managers. Join/read/note events
 do not count as replies. Reassignment grants the next staff member their own
 response window without rewriting the original customer wait or history.
 Unassigned queue work retains a ten-minute queue-overdue alert, without an email
 blaming an unassigned staff member. No public timing promise or numerical cap.
+
+S162 shortens only the assigned staff reply target from ten to two minutes.
+Unassigned queue handling remains ten minutes. Existing due-time projection,
+bounded sweep, exact-once assignment/message/recipient identity, manager email
+privacy, stale-job suppression, worker schedule and legacy-cycle suppression
+remain in force. A worker creates the overdue attention/email on its next bounded
+sweep after the two-minute deadline; this is internal guidance, not a customer
+response promise. This target-only change needs no schema migration.
 
 GIVEN an assigned cycle first becomes overdue for the current assignment THEN
 atomically persist one per-admin/operations-manager email job alongside the
@@ -97,9 +216,10 @@ remain subject to the current visual-approval requirement.
 This owner-approved contract supersedes earlier read-triggered joining and
 customer-facing assignment wording. Automatic routing remains internal.
 
-GIVEN a participant starts an unanswered message cycle WHEN ten minutes pass
-without a public staff reply THEN the unresolved request becomes Overdue for
-staff, after first showing Needs staff reply. Additional participant messages,
+GIVEN a participant starts an unanswered message cycle WHEN the applicable
+assigned or unassigned response target passes without a public staff reply THEN
+the unresolved request becomes Overdue for staff, after first showing Needs
+staff reply. Additional participant messages,
 assignment, Join, reads and private notes do not reset the oldest unanswered
 message. Only a public staff reply clears that cycle. No public response-time
 promise or automatic resolution is introduced. Reopen alone starts no new clock;
@@ -941,6 +1061,7 @@ Scenario: Anonymous chat is abused
 
 | Criterion | Level | Test path or planned ID |
 |---|---|---|
+| Managed identity readiness, runtime legacy compatibility, unavailable-prefix fairness and manual assignment rejection | security/integration | `scripts/test-support-signin-readiness.ts` |
 | Tenant and role authorization | security/integration | `scripts/test-support.ts` |
 | Least-loaded assignment, configured capacity, and claim transaction | integration | `scripts/test-support.ts` |
 | Message bounds, polling, close/reopen | integration | `scripts/test-support.ts` |

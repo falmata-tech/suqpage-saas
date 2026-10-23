@@ -33,12 +33,12 @@ async function main(){
   // More than100 older requests from an unavailable queue cannot hide eligible transport work.
   await db.prepare('UPDATE support_agent_settings SET enabled=0 WHERE user_id IN (?,?)').run(a.id,b.id);
   const older=await waiting(105,'general',clock-10000),eligible=await waiting(3,'shipment_observation',clock);
-  const actualCandidates=await db.prepare(SUPPORT_WAITING_CANDIDATES_QUERY).all();assert.deepEqual(actualCandidates.map(row=>row.id),eligible);
+  const actualCandidates=await db.prepare(SUPPORT_WAITING_CANDIDATES_QUERY).all(0);assert.deepEqual(actualCandidates.map(row=>row.id),eligible);
   assert.deepEqual(await sweepWaitingSupportAssignments(clock,()=>0),{routed:3,skippedBusy:false});for(const id of eligible)assert.equal((await state(id)).assigned_user_id,transport.id);for(const id of older)assert.equal((await state(id)).status,'waiting');
   await db.prepare('UPDATE support_agent_settings SET enabled=0 WHERE user_id=?').run(transport.id);assert.deepEqual(await sweepWaitingSupportAssignments(clock,()=>0),{routed:0,skippedBusy:false},'Wrong-role and paused settings cannot admit waiting work');
 
   await db.prepare('UPDATE support_agent_settings SET enabled=1 WHERE user_id IN (?,?)').run(a.id,b.id);
-  assert.equal((await db.prepare(SUPPORT_WAITING_CANDIDATES_QUERY).all()).length,100,'Candidate discovery is bounded before transitions');
+  assert.equal((await db.prepare(SUPPORT_WAITING_CANDIDATES_QUERY).all(0)).length,100,'Candidate discovery is bounded before transitions');
   const firstBatch=await sweepWaitingSupportAssignments(clock,()=>0);assert.deepEqual(firstBatch,{routed:25,skippedBusy:false});
   const routedOrder=await db.prepare('SELECT conversation_id FROM support_assignments WHERE conversation_id=ANY(?::bigint[]) ORDER BY id').all(older);assert.deepEqual(routedOrder.map(row=>row.conversation_id),older.slice(0,25),'Oldest eligible requests route first');
   const concurrent=await Promise.all([sweepWaitingSupportAssignments(clock,()=>0),sweepWaitingSupportAssignments(clock,()=>0)]);assert.ok(concurrent.every(result=>result.routed<=25));assert.ok(concurrent.reduce((sum,result)=>sum+result.routed,0)>=25);

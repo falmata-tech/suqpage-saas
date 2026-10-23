@@ -25,6 +25,7 @@ export type SignupInput = {
   handle: string;
   businessCategory: BusinessCategoryKey;
   place: KnownPlace;
+  storefrontPoint?: { latitude: number; longitude: number };
   accentColor?: string;
   idempotencyKey: string;
 };
@@ -49,6 +50,10 @@ export function parseSignupInput(raw: Record<string, unknown>, identity: SignupI
   const businessCategory = text(raw.businessCategory);
   const idempotencyKey = text(raw.idempotencyKey);
   const place = typeof raw.placeId === 'string' && raw.placeId.length <= 80 ? findKnownPlace(raw.placeId) : null;
+  const coordinate = (value: unknown) => typeof value === 'number' ? value : typeof value === 'string' && value.trim() ? Number(value) : null;
+  const rawLatitude = coordinate(raw.latitude), rawLongitude = coordinate(raw.longitude);
+  const hasLatitude = raw.latitude !== undefined && raw.latitude !== null && String(raw.latitude).trim() !== '';
+  const hasLongitude = raw.longitude !== undefined && raw.longitude !== null && String(raw.longitude).trim() !== '';
   const providerUserId = text(identity.providerUserId);
   const consent = raw.consent === true || raw.consent === "true" || raw.consent === "on" || raw.consent === "1";
 
@@ -61,6 +66,11 @@ export function parseSignupInput(raw: Record<string, unknown>, identity: SignupI
   if (!/^[A-Za-z0-9_-]{16,100}$/.test(idempotencyKey)) throw new SignupError("The setup session is invalid. Refresh and try again.");
   if (!place) throw new SignupError("Choose your business city from the results.", 400, "city_required");
   if (raw.countryCode !== undefined && raw.countryCode !== place.countryCode) throw new SignupError("Choose a city in the selected country.", 400, "country_mismatch");
+  if (hasLatitude !== hasLongitude || (hasLatitude && hasLongitude &&
+      (!Number.isFinite(rawLatitude) || rawLatitude! < -90 || rawLatitude! > 90 ||
+       !Number.isFinite(rawLongitude) || rawLongitude! < -180 || rawLongitude! > 180))) {
+    throw new SignupError("Choose a valid point on the map for the public storefront.", 400, "invalid_location");
+  }
   if (!consent) throw new SignupError("Agree to the Terms and Privacy Policy to continue.");
   let handle = generatedHandle(businessName, providerUserId);
   if (Object.hasOwn(raw, "handle")) {
@@ -70,7 +80,8 @@ export function parseSignupInput(raw: Record<string, unknown>, identity: SignupI
   let accentColor: string;
   try { accentColor = parseAccentColor(raw.accentColor); }
   catch (error) { throw new SignupError((error as Error).message); }
-  return { name, email, phone, businessName, handle, businessCategory, place, idempotencyKey, ...(accentColor ? { accentColor } : {}) };
+  const storefrontPoint = hasLatitude && hasLongitude ? { latitude: rawLatitude!, longitude: rawLongitude! } : undefined;
+  return { name, email, phone, businessName, handle, businessCategory, place, idempotencyKey, ...(storefrontPoint ? { storefrontPoint } : {}), ...(accentColor ? { accentColor } : {}) };
 }
 
 export async function createPublicClientWorkspace(raw: Record<string, unknown>, identity: SignupIdentity) {

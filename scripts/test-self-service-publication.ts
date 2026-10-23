@@ -86,9 +86,10 @@ async function main() {
     await assert.rejects(()=>changePagePublication(ownerPagePort,pagePublicationPort,owner,bid,{action:'publish',version:draft.version,revision:3}),/not available/);
     const points=Array.from({length:1000},(_,i)=>({id:i+1,latitude:9,longitude:38,locationMode:'area' as const}));
     const displayed=points.map(mapDisplayLocation);
-    assert.equal(new Set(displayed.map(p=>`${p.latitude},${p.longitude}`)).size,points.length);
+    assert.equal(new Set(displayed.map(p=>`${p.latitude},${p.longitude}`)).size,1,'City-only pins retain their canonical city anchor');
     for(const point of displayed) {
-      assert.ok(Math.hypot((point.latitude-9)*110.574,(point.longitude-38)*111.32*Math.cos(9*Math.PI/180))<1.5);
+      assert.equal(point.latitude,9);
+      assert.equal(point.longitude,38);
       assert.deepEqual(mapDisplayLocation(points[point.id-1]),point);
     }
     const exact={id:1,latitude:9.02345,longitude:38.76543,locationMode:'storefront' as const};
@@ -105,7 +106,7 @@ async function main() {
     assert.equal((await db.prepare('SELECT status FROM businesses WHERE id=?').get(otherId)).status,'active');
     assert.equal((await getMarketplaceDiscoveryView({industry:'all',q:'Other item'})).resultCounts.products,1);
     assert.equal((await db.prepare('SELECT COUNT(*) n FROM business_industries WHERE business_id=?').get(otherId)).n,0);
-    console.log('PASS direct publish, live-save atomicity, granted staff publication, stale/foreign/suspended denial, Other-category signup/save/publication/discovery, immediate GPS/area privacy, public About search and 1,000 stable bounded city offsets.');
+    console.log('PASS direct publish, live-save atomicity, granted staff publication, stale/foreign/suspended denial, Other-category signup/save/publication/discovery, immediate GPS/area privacy, public About search and 1,000 canonical city-only pins.');
   } finally {await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

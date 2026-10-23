@@ -1,4 +1,14 @@
-.dialog :global(section.new-conversation) { display:block; overflow-y:auto; overscroll-behavior:contain; }
+.dialog :global(section.new-conversation),.dialog .receivedSection { display:grid; grid-template-rows:auto auto minmax(0,1fr); height:100%; max-height:inherit; min-height:0; overflow:hidden; }
+.chatSection { box-sizing:border-box; width:100%; min-width:0; }
+.intakeArea { min-height:0; overflow-y:auto; overscroll-behavior:contain; }
+.conversationBody { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+.conversationBody > p[role="alert"] { flex:none; margin:0; padding:8px 12px; }
+.startTools,.chatTools { display:flex; min-width:0; min-height:52px; align-items:center; justify-content:flex-end; gap:8px; padding:4px 14px; }
+.chatTools { display:grid; grid-template-columns:minmax(0,1fr); gap:4px; align-items:center; border-bottom:1px solid #e5ebeb; }
+.chatTools > [data-transport-coordinator] { width:100%; min-width:0; }
+.chatTools > a { justify-self:end; max-width:100%; white-space:normal; text-align:center; }
+.startTools > a,.chatTools > a { display:inline-flex; min-height:48px; align-items:center; justify-content:center; border:1px solid #dbe2e5; border-radius:9px; padding:6px 12px; color:#a43107; font-size:13px; font-weight:650; text-decoration:none; white-space:nowrap; }
+.startTools > a:focus-visible,.chatTools > a:focus-visible { outline:3px solid #2459cc; outline-offset:2px; }
 .dialog :global(.public-support-contact-fields) label { font-size:13px; gap:6px; }
 .dialog :global(.public-support-contact-fields) input { font-size:16px; min-height:46px; }
 .dialog :global(.public-support-contact-fields) { gap:12px; }
@@ -104,6 +114,38 @@
  .staffConversation .conversationMain :global(.support-reply){padding:12px}
 }
 
+/* Reserve the phone shell first; the transcript gives space back to the composer. */
+@media(max-width:900px){
+ :global(.dashboard):has(.staffWorkspace){display:flex;flex-direction:column;height:100dvh;min-height:0;overflow:hidden}
+ :global(.dashboard .workspace-mobile-header):has(~ :global(.main) .staffWorkspace){flex:none}
+ :global(.dashboard .main):has(.staffWorkspace){display:flex;flex:1;flex-direction:column;min-height:0;padding:8px 14px calc(74px + env(safe-area-inset-bottom));overflow:hidden}
+ :global(.dashboard .main):has(.staffWorkspace)>:first-child{flex:none}
+ .staffWorkspace{display:flex;flex:1;flex-direction:column;min-height:0}
+ .staffWorkspace .threadHeader,.staffWorkspace .threadNotices{flex:none}
+ .staffConversation{flex:1;min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);align-items:stretch;gap:0;overflow:hidden}
+ .staffConversation .conversationMain{display:flex;flex-direction:column;min-height:0;gap:8px;overflow:hidden}
+ .staffConversation .conversationMain[hidden]{display:none}
+ .staffConversation .conversationMain :global(.support-thread){flex:1;height:auto;min-height:80px;max-height:none;margin:0}
+ .staffConversation .conversationMain :global(.support-reply){flex:none;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 8px;padding:8px;margin:0}
+ .staffConversation .replyAudience{grid-column:1 / -1;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px;margin:0}
+ .staffConversation .replyAudience select{min-height:48px}
+ .staffConversation :global(.support-reply)>label[for="support-reply"]{grid-column:1;grid-row:2;margin:0;font-size:13px;line-height:1.3}
+ .staffConversation .conversationMain :global(.support-reply) textarea{grid-column:1;grid-row:3;height:56px;min-height:56px;max-height:96px;resize:none}
+ .staffConversation :global(.support-reply)>button{grid-column:2;grid-row:2 / 4;align-self:stretch;min-width:64px;padding:8px 12px}
+ .staffConversation .conversationContext{display:none;overflow-y:auto;max-height:100%}
+ .staffConversation[data-details-view] .conversationContext{display:grid;grid-template-columns:minmax(0,1fr)}
+ .detailsLink{display:inline-flex}
+}
+/* Wide, short windows keep history and reply side by side instead of hiding either. */
+@media(min-width:600px) and (max-width:900px) and (max-height:500px){
+ :global(.dashboard .main):has(.staffWorkspace){position:relative}
+ :global(.dashboard .main):has(.staffWorkspace)>:first-child{position:absolute;top:8px;right:14px;z-index:1}
+ .staffWorkspace .threadHeading{padding-right:112px}
+ .staffConversation .conversationMain{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.8fr);gap:10px;align-items:stretch}
+ .staffConversation .conversationMain :global(.support-thread){height:100%;min-height:80px}
+ .staffConversation .conversationMain :global(.support-reply){align-self:start}
+}
+
 .dialog .receivedSection { display:grid; grid-template-rows:auto minmax(0,1fr); }
 .receipt { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:40px 24px; min-height:min(420px,55dvh); overflow-y:auto; text-align:center; background:#f5faf8; }
 .receipt > svg { width:64px; height:64px; flex:none; color:#087f6d; }
@@ -116,7 +158,7 @@
 
 /* The public action dock owns all positioning and navigation clearance. */
 .launchers:global(.public-support-launcher) { display:flex; width:100%; overflow:visible; }
-.launcher { position:relative; display:flex; width:100%; align-items:center; gap:8px; min-height:48px; min-width:0; padding:12px; border:1px solid #a93000; border-radius:12px; background:#b83200; color:#fff; box-shadow:0 4px 16px #3d251c26; font:700 14px/1.25 var(--font-body),Arial,sans-serif; cursor:pointer; }
+.launcher { position:relative; display:flex; width:100%; align-items:center; gap:8px; min-height:48px; min-width:0; padding:9px 16px; border:1px solid #a93000; border-radius:28px; background:#b83200; color:#fff; box-shadow:0 4px 16px #3d251c26; font:700 14px/1.25 var(--font-body),Arial,sans-serif; cursor:pointer; }
 .launcher svg { flex:none; width:20px; height:20px; }
 .launcherLabel { flex:1; min-width:0; text-align:start; overflow-wrap:anywhere; }
 .launcherLabel strong { font:inherit; }
@@ -139,13 +181,11 @@
 .replyAudience select:focus-visible { outline:3px solid #263c42; outline-offset:2px; }
 
 /* Buying chat entry: message first, then the two follow-up details. */
-.dialog header .chatEyebrow { display:flex; align-items:center; gap:5px; font-size:11px; letter-spacing:.04em; color:#a43108; }
-.chatEyebrow svg { width:13px; height:13px; }
-.welcome { display:grid; gap:8px; padding:20px 18px 16px; background:linear-gradient(135deg,#fff4ec,#fff 80%); }
+.welcome { display:grid; gap:6px; padding:14px 16px 6px; background:linear-gradient(135deg,#fff4ec,#fff 80%); }
 .welcomeIcon { display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:#ffe4d2; color:#a63108; }
 .welcomeIcon svg { width:22px; height:22px; }
-.welcome h3 { margin:0; font-size:21px; line-height:1.2; letter-spacing:-.02em; }
-.welcome p { margin:0; max-width:36ch; color:#4d6065; font-size:14px; line-height:1.45; }
+.welcome h3 { margin:0; font-size:19px; line-height:1.2; letter-spacing:-.02em; }
+.welcome p { margin:0; max-width:40ch; color:#4d6065; font-size:13px; line-height:1.42; }
 .dialog .intake { grid-template-columns:minmax(0,1fr); gap:9px; padding:14px 18px 18px; }
 .dialog .intake > label { font-size:13px; }
 .dialog .intake textarea { width:100%; font-size:16px; min-height:92px; }
@@ -166,11 +206,72 @@
 .dialog .intake .routePair { padding:12px; border:1px solid #f0cbb8; border-radius:12px; background:#fff5ee; }
 .fieldLabel { display:flex; align-items:center; gap:6px; min-width:0; }
 .fieldLabel svg { flex:none; color:#b83200; }
-.dialog .intake { gap:12px; border-top:0; }
-.dialog .intake textarea { min-height:68px; margin-top:-6px; }
-.dialog .intake > p:not(:global(.public-support-error)) { margin:0; font-size:13px; line-height:1.45; color:#52666d; }
-.welcome { grid-template-columns:40px minmax(0,1fr); align-items:center; column-gap:12px; padding-bottom:8px; }
+.dialog .intake { gap:9px; padding:10px 14px 12px; border-top:0; }
+.dialog .intake textarea { min-height:54px; margin-top:-6px; }
+.welcome { grid-template-columns:36px minmax(0,1fr); align-items:center; column-gap:10px; padding-bottom:6px; }
+.welcomeIcon { width:36px; height:36px; border-radius:10px; }
+.welcomeIcon svg { width:20px; height:20px; }
 .welcome p { grid-column:1 / -1; max-width:none; }
 @media(max-height:600px) { .welcome { grid-template-columns:minmax(0,1fr); } }
 
 .trackingEntry{display:flex;justify-content:flex-end;padding:8px 20px 0}.trackingEntry a{display:inline-flex;align-items:center;min-height:48px;padding:6px 12px;border:1px solid #dbe2e5;border-radius:10px;color:#a43107;font-size:14px;font-weight:650;text-decoration:none}.trackingEntry a:focus-visible{outline:3px solid #2459cc;outline-offset:3px}
+
+@media(max-width:680px) {
+ .startTools,.chatTools { min-height:44px; padding:2px 12px; }
+ .chatTools > a,.startTools > a { max-width:100%; min-height:48px; padding-inline:9px; font-size:12px; white-space:normal; text-align:center; }
+ .dialog .coordinatorSelector { margin:4px 12px; border-radius:10px; }
+ .dialog .coordinatorTrigger { min-height:64px; gap:8px; padding:8px 10px; }
+ .dialog .coordinatorMark { width:36px; height:36px; }
+ .dialog .coordinatorDescription { font-size:10px; }
+ .welcome { padding:10px 14px 4px; column-gap:8px; }
+ .welcome h3 { font-size:18px; }
+ .welcome p { font-size:12px; line-height:1.4; }
+ .dialog .intake { gap:8px; padding:8px 14px 8px; }
+ .dialog .intake .routePair { padding:9px; }
+ .dialog .intake :global(.public-support-contact-fields) { gap:8px; }
+ .dialog .intake :global(.public-support-contact-fields) input { min-height:42px; padding-block:6px; }
+ .dialog .intake textarea { min-height:48px; }
+ .partnerEntry { padding:0 14px 5px; font-size:12px; }
+ .partnerEntry a { min-height:32px; }
+}
+
+.coordinator { display:flex; align-items:center; gap:9px; padding:8px 10px; margin:8px 14px; border:1px solid #dbe2e5; border-radius:12px; background:#fff; color:#303b3e; text-align:start; }
+.coordinator > span:nth-child(2) { flex:1; min-width:0; }
+.coordinator small,.coordinator strong { display:block; line-height:1.35; overflow-wrap:anywhere; }
+.coordinator small { font-size:11px; font-weight:400; color:#596b72; }
+.coordinator strong { font-size:13px; font-weight:650; }
+.coordinatorLogo { display:block; flex:none; width:158px; max-width:100%; height:38px; object-fit:contain; object-position:left center; background:#fff; }
+.coordinatorLogoCompact { width:112px; height:27px; }
+.coordinatorBrandDetails { display:block; min-width:0; }
+.coordinatorSelector { margin:8px 14px; border:1px solid #cbd6e2; border-radius:14px; overflow:hidden; background:#fff; color:#303b3e; }
+.coordinatorTrigger { display:flex; width:100%; min-height:76px; align-items:center; gap:10px; padding:11px 12px; border:0; background:#fff; color:inherit; text-align:start; font:inherit; cursor:pointer; }
+.coordinatorTrigger:hover { background:#f4f8fc; }
+.coordinatorTrigger:focus-visible { outline:3px solid #2459cc; outline-offset:-3px; }
+.coordinatorIdentity { display:block; flex:1; min-width:0; }
+.coordinatorIdentity small,.coordinatorIdentity strong,.coordinatorDescription { display:block; line-height:1.35; overflow-wrap:anywhere; }
+.coordinatorIdentity small { margin-bottom:2px; color:#596b72; font-size:11px; }
+.coordinatorIdentity strong { color:#303b3e; font-size:14px; font-weight:700; }
+.coordinatorDescription { margin-top:2px; color:#596b72; font-size:11px; }
+.coordinatorType { display:inline-flex; width:max-content; max-width:100%; margin-top:4px; padding:2px 8px; border:1px solid #bfd0e1; border-radius:999px; background:#eff5fb; color:#183a60; font-size:11px; line-height:1.35; font-weight:700; overflow-wrap:anywhere; }
+.coordinatorCheck { flex:none; color:#176b4c; }
+.coordinatorState { display:flex; align-items:center; gap:4px; flex:none; color:#176b4c; font-size:11px; font-weight:700; }
+.coordinatorState svg { color:#176b4c; }
+.coordinatorTrigger > svg:last-child { flex:none; color:#596b72; transition:transform .16s ease; }
+.coordinatorChevronOpen { transform:rotate(180deg); }
+.coordinatorOptions { padding:8px 12px 10px; border-top:1px solid #dce5ee; background:#f4f8fc; }
+.coordinatorOption { display:flex; align-items:center; width:100%; min-height:58px; gap:9px; padding:8px; border:1px solid #cbd6e2; border-radius:10px; background:#fff; color:inherit; text-align:start; font:inherit; cursor:pointer; }
+.coordinatorOption:hover { border-color:#56799f; background:#f8fbff; }
+.coordinatorOption:focus-visible { outline:3px solid #2459cc; outline-offset:2px; }
+.coordinatorOption > span:nth-child(2) { flex:1; min-width:0; }
+.coordinatorOption strong,.coordinatorOption small { display:block; line-height:1.35; overflow-wrap:anywhere; }
+.coordinatorOption strong { font-size:13px; }
+.coordinatorOption small { margin-top:2px; color:#596b72; font-size:11px; }
+.coordinatorOption .coordinatorDescription { display:block; line-height:1.35; }
+.coordinatorOption > svg { flex:none; color:#176b4c; }
+.coordinatorOptions > p { margin:6px 2px 0; color:#596b72; font-size:11px; line-height:1.4; }
+.coordinatorCompact { border:0; margin:0; padding:3px 0; background:transparent; }
+.coordinatorCompact small { display:none; }
+.coordinatorCompact .coordinatorType { margin-top:2px; font-size:10px; }
+
+.partnerEntry { margin:0; padding:4px 18px 16px; font-size:13px; }
+.partnerEntry a { display:inline-flex; min-height:44px; align-items:center; color:#a63108; text-underline-offset:3px; }

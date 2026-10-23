@@ -3,40 +3,31 @@
 Current product authority: [master brief](../SUQPAGE-MASTER-PROMPT.md).
 Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 [DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md).
-Updated 2026-10-20. This working board replaces dated `CURRENT` labels; it does
+Updated 2026-10-23. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
 ## Current position
 
-MirtPage is live at **mirtpage.com** on schema **77**. The new Android identity
-is **com.mirtpage.app**. The prior Suqpage app's enrollment does not transfer.
-Source `d78dcf538927a1b403899d196f5631ebc199cd8c` passes its complete check,
-clean web release, 20/20 acceptance and all five CI jobs. B09’s replacement
-`6ad7f59795812d9f56be42a2` is published/ready and optimized images now decode.
-The operator’s original stopped result is preserved; separate read-only provider,
-GET and Chrome evidence qualify the scopes below. **The combined rollout remains
-incomplete**: browser request-cancellation classification and device/Play proof
-are still open, rather than another image-publication approval.
+MirtPage is live at **mirtpage.com**. The approved additive production migration
+to schema **79** committed on 2026-10-23: read-only incident follow-up confirms
+the exact ledger, row-level security and unchanged 102 existing inquiries. Its
+one-use runner returned permission error `42501` only on a post-commit read without
+the migration role; do not retry or restore it. The protected backup and plan
+remain local. The current launch-parity branch passes `npm run check`, a clean
+web-only `npm run release:web` with zero dependency findings, and a serial
+`npm run test:acceptance` with 20/20 scenarios on patched Next.js 16.4.2.
+The first concurrent acceptance attempt retained its one transient private-media
+connection reset; the isolated journey and subsequent complete serial suite pass.
 
-The nonvisual B09 correction and workflow improvements are qualified at source
-digest `c6ddc736…a3d185` (2,320 files): all 77 check commands pass through the
-preserved 18-command prefix and the complete 59-command continuation. The original
-full-check exit 1 remains recorded. Clean web release exits 0 with no production
-vulnerabilities; full acceptance exits 0 with 20/20 scenarios. Raw browser
-destination-stream-close messages remain retained and unclassified; this is not
-a claim of an error-free browser log or a raw full-check exit zero.
-
-Commits `a153547` (B09 routing) and `7e24014` (workflow/skills) are pushed.
-GitHub run `39509285979` attempt 2 has all five jobs passing on `7e24014`.
-The original core operations-fixture startup failure remains retained; the
-successful unchanged retry does not establish its exact cause. R01 and R02’s
-approval/publication/image/worker checks are recorded; R02’s browser cancellation
-classification is the first unmet web qualification.
-
-Version 2 AAB and derived APK are built and statically inspected from `d78dcf5`.
-The owner's phone/ADB hold remains in force; use Expo for permitted local checks.
-No version 2 device qualification, MirtPage Play upload, twelve-person opt-in count
-or fourteen-day test is claimed.
+**Next delivery dependency:** review/stage this branch, commit and run the five
+required GitHub checks; then qualify the exact Netlify artifact and one locally
+signed Android bundle/APK. The new UI and API source is not yet on the live site
+or in a newly built Android release. The Android package remains
+**com.mirtpage.app**; the old Suqpage enrollment does not transfer. Prior B09
+image-routing publication is verified. Raw browser request-cancellation causes
+and installed-device/Play delivery remain separate qualifications; do not infer
+them from web/Expo acceptance. No new Play upload, twelve-person opt-in count or
+fourteen-day test is claimed.
 
 ## Surface status
 
@@ -52,6 +43,29 @@ or fourteen-day test is claimed.
 | Workflow/skills/docs consolidation | Skills/checker and reviewed compact docs committed/pushed | App CI passes on 7e; isolated L0 docs checks and root review pass | No UI change | Docs branch integration and actual skill selection remain separate |
 
 ## Ordered work
+
+### S161 — Shipment record terminology and future party access
+
+Owner direction: use **Shipment records** for the recipient's list and
+**Shipment record** for one arranged journey. Show the selected logistics
+company's identity. Future records identify shipper and receiver as a published
+MirtPage business or custom party; each selected email verifies separately for
+read-only access to that one record. Use a business's published contact email as
+the default, never its private sign-in/notification email. No discount is
+automatic; any offer belongs to the logistics provider. Current transport chats
+continue to MirtPage's internal staff.
+
+- [x] Record the product direction and security boundary in draft FE-077/BE-064.
+- [x] Update current web, mobile web and Expo labels/copy to Shipment record(s),
+  keeping technical `/tracking` routes and API names stable. The supplied
+  SharedTrucks Logistics wordmark, including its name, renders on list and detail.
+- [ ] Run focused localization/UI tests and actual Chrome/Expo review of the
+  recipient list, record detail and staff workspace. Capture desktop/phone states
+  and record an agent visual pass/fail decision before complete release checks.
+- [ ] Keep FE-077/BE-064 draft-only until an explicitly scheduled multi-party
+  shipment milestone. Before implementation, qualify additive grant storage,
+  per-party verification/revocation, contact snapshots and rollback. Do not alter
+  live data or add provider-owned routing under this task.
 
 Root owns integration, source freeze, shared files, Git/CI and hosted operations.
 Use bounded agents for independent work; do not replace earlier open requests.
@@ -149,36 +163,266 @@ stop remains a stop, not a fabricated successful apply result.
 
 ### R03 — Reconcile public and management workflows
 
-Depends on **R02** for hosted verification; local independent work can continue.
-FE-019/021/026/041/049/050/053/056/062/065–074,
-BE-018/029/032/033/044/050/054–061. Retains S2–S146 and B01–B10 acceptance.
+#### S168 — timely staff reply must keep Transport live (release-blocking defect)
 
-- [ ] Reconcile existing source-matched checks and approvals against the current
-  affected visitor/owner/staff/admin journeys; run only missing or invalidated
-  checks. Do not repeat historical operations because an old box was left open.
-- [ ] Cover independent business-map and product searches, country/city filters,
-  bounded initial results, infinite products, remembered panel/criteria and Back;
-  compact toolbar, max-zoom/all-fit clusters, rich previews and optional collections.
-- [ ] Cover product-only ready/custom-order cards, descriptions and location,
-  card-level Add/options/stock, per-business floating inquiry lists, localized
-  copied product messages and configured SMS/Telegram/WhatsApp handoffs.
-  Social profile links remain separate; no direct MirtPage business inbox returns.
-- [ ] Cover focused Account/business/page/product/media/location/publish tasks,
-  real signup/private starters/handle rules, staff grants/revocation, admin record
-  navigation, save/cancel/failure states and owner-only security boundaries.
-  Team-editing owner consent and retired subscription controls stay removed.
-- [ ] Cover visitor and owner Transport, separate owner Support, workload-based
-  assignment, explicit staff Join, truthful reads, idle-ending reasons, overdue
-  admin alerts and permissions. Preserve unresolved follow-up and private history.
-- [ ] Cover independent multiple shipments per recipient email, verified portal
-  access, editable ordered legs/methods and external tracking links/codes. No
-  conversation-ID ownership, invented scan integration or delivery-date promise.
-- [ ] Preserve Featured schedule/caps/sponsor disclosure and rotation, gallery
-  selection/playback, theme identity, plain information-page backgrounds,
-  loading retention/skeletons, report/moderation and anonymous safety behavior.
-- [ ] Review remaining en/am/om comprehension with native speakers when available;
-  semantic catalog/layout tests do not prove native fluency. Somali, Afar and
-  Tigrinya remain disabled; no automatic locale restoration is planned.
+The full support gate found that a later staff reply replaced the earlier
+timely one in the deadline query, making a valid live case look overdue.
+BE-018 and FE-019 own this correction.
+
+1. [x] Record the first-public-reply rule in BE-018 and FE-019 before code.
+2. [x] Use that same server-authoritative timestamp in guest and owner receipts,
+   deadline enforcement, web and Expo. Preserve a late-first-reply handoff.
+3. [x] Prove timely-then-late reply and reassignment with focused PostgreSQL/model
+   tests, web/Expo Chrome and 38 affected UI cases; the first timestamp is queried
+   outside the bounded transcript. All 20 remaining check stages pass. Protected
+   evidence: `.local/s168-support-response.log`, `.local/s168-focused-ui.log`,
+   `.local/s168-check-tail.log`, `.local/s168-browser-review/receipt.json`.
+   Raw web GET abort provenance stays open; installed Android is separate.
+4. [ ] Carry the passing correction into the S162 GitHub, web and Android gates.
+
+#### S162 — professional SharedTrucks live wait and callback handoff (CURRENT)
+
+Owner direction: state plainly that a live agent from the selected logistics
+service provider will join to arrange the shipment. Do not use “coordinator.”
+Until provider-owned staff accounts are implemented, MirtPage support staff
+operate the internal queue on the provider's behalf; provider-owned routing is
+still future work. The assigned staff response cycle becomes overdue after two
+minutes; retain the bounded staff alert/admin email path and privacy rules. At
+2:00 show that the provider's team is busy and an elapsed wait counter. At 3:30,
+without Join/reply, stop the live chat and replace it with a callback form.
+Prefill the already captured phone, allow correction and optional email, require
+at least one valid contact, then submit one follow-up into the existing staff
+case. After success show a static receipt only. Stop both conversation and
+unread-alert polling at timeout; do not keep a public message portal open. The
+internal case stays available for staff to call/email and is not resolved or
+reclassified as a new shipment. No draft is auto-sent. Unassigned work keeps its
+separate ten-minute manager alert and is never blamed on an absent agent.
+Existing visitor/owner idle clocks remain unchanged outside this no-agent handoff.
+
+1. [x] Record the corrected 2:00 staff-overdue and 3:30 callback limits in this
+   checklist and FE/BE/notification specs before changing production code.
+2. [x] Change assigned response projection, queue filtering, bounded escalation
+   sweep and precise tests to 2:00; retain ten-minute unassigned escalation,
+   assignment epochs, deduplication, privacy, no-catch-up handling and worker
+   bounds. No schema change is expected. Pure assigned/unassigned boundary
+   checks and local API/PostgreSQL workflow readback pass.
+3. [x] Keep server-created wait timestamps and server-clock samples authoritative.
+   At 3:30 the active no-agent conversation must present the same deadline in
+   web/Expo and enforce it on the server; stale DTOs, sleep, reconnect or late
+   replies cannot reopen the live portal. The earlier same-thread composer test
+   found a transient Expo clock race; retest monotonic phase changes against the
+   callback form.
+4. [x] Add an idempotent offline-follow-up action that saves corrected phone,
+   optional validated email and the request to the existing staff case, without
+   creating a new shipment or resolving/removing the case. Reject live public
+   reply/read actions after the no-agent deadline. Use the existing bounded
+   support queue and preserve rate limits, participant authorization and privacy.
+5. [x] Replace the live UI at 3:30 with a concise callback form; prefill phone,
+   offer optional email and require at least one valid channel. On success show a
+   static receipt naming the contact channel(s). Stop transcript and unread-alert
+   polling. Author English, Amharic and Afaan Oromo by meaning; test 320/390/
+   desktop layouts and validation/error/retry states.
+6. [x] Run focused wait-boundary, response-deadline, callback idempotency,
+   privacy, localization and type checks. Actual Chrome starts a labelled journey
+   in Expo 390, then completes callback flow on web 1440/390; local PostgreSQL
+   confirms one same-case callback, contact values, staff visibility and no public
+   reads/polls after timeout. Cover guest and owner scopes, lost-response retry,
+   and staff phone/email follow-up. A fifth prior shared-preview start was rate-
+   limited before chat creation; do not bypass it. The old shared journey proved
+   only the superseded composer path; do not cite it as new-flow evidence. Raw web
+   `GET /api/public-support` cancellations remain unclassified. The passing
+   `.local/s162-transport-review/callback-journey-summary.json` records Expo,
+   desktop/phone web, same-case database readback, zero settled polling, and
+   Amharic/Afaan Oromo; focused callback/API tests and the complete local checks
+   pass. Installed Android and hosted email delivery are separate.
+7. [x] Verify owner transport, staff inbox/Join/reply/read, and assigned
+   two-minute overdue/admin-email delivery against the local API/database.
+   Unassigned ten-minute handling and existing alert privacy must remain intact.
+   This is local adapter/sink evidence, not proof of hosted email delivery.
+8. [x] Complete the remaining affected owner/staff journeys, then record a
+   source-bound agent visual pass/fail decision under DEP-002 S165 before full
+   `npm run check`, acceptance/release gates or remote CI. The owner and staff
+   receipts and `.local/s166-agent-visual-review.json` record the passing local
+   decision; installed Android remains a separate gate.
+9. [ ] After a passing agent review, qualify current source/repo/PR with the GitHub workflow;
+   then use DEP-049 to qualify and deploy web and build one Android artifact.
+   Record each approval, CI, deploy and artifact separately; no secrets or
+   customer data in repository evidence.
+
+Future direction recorded, not in current scope: if staff call and invite the
+visitor back to live chat, use a one-time case-bound code (expiring,
+attempt-limited and single-use). Activate polling only after code redemption.
+Do not implement this until a separate spec defines code delivery, verification
+and session behavior.
+
+#### S163 — end a timed-out request and start another (CURRENT defect)
+
+The reported transport chat displayed End chat but the server refused it after
+the 3:30 handoff; its submitted-callback receipt offered no new intake. BE-018
+and FE-019 own the corrected authority and web/Expo behavior.
+
+1. [x] Record timeout-close and callback-receipt contracts before code.
+2. [x] Permit one authorized explicit close after handoff, with regression for
+   the exact deadline, duplicate close, foreign token and no callback creation.
+3. [x] Add Cancel request to the callback form and Send another request to its
+   static receipt on web and Expo; verify old-case retention and fresh-intake
+   identity without background polling.
+4. [x] Run focused API/PostgreSQL and Chrome workflows, capture phone web/Expo
+   screens and record a passing agent visual review for this scoped defect.
+5. [ ] Requalify revised source, GitHub PR/main, web deploy and one locally
+   signed Android artifact under the S162 and DEP-049 release gates.
+
+#### S164 — name businesses without exposing location-mode jargon (CURRENT defect)
+
+The first S164 visual review was rejected: the internal **City only** label
+appeared on visitor-facing web and Expo pins/previews. FE-021 now requires the
+business name and actual city only, including accessible names and group cards.
+Owner location choice uses plain action language. No coordinate or clustering
+change is needed.
+
+1. [x] Record the corrected web/Expo marker, preview and owner-choice wording in FE-021.
+2. [x] Remove internal location-mode text from visitor UI on web and Expo;
+   keep the business name, city and current touch/accessibility behavior.
+3. [x] Add focused marker regressions and inspect actual Chrome desktop, phone
+   web and Expo screens using synthetic tiles. Source-matched walkthrough:
+   `.local/s164-marker-review/clean-public-copy/receipt.json`. The local
+   web/Expo owner setup and saved-location journey also passed via
+   `capture-signup-city.mjs` after the label change.
+4. [x] Record a passing agent visual review of the source-matched pin,
+   preview and owner-choice screens under DEP-002 S165. Include this fix in
+   the pending GitHub/web/native delivery batch.
+
+#### S166 — owner transport new-request route stays in sync (CURRENT defect)
+
+The local owner walkthrough reproduced a route mismatch: after Start and End,
+Send another request changed the URL to `?new=1` while the ended chat stayed
+mounted. FE-019 S162 owns this same-account new-request contract.
+
+1. [x] Record Start → End → Send another request, case retention and router/URL
+   consistency in FE-019 before production code.
+2. [x] Replace the address-bar-only case selection with a Next router transition;
+   keep the validated case ID and owner draft behavior. Focused React owner
+   workspace tests pass; real Chrome reached the fresh web intake.
+3. [x] Prove the transition in focused React and actual Chrome owner web/Expo
+   journeys. Confirm the ended database case remains, the fresh intake appears,
+   and Chat history still reaches the original reference. Compact the Expo owner
+   intake utilities and keep the shared Afaan Oromo language control within
+   320px; inspect 320/390 in English, Amharic and Afaan Oromo under FE-053.
+   Record an agent visual decision under DEP-002 S165. Local Chrome web/Expo
+   owner cases, database readback and English/Amharic/Afaan Oromo 320/390 captures
+   pass; `.local/s165-owner-transport-browser/receipt.json` and
+   `.local/s166-agent-visual-review.json` record the evidence and limits.
+4. [ ] Include the fix in the S162 full gates, GitHub integration, web rollout
+   and locally signed Android artifact.
+
+#### S167 — align unpublished Android listing and campaign draft (CURRENT)
+
+1. [x] Record current Inbox, selected logistics provider and Shipment records
+   claims in FE-070 before changing launch drafts. Keep live movement and
+   provider-owned tenant accounts out of current claims.
+2. [x] Update English, Amharic and Afaan Oromo Play/campaign drafts using active
+   interface terminology; preserve draft and native-speaker-review status.
+3. [ ] Run the focused draft/copy assertions and include this source in the
+   release gates. Do not describe draft copy as published Play content.
+
+### S153 N16 — localized login showroom headline
+
+- [ ] Confirm the two authored Amharic/Afaan Oromo headline values and controlling
+  copy contract; English and login behavior remain unchanged.
+- [ ] Replace only those values with natural digital-showroom wording, then run
+  focused localization/narrative/spec validation.
+- [ ] Retouch both languages on the existing physical development client and
+  include the text in the existing batch visual review; no new native build.
+
+### S153 N15 — restore foreground transport polling after Send
+
+- [x] Retain the actual foreground stale UI/backend difference and normal
+  Back→dock same-case recovery; pause the lower-priority N12 compact layout work.
+- [x] Record FE-053 cancellation/renewal/focus/closed acceptance before code.
+- [x] Reproduce with actual Buying React source, signal-aware settling/held
+  cancelled reads and paused virtual time. Normally rejecting aborts pass; a held
+  cancelled read starves the old loop. Preserve the initial clock-fixture failure.
+- [x] Root authorized generation-owned read leases, current-only rescheduling and
+  existing-cadence mutation wake. All26 race/idle/owner/storage tests, mobile/test
+  types and219 specs pass; no layout, API or credential behavior changed.
+- [ ] Current physical step: verify the same case updates messages/read state
+  after Send without leaving. Native abort settlement, DEV Fast Refresh effects
+  and release-build reproduction remain unproven; combine the verified fix with
+  existing visual/full/release qualification.
+
+### S153 N14 — linked staff assignment eligibility
+
+- [ ] Define BE-018 Supabase-mode assignment eligibility using the existing
+  immutable Auth link, while retaining the established legacy-runtime behavior.
+- [ ] Reproduce legacy/unlinked immediate selection and worker/recovery cases
+  with isolated managed-mode fixtures; preserve workload fairness beyond100,
+  explicit new assignment, and no identity creation as regression invariants.
+- [ ] Dependency: finish source-pinned paired case70 and obtain root GO before
+  touching the combined production support adapter; do not reshuffle old cases.
+- [ ] Apply only the reviewed eligibility correction and pass the focused RED/
+  GREEN and existing queue/security tests.
+- [ ] Separately verify actual local autoassignment to a usable staff identity;
+  retain ordinary login and Join/reply evidence. No provider/link/role mutation.
+
+### S153 — native conversation density and inactive-pane accessibility
+
+- [x] Retain physical waiting-chat geometry as N12 and the installed RNWeb
+  inactive-pane gap as N13 in the existing S153 issue inventory. Modal screenshot/
+  XML timing and verbose Android hierarchy limits remain classified separately.
+- [x] Record FE-019/FE-053 acceptance before production edits; master §§13/19
+  already govern task-first chat and inert hidden controls.
+- [x] Preserve native flags and add only explicit browser hidden/inert state to
+  the existing Market panes. Old source fails the new regression;23 focused
+  actual-source/installed-web cases, mobile/test types and219 spec links pass.
+- [x] Actual Expo Chrome390/1440 passes272 Tab/Shift+Tab steps, real accessibility
+  exclusion, mode/handle switches and About→Market return with Products/camera/
+  zoom restored. The corrected map-remount harness assumptions and prior stops
+  remain retained; no page errors, failed requests, writes or public tiles.
+- [ ] Include N13 states in the existing batch visual review before full gates.
+- [x] N12 dependency: paired audit and N15 diagnosis are complete; root authorized
+  the layout-only correction after its26 focused polling/state tests passed.
+- [x] Compact active utilities/status and place the single End action near the
+  status. Intake and N15 polling bytes are unchanged. Installed RNWeb passes18
+  locale/role/viewport states plus enlarged-text stress;38 state/race/idle/owner/
+  storage tests qualify in composite after the retained raw-div style-port failure
+  is corrected. Mobile/test types and219 specs pass; no shared copy changed.
+- [ ] Current N12 step: review actual Expo and physical Fast Refresh on phone/
+  landscape/keyboard; include affected states in the existing combined review.
+
+### S153 — main navigation selected state
+
+- [x] Preserve the ordinary local-code owner Account success and classify its
+  missing DOM selected state as the installed React Native Web mapping gap.
+- [x] Apply FE-053's explicit tab-selected attribute while preserving native state
+  and route behavior. Prove old-source RED and focused native/installed-web checks,
+  then freeze: nine tests and mobile/scoped types pass; actual extra owner task,
+  Support and sign-out review remains coordinated separately.
+
+### S153 N07 — owner history empty-state correction
+
+- [x] Classify existing phone XML: both empty Support pager buttons are disabled;
+  the defect is missing empty guidance and unnecessary controls, not paging access.
+- [x] Apply FE-019's ready empty/single/multiple-page presentation contract to
+  native Support and Transport history, preserving composer and retained state.
+  Existing actual-source/React regressions pass 24 tests; mobile/scoped types and
+  219-spec validation pass. Source is frozen; these are controlled component tests.
+- [ ] At the coordinated local readiness checkpoint, review actual Expo and the
+  admitted development client; include N07 in the existing combined visual review.
+  No backend, email, navigation redesign or additional full gate is implied.
+
+### S153 — PostgreSQL idle-disconnect containment
+
+- [x] Inspect the actual pool factory and installed driver, then retain a
+  controlled old-source RED: idle disconnect escapes without a pool listener.
+  The lost local web/worker process cause remains unproven; no database was used.
+- [x] Implement BE-027's factory-only sanitized handler and prove idle eviction,
+  fresh-client recovery and unchanged query/transaction rejection with the actual
+  installed driver and non-network Client port. Three focused cases pass; the old
+  adapter fails the real idle-event case. Existing gate registration, scoped types,
+  static script and 219-spec checks pass; no supervisor or running-stack changes.
+- [ ] Include the reviewed backend patch in the existing combined qualification;
+  preserve full-gate and runtime monitoring limits rather than claiming an outage
+  rehearsal or a proven explanation of the previous server exit.
 
 ### R04 — Finish email and owner-security release boundaries
 
@@ -204,16 +448,99 @@ hosted configuration review; this is separate from the B09 deployment approval.
   credential authority and actual login proof; do not silently reenable it to
   close a historical launch checkbox.
 
+### S153 parallel web preview-context correction — FE-065
+
+- [x] Record the live desktop/phone finding and ready contract before production
+  code: discovery cards must visibly expose available business city and optional
+  merchant grouping; repeated case-equivalent location parts display once.
+- [ ] In the separate FE-065 worktree, reuse the existing discovery contract and
+  three web consumers; preserve native, API, canonical product actions and tenant
+  boundaries. Run focused regressions and actual desktop/phone Chrome tasks.
+- [ ] Combine the reviewed native and web fixes on clean frozen source, record
+  a source-bound agent visual pass, then qualify applicable gates and artifact/build
+  admission. Do not treat separate worktree proofs as combined release evidence.
+
 ### R05 — Qualify the existing Android version 2 artifact
 
 DEP-042/043/044/049. Hosted device workflows use stable compatible APIs and the
 owner's actual phone availability; permitted local preparation can continue.
 The web-only B09 routing fix does not require a new native compilation.
 
+- [ ] Owner-requested physical development loop (current): prepare one local
+  arm64 MirtPage development client using the existing package and signer, with
+  no data reset or Play upload. Verify exact build-tool admission and local
+  API/Auth/Metro identity before building/installing; use Fast Refresh for later
+  JavaScript fixes rather than repeating release builds. Keep final standalone
+  release and push/App Links evidence separate from development-client results.
+  Exercise actual touches and visuals across discovery/map/filter/Back,
+  showroom/media/collections, product/options/inquiry/contact, visitor and owner
+  transport/tracking, Account/setup/edit/save/cancel, locales/keyboard/safe areas
+  and permission/background/error paths. Use controlled local fixtures for writes,
+  keep one issue list, and verify fixes on the phone before closing their IDs.
+  - [x] Owner approved the exact one-development-APK tooling exception
+    `668d3dca…0651`. Native source/lock/package/signer are bound independently of
+    evolving Metro JavaScript; no Play upload or paid build is included.
+  - [x] Root reviewed development credential isolation: 16 security and 41
+    affected tests pass, with unchanged production keys and no legacy fallback.
+    Floating-action scroll clearance passes focused tests and 13 actual Expo
+    states; neither result is physical Android proof.
+  - [x] Preserve both failed attempts and qualify the same-source installed-JDK17
+    correction. Final development APK `0d579aed…ab47d8` independently verifies
+    MirtPage/com.mirtpage.app/version2, registered signer, arm64, debug launcher
+    and 16KiB ZIP alignment. No app JavaScript is embedded; this consumes only
+    the approved development-client exception, not a Play/release admission.
+  - [x] Actual Android Metro compilation verifies development mode, local API/
+    Auth, scoped credentials and the synthetic native map binding. Expo57 uses
+    generated environment bindings rather than the verifier's old literal-inline
+    assumption; the classified verifier correction preserves the same invariant.
+  - [x] Data-preserving installation verifies exact development APK
+    `0d579aed…ab47d8`. Real Fast Refresh visual probe and restoration retain the
+    same Tracking state (`physical-development/fast-refresh-receipt.json`).
+  - [x] Actual native map31→22/9→terminal3 preview→Afia detail→Explore showroom
+    passes. Product Add/inquiry count1 and all3 enabled contact options expose
+    the complete message above the floating dock. Empty Tracking email entry
+    opens; verified-session restoration is not yet tested.
+  - [ ] Current physical step: continue the broader role, keyboard, lifecycle,
+    conversation and accessibility audit, retaining one issue list. These DEV
+    results do not qualify standalone release, push/App Links or Play delivery.
 - [x] One authorized compilation produced version 2 AAB and derived APK; independent
   static inspection verifies package/signing/config/resources/App Links/Hermes,
   native library equality, ELF alignment and zipalign. Exact hashes: traceability E3.
-- [ ] When the owner releases the phone hold, verify installed artifact identity
+- [ ] Current step — FE-069/BE-058 Android tracking storage correction:
+  1. [x] Verify version 2 installed APK identity and retain bounded public-flow
+     captures plus the failed tracking entry/retry. No chat or email was sent.
+  2. [x] Define a collision-free full-origin hex key accepted by installed
+     SecureStore; strengthen storage/component fixtures and retain old-source
+     red proof before the minimal production fix.
+  3. [x] Pass focused storage (9), controlled Tracking component (6), mobile and
+     strict test typechecks, and spec validation. Preserve the sandbox launch
+     stop separately from actual red/green component results; device is unproven.
+  4. [ ] Integrate the selected audit-fix batch and run its applicable full gates
+     on frozen source; these focused passes do not qualify a new binary.
+  5. [ ] Obtain the separate DEP-044 exact new-build admission, then physically
+     confirm email entry, secure save/restore/logout and final screenshot set.
+     Version 2 and current captures do not prove the corrected binary.
+- [ ] Confirmed native owner UX batch — FE-053/FE-056/FE-064:
+  1. [x] Record the three physical/source findings and acceptance before code;
+     preserve the independently focused tracking storage correction.
+  2. [x] Retain interactive Account entry across the actor-keyed navigation reset;
+     keep cold restoration, refresh, denial and logout isolation unchanged.
+     Intent is transient and bound to the validated actor.
+  3. [x] Use compact private product rows and one persistent product Save/Cancel
+     bar with a single scrolling form; retain exact commands and dirty/busy guards.
+  4. [x] Focused tests pass: root/resource 8, Account hub 8, editor/removal 15 and
+     logout/SDK 5; native and scoped types and validation of all 219 specs pass. Real
+     en/am/om labels fit controlled phone/landscape geometry. The old root-layout
+     control fails both interactive login cases; no actual Expo/device pass is inferred.
+  5. [x] Review actual source-bound Chrome/Expo tasks: visitor Tracking email
+     entry; local SDK fixture owner Account, compact Products/Edit, dirty
+     Keep/Discard, en/am/om at 390/844 landscape actions, blocked Save→retry→exact UI
+     restore. API readback confirms outcomes; ordinary email-code entry remains
+     Auth 429 and corrected physical Android is unverified. Protected receipt:
+     `tracking-storage-fix/expo-owner-actual-review-result.json` in the S153 audit.
+  6. [ ] Record a combined source-bound agent visual pass, then run applicable full gates,
+     admit the exact new build and physically retest the corrected binary.
+- [ ] With the owner's phone available, verify installed artifact identity
   and actual visitor/owner/chat/tracking/signup/save/cancel flows, gestures,
   foreground/background/resume, playback, clipboard/social OS handoffs and cold/
   warm App Links. Expo localhost:8082 is separate evidence; do not use an emulator

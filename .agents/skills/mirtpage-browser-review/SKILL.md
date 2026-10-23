@@ -3,10 +3,14 @@ name: mirtpage-browser-review
 description: Exercise changed MirtPage UI, UX, layout or navigation as affected visitors, owners, staff and admins in actual Chrome on web and Expo preview. Use for interface changes or usability audits; not backend-only logic or static code review.
 ---
 
+For interface work, also load `.agents/skills/mirtpage-interface-design/SKILL.md`;
+it supplies the content, localization and responsive-layout criteria.
+
 Resolve paths from this MirtPage repository root. Follow `AGENTS.md` and read
 `docs/operations/BROWSER-WORKFLOW-REVIEW.md` for the actual review contract;
 locate only the relevant current checklist section and controlling feature spec.
-Keep source edits, focused tests, browser evidence and visual approval distinct.
+Keep source edits, focused tests, browser evidence and the agent's source-bound
+visual decision distinct.
 
 Prepare a bounded journey with the affected roles, local targets, source hashes,
 allowed fixture writes and expected authoritative readback. Confirm repository
@@ -24,5 +28,6 @@ browser guide; never automate public OSM tile requests.
 Retain compact protected receipts and representative states, including failures,
 controlled fixtures and coverage limits. Actual Expo Chrome is not physical
 Android or push evidence. Classify a stopped journey before a bounded retry.
-Present focused review evidence at the existing visual-approval gate; do not
-invent another approval or label a mixed result successful.
+Inspect focused review evidence and record a pass/fail visual decision before
+full gates. Share the result with the user without requesting routine visual
+approval; do not label a mixed result successful. DEP-002 S165 controls this gate.

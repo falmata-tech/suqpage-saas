@@ -2,7 +2,7 @@
 id: DEP-048
 title: Safe verified-recipient tracking migration and delivery rollout
 status: in_progress
-related: [BE-058, FE-049, FE-053, FE-069, DEP-047, DEP-029, DEP-043, ADR-0031]
+related: [BE-058, FE-049, FE-053, FE-069, DEP-047, DEP-029, DEP-043, ADR-0031, BE-063, FE-077, BE-064]
 owners: [operations, security, backend]
 last_updated: 2026-10-18
 change_level: L3

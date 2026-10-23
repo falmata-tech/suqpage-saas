@@ -1,15 +1,17 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {after,test} from 'node:test';
 import {build} from 'esbuild';
 import {chromium,type Browser,type BrowserContext,type Page} from 'playwright';
 import {expect} from '@playwright/test';
 import {emptyMarketWorkspace,serializeMarketWorkspaceSnapshot,type MarketWorkspaceState} from '../lib/market-workspace';
 import {normalizeMarketSearch} from '../lib/market-search';
+import {discoveryLocationLabel} from '../lib/discovery-contract';
 
 // Actual React, DiscoveryWorkspace, controls, storage and feed hooks. Only router,
 // translation, map rendering and HTTP data ports are controlled; not device/API proof.
 const KEY='suqpage:market-workspace:v1',RETURN_KEY='suqpage:last-marketplace-url:v1';
-const bundle=build({stdin:{loader:'jsx',resolveDir:process.cwd(),contents:`
+const compileWorkspace=(realStyles=false)=>build({stdin:{loader:'jsx',resolveDir:process.cwd(),contents:`
  import React,{useEffect,useState,Fragment,Activity} from 'react';import {createRoot} from 'react-dom/client';
  import Workspace from './components/DiscoveryWorkspace';import {marketWorkspaceFromParams} from './lib/market-workspace';
  import {useBlockedBusinesses} from './components/useBlockedBusinesses';
@@ -46,8 +48,8 @@ const bundle=build({stdin:{loader:'jsx',resolveDir:process.cwd(),contents:`
   </Fragment>;
  }
  createRoot(document.getElementById('root')).render(<App/>);
-`},bundle:true,write:false,format:'iife',platform:'browser',jsx:'automatic',plugins:[{name:'market-navigation-ports',setup(b){
- b.onResolve({filter:/\.css$/},args=>({path:args.path,namespace:'css'}));
+`},bundle:true,write:false,outfile:'workspace.js',format:'iife',platform:'browser',jsx:'automatic',loader:{'.module.css':'local-css'},plugins:[{name:'market-navigation-ports',setup(b){
+ if(!realStyles)b.onResolve({filter:/\.css$/},args=>({path:args.path,namespace:'css'}));
  b.onLoad({filter:/.*/,namespace:'css'},()=>({loader:'js',contents:'export default new Proxy({}, {get:(_,key)=>String(key)});'}));
  b.onResolve({filter:/^(?:next\/(?:navigation|link|image)|next-intl|@\/lib\/i18n\/ui|@\/components\/MarketplaceMap)$/},args=>({path:args.path,namespace:'ports'}));
  b.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'jsx',resolveDir:process.cwd(),contents:
@@ -58,14 +60,16 @@ const bundle=build({stdin:{loader:'jsx',resolveDir:process.cwd(),contents:`
   :args.path==='next/image'?`export default function Image({src,alt,...props}){return <img {...props} src={src} alt={alt}/>;}`
   :`import React,{forwardRef,useEffect,useImperativeHandle} from 'react';export default forwardRef(function Map(p,ref){useImperativeHandle(ref,()=>({centerAt(){},zoomIn(){},zoomOut(){},reset(){}}));useEffect(()=>{if(window.fixture.initialSdkView&&p.showrooms.length)p.onViewChange({center:[9.145,40.4897],zoom:5});},[p.showrooms]);useEffect(()=>{window.fixture.currentSelect=()=>p.showrooms[0]&&p.onSelectShowroom(p.showrooms[0]);window.fixture.currentOpenGroup=()=>p.onOpenNearbyGroup({key:'cluster:1-2'});});return <div data-fixture-map data-view={JSON.stringify(p.requestedView)} data-fixture-shops={p.showrooms.length}><button onClick={()=>p.onViewChange({center:[1.25,36.75],zoom:11})}>Move fixture map</button><button onClick={()=>p.onViewChange(p.requestedView||{center:[9.03,38.75],zoom:18})}>Commit current fixture map</button></div>;});`}));
  }}]});
+const bundle=compileWorkspace();
+let styledBundle:ReturnType<typeof compileWorkspace>|undefined;
 
 type Fixture={go:(href:string)=>void;goSilent:(href:string)=>void;flush:()=>void;writes:Array<{key:string;value:string}>;requests:string[];reads:Array<{scope:string;page:number;excluded:number[]}>;saveExclusions:(ids:number[])=>Promise<void>;currentSelect:()=>void;currentOpenGroup:()=>void;staleSelect:()=>void;staleOpenGroup:()=>void;pendingReads:Array<()=>void>;abortedReads:number;holdBusiness:boolean;holdProducts?:boolean;pendingProductReads:Array<()=>void>;failBusiness?:boolean;failProducts?:boolean};
 let browser:Browser|undefined;
 after(async()=>{await browser?.close();});
 
-async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;memory?:string;blocked?:boolean;serverParams?:string;withShops?:boolean;holdBusiness?:boolean;holdProducts?:boolean;ignoreAbort?:boolean;initialSdkView?:boolean;discoveryMemory?:string;seedShops?:boolean;excluded?:number[];initialExclusions?:number[]|null;enforceExclusions?:boolean;productPages?:boolean;deferWorkspace?:boolean}={}){
- const compiled=await bundle;
- browser??=await chromium.launch({channel:'chrome',headless:true});const context:BrowserContext=await browser.newContext();t.after(()=>context.close());
+async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;memory?:string;blocked?:boolean;serverParams?:string;withShops?:boolean;holdBusiness?:boolean;holdProducts?:boolean;ignoreAbort?:boolean;initialSdkView?:boolean;discoveryMemory?:string;seedShops?:boolean;excluded?:number[];initialExclusions?:number[]|null;enforceExclusions?:boolean;productPages?:boolean;deferWorkspace?:boolean;realStyles?:boolean;width?:number}={}){
+ const compiled=await(options.realStyles?(styledBundle??=compileWorkspace(true)):bundle);
+ browser??=await chromium.launch({channel:'chrome',headless:true});const context:BrowserContext=await browser.newContext({viewport:{width:options.width||1280,height:900}});t.after(()=>context.close());
  const page=await context.newPage(),errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
  await page.route('http://market.fixture/**',route=>route.fulfill({contentType:'text/html',body:'<div id="root"></div>'}));
  await page.goto('http://market.fixture'+(options.url||'/'));
@@ -83,28 +87,83 @@ async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;
   const write=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){f.writes.push({key,value});return write.call(this,key,value);};
   if(blocked)Object.defineProperty(window,'sessionStorage',{configurable:true,get(){throw new DOMException('Storage blocked','SecurityError');}});
  },{key:KEY,memory:options.memory,blocked:options.blocked,serverParams:options.serverParams,withShops:options.withShops,holdBusiness:options.holdBusiness,holdProducts:options.holdProducts,ignoreAbort:options.ignoreAbort,initialSdkView:options.initialSdkView,discoveryMemory:options.discoveryMemory,seedShops:options.seedShops,excluded:options.excluded,initialExclusions:options.initialExclusions,enforceExclusions:options.enforceExclusions,productPages:options.productPages,deferWorkspace:options.deferWorkspace});
- await page.addScriptTag({content:compiled.outputFiles[0].text});
- await expect(page.getByRole('button',{name:'Products',exact:true})).toBeEnabled();
+ if(options.realStyles){
+  for(const file of ['app/globals.css','app/landing.css','app/discovery.css'])await page.addStyleTag({content:fs.readFileSync(file,'utf8')});
+  await page.addStyleTag({content:compiled.outputFiles.find(file=>file.path.endsWith('.css'))!.text});
+  await page.addStyleTag({content:'#root>nav{display:none}#root{height:900px}'});
+ }
+ await page.addScriptTag({content:compiled.outputFiles.find(file=>file.path.endsWith('.js'))!.text});
+ await expect(page.getByRole('button',{name:'Product listings',exact:true})).toBeEnabled();
  return {page,errors};
 }
 const go=(page:Page,href:string)=>page.evaluate(href=>(window as unknown as {fixture:Fixture}).fixture.go(href),href);
 const savedWrites=(page:Page)=>page.evaluate(key=>(window as unknown as {fixture:Fixture}).fixture.writes.filter(write=>write.key===key).map(write=>JSON.parse(write.value).params as string),KEY);
 const remembered:MarketWorkspaceState={mode:'products',business:normalizeMarketSearch({q:'Workshop'}),product:normalizeMarketSearch({q:'Cup',country:['ET'],madeToOrder:true})};
 
+test('FE-065 S153 location text keeps literal city/legacy fallback and removes only equivalent labels',()=>{
+ const label=discoveryLocationLabel;
+ assert.equal(label([' Addis Ababa ','addis ababa','ADDIS ABABA']),'Addis Ababa');
+ assert.equal(label(['Bahir Dar',' Bahir Dar ','Amhara']),'Bahir Dar · Amhara');
+ assert.equal(label(['','Oromia']),'Oromia');assert.equal(label([' ','']),'');
+ assert.equal(label(['Adama','Oromia']),'Adama · Oromia');
+ assert.equal(label(['Café','Cafe\u0301','North']),'Café · North');
+ assert.equal(label(['Addis Ababa','Addis Ababa urban']),'Addis Ababa · Addis Ababa urban');
+ assert.equal(label(['München','Munich']),'München · Munich','Do not infer aliases, countries or other geographic identity');
+});
+
+test('FE-065 S153 actual map preview deduplicates literal city and region',async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=map',withShops:true});
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:{fullData:{showrooms:Array<{city:string;region:string}>}}}).fixture;Object.assign(f.fullData.showrooms[0],{city:'Addis Ababa',region:'addis ababa'});});
+ await page.getByRole('searchbox',{name:'Search businesses',exact:true}).fill('Addis');
+ await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','2');
+ await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.currentSelect());
+ await expect(page.locator('.discovery-preview-copy small')).toHaveText('Addis Ababa');assert.deepEqual(errors,[]);
+});
+
+for(const width of[1440,390])test(`FE-065 S153 actual product category and city are visible with production CSS at ${width}px`,async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=search',realStyles:true,width});
+ const card=page.locator('.discovery-product-card').first(),group=card.locator('.discovery-product-result-copy small'),location=card.locator('.discovery-product-result-copy em');
+ await expect(group).toHaveText('Cups');await expect(location).toContainText('Addis Ababa');
+ for(const field of[group,location]){
+  await expect(field).toBeVisible();
+  const geometry=await field.evaluate(element=>{const r=element.getBoundingClientRect(),style=getComputedStyle(element);return{display:style.display,width:r.width,height:r.height,right:r.right,fontSize:parseFloat(style.fontSize)};});
+  assert.notEqual(geometry.display,'none');assert.ok(geometry.width>0&&geometry.height>=12,JSON.stringify(geometry));assert.ok(geometry.fontSize>=11,JSON.stringify(geometry));assert.ok(geometry.right<=width,JSON.stringify(geometry));
+ }
+ await expect(location).toHaveText('Addis Ababa');
+ await expect(card.locator('.discovery-product-result-copy p')).toBeVisible();await expect(card.getByRole('link',{name:'From Fixture Shop',exact:true})).toBeVisible();
+ // Authored long labels must remain readable, without pushing the card wider.
+ await page.evaluate(()=>{const f=(window as unknown as{fixture:{data:{searchProducts:Array<{categoryName:string;city:string;region:string}>}}}).fixture;Object.assign(f.data.searchProducts[0],{categoryName:'LongUnbrokenMerchantCollectionName'.repeat(3),city:'LongUnbrokenMerchantCityName'.repeat(3),region:''});});
+ await page.getByRole('searchbox',{name:'Search products',exact:true}).fill('Long');await expect(group).toContainText('LongUnbrokenMerchantCollectionName');
+ for(const field of[group,location]){const bounds=await field.evaluate(e=>({width:e.clientWidth,scroll:e.scrollWidth}));assert.ok(bounds.scroll<=bounds.width+1,JSON.stringify(bounds));}
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);assert.deepEqual(errors,[]);
+});
+
+test('FE-065 S157 empty exact-pin map offers a one-tap path to product listings at phone width',async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=map&b.q=No+mapped+shops&p.q=Cup',realStyles:true,width:390});
+ await expect(page.getByText('No businesses with public map locations match these filters.',{exact:true})).toBeVisible();
+ const next=page.getByRole('button',{name:'Browse product listings',exact:true});await expect(next).toBeVisible();
+ const bounds=await next.evaluate(element=>{const rect=element.getBoundingClientRect();return{height:rect.height,right:rect.right,viewport:innerWidth};});
+ assert.ok(bounds.height>=44,JSON.stringify(bounds));assert.ok(bounds.right<=bounds.viewport,JSON.stringify(bounds));
+ await next.click();
+ await expect(page.getByRole('button',{name:'Product listings',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
+ assert.deepEqual(errors,[]);
+});
+
 test('FE-065 actual web workspace restores before its first write and keeps map/source return separate',async t=>{
  const {page,errors}=await boot(t,{memory:serializeMarketWorkspaceSnapshot(remembered)});
  await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
  await expect(page.getByRole('button',{name:'Made to order',exact:true})).toHaveAttribute('aria-pressed','true');
  const writes=await savedWrites(page);assert.ok(writes.length);assert.ok(writes.every(params=>new URLSearchParams(params).get('view')==='search'),'No default-map write precedes restoration');
- await page.getByRole('button',{name:'Businesses',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');
+ await page.getByRole('button',{name:'Business locations',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');
  await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.requests.some(url=>new URL(url,location.href).searchParams.get('q')==='Workshop'))).toBe(true);await expect(page.locator('.suqpage-loading')).toHaveCount(0);
  await page.getByRole('button',{name:'Move fixture map',exact:true}).click();
- await page.getByRole('button',{name:'Products',exact:true}).click();await page.getByRole('button',{name:'Open Featured',exact:true}).click();
+ await page.getByRole('button',{name:'Product listings',exact:true}).click();await page.getByRole('button',{name:'Open Featured',exact:true}).click();
  await page.getByRole('button',{name:'Open Featured showroom',exact:true}).click();
  assert.equal(await page.evaluate(key=>sessionStorage.getItem(key),RETURN_KEY),'/featured?day=2');
  await page.getByRole('button',{name:'Return Market',exact:true}).click();
  await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
- await page.getByRole('button',{name:'Businesses',exact:true}).click();await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-view',JSON.stringify({center:[1.25,36.75],zoom:11}));
+ await page.getByRole('button',{name:'Business locations',exact:true}).click();await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-view',JSON.stringify({center:[1.25,36.75],zoom:11}));
  assert.deepEqual(errors,[]);
 });
 
@@ -116,7 +175,7 @@ test('FE-065 actual web Products survives detail Back and About to bare Market',
  await page.getByRole('button',{name:'Browser Back',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
  await page.getByRole('button',{name:'Open About',exact:true}).click();await page.getByRole('button',{name:'Return Market',exact:true}).click();
  await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
- await page.getByRole('button',{name:'Businesses',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');
+ await page.getByRole('button',{name:'Business locations',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');
  await page.getByRole('button',{name:'Open About',exact:true}).click();await page.getByRole('button',{name:'Return Market',exact:true}).click();
  await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');assert.deepEqual(errors,[]);
 });
@@ -127,7 +186,7 @@ test('FE-065 reused web route honors explicit URL/history and retains router met
  await go(page,'/?view=map&b.q=Explicit+shop&p.q=Explicit+item');
  await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Explicit shop');
  assert.equal(await page.evaluate(()=>history.state.framework),'fixture-router');
- await page.getByRole('button',{name:'Products',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Explicit item');
+ await page.getByRole('button',{name:'Product listings',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Explicit item');
  await go(page,'/?view=map');await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('');
  await page.getByRole('button',{name:'Browser Back',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Explicit item');
  await go(page,'/?q=Legacy');await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Legacy');
@@ -138,7 +197,7 @@ test('FE-065 unavailable or expired browser memory safely opens default Business
  for(const options of [{blocked:true},{memory:serializeMarketWorkspaceSnapshot(remembered,1)}]){
   const {page,errors}=await boot(t,options);
   await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('');
-  await page.getByRole('button',{name:'Products',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('');
+  await page.getByRole('button',{name:'Product listings',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('');
   assert.equal(await page.evaluate(()=>history.state.framework),'fixture-router');assert.deepEqual(errors,[]);
  }
 });
@@ -150,7 +209,7 @@ test('FE-065 queued router state cannot let local persistence overwrite incoming
  assert.equal(new URL(page.url()).search,'?view=map&b.q=External&p.q=Preserved');
  await page.evaluate(()=>(window as unknown as {fixture:Fixture}).fixture.flush());
  await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('External');
- await page.getByRole('button',{name:'Products',exact:true}).click();
+ await page.getByRole('button',{name:'Product listings',exact:true}).click();
  await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Preserved');
  assert.ok((await savedWrites(page)).every(params=>!params.includes('Pending')));assert.deepEqual(errors,[]);
 });
@@ -158,7 +217,7 @@ test('FE-065 queued router state cannot let local persistence overwrite incoming
 test('FE-065 S143 no information overlay and ordinary About return preserve both unsent queries',async t=>{
  const {page,errors}=await boot(t,{url:'/?view=map&b.q=Workshop&p.q=Cup'});
  await expect(page.getByRole('heading',{name:'MirtPage Market',exact:true})).toHaveClass('sr-only');
- const businesses=page.getByRole('button',{name:'Businesses',exact:true}),products=page.getByRole('button',{name:'Products',exact:true});
+ const businesses=page.getByRole('button',{name:'Business locations',exact:true}),products=page.getByRole('button',{name:'Product listings',exact:true});
  await expect(businesses).toHaveAttribute('aria-pressed','true');await expect(products).toBeVisible();
  await expect(page.getByRole('button',{name:'About MirtPage',exact:true})).toHaveCount(0);await expect(page.locator('dialog')).toHaveCount(0);
  await page.getByRole('button',{name:'Open About',exact:true}).click();await expect(page.getByRole('heading',{name:'/about',exact:true})).toBeVisible();await page.getByRole('button',{name:'Return Market',exact:true}).click();
@@ -311,7 +370,7 @@ test('FE-065 web exclusions reject old query/page responses and queued map/group
  await expect(page.getByRole('dialog')).toHaveCount(1);await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);
  await page.getByRole('searchbox',{name:'Search businesses',exact:true}).fill('Pending query');
  await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingReads.length)).toBe(1);
- await page.getByRole('button',{name:'Products',exact:true}).click();
+ await page.getByRole('button',{name:'Product listings',exact:true}).click();
  if(!(await fixtureReads(page)).some(read=>read.scope==='products'&&read.page===2))await page.getByRole('button',{name:'Load more',exact:true}).click();
  await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingProductReads.length)).toBe(1);
  await exclude(page,[1]);

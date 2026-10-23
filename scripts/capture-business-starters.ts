@@ -79,7 +79,8 @@ async function main() {
    await owner.getByRole('button',{name:'Save',exact:true}).click();
    await expect(owner.getByText('Private draft saved',{exact:true})).toBeVisible();
    await owner.goto(base+'/dashboard/business');
-   await filled('#owner-business-name, #owner-city, #owner-region, #owner-category, #owner-location-mode');
+   await filled('#owner-business-name, #owner-city, #owner-category');
+   await expect(owner.getByRole('radio',{name:'City only',exact:true})).toBeChecked();
    await capture(owner,'business-editor',width);
    for(const [index,product] of products.entries()){
     await owner.goto(`${base}/dashboard/products/${product.id}`);

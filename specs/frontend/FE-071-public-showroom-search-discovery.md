@@ -37,6 +37,10 @@ visual design or promising search placement.
 - Give visitors a simple server-rendered `/showrooms` directory linked from
   About. It provides a real internal path to eligible businesses that may not
   appear in the Market's initial map/product batch, without taking map space.
+- If the first eligible-business page is empty, tell visitors no public business
+  showrooms are listed yet and link directly to Product listings in the Market,
+  where sample products identify their source business. The examples remain
+  outside directory results, canonicals and sitemaps.
 
 ## Non-goals
 
@@ -62,6 +66,9 @@ visual design or promising search placement.
   enter the sitemap when the business has an approved, non-excluded public
   discovery profile and at least one published physical product. The directory
   uses the same eligibility; no draft, hidden or empty showroom is listed.
+  Its empty state explains that no public business showrooms are listed yet and
+  links directly to Product listings, where fictional content is visibly
+  labelled and product cards identify the source business.
   An active demo remains visitable as an example but is
   explicitly `noindex`. A directly shared hidden/empty showroom also stays
   viewable but `noindex`; a missing, draft or suspended showroom remains absent.
@@ -199,7 +206,7 @@ log customer data, raw merchant text or credentials for SEO verification.
 | Paged sitemap/public-only projection | focused and PostgreSQL | `scripts/test-public-seo.ts` |
 | JSON-LD escaping and no invented offers | focused | `scripts/test-public-seo.ts` |
 | Product href and server-visible content | Chrome desktop/phone + HTTP | FE-071 local review receipt |
-| Directory link/eligibility/keyset pagination | focused + Chrome desktop/phone | `scripts/test-public-seo.ts`, `scripts/test-public-seo-http.ts` |
+| Directory link/eligibility/keyset pagination and empty-directory destination | focused + Chrome desktop/phone | `scripts/test-public-seo.ts`, `scripts/test-public-seo-http.ts`, `scripts/test-platform-narrative.mjs`, S157 browser receipt |
 | Missing/draft showroom HTTP status and noindex | local HTTP and installed Chrome | `scripts/test-public-seo-http.ts`, `scripts/test-showroom-status-origin.ts` |
 | Hosted origin and publication | release and operator review | DEP-049 guarded cutover; separate evidence |
 

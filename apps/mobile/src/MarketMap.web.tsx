@@ -119,7 +119,7 @@ export default forwardRef<MapControls, MapProps>(function MarketMap(props, ref) 
           }
           const root = createRoot(el); roots.push(root);
           root.render(<MapMarker item={item} selected={item.shop?.id === selectedId}
-            label={item.shop ? `${item.shop.name}. ${t("Open page preview")}` : item.expansionZoom!==undefined?item.count===1?t('1 business. Zoom in.'):t('{count} businesses. Zoom in.',{count:item.count}):item.count===1?t('1 business. View business.'):t("{count} businesses. View businesses.", { count: item.count })}
+            label={item.shop ? `${item.shop.name}. ${item.shop.city}. ${t("Open page preview")}` : item.expansionZoom!==undefined?item.count===1?t('1 business. Zoom in.'):t('{count} businesses. Zoom in.',{count:item.count}):t("{count} businesses. View businesses.", { count: item.count })}
             badge={item.presence ? t(item.presence === "featured" ? "Featured" : "Live") : ""} nearby={t("Nearby")}
             onPress={() => {
               if (!live || map.current !== m) return;

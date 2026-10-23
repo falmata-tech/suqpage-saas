@@ -17,6 +17,6 @@ export default function OwnerTransportHistory(){
   return <Screen><Button secondary label={t('Back to account')} onPress={()=>router.replace('/account')}/><Copy big heading>{t('Transport chat')}</Copy><Copy>{t('Chat history')}</Copy><Button label={t('Start another chat')} onPress={()=>router.push({pathname:'/owner/[section]',params:{section:'transport',view:'new',returnTo:'profile'}})}/><ResourceLoading load={load} variant="rows"/>
     {!load.loading&&!load.error&&load.data?.items.length===0&&<Copy muted>{t('No conversations yet.')}</Copy>}
     {load.data?.items.map(item=><Card key={item.id}><Copy>{item.subject}</Copy><Copy muted>{item.publicRef}</Copy>{item.unread&&<Copy>{t('New')}</Copy>}<Copy muted>{t(clientChatPresentation(item).statusKey)}</Copy><Button secondary label={t('Open')} onPress={()=>router.push({pathname:'/owner/[section]',params:{section:'transport',id:String(item.id),returnTo:'profile'}})}/></Card>)}
-    <View style={s.row}><Button secondary label={t('Previous')} disabled={page<=1} onPress={()=>setPage(value=>value-1)}/><Button secondary label={t('Next')} disabled={!load.data||page>=load.data.pages} onPress={()=>setPage(value=>value+1)}/></View>
+    {load.data&&load.data.pages>1&&<View style={s.row}><Button secondary label={t('Previous')} disabled={page<=1} onPress={()=>setPage(value=>value-1)}/><Button secondary label={t('Next')} disabled={page>=load.data.pages} onPress={()=>setPage(value=>value+1)}/></View>}
   </Screen>;
 }

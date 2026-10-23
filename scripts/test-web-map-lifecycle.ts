@@ -16,8 +16,8 @@ const bundle=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
  L.Map.include({invalidateSize(...args){if(removed.has(this))f.lateInvalidates++;return invalidate.apply(this,args);},remove(...args){const result=remove.apply(this,args);removed.add(this);return result;}});
  L.Map.addInitHook(function(){f.maps.push(this);if(f.fastUnmount){f.fastUnmount=false;queueMicrotask(()=>f.unmount());}});
  const root=createRoot(document.getElementById('root')),controls=React.createRef();f.controls=controls;
- f.mount=(shop,fast=false,zoom=14,selected=null,capacity=3,view)=>{const shops=Array.isArray(shop)?shop:[shop];f.fastUnmount=fast;flushSync(()=>root.render(<Map ref={controls} showrooms={shops} groupCapacity={capacity} featuredNowBusinessId={null} selectedShowroomId={selected} requestedView={view||{center:[shops[0].latitude,shops[0].longitude],zoom}} onViewChange={view=>f.views.push(view)} onOpenNearbyGroup={group=>f.openedGroups.push(group.key)} onSelectShowroom={shop=>{f.selected.push(shop.id);if(f.focusOnSelect)controls.current?.centerAt(shop.latitude,shop.longitude,14);}} onError={()=>{f.mapErrors++;}}/>));};
- const fractional=L.CRS.EPSG3857.pointToLatLng(L.point(41363957.584632345,31755378.063858584),18);f.fractionalView={center:[fractional.lat,fractional.lng],zoom:18};
+ f.mount=(shop,fast=false,zoom=13,selected=null,capacity=3,view)=>{const shops=Array.isArray(shop)?shop:[shop];f.fastUnmount=fast;flushSync(()=>root.render(<Map ref={controls} showrooms={shops} groupCapacity={capacity} featuredNowBusinessId={null} selectedShowroomId={selected} requestedView={view||{center:[shops[0].latitude,shops[0].longitude],zoom}} onViewChange={view=>f.views.push(view)} onOpenNearbyGroup={group=>f.openedGroups.push(group.key)} onSelectShowroom={shop=>{f.selected.push(shop.id);if(f.focusOnSelect)controls.current?.centerAt(shop.latitude,shop.longitude,13);}} onError={()=>{f.mapErrors++;}}/>));};
+ const fractional=L.CRS.EPSG3857.pointToLatLng(L.point(1292623.674519761,992355.5644955807),13);f.fractionalView={center:[fractional.lat,fractional.lng],zoom:13};
  f.polylineCount=()=>{let count=0;f.maps[0].eachLayer(layer=>{if(layer instanceof L.Polyline)count++;});return count;};
  f.unmount=()=>flushSync(()=>root.render(null));
 `},bundle:true,write:false,platform:'browser',format:'iife',jsx:'automatic',define:{'process.env.NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER':'"osm-standard"'},plugins:[{name:'web-map-lifecycle-ports',setup(b){
@@ -31,7 +31,7 @@ type MapProbe=LeafletMap&{_loaded:boolean;_animatingZoom?:boolean;_zoomAnimated?
 type CameraView={center:[number,number];zoom:number};
 type Probe={polylineCount:()=>number;openedGroups:string[];maps:MapProbe[];selected:number[];lateInvalidates:number;mapErrors:number;focusOnSelect?:boolean;fractionalView:CameraView;views:CameraView[];mount:(shop:DiscoveryShowroom|DiscoveryShowroom[],fast?:boolean,zoom?:number,selected?:number|null,capacity?:number,view?:CameraView)=>void;unmount:()=>void;controls:{current:{reset:()=>void}}};
 
-async function boot(channel?:'chrome'){
+async function boot(channel:'chrome'='chrome'){
  const compiled=await bundle,browser=await chromium.launch({channel,headless:true,timeout:20000}),errors:string[]=[];
  const page=await browser.newPage({viewport:{width:390,height:844}});page.on('pageerror',error=>errors.push(error.stack||error.message));
  page.setDefaultTimeout(8000);
@@ -54,7 +54,7 @@ test('FE-065 web map cancels its startup resize when navigation immediately unmo
   assert.equal(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.lateInvalidates),0,'Owned120ms startup resize must not reach a removed map');
   assert.equal(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.mapErrors),0);
   assert.deepEqual(errors,[]);
- }finally{await browser.close();}
+ }catch(error){console.error('Web map fixture startup diagnosis',await page.evaluate(()=>({maps:(window as unknown as{fixture:Probe}).fixture.maps.length,mapErrors:(window as unknown as{fixture:Probe}).fixture.mapErrors,root:document.getElementById('root')?.innerHTML.slice(0,500)})),errors);throw error;}finally{await browser.close();}
 });
 
 test('FE-065 web map keeps live pan/resize/selection but detaches delayed moveend before destruction',{timeout:30000},async()=>{
@@ -70,7 +70,7 @@ test('FE-065 web map keeps live pan/resize/selection but detaches delayed moveen
   assert.deepEqual(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.selected),[21,22]);
   assert.equal(await page.locator('.discovery-map').getAttribute('data-map-marker-count'),'1');
   const view=await page.evaluate(()=>{const m=(window as unknown as {fixture:Probe}).fixture.maps[0],center=m.getCenter();return {latitude:center.lat,longitude:center.lng,zoom:m.getZoom()};});
-  assert.ok(Math.abs(view.latitude-9.032)<.01&&Math.abs(view.longitude-39.702)<.01);assert.equal(view.zoom,14);
+  assert.ok(Math.abs(view.latitude-9.032)<.01&&Math.abs(view.longitude-39.702)<.01);assert.equal(view.zoom,13);
   await page.evaluate(()=>{const f=(window as unknown as {fixture:Probe}).fixture,m=f.maps[0];m.getContainer().style.height='280px';m.invalidateSize({debounceMoveend:true});f.unmount();});
   await page.waitForTimeout(260);assert.deepEqual(errors,[],'No delayed SDK event may read a destroyed pane');
   assert.equal(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.maps[0].listens('moveend')),false,'Owned render/commit listener is detached');
@@ -96,10 +96,10 @@ test('FE-065 phone marker animated zoom can be left immediately without a late S
   assert.deepEqual(errors,[],'The SDK250ms zoom fallback must not move a destroyed pane');
   await page.evaluate(shop=>(window as unknown as {fixture:Probe}).fixture.mount({...shop,id:24,name:'Returned shop'},false,11),shop);
   await page.getByRole('button',{name:/^Returned shop,/}).click();
-  await page.waitForFunction(()=>{const m=(window as unknown as {fixture:Probe}).fixture.maps[1];return m.getZoom()===14&&!m._animatingZoom;});
+  await page.waitForFunction(()=>{const m=(window as unknown as {fixture:Probe}).fixture.maps[1];return m.getZoom()===13&&!m._animatingZoom;});
   assert.deepEqual(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.selected),[21,24]);
   await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.controls.current.reset());
-  await page.waitForFunction(()=>{const m=(window as unknown as {fixture:Probe}).fixture.maps[1];return m.getZoom()<14&&!m._animatingZoom;});
+  await page.waitForFunction(()=>{const m=(window as unknown as {fixture:Probe}).fixture.maps[1];return m.getZoom()<13&&!m._animatingZoom;});
   await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.unmount());await page.waitForTimeout(350);assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });
@@ -109,15 +109,15 @@ test('FE-021 S127 marker reprojection preserves the current trigger focus withou
  const {browser,page,errors}=await boot();
  try{
   const cohort=[shop,{...shop,id:22,name:'Second fixture shop'}];
-  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,18),cohort);
+  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,13),cohort);
   const marker=page.getByRole('button',{name:'2 businesses. View businesses.',exact:true});await marker.waitFor();await marker.focus();await expectFocus();
   const previous=await marker.elementHandle();
-  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,18,21),cohort);
+  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,13,21),cohort);
   await expectFocus();assert.equal(await previous!.evaluate(element=>element.isConnected),false,'The original focused icon must really have been replaced');
   await page.evaluate(()=>{const button=document.createElement('button');button.id='external-modal-control';button.textContent='External dialog control';document.body.append(button);button.focus();});
-  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,18,null),cohort);
+  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,13,null),cohort);
   assert.equal(await page.locator('#external-modal-control').evaluate(element=>document.activeElement===element),true,'Marker refresh must never steal focus from a dialog/control');
-  assert.equal(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.maps[0].getZoom()),18);assert.deepEqual(errors,[]);
+  assert.equal(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.maps[0].getZoom()),13);assert.deepEqual(errors,[]);
   async function expectFocus(){await page.waitForFunction(()=>{const marker=document.querySelector('.leaflet-marker-icon:has([data-map-group-key])');return Boolean(marker&&document.activeElement===marker);});}
  }finally{await browser.close();}
 });
@@ -126,7 +126,7 @@ test('FE-021 S127 marker reprojection preserves the current trigger focus withou
 test('FE-021 revised S127 focusing and activating an edge counted group never pans or zooms the map',{timeout:30000},async()=>{
  const {browser,page,errors}=await boot();
  try{
-  const cohort=[shop,...[22,23,24].map(id=>({...shop,id,name:'Fixture shop '+id}))];await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,18,null,2),cohort);
+  const cohort=[shop,...[22,23,24].map(id=>({...shop,id,name:'Fixture shop '+id}))];await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,13,null,2),cohort);
   const markers=page.getByRole('button',{name:'2 businesses. View businesses.',exact:true});await page.waitForFunction(()=>document.querySelectorAll('.mp-map-cluster').length===2);assert.equal(await markers.count(),2);const marker=markers.first();await marker.waitFor();assert.equal(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.polylineCount()),0,'Four co-located shops must render two independent2-count circles without connecting lines');
   await page.evaluate(()=>{const button=document.createElement('button');button.id='outside-map';document.body.append(button);button.focus();const map=(window as unknown as {fixture:Probe}).fixture.maps[0];map.panBy([map.getSize().x/2-8,0],{animate:false});});
   const view=()=>page.evaluate(()=>{const map=(window as unknown as {fixture:Probe}).fixture.maps[0],center=map.getCenter();return{center:[center.lat,center.lng],zoom:map.getZoom()};});
@@ -146,14 +146,14 @@ test('FE-021 S140 outer aggregates expand while exposed terminal circles open be
   await aggregate.click();await expandedWithoutOpening();
   await mountAtOverview();await page.waitForFunction(()=>document.querySelector('.discovery-map')?.getAttribute('data-map-zoom')==='5');
   await aggregate.press('Enter');await expandedWithoutOpening();
-  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,14,null,3),cohort.slice(0,2));
-  await page.waitForFunction(()=>{const map=(window as unknown as {fixture:Probe}).fixture.maps[0];return map.getZoom()===14&&!map._animatingZoom;});
+  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,12,null,3),cohort.slice(0,2));
+  await page.waitForFunction(()=>{const map=(window as unknown as {fixture:Probe}).fixture.maps[0];return map.getZoom()===12&&!map._animatingZoom;});
   const smallCircle=page.getByRole('button',{name:'2 businesses. View businesses.',exact:true});await smallCircle.waitFor();assert.equal(await smallCircle.locator('[data-map-group-kind="cluster"]').count(),1);
-  const oneGroupView=await view();assert.equal(oneGroupView.zoom,14);await smallCircle.press('Enter');assert.deepEqual(await view(),oneGroupView);assert.equal((await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.openedGroups)).length,1,'A final circle below max opens immediately');
+  const oneGroupView=await view();assert.equal(oneGroupView.zoom,12);await smallCircle.press('Enter');assert.deepEqual(await view(),oneGroupView);assert.equal((await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.openedGroups)).length,1,'A final circle below max opens immediately');
   await smallCircle.click();assert.deepEqual(await view(),oneGroupView);assert.equal((await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.openedGroups)).length,2,'Pointer activation has the same in-place behavior');
-  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,18,null,3),cohort);
-  await page.evaluate(()=>{const f=(window as unknown as {fixture:Probe}).fixture;f.maps[0].setView([9.03,39.7],18,{animate:false});});
-  await page.waitForFunction(()=>document.querySelector('.discovery-map')?.getAttribute('data-map-zoom')==='18');
+  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,13,null,3),cohort);
+  await page.evaluate(()=>{const f=(window as unknown as {fixture:Probe}).fixture;f.maps[0].setView([9.03,39.7],13,{animate:false});});
+  await page.waitForFunction(()=>document.querySelector('.discovery-map')?.getAttribute('data-map-zoom')==='13');
   await page.waitForFunction(()=>document.querySelectorAll('[data-map-group-kind="cluster"]').length===4);
   assert.equal(await page.locator('[data-map-group-kind="aggregate"]').count(),0);
   assert.equal(await page.locator('[data-map-group-kind="cluster"]').count(),4);
@@ -166,23 +166,41 @@ test('FE-021 S140 outer aggregates expand while exposed terminal circles open be
    await page.waitForFunction(()=>{const map=(window as unknown as {fixture:Probe}).fixture.maps[0];return map.getZoom()>5&&!map._animatingZoom;});
    assert.deepEqual(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.openedGroups),[],'An outer aggregate must never open a picker');
    assert.deepEqual(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.selected),[]);
-   assert.ok((await view()).zoom<=18);
+   assert.ok((await view()).zoom<=13);
   }
  }finally{await browser.close();}
+});
+
+test('FE-021 S154 actual web21 area businesses open every city group once at390/1440 without street zoom',{timeout:45000},async()=>{
+ for(const[width,capacity,expected]of[[390,3,7],[1440,6,4]]){
+  const{browser,page,errors}=await boot('chrome');
+  try{
+   await page.setViewportSize({width,height:844});await page.addStyleTag({content:'.discovery-map{width:'+width+'px;height:600px}'});
+   const cohort=Array.from({length:21},(_,i)=>({...shop,id:i+1,name:'City shop '+i,locationMode:'area' as const}));
+   await page.evaluate(({cohort,capacity})=>(window as unknown as{fixture:Probe}).fixture.mount(cohort,false,5,null,capacity),{cohort,capacity});
+   await page.getByRole('button',{name:'21 businesses. Zoom in.',exact:true}).click();
+   await page.waitForFunction(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return m.getZoom()===12&&!m._animatingZoom;});
+   const buttons=page.getByRole('button',{name:/businesses\. View businesses\./});await buttons.nth(expected-1).waitFor();assert.equal(await buttons.count(),expected);
+   const before=await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return{zoom:m.getZoom(),center:m.getCenter()};});
+   for(let i=0;i<expected;i++){const button=buttons.nth(i);assert.equal(await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}),true,'Each separated current group remains pointer accessible');await button.click();}
+   const keys=await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.openedGroups);assert.equal(new Set(keys).size,expected);assert.deepEqual(keys.flatMap(key=>key.replace('cluster:','').split('-').map(Number)).sort((a,b)=>a-b),cohort.map(item=>item.id));
+   assert.deepEqual(await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return{zoom:m.getZoom(),center:m.getCenter()};}),before);assert.equal(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.polylineCount()),0);assert.deepEqual(errors,[]);
+  }finally{await browser.close();}
+ }
 });
 
 test('FE-065 S128 web container resize preserves max-zoom camera and commits only its corrected view',{timeout:30000},async()=>{
  const {browser,page,errors}=await boot('chrome');
  try{
-  await page.evaluate(shop=>(window as unknown as{fixture:Probe}).fixture.mount(shop,false,18),shop);
+  await page.evaluate(shop=>(window as unknown as{fixture:Probe}).fixture.mount(shop,false,13),shop);
   await page.getByRole('button',{name:/^Original shop,/}).waitFor();await page.waitForTimeout(220);
   const before=await page.evaluate(()=>{const f=(window as unknown as{fixture:Probe}).fixture,map=f.maps[0];f.views=[];const center=map.getCenter(),point=map.project(center,map.getZoom());return{point:{x:point.x,y:point.y},center:{lat:center.lat,lng:center.lng},zoom:map.getZoom()};});
   await page.locator('.discovery-map').evaluate(el=>{(el as HTMLElement).style.height='554px';});
   await page.waitForFunction(()=>(window as unknown as{fixture:Probe}).fixture.maps[0].getSize().y===554);
   const resized=await page.evaluate(()=>{const f=(window as unknown as{fixture:Probe}).fixture,map=f.maps[0],point=map.project(map.getCenter(),map.getZoom());return{point:{x:point.x,y:point.y},zoom:map.getZoom(),commits:f.views.map(view=>{const p=map.project([view.center[0],view.center[1]],view.zoom);return{x:p.x,y:p.y,zoom:view.zoom};})};});
-  assert.equal(resized.zoom,18);assert.ok(Math.abs(resized.point.x-before.point.x)<=.5&&Math.abs(resized.point.y-before.point.y)<=.5,'A54px loading-row change must not move the real SDK camera by27px');
+  assert.equal(resized.zoom,13);assert.ok(Math.abs(resized.point.x-before.point.x)<=.5&&Math.abs(resized.point.y-before.point.y)<=.5,'A54px loading-row change must not move the real SDK camera by27px');
   assert.equal(resized.commits.length,1,'Only one final corrected camera is published per container resize');
-  assert.ok(resized.commits.every(point=>point.zoom===18&&Math.abs(point.x-before.point.x)<=.5&&Math.abs(point.y-before.point.y)<=.5),'Intermediate SDK resize/pan events cannot corrupt saved navigation state');
+  assert.ok(resized.commits.every(point=>point.zoom===13&&Math.abs(point.x-before.point.x)<=.5&&Math.abs(point.y-before.point.y)<=.5),'Intermediate SDK resize/pan events cannot corrupt saved navigation state');
   await page.evaluate(()=>{(window as unknown as{fixture:Probe}).fixture.views=[];});
   await page.locator('.discovery-map').evaluate(el=>{(el as HTMLElement).style.height='0px';});await page.waitForTimeout(80);
   assert.equal(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.maps[0].getSize().y),554,'Hidden zero-size geometry cannot invalidate the last valid viewport');
@@ -198,9 +216,9 @@ test('FE-065 S136 actual web Leaflet keeps fractional resize intent through remo
   await page.addStyleTag({content:'.discovery-map{width:372px;height:300px}'});
   const initial=await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.fractionalView);
   let saved=initial;
-  const original={x:41363957.584632345,y:31755378.063858584};
+  const original={x:1292623.674519761,y:992355.5644955807};
   for(let cycle=0;cycle<3;cycle++){
-   await page.evaluate(({shop,view})=>{const f=(window as unknown as{fixture:Probe}).fixture;f.mount(shop,false,18,null,3,view);},{shop,view:saved});
+   await page.evaluate(({shop,view})=>{const f=(window as unknown as{fixture:Probe}).fixture;f.mount(shop,false,13,null,3,view);},{shop,view:saved});
    await page.waitForFunction(()=>(window as unknown as{fixture:Probe}).fixture.maps.at(-1)?._loaded);
    await page.waitForTimeout(220);
    for(const[width,height]of[[373,301],[373,302],[372,300]]){
@@ -216,12 +234,12 @@ test('FE-065 S136 actual web Leaflet keeps fractional resize intent through remo
    }
    await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.unmount());
   }
-  await page.evaluate(({shop,view})=>(window as unknown as{fixture:Probe}).fixture.mount(shop,false,18,null,3,view),{shop,view:saved});
+  await page.evaluate(({shop,view})=>(window as unknown as{fixture:Probe}).fixture.mount(shop,false,13,null,3,view),{shop,view:saved});
   await page.waitForFunction(()=>(window as unknown as{fixture:Probe}).fixture.maps.at(-1)?._loaded);await page.waitForTimeout(220);
   const panned=await page.evaluate(()=>{const f=(window as unknown as{fixture:Probe}).fixture,m=f.maps.at(-1)!;f.views=[];m.panBy([17,-9],{animate:false});const center=m.getCenter(),view=f.views.at(-1)!;return{actual:[center.lat,center.lng],view};});
   assert.deepEqual(panned.view.center,panned.actual,'Genuine public SDK pan replaces the old resize intent');
-  const zoomed=await page.evaluate(()=>{const f=(window as unknown as{fixture:Probe}).fixture,m=f.maps.at(-1)!;m.setZoom(17,{animate:false});const center=m.getCenter();return{actual:[center.lat,center.lng],view:f.views.at(-1)!};});
-  assert.equal(zoomed.view.zoom,17);assert.deepEqual(zoomed.view.center,zoomed.actual,'Genuine public SDK zoom publishes its current center');
+  const zoomed=await page.evaluate(()=>{const f=(window as unknown as{fixture:Probe}).fixture,m=f.maps.at(-1)!;m.setZoom(12,{animate:false});const center=m.getCenter();return{actual:[center.lat,center.lng],view:f.views.at(-1)!};});
+  assert.equal(zoomed.view.zoom,12);assert.deepEqual(zoomed.view.center,zoomed.actual,'Genuine public SDK zoom publishes its current center');
   await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.unmount());await page.waitForTimeout(260);
   assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.lateInvalidates),0);
  }finally{await browser.close();}

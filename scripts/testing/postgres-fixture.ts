@@ -91,7 +91,7 @@ export async function seedFixture() {
   if (!/^suqpage_test_[a-f0-9]{32}$/.test(schema)) throw new Error('Demo test seed requires an isolated fixture schema.');
   try {
     await new Promise<void>((resolve, reject) => {
-      const child = spawn(process.execPath, ['--import','tsx','scripts/setup.ts'], { env: { ...process.env, SUQPAGE_POSTGRES_DIRECT_URL: process.env.SUQPAGE_POSTGRES_URL, SUQPAGE_POSTGRES_MIGRATION_SCHEMA: schema, SUQPAGE_CREDENTIAL_PATH: path.join(root,'credentials.txt'), SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: '1' }, stdio: ['ignore','pipe','pipe'] });
+      const child = spawn(process.execPath, ['--import','tsx','scripts/setup.ts'], { env: { ...process.env, SUQPAGE_DEMO_INQUIRY_PHONE: '', SUQPAGE_POSTGRES_DIRECT_URL: process.env.SUQPAGE_POSTGRES_URL, SUQPAGE_POSTGRES_MIGRATION_SCHEMA: schema, SUQPAGE_CREDENTIAL_PATH: path.join(root,'credentials.txt'), SUQPAGE_SUPPRESS_CREDENTIAL_OUTPUT: '1' }, stdio: ['ignore','pipe','pipe'] });
       let log = '';
       const timer = setTimeout(() => { child.kill('SIGTERM'); reject(new Error('Native demo fixture setup timed out.')); }, 180_000);
       child.stdout.on('data', value => { log += String(value); });

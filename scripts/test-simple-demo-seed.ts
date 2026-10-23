@@ -24,11 +24,23 @@ async function main() {
       assert.equal(product.lead_time_summary, '');
     }
     assert.equal(Number((await db.prepare('SELECT COUNT(*) n FROM option_groups').get()).n), 0);
-    const locations = await db.prepare(`SELECT p.location_mode, p.latitude, p.longitude
-      FROM businesses b JOIN owner_location_proposals p ON p.business_id=b.id
+    const locations = await db.prepare(`SELECT b.handle, d.city, d.latitude, d.longitude,
+      p.location_mode, p.latitude area_latitude, p.longitude area_longitude
+      FROM businesses b
+      JOIN business_discovery_profiles d ON d.business_id=b.id
+      JOIN owner_location_proposals p ON p.business_id=b.id
       WHERE b.handle=ANY(?::text[])`).all(Object.keys(SEEDED_MARKETPLACE_PROFILES));
     assert.ok(locations.length >= 66);
-    assert.ok(locations.every(p => p.location_mode === 'area' && p.latitude === null && p.longitude === null));
+    assert.ok(locations.every(p => p.location_mode === 'area' && p.area_latitude === null && p.area_longitude === null));
+    for (const location of locations) {
+      const expected = SEEDED_MARKETPLACE_PROFILES[location.handle];
+      assert.equal(location.latitude, expected.latitude, `${location.handle} retains its distinct area-level map latitude`);
+      assert.equal(location.longitude, expected.longitude, `${location.handle} retains its distinct area-level map longitude`);
+    }
+    const addis = locations.filter(location => location.city === 'Addis Ababa');
+    assert.ok(addis.length >= 20);
+    assert.ok(new Set(addis.map(location => `${location.latitude},${location.longitude}`)).size >= 20,
+      'Addis demo showrooms keep the distinct approximate map positions supplied by their fixtures instead of one city-center stack');
     const pages = await db.prepare('SELECT content_json FROM owner_page_publications').all();
     assert.equal(pages.length,66);
     for (const page of pages) {

@@ -150,26 +150,30 @@ messages and private notes in the transport-scoped queue. Owners/visitors receiv
 only explicitly public replies, including through retained older mobile adapters.
 No booking or immediate response is promised by an assignment or notification.
 
-Customers see **Waiting for our team** while work is queued, assigned internally
-or awaiting a team reply. Only an explicit Join announces the agent's identity;
-after a public team reply they see **Waiting for your reply**. Internal assignment,
-reply deadlines and escalation labels are not customer-facing response promises.
+Support customers see **Waiting for our team** while work is queued or assigned.
+Transport customers see that a live agent will help arrange the shipment with
+SharedTrucks Logistics. Only an explicit Join announces the joining agent;
+internal assignment and overdue labels are never exposed.
 
 ## Staff reply priority
 
-A participant's first unanswered message starts one response cycle. Staff see
-**Needs staff reply**, then **Overdue** ten minutes after the later of that oldest
-unanswered message or the current active assignment. Reassignment gives the next
+A participant's first unanswered message starts one response cycle. Assigned
+staff see **Needs staff reply**, then **Overdue** two minutes after the later of
+that oldest unanswered message or the current active assignment. Reassignment gives the next
 agent their own response window while preserving the customer's original wait
 and assignment history. Additional customer messages, Join, reads and private
 notes do not reset the customer anchor. A public reply clears the cycle. Reopen
 alone starts no new cycle; the next participant message does. Unassigned work
 keeps its ten-minute queue target, without attributing delay to an absent agent.
 
-This ten-minute target is internal workflow guidance, not a public SLA or an
-expiry rule. Unanswered work remains queued/active and unresolved; it does not
-end just because a team reply is overdue. An ended request still needs follow-up
-until authorized staff explicitly mark it resolved.
+The two-minute assigned target and ten-minute unassigned target are internal
+workflow guidance, not public SLAs or expiry rules. The due timestamp is exact;
+the bounded alert/email worker records overdue attention on its next scheduled
+sweep. Unanswered work remains active and unresolved. A Transport live wait ends
+at three minutes thirty seconds when no agent has joined or replied, and the
+same conversation then accepts an asynchronous message for the existing staff
+inbox. This does not close or resolve the underlying request. An ended request
+still needs follow-up until authorized staff explicitly mark it resolved.
 
 Visible active conversations refresh about every five seconds; failed refreshes
 back off to thirty seconds and show a warning. Visible closed web threads check

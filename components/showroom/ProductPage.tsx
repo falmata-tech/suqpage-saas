@@ -11,8 +11,9 @@ import { productMedia } from "@/lib/product-media";
 import ProductMediaGallery from "./ProductMediaGallery";
 import styles from "./ProductPage.module.css";
 
-export default function ProductPage({ product, backHref, onBack, onAdd, onInquire, isAdded, copyLink, ready, catalogLabel = "Products" }: {
+export default function ProductPage({ product, backHref, onBack, onAdd, onInquire, isAdded, copyLink, ready, catalogLabel = "Products", isDemo = false }: {
   catalogLabel?: string;
+  isDemo?: boolean;
   ready: boolean;
   product: Product | null; backHref: string; onBack: (event: MouseEvent<HTMLAnchorElement>) => void;
   onAdd: (options: Record<string, string>) => void; onInquire: (options: Record<string, string>) => void;
@@ -29,6 +30,7 @@ export default function ProductPage({ product, backHref, onBack, onAdd, onInquir
     {!product ? <div className={styles.unavailable}><PackageOpen size={36} aria-hidden="true" /><h2 ref={heading} tabIndex={-1}>{t("Item unavailable")}</h2><p>{t("This item is no longer listed. Browse the shop’s other products.")}</p></div> : <div className={styles.layout}>
       <div className={styles.media}><ProductMediaGallery key={product.id} items={productMedia(product)} name={product.name} /></div>
       <div className={styles.copy}>
+        {isDemo ? <span className={styles.category}>{t("Example product")}</span> : null}
         {product.category_name ? <span className={styles.category}>{product.category_name}</span> : null}
         <h2 ref={heading} tabIndex={-1}>{product.name}</h2>
         <div className={styles.priceRow}><strong>{product.price_minor !== null ? formatEtbPrice(product.price_minor) : t("Ask for price")}</strong>{unit ? <span>{unit}</span> : null}</div>

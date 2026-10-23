@@ -2,13 +2,54 @@
 id: FE-049
 title: Five-language interface
 status: in_progress
-related: [BE-058, DEP-048, FE-069, FE-066, FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062, DEP-044, FE-065, FE-067, FE-063, FE-068]
+related: [BE-058, DEP-048, FE-069, FE-066, FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062, DEP-044, FE-065, FE-067, FE-063, FE-068, FE-076, FE-075]
 owners: [product, frontend]
-last_updated: 2026-10-18
+last_updated: 2026-10-21
 change_level: L2
 ---
 
 # FE-049 — Five-language interface
+
+## S154 — compact inclusive showroom copy (ready before source changes)
+
+Market names digital showrooms for businesses of every size. Its short supporting
+copy connects business stories and products, organization without social-post
+clutter, and specific direct questions. Keep sector examples in About rather than
+adding height above the map. Shared web/native About and localized SEO use the
+same meaning; adapt active Amharic/Oromo grammar rather than copying English
+word order. Preserve literal merchant content. Current sign-in entry is role-neutral:
+web and native say ‘Sign in to MirtPage.’ and explain email sign-in/account creation.
+No business-only title, supporting sentence or new-user hint appears before Auth;
+existing business setup and native staff access boundaries are unchanged.
+
+Under FE-075/BE-062, inquiry copy describes a selected-product question
+with the visitor's name/phone, delivered asynchronously to the business Inbox.
+The business follows up with the customer; no live business-chat, onsite reply,
+read receipt, checkout or inventory-sync claim. When configured, WhatsApp,
+Telegram and MirtPage Inbox are equally prominent adjacent choices; translated
+actions state the destination without implying a preferred channel.
+Transport/owner Support live chat are separate features. Privacy and
+Terms describe actual received inquiry fields and restricted business access.
+BE-063 partner-interest copy describes private administrator review,90-day
+retention, and no operating account created by submission.
+
+Author source rows after their English owners freeze inquiry/transport keys, then
+generate catalogs once. Verify source/catalog parity and focused semantic tests;
+actual web/Expo/physical wrapping and batch visual approval remain separate.
+Independent native-speaker review is not claimed. Root owns master/checklist and
+traceability updates; these source changes are not deployed behavior.
+
+## S153 N16 — login headline copy correction (superseded at sign-in by S154)
+
+S154 replaces the login headline with role-neutral account entry under the latest
+owner instruction. The earlier N16 wording remains compatibility catalog content,
+not the current sign-in headline. The preceding N16 correction kept English unchanged. Amharic and Afaan Oromo
+explain a digital place for the business's product display, replacing the stale
+internet-page wording. Change only those two source-catalog values and their
+generated entries; retain inactive languages, controls, Auth behavior and merchant
+content. Existing localization/catalog checks precede physical phone wrapping
+review and batch visual approval. Primary usage informs this agent-authored copy;
+independent native-speaker review is not claimed. Master narrative is unchanged.
 
 ## S145 local source: Shipment tracking vocabulary
 
@@ -47,8 +88,9 @@ are affected. This is L2 preference compatibility plus L1 copy/layout work.
    normalize consistently without rewriting saved records or credentials.
 2. GIVEN primary public/owner UI and About/Market copy THEN rewrite Amharic/Oromo
    to explain the task/idea in ordinary local wording. Explain a digital showroom
-   as an organized internet page for a business's products; do not invent a
-   borrowed technical noun or restrict the audience to online resellers. Review
+   with ordinary words for a business's organized digital product display,
+   not an internet page. Avoid unfamiliar coined terms or restricting the
+   audience to online resellers. Review
    discovery/filter/collection, product/stock/custom order, external inquiry,
    account/setup/page publication, and support/transport vocabulary consistently.
    Keep action labels brief while explanatory sentences may expand when needed.

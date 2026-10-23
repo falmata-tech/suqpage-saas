@@ -2,8 +2,9 @@
 
 S120 makes this a recurring requirement for Suqpage UI, UX, layout and navigation
 work. Follow [AGENTS.md](../../AGENTS.md), the active task checklist and the
-controlling specs. Review the affected tasks, roles and platforms before asking
-for visual approval; then follow the existing full-check/release workflow. This
+controlling specs. Review the affected tasks, roles and platforms and record an
+agent-owned visual pass/fail decision before full checks; then follow the
+existing release workflow. This
 guide adds no deployment permission and preserves the existing emergency-fix
 exception. A screenshot is supporting evidence, not a completed workflow test.
 
@@ -39,6 +40,8 @@ exception. A screenshot is supporting evidence, not a completed workflow test.
    unrelated user tabs or preview servers as test cleanup.
 
 ## Exercise the task as its user
+
+For interface changes, also follow the [MirtPage interface-design skill](../../.agents/skills/mirtpage-interface-design/SKILL.md). At affected phone widths, inspect real active-language labels and content—not just English—with equal attention to meaning, fit and whether the main task stays visible. Catalog/key parity is not evidence of natural wording; record when qualified language review remains outstanding.
 
 Cover every affected role below; an unaffected role need not repeat an unrelated
 workflow. Shared navigation changes require the affected role entry/exit paths.
@@ -80,12 +83,56 @@ workflow. Shared navigation changes require the affected role entry/exit paths.
   committed database Join alone does not prove its new RSC UI has rendered. Do
   not skip a missing audience selector or use a still-visible Internal note form
   as a public reply. Verify the saved message's audience as well as its text.
+- Expo retains earlier stack screens in the DOM. Scope repeated labels to the
+  visible active screen; an unscoped `.first()` may match a hidden predecessor.
 - Check console/page errors and failed application requests throughout. After a
   real write, verify the authoritative local API/database state and reload it in
   the relevant user view. For paired chat, inspect both participants, assignment,
   receipt and maintenance outcomes. Keep readback scoped; never expose database
   credentials or customer rows. Browser results supplement automated security,
   role and tenant-isolation regressions; they do not replace those tests.
+
+## Recurring real-user review and physical Android
+
+Treat affected user journeys as part of normal development and release work,
+including UI changes that compile cleanly. Walk through the actual interface;
+do not replace navigation, typing, validation, loading, Back, Save/Cancel or
+paired-participant checks with direct URLs and screenshots. Batch reproducible
+findings in one protected task issue list with severity, platform, role, steps,
+expected/actual outcome, evidence and retest status before selecting a fix batch.
+Keep untested journeys visible instead of declaring the whole app passed.
+
+For requested cross-platform audits, use live web for the current public read
+experience and local web/Expo for labelled role fixtures and controlled writes.
+Hosted writes remain limited to the owner's authorized scope. Use independent
+browser contexts; never disturb ordinary signed-in tabs or another project.
+
+When a physical Android phone is available and authorized, verify the exact
+installed package/version/APK digest first. Exercise visitor and demo-owner
+journeys through native controls, including real keyboard, Back/gesture return,
+category/search state, inquiry isolation, account task navigation, loading/error
+recovery and foreground/resume. Staff/admin remain web-only. Device evidence is
+separate from Expo and must identify the tested binary; a source fix is not an
+installed fix. Resume the existing build/release admission when a new binary is
+needed rather than silently reusing an older build approval.
+
+For native-backed controls such as map markers, exercise the installed SDK event
+path and measured touch area. Calling a React callback directly does not prove
+that an Android tap reaches it; keep that regression separate from device proof.
+For sustained phone development, prefer a source-qualified development client
+with matching native dependencies and local API/Auth over repeated release builds.
+Use Fast Refresh for JavaScript changes; separately verify the final standalone
+release, OS integration and production configuration before distribution.
+
+Before every phone interaction/capture, confirm the phone is awake, unlocked and
+MirtPage is the actual foreground window. Stop if another app, notification shade
+or lockscreen appears. Keep credentials out of captures/output and private demo
+records protected; never capture unrelated phone content. Recheck after capture,
+wait for settled transitions and retain rejected/loading captures as such. Use
+only owned test data and restore test selections/settings when practical. Avoid
+automated public OSM tile traffic on native as on web: exercise native map tasks
+with an admitted local tile fixture, or record the human-operated provider check
+and leave automated native-map coverage explicitly unqualified.
 
 ## Map tiles during automated review
 
@@ -149,6 +196,10 @@ retry, classify the cause as product behavior, stale fixtures or test
 infrastructure before expanding scope; document any corrected harness and
 re-verify the affected journey. Do not hide errors, weaken assertions or turn a
 mixed receipt into an unconditional pass. Record implemented, focused-tested,
-visually approved and deployed as distinct states. Present the concrete local
-review and wait at the existing visual-approval gate before expensive full,
-release, container or remote CI checks.
+agent-visually-reviewed and deployed as distinct states. Inspect the concrete
+local review yourself, record the source-bound pass/fail decision and share the
+evidence with the owner. A passing agent visual review admits expensive full,
+release, container or remote CI checks without a separate owner sign-off under
+DEP-002 S165. An untested or failed affected journey does not pass this gate.
+Hosted configuration, signing, recovery and protected-branch actions retain
+their separate controls.

@@ -20,7 +20,12 @@ async function main() {
     await assert.rejects(()=>updateInquiryStatus({...actor,access_role:'client',business_id:otherId},change),/access required/);
     await assert.rejects(()=>updateInquiryStatus({...actor,access_role:'team_member',business_id:businessId},change),/access required/);
     assert.equal(await status(),'contacted'); assert.equal(await audits(),1,'Denied/no-op commands never record success');
-    await updateInquiryStatus({...actor,access_role:'operations_manager'},{...change,status:'closed'}); assert.equal(await status(),'closed');
+    await assert.rejects(()=>updateInquiryStatus({...actor,access_role:'operations_manager'},{...change,status:'closed'}),/access required/);
+    const managerId=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role) VALUES('wiring-manager@example.test','unused','Wiring manager','admin')").run()).insertedId);
+    await db.prepare("INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,'operations_manager')").run(managerId);
+    await db.prepare('INSERT INTO staff_business_grants(user_id,enabled,version,updated_at) VALUES(?,1,1,1)').run(managerId);
+    const manager=(await getUserById(managerId))!;
+    await updateInquiryStatus(manager,{...change,status:'closed'}); assert.equal(await status(),'closed');
     await db.exec("CREATE FUNCTION reject_wiring_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'fixture audit failure'; END; $$; CREATE TRIGGER reject_wiring_audit BEFORE INSERT ON audit_logs FOR EACH ROW EXECUTE FUNCTION reject_wiring_audit();");
     await assert.rejects(()=>updateInquiryStatus(actor,change),/fixture audit failure/); assert.equal(await status(),'closed','Failure rolls back the status change');
     await db.exec('DROP TRIGGER reject_wiring_audit ON audit_logs; DROP FUNCTION reject_wiring_audit();');

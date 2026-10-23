@@ -16,12 +16,13 @@ const bundle=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
 `},bundle:true,write:false,format:'iife',platform:'browser',jsx:'automatic',plugins:[{name:'editor-workflow-ports',setup(b){
  b.onResolve({filter:/^react(?:\/jsx(?:-dev)?-runtime)?$/},a=>({path:require.resolve(a.path)}));
  b.onResolve({filter:/\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({loader:'js',contents:'export default new Proxy({}, {get:(_,key)=>key});'}));
- b.onResolve({filter:/^(next\/navigation|@\/lib\/i18n\/ui|(?:@\/components\/|\.\/)(?:LoadingBar|CountrySelect|PlaceSearch|CategorySelect))$/},a=>({path:a.path,namespace:'ports'}));
+ b.onResolve({filter:/^(next\/navigation|@\/lib\/i18n\/ui|(?:@\/components\/|\.\/)(?:LoadingBar|CountrySelect|PlaceSearch|CategorySelect|OwnerLocationPicker))$/},a=>({path:a.path,namespace:'ports'}));
  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',resolveDir:process.cwd(),contents:a.path==='next/navigation'?`export {unstable_rethrow} from ${JSON.stringify(require.resolve('next/dist/client/components/unstable-rethrow.browser.js'))};export const useRouter=()=>({push:href=>window.fixture.routes.push(href)});`
   :a.path==='@/lib/i18n/ui'?`export const useUiText=()=> (key,values={})=>key.replace(/\{([^}]+)\}/g,(_,name)=>values[name]??'{'+name+'}');`
   :a.path.endsWith('LoadingBar')?`export default ()=> <div role='progressbar'/>;`
   :a.path.endsWith('CountrySelect')?`export default ({value,onChange})=> <select id='business-country' name='countryCode' value={value} onChange={e=>onChange(e.target.value)}><option value='ET'>Ethiopia</option><option value='KE'>Kenya</option></select>;`
   :a.path.endsWith('PlaceSearch')?`export default ({value,onChange})=> <input id='owner-city' value={value} onChange={e=>onChange(e.target.value)}/>;`
+  :a.path.endsWith('OwnerLocationPicker')?`export default ({point,onChange})=><div><button type='button' onClick={()=>onChange({latitude:9.01,longitude:38.76})}>Choose public pin</button><output>{point?String(point.latitude)+','+String(point.longitude):'No pin selected'}</output></div>;`
   :`export default ({id,name,defaultValue})=><select id={id} name={name} defaultValue={defaultValue}><option value='home-living'>Home</option><option value='other-products'>Other products</option></select>;`}));
 }}]});
 
@@ -109,8 +110,8 @@ test('FE-056 Business details places Cancel beside Save and protects name/logo/l
   const save=page.getByRole('button',{name:'Save business details',exact:true}),cancel=page.getByRole('button',{name:'Cancel',exact:true});
   assert.equal(await save.evaluate(node=>node.parentElement===Array.from(document.querySelectorAll('button')).find(button=>button.textContent==='Cancel')?.parentElement),true);
   await page.getByLabel('Business name',{exact:true}).fill('Retained workshop');await page.getByLabel('Business logo',{exact:true}).setInputFiles({name:'logo.png',mimeType:'image/png',buffer:Buffer.from('qa-logo')});
-  await page.getByLabel('Public location',{exact:true}).selectOption('storefront');await page.getByLabel('Storefront latitude',{exact:true}).fill('9.01');await page.getByLabel('Storefront longitude',{exact:true}).fill('38.76');
-  await cancel.click();await page.getByRole('button',{name:'Keep editing',exact:true}).click();assert.equal(await page.getByLabel('Storefront latitude',{exact:true}).inputValue(),'9.01');
+  await page.getByRole('radio',{name:'Show on map'}).check();await page.getByRole('button',{name:'Choose public pin'}).click();
+  await cancel.click();await page.getByRole('button',{name:'Keep editing',exact:true}).click();assert.equal(await page.locator('input[name=latitude]').inputValue(),'9.01');assert.equal(await page.locator('input[name=longitude]').inputValue(),'38.76');
   await save.click();await page.evaluate(()=>document.querySelector('form')!.requestSubmit());assert.equal((await saves(page)).length,1);assert.equal(await page.getByLabel('Business name',{exact:true}).isDisabled(),true);
   await settle(page,'error');await page.getByRole('alert').waitFor();assert.equal(await page.getByLabel('Business name',{exact:true}).inputValue(),'Retained workshop');assert.equal(await page.getByLabel('Business logo',{exact:true}).evaluate((node:HTMLInputElement)=>node.files?.[0]?.name),'logo.png');
   await cancel.click();await page.getByRole('button',{name:'Discard changes',exact:true}).click();assert.deepEqual(await routes(page),['/dashboard/business']);assert.equal((await saves(page)).length,1);assert.deepEqual(errors,[]);

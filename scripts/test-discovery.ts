@@ -14,6 +14,7 @@ async function runPostgresFixture() {
     const marketplaceMapSource = fs.readFileSync(path.join(process.cwd(), "components/MarketplaceMap.tsx"), "utf8");
     const discoveryCssSource = fs.readFileSync(path.join(process.cwd(), "app/discovery.css"), "utf8");
     const featuredUiSource = fs.readFileSync(path.join(process.cwd(), "components/FeaturedShowroomsWorkspace.tsx"), "utf8");
+    const featuredBroadcastHeaderSource = fs.readFileSync(path.join(process.cwd(), "lib/featured-broadcast-header.ts"), "utf8");
     const discoveryUiSource = `${discoveryMapSource}\n${marketplaceMapSource}\n${featuredUiSource}`;
     const featuredPageSource = fs.readFileSync(path.join(process.cwd(), "app/(public)/featured/page.tsx"), "utf8");
     const publicDiscoveryCacheSource = fs.readFileSync(path.join(process.cwd(), "lib/public-discovery-cache.ts"), "utf8");
@@ -64,8 +65,8 @@ async function runPostgresFixture() {
     assert.match(discoveryUiSource, /className={`featured-card/);
     assert.doesNotMatch(discoveryUiSource, /featured-floor|featured-booth-platform|buildScrollableFeaturedVenueLayout/);
     assert.match(discoveryUiSource, /featured-experience/);
-    assert.match(discoveryUiSource, /TikTok Live/);
-    assert.match(discoveryUiSource, /Livestream ended/);
+    assert.match(featuredBroadcastHeaderSource, /TikTok Live/);
+    assert.match(featuredBroadcastHeaderSource, /Today's featured program has ended/);
     assert.match(marketplaceMapSource, /mp-map-storefront/);
     assert.doesNotMatch(marketplaceMapSource, /point-halo|cluster-halo/);
     assert.match(marketplaceMapSource, /SHOWROOM_DETAIL_ZOOM/);

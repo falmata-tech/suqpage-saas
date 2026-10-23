@@ -115,19 +115,21 @@ test('category product batches retain the independent map on desktop and phones'
   });
 });
 
-test('linked products and social-only contact with no inbox submission',async({page})=>{
+test('linked products offer a prepared message and first-party inbox contact',async({page})=>{
   for(const width of [1440,390,320]){
     await page.setViewportSize({width,height:900});await page.goto('/@selam-weave');
     await page.locator('a[href*="?product="]').first().click();await expect(page).toHaveURL(/product=\d+/);
     const url=page.url();await page.reload();await expect(page).toHaveURL(url);
     await page.getByRole('button',{name:'Inquire about this product only',exact:true}).click();
     const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();
-    await expect(page.getByLabel('Reply phone number',{exact:true})).toHaveCount(0);
+    await expect(dialog.getByRole('heading',{name:'Inquire about this product',exact:true})).toBeVisible();
     await expect(dialog.getByRole('button',{name:'Copy message',exact:true})).toBeVisible();
-    await expect(dialog.getByRole('button',{name:'Send inquiry on Suqpage',exact:true})).toHaveCount(0);
-    await expect(dialog.getByRole('heading',{name:'Message the business',exact:true})).toBeVisible();
+    await dialog.getByRole('button',{name:'Send to MirtPage Inbox',exact:true}).click();
+    await expect(dialog.getByRole('textbox',{name:'Your message',exact:true})).toHaveValue(/I'd like to ask about:/);
+    await expect(dialog.getByRole('textbox',{name:'Your name',exact:true})).toBeVisible();
+    await expect(dialog.getByRole('textbox',{name:'Phone number',exact:true})).toBeVisible();
     await dialog.getByRole('button',{name:'Copy message',exact:true}).click();
-    await expect(dialog.getByRole('textbox',{name:'Inquiry message',exact:true})).toHaveValue(/I'd like to ask about:/);
+    await expect(dialog.getByRole('textbox',{name:'Your message',exact:true})).toHaveValue(/I'd like to ask about:/);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
     await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);
   }
@@ -152,8 +154,8 @@ test('API authorization, validation, health, and security headers',async({reques
   }
   expect((await request.get('/api/page-drafts/1')).status()).toBe(405);
   expect((await request.post('/api/page-drafts/1',{data:{action:'start'}})).status()).toBe(401);
-  const retired=await request.post('/api/inquiries',{data:{businessId:1,customerName:'X',contact:'12345',items:[]}});
-  expect(retired.status()).toBe(410);expect(await retired.json()).toMatchObject({code:'inquiry_retired'});
+  const invalid=await request.post('/api/inquiries',{data:{businessId:1,customerName:'X',contact:'12345',items:[]}});
+  expect(invalid.status()).toBe(400);expect(await invalid.json()).toMatchObject({code:'invalid'});
   const home=await request.get('/');expect(home.headers()['x-frame-options']).toBe('DENY');
   expect(home.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
   expect(home.headers()['content-security-policy']).toContain("frame-src 'self' https://www.youtube-nocookie.com");

@@ -1,7 +1,9 @@
+import {selectTransportCoordinator} from './transport-coordinator';
 import { buyingService, isCallbackRequest, type BuyingService } from "./buying-assistance";
 import { platformCookies } from "./platform-state";
 import crypto from "node:crypto";
 import { hasCapability } from "./capabilities";
+import { authDriver } from "./config";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import {
   likePattern,
@@ -18,10 +20,11 @@ import { consumeRuntimeRateLimit } from "./rate-limit-runtime";
 import { assertMediaObjectKey } from "./media-storage";
 import type { SessionUser } from "./types";
 import { supportIdleDeadlines,SUPPORT_IDLE_WINDOWS,SUPPORT_IDLE_SWEEP_LIMIT } from './support-idle-contract';
-import { supportReplyState, SUPPORT_STAFF_REPLY_TARGET_MS, SUPPORT_REPLY_SWEEP_LIMIT, type SupportReplyState } from './support-response-contract';
+import { supportReplyState, SUPPORT_STAFF_REPLY_TARGET_MS, SUPPORT_UNASSIGNED_QUEUE_TARGET_MS, SUPPORT_REPLY_SWEEP_LIMIT, type SupportReplyState } from './support-response-contract';
 import {supportIdleEndEvidence,type SupportIdleEndEvidence} from './support-idle-evidence';
-import {SUPPORT_ACTIVE_ASSIGNMENT_JOIN,SUPPORT_RESPONSE_EPOCH_SQL,SUPPORT_RESPONSE_START_SQL} from './support-response-sql';
+import {SUPPORT_ACTIVE_ASSIGNMENT_JOIN,SUPPORT_RESPONSE_DEADLINE_SQL,SUPPORT_RESPONSE_EPOCH_SQL,SUPPORT_RESPONSE_START_SQL} from './support-response-sql';
 import {participantTransportPlan} from './transport-plan';
+import {transportLiveWait} from './transport-live-wait';
 import type {TransportPlan} from '@suqpage/contracts';
 
 export const PUBLIC_SUPPORT_SESSION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -57,12 +60,16 @@ export type SupportConversation = {
   transportCompany: string | null;
   visitorEmail: string | null;
   visitorPhone: string | null;
+  transportCallback?: { phone:string; email:string|null; submitted:boolean };
   subject: string;
   status: SupportStatus;
   assignedUserId: number | null;
   assignedUserName: string | null;
   lastMessageAt: number;
   createdAt: number;
+  transportWaitStartedAt?: number;
+  agentJoinedAt?: number | null;
+  firstStaffReplyAt?: number | null;
   closedAt: number | null;
   resolvedAt: number | null;
   requestSummary: string;
@@ -228,6 +235,8 @@ function conversationView(row: ConversationRow, user: SessionUser, now=Date.now(
     assignedUserName: user.access_role==='client'&&!explicitlyJoined(row)?null:row.assigned_user_name,
     lastMessageAt: row.last_message_at,
     createdAt: row.created_at,
+    transportWaitStartedAt: row.created_at,
+    agentJoinedAt: explicitlyJoined(row)?row.staff_joined_at:null,
     closedAt: row.closed_at,
     resolvedAt: row.resolved_at,
     requestSummary: row.request_summary || "",
@@ -297,6 +306,31 @@ async function requireConversation(user: SessionUser, conversationId: number) {
     throw new SupportError("Support conversation was not found.", "not_found");
   }
   return row;
+}
+
+const TRANSPORT_CALLBACK_EVENT = 'transport callback submitted';
+const TRANSPORT_CALLBACK_MESSAGE = 'Please contact me about this transport request using the contact details on this case.';
+
+async function firstTransportStaffReplyAt(conversationId:number):Promise<number|null>{
+  const row=await runtimeGet<{created_at:number|null}>(`SELECT MIN(m.created_at) created_at FROM support_messages m
+    JOIN support_conversations c ON c.id=m.conversation_id
+    WHERE m.conversation_id=? AND m.sender_kind='user' AND m.sender_user_id IS NOT NULL
+      AND m.sender_side IS DISTINCT FROM 'participant' AND m.visitor_visible=TRUE
+      AND (c.participant_kind='visitor' OR m.sender_user_id IS DISTINCT FROM c.opened_by_user_id)`,[conversationId]);
+  return row?.created_at==null?null:Number(row.created_at);
+}
+
+async function noAgentTransportCallbackDue(row:ConversationRow,now:number,firstStaffReplyAt?:number|null):Promise<boolean>{
+  if(row.assistance_category!=='shipment_observation'||row.status==='closed')return false;
+  const phase=transportLiveWait({status:row.status,waitStartedAt:row.created_at,
+    agentJoined:explicitlyJoined(row),agentJoinedAt:explicitlyJoined(row)?row.staff_joined_at:null,
+    firstStaffReplyAt:firstStaffReplyAt===undefined?await firstTransportStaffReplyAt(row.id):firstStaffReplyAt},now).phase;
+  return phase==='inbox';
+}
+
+async function hasTransportCallback(row:ConversationRow):Promise<boolean>{
+  return Boolean(await runtimeGet<{id:number}>(`SELECT id FROM support_events
+    WHERE conversation_id=? AND event_type='message' AND detail=? ORDER BY id LIMIT 1`,[row.id,TRANSPORT_CALLBACK_EVENT]));
 }
 
 /** Staff-only immutable journal. Absent/ambiguous historical proof stays unknown. */
@@ -383,6 +417,75 @@ function visitorSenderKey(tokenHash: string) {
   return `visitor:${tokenHash}`;
 }
 
+function optionalVisitorEmail(value:unknown):string|null{
+  if(value==null||typeof value==='string'&&!value.trim())return null;
+  return visitorEmail(value);
+}
+
+async function submitTransportCallbackLocked(
+  row:ConversationRow,
+  input:{phone:unknown;email?:unknown;idempotencyKey:unknown},
+  senderKey:string,
+  actorUserId:number|null,
+  now:number,
+){
+  if(row.assistance_category!=='shipment_observation'||row.resolved_at!==null||row.status==='closed')throw new SupportError('This callback request is no longer available.','not_found');
+  const phone=visitorPhone(input.phone),email=optionalVisitorEmail(input.email),key=idempotency(input.idempotencyKey);
+  const submitted=await hasTransportCallback(row);
+  const existing=await runtimeGet<{id:number;body:string;idempotency_key:string}>(`SELECT id,body,idempotency_key FROM support_messages WHERE conversation_id=? AND sender_key=? AND idempotency_key=?`,[row.id,senderKey,key]);
+  if(submitted){
+    if(existing&&existing.body===TRANSPORT_CALLBACK_MESSAGE&&row.visitor_phone===phone&&row.visitor_email===email)return {duplicate:true};
+    throw new SupportError('Your contact request has already been sent.','callback_already_submitted');
+  }
+  if(!await noAgentTransportCallbackDue(row,now))throw new SupportError('The live chat is still available.','callback_not_ready');
+  if(existing)throw new SupportError('Request could not be accepted.','idempotency_conflict');
+  const result=await runtimeGet<{id:number}>(`INSERT INTO support_messages(
+    conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at,visitor_visible,sender_side
+  ) VALUES(?,?,?, ?,?,?,?,TRUE,'participant') RETURNING id`,[
+    row.id,actorUserId,row.participant_kind==='visitor'?'visitor':'user',senderKey,TRANSPORT_CALLBACK_MESSAGE,key,now,
+  ]);
+  const messageId=Number(result!.id);
+  const readColumn=row.participant_kind==='visitor'?'visitor_last_read_message_id':'client_last_read_message_id';
+  await runtimeRun(`UPDATE support_conversations SET visitor_phone=?,visitor_email=?,updated_at=?,last_message_at=?,
+    ${readColumn}=?,awaiting_participant_since=NULL,idle_ended_at=NULL,awaiting_staff_since=?,awaiting_staff_message_id=? WHERE id=?`,
+    [phone,email,now,now,messageId,now,messageId,row.id]);
+  await runtimeRun(`INSERT INTO support_events(conversation_id,actor_user_id,event_type,detail,created_at)
+    VALUES(?,?,'message',?,?)`,[row.id,actorUserId,TRANSPORT_CALLBACK_EVENT,now]);
+  await enqueueChatAttention({conversationId:row.id,source:`support-message:${messageId}`,kind:'message',direction:'staff',now});
+  return {duplicate:false};
+}
+
+/** Adds one callback request to the existing visitor case; it never reopens a live portal. */
+export async function submitPublicTransportCallback(
+  token:unknown,input:{phone:unknown;email?:unknown;idempotencyKey:unknown},ipHash:string,now=Date.now(),
+){
+  const normalized=publicSupportToken(token),tokenHash=hashPrivateValue(`public-support:${normalized}`);
+  return runtimeTransaction(async()=>{
+    await lockSupportWork();
+    const {row}=await requirePublicConversation(normalized,now);
+    if(row.assistance_category!=='shipment_observation')throw new SupportError('This callback request is not available.','invalid_channel');
+    if(!await hasTransportCallback(row)){
+      const rate=await consumeRuntimeRateLimit(`public-support:callback:${ipHash}:${tokenHash}`,3,60*60*1000,60*60*1000);
+      if(!rate.allowed)throw new SupportError('Please wait before sending another contact request.','rate_limited');
+    }
+    return submitTransportCallbackLocked(row,input,visitorSenderKey(tokenHash),null,now);
+  });
+}
+
+/** The signed-in owner may request a callback only for their own transport case. */
+export async function submitOwnerTransportCallback(
+  user:SessionUser,conversationId:number,input:{publicRef:unknown;phone:unknown;email?:unknown;idempotencyKey:unknown},now=Date.now(),
+){
+  return runtimeTransaction(async()=>{
+    await lockSupportWork();
+    if(!await currentSupportClient(user,true))throw new SupportError('A client account is required.','forbidden');
+    const row=await requireConversation(user,conversationId);
+    if(row.participant_kind!=='client'||row.business_id!==user.business_id||row.assistance_category!=='shipment_observation')throw new SupportError('Transport request was not found.','not_found');
+    if(input.publicRef!==row.public_ref)throw new SupportError('This chat changed. Please refresh.','conversation_changed');
+    return submitTransportCallbackLocked(row,input,`user:${user.id}`,user.id,now);
+  });
+}
+
 function acceptsQueue(scope: SupportQueueScope, category: SupportAssistanceCategory) {
   return scope === "all" || scope === (isCallbackRequest(category) ? "transport" : "support");
 }
@@ -395,7 +498,7 @@ export const SUPPORT_REPLY_OVERDUE_QUERY=`SELECT c.id,c.awaiting_staff_message_i
  FROM support_conversations c
  ${SUPPORT_ACTIVE_ASSIGNMENT_JOIN}
  WHERE c.status IN ('waiting','open') AND c.resolved_at IS NULL
-   AND c.awaiting_staff_since IS NOT NULL AND ${SUPPORT_RESPONSE_START_SQL}<=?
+   AND c.awaiting_staff_since IS NOT NULL AND ${SUPPORT_RESPONSE_DEADLINE_SQL}<=?
    AND c.awaiting_staff_message_id IS NOT NULL
    AND (c.overdue_notified_message_id IS DISTINCT FROM c.awaiting_staff_message_id
      OR c.overdue_notified_assignment_id IS DISTINCT FROM ${SUPPORT_RESPONSE_EPOCH_SQL})
@@ -416,18 +519,19 @@ export async function sweepSupportReplyOverdue(now=Date.now(),monotonicNow:()=>n
   const locked=await runtimeGet<{locked:boolean}>("SELECT pg_try_advisory_xact_lock(hashtextextended(current_schema() || ':support-work',0)) locked");
   if(!locked?.locked)return {notified:0,skippedBusy:true};
   if(monotonicNow()-started>=2500)return {notified:0,skippedBusy:false};
-  const due=await runtimeAll<{id:number;awaiting_staff_message_id:number;assignment_id:number}>(SUPPORT_REPLY_OVERDUE_QUERY,[now-SUPPORT_STAFF_REPLY_TARGET_MS]);
+  const due=await runtimeAll<{id:number;awaiting_staff_message_id:number;assignment_id:number}>(SUPPORT_REPLY_OVERDUE_QUERY,[now]);
   let notified=0;
   for(const candidate of due){
    const remaining=3000-(monotonicNow()-started);if(remaining<500)break;
    await runtimeGet("SELECT set_config('statement_timeout',?,true)",[`${Math.min(1000,Math.floor(remaining))}ms`]);
    const recipients=await enqueueReplyOverdueAttention(candidate.id,candidate.awaiting_staff_message_id,candidate.assignment_id,now);
    if(!recipients)continue; // Keep durable work pending when nobody is authorized.
+   const target=candidate.assignment_id>0?SUPPORT_STAFF_REPLY_TARGET_MS:SUPPORT_UNASSIGNED_QUEUE_TARGET_MS;
    const changed=await runtimeRun(`UPDATE support_conversations SET overdue_notified_message_id=?,overdue_notified_assignment_id=?
     WHERE id=? AND status IN ('waiting','open') AND resolved_at IS NULL
       AND awaiting_staff_since<=? AND awaiting_staff_message_id=?
       AND (overdue_notified_message_id IS DISTINCT FROM awaiting_staff_message_id OR overdue_notified_assignment_id IS DISTINCT FROM ?)`,
-    [candidate.awaiting_staff_message_id,candidate.assignment_id,candidate.id,now-SUPPORT_STAFF_REPLY_TARGET_MS,candidate.awaiting_staff_message_id,candidate.assignment_id]);
+    [candidate.awaiting_staff_message_id,candidate.assignment_id,candidate.id,now-target,candidate.awaiting_staff_message_id,candidate.assignment_id]);
    if(changed.changes)notified++;
   }
   return {notified,skippedBusy:false};
@@ -507,7 +611,15 @@ export const SUPPORT_WAITING_SCOPE_SQL = `EXISTS(SELECT 1 FROM support_agent_set
     OR (s.queue_scope='transport' AND c.assistance_category IN ('shipment_observation','buying_assistance'))
     OR (s.queue_scope='support' AND c.assistance_category NOT IN ('shipment_observation','buying_assistance'))))`;
 
-async function supportAgentWorkload(userId: number) {
+// Managed sign-in requires an immutable application identity link; never infer one
+// from email or contact the provider while holding queue work locks.
+const SUPPORT_AGENT_IDENTITY_SQL = `(?=0 OR EXISTS(
+  SELECT 1 FROM auth_identity_links identity_link
+  WHERE identity_link.user_id=s.user_id AND identity_link.provider='supabase'
+))`;
+const requiresManagedStaffIdentity = () => authDriver() === 'supabase' ? 1 : 0;
+
+async function supportAgentWorkload(userId: number, requireSignInReady = false) {
   return runtimeGet<{
     enabled: number;
     queue_scope: SupportQueueScope;
@@ -515,7 +627,8 @@ async function supportAgentWorkload(userId: number) {
     SELECT s.enabled,s.queue_scope
     FROM support_agent_settings s JOIN user_access_profiles p ON p.user_id=s.user_id
     WHERE s.user_id=? AND p.access_role IN ('team_member','operations_manager')
-  `, [userId]);
+      AND ${SUPPORT_AGENT_IDENTITY_SQL}
+  `, [userId, requireSignInReady ? requiresManagedStaffIdentity() : 0]);
 }
 
 async function leastLoadedAgent(category: SupportAssistanceCategory = "general") {
@@ -533,11 +646,12 @@ async function leastLoadedAgent(category: SupportAssistanceCategory = "general")
     LEFT JOIN support_conversations c
       ON c.assigned_user_id=u.id AND c.status='open'
     WHERE s.enabled=1 AND p.access_role IN ('team_member','operations_manager')
+      AND ${SUPPORT_AGENT_IDENTITY_SQL}
       AND (s.queue_scope='all' OR s.queue_scope=?)
     GROUP BY u.id,u.name
     ORDER BY COUNT(c.id),last_assignment_id ASC NULLS FIRST,u.id
     LIMIT 1
-  `, [isCallbackRequest(category) ? "transport" : "support"]);
+  `, [requiresManagedStaffIdentity(), isCallbackRequest(category) ? "transport" : "support"]);
 }
 
 async function assignConversation(
@@ -579,6 +693,7 @@ export const SUPPORT_WAITING_CANDIDATES_QUERY = `
   WHERE c.status='waiting' AND c.assigned_user_id IS NULL AND EXISTS(
     SELECT 1 FROM support_agent_settings s JOIN user_access_profiles p ON p.user_id=s.user_id
     WHERE s.enabled=1 AND p.access_role IN ('team_member','operations_manager')
+      AND ${SUPPORT_AGENT_IDENTITY_SQL}
       AND (s.queue_scope='all' OR s.queue_scope=CASE
         WHEN c.assistance_category IN ('shipment_observation','buying_assistance') THEN 'transport' ELSE 'support' END)
   )
@@ -600,7 +715,7 @@ export async function sweepWaitingSupportAssignments(
     const locked = await runtimeGet<{locked:boolean}>("SELECT pg_try_advisory_xact_lock(hashtextextended(current_schema() || ':support-work',0)) locked");
     if (!locked?.locked) return {routed:0,skippedBusy:true};
     if (monotonicNow() - started >= 2500) return {routed:0,skippedBusy:false};
-    const waiting = await runtimeAll<{id:number;assistance_category:SupportAssistanceCategory}>(SUPPORT_WAITING_CANDIDATES_QUERY);
+    const waiting = await runtimeAll<{id:number;assistance_category:SupportAssistanceCategory}>(SUPPORT_WAITING_CANDIDATES_QUERY, [requiresManagedStaffIdentity()]);
     let routed = 0;
     for (const conversation of waiting) {
       const remaining = 3000 - (monotonicNow() - started);
@@ -642,11 +757,12 @@ export async function routeWaitingSupportConversations(
       WHERE c.status='waiting' AND c.assigned_user_id IS NULL${queueWhere} AND EXISTS(
         SELECT 1 FROM support_agent_settings s JOIN user_access_profiles p ON p.user_id=s.user_id
         WHERE s.enabled=1 AND p.access_role IN ('team_member','operations_manager')
+          AND ${SUPPORT_AGENT_IDENTITY_SQL}
           AND (s.queue_scope='all' OR s.queue_scope=CASE
             WHEN c.assistance_category IN ('buying_assistance','shipment_observation') THEN 'transport' ELSE 'support' END)
       )
       ORDER BY c.created_at,c.id LIMIT 100
-    `);
+    `, [requiresManagedStaffIdentity()]);
     let routed = 0;
     for (const conversation of waiting) {
       const agent = await leastLoadedAgent(conversation.assistance_category);
@@ -663,7 +779,7 @@ export async function routeWaitingSupportConversations(
 
 export async function createSupportConversation(
   user: SessionUser,
-  input: { subject: unknown; message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
+  input: { subject: unknown; message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null; coordinatorId?:unknown },
   now = Date.now(),
 ) {
   if (user.access_role !== "client" || !user.business_id) {
@@ -739,8 +855,9 @@ export async function createSupportConversation(
   };
 }
 
-export async function createOwnerTransportConversation(user:SessionUser,input:{name:unknown;phone:unknown;origin:unknown;destination:unknown;message?:unknown;idempotencyKey:unknown},now=Date.now()) {
+export async function createOwnerTransportConversation(user:SessionUser,input:{name:unknown;phone:unknown;origin:unknown;destination:unknown;message?:unknown;idempotencyKey:unknown;coordinatorId?:unknown},now=Date.now()) {
   if(user.access_role!=='client'||!user.business_id)throw new SupportError('A client account is required.','forbidden');
+  if(!selectTransportCoordinator(input.coordinatorId).ok)throw new SupportError('Choose a logistics service provider.','invalid_request');
   const name=transportField(input.name,'Enter your name.',80),origin=transportField(input.origin,'Enter the pickup location.',120),destination=transportField(input.destination,'Enter the destination.',120);
   if(typeof input.phone!=='string'||input.phone.length>40)throw new SupportError('Enter a valid phone number.','phone_required');
   const phone=visitorPhone(input.phone),key=idempotency(input.idempotencyKey);
@@ -773,13 +890,14 @@ export async function createOwnerTransportConversation(user:SessionUser,input:{n
 }
 
 export async function createPublicSupportConversation(
-  input: { category: unknown; email?: unknown; phone: unknown; message?: unknown; name?: unknown; service?: unknown; origin?: unknown; destination?: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
+  input: { category: unknown; email?: unknown; phone: unknown; message?: unknown; name?: unknown; service?: unknown; origin?: unknown; destination?: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null; coordinatorId?:unknown },
   ipHash: string,
   now = Date.now(),
   preparedToken?: string,
 ) {
   const category = assistanceCategory(input.category);
   const transport = category === "shipment_observation";
+  if(input.coordinatorId!==undefined&&!transport||transport&&!selectTransportCoordinator(input.coordinatorId).ok)throw new SupportError("Choose a logistics service provider.","invalid_request");
   const callback = isCallbackRequest(category);
   const service = category === "buying_assistance" ? buyingService(input.service) : null;
   if (category === "buying_assistance" && input.service != null && !service) throw new SupportError("Choose what you need help with.", "invalid_service");
@@ -877,6 +995,9 @@ async function requirePublicConversation(token: unknown, now = Date.now()) {
 
 export async function getPublicSupportConversation(token: unknown, now = Date.now()) {
   const { row } = await requirePublicConversation(token, now);
+  const firstStaffReplyAt=row.assistance_category==='shipment_observation'?await firstTransportStaffReplyAt(row.id):null;
+  const callbackDue=await noAgentTransportCallbackDue(row,now,firstStaffReplyAt);
+  const callbackSubmitted=callbackDue?await hasTransportCallback(row):false;
   // Retained notes and carrier handoffs stay private; only explicit replies are public.
   const messages = (await runtimeAll<{
     id: number;
@@ -897,17 +1018,23 @@ export async function getPublicSupportConversation(token: unknown, now = Date.no
   return {
     id: row.id,
     publicRef: row.public_ref,
+    createdAt: row.created_at,
+    serverNow: now,
+    transportWaitStartedAt: row.created_at,
     category: row.assistance_category,
     status: row.status,
     resolvedAt:row.resolved_at,
     assignedUserName: explicitlyJoined(row)?row.assigned_user_name:null,
     agentJoined: explicitlyJoined(row),
+    agentJoinedAt: explicitlyJoined(row)?row.staff_joined_at:null,
+    firstStaffReplyAt,
     ...supportIdleDeadlines(row.awaiting_participant_since??null,'guest'),
     idleEndedAt:row.idle_ended_at??null,
     ...responseView(row,now),
     staffReplyDueAt:null,
     ...(row.assistance_category==='shipment_observation'?await participantTransportPlan(row.id):{}),
-    messages: messages.map((message) => ({
+    ...(row.assistance_category==='shipment_observation'?{transportCallback:{phone:row.visitor_phone,email:row.visitor_email,submitted:callbackSubmitted}}:{}),
+    messages: (callbackDue?[]:messages).map((message) => ({
       id: message.id,
       sender: message.sender_kind === "visitor" ? "visitor" as const : "staff" as const,
       senderName: message.sender_kind === "visitor" ? "You" : message.sender_name || "MirtPage support",
@@ -985,6 +1112,7 @@ export async function joinSupportConversation(user:SessionUser,conversationId:nu
     typeof input.assignmentEpoch!=='string'||input.assignmentEpoch!==String(row.assignment_epoch)||row.assignment_epoch<1)
     throw new SupportError('This chat changed. Please refresh.','conversation_changed');
   if(row.status!=='open'||row.resolved_at!==null)throw new SupportError('This conversation is closed.','closed');
+  if(await noAgentTransportCallbackDue(row,now))throw new SupportError('The callback form is available for this request.','callback_required');
   const active=await runtimeGet<{id:number}>('SELECT id FROM support_assignments WHERE id=? AND conversation_id=? AND assigned_user_id=? AND released_at IS NULL',
     [row.assignment_epoch,conversationId,user.id]);
   if(row.assigned_user_id!==user.id||!active)throw new SupportError('Only the assigned agent can join this chat.','unassigned');
@@ -1012,6 +1140,7 @@ export async function acknowledgeSupportRead(user: SessionUser, conversationId: 
     if (user.access_role !== 'client' && row.assigned_user_id !== user.id) {
       throw new SupportError('Only the assigned agent can acknowledge this conversation.', 'unassigned');
     }
+    if(user.access_role==='client'&&await noAgentTransportCallbackDue(row,now))throw new SupportError('Live chat is no longer available.','callback_required');
     return confirmVisibleRead(row, user.access_role === 'client' ? 'client' : 'staff', command.messageId, now, user.id);
   });
 }
@@ -1021,13 +1150,14 @@ export async function acknowledgePublicRead(token: unknown, command: ChatReadCom
     await lockSupportWork();
     const { row } = await requirePublicConversation(token, now);
     if (command.publicRef !== row.public_ref) throw new SupportError('This chat changed. Please refresh.', 'conversation_changed');
+    if(await noAgentTransportCallbackDue(row,now))throw new SupportError('Live chat is no longer available.','callback_required');
     return confirmVisibleRead(row, 'visitor', command.messageId, now);
   });
 }
 
 export async function postPublicSupportMessage(
   token: unknown,
-  input: { message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
+  input: { message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null; coordinatorId?:unknown },
   ipHash: string,
   now = Date.now(),
 ) {
@@ -1046,6 +1176,7 @@ export async function postPublicSupportMessage(
     await lockSupportWork();
     const current = await requirePublicConversation(token, now);
     if (current.row.status === "closed") throw new SupportError("This conversation is closed.", "closed");
+    if(await noAgentTransportCallbackDue(current.row,now))throw new SupportError('Live chat is no longer available.','callback_required');
     const existing = await runtimeGet<{ id: number; conversation_id: number; body: string }>(`
       SELECT id,conversation_id,body FROM support_messages WHERE sender_key=? AND idempotency_key=?
     `, [senderKey, key]);
@@ -1149,8 +1280,8 @@ export async function listSupportConversations(
   if (input.queue === "support" || user.access_role==='client'&&input.queue!=='transport') where += " AND c.assistance_category NOT IN ('shipment_observation','buying_assistance')";
   if (input.status === "active") where += " AND c.status IN ('waiting','open')";
   else if(input.status==='needs_reply'||input.status==='overdue'){
-    where+=" AND c.status IN ('waiting','open') AND c.resolved_at IS NULL AND c.awaiting_staff_since IS NOT NULL AND "+SUPPORT_RESPONSE_START_SQL+(input.status==='overdue'?'<=?':'>?');
-    params.push(now-SUPPORT_STAFF_REPLY_TARGET_MS);
+    where+=" AND c.status IN ('waiting','open') AND c.resolved_at IS NULL AND c.awaiting_staff_since IS NOT NULL AND "+SUPPORT_RESPONSE_DEADLINE_SQL+(input.status==='overdue'?'<=?':'>?');
+    params.push(now);
   }
   else if(input.status==='waiting_customer')where+=" AND c.status='open' AND c.resolved_at IS NULL AND c.awaiting_staff_since IS NULL AND c.awaiting_participant_since IS NOT NULL";
   else if (input.status === "history") where += " AND c.status='closed' AND c.resolved_at IS NULL";
@@ -1180,6 +1311,7 @@ export async function listSupportConversations(
 
 export async function getSupportConversation(user: SessionUser, conversationId: number) {
   const row = await requireConversation(user, conversationId);
+  const firstStaffReplyAt=user.access_role==='client'&&row.assistance_category==='shipment_observation'?await firstTransportStaffReplyAt(row.id):null;
   const messages = (await runtimeAll<{
     id: number;
     conversation_id: number;
@@ -1206,11 +1338,15 @@ export async function getSupportConversation(user: SessionUser, conversationId: 
     WHERE m.conversation_id=? ${user.access_role==='client'&&isCallbackRequest(row.assistance_category)?'AND m.visitor_visible=TRUE':''}
     ORDER BY m.id DESC LIMIT 100
   `, [conversationId])).reverse();
+  const callbackDue=user.access_role==='client'&&await noAgentTransportCallbackDue(row,Date.now(),firstStaffReplyAt);
+  const callbackSubmitted=user.access_role==='client'&&row.assistance_category==='shipment_observation'?await hasTransportCallback(row):false;
   const lastId = messages.at(-1)?.id || 0;
   return {
     conversation: {...conversationView({ ...row, last_message_id: lastId }, user),
+      ...(user.access_role==='client'&&row.assistance_category==='shipment_observation'?{firstStaffReplyAt}:{}),
+      ...(user.access_role==='client'&&row.assistance_category==='shipment_observation'?{transportCallback:{phone:row.visitor_phone,email:row.visitor_email,submitted:callbackSubmitted}}:{}),
       ...(user.access_role==='client'&&row.assistance_category==='shipment_observation'?await participantTransportPlan(row.id):{})},
-    messages: messages.map((message): SupportMessage => ({
+    messages: (callbackDue?[]:messages).map((message): SupportMessage => ({
       id: message.id,
       conversationId: message.conversation_id,
       senderUserId: message.sender_user_id,
@@ -1250,7 +1386,7 @@ export async function getSupportAttachment(user: SessionUser, conversationId: nu
 export async function postSupportMessage(
   user: SessionUser,
   conversationId: number,
-  input: { audience?: unknown; message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null },
+  input: { audience?: unknown; message: unknown; idempotencyKey: unknown; attachment?: SupportAttachmentWrite | null; coordinatorId?:unknown },
   now = Date.now(),
 ) {
   const body = cleanText(input.message, 4000);
@@ -1265,6 +1401,7 @@ export async function postSupportMessage(
     const row = await requireConversation(user, conversationId);
     const closedNote = isCallbackRequest(row.assistance_category) && user.access_role !== "client" && input.audience === "note";
     if (row.status === "closed" && !closedNote) throw new SupportError("Reopen this conversation before replying.", "closed");
+    if(user.access_role==='client'&&await noAgentTransportCallbackDue(row,now))throw new SupportError('Live chat is no longer available.','callback_required');
     if (user.access_role !== "client" && row.assigned_user_id !== user.id && !hasCapability(user, "operations:manage")) {
       throw new SupportError("Claim this conversation before replying.", "unassigned");
     }
@@ -1323,7 +1460,7 @@ export async function claimSupportConversation(
       if (row.assigned_user_id === user.id && row.status === "open") return { duplicate: true };
       throw new SupportError("This conversation is already assigned.", "already_assigned");
     }
-    const workload = await supportAgentWorkload(user.id);
+    const workload = await supportAgentWorkload(user.id, true);
     if (!workload?.enabled || !acceptsQueue(workload.queue_scope, row.assistance_category)) {
       throw new SupportError("This account is not enabled for support assignments.", "not_support_agent");
     }
@@ -1404,7 +1541,7 @@ export async function reopenSupportConversation(user: SessionUser, conversationI
     if (row.assigned_user_id !== user.id && !hasCapability(user, "operations:manage")) {
       throw new SupportError("Only the assigned team member can reopen this conversation.", "forbidden");
     }
-    const workload = row.assigned_user_id ? await supportAgentWorkload(row.assigned_user_id) : null;
+    const workload = row.assigned_user_id ? await supportAgentWorkload(row.assigned_user_id, true) : null;
     if (row.assigned_user_id && (!workload?.enabled || !acceptsQueue(workload.queue_scope, row.assistance_category))) {
       throw new SupportError("That support agent is unavailable.", "unavailable");
     }
@@ -1632,7 +1769,7 @@ export async function reassignSupportConversation(
         WHERE id=?
       `, [now, conversationId]);
     } else {
-      const workload = await supportAgentWorkload(assignedUserId);
+      const workload = await supportAgentWorkload(assignedUserId, true);
       if (!workload?.enabled || !acceptsQueue(workload.queue_scope, row.assistance_category)) {
         throw new SupportError("That support agent is unavailable.", "unavailable");
       }
