@@ -4,11 +4,26 @@ title: MirtPage domain, managed services and app release cutover
 status: draft
 related: [FE-021, FE-070, FE-071, BE-059, DEP-029, ADR-0029, FE-072, BE-060, DEP-050, DEP-044, FE-075, BE-062]
 owners: [operations, security, mobile]
-last_updated: 2026-10-20
+last_updated: 2026-10-23
 change_level: L4
 ---
 
 # DEP-049 — MirtPage cutover
+
+## S170 — launch-parity web publication and local Android candidate
+
+The reviewed source tree is merged into `main` by PR #37. All five required CI
+jobs passed on the merged commit. The exact Netlify artifact is published on
+`mirtpage.com`; fresh public route checks pass. One version 3 Android AAB and a
+universal APK derived from it are locally signed and independently inspected for
+`com.mirtpage.app`. These are separate web and native delivery outcomes. The
+original Netlify operator stops and the Android build wrapper timeout remain
+recorded; independent readback and artifact checks support the current outcomes
+without rewriting those executions. [Traceability E9](../TRACEABILITY.md#current-release-evidence)
+owns the exact commit, deploy, CI, artifact hashes and remaining boundaries.
+Installed-device behavior, Play submission and actual closed-test enrollment are
+not yet qualified. The approved one-build dependency-advisory exception applies
+only to this artifact and does not authorize another compilation.
 
 ## S151 — published web recovery; browser classification and device checks pending
 

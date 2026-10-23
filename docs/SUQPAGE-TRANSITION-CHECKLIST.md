@@ -13,21 +13,25 @@ to schema **79** committed on 2026-10-23: read-only incident follow-up confirms
 the exact ledger, row-level security and unchanged 102 existing inquiries. Its
 one-use runner returned permission error `42501` only on a post-commit read without
 the migration role; do not retry or restore it. The protected backup and plan
-remain local. The current launch-parity branch passes `npm run check`, a clean
+remain local. The now-merged launch-parity source passes `npm run check`, a clean
 web-only `npm run release:web` with zero dependency findings, and a serial
 `npm run test:acceptance` with 20/20 scenarios on patched Next.js 16.4.2.
 The first concurrent acceptance attempt retained its one transient private-media
 connection reset; the isolated journey and subsequent complete serial suite pass.
 
-**Next delivery dependency:** review/stage this branch, commit and run the five
-required GitHub checks; then qualify the exact Netlify artifact and one locally
-signed Android bundle/APK. The new UI and API source is not yet on the live site
-or in a newly built Android release. The Android package remains
-**com.mirtpage.app**; the old Suqpage enrollment does not transfer. Prior B09
-image-routing publication is verified. Raw browser request-cancellation causes
-and installed-device/Play delivery remain separate qualifications; do not infer
-them from web/Expo acceptance. No new Play upload, twelve-person opt-in count or
-fourteen-day test is claimed.
+**Current delivery:** launch-parity PR #37 is merged into `main` as `d4de292`
+(identical source tree to `b1db574`); run `39978434188` attempt 2 passed all five
+required jobs. Netlify deploy `6adbbf85637609345d34fe47` is published on
+**mirtpage.com**; fresh home, health, buying, tracking and partner-page requests
+return HTTP 200. One local version 3 AAB and its derived universal APK are signed
+and independently verified for **com.mirtpage.app**. The exact evidence and
+limits are in [traceability E9](../specs/TRACEABILITY.md#current-release-evidence).
+
+**Next delivery dependency:** use the actual Android phone to qualify this
+version 3 APK and complete the separate MirtPage Play Console review before an
+exact closed-track upload. Raw browser request-cancellation causes, installed
+device behavior, Play availability, twelve genuine opt-ins and the fourteen-day
+test remain separate; none is inferred from web/Expo or static artifact checks.
 
 ## Surface status
 
@@ -38,7 +42,7 @@ fourteen-day test is claimed.
 | B04/B05 demo contacts/catalog cleanup | Applied exact finite operations | Independent complete readback | Separate actual data/settings approvals | Live; no repeat data write needed |
 | Opaque Auth-email logo | Source + public PNG + thirteen HTML templates | Pixel/template/Chrome/local gates and guarded hosted readback | Approved light/dark visuals and exact hosted change | Applied/read back; no email sent by this operation, actual inbox rendering remains separate |
 | Owner sign-in email change | Local guarded source/schema | Local two-mailbox/provider/security proof | Prior reviewed layouts; current hosted behavior unqualified | Initiation disabled; exact Auth/settings/notices gate pending |
-| Android version 2 | Compiled once from d78 | Independent static inspection | Approved shared layouts; genuine native captures pending | Local artifact exists; phone/OS/Play delivery unverified |
+| Android version 3 | One local compilation from the merged launch-parity source | AAB/APK package, version, signature, bundle and static integrity verified | Source-matched web/Expo review passed; genuine native captures pending | Local signed AAB and derived APK exist; phone/OS/Play delivery unverified |
 | New MirtPage Alpha | App/listing/tester list saved | Prior console reloads; fresh admission pending | Logo/charcoal graphics approved | No MirtPage release/12 actual opt-ins/14-day test claimed |
 | Workflow/skills/docs consolidation | Skills/checker and reviewed compact docs committed/pushed | App CI passes on 7e; isolated L0 docs checks and root review pass | No UI change | Docs branch integration and actual skill selection remain separate |
 
@@ -178,7 +182,8 @@ BE-018 and FE-019 own this correction.
    evidence: `.local/s168-support-response.log`, `.local/s168-focused-ui.log`,
    `.local/s168-check-tail.log`, `.local/s168-browser-review/receipt.json`.
    Raw web GET abort provenance stays open; installed Android is separate.
-4. [ ] Carry the passing correction into the S162 GitHub, web and Android gates.
+4. [x] Carry the passing correction into the S162 GitHub, web and Android gates
+   (traceability E9). Installed-device qualification remains separate.
 
 #### S162 — professional SharedTrucks live wait and callback handoff (CURRENT)
 
@@ -244,10 +249,10 @@ Existing visitor/owner idle clocks remain unchanged outside this no-agent handof
    `npm run check`, acceptance/release gates or remote CI. The owner and staff
    receipts and `.local/s166-agent-visual-review.json` record the passing local
    decision; installed Android remains a separate gate.
-9. [ ] After a passing agent review, qualify current source/repo/PR with the GitHub workflow;
-   then use DEP-049 to qualify and deploy web and build one Android artifact.
-   Record each approval, CI, deploy and artifact separately; no secrets or
-   customer data in repository evidence.
+9. [x] After the passing agent review, qualify PR #37 and the merged main tree;
+   publish the exact web artifact and compile one signed Android version 3 AAB
+   with a derived APK. Traceability E9 separates CI, deploy and artifact proof
+   from phone/Play qualification; protected receipts retain approvals and stops.
 
 Future direction recorded, not in current scope: if staff call and invite the
 visitor back to live chat, use a one-time case-bound code (expiring,
@@ -269,8 +274,8 @@ and FE-019 own the corrected authority and web/Expo behavior.
    identity without background polling.
 4. [x] Run focused API/PostgreSQL and Chrome workflows, capture phone web/Expo
    screens and record a passing agent visual review for this scoped defect.
-5. [ ] Requalify revised source, GitHub PR/main, web deploy and one locally
-   signed Android artifact under the S162 and DEP-049 release gates.
+5. [x] Requalify revised source, GitHub PR/main, web deploy and one locally
+   signed Android artifact under S162 and DEP-049 (traceability E9).
 
 #### S164 — name businesses without exposing location-mode jargon (CURRENT defect)
 
@@ -312,8 +317,8 @@ mounted. FE-019 S162 owns this same-account new-request contract.
    owner cases, database readback and English/Amharic/Afaan Oromo 320/390 captures
    pass; `.local/s165-owner-transport-browser/receipt.json` and
    `.local/s166-agent-visual-review.json` record the evidence and limits.
-4. [ ] Include the fix in the S162 full gates, GitHub integration, web rollout
-   and locally signed Android artifact.
+4. [x] Include the fix in the S162 full gates, GitHub integration, web rollout
+   and locally signed Android artifact (traceability E9).
 
 #### S167 — align unpublished Android listing and campaign draft (CURRENT)
 
@@ -460,11 +465,11 @@ hosted configuration review; this is separate from the B09 deployment approval.
   a source-bound agent visual pass, then qualify applicable gates and artifact/build
   admission. Do not treat separate worktree proofs as combined release evidence.
 
-### R05 — Qualify the existing Android version 2 artifact
+### R05 — Qualify the current Android version 3 candidate
 
 DEP-042/043/044/049. Hosted device workflows use stable compatible APIs and the
-owner's actual phone availability; permitted local preparation can continue.
-The web-only B09 routing fix does not require a new native compilation.
+owner's actual phone availability. Version 2 development-client evidence below
+is retained; it does not qualify the newly built version 3 release candidate.
 
 - [ ] Owner-requested physical development loop (current): prepare one local
   arm64 MirtPage development client using the existing package and signer, with
@@ -506,7 +511,7 @@ The web-only B09 routing fix does not require a new native compilation.
 - [x] One authorized compilation produced version 2 AAB and derived APK; independent
   static inspection verifies package/signing/config/resources/App Links/Hermes,
   native library equality, ELF alignment and zipalign. Exact hashes: traceability E3.
-- [ ] Current step — FE-069/BE-058 Android tracking storage correction:
+- [ ] FE-069/BE-058 Android tracking storage correction; device proof remains:
   1. [x] Verify version 2 installed APK identity and retain bounded public-flow
      captures plus the failed tracking entry/retry. No chat or email was sent.
   2. [x] Define a collision-free full-origin hex key accepted by installed
@@ -515,11 +520,11 @@ The web-only B09 routing fix does not require a new native compilation.
   3. [x] Pass focused storage (9), controlled Tracking component (6), mobile and
      strict test typechecks, and spec validation. Preserve the sandbox launch
      stop separately from actual red/green component results; device is unproven.
-  4. [ ] Integrate the selected audit-fix batch and run its applicable full gates
-     on frozen source; these focused passes do not qualify a new binary.
-  5. [ ] Obtain the separate DEP-044 exact new-build admission, then physically
-     confirm email entry, secure save/restore/logout and final screenshot set.
-     Version 2 and current captures do not prove the corrected binary.
+  4. [x] Integrate the selected audit-fix batch and pass the applicable full
+     gates on the frozen source (traceability E9).
+  5. [ ] The separate DEP-044 one-build admission produced signed version 3
+     artifacts (traceability E9). Physically confirm email entry, secure
+     save/restore/logout and final screenshots on that binary.
 - [ ] Confirmed native owner UX batch — FE-053/FE-056/FE-064:
   1. [x] Record the three physical/source findings and acceptance before code;
      preserve the independently focused tracking storage correction.
@@ -538,8 +543,8 @@ The web-only B09 routing fix does not require a new native compilation.
      restore. API readback confirms outcomes; ordinary email-code entry remains
      Auth 429 and corrected physical Android is unverified. Protected receipt:
      `tracking-storage-fix/expo-owner-actual-review-result.json` in the S153 audit.
-  6. [ ] Record a combined source-bound agent visual pass, then run applicable full gates,
-     admit the exact new build and physically retest the corrected binary.
+  6. [ ] The combined agent visual pass, full gates and exact local version 3
+     artifact are recorded in E9. Physically retest the corrected binary.
 - [ ] With the owner's phone available, verify installed artifact identity
   and actual visitor/owner/chat/tracking/signup/save/cancel flows, gestures,
   foreground/background/resume, playback, clipboard/social OS handoffs and cold/
