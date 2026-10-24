@@ -49,7 +49,7 @@ const forbidden: unknown[] = [
   { external_google_client_id: "local-client" }, { external_google_secret: "new-secret" },
   { smtp_pass: "new-secret" }, { smtp_host: "localhost" }, { smtp_user: "other-sender" },
   { mailer_templates_confirmation_content: "<a href='https://evil.test'>Sign in</a>" },
-  { mailer_subjects_confirmation: "Your AfricMade sign-in code" },
+  { mailer_subjects_confirmation: "Your MirtPage sign-in code" },
   { mailer_subjects_magic_link: "Arbitrary subject" },
   { smtp_sender_name: "Suqpage" }, { mailer_subjects_confirmation: "Your Suqpage sign-in code" },
   { unknown: true }, { mailer_otp_length: 6, smtp_pass: "smuggled-secret" },
@@ -66,12 +66,12 @@ for (const [index, patch] of forbidden.entries()) {
     } finally { f.dispose(); }
   });
 }
-test("all MirtPage email branding is exact and cannot alter providers or sender addresses", () => {
+test("all AfricMade email branding is exact and cannot alter providers or sender addresses", () => {
   const patch = suqpageEmailBrandingPatch();
   assert.equal(Object.keys(patch).length, 27);
   validatePatch(project, patch, template);
   for (const [key, value] of Object.entries(patch)) {
-    assert.doesNotMatch(value, /africmade|africpage|suqpage/i);
+    assert.doesNotMatch(value, /mirtpage|africpage|suqpage/i);
     assert.throws(() => validatePatch(project, { [key]: "unreviewed" }, template));
   }
   for (const patch of [{ smtp_admin_email: "new@example.test" }, { mailer_notifications_email_changed_enabled: true }]) {
@@ -83,14 +83,14 @@ test("email contrast repair admits only the thirteen exact HTML fields", () => {
   const patch=Object.fromEntries(Object.entries(suqpageEmailBrandingPatch()).filter(([key])=>key.startsWith("mailer_templates_")&&key.endsWith("_content")));
   assert.equal(Object.keys(patch).length,13);
   assert.ok(Object.keys(patch).every(key=>key.startsWith("mailer_templates_")));
-  for(const html of Object.values(patch))assert.match(html,/mirtpage-panels-wordmark-email-white-v2\.png/);
+  for(const html of Object.values(patch))assert.match(html,/africmade-wordmark-email-white-v1\.png/);
   validatePatch(project,patch,template);
 });
 
 test("saved legacy-brand settings plans are rejected before any provider read", async () => {
   const f = fixture();
   try {
-    const plan = await f.plan({ smtp_sender_name: "MirtPage" });
+    const plan = await f.plan({ smtp_sender_name: "AfricMade" });
     const file = path.join(f.directory, `${plan.id}.json`);
     const saved = JSON.parse(fs.readFileSync(file, "utf8"));
     saved.patch.smtp_sender_name = "Suqpage";
@@ -131,7 +131,7 @@ test("plans bind credential source and login, and reject old unbound plans befor
 test("explicit target and safe exact patch are required", async () => {
   assert.throws(() => validatePatch("another-project", { mailer_otp_length: 6 }, template), /project/);
   validatePatch(project, { mailer_otp_length: 6, mailer_otp_exp: 600, smtp_max_frequency: 60, mailer_autoconfirm: false,
-    mailer_subjects_confirmation: "Your MirtPage sign-in code", mailer_subjects_magic_link: "Your MirtPage sign-in code",
+    mailer_subjects_confirmation: "Your AfricMade sign-in code", mailer_subjects_magic_link: "Your AfricMade sign-in code",
     mailer_templates_confirmation_content: template, mailer_templates_magic_link_content: template }, template);
   const f = fixture();
   try {
@@ -315,7 +315,7 @@ test("readback predicts only approved customization flags and preserves every ot
       const config = f.config();
       config.mailer_subjects_custom_contents = { MAILER_SUBJECTS_INVITE: false, MAILER_SUBJECTS_RECOVERY: false };
       config.mailer_templates_custom_contents = { MAILER_TEMPLATES_INVITE_CONTENT: false };
-      const patch = { mailer_subjects_invite: "You are invited to MirtPage",
+      const patch = { mailer_subjects_invite: "You are invited to AfricMade",
         mailer_templates_invite_content: suqpageEmailBrandingPatch().mailer_templates_invite_content };
       const plan = await f.plan(patch);
       const originalPatch = f.port.patch;
@@ -345,14 +345,14 @@ test("readback predicts only approved customization flags and preserves every ot
 });
 test("customization metadata is immutable and malformed metadata cannot admit a write", async () => {
   const before = { mailer_subjects_custom_contents: { MAILER_SUBJECTS_INVITE: false } };
-  const expected = expectedAuthReadback(before, { mailer_subjects_invite: "You are invited to MirtPage" });
+  const expected = expectedAuthReadback(before, { mailer_subjects_invite: "You are invited to AfricMade" });
   assert.equal(before.mailer_subjects_custom_contents.MAILER_SUBJECTS_INVITE, false);
   assert.deepEqual(expected.mailer_subjects_custom_contents, { MAILER_SUBJECTS_INVITE: true });
   for (const flags of [null, [], { MAILER_SUBJECTS_INVITE: "false" }]) {
     const f = fixture();
     try {
       f.config().mailer_subjects_custom_contents = flags;
-      const plan = await f.plan({ mailer_subjects_invite: "You are invited to MirtPage" });
+      const plan = await f.plan({ mailer_subjects_invite: "You are invited to AfricMade" });
       await assert.rejects(f.apply(plan), /metadata/);
       assert.equal(f.writes.length, 0);
       assert.equal(fs.existsSync(path.join(f.directory, `${plan.id}.json.attempt`)), false);

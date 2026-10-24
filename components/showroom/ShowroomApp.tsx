@@ -3,6 +3,7 @@ import {copyBrowserText as copyText, openCopiedBrowserLink} from "@/lib/browser-
 import LanguageSelector from "@/components/LanguageSelector";
 import SuqpageBrand from "@/components/SuqpageBrand";
 import { useUiText } from "@/lib/i18n/ui";
+import {orderScopeLabels} from "@/lib/order-scope";
 
 import { readPlatformState } from "@/lib/platform-state";
 
@@ -399,7 +400,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         className={`runtime-root theme-${catalog.business.design_key}${withinPublicApp ? " is-public-shell" : ""}${compositionManifest && !previewMode && !embedded ? " has-showroom-mobile-nav" : ""}`}
         style={runtimeTokenVariables as CSSProperties | undefined}
       >
-      {!embedded && !businessProfile ? <h1 className="sr-only">{catalog.business.name} {" "}{t("on MirtPage")}</h1> : null}
+      {!embedded && !businessProfile ? <h1 className="sr-only">{catalog.business.name} {" "}{t("on AfricMade")}</h1> : null}
       {catalog.business.is_demo && !businessProfile ? <p className="showroom-example-note" role="note">{t("Example showroom. This business and its products are fictional.")}</p> : null}
       {businessProfile ? <BusinessProfile {...designProps} profile={businessProfile} previewMode={previewMode} embedded={embedded}
         selectedIds={savedCart.map(line => line.product.id)} onBackToProducts={backToProducts} onContact={contactWithSelections}
@@ -479,6 +480,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
                   {t(productSupplyLabel(selected.offering_kind, selected.availability))}
                 </span>
                 <h2>{selected.name}</h2>
+                {orderScopeLabels(selected.order_scope).length ? <ul className="product-dialog-order-tags" aria-label={t("Order sizes")}>{orderScopeLabels(selected.order_scope).map(label=><li key={label}>{t(label)}</li>)}</ul> : null}
                 {selected.price_minor !== null ? (
                   <p className="product-dialog-price">{formatEtbPrice(selected.price_minor)}</p>
                 ) : null}
@@ -721,7 +723,7 @@ function InquiryDrawer({
                     ? <a key={link.kind} className={`${inquiryStyles.channelCard} ${channelClass}`} href={link.href} target="_blank" rel="noopener noreferrer" onClick={event=>void openSocial(event,link)}>{content}<span className={inquiryStyles.channelAction}>{label}<span aria-hidden="true"> ↗</span></span></a>
                     : <div key={link.kind} className={`${inquiryStyles.channelCard} ${channelClass}`}>{content}<button type="button" className={`${inquiryStyles.copyContact} ${contactCopyState===link.kind?inquiryStyles.copied:""}`} aria-label={`${t(contactCopyState===link.kind?"Copied":"Copy contact")} ${link.label}`} onClick={()=>void copyText(value).then(copied=>{setContactCopyState(copied?link.kind:null);setContactCopyNotice(copied?"":t("Select and copy the contact details."));})}><Copy size={16} aria-hidden="true"/>{t(contactCopyState===link.kind?"Copied":"Copy contact")}</button></div>;
                 })}
-                <button type="button" className={`${inquiryStyles.channelCard} ${inquiryStyles.inboxChoice}`} aria-expanded={showPlatform} aria-controls="mirtpage-inquiry-details" onClick={()=>{if(!showPlatform)setInboxMessage(message);setShowPlatform(value=>!value);}}><span className={inquiryStyles.channelIcon}><MessageSquare size={22} aria-hidden="true"/></span><span className={inquiryStyles.channelIdentity}><strong>{t("Send to MirtPage Inbox")}</strong></span><span className={inquiryStyles.inboxArrow} aria-hidden="true">→</span></button>
+                <button type="button" className={`${inquiryStyles.channelCard} ${inquiryStyles.inboxChoice}`} aria-expanded={showPlatform} aria-controls="mirtpage-inquiry-details" onClick={()=>{if(!showPlatform)setInboxMessage(message);setShowPlatform(value=>!value);}}><span className={inquiryStyles.channelIcon}><MessageSquare size={22} aria-hidden="true"/></span><span className={inquiryStyles.channelIdentity}><strong>{t("Send to AfricMade Inbox")}</strong></span><span className={inquiryStyles.inboxArrow} aria-hidden="true">→</span></button>
               </div>
               {contactCopyNotice&&<p role="status" className={inquiryStyles.note}>{contactCopyNotice}</p>}
             </section>

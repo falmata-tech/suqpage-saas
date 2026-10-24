@@ -18,8 +18,8 @@ function configuration(mode:SupportEscalationEmailMode,env:Environment){
 export function partnerInterestEmailReadiness(mode:SupportEscalationEmailMode=selectedHostedEmailMode(),env:Environment=platformEnvironment()){return{ready:configuration(mode,env)!==null};}
 export function partnerInterestEmailContent(email:PartnerInterestEmail){
  const value=email.interest;
- return{subject:`MirtPage · Logistics partner request · ${email.reference}`,text:[
-  'A logistics company would like to work with MirtPage.',`Reference: ${email.reference}`,
+ return{subject:`AfricMade · Logistics partner request · ${email.reference}`,text:[
+  'A logistics company would like to work with AfricMade.',`Reference: ${email.reference}`,
   `Company: ${value.companyName}`,`Contact: ${value.contactName}`,`Email: ${value.email}`,
   ...(value.phone?[`Phone: ${value.phone}`]:[]),'',value.message,
   '', 'This is an interest request, not an approved transport-provider account.',
@@ -34,7 +34,7 @@ export async function sendPartnerInterestEmail(email:PartnerInterestEmail,option
  if(mode==='gmail-smtp')return sendGmailSmtpEmail({recipientEmail:email.recipientEmail,subject:content.subject,text:content.text,deliveryKey:key},{env,createTransport:options.smtpCreateTransport});
  const headers:Record<string,string>={'Content-Type':'application/json'};
  if(config.key){headers.Authorization=`Bearer ${config.key}`;headers['Idempotency-Key']=key;}
- const body=mode==='local-mailpit'?{From:{Email:config.from,Name:'MirtPage'},To:[{Email:email.recipientEmail}],Subject:content.subject,Text:content.text,Headers:{'Message-ID':`<${key}@mirtpage.test>`}}:{from:`MirtPage <${config.from}>`,to:[email.recipientEmail],subject:content.subject,text:content.text};
+ const body=mode==='local-mailpit'?{From:{Email:config.from,Name:'AfricMade'},To:[{Email:email.recipientEmail}],Subject:content.subject,Text:content.text,Headers:{'Message-ID':`<${key}@mirtpage.test>`}}:{from:`AfricMade <${config.from}>`,to:[email.recipientEmail],subject:content.subject,text:content.text};
  try{
   const response=await(options.send??fetch)(mode==='local-mailpit'?'http://127.0.0.1:54324/api/v1/send':'https://api.resend.com/emails',{method:'POST',headers,body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(4000)});
   await response.body?.cancel().catch(()=>{});

@@ -20,7 +20,7 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
   const url = publicSeoUrl(after ? `/showrooms?after=${after}` : "/showrooms");
   const image = publicSeoImageUrl(BRAND_SOCIAL_IMAGE);
   return { title, description, alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "MirtPage", images: image ? [image] : [] },
+    openGraph: { title, description, url, siteName: "AfricMade", images: image ? [image] : [] },
     twitter: { card: "summary_large_image", title, description, images: image ? [image] : [] } };
 }
 
@@ -33,7 +33,7 @@ export default async function ShowroomDirectory({ searchParams }: { searchParams
 
   return <div className={styles.stage}><div className={styles.page}>
     <header className={styles.heading}>
-      <div><p className={styles.eyebrow}>MirtPage</p><h1>{t("Businesses")}</h1>
+      <div><p className={styles.eyebrow}>AfricMade</p><h1>{t("Businesses")}</h1>
         <p>{t(ABOUT_STOREFRONT_SECTIONS[0].title)}</p></div>
     </header>
     {items.length ? <div className={styles.grid}>{items.map(business => {

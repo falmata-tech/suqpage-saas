@@ -1,5 +1,5 @@
 /** Required PostgreSQL history ends here; retired data-only27–30 form one group. */
-export const LATEST_POSTGRES_MIGRATION_VERSION = 79;
+export const LATEST_POSTGRES_MIGRATION_VERSION = 80;
 
 /** Input is the bounded, ascending ledger. Only the two proven histories match. */
 export function isSupportedPostgresMigrationLedger(versions: readonly unknown[]): boolean {

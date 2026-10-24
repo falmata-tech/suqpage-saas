@@ -2,13 +2,32 @@
 id: FE-049
 title: Five-language interface
 status: in_progress
-related: [BE-058, DEP-048, FE-069, FE-066, FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062, DEP-044, FE-065, FE-067, FE-063, FE-068, FE-076, FE-075]
+related: [BE-058, DEP-048, FE-069, FE-066, FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062, DEP-044, FE-065, FE-067, FE-063, FE-068, FE-076, FE-075, FE-070, DEP-051]
 owners: [product, frontend]
-last_updated: 2026-10-21
+last_updated: 2026-10-23
 change_level: L2
 ---
 
 # FE-049 — Five-language interface
+
+## S173 — finish a native language selection (ready)
+
+GIVEN a native user opens the header or More language sheet WHEN they choose an
+active language THEN the selection applies and the sheet closes, leaving the
+current page visible in the chosen language. A second selection remains possible
+by reopening the control; the existing language preference is retained.
+
+## S172 — AfricMade in the three active languages (ready)
+
+Re-author the short supplier/sourcing story and platform name in English,
+Amharic and Afaan Oromo together. Translate the idea and task, not English word
+order. Preserve readable type, controls, dates, provider names, merchant-entered
+text and URLs. The owner-approved Market sentence names farms, factories,
+workshops and artisans; keep it readable on phones without adding another
+sector list or extra explanation. Regenerate
+catalogs from the source TSV once after English keys and active-language values
+are frozen; inactive Somali/Tigrinya rows remain retained compatibility data.
+Verify key/catalog parity, screen-reader labels and web/Expo wrapping.
 
 ## S154 — compact inclusive showroom copy (ready before source changes)
 

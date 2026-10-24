@@ -25,14 +25,14 @@ try {
       if (mobile && locale !== "en") {
         await page.getByRole("button", { name: "Language", exact: true }).click();
         await page.getByRole("radio", { name: languageNames[locale], exact: true }).click();
-        await page.getByRole("button", { name: t("Close"), exact: true }).last().click();
+        if(await page.getByRole("button", { name: t("Close"), exact: true }).last().isVisible()) await page.getByRole("button", { name: t("Close"), exact: true }).last().click();
         await expect(page.getByRole("button", { name: t("Close"), exact: true })).toHaveCount(0);
       }
-      await expect(page.getByText(t("Delete your Suqpage account"), { exact: true })).toBeVisible();
+      await expect(page.getByText(t("Delete your AfricMade account"), { exact: true })).toBeVisible();
       const email = page.getByRole(mobile ? "button" : "link", { name: t("Email deletion request"), exact: true });
       await expect(email).toBeVisible();
       await expect(page.getByText("falmata.dawano@gmail.com", { exact: true })).toBeVisible();
-      if (!mobile) await expect(email).toHaveAttribute("href", "mailto:falmata.dawano@gmail.com?subject=Suqpage%20account%20deletion%20request");
+      if (!mobile) await expect(email).toHaveAttribute("href", "mailto:falmata.dawano@gmail.com?subject=AfricMade%20account%20deletion%20request");
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "No horizontal overflow");
       const name = `${mobile ? "native-browser" : "web"}-${width}-${locale}.png`;
       await page.screenshot({ path: `${directory}/${name}`, fullPage: true, style: "nextjs-portal { visibility: hidden }" });
@@ -69,7 +69,7 @@ try {
     await page.getByRole("button", { name: "Verify code", exact: true }).click();
     await expect(page.getByRole("button", { name: "Create your business page", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Delete account", exact: true }).click();
-    await expect(page.getByText("Delete your Suqpage account", { exact: true })).toBeVisible();
+    await expect(page.getByText("Delete your AfricMade account", { exact: true })).toBeVisible();
     await context.close();
   } finally {
     const deleted = await admin.auth.admin.deleteUser(created.data.user.id);

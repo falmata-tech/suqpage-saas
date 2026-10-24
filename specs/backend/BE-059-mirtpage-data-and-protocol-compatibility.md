@@ -2,13 +2,33 @@
 id: BE-059
 title: Data-preserving MirtPage branding and compatibility
 status: in_progress
-related: [FE-070, DEP-029, DEP-049, ADR-0029]
+related: [FE-070, DEP-029, DEP-049, DEP-051, ADR-0029]
 owners: [backend, security, operations]
 last_updated: 2026-10-20
 change_level: L3
 ---
 
 # BE-059 — MirtPage data and protocol compatibility
+
+## S172 — AfricMade display with stable system identifiers (ready)
+
+Public and staff-facing platform presentation changes to AfricMade without
+rewriting tenant records, accounts, conversations, sessions, inquiries, shipments,
+database identifiers, API routes, provider IDs or mobile package IDs. Existing
+MirtPage/Suqpage wire values remain accepted where older installed clients or
+workers depend on them; new display copy and safe notification rendering use
+AfricMade. The selected logistics provider retains its own name and assets.
+
+GIVEN existing records and old clients WHEN the new web/native app reads or sends
+their protocol values THEN authorization and tenant isolation still hold and no
+data migration is required. GIVEN an authored email or push notification WHEN it
+is shown THEN the platform name is AfricMade without changing recipient,
+delivery, consent, message content or provider credentials.
+
+Focused regression tests cover notification display/wire compatibility, email
+template placeholders, data identifiers and tenant boundaries. Hosted Auth
+presentation changes require DEP-029's guarded plan and separate provider-state
+verification; source wording alone must not be reported as a hosted Auth update.
 
 ## Ready: finite push wire and display split
 

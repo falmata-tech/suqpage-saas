@@ -36,7 +36,7 @@ function PublicAppFrameContent({ children, signedIn, dashboardHref="/dashboard" 
     <aside className="public-app-rail">
       <section className="public-app-rail-group">
         <span>{t("Explore")}</span>
-        <nav aria-label={t("Explore MirtPage")}>
+        <nav aria-label={t("Explore AfricMade")}>
           {exploreDestinations.map(({ href, label, icon: Icon }) => <Link key={href} href={href} aria-current={isCurrent(pathname, href) ? "page" : undefined}>
             <Icon aria-hidden="true" />
             <span>{t(label)}</span>
@@ -46,7 +46,7 @@ function PublicAppFrameContent({ children, signedIn, dashboardHref="/dashboard" 
       </section>
       <section className="public-app-rail-group">
         <span>{t("Account")}</span>
-        <nav aria-label={t("MirtPage account")}>
+        <nav aria-label={t("AfricMade account")}>
           {signedIn
             ? <Link href={dashboardHref} aria-current={isCurrent(pathname,"/dashboard")?"page":undefined}><LayoutDashboard aria-hidden="true" /><span>{t("Account")}</span><NavigationPendingIndicator label={t("Account")} /></Link>
             : <Link href="/login" aria-current={pathname==="/login"||pathname==="/request"?"page":undefined}><LogIn aria-hidden="true" /><span>{t("Login")}</span><NavigationPendingIndicator label={t("Login")} /></Link>}

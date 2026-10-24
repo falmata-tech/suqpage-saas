@@ -405,7 +405,7 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
     data-map-marker-count="0"
     data-map-zoom={DEFAULT_ZOOM}
     role="region"
-    aria-label={t("Interactive OpenStreetMap map with clustered MirtPage page locations")}
+    aria-label={t("Interactive OpenStreetMap map with clustered AfricMade page locations")}
   />{tileFailed && <div className="discovery-map-background-status" role="status">
     <p>{t('Map background is unavailable. You can still explore businesses.')}</p>
     <button type="button" onClick={() => retryTiles.current?.()}>{t('Retry map')}</button>

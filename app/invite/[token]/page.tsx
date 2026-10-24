@@ -22,14 +22,14 @@ export default async function InvitationPage({ params, searchParams }: { params:
   const invitation = await getActiveInvitation(token);
   const errors: Record<string,string> = {
     mismatch: "The passwords do not match.",
-    expired: "This invitation expired or was replaced. Ask MirtPage for a new link.",
+    expired: "This invitation expired or was replaced. Ask AfricMade for a new link.",
     replayed: "This invitation has already been used.",
-    conflict: "An account already exists for this email. Contact MirtPage for help.",
+    conflict: "An account already exists for this email. Contact AfricMade for help.",
     invalid: "The invitation could not be accepted.",
   };
   return <><LanguageSelector /><main className="invite-page public-mobile-page"><div className="invite-card">
-    <NavigationTrail items={[{label:t("MirtPage"),href:"/"},{label:t("Client invitation")}]} fallback="/"/>
-    {!invitation ? <><span className="eyebrow">{t("Invitation unavailable")}</span><h1>{t("Ask MirtPage for a new invitation")}</h1><p>{t("This link is invalid, expired, already used, or was replaced for your protection.")}</p><a className="btn secondary" href="/">{t("Return home")}</a></> : <>
+    <NavigationTrail items={[{label:t("AfricMade"),href:"/"},{label:t("Client invitation")}]} fallback="/"/>
+    {!invitation ? <><span className="eyebrow">{t("Invitation unavailable")}</span><h1>{t("Ask AfricMade for a new invitation")}</h1><p>{t("This link is invalid, expired, already used, or was replaced for your protection.")}</p><a className="btn secondary" href="/">{t("Return home")}</a></> : <>
       <span className="eyebrow">{t("Private client invitation")}</span><h1>{t("Join")}{" "}{invitation.business_name}</h1><p>{t("Set up your private client workspace. You’ll use it to edit your page, manage products, follow inquiries, and contact support.")}</p>
       <div className="invite-summary"><div><small>{t("Account email")}</small><strong>{maskEmail(invitation.email)}</strong></div><div><small>{t("Link expires")}</small><strong>{new Date(invitation.expires_at).toLocaleString("en-US", { hour12: true })}</strong></div></div>
       {query.error && <p className="error" role="alert">{errors[query.error] || errors.invalid}</p>}

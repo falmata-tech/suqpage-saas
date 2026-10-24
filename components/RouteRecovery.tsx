@@ -23,7 +23,7 @@ export default function RouteRecovery({retry}: {retry: () => void}) {
   const action = {display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 44, padding: "10px 18px", borderRadius: 10, font: "inherit", fontWeight: 650, cursor: "pointer", textDecoration: "none"} as const;
   return <main style={{minHeight: "65vh", display: "grid", placeItems: "center", padding: 24, fontFamily: "system-ui, sans-serif", color: "#252b2d", background: "#f5f7f7"}}>
     <section aria-labelledby="recovery-title" style={{boxSizing: "border-box", width: "min(100%, 480px)", padding: 28, background: "white", border: "1px solid #d9e1e3", borderRadius: 16}}>
-      <p style={{color: "#be3d00", fontWeight: 750, marginTop: 0}}>MirtPage</p>
+      <p style={{color: "#be3d00", fontWeight: 750, marginTop: 0}}>AfricMade</p>
       <h1 id="recovery-title" style={{fontSize: 25, lineHeight: 1.3}}>{t("Unable to connect. Please try again.")}</h1>
       <div style={{display: "flex", gap: 12, flexWrap: "wrap"}}>
         <button type="button" style={{...action, border: "1px solid #be3d00", background: "#be3d00", color: "white"}} onClick={retry}>{t("Try again")}</button>

@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const url = publicSeoUrl("/featured");
   const image = publicSeoImageUrl(BRAND_SOCIAL_IMAGE);
   return { title, description, alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "MirtPage", images: image ? [image] : [] },
+    openGraph: { title, description, url, siteName: "AfricMade", images: image ? [image] : [] },
     twitter: { card: "summary_large_image", title, description, images: image ? [image] : [] } };
 }
 

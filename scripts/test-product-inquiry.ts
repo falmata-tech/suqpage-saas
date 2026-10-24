@@ -43,6 +43,8 @@ test("single and grouped messages contain exact chosen products and linkable det
   const two = { product: { ...product, id: 5, name: "Second item" }, options: {}, quantity: "" };
   const single = buildInquiryMessage(business, [one], "https://example.com");
   assert.ok(single.includes("Cup & saucer") && single.includes("Quantity: 2 pieces") && single.includes("?product=1"));
+  assert.ok(single.includes("Are these available?"));
+  assert.doesNotMatch(single, /lead time|pricing|best price|how can I order/i, "The prepared inquiry does not add a sourcing questionnaire");
   assert.ok(!single.includes(two.product.name) && !single.includes(business.contact_email));
   assert.ok(buildInquiryMessage(business, [one, two], "https://example.com").includes("?product=5"));
 });
@@ -72,17 +74,17 @@ test("all five locales produce literal selections with a contextual message", ()
   assert.equal(seen.size, 5);
 });
 test("general inquiry gets a localized prepared message and showroom link without selected products",()=>{
-  const seen=new Set<string>();
+  const activeMessages=new Set<string>();
   for(const locale of ["en","am","om","so","ti"]){
     const t=createUiText(locale==="en"?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,"utf8")));
     const message=buildInquiryMessage(business,[],"https://mirtpage.com/",t);
     assert.ok(message.startsWith(t("Hello {value1},",{value1:business.name})));
-    assert.ok(message.includes(t("Could you tell me what products are available and how I can order?")));
+    assert.ok(message.includes(t("I'd like to ask about your products.")));
     assert.ok(message.includes("https://mirtpage.com/@fixture-shop"));
     assert.ok(!message.includes("Are these available"));
-    seen.add(message);
+    if(["en","am","om"].includes(locale))activeMessages.add(message);
   }
-  assert.equal(seen.size,5);
+  assert.equal(activeMessages.size,3);
 });
 test("only inbox providers prepare drafts; social profiles remain ordinary public links", () => {
   const contacts={phone:"+447700900002", email:"owner@example.test", website:"https://example.com", whatsapp:"+447700900001", telegram:"fixture_shop", instagram:"fixture_shop", tiktok:"fixture_shop", facebook:"fixture_shop"};

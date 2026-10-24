@@ -1,3 +1,3 @@
-/** Compatibility import for existing shells; visible identity is MirtPage. */
-export { default } from "./MirtPageBrand";
-export type { PlatformBrandProps } from "./MirtPageBrand";
+/** Compatibility import for existing shells; visible identity is AfricMade. */
+export { default } from "./AfricMadeBrand";
+export type { PlatformBrandProps } from "./AfricMadeBrand";

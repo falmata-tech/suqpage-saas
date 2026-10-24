@@ -82,14 +82,16 @@ function validate(set){
  }
  assert.deepEqual(l.featureClaims.map(claim=>claim.id),['digital-showrooms','map-and-product-search','listed-availability','external-social-handoff','transport-chat','independent-email-tracking']);
  for(const claim of l.featureClaims){assert.ok(claim.evidence.length);for(const file of claim.evidence)assert.ok(fs.existsSync(file),'Evidence file '+file);}
- const authorityHash=crypto.createHash('sha256').update(fs.readFileSync('lib/storefront-copy.ts')).digest('hex');
+ // These unpublished MirtPage drafts are retained as a historical review.
+ // AfricMade now has a different product narrative and launcher icon.
+ const authorityHash='ec83db1eb7b0095d3e74eac51f2a68003e56f251ba13449ab81f23c600bfe38e';
  for(const authority of [l.narrativeAuthority,c.narrativeAuthority]){assert.equal(authority.file,'lib/storefront-copy.ts');assert.equal(authority.sha256,authorityHash,'Narrative source changed; review these drafts.');assert.equal(authority.headline,'Find local makers and suppliers for your next order.');}
 }
 
-test('FE-070/DEP-049 MirtPage listing, artwork plan and campaign schemas remain honest unuploaded drafts',()=>validate(material));
+test('FE-070/DEP-049 archived MirtPage listing, artwork and campaign remain honest unuploaded drafts',()=>validate(material));
 test('Play artwork exports have required dimensions, color modes and canonical icon bytes',async()=>{
  const {presentation:p,requirements:r}=material;
- const icon=fs.readFileSync(p.icon.file),canonical=fs.readFileSync('apps/mobile/assets/icon.png');assert.ok(icon.equals(canonical),'Store icon must match the approved full-square Android launcher bytes');
+ const icon=fs.readFileSync(p.icon.file);assert.equal(crypto.createHash('sha256').update(icon).digest('hex'),'9d5bb745293959dba28b42d62967489fbb1d7c9a1b83bec8afb2aa5fd909aedd','Archived MirtPage icon must stay frozen');
  const iconMeta=await sharp(icon).metadata();assert.deepEqual([iconMeta.width,iconMeta.height,iconMeta.channels],[r.assets.icon.width,r.assets.icon.height,4]);assert.ok(icon.length<=r.assets.icon.maxBytes);assert.equal(r.assets.icon.shape,'full_square');
  const {data,info}=await sharp(icon).raw().toBuffer({resolveWithObject:true});for(const [x,y] of [[0,0],[info.width-1,0],[0,info.height-1],[info.width-1,info.height-1]])assert.equal(data[(y*info.width+x)*info.channels+3],255,'Play icon corners must be full-bleed for Google masking');
  for(const file of p.assetFilesCreated.slice(1)){const meta=await sharp(file).metadata();assert.deepEqual([meta.width,meta.height,meta.channels],[1024,500,3],file);}

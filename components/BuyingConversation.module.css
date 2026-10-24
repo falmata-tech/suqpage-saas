@@ -48,6 +48,7 @@
 .callback button:focus-visible,.callback input:focus-visible { outline:3px solid #263c42; outline-offset:2px; }
 
 .status .connection { grid-column:1; grid-row:2; }
+.status .countdown { grid-column:1; grid-row:2; color:#9f2a00; font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; }
 .endChat { grid-column:2; grid-row:1 / span 2; min-height:44px; align-self:center; border:1px solid #becaca; border-radius:6px; background:#fff; color:#344a52; font:inherit; font-size:13px; font-weight:650; padding:8px 10px; cursor:pointer; }
 .endChat:disabled { opacity:.55; cursor:wait; }
 .endChat:focus-visible { outline:3px solid #263c42; outline-offset:2px; }

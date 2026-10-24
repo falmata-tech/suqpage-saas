@@ -71,7 +71,7 @@ async function main() {
         await page.locator('button[data-channel=buying]').click();
       }
       await expect(dialog.getByRole('log')).toContainText('Please deliver two chairs.');
-      await expect(dialog.getByRole('status')).toContainText('Waiting for a SharedTrucks live agent');
+      await expect(dialog.getByRole('status')).toContainText('Waiting for a live agent at SharedTrucks Logistics');
       await expect(dialog.getByText('Replies appear here automatically. You can return to this chat in this browser.')).toBeVisible();
       await page.screenshot({path:`${dir}/waiting-${width}.png`,style:'nextjs-portal {visibility:hidden}'});
       await expect(dialog.getByRole('status')).toContainText('Chat connected');

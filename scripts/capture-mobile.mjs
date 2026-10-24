@@ -71,7 +71,7 @@ try {
   await page.getByRole("radio", { name: "አማርኛ", exact: true }).click();
   await page.screenshot({ path: out + "/amharic-phone.png" });
   await page.getByRole("radio", { name: "English", exact: true }).click();
-  await page.getByRole("button", { name: "Close", exact: true }).last().click();
+  if(await page.getByRole("button", { name: "Close", exact: true }).last().isVisible()) await page.getByRole("button", { name: "Close", exact: true }).last().click();
   await page.goto("http://localhost:8082/account");
   const rows = (
     await pool.query(

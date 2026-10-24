@@ -59,7 +59,7 @@ export default function SignupForm({ email, initialName }: { email: string; init
       {locationMode==='storefront'?<div className="field full"><OwnerLocationPicker city={place} point={point} disabled={state.kind==='sending'} t={t} onChange={setPoint}/>{point?<><input type="hidden" name="latitude" value={point.latitude}/><input type="hidden" name="longitude" value={point.longitude}/></>:null}</div>:null}
     </> : null}
     {state.kind === "sending" && <div className="full"><LoadingBar/></div>}
-    <div className="field full consent-field"><label><input name="consent" type="checkbox" required /> {" "}{t("I agree to the MirtPage Terms and Privacy Policy.")}</label></div>
+    <div className="field full consent-field"><label><input name="consent" type="checkbox" required /> {" "}{t("I agree to the AfricMade Terms and Privacy Policy.")}</label></div>
     {state.kind === "error" ? <div className="field full error" role="alert">{t(state.message)}</div> : null}
     <div className="field full"><button className="btn brand" type="submit" disabled={state.kind === "sending" || !handleReady || !place || (locationMode==='storefront'&&!point)}>{state.kind === "sending" ? t("Finishing setup...") : t("Finish setup")}</button></div>
   </div></form>;

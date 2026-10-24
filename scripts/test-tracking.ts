@@ -105,7 +105,7 @@ async function main(){
   const newWithProvider=await submitTrackingShipment(staff,{recipientEmail:providerEmail,label:'Portal-only provider fields',legs:[{...leg(),trackingUrl:'https://carrier.example.com/track?portal-only=private-marker',trackingCode:'PORTAL-ONLY-CODE'}],idempotencyKey:crypto.randomUUID()},providerNow+10);
   const sent:TrackingEmail[]=[],providerBodies:string[]=[],keys:string[]=[];
   await dispatchTrackingEmails({now:providerNow+1000,send:async email=>{
-   sent.push(email);const env={NODE_ENV:'production',SUQPAGE_DATABASE_DRIVER:'postgres',SUQPAGE_POSTGRES_URL:'postgresql://fixture:unused@db.example.test:5432/postgres',NEXT_PUBLIC_SUPABASE_URL:'https://auth.example.test',NEXT_PUBLIC_APP_URL:'https://tracking.example.test',RESEND_API_KEY:'fictional-provider-key',NOTIFICATION_FROM_EMAIL:'MirtPage <tracking@example.test>'};
+   sent.push(email);const env={NODE_ENV:'production',SUQPAGE_DATABASE_DRIVER:'postgres',SUQPAGE_POSTGRES_URL:'postgresql://fixture:unused@db.example.test:5432/postgres',NEXT_PUBLIC_SUPABASE_URL:'https://auth.example.test',NEXT_PUBLIC_APP_URL:'https://tracking.example.test',RESEND_API_KEY:'fictional-provider-key',NOTIFICATION_FROM_EMAIL:'AfricMade <tracking@example.test>'};
    return sendTrackingEmail(email,{env,send:async(_url,init)=>{providerBodies.push(String(init?.body));keys.push((init?.headers as Record<string,string>)['Idempotency-Key']);return new Response('{}');}});
   }});
   assert.deepEqual(sent.filter(email=>email.kind==='initial').map(email=>email.kind==='initial'?email.shipment.reference:'').sort(),[legacyReference,newWithProvider.reference].sort());

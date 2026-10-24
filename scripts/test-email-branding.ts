@@ -11,10 +11,10 @@ assert.equal(manifest.length, 13);
 assert.equal(new Set(manifest.map(entry => entry.key)).size, 13);
 for (const entry of manifest) {
   const html = fs.readFileSync(`supabase/templates/${entry.file}`, "utf8");
-  assert.match(html, /MirtPage/);
-  assert.doesNotMatch(html + entry.subject, /africmade|africpage|suqpage|<script/i);
-  assert.match(entry.subject, /MirtPage/);
-  assert.ok(html.includes(`src="{{ .SiteURL }}${PLATFORM_BRAND.assets.emailWordmark}" alt="MirtPage" width="220" height="48"`));
+  assert.match(html, /AfricMade/);
+  assert.doesNotMatch(html + entry.subject, /mirtpage|africpage|suqpage|<script/i);
+  assert.match(entry.subject, /AfricMade/);
+  assert.ok(html.includes(`src="{{ .SiteURL }}${PLATFORM_BRAND.assets.emailWordmark}" alt="AfricMade" width="220" height="60"`));
   assert.match(html, /<img[^>]+background-color:#ffffff/,'Email wordmark explicitly keeps its white backing');
   assert.equal((html.match(/<img\b/g) || []).length, 1, 'One canonical wordmark without external tracking images.');
   const notification = entry.key.endsWith("_notification");
@@ -39,7 +39,7 @@ for (const entry of manifest) {
   }
 }
 const smtp = config.split('\n[auth.email.smtp]\n')[1]?.split('\n[')[0];
-assert.ok(smtp?.includes('sender_name = "MirtPage"'));
+assert.ok(smtp?.includes('sender_name = "AfricMade"'));
 assert.ok(smtp.includes('user = "suqpage-local"') && smtp.includes('admin_email = "no-reply@suqpage.test"'), 'Display-only branding preserves local SMTP technical identities.');
 assert.ok(fs.existsSync('public' + PLATFORM_BRAND.assets.emailWordmark));
 const before = { key: process.env.RESEND_API_KEY, from: process.env.NOTIFICATION_FROM_EMAIL };
@@ -52,8 +52,8 @@ try {
     assert.equal(await notifyNewInquiry(business, 2, "Customer", { send: async (_url, init) => {
       calls++;
       const email = JSON.parse(String(init?.body));
-      assert.equal(email.from, "Suqpage <verified@example.test>");
-      assert.equal(email.subject, "New Suqpage inquiry #2");
+      assert.equal(email.from, "AfricMade <verified@example.test>");
+      assert.equal(email.subject, "New AfricMade enquiry #2");
       assert.deepEqual(email.to, [business.contact_email]);
       return new Response(null, { status: 202 });
     }}), "sent");

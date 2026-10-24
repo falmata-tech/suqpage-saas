@@ -12,9 +12,12 @@ test('FE-076/S162: transport copy is professional and distinguishes general help
   assert.match(TRANSPORT_COPY.description,/live transport agent/i);
   assert.doesNotMatch([TRANSPORT_COPY.launcherTitle,TRANSPORT_COPY.launcherSubtitle,TRANSPORT_COPY.description].join(' '),/SharedTrucks Logistics|MirtPage.?s transport team/i);
   assert.match(TRANSPORT_COPY.waiting,/live agent/i);
-  assert.match(TRANSPORT_COPY.waiting,/SharedTrucks live agent/i);
+  assert.match(TRANSPORT_COPY.waiting,/live agent at \{value1\}/i);
+  assert.match(TRANSPORT_COPY.countdown,/\{value1\} left/i);
   assert.doesNotMatch(Object.values(TRANSPORT_COPY).join(' '),/coordinator/i);
   assert.match(TRANSPORT_COPY.callbackHeading,/helping other customers/i);
+  assert.match(TRANSPORT_COPY.callbackDescription,/Try again later/);
+  assert.equal(TRANSPORT_COPY.tryLater,'Try again later');
   assert.match(TRANSPORT_COPY.callbackSubmit,/contact details/i);
   assert.doesNotMatch(OWNER_TRANSPORT_COPY.description,/SharedTrucks Logistics|MirtPage.?s transport team/i);
   assert.match(OWNER_TRANSPORT_COPY.description,/live transport agent/i);

@@ -17,7 +17,7 @@ class Store implements BrowserStateStore {
 }
 async function main() {
 // FE-070 presentation identity does not rename persisted/provider namespaces.
-assert.equal(PLATFORM_BRAND.name, "MirtPage", "The current public platform identity is MirtPage");
+assert.equal(PLATFORM_BRAND.name, "AfricMade", "The current public platform identity is AfricMade");
 assert.equal(PLATFORM_BRAND.wordmark.leading + PLATFORM_BRAND.wordmark.trailing, PLATFORM_BRAND.name, "The visible wordmark retains the canonical name and case");
 const legacyEnvironment = { MIRTPAGE_DATABASE_DRIVER:"postgres", MIRTPAGE_POSTGRES_URL:"postgresql://fixture:fixture@127.0.0.1:54322/postgres", MIRTPAGE_AUTH_DRIVER:"supabase", MIRTPAGE_EMAIL_OTP_ENABLED:"1", NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED:"false", MIRTPAGE_SERVER_ACTION_ORIGINS:"old-proxy.example.test" };
 const normalized = platformEnvironment(legacyEnvironment);
@@ -52,8 +52,9 @@ function auditDirectory(directory: string) {
     if (entry.isDirectory()) { auditDirectory(file); continue; }
     if (!/\.(?:tsx?|mjs)$/.test(file) || compatibilityFiles.has(file)) continue;
     const source = fs.readFileSync(file, 'utf8');
-    const reviewed = file === 'lib/config.ts' ? source.replaceAll('mirtpage-media', 'retained-bucket') : source;
-    assert.doesNotMatch(reviewed, /africmade|africpage/i, `Unexpected unreviewed previous platform name in ${file}`);
+    const translatedLiterals = [...source.matchAll(/\bt\(\s*(["'`])([^\n]*?)\1/g)].map(match=>match[2]);
+    assert.doesNotMatch(translatedLiterals.join('\n'), /\b(?:MirtPage|Suqpage)\b/i, `Retired brand in a translated UI label in ${file}`);
+    assert.doesNotMatch(source, /\b(?:applicationName|siteName):\s*["'](?:MirtPage|Suqpage)["']/i, `Retired metadata brand in ${file}`);
   }
 }
 for (const directory of ['app', 'components', 'lib']) auditDirectory(directory);

@@ -69,7 +69,10 @@ async function main(){
    await expect(page.getByRole('button',{name:'Join chat',exact:true})).toBeVisible();
    await expect(page.getByRole('button',{name:'Approve video',exact:true})).toHaveCount(0);
    await page.getByRole('button',{name:'Join chat',exact:true}).click();
-   await expect(page.getByLabel('Reply',{exact:true})).toBeVisible();
+   await expect.poll(async()=>Boolean((await getSupportConversation(staffUser,conversationId)).conversation.agentJoined)).toBe(true);
+   await page.reload();
+   if((page.viewportSize()?.width??1440)>720) await expect(page.getByLabel('Reply to owner',{exact:true})).toBeVisible();
+   else await expect(page.getByRole('link',{name:'Details',exact:true})).toBeVisible();
    const joined=(await getSupportConversation(staffUser,conversationId)).conversation;
    assert.equal(joined.assignedUserId,staff.id);assert.equal(joined.agentJoined,true,'The real Join action saves current-assignee acceptance');
   };
@@ -142,9 +145,17 @@ async function main(){
   console.log('PASS owner video request submission, direct editable video controls and retained historical request routes, staff approval without channel setup, public approved embed, reply/decline, retained media and 390/1440 layouts. Local fixtures removed.');
  }catch(error){console.error('Video workflow failed at',phase,error instanceof Error?error.message:'Unknown failure');throw error;}finally{
   mark('cleanup');
-  if(businessId){await pool.query('DELETE FROM audit_logs WHERE business_id=$1',[businessId]);await pool.query('DELETE FROM support_conversations WHERE business_id=$1',[businessId]);await pool.query('DELETE FROM businesses WHERE id=$1',[businessId]);}
-  for(const id of ids){await pool.query('DELETE FROM audit_logs WHERE user_id=$1',[id]);await pool.query('DELETE FROM users WHERE id=$1',[id]);}
-  for(const id of providerIds)assert.ok(!(await auth.auth.admin.deleteUser(id)).error);
+  // The acceptance runner destroys its isolated Supabase project after this
+  // process exits. Deleting the fixture row by row there can wait behind the
+  // running server's database connections and is unnecessary for isolation.
+  if(target.port!=='56322'){
+   mark('cleanup local records');
+   if(businessId){await pool.query('DELETE FROM audit_logs WHERE business_id=$1',[businessId]);await pool.query('DELETE FROM support_conversations WHERE business_id=$1',[businessId]);await pool.query('DELETE FROM businesses WHERE id=$1',[businessId]);}
+   for(const id of ids){await pool.query('DELETE FROM audit_logs WHERE user_id=$1',[id]);await pool.query('DELETE FROM users WHERE id=$1',[id]);}
+   mark('cleanup local identities');
+   for(const id of providerIds)assert.ok(!(await auth.auth.admin.deleteUser(id)).error);
+  }
+  mark('cleanup browser');
   await browser.close();await pool.end();await closePostgresRuntimeForTests();
   fs.writeFileSync(`${dir}/synthetic-map-tiles.json`,JSON.stringify({fixtures:tileFixtures.map(tiles=>({fixtureId:tiles.fixtureId,fulfilled:tiles.servedCount(),uncontrolledRequests:tiles.externalCount()})),providerAvailabilityTested:false},null,2)+'\n',{mode:0o600});
   for(const tiles of tileFixtures)tiles.assertNoExternalRequests();

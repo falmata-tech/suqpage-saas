@@ -321,7 +321,7 @@
   .landing-footer { display: none; }
   .landing-header { padding-top: env(safe-area-inset-top); }
   .landing-nav { gap: 6px; }
-  .landing-nav .suqpage-brand { --suqpage-mark-width: 28px; --suqpage-wordmark-size: 22px; }
+  .landing-nav .suqpage-brand { --suqpage-mark-width: 42px; --suqpage-wordmark-size: 22px; }
   .landing-nav .language-selector select { max-width: 110px; font-size: 12px; }
   .landing-nav .language-selector > svg { display: none; }
   .public-mobile-page { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
@@ -506,7 +506,7 @@
   .public-app-shell-showroom { padding-bottom: 0; }
   .public-app-rail,.public-app-shell-showroom > .public-app-header { display: none; }
   .public-app-header { height: calc(54px + env(safe-area-inset-top)); gap: 12px; padding: env(safe-area-inset-top) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left)); }
-  .public-app-header .suqpage-brand { --suqpage-mark-width: 28px; --suqpage-wordmark-size: 22px; }
+  .public-app-header .suqpage-brand { --suqpage-mark-width: 34px; --suqpage-wordmark-size: 22px; }
   .public-app-main { min-height: calc(100dvh - 118px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
   .public-app-showroom-main { height: auto; min-height: 100dvh; overflow: visible; background: #fff; }
   .public-app-shell-showroom .public-app-showroom-main { padding-bottom: 76px; }

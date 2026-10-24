@@ -50,9 +50,9 @@ export default async function SupportInbox({
       <SupportThreadRefresh active />
       <div className="dashboard-head">
         <div>
-          <span className="eyebrow">{client ? t("MirtPage support") : t("Chats")}</span>
+          <span className="eyebrow">{client ? t("AfricMade support") : t("Chats")}</span>
           <h1>{client ? t("How can we help?") : t(transport ? "Transport" : "Business support")}</h1>
-          {client ? <p>{t("Keep questions and replies together with your MirtPage account.")}</p> : null}
+          {client ? <p>{t("Keep questions and replies together with your AfricMade account.")}</p> : null}
         </div>
         {client && emergencyWhatsApp ? <a className="btn secondary" href={emergencyWhatsApp} target="_blank" rel="noreferrer">{t("Emergency WhatsApp")}</a> : operations ? <Link className="small-btn" href="/dashboard/support/agents">{t("Workload & availability")}</Link> : null}
       </div>
@@ -88,7 +88,7 @@ export default async function SupportInbox({
             <input id="support-attachment" name="attachment" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" />
             <small>{t("One JPEG, PNG, WebP, or PDF up to 5 MB.")}</small>
           </div>
-          <div className="field full"><button className="btn brand">{t("Send to MirtPage support")}</button></div>
+          <div className="field full"><button className="btn brand">{t("Send to AfricMade support")}</button></div>
         </form>
       ) : (
         <CollectionToolbar action="/dashboard/support" hidden={{queue,...(!activeView?{status}:{})}} search={view.q || ""} placeholder={t("Conversation, business, or reference")} activeFilters={activeView?false:Boolean(view.q)}>

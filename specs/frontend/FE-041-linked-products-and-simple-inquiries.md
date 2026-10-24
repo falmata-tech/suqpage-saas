@@ -2,13 +2,56 @@
 id: FE-041
 title: Linked product pages and simple single or grouped inquiries
 status: in_progress
-related: [FE-074, FE-066, FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, DEP-030, FE-042, FE-049, FE-053, BE-044, FE-075]
+related: [FE-074, FE-066, FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, BE-014, DEP-030, DEP-051, FE-042, FE-049, FE-053, BE-044, FE-075, FE-070]
 owners: [product, frontend, security]
-last_updated: 2026-10-20
+last_updated: 2026-10-23
 change_level: L2
 ---
 
 # FE-041 — Linked products, simpler inquiries and search beside the map
+
+## S173 — one product page for individual and business buyers (ready)
+
+AfricMade centers goods made in Africa while welcoming both B2C and B2B
+buyers. A merchant can state whether a listed product is offered as individual
+items, bulk orders, both, or has no declared order size. This is a merchant
+declaration, not a platform verification, stock promise or checkout rule.
+Existing products have no declared order size until their merchant edits them;
+industry, price, minimum order and product kind never silently infer a tag.
+
+GIVEN an authorized owner or staff member edits a product on web or native WHEN
+they save its order-size choice, unit, optional minimum order, typical lead time,
+capacity and short highlights THEN the same tenant-scoped versioned upkeep
+stores those fields. Older clients that omit the new fields preserve existing
+values. A forged or cross-tenant edit cannot alter another business's facts.
+
+GIVEN a buyer opens a product on web or native WHEN the merchant has entered
+order-size and other facts THEN the order-size badges, price (when supplied),
+supply status, unit and merchant-entered facts are easy to scan before the
+description and inquiry actions. Empty facts add no empty labels. Long facts
+wrap on 320px screens and remain readable in English, Amharic and Afaan Oromo.
+
+GIVEN a buyer selects one item or a larger order WHEN they inquire THEN the
+existing optional quantity, selected product/options and channel choice remain.
+Order-size tags and product facts do not create a required quantity, minimum,
+lead-time question or purchase restriction; the buyer can add details at the
+message destination.
+
+BE-014 owns the additive catalog/snapshot/wire contract. A guarded additive
+database migration precedes any web or native release using the new column.
+Tests cover old-client preservation, tenant isolation, snapshot round-trip,
+native projection and the simple inquiry. Browser review covers web phone,
+desktop and Expo owner/buyer tasks. No origin eligibility gate is added.
+
+## S172 — rebrand without changing the enquiry journey
+
+FE-070 changes platform identity and the short prepared message, not this
+workflow. GIVEN a visitor selects products and optionally enters a quantity WHEN
+they choose AfricMade Inbox, WhatsApp, Telegram or copy THEN the same channel
+selection, editable message step and product links remain. The draft contains
+only selected product information and a simple availability question; it never
+adds an unrequested pricing or lead-time prompt. Retain the established “Add to
+inquiry list” and “Send inquiry” labels so the list and send actions stay clear.
 
 ## S153 N09 — reachable floating inquiry actions without viewport obstruction
 

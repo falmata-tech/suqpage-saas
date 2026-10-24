@@ -8,6 +8,7 @@ import { inquiryEligible, productSellingUnit } from "@/lib/product-inquiry";
 import { offeringNoun, productSupplyLabel } from "@/lib/offerings";
 import { formatEtbPrice } from "@/lib/offering-presentation";
 import { productMedia } from "@/lib/product-media";
+import {orderScopeLabels} from "@/lib/order-scope";
 import ProductMediaGallery from "./ProductMediaGallery";
 import styles from "./ProductPage.module.css";
 
@@ -34,9 +35,15 @@ export default function ProductPage({ product, backHref, onBack, onAdd, onInquir
         {product.category_name ? <span className={styles.category}>{product.category_name}</span> : null}
         <h2 ref={heading} tabIndex={-1}>{product.name}</h2>
         <div className={styles.priceRow}><strong>{product.price_minor !== null ? formatEtbPrice(product.price_minor) : t("Ask for price")}</strong>{unit ? <span>{unit}</span> : null}</div>
+        {orderScopeLabels(product.order_scope).length ? <ul className={styles.orderTags} aria-label={t("Order sizes")}>{orderScopeLabels(product.order_scope).map(label=><li key={label}>{t(label)}</li>)}</ul> : null}
+        <p className={styles.availability}>{t(productSupplyLabel(product.offering_kind, product.availability))}</p>
+        {(product.minimum_order_summary || product.lead_time_summary || product.capacity_summary) ? <dl className={styles.facts}>
+          {product.minimum_order_summary ? <div><dt>{t("Minimum order")}</dt><dd>{product.minimum_order_summary}</dd></div> : null}
+          {product.lead_time_summary ? <div><dt>{t("Typical lead time")}</dt><dd>{product.lead_time_summary}</dd></div> : null}
+          {product.capacity_summary ? <div><dt>{t("Supply capacity")}</dt><dd>{product.capacity_summary}</dd></div> : null}
+        </dl> : null}
         {product.description ? <p className={styles.description}>{product.description}</p> : null}
         {product.highlights.length ? <ul className={styles.features} aria-label={t("Highlights")}>{product.highlights.map(feature => <li key={feature}><Check size={14} aria-hidden="true" />{feature}</li>)}</ul> : null}
-        <p className={styles.availability}>{t(productSupplyLabel(product.offering_kind, product.availability))}</p>
         {product.option_groups?.some(group => group.values.length > 1) ? <div className={styles.options}>{product.option_groups.filter(group => group.values.length > 1).map(group => <label key={group.id}><span>{group.name}</span><select value={options[group.name] || ""} onChange={e => setOptions(current => ({ ...current, [group.name]: e.target.value }))}>{group.values.map(value => <option key={value.id}>{value.value}</option>)}</select></label>)}</div> : null}
         <div className={styles.actions}>
           <div>

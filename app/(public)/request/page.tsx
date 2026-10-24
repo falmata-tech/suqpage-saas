@@ -8,7 +8,7 @@ import SignupForm from "@/components/SignupForm";
 import { supabaseAuthEnabled } from "@/lib/config";
 import { currentSupabaseProviderIdentity } from "@/lib/supabase-auth";
 
-export const metadata = { title: "Set up your business", description: "Add your business and contact details to MirtPage." };
+export const metadata = { title: "Set up your business", description: "Add your business and contact details to AfricMade." };
 
 export default async function RequestPage() {
   const t = await getUiText();

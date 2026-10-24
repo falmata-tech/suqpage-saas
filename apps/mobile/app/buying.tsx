@@ -13,7 +13,7 @@ import {clientChatPresentation} from '../../../lib/support-client-state';
 import type {OwnerTransportCommand,OwnerTransportConversation,OwnerTransportState} from '../../../lib/owner-transport-contract';
 import TransportCoordinator from "../src/TransportCoordinator";
 import {TRANSPORT_COORDINATOR} from "../../../lib/transport-coordinator";
-import {estimateServerNow,formatTransportElapsed,transportLiveWait} from "../../../lib/transport-live-wait";
+import {estimateServerNow,formatTransportRemaining,transportLiveWait} from "../../../lib/transport-live-wait";
 type TransportConversation=Buying|OwnerTransportConversation;
 // A single in-memory return draft survives a web-stack remount. Never store it
 // on disk, in navigation URLs, or across a different actor/chat identity.
@@ -309,7 +309,7 @@ export default function BuyingScreen({owner=false,conversationId,newIntake=false
         {callbackMode?<View style={conversationLayout.callback}>
           {callbackSubmitted? <>
             <Copy big heading>{t(TRANSPORT_COPY.callbackReceivedHeading)}</Copy>
-            <Copy>{t(TRANSPORT_COPY.callbackReceived)}</Copy>
+            <Copy>{t(TRANSPORT_COPY.callbackReceived,{value1:TRANSPORT_COORDINATOR.name})}</Copy>
             <View style={conversationLayout.callbackDetails}>
               {!!conversation.transportCallback?.phone&&<Copy>{t(TRANSPORT_COPY.callbackPhone)}: {conversation.transportCallback.phone}</Copy>}
               {!!conversation.transportCallback?.email&&<Copy>{t(TRANSPORT_COPY.callbackEmail)}: {conversation.transportCallback.email}</Copy>}
@@ -317,13 +317,13 @@ export default function BuyingScreen({owner=false,conversationId,newIntake=false
             <Copy muted>{conversation.publicRef}</Copy>
             <Button secondary label={t('Send another request')} onPress={()=>void anotherChat()}/>
           </>:<>
-            <Copy big heading>{t(TRANSPORT_COPY.callbackHeading)}</Copy>
+            <Copy big heading>{t(TRANSPORT_COPY.callbackHeading,{value1:TRANSPORT_COORDINATOR.name})}</Copy>
             <Copy muted>{t(TRANSPORT_COPY.callbackDescription)}</Copy>
             <Field label={t(TRANSPORT_COPY.callbackPhone)} value={callbackPhone} onChangeText={setCallbackPhone} keyboardType="phone-pad" autoComplete="tel" maxLength={40}/>
             <Field label={t(TRANSPORT_COPY.callbackEmail)} value={callbackEmail} onChangeText={setCallbackEmail} keyboardType="email-address" autoComplete="email" maxLength={254}/>
             {!!error&&<Status error={error}/>}
             <Button label={t(busy?'Sending…':TRANSPORT_COPY.callbackSubmit)} disabled={busy||checking||!callbackPhone.trim()} onPress={()=>void submitCallback()}/>
-            <Button secondary label={t('Cancel request')} disabled={busy||checking} onPress={()=>void send('close')}/>
+            <Button secondary label={t(TRANSPORT_COPY.tryLater)} disabled={busy||checking} onPress={()=>void send('close')}/>
           </>}
         </View>:<>
         <View style={conversationLayout.statusRow}>
@@ -332,16 +332,15 @@ export default function BuyingScreen({owner=false,conversationId,newIntake=false
               <Text style={conversationLayout.company} accessibilityLabel={TRANSPORT_COORDINATOR.name}>{TRANSPORT_COORDINATOR.shortName}</Text>
               <Copy muted>{conversation.publicRef}</Copy>
             </View>
-            <Copy>{t(checking ? "Checking…" : !connected ? "Reconnecting…" : liveWait?.phase==='busy'?TRANSPORT_COPY.busyStatus:presentation!.awaitingTeam ? TRANSPORT_COPY.waitingStatus : presentation!.statusKey)}</Copy>
-            {liveWait?.phase==='busy'?<Copy muted>{t(TRANSPORT_COPY.elapsed,{value1:formatTransportElapsed(liveWait.elapsedMs,locale)})}</Copy>:null}
+            <Copy>{t(checking ? "Checking…" : !connected ? "Reconnecting…" : (liveWait?.phase==='waiting'||liveWait?.phase==='busy')&&presentation!.awaitingTeam ? TRANSPORT_COPY.waitingStatus : presentation!.statusKey,{value1:TRANSPORT_COORDINATOR.name})}</Copy>
+            {(liveWait?.phase==='waiting'||liveWait?.phase==='busy')?<Copy>{t(TRANSPORT_COPY.countdown,{value1:formatTransportRemaining(liveWait.elapsedMs,locale)})}</Copy>:null}
             {!checking&&connected&&presentation?.joined&&<Copy>{t(presentation.joined.key,presentation.joined.values)}</Copy>}
           </View>
           {conversation.status!=='closed'&&<View style={conversationLayout.endAction}>
             <Button secondary wrapLabel disabled={busy||checking} label={t('End chat')} onPress={()=>void send('close')}/>
           </View>}
         </View>
-        {liveWait?.phase==='waiting'&&presentation?.awaitingTeam&&!checking?<Copy muted>{t(TRANSPORT_COPY.waiting,{value1:TRANSPORT_COORDINATOR.name})}</Copy>:null}
-        {liveWait?.phase==='busy'?<Copy muted>{t(TRANSPORT_COPY.busy)}</Copy>:null}
+        {(liveWait?.phase==='waiting'||liveWait?.phase==='busy')&&presentation?.awaitingTeam&&!checking?<Copy muted>{t(TRANSPORT_COPY.waiting,{value1:TRANSPORT_COORDINATOR.name})}</Copy>:null}
         {!checking&&connected&&idle.warning?<Copy>{t('This chat will end soon. Send a message to keep it open.')}</Copy>:null}
         <ChatReadTranscript identity={`${scope}:${conversation.publicRef}`} active={!checking&&connected&&!callbackMode} onRead={async messageId=>{if(!live.current||scopeRef.current!==scope)return;if(owner){if(!('id'in conversation))throw Error('Support could not be updated.');await ownerRequest('owner/transport',{action:'read',conversationId:conversation.id,messageId,publicRef:conversation.publicRef} satisfies OwnerTransportCommand);}else await request('transport',{buyingToken:token,body:{action:'read',messageId,publicRef:conversation.publicRef}});}}>
           <ScrollView ref={transcriptRef} style={[conversationLayout.transcript,shortViewport&&conversationLayout.shortTranscript]} scrollEnabled={!shortViewport} contentContainerStyle={conversationLayout.transcriptContent} keyboardShouldPersistTaps="handled" scrollEventThrottle={100} onScroll={event=>{const {contentOffset,contentSize,layoutMeasurement}=event.nativeEvent;transcriptNearBottom.current=contentOffset.y+layoutMeasurement.height>=contentSize.height-48;}} onContentSizeChange={()=>{if(!shortViewport&&transcriptNearBottom.current)requestAnimationFrame(()=>transcriptRef.current?.scrollToEnd({animated:false}));}}>

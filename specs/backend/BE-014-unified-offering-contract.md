@@ -2,13 +2,30 @@
 id: BE-014
 title: Tenant-scoped unified offering contract
 status: done
-related: [BE-037, BE-001, BE-007, BE-008, BE-009, BE-013, BE-015, FE-016, DEP-012, BE-056]
+related: [BE-037, BE-001, BE-007, BE-008, BE-009, BE-013, BE-015, FE-016, FE-041, DEP-012, DEP-051, BE-056]
 owners: [product, backend, security]
 last_updated: 2026-09-21
 change_level: L3
 ---
 
 # BE-014 — Tenant-scoped unified offering contract
+
+## S173 — declared order size and visible merchant facts (planned)
+
+The additive `order_scope` product field accepts only `unspecified`, `single`,
+`bulk`, or `both`. Old rows and old snapshots default to `unspecified`; no
+merchant claim is inferred from minimum-order prose. Current snapshots include
+the field, historical snapshots remain readable, and restored publications keep
+the declaration. The mobile offering projection includes the same declaration
+and optional unit, highlights, minimum-order, lead-time and capacity facts.
+Versioned tenant-locked upkeep validates them; an older web/native client that
+omits them preserves the canonical fields. No fact changes inquiry acceptance.
+
+GIVEN an old product without a declaration WHEN it is projected or restored
+THEN no single/bulk badge is shown. GIVEN a merchant saves `both` WHEN that
+product appears on web and native THEN both order-size badges appear without
+requiring a buyer to choose one. A rejected value or cross-tenant edit changes
+neither product nor publication.
 
 ## Problem and outcome
 

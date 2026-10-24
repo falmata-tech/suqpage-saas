@@ -124,12 +124,12 @@ test('linked products offer a prepared message and first-party inbox contact',as
     const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('heading',{name:'Inquire about this product',exact:true})).toBeVisible();
     await expect(dialog.getByRole('button',{name:'Copy message',exact:true})).toBeVisible();
-    await dialog.getByRole('button',{name:'Send to MirtPage Inbox',exact:true}).click();
-    await expect(dialog.getByRole('textbox',{name:'Your message',exact:true})).toHaveValue(/I'd like to ask about:/);
+    await dialog.getByRole('button',{name:'Send to AfricMade Inbox',exact:true}).click();
+    await expect(dialog.getByRole('textbox',{name:'Your message',exact:true})).toHaveValue(/I'm interested in:/);
     await expect(dialog.getByRole('textbox',{name:'Your name',exact:true})).toBeVisible();
     await expect(dialog.getByRole('textbox',{name:'Phone number',exact:true})).toBeVisible();
     await dialog.getByRole('button',{name:'Copy message',exact:true}).click();
-    await expect(dialog.getByRole('textbox',{name:'Your message',exact:true})).toHaveValue(/I'd like to ask about:/);
+    await expect(dialog.getByRole('textbox',{name:'Your message',exact:true})).toHaveValue(/I'm interested in:/);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
     await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);
   }

@@ -109,7 +109,7 @@ export function Sheet({
     </Modal>
   );
 }
-export function LanguageOptions() {
+export function LanguageOptions({onSelect}: {onSelect?: () => void} = {}) {
   const { locale, setLocale } = useApp();
   return (
     <View style={{ gap: 4 }}>
@@ -118,7 +118,7 @@ export function LanguageOptions() {
           key={l}
           accessibilityRole="radio"
           accessibilityState={{ checked: locale === l }}
-          onPress={() => setLocale(l)}
+          onPress={() => { setLocale(l); onSelect?.(); }}
           style={c.menuRow}
         >
           <Text style={c.menuText}>{languageNames[l]}</Text>
@@ -167,7 +167,7 @@ export function AppHeader({ back = false }: { back?: boolean }) {
         title={t("Language")}
         onClose={() => setLanguage(false)}
       >
-        <LanguageOptions />
+        <LanguageOptions onSelect={() => setLanguage(false)} />
       </Sheet>
     </View>
   );
@@ -198,7 +198,7 @@ export function MoreSheet({
         <Icon name="arrow" size={18} />
       </Pressable>
       <Text style={c.sectionLabel}>{t("Language")}</Text>
-      <LanguageOptions />
+      <LanguageOptions onSelect={onClose} />
       <Text style={c.sectionLabel}>{t("Information")}</Text>
       {[
         ["Privacy", "/privacy"],
@@ -232,7 +232,7 @@ export function BuyingLauncher({ compact = false }: { compact?: boolean }) {
       {unread>0&&<Text accessibilityElementsHidden style={{position:'absolute',right:4,top:3,backgroundColor:'white',color:colors.brand,borderRadius:12,minWidth:20,paddingHorizontal:5,fontSize:12,fontWeight:'700',textAlign:'center'}}>{unread>99?'99+':unread}</Text>}
       <View style={{flex:1,minWidth:0,gap:3}}>
         <Text style={[c.buyingText,{lineHeight:17},compact&&{fontSize:12}]}>{t(TRANSPORT_COPY.launcherTitle)}</Text>
-        <Text style={[c.buyingSmall,{lineHeight:16}]}>{t(TRANSPORT_COPY.launcherSubtitle)}</Text>
+        {!compact&&<Text style={[c.buyingSmall,{lineHeight:16}]}>{t(TRANSPORT_COPY.launcherSubtitle)}</Text>}
       </View>
     </Pressable>
   );

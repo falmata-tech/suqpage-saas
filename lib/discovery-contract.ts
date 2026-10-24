@@ -1,5 +1,5 @@
 export const PRODUCTION_SCALES = [
-  { key: "workshop", label: "Workshop / producer" },
+  { key: "workshop", label: "Workshop / supplier" },
   { key: "growing_factory", label: "Growing factory" },
 ] as const;
 

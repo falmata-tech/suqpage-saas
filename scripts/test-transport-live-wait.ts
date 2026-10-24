@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {estimateServerNow,formatTransportElapsed,transportLiveWait,TRANSPORT_BUSY_AFTER_MS,TRANSPORT_INBOX_AFTER_MS} from '../lib/transport-live-wait';
+import {estimateServerNow,formatTransportElapsed,formatTransportRemaining,transportLiveWait,TRANSPORT_BUSY_AFTER_MS,TRANSPORT_INBOX_AFTER_MS} from '../lib/transport-live-wait';
 
 test('S162: assigned customer wait shows busy at 2:00 and inbox handoff at 3:30 exactly',()=>{
   const start=1_800_000_000_000,snapshot={status:'open',waitStartedAt:start};
@@ -33,4 +33,14 @@ test('S162: reconnecting preserves the server clock and the same open inbox stat
   assert.equal(transportLiveWait({status:'open',waitStartedAt:serverNow},serverNow+210_000).phase,'inbox');
   assert.equal(transportLiveWait({status:'closed',waitStartedAt:serverNow},serverNow+500_000).phase,'closed');
   assert.equal(transportLiveWait({status:'open',waitStartedAt:null},serverNow+500_000).phase,'waiting','Missing timestamps fail safe; they never auto-submit or prematurely hand off');
+});
+
+test('FE-019 S174: the live wait counts down from the server clock and never displays zero early',()=>{
+  const start=1_800_000_000_000;
+  for(const [elapsed,expected] of [[0,'03:30'],[120_000,'01:30'],[209_999,'00:01'],[210_000,'00:00']] as const){
+    assert.equal(formatTransportRemaining(elapsed,'en'),expected);
+    assert.equal(formatTransportRemaining(transportLiveWait({status:'open',waitStartedAt:start},start+elapsed).elapsedMs,'en'),expected);
+  }
+  assert.equal(formatTransportRemaining(-1000,'en'),'03:30');
+  assert.equal(formatTransportRemaining(300_000,'en'),'00:00');
 });

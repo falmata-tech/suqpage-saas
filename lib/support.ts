@@ -40,7 +40,7 @@ export const PUBLIC_SUPPORT_CATEGORIES: ReadonlyArray<{
   label: string;
   description: string;
 }> = [
-  { key: "general", label: "MirtPage help or report", description: "Ask how MirtPage works or report a concern about a listing." },
+  { key: "general", label: "AfricMade help or report", description: "Ask how AfricMade works or report a concern about a listing." },
   { key: "buying_assistance", label: "Buying assistance", description: "Get help checking a seller, checking product quality, or making a purchase." },
   { key: "shipment_observation", label: "Transport arrangements", description: "Ask for help connecting with a transport option for a purchase." },
 ] as const;
@@ -383,7 +383,7 @@ async function insertSupportAttachment(messageId: number, value: ReturnType<type
 function assistanceCategory(value: unknown): SupportAssistanceCategory {
   const category = cleanText(value, 40) as SupportAssistanceCategory;
   if (!PUBLIC_SUPPORT_CATEGORIES.some((option) => option.key === category)) {
-    throw new SupportError("Choose how MirtPage can help.", "category_required");
+    throw new SupportError("Choose how AfricMade can help.", "category_required");
   }
   return category;
 }
@@ -812,7 +812,7 @@ export async function createSupportConversation(
         public_ref,participant_kind,business_id,opened_by_user_id,
         assistance_category,requester_label,subject,status,
         created_at,updated_at,last_message_at
-      ) VALUES(?,'client',?,?, 'general','MirtPage client',?,'waiting',?,?,?) RETURNING id
+      ) VALUES(?,'client',?,?, 'general','AfricMade client',?,'waiting',?,?,?) RETURNING id
     `, [publicRef, user.business_id, user.id, subject, now, now, now]);
     const conversationId = Number(result!.id);
     const messageResult = await runtimeGet<{ id: number }>(`
@@ -914,7 +914,7 @@ export async function createPublicSupportConversation(
   const key = idempotency(input.idempotencyKey);
   const attachment = supportAttachment(input.attachment);
   if (callback && attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
-  if (!message) throw new SupportError("Write a message for the MirtPage team.", "message_required");
+  if (!message) throw new SupportError("Write a message for the AfricMade team.", "message_required");
 
   const token = preparedToken ? publicSupportToken(preparedToken) : crypto.randomBytes(32).toString("base64url");
   const tokenHash = hashPrivateValue(`public-support:${token}`);
@@ -1037,7 +1037,7 @@ export async function getPublicSupportConversation(token: unknown, now = Date.no
     messages: (callbackDue?[]:messages).map((message) => ({
       id: message.id,
       sender: message.sender_kind === "visitor" ? "visitor" as const : "staff" as const,
-      senderName: message.sender_kind === "visitor" ? "You" : message.sender_name || "MirtPage support",
+      senderName: message.sender_kind === "visitor" ? "You" : message.sender_name || "AfricMade support",
       body: message.body,
       createdAt: message.created_at,
       attachment: isCallbackRequest(row.assistance_category) ? null : attachmentView(message),
@@ -1165,7 +1165,7 @@ export async function postPublicSupportMessage(
   const body = cleanText(input.message, 4000);
   const key = idempotency(input.idempotencyKey);
   const attachment = supportAttachment(input.attachment);
-  if (!body) throw new SupportError("Write a message for the MirtPage team.", "message_required");
+  if (!body) throw new SupportError("Write a message for the AfricMade team.", "message_required");
   const { row, tokenHash } = await requirePublicConversation(token, now);
   if (isCallbackRequest(row.assistance_category) && attachment) throw new SupportError("These requests do not accept attachments.", "invalid_attachment");
   if (row.status === "closed") throw new SupportError("This conversation is closed.", "closed");

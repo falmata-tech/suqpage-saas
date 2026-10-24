@@ -11,7 +11,7 @@
   ],
   "artworkStatus": "owner_approved_logo_and_feature_graphics_exported_actual_android_screenshots_pending",
   "icon": {
-    "sourceCandidate": "apps/mobile/assets/icon.png",
+    "sourceCandidate": "docs/play-store/mirtpage/assets/icon.png",
     "file": "docs/play-store/mirtpage/assets/icon.png",
     "approved": true
   },

@@ -1,14 +1,13 @@
 import assert from 'node:assert/strict';
 import { getDb, closeDbForTests } from './testing/postgres-fixture';
 import { migratePostgresDatabase } from '../lib/postgres-migrations';
-import { LATEST_POSTGRES_MIGRATION_VERSION } from '../lib/postgres-schema-version';
 
 async function main() {
   const db = await getDb();
   try {
     const schema = String((await db.prepare('SELECT current_schema() name').get()).name);
     assert.match(schema, /^suqpage_test_[a-f0-9]{32}$/);
-    assert.equal(LATEST_POSTGRES_MIGRATION_VERSION, 77);
+    assert.equal((await db.prepare('SELECT version FROM schema_migrations WHERE version=77').get())?.version, 77);
     const names = ['owner_auth_session_fences', 'owner_email_change_requests'];
     const metadata = async () => db.prepare(`SELECT c.relname,c.relrowsecurity,c.relacl::text acl
       FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace

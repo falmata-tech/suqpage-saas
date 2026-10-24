@@ -117,12 +117,11 @@ try {
   await page.getByRole("tab", { name: "More", exact: true }).click();
   await expect(button("Sign in")).toBeVisible();
   await page.getByRole("radio", { name: "አማርኛ", exact: true }).click();
-  await page.keyboard.press("Escape");
   await capture("native-market-amharic");
   await noOverflow();
   await page.getByRole("button", { name: "ቋንቋ", exact: true }).click();
   await page.getByRole("radio", { name: "English", exact: true }).click();
-  await button("Close").last().click();
+  if (await button("Close").last().isVisible()) await button("Close").last().click();
   checks.push("More account/language menu and Amharic shell");
   for (const [width, height] of [
     [320, 640],

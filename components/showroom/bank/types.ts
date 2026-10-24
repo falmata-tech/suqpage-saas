@@ -51,6 +51,7 @@ export type BankProductView = {
   availability: BankAvailability;
   offeringKind: OfferingKind;
   quantityMode: QuantityMode;
+  orderScope?: "unspecified" | "single" | "bulk" | "both";
   capacitySummary: string;
   minimumOrderSummary: string;
   leadTimeSummary: string;

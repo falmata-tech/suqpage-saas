@@ -1,21 +1,25 @@
 import assert from "node:assert/strict";
 import {test} from "node:test";
 import vm from "node:vm";
+import fs from "node:fs";
 import {build} from "esbuild";
 import type {Offering,Shop} from "@suqpage/contracts";
 import {TRANSPORT_COPY} from "../lib/i18n/transport-copy";
 import {publicTransportPlacement} from "../lib/public-transport-placement";
 
 type Node = {type: string | ((props: Record<string, unknown>) => unknown);props: Record<string, unknown> & {children?: unknown}};
-const webPublic = ["/", "/discover", "/featured", "/about", "/privacy", "/terms", "/contact-success", "/@merchant", "/@missing-showroom", "/tracking", "/tracking/SHP-AAAAAAAAAAAAAAAAAAAA"];
-const nativePublic = ["/featured", "/about", "/shop/merchant", "/shop/missing-showroom", "/product", "/inquiry"];
+const webPublic = ["/", "/discover", "/featured", "/privacy", "/terms", "/contact-success", "/@merchant", "/@missing-showroom", "/tracking", "/tracking/SHP-AAAAAAAAAAAAAAAAAAAA"];
+const nativePublic = ["/featured", "/shop/merchant", "/shop/missing-showroom", "/product", "/inquiry"];
 const excluded = ["/account", "/account-deletion", "/login", "/request", "/setup", "/owner/setup", "/owner/page", "/owner/support", "/owner/settings", "/owner/chat", "/dashboard", "/dashboard/profile", "/dashboard/support", "/dashboard/admin/staff", "/buying", "/blocked-businesses", "/invite/token", "/api/public-support", "/unknown-private-screen"];
 
 test("FE-036 public transport placement is explicit and excludes account, staff, setup and conversation routes", () => {
   for (const route of webPublic) assert.equal(publicTransportPlacement(route, "web"), "shell", route);
   for (const route of nativePublic) assert.equal(publicTransportPlacement(route, "native"), "shell", route);
   assert.equal(publicTransportPlacement("/", "native"), "market", "Market retains its existing handle-safe placement");
-  assert.equal(publicTransportPlacement("/about/", "native"), "shell");
+  assert.equal(publicTransportPlacement("/about/", "native"), null);
+  assert.equal(publicTransportPlacement("/about", "web"), null);
+  assert.match(fs.readFileSync('components/AboutAudience.tsx','utf8'),/href="\/\?chat=transport"/);
+  assert.match(fs.readFileSync('apps/mobile/app/(tabs)/about.tsx','utf8'),/router\.navigate\('\/buying'\)/);
   for (const platform of ["web", "native"] as const) {
     for (const route of [...excluded, "https://example.test/about", "/owner/../about", "/@merchant/private", "/shop/merchant/private"]) {
       assert.equal(publicTransportPlacement(route, platform), null, `${platform} ${route}`);

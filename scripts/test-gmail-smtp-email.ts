@@ -15,7 +15,7 @@ const hosted={
 };
 const code:TrackingEmail={deliveryId:7,recipientEmail:'recipient@example.test',locale:'en',kind:'code',code:'123456'};
 const alert:SupportEscalationEmail={notificationId:81,recipientEmail:'admin@example.test',publicRef:'SUP-QA126',queue:'transport',assignedStaffName:'Current agent',dashboardUrl:'https://mirtpage.com/dashboard/support/42?queue=transport&status=overdue',language:'en'};
-const message:GmailSmtpMessage={recipientEmail:'recipient@example.test',subject:'Your MirtPage code',text:'Code: 123456',deliveryKey:'suqpage-tracking-7'};
+const message:GmailSmtpMessage={recipientEmail:'recipient@example.test',subject:'Your AfricMade code',text:'Code: 123456',deliveryKey:'suqpage-tracking-7'};
 
 test('ADR-0031 selects Gmail explicitly and refuses unknown selections without a Resend fallback',async()=>{
   const actualBoundary=platformEnvironment({MIRTPAGE_TRANSACTIONAL_EMAIL_PROVIDER:'gmail-smtp',MIRTPAGE_SMTP_USER:'owner@gmail.com',MIRTPAGE_SMTP_APP_PASSWORD:'abcdefghijklmnop'});
@@ -59,7 +59,7 @@ test('ADR-0031 Gmail adapter pins TLS, sender and stable Message-ID without prov
   assert.equal(settings[0].logger,false);assert.equal(settings[0].debug,false);
   assert.equal(settings[0].disableFileAccess,true);assert.equal(settings[0].disableUrlAccess,true);
   assert.equal(settings[0].connectionTimeout,4000);assert.equal(settings[0].socketTimeout,4000);
-  assert.deepEqual(messages[0].from,{name:'MirtPage',address:'owner@gmail.com'});
+  assert.deepEqual(messages[0].from,{name:'AfricMade',address:'owner@gmail.com'});
   assert.deepEqual(messages[0].to,{address:message.recipientEmail});
   assert.equal(messages[0].messageId,'<suqpage-tracking-7@mirtpage.com>');
   assert.deepEqual(messages[0],messages[1]);

@@ -14,8 +14,8 @@ Notifications.setNotificationHandler({handleNotification:async notification=>{
 }});
 export async function notificationDevice(){
   if(Platform.OS==='android'){
-    await Notifications.setNotificationChannelAsync('suqpage-alerts',{name:'MirtPage',importance:Notifications.AndroidImportance.HIGH,sound:'default',vibrationPattern:[0,120]});
-    await Notifications.setNotificationChannelAsync('suqpage-alerts-quiet',{name:'MirtPage · quiet',importance:Notifications.AndroidImportance.DEFAULT,sound:null,enableVibrate:false});
+    await Notifications.setNotificationChannelAsync('suqpage-alerts',{name:'AfricMade',importance:Notifications.AndroidImportance.HIGH,sound:'default',vibrationPattern:[0,120]});
+    await Notifications.setNotificationChannelAsync('suqpage-alerts-quiet',{name:'AfricMade · quiet',importance:Notifications.AndroidImportance.DEFAULT,sound:null,enableVibrate:false});
   }
   const permission=await Notifications.requestPermissionsAsync();if(permission.status!=='granted')throw new Error('Could not enable notifications. Try again.');
   const projectId=Constants.expoConfig?.extra?.eas?.projectId||Constants.easConfig?.projectId;

@@ -64,14 +64,14 @@ export function buildSocialInquiryMessage(
   items: SocialInquiryItem[], origin: string, t: UiText = createUiText({}),
 ): string {
   const products=items.filter(item=>!item.service);
-  if(products.length===0)return [t("Hello {value1},",{value1:business.name}),"",t("Could you tell me what products are available and how I can order?"),"",`${origin.replace(/\/$/,"")}/@${encodeURIComponent(business.handle)}`].join("\n");
+  if(products.length===0)return [t("Hello {value1},",{value1:business.name}),"",t("I'd like to ask about your products."),"",`${origin.replace(/\/$/,"")}/@${encodeURIComponent(business.handle)}`].join("\n");
   return [t("Hello {value1},", { value1: business.name }), "",
-    t("I'd like to ask about:"), ...products.flatMap((item, index) => [
+    t("I'm interested in:"), ...products.flatMap((item, index) => [
       `${index + 1}. ${item.name}`,
       ...Object.entries(item.options).map(([name, value]) => `   ${name}: ${value}`),
       ...(item.quantity.trim() ? [`   ${t(item.service ? "Request" : "Quantity")}: ${item.quantity.trim()}`] : []),
       `   ${origin.replace(/\/$/, "")}${productHref(business.handle, item.id)}`,
-    ]), "", t("Are these available, and how can I order?")].join("\n");
+    ]), "", t("Are these available?")].join("\n");
 }
 export function buildInquiryMessage(business: Pick<Business, "name" | "handle">, selections: InquirySelection[], origin: string, t?: UiText): string {
   return buildSocialInquiryMessage(business, selections.filter(line => isPublicProduct(line.product)).map(line => ({

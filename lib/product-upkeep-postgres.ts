@@ -12,6 +12,7 @@ import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
 import { parseOfferingHighlightsJson } from "./offering-presentation";
 import type { Product, SessionUser } from "./types";
 import { isPublicProduct } from "./offerings";
+import { readOrderScope } from "./order-scope";
 import { currentBusinessAuthority } from './staff-business-authority';
 
 type StoredCommand = {
@@ -81,6 +82,7 @@ async function validateProspectiveSnapshot(command: BasicProductCommand, imageRe
       availability: command.availability,
       offeringKind: command.offeringKind,
       quantityMode: command.quantityMode,
+      orderScope: command.orderScope,
       capacitySummary: command.capacitySummary,
       minimumOrderSummary: command.minimumOrderSummary,
       leadTimeSummary: command.leadTimeSummary,
@@ -108,6 +110,7 @@ async function validateProspectiveSnapshot(command: BasicProductCommand, imageRe
       availability: command.availability,
       offeringKind: command.offeringKind,
       quantityMode: command.quantityMode,
+      orderScope: command.orderScope,
       capacitySummary: command.capacitySummary,
       minimumOrderSummary: command.minimumOrderSummary,
       leadTimeSummary: command.leadTimeSummary,
@@ -155,11 +158,12 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
           offeringKind: command.offeringKind,
           quantityMode: existing?.quantity_mode ?? "optional",
           categoryId: existing?.category_id ?? null,
-          quantityUnit: existing?.quantity_unit ?? "",
-          highlights: parseOfferingHighlightsJson(existing?.highlights_json),
-          capacitySummary: existing?.capacity_summary ?? "",
-          minimumOrderSummary: existing?.minimum_order_summary ?? "",
-          leadTimeSummary: existing?.lead_time_summary ?? "",
+          orderScope: command.updateSellingFacts ? command.orderScope : readOrderScope(existing?.order_scope),
+          quantityUnit: command.updateSellingFacts ? command.quantityUnit : existing?.quantity_unit ?? "",
+          highlights: command.updateSellingFacts ? command.highlights : parseOfferingHighlightsJson(existing?.highlights_json),
+          capacitySummary: command.updateSellingFacts ? command.capacitySummary : existing?.capacity_summary ?? "",
+          minimumOrderSummary: command.updateSellingFacts ? command.minimumOrderSummary : existing?.minimum_order_summary ?? "",
+          leadTimeSummary: command.updateSellingFacts ? command.leadTimeSummary : existing?.lead_time_summary ?? "",
         };
       }
       await validateStructure(command);
@@ -200,12 +204,12 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
           `INSERT INTO products(
             business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,
             availability,offering_kind,quantity_mode,capacity_summary,minimum_order_summary,
-            lead_time_summary,video_ref,price_minor,currency,quantity_unit,highlights_json,is_published,sort_order
-          ) VALUES(?,NULL,?,?,?,'',?,?,?,?,?,?,?,?,?,?,'ETB',?,?,1,?) RETURNING id`,
+            lead_time_summary,video_ref,price_minor,currency,quantity_unit,highlights_json,order_scope,is_published,sort_order
+          ) VALUES(?,NULL,?,?,?,'',?,?,?,?,?,?,?,?,?,?,'ETB',?,?,?,1,?) RETURNING id`,
           [command.businessId, command.categoryId, command.name, slug!, command.description, imageRef,
             command.availability, command.offeringKind, command.quantityMode, command.capacitySummary,
             command.minimumOrderSummary, command.leadTimeSummary, command.videoRef, command.priceMinor,
-            command.quantityUnit, JSON.stringify(command.highlights), Number(order?.next_order || 0)],
+            command.quantityUnit, JSON.stringify(command.highlights), command.orderScope, Number(order?.next_order || 0)],
         );
         productId = inserted!.id;
       } else {
@@ -213,12 +217,12 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
         const changed = await runtimeRun(
           `UPDATE products SET collection_id=CASE WHEN ?=1 THEN collection_id ELSE NULL END,category_id=?,name=?,description=?,image_path=?,
             availability=?,offering_kind=?,quantity_mode=?,capacity_summary=?,minimum_order_summary=?,
-            lead_time_summary=?,video_ref=?,price_minor=?,currency='ETB',quantity_unit=?,highlights_json=?
+            lead_time_summary=?,video_ref=?,price_minor=?,currency='ETB',quantity_unit=?,highlights_json=?,order_scope=?
            WHERE id=? AND business_id=?`,
           [Number(Boolean(command.preserveMetadata)), command.categoryId, command.name, command.description, imageRef, command.availability,
             command.offeringKind, command.quantityMode, command.capacitySummary, command.minimumOrderSummary,
             command.leadTimeSummary, command.videoRef, command.priceMinor, command.quantityUnit,
-            JSON.stringify(command.highlights), productId, command.businessId],
+            JSON.stringify(command.highlights), command.orderScope, productId, command.businessId],
         );
         if (changed.changes !== 1) throw new ProductUpkeepError("The product changed while saving.", 409, "write_conflict");
       }

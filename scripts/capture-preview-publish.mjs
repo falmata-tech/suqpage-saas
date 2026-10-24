@@ -29,7 +29,7 @@ try{
  let previousLocale='en';
  for(const locale of ['am','om','so','ti','en']){
   const oldT=createUiText(previousLocale==='en'?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${previousLocale}.json`,'utf8'))),t=createUiText(locale==='en'?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,'utf8')));
-  await page.getByRole('button',{name:oldT('Language'),exact:true}).click();await page.getByRole('radio',{name:languageNames[locale],exact:true}).click();await page.getByRole('button',{name:t('Close'),exact:true}).last().click();
+  await page.getByRole('button',{name:oldT('Language'),exact:true}).click();await page.getByRole('radio',{name:languageNames[locale],exact:true}).click();if(await page.getByRole('button',{name:t('Close'),exact:true}).last().isVisible()) await page.getByRole('button',{name:t('Close'),exact:true}).last().click();
   await expect(page.getByRole('button',{name:t('Publish'),exact:true})).toBeVisible();await expect(page.getByRole('button',{name:t('Edit'),exact:true})).toBeVisible();await shot(page,'private-preview-'+locale,320);
   await page.getByRole('button',{name:t('Publish'),exact:true}).click();await expect(page.getByRole('button',{name:t('Publish page'),exact:true})).toBeDisabled();await shot(page,'unfinished-review-'+locale,320);await page.getByRole('button',{name:t('Cancel'),exact:true}).click();previousLocale=locale;
  }

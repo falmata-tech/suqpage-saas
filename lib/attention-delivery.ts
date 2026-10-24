@@ -39,8 +39,8 @@ function payload(r:PayloadRow):PushPayload{
   const item:AttentionItem={id:r.id,kind:r.kind,channel:r.assistance_category==='shipment_observation'?'transport':'support',createdAt:r.created_at,read:false,destination};
   const t=createUiText(catalogs[parseLocale(r.language)]);
   // The legacy browser worker treats this title as a protocol token. New web
-  // workers display MirtPage; Expo renders its canonical title directly.
-  return {notificationId:r.id,title:r.subscription_kind==='expo'?'MirtPage':'Suqpage',body:t(attentionLabel(item)),destination,scope:visitor?'visitor':'user',silent:!r.sound_enabled};
+  // workers display AfricMade; Expo renders its canonical title directly.
+  return {notificationId:r.id,title:'AfricMade',body:t(attentionLabel(item)),destination,scope:visitor?'visitor':'user',silent:!r.sound_enabled};
 }
 
 /** Bounded leased dispatch. Provider acceptance never means a person received/read it. */

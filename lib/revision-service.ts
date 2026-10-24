@@ -467,7 +467,7 @@ export async function decideRevision(
     .slice(0, 1000);
   if (decision === "reject" && comment.length < 5) {
     throw new RevisionError(
-      "Tell MirtPage what should change in at least 5 characters.",
+      "Tell AfricMade what should change in at least 5 characters.",
     );
   }
   return runtimeTransaction(async () => {
@@ -628,8 +628,8 @@ async function replaceCanonicalCatalog(
             business_id,collection_id,category_id,name,slug,eyebrow,description,
             image_path,availability,offering_kind,quantity_mode,capacity_summary,
             minimum_order_summary,lead_time_summary,video_ref,price_minor,currency,
-            quantity_unit,highlights_json,is_published,sort_order
-          ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id`,
+            quantity_unit,highlights_json,order_scope,is_published,sort_order
+          ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id`,
       [
           businessId,
           item.collectionKey ? collectionIds.get(item.collectionKey) || null : null,
@@ -650,6 +650,7 @@ async function replaceCanonicalCatalog(
           item.currency,
           item.quantityUnit,
           JSON.stringify(item.highlights),
+          item.orderScope || "unspecified",
           item.published ? 1 : 0,
           item.sortOrder,
       ],

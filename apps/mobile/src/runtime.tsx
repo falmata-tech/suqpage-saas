@@ -246,7 +246,7 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
         if(denied){accountEntryRequested.current=false;setAccountEntryActor(null);}
         setAuthIssue(error instanceof ApiFailure && error.status === 403
           ? "Staff accounts sign in on the website."
-          : denied ? "Sign in to MirtPage." : "Unable to connect. Please try again.");
+          : denied ? "Sign in to AfricMade." : "Unable to connect. Please try again.");
         if (denied) await signOut(true).catch(() => {});
       })
       .finally(() => {if (current) setReady(true);});
@@ -254,11 +254,11 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
   }, [candidate, validationRevision, signOut]);
   const ownerRequest = useCallback(
     async <T,>(path: string, body?: unknown, form?: FormData) => {
-      if (logoutFence.current) throw new ApiFailure("Sign in to MirtPage.", 401);
+      if (logoutFence.current) throw new ApiFailure("Sign in to AfricMade.", 401);
       if (!auth) throw new ApiFailure("Sign-in is not configured.", 503);
       const { data } = await auth.auth.getSession();
-      if (logoutFence.current) throw new ApiFailure("Sign in to MirtPage.", 401);
-      if (!data.session) throw new ApiFailure("Sign in to MirtPage.", 401);
+      if (logoutFence.current) throw new ApiFailure("Sign in to AfricMade.", 401);
+      if (!data.session) throw new ApiFailure("Sign in to AfricMade.", 401);
       try {
         return await request<T>(path, { body, form, token: data.session.access_token });
       } catch (error) {

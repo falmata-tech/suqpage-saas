@@ -96,7 +96,7 @@ export default function Account() {
     <Screen>
       {!session ? (
         <>
-          <Copy big heading>{t("Sign in to MirtPage.")}</Copy>
+          <Copy big heading>{t("Sign in to AfricMade.")}</Copy>
           <Copy muted>
             {t(
               "Use your email to sign in or create an account.",
@@ -179,7 +179,7 @@ export default function Account() {
           )}
         </>
       )}
-      {!session&&<><Button secondary label={t("About MirtPage")} onPress={()=>router.navigate("/about")}/>
+      {!session&&<><Button secondary label={t("About AfricMade")} onPress={()=>router.navigate("/about")}/>
       <Button secondary label={t("Privacy")} onPress={()=>void openLink(API+"/privacy")}/>
       <Button secondary label={t("Terms")} onPress={()=>void openLink(API+"/terms")}/></>}
     </Screen>

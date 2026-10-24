@@ -216,10 +216,10 @@ test('FE-065 queued router state cannot let local persistence overwrite incoming
 
 test('FE-065 S143 no information overlay and ordinary About return preserve both unsent queries',async t=>{
  const {page,errors}=await boot(t,{url:'/?view=map&b.q=Workshop&p.q=Cup'});
- await expect(page.getByRole('heading',{name:'MirtPage Market',exact:true})).toHaveClass('sr-only');
+ await expect(page.getByRole('heading',{name:'AfricMade Market',exact:true})).toHaveClass('sr-only');
  const businesses=page.getByRole('button',{name:'Business locations',exact:true}),products=page.getByRole('button',{name:'Product listings',exact:true});
  await expect(businesses).toHaveAttribute('aria-pressed','true');await expect(products).toBeVisible();
- await expect(page.getByRole('button',{name:'About MirtPage',exact:true})).toHaveCount(0);await expect(page.locator('dialog')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'About AfricMade',exact:true})).toHaveCount(0);await expect(page.locator('dialog')).toHaveCount(0);
  await page.getByRole('button',{name:'Open About',exact:true}).click();await expect(page.getByRole('heading',{name:'/about',exact:true})).toBeVisible();await page.getByRole('button',{name:'Return Market',exact:true}).click();
  await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');await products.click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');await businesses.click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');assert.deepEqual(errors,[]);
 });

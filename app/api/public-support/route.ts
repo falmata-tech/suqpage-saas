@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       if(body.action!=='read')scheduleAttentionDelivery();
       return privateJson({ conversation: await channelConversation(token, channel) });
     }
-    if (body.action !== "start" || body.category !== (channel === "transport" ? "shipment_observation" : "buying_assistance")) throw new SupportError("Choose how MirtPage can help.", "invalid_channel");
+    if (body.action !== "start" || body.category !== (channel === "transport" ? "shipment_observation" : "buying_assistance")) throw new SupportError("Choose how AfricMade can help.", "invalid_channel");
     const created = await createPublicSupportConversation({
       category: body.category,
       coordinatorId:body.coordinatorId,

@@ -1,28 +1,21 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-// Brand contracts cover current surfaces, not historical docs or provider IDs.
+// Old package names are protocol identities. Rendered labels must use AfricMade.
 const activeFiles = ["app", "components"].flatMap((root) => fs.readdirSync(root, { recursive: true })
   .filter((file) => /\.(tsx?|css)$/.test(file)).map((file) => `${root}/${file}`));
-const violations = [];
-for (const file of activeFiles) {
-  const source=fs.readFileSync(file, "utf8");
-  const retiredVisibleLabels=[...source.matchAll(/(["'`])([^"'`\n]*\bSuq[Pp]age\b[^"'`\n]*)\1/g)]
-    .map(match=>match[2]).filter(value=>!value.startsWith("X-Suqpage-"));
-  if (/AfricMade/.test(source)||retiredVisibleLabels.length) violations.push(file);
+const visibleOldBrand=[];
+for(const file of activeFiles){
+ const source=fs.readFileSync(file,"utf8");
+ if(/(?:aria-label|alt|title|description)=[{]?[^\n]*\b(?:MirtPage|Suq[Pp]age)\b/.test(source))visibleOldBrand.push(file);
 }
-
-assert.deepEqual(violations, [], `retired platform identity remains in: ${violations.join(", ")}`);
+assert.deepEqual(visibleOldBrand,[],`Old customer-facing brand remains in: ${visibleOldBrand.join(", ")}`);
 assert.equal(JSON.parse(fs.readFileSync("package.json", "utf8")).name, "suqpage-saas-mvp");
-assert.ok(fs.existsSync("public/brand/mirtpage-panels-mark.svg"));
 assert.ok(fs.existsSync("SUQPAGE-MASTER-PROMPT.md"));
-const mark = fs.readFileSync("public/brand/mirtpage-panels-mark.svg", "utf8").toLowerCase();
-assert.match(mark, /<title id="title">mirtpage<\/title>/);
-assert.ok(mark.includes("#ff4b00"));
-const brand = fs.readFileSync("components/MirtPageBrand.tsx", "utf8");
-assert.match(brand, /aria-label=\{t\("MirtPage home"\)\}/);
-assert.match(brand, /PLATFORM_BRAND\.wordmark\.leading/);
-assert.match(brand, /PLATFORM_BRAND\.wordmark\.trailing/);
-assert.match(fs.readFileSync("components/SuqpageBrand.tsx", "utf8"),/export \{ default \} from "\.\/MirtPageBrand"/);
+assert.ok(fs.existsSync("public/brand/africmade-afro-mark-v1.png"));
+const brand=fs.readFileSync("components/AfricMadeBrand.tsx","utf8");
+assert.match(brand,/aria-label=\{t\("AfricMade home"\)\}/);
+assert.match(brand,/PLATFORM_BRAND\.assets\.wordmark/);
+assert.match(fs.readFileSync("components/SuqpageBrand.tsx","utf8"),/export \{ default \} from "\.\/AfricMadeBrand"/);
 const platformStyles = ["app/globals.css", "app/landing.css", "app/discovery.css"]
   .map((file) => fs.readFileSync(file, "utf8").toLowerCase())
   .join("\n");
@@ -57,4 +50,4 @@ for (const file of ["app/(public)/[handle]/page.tsx", "app/preview/[handle]/page
   assert.match(source, /runtimePublishedPage\([^\n]+\|\| initialBusinessProfile\(catalog\)/);
   assert.match(source, /businessProfile=\{profile\}/);
 }
-console.log("MirtPage identity and shared public/preview renderer contracts passed; technical package identity retained.");
+console.log("AfricMade identity and shared public/preview renderer contracts passed; technical package identity retained.");

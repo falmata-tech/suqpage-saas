@@ -12,14 +12,14 @@ export function signingFingerprint(value: string): string {
   return normalized;
 }
 function validateMetadata(value:AndroidArtifactMetadata,policy:AndroidSigningPolicy,certificate:string){
-  if(value.packageName!==policy.packageName)throw Error('APK package does not match the MirtPage app.');
+  if(value.packageName!==policy.packageName)throw Error('APK package does not match the AfricMade app.');
   if(!Number.isSafeInteger(value.versionCode)||value.versionCode<1||value.versionCode>2147483647)throw Error('APK version code is invalid.');
   if(value.debuggable!==false)throw Error('Debug APKs must not be distributed as releases.');
   if(value.certificateSha256.length!==1||signingFingerprint(value.certificateSha256[0])!==certificate)throw Error('APK signing certificate does not match the reviewed policy.');
 }
 /** Admission compares inspected artifacts, never client-claimed version/signature snapshots. */
 export function validateAndroidRelease(candidate:AndroidArtifactMetadata,policy:AndroidSigningPolicy,previous:AndroidArtifactMetadata|null,firstCanonicalRelease=false){
-  if(policy.packageName!=='com.mirtpage.app'||!policy.certificateSha256)throw Error('Verify and pin the MirtPage signing certificate before distribution.');
+  if(policy.packageName!=='com.mirtpage.app'||!policy.certificateSha256)throw Error('Verify and pin the AfricMade signing certificate before distribution.');
   const certificate=signingFingerprint(policy.certificateSha256);
   validateMetadata(candidate,policy,certificate);
   if(previous){

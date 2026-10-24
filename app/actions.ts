@@ -17,6 +17,8 @@ import { stageUploadedImage, type StagedImage } from "@/lib/media";
 import { updateInquiryStatus } from "@/lib/inquiry-status-runtime";
 import { isStrongPassword } from "@/lib/passwords";
 import { ProductUpkeepError } from "@/lib/product-upkeep-domain";
+import { readOrderScope } from "@/lib/order-scope";
+import { parseOfferingHighlightsJson } from "@/lib/offering-presentation";
 import { OwnerPageError } from "@/lib/owner-page-domain";
 import { executeBasicProductUpkeep } from "@/lib/product-upkeep";
 import { runtimeProductUpkeepPort } from "@/lib/product-upkeep-runtime";
@@ -180,6 +182,7 @@ const productFormFields = new Set([
   "availability",
   "offeringKind",
   "quantityMode",
+  "orderScope",
   "capacitySummary",
   "minimumOrderSummary",
   "leadTimeSummary",
@@ -258,7 +261,7 @@ async function saveBasicProductUpkeep(formData:FormData,focused:boolean):Promise
       if(uploaded.size!==files.length)throw new ProductUpkeepError("An uploaded photo is missing from the gallery.");
       media=parseProductMedia(entries);
     }
-    const previous=productId?await runtimeGet<{capacity_summary:string;minimum_order_summary:string;lead_time_summary:string}>("SELECT capacity_summary,minimum_order_summary,lead_time_summary FROM products WHERE id=? AND business_id=?",[productId,businessId]):undefined;
+    const previous=productId?await runtimeGet<{capacity_summary:string;minimum_order_summary:string;lead_time_summary:string;order_scope:string;quantity_unit:string;highlights_json:string}>("SELECT capacity_summary,minimum_order_summary,lead_time_summary,order_scope,quantity_unit,highlights_json FROM products WHERE id=? AND business_id=?",[productId,businessId]):undefined;
     const optionText=String(formData.get("optionGroups")||"[]");
     if(optionText.length>25000)throw new ProductUpkeepError("Product options are too long.");
     const priceInput=text(formData,"priceEtb",40);
@@ -270,6 +273,7 @@ async function saveBasicProductUpkeep(formData:FormData,focused:boolean):Promise
       ...(formData.has("optionGroups")?{optionGroups:JSON.parse(optionText)}:{}),
       ...(formData.has("isPublished")?{isPublished:formData.get("isPublished")==="1"}:{}),
       preserveMetadata:user.access_role==="client",
+      updateSellingFacts:formData.has("orderScope") || formData.has("quantityUnit") || formData.has("highlights"),
       ...(focused&&user.access_role==='client'&&formData.has('availability')&&formData.has('isPublished')?{updateListingState:true}:{}),
       kind:text(formData,"kind",20),
       businessId,
@@ -281,12 +285,13 @@ async function saveBasicProductUpkeep(formData:FormData,focused:boolean):Promise
       availability:text(formData,"availability",30)||"available",
       ...(formData.has("offeringKind")?{offeringKind:text(formData,"offeringKind",40)}:{}),
       quantityMode:text(formData,"quantityMode",20)||"optional",
+      orderScope:formData.has("orderScope")?text(formData,"orderScope",20):readOrderScope(previous?.order_scope),
       capacitySummary:formData.has("capacitySummary")?text(formData,"capacitySummary",180):previous?.capacity_summary||"",
       minimumOrderSummary:formData.has("minimumOrderSummary")?text(formData,"minimumOrderSummary",140):previous?.minimum_order_summary||"",
       leadTimeSummary:formData.has("leadTimeSummary")?text(formData,"leadTimeSummary",140):previous?.lead_time_summary||"",
       priceMinor:priceValue===null?null:Math.round(priceValue*100),
-      quantityUnit:text(formData,"quantityUnit",40),
-      highlights:text(formData,"highlights",485).split(/\r?\n/),
+      quantityUnit:formData.has("quantityUnit")?text(formData,"quantityUnit",40):previous?.quantity_unit||"",
+      highlights:formData.has("highlights")?text(formData,"highlights",485).split(/\r?\n/):parseOfferingHighlightsJson(previous?.highlights_json),
       videoRef:videoInput?await resolveProductVideoUrl(videoInput):"",
       categoryId:int(formData,"categoryId")||null,
       imageAction:hasFile?"replace":removeImage?"remove":"keep",

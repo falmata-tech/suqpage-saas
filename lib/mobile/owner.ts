@@ -21,6 +21,7 @@ import {
 } from "../product-media";
 import type { StagedImage } from "../media";
 import {isPublicProduct} from '../offerings';
+import {readOrderScope} from '../order-scope';
 export async function ownerHome(actor: SessionUser & { business_id: number }) {
   const [catalog, draft, publication, contacts] = await Promise.all([
     runtimeCatalogByBusinessId(actor.business_id, true),
@@ -83,6 +84,12 @@ export async function saveNativeProduct(
     "idempotencyKey",
     "isPublished",
     "media",
+    "orderScope",
+    "quantityUnit",
+    "highlights",
+    "minimumOrderSummary",
+    "leadTimeSummary",
+    "capacitySummary",
   ]);
   const catalog = await runtimeCatalogByBusinessId(actor.business_id, true);
   if (!catalog) throw new MobileError("Business not found.", 404);
@@ -122,13 +129,15 @@ export async function saveNativeProduct(
         isPublished: b.isPublished,
         media,
         preserveMetadata: true,
+        updateSellingFacts: ["orderScope","quantityUnit","highlights","minimumOrderSummary","leadTimeSummary","capacitySummary"].some(field => Object.hasOwn(b,field)),
         updateListingState: true,
         quantityMode: old?.quantity_mode || "optional",
-        capacitySummary: old?.capacity_summary || "",
-        minimumOrderSummary: old?.minimum_order_summary || "",
-        leadTimeSummary: old?.lead_time_summary || "",
-        quantityUnit: old?.quantity_unit || "",
-        highlights: [],
+        orderScope: b.orderScope === undefined ? readOrderScope(old?.order_scope) : b.orderScope,
+        capacitySummary: b.capacitySummary === undefined ? old?.capacity_summary || "" : b.capacitySummary,
+        minimumOrderSummary: b.minimumOrderSummary === undefined ? old?.minimum_order_summary || "" : b.minimumOrderSummary,
+        leadTimeSummary: b.leadTimeSummary === undefined ? old?.lead_time_summary || "" : b.leadTimeSummary,
+        quantityUnit: b.quantityUnit === undefined ? old?.quantity_unit || "" : b.quantityUnit,
+        highlights: b.highlights === undefined ? old?.highlights || [] : b.highlights,
         videoRef: old?.video_ref || "",
         categoryId: old?.category_id || null,
         imageAction: "keep",

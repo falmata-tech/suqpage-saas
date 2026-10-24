@@ -8,6 +8,7 @@ import LoadingBar from "@/components/LoadingBar";
 import ProductMediaFields from "@/components/ProductMediaFields";
 import ProductOptionsFields from "@/components/ProductOptionsFields";
 import type { Catalog, Product } from "@/lib/types";
+import {isOrderScope} from "@/lib/order-scope";
 import type {OwnerEditResult} from "@/lib/owner-edit-contract";
 import useFormExitGuard from "./useFormExitGuard";
 import {
@@ -74,6 +75,10 @@ export default function ProductForm({
   );
   const [quantityUnit, setQuantityUnit] = useState(product?.quantity_unit || "");
   const [highlights, setHighlights] = useState((product?.highlights || []).join("\n"));
+  const [orderScope, setOrderScope] = useState(product?.order_scope || "unspecified");
+  const [minimumOrderSummary, setMinimumOrderSummary] = useState(product?.minimum_order_summary || "");
+  const [leadTimeSummary, setLeadTimeSummary] = useState(product?.lead_time_summary || "");
+  const [capacitySummary, setCapacitySummary] = useState(product?.capacity_summary || "");
   const [imagePreview, setImagePreview] = useState(product?.image_path || "");
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   return (
@@ -138,7 +143,15 @@ export default function ProductForm({
         />
       </div>
 
-      {staffMode ? <>
+      <div className="field">
+        <label htmlFor="product-order-scope">{t("Order sizes")}</label>
+        <select id="product-order-scope" name="orderScope" value={orderScope} onChange={event => { if(isOrderScope(event.target.value)) setOrderScope(event.target.value); }}>
+          <option value="unspecified">{t("Ask me about order size")}</option>
+          <option value="single">{t("Single items")}</option>
+          <option value="bulk">{t("Bulk orders")}</option>
+          <option value="both">{t("Single items and bulk orders")}</option>
+        </select>
+      </div>
       <div className="field">
         <label htmlFor="product-unit">{t("Offered by")}{" "}<span className="optional">{t("(optional)")}</span></label>
         <input
@@ -164,7 +177,18 @@ export default function ProductForm({
         <small>{t("Up to six highlights, each 80 characters or fewer.")}</small>
       </div>
 
-      </> : null}
+      <div className="field">
+        <label htmlFor="product-minimum-order">{t("Minimum order")} <span className="optional">{t("(optional)")}</span></label>
+        <input id="product-minimum-order" name="minimumOrderSummary" maxLength={140} value={minimumOrderSummary} onChange={event => setMinimumOrderSummary(event.target.value)} />
+      </div>
+      <div className="field">
+        <label htmlFor="product-lead-time">{t("Typical lead time")} <span className="optional">{t("(optional)")}</span></label>
+        <input id="product-lead-time" name="leadTimeSummary" maxLength={140} value={leadTimeSummary} onChange={event => setLeadTimeSummary(event.target.value)} />
+      </div>
+      <div className="field full">
+        <label htmlFor="product-capacity">{t("Supply capacity")} <span className="optional">{t("(optional)")}</span></label>
+        <input id="product-capacity" name="capacitySummary" maxLength={180} value={capacitySummary} onChange={event => setCapacitySummary(event.target.value)} />
+      </div>
 
 
 

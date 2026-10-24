@@ -61,11 +61,11 @@ for(const worker of workers){
   const f=fixture(worker.file);
   for(const title of ['Suqpage','MirtPage'])for(const silent of [false,true]){
    await f.push(payload(title,silent));
-   const shown=f.shown.at(-1);assert.equal(shown.title,'MirtPage');assert.equal(shown.options.body,'A new chat message.');
+   const shown=f.shown.at(-1);assert.equal(shown.title,'AfricMade');assert.equal(shown.options.body,'A new chat message.');
    assert.equal(shown.options.silent,silent);assert.equal(shown.options.tag,'suqpage-alert-41');assert.equal(shown.options.renotify,false);
    assert.deepEqual(JSON.parse(JSON.stringify(shown.options.data.destination)),{screen:'transport-chat'});
    if(worker.file==='public/attention-push.js'){
-    assert.equal(shown.options.icon,'/pwa/mirtpage-panels-icon-192.png');assert.equal(shown.options.badge,'/pwa/mirtpage-panels-badge-96.png');assert.equal(shown.options.data.notificationId,41);
+    assert.equal(shown.options.icon,'/pwa/africmade-icon-192.png');assert.equal(shown.options.badge,'/pwa/africmade-badge-96.png');assert.equal(shown.options.data.notificationId,41);
    }
   }
   assert.equal(f.shown.length,4);

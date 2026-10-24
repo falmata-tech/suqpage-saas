@@ -23,6 +23,7 @@ import {markerIndex,currentGroupMembers} from '../../src/map-markers';
 import {ResourceSkeleton} from '../../src/ResourceLoading';
 import {useBlockedBusinesses} from '../../src/blocked-businesses';
 import type {MapControls,MapViewpoint} from '../../src/map-contract';
+import {MARKET_STOREFRONT_COPY} from '../../../../lib/storefront-copy';
 const EMPTY_SHOPS:MapShop[]=[];
 const PANEL_EDGE=16;
 const horizontalHandleMove=({dx,dy}:{dx:number;dy:number})=>Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.3;
@@ -108,7 +109,11 @@ export default function MarketScreen() {
  function loadMore(){if(panel&&!products.moreError)products.loadMore();}
  const drawerWidth=width-PANEL_EDGE,items=blocked.ready?(products.batch?.items||[]).filter(i=>i.kind==='product'):[];
  return <Screen scroll={false}>
-  <Text accessibilityRole="header" style={m.programmaticTitle}>{t('MirtPage Market')}</Text>
+  <Text accessibilityRole="header" style={m.programmaticTitle}>{t('AfricMade Market')}</Text>
+  <View testID="market-introduction" style={m.intro}>
+   <Text accessibilityRole="header" style={m.introTitle}>{t(MARKET_STOREFRONT_COPY.title)}</Text>
+   <Text style={m.introDescription}>{t(MARKET_STOREFRONT_COPY.description)}</Text>
+  </View>
   <View testID="market-mode-row" style={m.modeRow}><View style={m.modeSwitch} accessibilityRole="tablist" accessibilityLabel={t('Search for')}>{[{key:'businesses',label:'Business locations',icon:'map'},{key:'products',label:'Product listings',icon:'package'}].map(mode=><Pressable key={mode.key} accessibilityRole="tab" accessibilityState={{selected:panel===(mode.key==='products')}} aria-selected={panel===(mode.key==='products')} onPress={()=>settlePanel(mode.key==='products')} style={[m.modeButton,panel===(mode.key==='products')&&m.activeMode]}>{width>360&&<Icon name={mode.icon} size={16}/>}<Text style={m.modeText}>{t(mode.label)}</Text></Pressable>)}</View></View>
   <View style={m.activeControls}><MarketSearchControls scope={panel?'products':'businesses'} value={panel?productSearch:businessSearch} onChange={panel?setProductSearch:setBusinessSearch} metadata={(panel?productData:businessData)||null}/>{Boolean(panel?products.error:businesses.error)&&<Status error={panel?products.error:businesses.error} retry={panel?products.retry:businesses.retry}/>}</View>
   <View testID="market-stage" style={m.stage} onLayout={e=>setStageHeight(e.nativeEvent.layout.height)}>
@@ -137,6 +142,9 @@ export default function MarketScreen() {
 }
 const m=StyleSheet.create({
  programmaticTitle:{position:'absolute',width:1,height:1,overflow:'hidden',color:'transparent'},
+ intro:{paddingHorizontal:16,paddingTop:8,paddingBottom:9,gap:3,backgroundColor:'white'},
+ introTitle:{fontSize:20,lineHeight:25,fontWeight:'800',color:colors.ink},
+ introDescription:{fontSize:13,lineHeight:18,color:colors.muted},
  modeRow:{flexDirection:'row',alignItems:'center',justifyContent:'center',paddingHorizontal:12,backgroundColor:'white'},
  modeSwitch:{maxWidth:'100%',flexShrink:1,flexDirection:'row',gap:2,backgroundColor:'#f5f7f6',borderWidth:1,borderColor:colors.line,borderRadius:10},
  modeButton:{flexShrink:1,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:6,minWidth:48,minHeight:48,paddingHorizontal:12,borderRadius:8},activeMode:{backgroundColor:colors.soft},modeText:{fontSize:12,fontWeight:'700',color:colors.ink,flexShrink:1,textAlign:'center'},

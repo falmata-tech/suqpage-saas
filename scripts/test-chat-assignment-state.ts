@@ -133,7 +133,7 @@ test("FE-019 recovery, assignment and lifecycle snapshots cannot replace a newer
     assert.equal(await page.getByText('Current agent joined your chat',{exact:true}).count(),0,'Opening must not claim cached assignment before recovery');
     const recovered=(await pending(page))[0];await resolve(page,recovered.id,caseView('SUP-NEW'));
     const fresh=(await pending(page))[0];await resolve(page,fresh.id,caseView('SUP-NEW'));
-    await page.getByText('Waiting for a SharedTrucks live agent',{exact:true}).waitFor();
+    await page.getByText('Waiting for a live agent at SharedTrucks Logistics',{exact:true}).waitFor();
     await page.keyboard.press('Escape');
     await page.waitForFunction(()=>!document.querySelector('dialog')?.hasAttribute('open'));
     await page.close();
@@ -188,7 +188,7 @@ test("FE-019 recovery, assignment and lifecycle snapshots cannot replace a newer
     await page.getByText('Checking…',{exact:true}).waitFor();
     assert.equal(await page.getByText('Initial assignee joined your chat',{exact:true}).count(),0,'Native refocus hides stale assignment until current recovery');
     await resolve(page,(await pending(page))[0].id,caseView('SUP-NATIVE'));
-    await page.getByText('Waiting for a SharedTrucks live agent',{exact:true}).waitFor();
+    await page.getByText('Waiting for a live agent at SharedTrucks Logistics',{exact:true}).waitFor();
     await page.clock.fastForward(5000);const nativeStaleGet=(await pending(page))[0];
     await page.getByRole('button',{name:'End chat',exact:true}).click();const nativePost=(await pending(page,'POST'))[0];
     assert.equal(nativePost.body?.publicRef,'SUP-NATIVE');await resolve(page,nativePost.id,caseView('SUP-NATIVE',null,'closed'));

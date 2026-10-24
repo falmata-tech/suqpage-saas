@@ -63,7 +63,7 @@ test('FE-053 actual Expo adapter uses an in-app native browser and isolated web 
  }
 });
 
-test('FE-070 native legal links follow the validated MirtPage, local or staging origin',async()=>{
+test('FE-070 native legal links follow the validated AfricMade, local or staging origin',async()=>{
  const {build}=await import('esbuild'),vm=await import('node:vm');
  for(const [raw,expected] of [[undefined,'https://mirtpage.com'],['http://127.0.0.1:3102','http://127.0.0.1:3102'],['https://preview.mirtpage.com','https://preview.mirtpage.com']] as const){
   const calls:string[]=[];
@@ -109,7 +109,7 @@ test('FE-070 native social-video WebView uses the same qualified referrer withou
   const webView=module.exports.default({id,height:260,onEvent:()=>{}}).props.children.props;
   const source=webView.source as {baseUrl:string;html:string};
   assert.equal(source.baseUrl,`${expected}/`);
-  assert.ok(source.html.includes(`"origin":"${expected}"`),'Embedded parent/referrer is the configured MirtPage origin');
+  assert.ok(source.html.includes(`"origin":"${expected}"`),'Embedded parent/referrer is the configured AfricMade origin');
   const permits=webView.onShouldStartLoadWithRequest as (request:{url:string})=>boolean;
   assert.equal(permits({url:`${expected}/`}),true);
   assert.equal(permits({url:`https://www.tiktok.com/player/v1/${id}`}),true);

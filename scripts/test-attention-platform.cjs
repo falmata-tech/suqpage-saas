@@ -2,14 +2,14 @@ const assert=require('node:assert/strict');const fs=require('node:fs');const os=
 (async()=>{
  const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'suqpage-notification-config-'));
  try{
-  const policy=require('../apps/mobile/release-policy.json'),crypto=require('node:crypto');
+  const policy=JSON.parse(fs.readFileSync('apps/mobile/release-policy.json','utf8')),crypto=require('node:crypto');
   const valid={project_info:{project_id:'suqpage',project_number:'588262779708'},client:[{client_info:{mobilesdk_app_id:policy.firebaseAndroidAppId,android_client_info:{package_name:'com.mirtpage.app'}}},{client_info:{mobilesdk_app_id:'1:588262779708:android:old-fixture',android_client_info:{package_name:'com.suqpage.app'}}}]};
   const validBytes=Buffer.from(JSON.stringify(valid));
   // A policy port admits disposable Firebase bytes while the real policy pins the reviewed provider download.
   const fixturePolicy={...policy,firebaseClientSha256:crypto.createHash('sha256').update(validBytes).digest('hex'),dataTargets:{'mirtpage-production':{apiOrigin:'https://mirtpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}}};
   const buildModule={exports:{}};vm.runInNewContext(fs.readFileSync('apps/mobile/build-config.cjs','utf8'),{module:buildModule,exports:buildModule.exports,URL,Buffer,require:id=>id==='./release-policy.json'?fixturePolicy:require(id)});
   const file=path.join(temporary,'google-services.json'),env={SUQPAGE_MOBILE_BUILD_PROFILE:'preview',EXPO_PUBLIC_API_ORIGIN:'https://mirtpage.com',SUQPAGE_MOBILE_DATA_TARGET:'mirtpage-production',EXPO_PUBLIC_SUPABASE_URL:'https://sjeiiqxgscuqajpgddcc.supabase.co',EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture_only',EXPO_PUBLIC_EAS_PROJECT_ID:policy.expoProjectId,SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED:'1',MIRTPAGE_GOOGLE_SERVICES_FILE:'',SUQPAGE_FIREBASE_PROJECT_ID:'suqpage'};
-  const run=extra=>{let stdout='';try{vm.runInNewContext(fs.readFileSync('scripts/validate-mobile-build.cjs','utf8'),{require:id=>id==='../apps/mobile/build-config.cjs'?buildModule.exports:id==='../apps/mobile/app.json'?require('../apps/mobile/app.json'):require(id),process:{env:{...env,...extra}},console:{log:value=>{stdout+=value;}}});return{status:0,stdout,stderr:''};}catch(error){return{status:1,stdout,stderr:error.message};}};
+  const run=extra=>{let stdout='';try{vm.runInNewContext(fs.readFileSync('scripts/validate-mobile-build.cjs','utf8'),{require:id=>id==='../apps/mobile/build-config.cjs'?buildModule.exports:id==='../apps/mobile/app.json'?JSON.parse(fs.readFileSync('apps/mobile/app.json','utf8')):require(id),process:{env:{...env,...extra}},console:{log:value=>{stdout+=value;}}});return{status:0,stdout,stderr:''};}catch(error){return{status:1,stdout,stderr:error.message};}};
   for(const profile of ['preview','production'])assert.notEqual(run({SUQPAGE_MOBILE_BUILD_PROFILE:profile}).status,0,'Missing Firebase source cannot claim either notification build');
   fs.writeFileSync(file,JSON.stringify({project_info:{project_id:'suqpage',project_number:'588262779708'},client:[{client_info:{mobilesdk_app_id:'1:588262779708:android:fixture',android_client_info:{package_name:'com.suqpage.app.preview'}}}]}));
   for(const profile of ['preview','production'])assert.notEqual(run({MIRTPAGE_GOOGLE_SERVICES_FILE:file,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).status,0,'Legacy preview APK package rejected in both profiles');
@@ -34,7 +34,7 @@ const assert=require('node:assert/strict');const fs=require('node:fs');const os=
    const handlers={},shown=[],opened=[];const self={location:{origin:'https://suqpage.com'},addEventListener:(kind,f)=>handlers[kind]=f,registration:{showNotification:async(...args)=>shown.push(args)},clients:{matchAll:async()=>[],openWindow:async url=>opened.push(url)}};
    vm.runInNewContext(fs.readFileSync(worker,'utf8'),{self,URL,console});
    let wait;const push=value=>{handlers.push({data:{json:()=>value},waitUntil:promise=>wait=promise});return wait;};
-   await push({title:'Suqpage',body:'New chat message',notificationId:1,destination:{screen:'transport-chat'},silent:true});assert.equal(shown.length,1);assert.equal(shown[0][0],'MirtPage');assert.equal(shown[0][1].silent,true);
+   await push({title:'Suqpage',body:'New chat message',notificationId:1,destination:{screen:'transport-chat'},silent:true});assert.equal(shown.length,1);assert.equal(shown[0][0],'AfricMade');assert.equal(shown[0][1].silent,true);
    await push({title:'Forged brand',body:'Private customer body',notificationId:2});assert.equal(shown.length,1,'Unknown payload not shown');
    const notification={data:{destination:{screen:'transport-chat'}},close(){}};handlers.notificationclick({notification,waitUntil:promise=>wait=promise});await wait;assert.ok(opened[0].startsWith('https://suqpage.com/')||opened[0].startsWith('/'));
    notification.data.destination={screen:'https://evil.example',id:1};handlers.notificationclick({notification,waitUntil:promise=>wait=promise});await wait;assert.ok(opened.every(url=>!url.includes('evil.example')),'Tap cannot become an external redirect');

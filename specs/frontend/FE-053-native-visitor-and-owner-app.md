@@ -4,11 +4,19 @@ title: Native visitor and business-owner app
 status: in_progress
 related: [FE-074, FE-066, FE-026, FE-021, FE-061, FE-060, FE-059, FE-058, FE-056, FE-051, FE-055, FE-054, BE-044, DEP-042, FE_BASE, FE-019, FE-049, ADR-0023, FE-036, FE-052, FE-057, FE-062, FE-063, FE-064, FE-065, DEP-043, BE-018, FE-067, FE-041, FE-047, BE-050, BE-023, FE-068, FE-069, BE-058, DEP-048, FE-072, BE-060, FE-073, FE-076, FE-075]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-20
+last_updated: 2026-10-23
 change_level: L3
 ---
 
 # FE-053 — Native visitor and business-owner app
+
+## S173 — compact transport entry beside product facts (ready)
+
+GIVEN a buyer opens a native product page WHEN merchant facts and order-size
+badges are visible THEN the floating transport entry uses its short title and
+truck icon without a second line covering those facts. Its full accessible
+label, route and touch size remain. The product content can scroll clear of the
+floating entry and bottom navigation.
 
 ## S166 — compact localized owner transport entry and header (in progress)
 

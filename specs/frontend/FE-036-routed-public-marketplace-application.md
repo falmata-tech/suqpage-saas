@@ -407,6 +407,12 @@ Focused routing/auth/landmark/keyboard/overflow tests and all-five-language
 1440/390/320 captures precede explicit visual approval and full gates. No migration;
 rollback restores previous UI/routes without data writes.
 
+For the AfricMade presentation, About keeps transport help reachable as an
+inline link to the existing intake. Its long buyer/supplier reading panels do
+not receive a floating launcher that covers translated text. Market, Featured,
+showrooms and product views retain their existing floating entry. Web and native
+About links must open the same transport task; neither creates a new chat API.
+
 S104 focused local evidence passes in TRACEABILITY: actual role/navigation and
 combined support/transport HTTP workflows plus desktop/phone/five-language
 captures. Visual approval, full gates, scoped commit and rollout remain pending.

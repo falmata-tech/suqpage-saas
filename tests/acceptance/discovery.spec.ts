@@ -3,7 +3,7 @@ import {test,expect} from './fixtures';
 test('FE-065 business and product searches type live, retain independent filters and clear to default browsing',async({page,request})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/');
  const business=page.getByRole('searchbox',{name:'Search businesses',exact:true});
- const map=page.getByRole('region',{name:'Interactive OpenStreetMap map with clustered MirtPage page locations',exact:true});
+ const map=page.getByRole('region',{name:'Interactive OpenStreetMap map with clustered AfricMade page locations',exact:true});
  await expect(business).toBeVisible();await expect.poll(async()=>Number(await map.getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
  await business.fill('selam');await expect.poll(async()=>Number(await map.getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
  await page.getByRole('button',{name:'Product listings',exact:true}).click();
@@ -72,7 +72,7 @@ test('FE-065 failed append preserves cards and retries one page without automati
 
 test('FE-065 centered switch and opposing handles support clicks, drag and reduced motion',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:390,height:844});await page.goto('/');
- const market=page.getByRole('main').getByRole('region',{name:'MirtPage Market',exact:true});
+ const market=page.getByRole('main').getByRole('region',{name:'AfricMade Market',exact:true});
  const stage=market.locator('.discovery-workbench'),switcher=market.getByRole('navigation',{name:'Search for',exact:true});
  const stageBox=(await stage.boundingBox())!,switchBox=(await switcher.boundingBox())!;
  expect(Math.abs(switchBox.x+switchBox.width/2-(stageBox.x+stageBox.width/2))).toBeLessThan(2);

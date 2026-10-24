@@ -12,8 +12,8 @@ export default function OfflinePage() {
     <div className="pwa-offline-panel">
       <SuqpageBrand className="pwa-offline-brand" /><LanguageSelector />
       <span>{t("You are offline")}</span>
-      <h1 id="offline-title">{t("MirtPage cannot reach the network.")}</h1>
-      <p>{t("Reconnect to refresh MirtPage pages, inquiries, and workspace information.")}</p>
+      <h1 id="offline-title">{t("AfricMade cannot reach the network.")}</h1>
+      <p>{t("Reconnect to refresh AfricMade pages, inquiries, and workspace information.")}</p>
       <Link href="/">{t("Try the marketplace again")}</Link>
     </div>
   </main>;

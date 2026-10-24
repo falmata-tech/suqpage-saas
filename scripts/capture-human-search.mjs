@@ -8,7 +8,7 @@ assert.ok(!process.argv.some(value=>value==='--actual-tiles'||value.startsWith('
 const out=process.env.SUQPAGE_SEARCH_CAPTURE_DIR||'.local/human-search-review';
 fs.mkdirSync(out,{recursive:true,mode:0o700});
 const browser=await chromium.launch();const evidence=[],tiles=[];
-const market=page=>page.getByRole('main').getByRole('region',{name:'MirtPage Market',exact:true});
+const market=page=>page.getByRole('main').getByRole('region',{name:'AfricMade Market',exact:true});
 const results=page=>market(page).getByRole('region',{name:'Products',exact:true});
 const visibleIds=page=>results(page).locator('.discovery-product-link').evaluateAll(links=>links.map(link=>Number(new URL(link.href).searchParams.get('product'))));
 async function search(context,query,category='beauty-wellness'){

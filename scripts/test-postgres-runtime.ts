@@ -144,7 +144,7 @@ async function main() {
       signupProject = { businessId: signup.businessId, userId: signup.userId };
       await assert.rejects(
         () => createPostgresPublicClientWorkspace(runner, { ...input, idempotencyKey: `again-${unique}` }, identity),
-        /already has a MirtPage workspace/,
+        /already has an AfricMade workspace/,
       );
     });
     assert.ok(signupProject);

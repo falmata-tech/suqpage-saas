@@ -34,7 +34,7 @@ async function main(){
   await visitor.locator('#public-buying-message').fill('Please deliver two chairs.');
   await visitor.locator('#public-buying-name').fill('Review visitor');await visitor.locator('#public-buying-phone').fill('+447700900999');
   await visitor.getByRole('button',{name:'Start chat',exact:true}).click();
-  await expect(visitor.getByText('Waiting for a SharedTrucks live agent',{exact:true})).toBeVisible();
+  await expect(visitor.getByText('Waiting for a live agent at SharedTrucks Logistics',{exact:true})).toBeVisible();
   const token=(await visitor.context().cookies()).find(cookie=>cookie.name==='suqpage_public_transport')?.value;assert.ok(token);
   const publicCase=await support.getPublicSupportConversation(token);
   caseId=Number((await pool.query('SELECT id FROM support_conversations WHERE public_ref=$1',[publicCase.publicRef])).rows[0].id);

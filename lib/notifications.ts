@@ -19,7 +19,7 @@ export async function notifyNewInquiry(
     ? /^[^<>\r\n]*<([^<>\r\n]+)>$/.exec(configuredFrom)?.[1]
     : configuredFrom;
   if (!apiKey || !address || !/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(address) || !business.contact_email) return "skipped";
-  const from = `Suqpage <${address}>`;
+  const from = `AfricMade <${address}>`;
   const send = options.send ?? fetch;
   try {
     const response = await send("https://api.resend.com/emails", {
@@ -29,8 +29,8 @@ export async function notifyNewInquiry(
       body: JSON.stringify({
         from,
         to: [business.contact_email],
-        subject: `New Suqpage inquiry #${inquiryId}`,
-        text: `${customerName} submitted a new inquiry to ${business.name}. Sign in to Suqpage to review it.`,
+        subject: `New AfricMade enquiry #${inquiryId}`,
+        text: `${customerName} sent an enquiry to ${business.name}. Sign in to AfricMade to review it.`,
       }),
     });
     if (!response.ok) throw new Error("provider_non_success");

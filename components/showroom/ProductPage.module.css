@@ -15,6 +15,12 @@
 .priceRow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; }
 .priceRow strong { font-size: 19px; }
 .priceRow span { padding: 5px 9px; border-radius: 5px; background: #f2f3f3; font-size: 12px; color: #515b61; }
+.orderTags { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 14px; padding: 0; list-style: none; }
+.orderTags li { padding: 7px 10px; border: 1px solid #dbc6b9; border-radius: 999px; background: #fff6f0; color: #8f340f; font-size: 13px; font-weight: 650; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 10px; margin: 12px 0 18px; }
+.facts > div { min-width: 0; padding: 10px 12px; border: 1px solid #e1e5e4; border-radius: 8px; background: #fafbfa; }
+.facts dt { font-size: 12px; font-weight: 650; color: #637079; }
+.facts dd { margin: 4px 0 0; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
 .description { font-size: 15px; line-height: 1.7; color: #515b61; white-space: pre-line; overflow-wrap: anywhere; }
 .features { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 20px 0; padding: 0; }
 .features li { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border: 1px solid #e1e5e4; border-radius: 6px; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }

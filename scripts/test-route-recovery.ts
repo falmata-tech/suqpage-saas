@@ -26,7 +26,7 @@ test('FE_BASE route/root recovery stays localized, actionable and private withou
       const button=nodes.find(n=>n.type==='button')!;assert.equal(text(button),t('Try again'));(button.props.onClick as ()=>void)();assert.equal(retried,1);
       assert.equal(nodes.find(n=>n.type==='a')?.props.href,'/');
       assert.ok(!JSON.stringify(nodes).includes('private_sql_token_contact_details'));
-      if(output.path.endsWith('global-error.js')){assert.equal(root.type,'html');assert.equal(root.props.lang,locale as Locale);assert.ok(nodes.some(n=>n.type==='title'&&text(n)==='MirtPage'));}
+      if(output.path.endsWith('global-error.js')){assert.equal(root.type,'html');assert.equal(root.props.lang,locale as Locale);assert.ok(nodes.some(n=>n.type==='title'&&text(n)==='AfricMade'));}
     }
   }
 });
