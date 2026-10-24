@@ -13,11 +13,11 @@ async function main() {
   try {
     const schema = (await db.prepare('SELECT current_schema() name').get()).name as string;
     assert.match(schema, /^suqpage_test_[a-f0-9]{32}$/);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 79);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 80);
     assert.deepEqual(
       (await db.prepare('SELECT version FROM schema_migrations WHERE version>=75 ORDER BY version').all()).map(row => Number(row.version)),
-      [75, 76, 77, 78, 79],
-      'A fresh native install includes shipment bounds, staff grants, owner email changes, and inquiry migrations in order.',
+      [75, 76, 77, 78, 79, 80],
+      'A fresh native install includes shipment bounds, staff grants, owner email changes, inquiry migrations, and product order scope in order.',
     );
     const privateTables = await db.prepare(`SELECT c.relname,c.relrowsecurity FROM pg_class c
       JOIN pg_namespace n ON n.oid=c.relnamespace

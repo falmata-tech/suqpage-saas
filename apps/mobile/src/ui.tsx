@@ -94,10 +94,10 @@ export function Brand() {
   return (
     <View style={s.row}>
       <Image
-        source={require("../assets/mirtpage-wordmark.png")}
+        source={require("../assets/africmade-wordmark.png")}
         accessibilityLabel={PLATFORM_BRAND.name}
         resizeMode="contain"
-        style={{ width: 28 * PLATFORM_BRAND.wordmark.width / PLATFORM_BRAND.wordmark.height, height: 28 }}
+        style={{ width: 34 * PLATFORM_BRAND.wordmark.width / PLATFORM_BRAND.wordmark.height, height: 34 }}
       />
     </View>
   );

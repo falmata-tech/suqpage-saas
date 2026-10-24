@@ -287,7 +287,7 @@ export async function admitRecipeImage(
     throw new ShowroomRecipeError([{
       category: "tenant_asset",
       path: "$.media.rights",
-      message: "Confirm that MirtPage may use this image for the client showroom.",
+      message: "Confirm that AfricMade may use this image for the client showroom.",
     }]);
   }
   if (!(file instanceof File) || file.size < 1) {
@@ -362,7 +362,7 @@ export async function admitRecipeYouTube(
     throw new ShowroomRecipeError([{
       category: "tenant_asset",
       path: "$.media.rights",
-      message: "Confirm that MirtPage may use this video for the client showroom.",
+      message: "Confirm that AfricMade may use this video for the client showroom.",
     }]);
   }
   const label = mediaLabel(labelInput, "video");

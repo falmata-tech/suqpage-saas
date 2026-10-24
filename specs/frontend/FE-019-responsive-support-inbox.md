@@ -10,6 +10,30 @@ change_level: L3
 
 # FE-019 - Responsive client and staff support inbox
 
+## S174 — visible live-agent countdown and provider follow-up (ready)
+
+For a Transport request that has not received an authorized Join or public
+staff reply, show the remaining time to the existing 3:30 live-chat handoff from
+the first waiting state. The timer uses the server-created wait timestamp, keeps
+counting across refresh/reconnect and never resets on reassignment. Do not tell
+the visitor that agents are busy before the timer expires; the existing 2:00
+staff overdue alert remains an internal operation. At 3:30, replace the live
+portal with a provider-named message saying its live agents are helping other
+customers, and offer a prefilled phone, optional email and a clear choice to
+try again later. Submitting retains the idempotent same-case follow-up; trying
+later closes the live request without creating a callback. The provider name is
+selected presentation data, never a claim that provider-owned staff accounts
+or routing are implemented.
+
+GIVEN a waiting visitor or owner at 0:00, 2:00 or 3:29 WHEN web or native chat
+renders THEN it shows a localized countdown to the 3:30 handoff, while the
+server's overdue alert and Join/reply semantics remain unchanged. GIVEN the
+deadline passes without Join or reply THEN both clients remove live polling,
+transcript and composer, name the selected provider in the busy message, and
+offer contact details or a way to try again later. A timely Join or reply
+removes the countdown and keeps the live conversation. Active locales retain
+the provider's literal name and readable phone-width copy.
+
 ## S168 — stable live-chat phase after a timely reply
 
 Web and Expo use the server's first public staff-reply timestamp to decide

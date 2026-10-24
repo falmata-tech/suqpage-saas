@@ -12,7 +12,7 @@ try{for(const native of clients)for(const [width,locale,height] of (short?[[390,
  console.log(`Checking ${native?'mobile':'web'} ${width} ${locale}`);
  const t=createUiText(locale==='en'?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,'utf8')));
  const context=await browser.newContext({viewport:{width,height:height||(width===1440?1000:844)}});const p=await context.newPage();p.setDefaultTimeout(20000);
- if(native){await p.goto('http://localhost:8082/buying',{waitUntil:'domcontentloaded'});if(locale!=='en'){await p.getByRole('button',{name:'Language',exact:true}).click();await p.getByRole('radio',{name:languageNames[locale],exact:true}).click();await p.getByRole('button',{name:t('Close'),exact:true}).last().click();await expect(p.getByRole('button',{name:t('Close'),exact:true})).toHaveCount(0);}}
+ if(native){await p.goto('http://localhost:8082/buying',{waitUntil:'domcontentloaded'});if(locale!=='en'){await p.getByRole('button',{name:'Language',exact:true}).click();await p.getByRole('radio',{name:languageNames[locale],exact:true}).click();if(await p.getByRole('button',{name:t('Close'),exact:true}).last().isVisible()) await p.getByRole('button',{name:t('Close'),exact:true}).last().click();await expect(p.getByRole('button',{name:t('Close'),exact:true})).toHaveCount(0);}}
  else {await context.addCookies([{name:'suqpage-language',value:locale,url:'http://127.0.0.1:3102'}]);await p.goto('http://127.0.0.1:3102/about',{waitUntil:'domcontentloaded'});await p.locator('button[data-channel=buying]').click();}
  const field=label=>p.getByRole('textbox',{name:t(label),exact:true});const submit=p.getByRole('button',{name:t('Start chat'),exact:true});
  const intakeScope=native?p:p.getByRole('dialog');

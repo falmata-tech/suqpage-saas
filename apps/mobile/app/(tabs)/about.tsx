@@ -3,6 +3,7 @@ import React, { useRef,useState,type KeyboardEvent } from "react";
 import { View, Text, Pressable,ScrollView, StyleSheet,Platform } from "react-native";
 import { router } from "expo-router";
 import { ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } from "../../../../lib/storefront-copy";
+import {TRANSPORT_COPY} from '../../../../lib/i18n/transport-copy';
 import { Screen, Button, Icon, colors, useOpenLink } from "../../src/ui";
 import { useApp } from "../../src/runtime";
 import { createMarketNavigationIntent } from "../../src/incoming-link";
@@ -17,8 +18,8 @@ export default function About() {
   function select(index:number,focus=false){setAudience(ABOUT_STOREFRONT_SECTIONS[index].id);scroll.current?.scrollTo({y:0,animated:false});if(focus)tabs.current[index]?.focus();}
   function navigate(event:KeyboardEvent<HTMLElement>,index:number){const next=event.key==='Home'?0:event.key==='End'?ABOUT_STOREFRONT_SECTIONS.length-1:event.key==='ArrowRight'?(index+1)%ABOUT_STOREFRONT_SECTIONS.length:event.key==='ArrowLeft'?(index+ABOUT_STOREFRONT_SECTIONS.length-1)%ABOUT_STOREFRONT_SECTIONS.length:null;if(next!==null){event.preventDefault();select(next,true);}}
   return <Screen scroll={false}><ScrollView ref={scroll} contentContainerStyle={[s.page,{paddingBottom:Math.max(30,bottomInset)}]}>
-    <Text accessibilityRole="header" style={s.heading}>{t("About MirtPage")}</Text>
-    <View style={s.tabs} accessibilityRole="tablist" accessibilityLabel={t('About MirtPage')}>{ABOUT_STOREFRONT_SECTIONS.map((item,index)=><Pressable key={item.id} ref={node=>{tabs.current[index]=node;}} nativeID={`about-tab-${item.id}`} accessibilityRole="tab" accessibilityState={{selected:audience===item.id}} aria-selected={audience===item.id} {...(Platform.OS==='web'?{tabIndex:audience===item.id?0:-1,'aria-controls':`about-panel-${item.id}`,onKeyDown:(event:KeyboardEvent<HTMLElement>)=>navigate(event,index)}:{})} onPress={()=>select(index)} style={[s.tab,audience===item.id&&s.selectedTab]}><Text style={s.tabText}>{t(item.label)}</Text></Pressable>)}</View>
+    <Text accessibilityRole="header" style={s.heading}>{t("About AfricMade")}</Text>
+    <View style={s.tabs} accessibilityRole="tablist" accessibilityLabel={t('About AfricMade')}>{ABOUT_STOREFRONT_SECTIONS.map((item,index)=><Pressable key={item.id} ref={node=>{tabs.current[index]=node;}} nativeID={`about-tab-${item.id}`} accessibilityRole="tab" accessibilityState={{selected:audience===item.id}} aria-selected={audience===item.id} {...(Platform.OS==='web'?{tabIndex:audience===item.id?0:-1,'aria-controls':`about-panel-${item.id}`,onKeyDown:(event:KeyboardEvent<HTMLElement>)=>navigate(event,index)}:{})} onPress={()=>select(index)} style={[s.tab,audience===item.id&&s.selectedTab]}><Text style={s.tabText}>{t(item.label)}</Text></Pressable>)}</View>
     <View key={section.id} nativeID={`about-panel-${section.id}`} testID={`about-${section.id}`} role="tabpanel" aria-labelledby={`about-tab-${section.id}`} style={[s.section, section.id === "businesses" && s.business]}>
       <Text accessibilityRole="header" style={s.title}>{t(section.title)}</Text>
       <Text style={s.intro}>{t(section.description)}</Text>
@@ -29,6 +30,7 @@ export default function About() {
       </View>)}</View>
       {section.id === "customers" && <View style={s.mapNote}><Text style={s.benefitTitle}>{t(CUSTOMER_MAP_COPY.title)}</Text><Text style={s.body}>{t(CUSTOMER_MAP_COPY.description)}</Text><Button secondary icon="map" label={t("Explore the map")} onPress={() => router.navigate(`/?view=map&_intent=${createMarketNavigationIntent()}`)} /></View>}
     </View>
+    <Button secondary icon="truck" label={t(TRANSPORT_COPY.launcherTitle)} onPress={()=>router.navigate('/buying')}/>
     <Button secondary label={t('Logistics service providers: Ask to be listed')} onPress={()=>router.navigate('/transport-partners')}/>
     <View style={{flexDirection:'row',flexWrap:'wrap',gap:10}}><Button secondary label={t('Privacy')} onPress={()=>void openLink(legalPageUrl('privacy'))}/><Button secondary label={t('Terms')} onPress={()=>void openLink(legalPageUrl('terms'))}/></View>
   </ScrollView></Screen>;

@@ -55,13 +55,13 @@ export default async function SponsorPlacementsPage({ searchParams }: {
 
   return <DashboardShell user={user} business={null}>
     <nav className="workspace-breadcrumbs" aria-label={t("Breadcrumb")}><Link href="/dashboard/admin">{t("Platform overview")}</Link><span>/</span><strong>{t("Sponsor placements")}</strong></nav>
-    <div className="dashboard-head"><div><span className="eyebrow">{t("Paid placement")}</span><h1>{t("Sponsor placements")}</h1><p>{t("Order up to five public sponsors from MirtPage pages and external advertisers. Sponsorship never changes marketplace or Daily Featured eligibility.")}</p></div><div className="inline-actions"><Link className="btn brand" href={editHref('new')}>{t('Create sponsor ad')}</Link><Link className="btn secondary" href="/featured" target="_blank">{t("View Daily Featured")}</Link></div></div>
+    <div className="dashboard-head"><div><span className="eyebrow">{t("Paid placement")}</span><h1>{t("Sponsor placements")}</h1><p>{t("Order up to five public sponsors from AfricMade pages and external advertisers. Sponsorship never changes marketplace or Daily Featured eligibility.")}</p></div><div className="inline-actions"><Link className="btn brand" href={editHref('new')}>{t('Create sponsor ad')}</Link><Link className="btn secondary" href="/featured" target="_blank">{t("View Daily Featured")}</Link></div></div>
     {query.error ? <p className="error">{t(query.error)}</p> : null}
     {query.saved ? <p className="notice">{t("Sponsor placements updated.")}</p> : null}
 
     <section className="panel sponsor-public-preview">
       <div><span className="eyebrow">{t("Currently public")}</span><h2>{t("Current sponsors")}</h2><p>{t("Up to five active sponsors appear in this order.")}</p></div>
-      {publicPlacements.length ? <ol>{publicPlacements.map((placement) => <li key={placement.id}><img src={placement.imagePath} alt=""/><span><small>{placement.kind === "showroom" ? t("MirtPage page") : t("External advertiser")}</small><strong>{placement.name}</strong><em>{t("Position")}{" "}{placement.position}</em></span></li>)}</ol> : <div className="empty-state">{t("No active sponsor placement is currently eligible.")}</div>}
+      {publicPlacements.length ? <ol>{publicPlacements.map((placement) => <li key={placement.id}><img src={placement.imagePath} alt=""/><span><small>{placement.kind === "showroom" ? t("AfricMade page") : t("External advertiser")}</small><strong>{placement.name}</strong><em>{t("Position")}{" "}{placement.position}</em></span></li>)}</ol> : <div className="empty-state">{t("No active sponsor placement is currently eligible.")}</div>}
     </section>
 
     <section className="panel">
@@ -71,7 +71,7 @@ export default async function SponsorPlacementsPage({ searchParams }: {
     </section>
 
     <section className="panel">
-      <div className="dashboard-section-head"><div><span className="eyebrow">{t("MirtPage accounts")}</span><h2>{t("Sponsor a MirtPage page")}</h2><p>{t("Find a business and choose its sponsor position.")}</p></div></div>
+      <div className="dashboard-section-head"><div><span className="eyebrow">{t("AfricMade accounts")}</span><h2>{t("Sponsor a AfricMade page")}</h2><p>{t("Find a business and choose its sponsor position.")}</p></div></div>
       <CollectionToolbar action="/dashboard/admin/sponsors" search={query.q || ""} placeholder={t("Business, handle, or location")} activeFilters={Boolean(query.q)}/>
       {businesses.items.length ? <div className="table-wrap admin-data-surface"><table className="data-table"><thead><tr><th>{t("Business")}</th><th>{t("Marketplace")}</th><th>{t("Paid placement")}</th></tr></thead><tbody>{businesses.items.map((business) => <tr key={business.businessId}>
         <td data-label="Business"><strong>{business.businessName}</strong><br/><small>@{business.handle}</small></td>

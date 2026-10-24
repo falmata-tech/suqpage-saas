@@ -21,7 +21,7 @@ export async function supportReplyForm(file:PickedSupportFile,message:string,key
 export function Attachment({conversationId,file}:{conversationId:string;file:SupportAttachment}){
  const{t}=useApp();const[busy,setBusy]=useState(false),[error,setError]=useState('');
  async function download(){setBusy(true);setError('');let local:File|undefined;try{
-  const session=await auth?.auth.getSession();if(!session?.data.session)throw Error('Sign in to MirtPage.');
+  const session=await auth?.auth.getSession();if(!session?.data.session)throw Error('Sign in to AfricMade.');
   const response=await fetch(`${API}/api/mobile/v1/owner/support/${conversationId}/attachments/${file.id}`,{headers:{Authorization:`Bearer ${session.data.session.access_token}`},signal:AbortSignal.timeout(20000)});
   if(!response.ok)throw Error('Attachment was not found.');
   if(Platform.OS==='web'){const url=URL.createObjectURL(await response.blob());const a=document.createElement('a');a.href=url;a.download=file.originalName;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}

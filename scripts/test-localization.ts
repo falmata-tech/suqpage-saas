@@ -23,11 +23,11 @@ test('FE-049 S132: enabled preferences are distinct from retained compatibility 
   assert.deepEqual(enabledLocales, ['en','am','om']);
   assert.equal(languageNames.om, 'Afaan Oromo');
 });
-test('FE-070: active MirtPage labels preserve the literal brand and compatibility identifiers', () => {
+test('FE-070: active AfricMade labels preserve the literal brand and compatibility identifiers', () => {
   for(const locale of enabledLocales){
     const t=createUiText(catalogs[locale]);
-    for(const label of ['MirtPage home','About MirtPage','Sign in to MirtPage.','MirtPage support','Delete your MirtPage account']){
-      assert.ok(t(label).includes('MirtPage'),`${locale}: ${label}`);
+    for(const label of ['AfricMade home','About AfricMade','Sign in to AfricMade.','AfricMade support','Delete your AfricMade account']){
+      assert.ok(t(label).includes('AfricMade'),`${locale}: ${label}`);
       assert.doesNotMatch(t(label),/Suqpage|SuqPage/);
       if(locale!=='en')assert.notEqual(t(label),label,`${locale}: authored interface label`);
     }
@@ -39,7 +39,7 @@ test('FE-070: active MirtPage labels preserve the literal brand and compatibilit
   });
   const channels=fs.readFileSync('apps/mobile/src/attention-platform.native.ts','utf8');
   for(const id of ['suqpage-alerts','suqpage-alerts-quiet'])assert.ok(channels.includes(id));
-  assert.ok(channels.includes("name:'MirtPage'"));
+  assert.ok(channels.includes("name:'AfricMade'"));
   assert.ok(fs.readFileSync('lib/i18n/core.ts','utf8').includes('suqpage-language'));
 });
 test('FE-070/BE-044: brand compatibility follows the scoped credential port and rejects legacy runtime wiring', () => {
@@ -72,21 +72,21 @@ test('FE-049/FE-070 S154: sign-in entry is role-neutral on web and native',async
   const {clientMessages}=await import('../lib/i18n/client-messages');
   for(const path of ['app/(public)/login/page.tsx','apps/mobile/app/(tabs)/account.tsx']){
     const source=fs.readFileSync(path,'utf8');
-    assert.match(source,/Sign in to MirtPage\./);
+    assert.match(source,/Sign in to AfricMade\./);
     assert.match(source,/Use your email to sign in or create an account\./);
     assert.doesNotMatch(source,/Your business\. Your digital showroom\.|Create a showroom for your business story|New business\? Enter your email/);
   }
   assert.match(fs.readFileSync('app/(public)/login/page.tsx','utf8'),/Enter your email to get started\./);
   for(const locale of ['am','om'] as const){
     const t=createUiText(clientMessages(catalogs[locale]));
-    for(const label of ['Sign in to MirtPage.','Use your email to sign in or create an account.']){
+    for(const label of ['Sign in to AfricMade.','Use your email to sign in or create an account.']){
       assert.notEqual(t(label),label,`${locale}: role-neutral native entry is authored`);
       assert.doesNotMatch(t(label),/ንግድ|daldal|showroom/i,'Entry copy does not restrict account access to business owners');
     }
     assert.notEqual(createUiText(catalogs[locale])('Enter your email to get started.'),'Enter your email to get started.');
   }
 });
-test('FE-070 S146: active account-deletion and staff notices keep MirtPage in Amharic and Afaan Oromo', async () => {
+test('FE-070 S146: active account-deletion and staff notices keep AfricMade in Amharic and Afaan Oromo', async () => {
   const {clientMessages}=await import('../lib/i18n/client-messages');
   const labels=[
     'Send your request from the email you use to sign in. Include your page handle, if you have one.',
@@ -97,7 +97,7 @@ test('FE-070 S146: active account-deletion and staff notices keep MirtPage in Am
     for(const label of labels){
       assert.ok(selected[messageKey(label)],`${locale}: notice reaches the web/Expo client`);
       const text=createUiText(selected)(label);
-      assert.match(text,/MirtPage/,`${locale}: active brand`);
+      assert.match(text,/AfricMade/,`${locale}: active brand`);
       assert.doesNotMatch(text,/Suqpage|SuqPage/,`${locale}: no previous brand`);
       assert.notEqual(text,label,`${locale}: authored native notice`);
     }
@@ -136,9 +136,9 @@ test('FE-049: catalogs have identical keys, no empty translations and bounded se
   assert.equal(new Set(sources.map(messageKey)).size, sources.length, 'No message-key collisions');
 });
 test('FE-049: platform branding, machine values and content boundaries stay separate', () => {
-  const brand=fs.readFileSync('components/MirtPageBrand.tsx','utf8');
+  const brand=fs.readFileSync('components/AfricMadeBrand.tsx','utf8');
   assert.ok(brand.includes('PLATFORM_BRAND'));
-  assert.ok(brand.includes('MirtPage home'));
+  assert.ok(brand.includes('AfricMade home'));
   const inquiry=fs.readFileSync('app/dashboard/inquiries/page.tsx','utf8');
   for(const value of ['new','contacted','confirmed','closed','cancelled']) assert.ok(inquiry.includes(`<option value="${value}">{t("${value}")}</option>`));
   for(const file of ['components/showroom/BusinessProfile.tsx','components/showroom/ProductPage.tsx']){
@@ -175,7 +175,7 @@ test('FE-049: server-only copy is excluded from client messages', async()=>{
   const {clientMessages}=await import('../lib/i18n/client-messages');
   const selected=clientMessages(catalogs.am);
   assert.equal(selected[messageKey('Save')],catalogs.am[messageKey('Save')]);
-  const privacy='MirtPage stores account details, showroom content, support and transport conversations, and shipment-tracking information to operate the service.';
+  const privacy='AfricMade stores account details, showroom content, support and transport conversations, and shipment-tracking information to operate the service.';
   assert.ok(catalogs.am[messageKey(privacy)]);
   assert.equal(selected[messageKey(privacy)],undefined);
   assert.ok(Object.keys(selected).length<Object.keys(catalogs.am).length);
@@ -206,17 +206,18 @@ test('FE-052: both storefront audiences and Market use complete client-safe cata
     const client = clientMessages(catalogs[locale]);
     for (const value of values) assert.ok(client[messageKey(value)], `${locale}: ${value}`);
   }
-  // FE-070 supersedes the internet-page gloss with a digital showroom concept.
+  // FE-070 presents African suppliers to both individual and business buyers.
   // Coverage checks authored meaning and client delivery, not independent fluency.
-  assert.match(MARKET_STOREFRONT_COPY.title,/local makers and suppliers/i);
-  assert.match(MARKET_STOREFRONT_COPY.description,/digital showrooms from farms, workshops, factories and shops/i);
-  assert.match(MARKET_STOREFRONT_COPY.description,/large orders or made-to-order items/i);
+  assert.match(MARKET_STOREFRONT_COPY.title,/Africa makes/i);
+  assert.match(MARKET_STOREFRONT_COPY.description,/product showrooms from farms, factories and artisans/i);
+  assert.match(MARKET_STOREFRONT_COPY.description,/without sifting through their social media posts/i);
+  assert.match(ABOUT_STOREFRONT_SECTIONS[0].benefits[0].description,/without scrolling through social posts/i);
   for (const locale of ['am','om'] as const) {
     const t=createUiText(catalogs[locale]), title=t(MARKET_STOREFRONT_COPY.title);
     assert.doesNotMatch(title,/ኢንተርኔት|intarneet|interneet/i);
-    assert.match(title,locale==='am'?/አካባቢ.*አምራቾች/:/oomishtootaa.*naannoo/);
-    assert.match(t(MARKET_STOREFRONT_COPY.description),locale==='am'?/ዲጂታል.*ማሳያ/:/agarsiisa.*dijitaalaa/);
-    assert.match(t(MARKET_STOREFRONT_COPY.description),locale==='am'?/ብዛት.*ትዕዛዝ/:/ajaja guddaa/);
+    assert.match(title,locale==='am'?/አፍሪካ.*ያግኙ/:/Afrikaa.*argadhaa/);
+    assert.match(t(MARKET_STOREFRONT_COPY.description),locale==='am'?/የምርት ማሳያ.*ማኅበራዊ ሚዲያ/:/agarsiisa oomishaa.*miidiyaa hawaasaa/);
+    assert.match(t(ABOUT_STOREFRONT_SECTIONS[0].benefits[0].description),locale==='am'?/ማኅበራዊ ሚዲያ/:/miidiyaa hawaasaa/);
     assert.notEqual(t(MARKET_STOREFRONT_COPY.description),MARKET_STOREFRONT_COPY.description);
     for(const section of ABOUT_STOREFRONT_SECTIONS){
       assert.notEqual(t(section.description),section.description);
@@ -335,11 +336,12 @@ test('FE-076 S162: transport chat copy offers route help and names the selected 
     assert.match(TRANSPORT_COPY.launcherSubtitle,/live transport agent/i);
     assert.match(TRANSPORT_COPY.description,/pickup and destination/i);
     assert.match(TRANSPORT_COPY.description,/live transport agent/i);
-    assert.doesNotMatch([TRANSPORT_COPY.launcherTitle,TRANSPORT_COPY.launcherSubtitle,TRANSPORT_COPY.description].join(' '),/Shared Trucks Freight|SharedTrucks Logistics|MirtPage.?s transport team/i);
+    assert.doesNotMatch([TRANSPORT_COPY.launcherTitle,TRANSPORT_COPY.launcherSubtitle,TRANSPORT_COPY.description].join(' '),/Shared Trucks Freight|SharedTrucks Logistics|AfricMade.?s transport team/i);
     assert.match(TRANSPORT_COPY.waiting,/live agent/i);
-    assert.match(TRANSPORT_COPY.waiting,/SharedTrucks live agent/i);
-    assert.match(TRANSPORT_COPY.busy,/helping other customers/i);
-    assert.match(TRANSPORT_COPY.callbackDescription,/contact details/i);
+    assert.match(TRANSPORT_COPY.waiting,/live agent at \{value1\}/i);
+    assert.match(TRANSPORT_COPY.countdown,/\{value1\} left/i);
+    assert.match(TRANSPORT_COPY.callbackHeading,/\{value1\}.*helping other customers/i);
+    assert.match(TRANSPORT_COPY.callbackDescription,/phone number and optional email/i);
     assert.match(TRANSPORT_COPY.callbackSubmit,/contact details/i);
     for (const source of [...Object.values(TRANSPORT_COPY), 'Goods or transport details (optional)', 'View products', 'Hide products']) {
       assert.ok(t(source).trim());
@@ -362,31 +364,33 @@ test('FE-049/FE-052 S132/S133: active copy explains products, social inquiry and
   const am=createUiText(catalogs.am),om=createUiText(catalogs.om);
   // Check the authored concepts independently of sentence order; these are
   // meaning/coverage regressions, not a claim of native-language human review.
-  assert.match(am(MARKET_STOREFRONT_COPY.title),/አካባቢ.*አምራቾች.*አቅራቢዎች/);
-  assert.match(om(MARKET_STOREFRONT_COPY.title),/oomishtootaa.*dhiheessitoota.*naannoo/);
-  for(const term of ['ምርቶች','ቅጦች','መገኘት','ማኅበራዊ ሚዲያ','በቀጥታ','ብዛት'])assert.ok(am(MARKET_STOREFRONT_COPY.description).includes(term),`am: ${term}`);
-  for(const term of ['oomishaalee','Bifa','argamaa','miidiyaa hawaasaa','kallattiin','ajaja guddaa'])assert.ok(om(MARKET_STOREFRONT_COPY.description).includes(term),`om: ${term}`);
-  // Detailed sectors/availability move to About so the hero does not take map room.
+  assert.match(am(MARKET_STOREFRONT_COPY.title),/አፍሪካ.*ያግኙ/);
+  assert.match(om(MARKET_STOREFRONT_COPY.title),/Afrikaa.*argadhaa/);
+  for(const term of ['እርሻዎችን','ፋብሪካዎችን','የእጅ ጥበበኞችን','የምርት ማሳያ','ማኅበራዊ ሚዲያ'])assert.ok(am(MARKET_STOREFRONT_COPY.description).includes(term),`am: ${term}`);
+  for(const term of ['qonnaan bultootaa','warshaalee','ogeeyyii hojii harkaa','agarsiisa oomishaa','miidiyaa hawaasaa'])assert.ok(om(MARKET_STOREFRONT_COPY.description).includes(term),`om: ${term}`);
+  assert.match(am(ABOUT_STOREFRONT_SECTIONS[0].benefits[0].description),/ማኅበራዊ ሚዲያ/);
+  assert.match(om(ABOUT_STOREFRONT_SECTIONS[0].benefits[0].description),/miidiyaa hawaasaa/);
+  // About adds supplier context beyond the compact owner-approved Market sentence.
   const amAbout=ABOUT_STOREFRONT_SECTIONS.map(section=>[section.description,...section.benefits.map(benefit=>benefit.description)].map(text=>am(text)).join(' ')).join(' ');
   const omAbout=ABOUT_STOREFRONT_SECTIONS.map(section=>[section.description,...section.benefits.map(benefit=>benefit.description)].map(text=>om(text)).join(' ')).join(' ');
-  for(const term of ['ሱቆች','ወርክሾፖች','እርሻ','ፋብሪካ','አስመጪ','መገኘት','በትዕዛዝ'])assert.ok(amAbout.includes(term),`am About: ${term}`);
-  for(const term of ['suuqii','manneen hojii harkaa','qonna','warshaa','galchitaniiti','argamaa','ajajaan'])assert.ok(omAbout.includes(term),`om About: ${term}`);
+  for(const term of ['እርሻ','ወርክሾፖች','ፋብሪካ','ከቤት','ሻጮች','ገዢዎች'])assert.ok(amAbout.includes(term),`am About: ${term}`);
+  for(const term of ['qonna','manneen hojii','warshaalee','mana keessaa','gurgurtoonni','bitattootaaf'])assert.ok(omAbout.includes(term),`om About: ${term}`);
   assert.match(am(TRANSPORT_COPY.launcherTitle),/ማጓጓዣ/);
   assert.match(om(TRANSPORT_COPY.launcherTitle),/geejjiba/i);
   for(const locale of ['am','om'] as const){
     const localized=createUiText(catalogs[locale]);
     assert.ok(localized(TRANSPORT_COPY.description).length>40);
-    assert.doesNotMatch(localized(TRANSPORT_COPY.description),/Shared Trucks Freight|MirtPage.?s transport team/i);
+    assert.doesNotMatch(localized(TRANSPORT_COPY.description),/Shared Trucks Freight|AfricMade.?s transport team/i);
     const waiting=localized(TRANSPORT_COPY.waiting);
     assert.ok(waiting.length>30);
-    assert.match(waiting,/SharedTrucks/);
-    assert.doesNotMatch(waiting,/MirtPage.?s transport team/i);
+    assert.match(waiting,/\{value1\}/);
+    assert.doesNotMatch(waiting,/AfricMade.?s transport team/i);
   }
 });
 
 test('FE-075/FE-076/FE-049 S154: received inquiries and partner interest have distinct active client copy',async()=>{
   const {clientMessages}=await import('../lib/i18n/client-messages');
-  const labels=['Send an inquiry','Choose how to contact','Send on WhatsApp','Send on Telegram','Copy contact','Select and copy the contact details.','Send to MirtPage Inbox','Your name','Phone number','Your message','Inbox','Open inquiry','Inquiry sent to the business.','The business can contact you using the phone number you provided.','Other ways to contact','For independent logistics service providers','Get listed on MirtPage','Freight brokerages, parcel express companies, and hub-and-spoke logistics operators can ask to be listed on MirtPage. Tell us about your company and we’ll contact you.','Logistics service providers: Ask to be listed','Company name','Contact name','About your company','Phone (optional)','Request received. We’ll contact you about the next steps.',"Check your name.","Check a message.","Check desired quantity.","Enter your name.","Enter a message.","A selected product is not available.","A selected product option is not available.","Choose all available product options.","Too many inquiries. Please try again later.","Too many inquiry attempts. Please try again later.","This inquiry key was already used for a different request."];
+  const labels=['Send an inquiry','Choose how to contact','Send on WhatsApp','Send on Telegram','Copy contact','Select and copy the contact details.','Send to AfricMade Inbox','Your name','Phone number','Your message','Inbox','Open inquiry','Inquiry sent to the business.','The business can contact you using the phone number you provided.','Other ways to contact','For independent logistics service providers','Get listed on AfricMade','Freight brokerages, parcel express companies, and hub-and-spoke logistics operators can ask to be listed on AfricMade. Tell us about your company and we’ll contact you.','Logistics service providers: Ask to be listed','Company name','Contact name','About your company','Phone (optional)','Request received. We’ll contact you about the next steps.',"Check your name.","Check a message.","Check desired quantity.","Enter your name.","Enter a message.","A selected product is not available.","A selected product option is not available.","Choose all available product options.","Too many inquiries. Please try again later.","Too many inquiry attempts. Please try again later.","This inquiry key was already used for a different request."];
   for(const locale of ['am','om'] as const){
     const t=createUiText(clientMessages(catalogs[locale]));
     for(const label of labels)assert.notEqual(t(label),label,`${locale}: ${label}`);
@@ -394,9 +398,9 @@ test('FE-075/FE-076/FE-049 S154: received inquiries and partner interest have di
     assert.notEqual(t('Send inquiry'),t('Start chat'),'Async business inquiry does not borrow live support chat wording');
     assert.notEqual(t('Inbox'),t('Support'),'Business inquiries remain separate from platform Support');
     assert.notEqual(t('Company name'),t('Contact name'),'Applicant company and human contact remain distinct');
-    const channels=['Send on WhatsApp','Send on Telegram','Send to MirtPage Inbox'];
+    const channels=['Send on WhatsApp','Send on Telegram','Send to AfricMade Inbox'];
     assert.equal(new Set(channels.map(label=>t(label))).size,3,'Equal choices name distinct destinations');
-    channels.forEach((label,index)=>assert.ok(t(label).includes(['WhatsApp','Telegram','MirtPage'][index]),'Destination brands stay recognizable'));
+    channels.forEach((label,index)=>assert.ok(t(label).includes(['WhatsApp','Telegram','AfricMade'][index]),'Destination brands stay recognizable'));
     const complete=createUiText(catalogs[locale]);
     assert.notEqual(complete('Inquiry details'),'Inquiry details','Server-rendered web inquiry detail remains localized');
   }
@@ -439,7 +443,7 @@ test('FE-066/FE-041 S118: inbox handoffs and device-storage failures have native
 // Child metadata replaces the entire parent Open Graph object in installed Next.
 // Exercise actual route exports so a root-only brand declaration cannot mask a
 // missing siteName on a child route. Catalog/local API components are inert ports.
-test('FE-070: localized Market and About metadata retain the explicit MirtPage Open Graph identity', async()=>{
+test('FE-070: localized Market and About metadata retain the explicit AfricMade Open Graph identity', async()=>{
   const [{build},{createRequire},{default:vm}]=await Promise.all([import('esbuild'),import('node:module'),import('node:vm')]);
   const require=createRequire(import.meta.url);
   const {MARKET_STOREFRONT_COPY}=await import('../lib/storefront-copy');
@@ -454,16 +458,16 @@ test('FE-070: localized Market and About metadata retain the explicit MirtPage O
     for(const locale of enabledLocales){
       const t=createUiText(catalogs[locale]),module={exports:{} as {generateMetadata:()=>Promise<{title:string|{absolute:string};description:string;alternates:{canonical:string};openGraph:{title:string;description:string;siteName:string;url:string;images:string[]};twitter:{title:string;description:string;card:string}}>}};
       vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,require,URL,__text:t,process:{env:{NEXT_PUBLIC_APP_URL:'https://mirtpage.test'}}});
-      const metadata=await module.exports.generateMetadata(),title=t(file.includes('/about/')?'About MirtPage':MARKET_STOREFRONT_COPY.title),description=t(MARKET_STOREFRONT_COPY.description);
+      const metadata=await module.exports.generateMetadata(),title=t(file.includes('/about/')?'About AfricMade':MARKET_STOREFRONT_COPY.title),description=t(MARKET_STOREFRONT_COPY.description);
       if(file.includes('/about/')){
         assert.equal(typeof metadata.title,'object');assert.equal((metadata.title as {absolute:string}).absolute,title);
       }else assert.equal(metadata.title,title);
       assert.equal(metadata.description,description);
-      assert.equal(metadata.openGraph.siteName,'MirtPage');assert.equal(metadata.openGraph.title,title);assert.equal(metadata.openGraph.description,description);
+      assert.equal(metadata.openGraph.siteName,'AfricMade');assert.equal(metadata.openGraph.title,title);assert.equal(metadata.openGraph.description,description);
       const path=file.includes('/about/')?'/about':'/';
       assert.equal(metadata.alternates.canonical,`https://mirtpage.test${path}`);
       assert.equal(metadata.openGraph.url,metadata.alternates.canonical);
-      assert.equal(metadata.openGraph.images[0],'https://mirtpage.test/pwa/mirtpage-panels-icon-512.png');
+      assert.equal(metadata.openGraph.images[0],'https://mirtpage.test/pwa/africmade-icon-512.png');
       assert.equal(metadata.twitter.title,title);assert.equal(metadata.twitter.description,description);
       assert.equal(metadata.twitter.card,'summary_large_image');
       assert.doesNotMatch(JSON.stringify(metadata),/Suqpage|SuqPage/);

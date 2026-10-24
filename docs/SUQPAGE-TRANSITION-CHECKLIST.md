@@ -1,4 +1,4 @@
-# MirtPage active delivery checklist
+# AfricMade active delivery checklist
 
 Current product authority: [master brief](../SUQPAGE-MASTER-PROMPT.md).
 Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
@@ -47,6 +47,101 @@ test remain separate; none is inferred from web/Expo or static artifact checks.
 | Workflow/skills/docs consolidation | Skills/checker and reviewed compact docs committed/pushed | App CI passes on 7e; isolated L0 docs checks and root review pass | No UI change | Docs branch integration and actual skill selection remain separate |
 
 ## Ordered work
+
+### S172 — AfricMade presentation and business-sourcing launch
+
+Owner direction: use the AfricMade name across web and native, retaining the
+current palette and typography. Celebrate African production and business
+sourcing without imposing origin restrictions or claiming universal coverage.
+Welcome individual and business buyers in the same browse-and-enquire flow,
+with African-made goods and their suppliers as the main story. Keep all
+demos and current workflows. Deploy the finished site on the temporary
+`mirtpage.com` domain; create a signed local Android artifact. A new Play app and
+managed-service names come later. FE-070, FE-049, BE-059 and DEP-051 control
+this work; master §§1–4, 10, 15, 18 and 22–23 need current-state reconciliation.
+
+1. [x] Read the owner's revised brief as product notes; inventory source/asset,
+   locale, protocol and release boundaries. Root checkout is dirty and preserved;
+   work is isolated from cached `origin/main` on the S172 task branch.
+2. [x] Integrate the owner-supplied AfricMade light/dark PNG artwork and derive
+   the icon in the existing palette/font. The owner supplied the final artwork on
+   2026-10-23; rejected drafts are not release assets. Verify exact-source
+   derivatives, small icons and dark/light contexts before checking this item.
+   The exact source hash, generated derivative and Chrome header inspection are
+   recorded in `.local/africmade-s172-visual-decision.md`.
+3. [x] Re-author compact Market/About/buyer/supplier/enquiry copy and all authored
+   identity surfaces in English, Amharic and Afaan Oromo. Preserve demo records,
+   external contact choices, SharedTrucks identity and stable IDs. Make one-item
+   and business orders both legible without another field or step; update focused
+   tests with changed labels in the same pass.
+4. [x] Render all icon, splash, PWA, email and notification asset variants from
+   the approved source; verify exact visual identity at small and large sizes.
+   The native splash uses the generated mark through Expo's splash plugin; physical
+   Android rendering still needs the signed-build/device check in step 8.
+5. [x] Run focused tests and actual Chrome desktop/phone web plus Expo task
+   journeys, record agent visual pass/fail and any intentional platform limits.
+   Verify real API outcomes where a workflow writes data. Use the owner's latest
+   compact Market copy: “Discover what Africa makes.” / “Explore product
+   showrooms from farms, factories and artisans without sifting through their
+   social media posts.” Check the English, Amharic and Afaan Oromo renderings
+   in both web and native before freezing the source for full gates. The nine
+   English/Amharic/Afaan Oromo desktop/phone/Expo copy states pass in
+   `.local/africmade-copy-review/result.json`; S173 owner/product save and
+   readback receipts are linked below. Agent visual review passed.
+6. [ ] Run `npm run check`, `npm run release:web`, and relevant acceptance/native
+   gates on the frozen source. Reconcile master, traceability and docs with
+   verified behavior. Commit only task paths and qualify PR/CI to current head.
+   Isolated `release:web` passes. Local `check` reached 457/459 UI cases;
+   both stale expectations passed focused retests and all 37 later commands
+   passed. Browser acceptance has 20/20 passing cases across the initial run
+   and focused corrections; the video fixture's disposable cleanup was fixed.
+   CI must still pass the complete gate on the final commit.
+7. [ ] Publish the exact admitted web artifact to the existing Netlify site and
+   verify live routes/assets; retain the previous deploy for recovery.
+8. [ ] Run fresh Android audit, build one locally signed AAB and derived APK,
+   inspect package/artwork/signature, and report physical/Play checks separately.
+
+### S173 — visible product facts for B2C and B2B buyers
+
+Dependency: FE-041 S173 and BE-014 S173 define the order-size contract; S172
+artwork/release remains separate. Active step: implement the additive catalog
+field and owner editors after spec readiness. Product facts are merchant
+declarations; do not infer them for existing products or add inquiry questions.
+
+1. [x] Audit current web/native owner editors, canonical fields, projection and
+   buyer pages. Owner facts are hidden or preserved by current simplified upkeep.
+2. [x] Add a compatible order-size field and preserve historical snapshots and
+   omitted fields under the tenant/version lock; add negative-path tests.
+   Local schema 80, updater/action, revision, mobile API and type checks pass;
+   no hosted schema change has been made.
+3. [x] Expose owner facts and order-size choice on web/native; show entered facts
+   prominently on buyer product pages without changing inquiry steps.
+4. [x] Run focused tests and agent-led Chrome desktop/phone/Expo journeys with
+   authoritative save/readback and localization review; record visual decision.
+   Visitor and owner receipts are in `.local/africmade-s173-review/receipt.json`
+   and `.local/africmade-s173-owner-review/receipt.json`; owner fixture restored.
+5. [ ] Run full/release gates on frozen source, qualify migration and deployment
+   as part of S172, then reconcile master/traceability.
+
+Current dependency: hosted schema 80, GitHub CI, web publication and the
+signed Android artifact. The approved owner artwork is integrated. Fresh
+read-only GitHub verification on 2026-10-24 confirms remote `main` at
+`3cb29e7`, matching the S172 branch base.
+
+### S174 — Transport live-agent countdown and provider follow-up
+
+FE-019 S174 is the controlling visitor/owner contract; the 2:00 staff overdue
+alert and 3:30 server handoff remain unchanged. Complete this in the same
+AfricMade web/native release source, with active-language copy and actual Chrome
+web/Expo review.
+
+1. [x] Record the owner-requested countdown, deadline copy, provider-name and
+   try-later behavior in FE-019 before implementation.
+2. [x] Implement shared remaining-time formatting and localized web/native
+   waiting and callback states without new polling or backend timers.
+3. [ ] Prove 0:00/2:00/3:29/3:30, Join/reply, refresh, callback submission and
+   try-later paths in focused tests and actual desktop/phone web and Expo.
+4. [ ] Include the qualified change in S172 release gates and delivery.
 
 ### S171 — browser acceptance map selector (current CI harness defect)
 

@@ -45,7 +45,7 @@ try {
   await p.goto('http://localhost:8082');
   await p.getByRole('button',{name:'Language',exact:true}).click();
   await p.getByRole('radio',{name:languageNames[locale],exact:true}).click();
-  await p.getByRole('button',{name:t('Close'),exact:true}).last().click();
+  if(await p.getByRole('button',{name:t('Close'),exact:true}).last().isVisible())await p.getByRole('button',{name:t('Close'),exact:true}).last().click();
   await p.getByRole('textbox',{name:t('Search'),exact:true}).fill('Aloe Field Care');
   await p.getByRole('button',{name:t('Search'),exact:true}).click();
   await p.getByRole('button',{name:t('View products'),exact:true}).click();

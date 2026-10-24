@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const url = publicSeoUrl("/");
   const image = publicSeoImageUrl(BRAND_SOCIAL_IMAGE);
   return { title, description, alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: "MirtPage", images: image ? [image] : [] },
+    openGraph: { title, description, url, siteName: "AfricMade", images: image ? [image] : [] },
     twitter: { card: "summary_large_image", title, description, images: image ? [image] : [] } };
 }
 
@@ -64,7 +64,7 @@ export default async function MarketPage({ searchParams }: {
   const t = await getUiText();
   return <div className="public-experience public-market-experience">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({
-        "@context": "https://schema.org", "@type": "WebSite", name: "MirtPage",
+        "@context": "https://schema.org", "@type": "WebSite", name: "AfricMade",
         url: publicSeoUrl("/"), description: t(MARKET_STOREFRONT_COPY.description),
       }) }} />
       <header className="market-landing-introduction">

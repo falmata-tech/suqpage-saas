@@ -306,8 +306,8 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
  const byId=new Map(mapData.showrooms.map(s=>[s.id,s]));
  const selected=byId.get(selectedShowroomId||-1)||null,group=useMemo(()=>currentMapGroup(groupIndex,mapData.showrooms,activeNearbyGroupKey,mapZoom),[groupIndex,mapData.showrooms,activeNearbyGroupKey,mapZoom]);
  function nearMe(){if(!navigator.geolocation){setNearMeStatus('Location is not available in this browser.');return;}navigator.geolocation.getCurrentPosition(({coords})=>{mapRef.current?.centerAt(coords.latitude,coords.longitude,11);setNearMeStatus('Map centered near your location.');},()=>setNearMeStatus('Location was not shared. Choose a country or city instead.'),{timeout:8000,maximumAge:300000});}
- return <section className="discovery discovery-marketplace" id="discover" aria-label={t('MirtPage Market')}>
-  <h2 className="sr-only">{t('MirtPage Market')}</h2>
+ return <section className="discovery discovery-marketplace" id="discover" aria-label={t('AfricMade Market')}>
+  <h2 className="sr-only">{t('AfricMade Market')}</h2>
   <div className={'discovery-workbench discovery-workbench-map discovery-drawer-workbench '+independentStyles.stage} data-panel-open={panelOpen}>
    <div className={independentStyles.modeBar}>
    <nav className={independentStyles.switch} aria-label={t('Search for')}>

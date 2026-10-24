@@ -42,6 +42,7 @@ import type {
 } from "./showroom-design-systems";
 import { SHOWROOM_DESIGN_SYSTEMS } from "./showroom-design-systems";
 import type { Catalog } from "./types";
+import {readOrderScope} from "./order-scope";
 import type { ProductDetailPattern } from "./product-detail-patterns";
 import {
   ADDITIONAL_SEED_SHOWROOM_BRIEFS,
@@ -595,6 +596,7 @@ function catalogToRevisionBase(catalog: Catalog): {
       availability: item.availability,
       offeringKind: item.offering_kind || "standard_product",
       quantityMode: "optional",
+      orderScope: readOrderScope(item.order_scope),
       capacitySummary: item.capacity_summary || "",
       minimumOrderSummary: item.minimum_order_summary || "",
       leadTimeSummary: item.lead_time_summary || "",

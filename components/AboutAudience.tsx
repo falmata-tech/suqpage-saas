@@ -5,6 +5,7 @@ import Link from "next/link";
 import {ArrowRight,MapPin,MessageCircle,Search,Store} from "lucide-react";
 import {useUiText} from "@/lib/i18n/ui";
 import {ABOUT_STOREFRONT_SECTIONS,CUSTOMER_MAP_COPY} from "@/lib/storefront-copy";
+import {TRANSPORT_COPY} from "@/lib/i18n/transport-copy";
 import styles from "./AboutStorefront.module.css";
 
 const icons={shop:Store,map:MapPin,chat:MessageCircle,search:Search};
@@ -17,8 +18,8 @@ export default function AboutAudience(){
   if(next===null)return;event.preventDefault();setAudience(ABOUT_STOREFRONT_SECTIONS[next].id);tabs.current[next]?.focus();
  }
  return <div className={styles.page+" public-about-experience"}>
-  <header className={styles.header}><h1>{t("About MirtPage")}</h1>
-   <div role="tablist" aria-label={t("About MirtPage")} className={styles.audiences}>{ABOUT_STOREFRONT_SECTIONS.map((section,index)=><button key={section.id} ref={node=>{tabs.current[index]=node;}} type="button" role="tab" id={`about-tab-${section.id}`} aria-controls={`for-${section.id}`} aria-selected={audience===section.id} tabIndex={audience===section.id?0:-1} onClick={()=>setAudience(section.id)} onKeyDown={event=>navigate(event,index)}>{t(section.label)}</button>)}</div>
+  <header className={styles.header}><h1>{t("About AfricMade")}</h1>
+   <div role="tablist" aria-label={t("About AfricMade")} className={styles.audiences}>{ABOUT_STOREFRONT_SECTIONS.map((section,index)=><button key={section.id} ref={node=>{tabs.current[index]=node;}} type="button" role="tab" id={`about-tab-${section.id}`} aria-controls={`for-${section.id}`} aria-selected={audience===section.id} tabIndex={audience===section.id?0:-1} onClick={()=>setAudience(section.id)} onKeyDown={event=>navigate(event,index)}>{t(section.label)}</button>)}</div>
   </header>
   {ABOUT_STOREFRONT_SECTIONS.map(section=><section key={section.id} id={`for-${section.id}`} role="tabpanel" aria-labelledby={`about-tab-${section.id}`} hidden={audience!==section.id} className={`${styles.section} ${section.id==="businesses"?styles.business:""}`}>
    <div className={styles.intro}><h2>{t(section.title)}</h2><p>{t(section.description)}</p>
@@ -27,6 +28,6 @@ export default function AboutAudience(){
    </div>
    <div className={styles.benefits}>{section.benefits.map(benefit=>{const Icon=icons[benefit.icon];return <article key={benefit.title}><span className={styles.icon}><Icon aria-hidden="true"/></span><div><h3>{t(benefit.title)}</h3><p>{t(benefit.description)}</p></div></article>;})}</div>
   </section>)}
-  <footer className={styles.footer}><Link href="/transport-partners">{t("Logistics service providers: Ask to be listed")}</Link><Link href="/showrooms">{t("Businesses")}</Link><Link href="/privacy">{t("Privacy")}</Link><Link href="/terms">{t("Terms")}</Link><Link href="/account-deletion">{t("Delete account")}</Link></footer>
+  <footer className={styles.footer}><Link href="/?chat=transport">{t(TRANSPORT_COPY.launcherTitle)}</Link><Link href="/transport-partners">{t("Logistics service providers: Ask to be listed")}</Link><Link href="/showrooms">{t("Businesses")}</Link><Link href="/privacy">{t("Privacy")}</Link><Link href="/terms">{t("Terms")}</Link><Link href="/account-deletion">{t("Delete account")}</Link></footer>
  </div>;
 }

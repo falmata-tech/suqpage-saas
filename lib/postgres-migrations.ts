@@ -1245,6 +1245,14 @@ export async function migratePostgresDatabase(
       }
       await runner.query('INSERT INTO schema_migrations(version) VALUES(79)');applied.push(79);
     }
+    const migration80=await runner.query('SELECT version FROM schema_migrations WHERE version=80');
+    if(!migration80.rows.length){
+      if(!(await runner.query('SELECT version FROM schema_migrations WHERE version=79')).rows.length)throw new Error('Migration 80 requires schema 79.');
+      await runner.query("ALTER TABLE products ADD COLUMN order_scope TEXT NOT NULL DEFAULT 'unspecified' CHECK(order_scope IN ('unspecified','single','bulk','both'))");
+      const checked=await runner.query<{total:number}>("SELECT COUNT(*) total FROM products WHERE order_scope<>'unspecified'");
+      if(Number(checked.rows[0]?.total)!==0)throw new Error('Migration 80 inferred an order size for existing products.');
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(80)');applied.push(80);
+    }
     return { applied };
   });
 }

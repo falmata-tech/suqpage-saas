@@ -30,7 +30,7 @@ try {
       if (native && locale !== 'en') {
         await page.getByRole('button', { name: 'Language', exact: true }).click();
         await page.getByRole('radio', { name: languageNames[locale], exact: true }).click();
-        await page.getByRole('button', { name: t('Close'), exact: true }).last().click();
+        if(await page.getByRole('button', { name: t('Close'), exact: true }).last().isVisible()) await page.getByRole('button', { name: t('Close'), exact: true }).last().click();
       }
       const map = page.locator('.leaflet-container');
       await expect.poll(async () => Number(await map.getAttribute('data-map-marker-count')), { timeout: 25000 }).toBeGreaterThan(0);

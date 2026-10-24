@@ -414,7 +414,7 @@ function selectSponsoredSql() {
     SELECT * FROM (
     SELECT
       'showroom' AS kind,b.id AS source_id,b.handle,b.name,
-      COALESCE(NULLIF(b.tagline,''),NULLIF(b.description,''),'MirtPage page') AS details,
+      COALESCE(NULLIF(b.tagline,''),NULLIF(b.description,''),'AfricMade page') AS details,
       COALESCE(NULLIF(p.booth_image_path,''),NULLIF(b.hero_image_path,''),NULLIF(b.logo_path,''),'') AS image_path,
       NULL AS website_url,NULL AS phone,s.position AS sponsor_position
     FROM discovery_sponsorships s

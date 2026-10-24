@@ -16,6 +16,7 @@ async function main() {
         const { executeBasicProductUpkeep: executeWithPort } = await import("../lib/product-upkeep");
         const { postgresProductUpkeepPort } = await import("../lib/product-upkeep-postgres");
         const { parseBasicProductCommand, ProductUpkeepError } = await import("../lib/product-upkeep-domain");
+        const {offeringDto} = await import("../lib/mobile/projections");
         const { stageUploadedImage } = await import("../lib/media");
         const executeBasicProductUpkeep = (user: Parameters<typeof executeWithPort>[1], command: Parameters<typeof executeWithPort>[2], stagedImage: Parameters<typeof executeWithPort>[3]) => executeWithPort(postgresProductUpkeepPort, user, command, stagedImage);
         const db = await getDb();
@@ -78,6 +79,7 @@ async function main() {
             availability: "limited",
             offeringKind: "made_to_order",
             quantityMode: "optional",
+            orderScope: "both",
             capacitySummary: "Up to 500 assemblies per month",
             minimumOrderSummary: "Prototype or 25-unit production run",
             leadTimeSummary: "Prototype in 10 working days",
@@ -102,6 +104,7 @@ async function main() {
         assert.equal(invalidImageDiscarded, true);
         await assert.rejects(() => executeBasicProductUpkeep(clientA, command({ offeringKind: "unknown_kind" }), null), /Choose Ready to ship or Made to order/);
         await assert.rejects(() => executeBasicProductUpkeep(clientA, command({ quantityMode: "inventory" }), null), /desired-quantity policy/);
+        await assert.rejects(() => executeBasicProductUpkeep(clientA, command({ orderScope: "wholesale_verified" }), null), /valid order size/);
         assert.equal(parseBasicProductCommand(command({ quantityMode: "required" }))
             .quantityMode, "optional");
         await assert.rejects(() => executeBasicProductUpkeep(clientA, command({ capacitySummary: "x".repeat(181) }), null), /Capacity is too long/);
@@ -110,7 +113,7 @@ async function main() {
         const created = await executeBasicProductUpkeep(clientA, command(), null);
         assert.deepEqual({ version: created.contentVersion, duplicate: created.duplicate }, { version: 2, duplicate: false });
         const createdProduct = await db
-            .prepare("SELECT business_id,collection_id,category_id,is_published,availability,offering_kind,quantity_mode,capacity_summary,minimum_order_summary,lead_time_summary,price_minor,currency,quantity_unit,highlights_json,video_ref FROM products WHERE id=?")
+            .prepare("SELECT business_id,collection_id,category_id,is_published,availability,offering_kind,quantity_mode,order_scope,capacity_summary,minimum_order_summary,lead_time_summary,price_minor,currency,quantity_unit,highlights_json,video_ref FROM products WHERE id=?")
             .get(created.productId) as Record<string, unknown>;
         assert.deepEqual({ ...createdProduct }, {
             business_id: tenantA.businessId,
@@ -120,6 +123,7 @@ async function main() {
             availability: "limited",
             offering_kind: "made_to_order",
             quantity_mode: "optional",
+            order_scope: "both",
             capacity_summary: "Up to 500 assemblies per month",
             minimum_order_summary: "Prototype or 25-unit production run",
             lead_time_summary: "Prototype in 10 working days",
@@ -271,14 +275,14 @@ async function main() {
             .get())?.count, 4);
         const simple = await createBusiness("simple-owner", "Simple owner");
         const simpleUser = await createUser("simple@example.test", "client", simple.businessId);
-        await db.prepare("UPDATE products SET offering_kind='manufacturing_capability',availability='limited',is_published=0,quantity_unit='piece',highlights_json='[\"Experienced team\"]' WHERE id=?").run(simple.productId);
+        await db.prepare("UPDATE products SET offering_kind='manufacturing_capability',availability='limited',is_published=0,quantity_unit='piece',highlights_json='[\"Experienced team\"]',order_scope='bulk' WHERE id=?").run(simple.productId);
         const before = await db.prepare("SELECT * FROM products WHERE id=?").get(simple.productId);
         const simpleCommand = command({kind:"update",businessId:simple.businessId,productId:simple.productId,
           expectedContentVersion:1,idempotencyKey:"simple_owner_save_001",preserveMetadata:true,
           categoryId:tenantB.categoryId,offeringKind:undefined,optionGroups:[],isPublished:true});
         await executeBasicProductUpkeep(simpleUser, simpleCommand, null);
         const after = await db.prepare("SELECT * FROM products WHERE id=?").get(simple.productId);
-        for (const key of ["offering_kind","availability","is_published","quantity_unit","highlights_json","category_id","collection_id","capacity_summary","minimum_order_summary","lead_time_summary"]) assert.deepEqual(after[key],before[key],key);
+        for (const key of ["offering_kind","availability","is_published","quantity_unit","highlights_json","category_id","collection_id","capacity_summary","minimum_order_summary","lead_time_summary","order_scope"]) assert.deepEqual(after[key],before[key],key);
         assert.equal((await db.prepare("SELECT COUNT(*) AS total FROM option_groups WHERE product_id=?").get(simple.productId)).total,1);
         assert.equal(after.name,"New client product");
         assert.equal((await executeBasicProductUpkeep(simpleUser,simpleCommand,null)).duplicate,true);
@@ -288,12 +292,25 @@ async function main() {
         const listingResult=await executeBasicProductUpkeep(simpleUser,listingCommand,null);
         const listed=await db.prepare('SELECT * FROM products WHERE id=?').get(simple.productId);
         assert.equal(listed.availability,'unavailable');assert.equal(listed.is_published,1);
-        for(const key of ['offering_kind','quantity_mode','quantity_unit','highlights_json','category_id','collection_id','capacity_summary','minimum_order_summary','lead_time_summary'])assert.deepEqual(listed[key],after[key],key);
+        for(const key of ['offering_kind','quantity_mode','quantity_unit','highlights_json','category_id','collection_id','capacity_summary','minimum_order_summary','lead_time_summary','order_scope'])assert.deepEqual(listed[key],after[key],key);
         assert.equal((await db.prepare('SELECT COUNT(*) total FROM option_groups WHERE product_id=?').get(simple.productId)).total,1);
         assert.equal((await executeBasicProductUpkeep(simpleUser,listingCommand,null)).duplicate,true);
         await assert.rejects(()=>executeBasicProductUpkeep(clientB,{...listingCommand,idempotencyKey:'foreign_listing_state_001'},null),throwsCode('forbidden'));
         await assert.rejects(()=>executeBasicProductUpkeep(simpleUser,{...listingCommand,idempotencyKey:'stale_listing_state_001'},null),throwsCode('stale_version'));
         assert.equal((await db.prepare('SELECT content_version FROM businesses WHERE id=?').get(simple.businessId)).content_version,listingResult.contentVersion);
+        const factsCommand={...simpleCommand,expectedContentVersion:3,idempotencyKey:'simple_facts_000001',updateSellingFacts:true,
+          orderScope:'both',quantityUnit:'box',highlights:['Locally milled'],capacitySummary:'200 boxes each week',minimumOrderSummary:'One box',leadTimeSummary:'Ready in two days'};
+        await assert.rejects(()=>executeBasicProductUpkeep(clientB,{...factsCommand,idempotencyKey:'foreign_facts_000001'},null),throwsCode('forbidden'));
+        const savedFacts=await executeBasicProductUpkeep(simpleUser,factsCommand,null);
+        const factRow=await db.prepare('SELECT * FROM products WHERE id=?').get(simple.productId);
+        assert.deepEqual([factRow.order_scope,factRow.quantity_unit,factRow.highlights_json,factRow.minimum_order_summary,factRow.lead_time_summary,factRow.capacity_summary],
+          ['both','box','["Locally milled"]','One box','Ready in two days','200 boxes each week']);
+        const publicOffering=offeringDto((await getCatalogByBusinessId(simple.businessId,true))!.products.find(product=>product.id===simple.productId)!);
+        assert.deepEqual([publicOffering.orderScope,publicOffering.quantityUnit,publicOffering.highlights,publicOffering.minimumOrderSummary],['both','box',['Locally milled'],'One box']);
+        const published=await db.prepare('SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=?').get(simple.businessId,savedFacts.contentVersion);
+        assert.equal(JSON.parse(published.snapshot_json).products.find((product:{key:string})=>product.key===`product-${simple.productId}`).orderScope,'both');
+        assert.equal((await db.prepare('SELECT COUNT(*) total FROM schema_migrations WHERE version=80').get()).total,1);
+        await assert.rejects(()=>db.prepare("UPDATE products SET order_scope='unsupported' WHERE id=?").run(simple.productId));
         console.log("Product upkeep role scope, protected fields, versions, idempotency, media cleanup, retention, and disable control passed.");
         await closeDbForTests();
     }

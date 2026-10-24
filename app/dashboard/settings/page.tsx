@@ -49,7 +49,7 @@ export default async function SettingsPage({searchParams}:{searchParams:Promise<
             </>:section==='live'?<>
               <div className="field full"><label htmlFor="business-live-platform">{t('Live platform')}</label><select id="business-live-platform" name="livePlatform" defaultValue={business.live_platform}><option value="">{t('Not configured')}</option>{LIVE_PLATFORMS.map(platform=><option key={platform} value={platform}>{LIVE_PLATFORM_LABELS[platform]}</option>)}</select></div>
               <div className="field full"><label htmlFor="business-live-url">{t('Live-session link')}</label><input id="business-live-url" type="url" name="liveUrl" defaultValue={business.live_url} placeholder="https://..."/></div>
-              <label className="check-field field full"><input type="checkbox" name="isLive" defaultChecked={Boolean(business.is_live)}/>{t('Show this business as live now on its page and across the MirtPage Market')}</label>
+              <label className="check-field field full"><input type="checkbox" name="isLive" defaultChecked={Boolean(business.is_live)}/>{t('Show this business as live now on its page and across the AfricMade Market')}</label>
             </>:<>
               <div className="field full"><label htmlFor="business-title">{t('Page title')}</label><input id="business-title" name="siteTitle" maxLength={120} defaultValue={business.site_title||business.name}/></div>
               <div className="field full"><label htmlFor="business-description">{t('Search and sharing description')}</label><textarea id="business-description" name="siteDescription" maxLength={240} rows={4} defaultValue={business.site_description||business.description}/></div>

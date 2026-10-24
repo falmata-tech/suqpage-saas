@@ -51,7 +51,7 @@ async function main(){
   const publicCase=await support.getPublicSupportConversation(token);
   assert.equal(publicCase.agentJoined,false,'Assignment does not claim the agent joined');
   assert.equal(publicCase.assignedUserName,null,'Unjoined assignment identity stays private');
-  await expect(visitor.getByText('Waiting for a SharedTrucks live agent',{exact:true})).toBeVisible();
+  await expect(visitor.getByText('Waiting for a live agent at SharedTrucks Logistics',{exact:true})).toBeVisible();
   caseId=Number((await pool.query('SELECT id FROM support_conversations WHERE public_ref=$1',[publicCase.publicRef])).rows[0].id);
   const request={id:caseId,token};
   await support.reassignSupportConversation(staff,caseId,userId);

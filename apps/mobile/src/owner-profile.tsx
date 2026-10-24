@@ -30,7 +30,7 @@ export function OwnerProfile({home}: {home: OwnerHome}) {
       {label:'Transport chat',section:'transport',icon:'chat',description:'Discuss transport options in live chat.'},
       {label:'Business details',section:'business',icon:'shop',description:'Name, category and business location.'},
       {label:'Account settings',section:'settings',icon:'user',description:'Private details and sign-in.'},
-      {label:'Support',section:'support',icon:'headphones',description:'Chat with the MirtPage support team.'},
+      {label:'Support',section:'support',icon:'headphones',description:'Chat with the AfricMade support team.'},
     ].map((item,index)=><Pressable key={item.section} accessibilityRole="button" accessibilityLabel={t(item.label)} onPress={()=>edit(item.section)} style={{minHeight:64,padding:12,flexDirection:'row',alignItems:'center',gap:12,borderTopWidth:index?1:0,borderColor:colors.line}}><Icon name={item.icon} color={colors.brand}/><View style={{flex:1,minWidth:0,gap:3}}><Text style={{fontSize:15,lineHeight:21,fontWeight:'700',color:colors.ink}}>{t(item.label)}</Text><Text style={{fontSize:12,lineHeight:17,color:colors.muted}}>{t(item.description)}</Text></View><Text accessibilityElementsHidden style={{color:colors.muted,fontSize:20}}>›</Text></Pressable>)}</View>
   </>;
 }

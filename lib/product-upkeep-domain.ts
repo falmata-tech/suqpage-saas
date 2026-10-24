@@ -1,6 +1,7 @@
 import { productVideo } from './video/product-video';
 import { parseProductMedia, type ProductMedia } from "./product-media";
 import type { Product } from "./types";
+import { isOrderScope, type OrderScope } from "./order-scope";
 import {
   normalizeQuantityMode,
   isActiveProductKind,
@@ -23,6 +24,7 @@ export type BasicProductCommand = {
   preserveOfferingKind?: boolean;
   media?: ProductMedia[];
   preserveMetadata?: boolean;
+  updateSellingFacts?: boolean;
   updateListingState?: boolean;
   optionGroups?: ProductOptionInput[];
   isPublished?: boolean;
@@ -36,6 +38,7 @@ export type BasicProductCommand = {
   availability: Product["availability"];
   offeringKind: OfferingKind;
   quantityMode: QuantityMode;
+  orderScope: OrderScope;
   capacitySummary: string;
   minimumOrderSummary: string;
   leadTimeSummary: string;
@@ -61,6 +64,7 @@ export class ProductUpkeepError extends Error {
 const commandKeys = new Set([
   "media",
   "preserveMetadata",
+  "updateSellingFacts",
   "updateListingState",
   "optionGroups",
   "isPublished",
@@ -74,6 +78,7 @@ const commandKeys = new Set([
   "availability",
   "offeringKind",
   "quantityMode",
+  "orderScope",
   "capacitySummary",
   "minimumOrderSummary",
   "leadTimeSummary",
@@ -148,6 +153,8 @@ export function parseBasicProductCommand(
     );
   }
   if (raw.preserveMetadata !== undefined && typeof raw.preserveMetadata !== "boolean") throw new ProductUpkeepError("Invalid metadata policy.");
+  if (raw.updateSellingFacts !== undefined && typeof raw.updateSellingFacts !== "boolean") throw new ProductUpkeepError("Invalid product-facts update.");
+  if (raw.orderScope !== undefined && !isOrderScope(raw.orderScope)) throw new ProductUpkeepError("Choose a valid order size.");
   const kind = raw.kind;
   if (kind !== "create" && kind !== "update") {
     throw new ProductUpkeepError("Choose a valid product action.");
@@ -205,6 +212,7 @@ export function parseBasicProductCommand(
   return {
     ...(raw.media !== undefined ? {media: (() => {try {return parseProductMedia(raw.media);} catch(error) {throw new ProductUpkeepError(error instanceof Error ? error.message : "Invalid product media.");}})()} : {}),
     ...(raw.preserveMetadata !== undefined ? { preserveMetadata: raw.preserveMetadata as boolean } : {}),
+    ...(raw.updateSellingFacts !== undefined ? { updateSellingFacts: raw.updateSellingFacts as boolean } : {}),
     ...(raw.updateListingState !== undefined ? { updateListingState: raw.updateListingState as boolean } : {}),
     ...(raw.optionGroups !== undefined ? { optionGroups: parseProductOptions(raw.optionGroups) } : {}),
     ...(raw.isPublished !== undefined ? { isPublished: raw.isPublished as boolean } : {}),
@@ -222,6 +230,7 @@ export function parseBasicProductCommand(
     availability,
     offeringKind,
     quantityMode,
+    orderScope: (raw.orderScope ?? "unspecified") as OrderScope,
     capacitySummary: boundedText(raw.capacitySummary, 180, "Capacity"),
     minimumOrderSummary: boundedText(raw.minimumOrderSummary, 140, "Minimum order"),
     leadTimeSummary: boundedText(raw.leadTimeSummary, 140, "Lead time"),

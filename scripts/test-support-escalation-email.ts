@@ -18,7 +18,7 @@ test('BE-059 optional Telegram presentation changes only its authored brand pref
  try{
   process.env.SUQPAGE_TELEGRAM_BOT_TOKEN='local-fixture-no-secret';process.env.SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID='fixture-target';process.env.NEXT_PUBLIC_APP_URL='https://suqpage.example';
   const result=await notifySupportQueue({id:42,publicRef:'SUP-QA126',businessName:'Fixture business',assignedUserName:'Fixture agent'},{send:async(url,init)=>{
-   sends++;assert.equal(String(url),'https://api.telegram.org/botlocal-fixture-no-secret/sendMessage');assert.equal(init?.method,'POST');assert.ok(init?.signal);assert.deepEqual(JSON.parse(String(init?.body)),{chat_id:'fixture-target',text:'New MirtPage support request SUP-QA126 from Fixture business. Assigned to Fixture agent.\nhttps://suqpage.example/dashboard/support/42',disable_web_page_preview:true});return new Response('{}');
+   sends++;assert.equal(String(url),'https://api.telegram.org/botlocal-fixture-no-secret/sendMessage');assert.equal(init?.method,'POST');assert.ok(init?.signal);assert.deepEqual(JSON.parse(String(init?.body)),{chat_id:'fixture-target',text:'New AfricMade support request SUP-QA126 from Fixture business. Assigned to Fixture agent.\nhttps://suqpage.example/dashboard/support/42',disable_web_page_preview:true});return new Response('{}');
   }});assert.equal(result,'sent');assert.equal(sends,1);
  }finally{for(const[key,value]of previous){if(value===undefined)delete process.env[key];else process.env[key]=value;}}
 });
@@ -45,7 +45,7 @@ test('BE-050/DEP-043 S126 Resend uses only generic localized facts and a stable 
   assert.equal(request.url,'https://api.resend.com/emails');assert.equal(request.init.redirect,'error');assert.equal(request.init.method,'POST');
   const headers=request.init.headers as Record<string,string>;assert.equal(headers['Idempotency-Key'],supportEscalationEmailKey(81));assert.equal(headers.Authorization,'Bearer fixture-key-not-a-secret');
   assert.ok(request.init.signal instanceof AbortSignal);const body=JSON.parse(String(request.init.body));assert.deepEqual(Object.keys(body).sort(),['from','subject','text','to']);
-  assert.deepEqual(body.to,['admin@example.test']);assert.equal(body.from,'MirtPage <alerts@suqpage.example>');assert.match(body.subject,/^MirtPage ·/);assert.match(body.text,/SUP-QA126/);assert.match(body.text,/Test transport agent/);assert.match(body.text,/https:\/\/suqpage\.example\/dashboard\/support\/42/);
+  assert.deepEqual(body.to,['admin@example.test']);assert.equal(body.from,'AfricMade <alerts@suqpage.example>');assert.match(body.subject,/^AfricMade ·/);assert.match(body.text,/SUP-QA126/);assert.match(body.text,/Test transport agent/);assert.match(body.text,/https:\/\/suqpage\.example\/dashboard\/support\/42/);
   assert.doesNotMatch(JSON.stringify(body),/route|phone|customer|cookie|token|fixture-key/);
  }
  assert.equal(requests[0].init.body,requests[1].init.body);assert.throws(()=>supportEscalationEmailKey(0));
@@ -72,7 +72,7 @@ test('DEP-043 S126 explicit local email targets only the installed Mailpit send 
  let calls=0;
  const result=await sendSupportEscalationEmail({...email,dashboardUrl:email.dashboardUrl.replace('https://suqpage.example','http://127.0.0.1:3102')},{mode:'local-mailpit',env:{...local,RESEND_API_KEY:'unused-hosted-key'},send:async(url,init)=>{
   calls++;assert.equal(String(url),'http://127.0.0.1:54324/api/v1/send');assert.equal(init?.redirect,'error');assert.deepEqual(init?.headers,{'Content-Type':'application/json'});
-  const body=JSON.parse(String(init?.body));assert.deepEqual(body.From,{Email:'alerts@suqpage.test',Name:'MirtPage'});assert.deepEqual(body.To,[{Email:'admin@example.test'}]);assert.equal(body.Headers['Message-ID'],'<suqpage-support-overdue-81@suqpage.test>');assert.doesNotMatch(String(init?.body),/unused-hosted-key/);return new Response('{}');
+  const body=JSON.parse(String(init?.body));assert.deepEqual(body.From,{Email:'alerts@suqpage.test',Name:'AfricMade'});assert.deepEqual(body.To,[{Email:'admin@example.test'}]);assert.equal(body.Headers['Message-ID'],'<suqpage-support-overdue-81@suqpage.test>');assert.doesNotMatch(String(init?.body),/unused-hosted-key/);return new Response('{}');
  }});assert.deepEqual(result,{state:'accepted'});assert.equal(calls,1);
 });
 
@@ -80,7 +80,7 @@ test('BE-050/FE-049 S132 escalation email uses active languages and English for 
  const catalogs={en:{},am,om,so,ti};
  for(const language of Object.keys(catalogs) as Locale[]){
   const t=createUiText(catalogs[parseLocale(language)]),content=supportEscalationEmailContent({...email,language});
-  assert.equal(content.subject,`MirtPage · ${t('A chat is overdue for a reply.')} · SUP-QA126`);
+  assert.equal(content.subject,`AfricMade · ${t('A chat is overdue for a reply.')} · SUP-QA126`);
   assert.ok(content.text.includes(t('Assigned to {value1}',{value1:'Test transport agent'})));assert.ok(content.text.includes(t('Transport')));assert.ok(content.text.includes(email.dashboardUrl));
   if(parseLocale(language)!=='en'){
    assert.ok(!content.subject.includes('A chat is overdue for a reply.'),'Non-English subjects must use the existing native catalog');

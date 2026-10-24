@@ -90,9 +90,10 @@ Master sections 4,12,13,15,16,18,19 and22 will change after qualification.
    transport agent can help arrange the shipment with SharedTrucks Logistics.
    Avoid “coordinator,” unsupported employment claims, internal staff routing
    and an exact response promise. Waiting copy never implies an agent has joined.
-   If no Join or public reply arrives, show that the team is busy after two
-   minutes with elapsed time, then change to a message-for-later composer at
-   three minutes thirty seconds without losing the same thread.
+   FE-019 S174 supersedes the earlier public wait wording: show remaining time
+   from the first waiting state, and use the provider-named busy/contact message
+   only after the three-minute-thirty-second deadline. The two-minute staff
+   overdue alert remains internal. The same staff case is retained.
 9. GIVEN a phone user opens the transport chat WHEN the form or conversation is
    active THEN the chat uses the available viewport without scrolling the page
    behind it; the reply controls remain visible, the transcript is the primary

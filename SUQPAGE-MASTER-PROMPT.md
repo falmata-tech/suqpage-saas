@@ -1,14 +1,17 @@
-# MirtPage Project Master Prompt
+# AfricMade Project Master Prompt
 
 Read this current product brief with [AGENTS.md](AGENTS.md) and
 [specs/README.md](specs/README.md). It records product boundaries, not a release
 transcript. Existing numbered headings retain their identities for spec references;
 older “Suqpage” heading names are compatibility anchors, not the public brand.
 
-MirtPage is the current brand at **https://mirtpage.com**; Android uses
-**com.mirtpage.app**. Supabase PostgreSQL, managed Auth and private Storage serve
-the application. Stable historical provider/protocol identifiers remain where
-compatibility requires them. Their spelling does not authorize recreating services.
+AfricMade is the current source brand. The website remains at
+**https://mirtpage.com** during the transition; Android retains
+**com.mirtpage.app** until the separately qualified new Play submission. Supabase
+PostgreSQL, managed Auth and private Storage serve the application. Stable
+historical provider/protocol identifiers remain where compatibility requires
+them. Their spelling does not authorize recreating services or imply that hosted
+names, email settings or existing store listings have already changed.
 
 This brief describes the current source contracts. Implementation, focused tests,
 visual approval, publication and physical/Play qualification are separate states.
@@ -34,11 +37,13 @@ Use the task to choose the next detailed reading; do not load every spec:
 
 ## 1. Your role
 
-Build and maintain MirtPage as a multi-tenant digital-showroom and discovery
-platform for businesses in East Africa. Preserve each business's identity and
-literal product information while improving usability, security and reliability.
+Build and maintain AfricMade as a multi-tenant digital-showroom and discovery
+platform centered on goods made and grown in Africa. Welcome individual and
+business buyers, from one-item purchases to larger sourcing inquiries. Preserve
+each business's identity and literal product information while improving
+usability, security and reliability.
 
-MirtPage provides one consistent showroom experience. Businesses organize what
+AfricMade provides one consistent showroom experience. Businesses organize what
 they sell, make or grow; customers browse clear product choices and ask through
 that business's configured external channels. Transport arrangements and private
 business-owner support are separate first-party conversations.
@@ -49,10 +54,13 @@ a generic website builder, checkout marketplace or unrelated architecture rewrit
 
 ## 2. Product identity
 
-Use **MirtPage**, the approved two-panel M artwork and the canonical values/assets
-in `lib/brand.ts` consistently across web, mobile, mail and store media. The public
-introduction is “A professional digital showroom for every business.” Logos and
-merchant pictures are not recolored by a showroom accent or locale.
+Use **AfricMade**, the owner-supplied afro-pick profile artwork and the canonical
+values/assets in `lib/brand.ts` consistently across web, mobile, mail and store
+media. The public Market introduction is “Discover what Africa makes.” with
+“Explore product showrooms from farms, factories and artisans without sifting
+through their social media posts.” Individual and business buyers use the same
+product and inquiry flows, with order options explained on the product page.
+Logos and merchant pictures are not recolored by a showroom accent or locale.
 
 Enabled interface languages are English, Amharic and Afaan Oromo. Native means
 the Expo visitor/owner application, with its own navigation and platform behavior;
@@ -73,13 +81,14 @@ request, revision-import or design-library product workflow.
 
 Identity and narrative detail: FE-070, BE-059 and ADR-0029. SEO: FE-071.
 
-## 3. The problem Suqpage solves
+## 3. The problem AfricMade solves
 
 Businesses may advertise on social media while their products, variations and
-story become hard to find among old posts. MirtPage gives online sellers, shops,
-workshops, growers, makers and suppliers an organized digital showroom that
-customers can browse before asking a specific question. It is not limited to
-online-only sellers or physical retail premises.
+story become hard to find among old posts. AfricMade gives farms, factories,
+workshops, artisans and other suppliers an organized digital showroom that
+individual buyers and business buyers can browse before asking a specific
+question. African-made goods are the main story; ordinary sellers and imported
+goods are not categorically excluded.
 
 Explain the benefit plainly: discover businesses nearby and farther away, learn
 what they carry or make, browse named products and styles with their listed
@@ -92,52 +101,29 @@ prioritizes exploration space; About explains benefits to both visitors and
 business owners. Write inviting, professional copy rather than hype or literal
 translations of internal brainstorming. FE-070 and FE-049 control authored copy.
 
-## 4. What Suqpage is—and is not
+## 4. What AfricMade is—and is not
 
-### S154 local implementation (awaiting acceptance and release)
+Visitors can send a product inquiry to the business's AfricMade Inbox or use its
+configured WhatsApp and Telegram channels. The message stays editable at the
+destination, and the inquiry does not become a purchase or a transport booking.
+Desktop visitors can copy the public messaging contact and prepared text; phone
+and native actions may open the configured app. SMS remains secondary.
 
-The current local working tree restores asynchronous visitor inquiries and a
-owner Inbox (FE-075/BE-062), alongside equally prominent configured WhatsApp
-and Telegram inquiry actions. SMS remains secondary. Approved WhatsApp/Telegram
-numbers or usernames remain visible in the inquiry modal on desktop, where the
-visitor can copy the contact; phone/native actions can open the destination with
-the prepared draft. Desktop does not launch external messaging links.
-FE-076/BE-063 locally offer one independent logistics service provider:
-SharedTrucks Logistics, a freight brokerage. Its approved navy/blue wordmark
-appears in provider choices and shipment records, distinct from MirtPage's
-orange identity. New visitor and owner transport
-intakes start without a company selected; opening the choice reveals its name,
-type and arranging role, and chat starts only after selection. Its stable
-internal ID remains `shared-trucks-logistics` for older conversations. Parcel
-express delivery and hub-and-spoke logistics are future service types, not
-currently selectable companies. The company name is shown in its specific
-choice and shipment record; general site copy does not advertise it. Transport
-chat names SharedTrucks Logistics and says its live agents will help arrange the
-shipment; MirtPage staff operate the internal queue on its behalf until provider-
-owned staff accounts exist. After a 3:30 no-agent wait, local web and Expo
-replace live chat with a callback form, prefilled phone, optional email and a
-static receipt. The participant can cancel the waiting case or start a separate
-request; submitting a callback leaves the original case available for staff
-follow-up. Callback screens do not keep live-message polling open. Provider-owned
-accounts and direct routing remain deferred. Provider interest is presented on
-its own page and grants no operating access.
-FE-021/FE-065 expose bounded map groups at city scale without altering saved
-business locations. Exact public storefront pins remain optional and owner
-selected. Local FE-021 S160 adds city-area map markers for eligible city-only
-businesses at their canonical city anchor. One business uses the shop marker;
-numbered circles represent multiple businesses. Visitor markers and previews show
-the business name and city, without internal location-mode terms or an implied
-street address. Agent-led browser review passed; rollout remains pending, so
-hosted map behavior has not changed.
-FE-070/FE-049 shorten the business-story/product narrative while explicitly
-retaining the benefit of avoiding social-media clutter in English, Amharic and
-Afaan Oromo. Local and production schema79 are verified. The changed web/Expo
-journeys passed agent-led browser review, complete local checks, clean web release
-and 20/20 acceptance; this batch is not yet published or compiled into a new
-Android release. The transition checklist owns its GitHub, deployment and device
-qualification state.
+Transport is a separate conversation with a selected independent logistics
+service provider. SharedTrucks Logistics is the current freight-brokerage choice;
+its navy/blue identity appears in the provider choice and shipment records,
+while general site copy remains provider-neutral. Its stable internal ID remains
+`shared-trucks-logistics`. AfricMade staff currently operate that provider's
+queue on its behalf; provider-owned accounts and direct routing are future work.
+The visible live-wait countdown and callback handoff are defined in §12.
 
-### Suqpage is
+Market groups map markers at city scale without changing saved locations. An
+eligible business with only a city location appears at its validated city anchor;
+a single business uses a named shop marker, while close groups use a count.
+Exact public storefront pins remain optional and owner-selected. Visitor labels
+show business names and cities, not internal location-mode terms.
+
+### AfricMade is
 
 - A public business showroom and geographic/product discovery platform.
 - A dynamic **physical-product** catalog, including ready-made and made-to-order goods.
@@ -146,9 +132,9 @@ qualification state.
 - Human transport-arrangement chat, private owner support and separate
   email-verified shipment tracking.
 
-### Suqpage is not
+### AfricMade is not
 
-MirtPage is not a payment processor, checkout/order system, inventory counter,
+AfricMade is not a payment processor, checkout/order system, inventory counter,
 ERP, tax/accounting engine, automated carrier booking/dispatch service or
 merchant-listing guarantee. A selected product, copied message, chat, tracking
 record or external link is not a paid order, confirmed booking or delivery proof.
@@ -178,7 +164,7 @@ Live/sharing controls are authored presentation settings, not proof that a provi
 broadcast started; retain only configured links and truthful status. Sound/push
 preferences do not change the business's public content or permission authority.
 
-### 5.2 Suqpage must have its own platform identity
+### 5.2 AfricMade must have its own platform identity
 
 Keep a consistent shell, typography and recognizable controls across Market,
 Featured, About, legal/account pages and workspaces. Use ordinary page/task
@@ -222,7 +208,7 @@ Details: FE-029/FE-036/FE-040/FE-053/FE-054/FE-056 and the relevant current spec
 Marked fictional demo businesses exercise varied product counts, industries,
 optional categories, media and supply types. They are fixtures, not real clients
 or authority for merchant facts, and intentionally demonstrate the range of
-businesses MirtPage serves to first-time visitors. Keep examples clearly marked;
+businesses AfricMade serves to first-time visitors. Keep examples clearly marked;
 never present them as real merchants or as factual availability, capacity or
 production evidence. Generated demo illustrations are illustrative, not
 documentary product photographs; use honest no-photo placeholders when genuine
@@ -262,9 +248,11 @@ A product may carry ordered validated media, description, optional nonnegative E
 display price, merchant-defined offered-by unit and concise highlights. Current
 canonical option groups, where present, retain their validated values and defaults;
 zero to four groups are supported. Desired quantity is optional free-form inquiry
-intent, bounded to 80 characters, never inventory. Optional capacity/minimum-order/
-lead-time facts must be authored, not calculated or verified by the platform; the
-shared public product view omits those production facts.
+intent, bounded to 80 characters, never inventory. Owners may explicitly declare
+single-item, bulk or both order sizes, and optional capacity/minimum-order/
+lead-time facts. These are merchant claims, not calculated or verified by the
+platform. Public product details show entered facts so a buyer can decide whether
+to inquire; the inquiry itself still asks only for optional quantity.
 
 Admitted owner video links use canonical supported provider IDs, never arbitrary
 iframe markup. Preserve media ordering, ownership, visibility and the gallery limits
@@ -289,17 +277,18 @@ rehydrated against the latest eligible canonical products/options before use.
 
 Contact prepares a short inquiry in the current interface language, with literal
 merchant data, optional quantity intent and each canonical product link. Offer
-validated, policy-approved WhatsApp and Telegram actions alongside MirtPage Inbox.
+validated, policy-approved WhatsApp and Telegram actions alongside AfricMade Inbox.
 Show the approved public contact identity on desktop with a separate Copy contact
-action; desktop uses Copy message or MirtPage Inbox and does not launch messaging
+action; desktop uses Copy message or AfricMade Inbox and does not launch messaging
 apps. Phone/native actions may open the supported channel with the prepared draft.
 SMS remains secondary. No external message is sent automatically.
 
-New first-party business-inbox submissions and their primary owner navigation,
-metrics and alerts are retired. Stale creation APIs return 410 before body parsing,
-persistence or notification work. Authorized historical records remain private;
-retirement does not delete them. Transport and owner Support are unaffected.
-Details: FE-041/FE-066, BE-055 and §9.
+An AfricMade Inbox submission is an asynchronous inquiry to the selected business,
+not a live chat. Its owner reads the canonical message and contact details in a
+private business inbox; the visitor sees a receipt, not a delivery or sale claim.
+Authorize creation and reads by current product visibility and tenant boundaries.
+Transport and owner Support remain separate. Details: FE-041/FE-075, BE-055/BE-062
+and §9.
 
 ## 9. Social messaging and clipboard behavior
 
@@ -460,10 +449,12 @@ Details: BE-030/BE-031/BE-038/BE-039/BE-043/BE-045/BE-047/BE-052/BE-053/BE-061.
 
 Customers and businesses agree purchases/payment directly. Visitors and authenticated
 business owners can share an origin and destination to arrange transport with
-SharedTrucks Logistics. A live transport agent helps with the request; MirtPage
-staff currently operate the internal queue, and provider-owned routing is future
-work. If no agent joins or replies, the live wait closes after three minutes
-thirty seconds and offers a short callback form. Submitting it leaves one
+SharedTrucks Logistics. A live transport agent helps with the request; AfricMade
+staff currently operate the internal queue on the provider's behalf, and
+provider-owned routing is future work. If no agent joins or replies, a visible
+countdown runs during the live wait. Staff are alerted after two minutes; after
+three minutes thirty seconds the provider-named busy state offers a short callback
+form or a way to try again later. Submitting the form leaves one
 follow-up on the existing staff case and shows a static receipt; it does not
 keep a public chat or message portal open. The visitor or owner can cancel a
 timed-out request and start a separate one. Owner transport is bound to the current business;
@@ -499,13 +490,13 @@ new provider details belong to independent shipments. BE-058/FE-069/DEP-048 own 
 contract; external scan integration remains future work.
 
 Planned FE-077/BE-064 adds a named shipper and receiver to a shipment record, each
-optionally linked to a published MirtPage
+optionally linked to a published AfricMade
 business or entered as a custom party. Both selected emails will require separate
 verification and receive read access only to that shipment. A business's published
 contact email may be the default; private sign-in/notification email is never
 inferred. This plan does not change today's recipient-only access or internal chat
 routing. Any repeat-business discount must be a logistics provider's explicit offer;
-MirtPage does not calculate or promise one.
+AfricMade does not calculate or promise one.
 
 ## 13. User roles and standard page workspaces
 
@@ -523,16 +514,16 @@ is explicit; it is not an accidental tenant-query bypass or an owner's Auth sess
 ### Owner (client)
 
 An owner manages only their business plus their own private Account settings.
-Account exposes Your page, Products, Business details, Account settings, Support
-and Transport through focused summaries/tasks rather than stacked edit forms.
+Account exposes Your page, Products, Inquiries, Business details, Account settings,
+Support and Transport through focused summaries/tasks rather than stacked edit forms.
 Public contact/profile values and private account/notification values remain separate.
 Show canonical visit/offering metrics without reviving business subscriptions, plans,
 renewals, payment controls or incoming-inquiry counts. Visit attribution uses bounded
 privacy-salted daily deduplication, not raw IPs/contact data; analytics access remains
 scoped under BE-017/FE-018 and never follows queue membership alone.
 Save/Cancel, preview and publication show truthful pending/error states and preserve
-unsaved inputs according to the focused editor contract. Legacy inbox history is
-private compatibility access, not a primary incoming-inquiries destination.
+unsaved inputs according to the focused editor contract. Incoming product inquiries
+are a primary private business task; they do not grant transport or Support access.
 
 Planned FE-056 native correction: product management uses compact private rows,
 while a product editor keeps one reachable Save/Cancel bar outside its scrolling
@@ -590,7 +581,7 @@ and current recipient authority. Provider handoff is not human Read or guarantee
 OS display. Generic localized payloads contain no transcript/contact/carrier details;
 private feeds, subscriptions and leased deliveries recheck access and suppress stale
 answered/ended work. Preserve quiet/mute behavior, bounded retries and honest failure
-feedback; no new business-inbox alert or silent permission grant is implied.
+feedback; an inquiry alert remains informational and never grants a new permission.
 
 ### Public customer
 
@@ -698,9 +689,10 @@ visibility is checked before content, metadata, cache/304 or user-visible succes
 
 External drafts are convenience text, not a database/order authorization source.
 Revalidate public products/options/status and bounded item/quantity/body limits;
-never trust names or snapshots from local storage. Retired first-party creation APIs
-remain 410 without creating records/alerts. Retained authenticated inquiry commands
-still require matching business, current permission and audit with the successful change.
+never trust names or snapshots from local storage. AfricMade Inbox creates a bounded
+first-party inquiry only for a currently eligible business and products. Owner reads
+and changes require matching business, current permission and audit with the
+successful change.
 
 ### Retired logistics routes
 
@@ -802,7 +794,7 @@ Country labels may use locale data with an honest fallback where unavailable.
 Use the authoritative interface TSV and generated catalogs, selected-language
 loading and server/client catalog boundary. Preserve URL, form, inquiry and
 navigation state during a language change, and do not lose a pre-hydration choice.
-Allow long Oromo text and appropriate script typography; the Latin MirtPage artwork
+Allow long Oromo text and appropriate script typography; the Latin AfricMade artwork
 is constant. Automated completeness/layout coverage is not independent native-speaker
 endorsement, translated user data or cross-language search. FE-049/FE-070 govern
 copy; rollout evidence remains separate.
@@ -895,9 +887,9 @@ business into goods or apply demo corrections to unmarked tenants.
    bypass readiness or suspension with an editor shortcut.
 6. Authorized staff follow the same canonical business command boundaries under
    their current administrator grant. They never acquire private account authority.
-7. Visitors browse, select and use external localized inquiry handoffs. Support,
-   transport requests and independent recipient tracking retain their own access
-   and history, not a reinstated business inbox.
+7. Visitors browse, select and use a localized AfricMade Inbox inquiry or an
+   approved external handoff. Support, transport requests and independent recipient
+   tracking retain their own access and history, separate from business inquiries.
 
 Details: FE-040/FE-048/FE-056/FE-072 and BE-032/BE-033/BE-039/BE-041/BE-060.
 
@@ -912,8 +904,10 @@ automated map navigation; public community tiles are not automated test traffic.
 Do not fabricate successful application responses or claim screenshots/mocked
 ports as end-to-end or provider evidence.
 
-Focused UI evidence and existing visual approval precede expensive gates except
-the contract's security/data-integrity/nonvisual emergency cases. Run applicable
+Focused UI evidence and a source-bound agent visual pass/fail decision precede
+expensive gates except the contract's security/data-integrity/nonvisual emergency
+cases. The supplied AfricMade logo was the owner's explicit design approval;
+routine subsequent layout checks are agent-led. Run applicable
 source-bound full check, release, acceptance and required CI; preserve first failures
 and classify product/data/infrastructure before a bounded retry. Reuse evidence
 only while its actual relevant inputs are unchanged. Finite static scans, synthetic

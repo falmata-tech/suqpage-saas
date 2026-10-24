@@ -3,7 +3,7 @@ import { test } from "node:test";
 import vm from "node:vm";
 import {createRequire} from 'node:module';
 import { build } from "esbuild";
-import {ABOUT_STOREFRONT_SECTIONS} from "../lib/storefront-copy";
+import {ABOUT_STOREFRONT_SECTIONS,MARKET_STOREFRONT_COPY} from "../lib/storefront-copy";
 
 type Element = { type: string | ((props: Record<string, unknown>) => Element); props: Record<string, unknown> & { children?: unknown } };
 type Gesture = { dx: number; dy: number; vx: number };
@@ -74,6 +74,18 @@ test('FE-074 native Market retains the displayed feed/scroll during criteria upd
 });
 const nodes = (element: Element): Element[] => [element, ...[element.props.children].flat(Infinity).filter((value): value is Element => value !== null && typeof value === "object" && "props" in value).flatMap(nodes)];
 function style(element: Element) { return Object.assign({}, ...[element.props.style].flat().filter(value => value && typeof value === "object")) as Record<string, unknown>; }
+test('FE-070 native Market shows the same concise introduction without covering discovery',async()=>{
+ const state=fixture();state.dimensions={width:320,height:700,fontScale:1};
+ const render=await component('index',state),tree=render();
+ const intro=tree.find(node=>node.props.testID==='market-introduction');
+ assert.ok(intro,'Native Market has a visible introduction');
+ const copy=nodes(intro).filter(node=>node.type==='Text').map(node=>node.props.children);
+ assert.ok(copy.includes(MARKET_STOREFRONT_COPY.title));
+ assert.ok(copy.includes(MARKET_STOREFRONT_COPY.description));
+ assert.ok(tree.indexOf(intro)<tree.findIndex(node=>node.props.testID==='market-mode-row'));
+ assert.ok(tree.indexOf(intro)<tree.findIndex(node=>node.props.testID==='market-stage'));
+ assert.equal(style(intro).position,undefined,'Introduction takes layout space instead of blocking the map');
+});
 function resetHooks(state:ReturnType<typeof fixture>) {
   for(const effect of state.effects)effect?.cleanup?.();
   state.states=[];state.refs=[];state.effects=[];state.pendingEffects=[];
@@ -126,7 +138,7 @@ test("FE-053 actual Market component preserves the mounted panes and follows onl
   const modes = tree.filter(node => node.props.accessibilityRole === "tab");
   assert.ok(modes.every(mode => style(mode).minHeight === 48));
   assert.deepEqual(modes.map(mode=>mode.props['aria-selected']),[true,false],"Browser selection aliases match the native state");
-  assert.ok(tree.some(node => node.type === "Text" && node.props.accessibilityRole === "header" && node.props.children === "MirtPage Market"));
+  assert.ok(tree.some(node => node.type === "Text" && node.props.accessibilityRole === "header" && node.props.children === "AfricMade Market"));
   const gesture = state.gesture!;
   assert.equal(gesture.onMoveShouldSetPanResponder({}, { dx: 5, dy: 0, vx: 0 }), false);
   assert.equal(gesture.onMoveShouldSetPanResponder({}, { dx: 20, dy: 30, vx: 0 }), false, "Vertical motion is not a pane swipe");
@@ -185,7 +197,7 @@ test("FE-053 actual Market component preserves the mounted panes and follows onl
   (launcherFrame.props.onLayout as (event:{nativeEvent:{layout:{height:number}}})=>void)({nativeEvent:{layout:{height:56}}});tree=render();
   assert.equal((tree.find(node=>node.type==='FlatList')!.props.contentContainerStyle as {paddingBottom:number}).paddingBottom,92,'The last product action can scroll clear of the measured single-row dock');
   assert.equal(style(tree.find(node=>node.props.testID==='map-tools')!).flexDirection,'row','Short maps keep zoom controls above the right-side handle');
-  assert.ok(!tree.some(node=>node.props.accessibilityLabel==='About MirtPage'||node.type==='Sheet'&&node.props.title==='About MirtPage'),'Market leaves its narrative on the dedicated About page');
+  assert.ok(!tree.some(node=>node.props.accessibilityLabel==='About AfricMade'||node.type==='Sheet'&&node.props.title==='About AfricMade'),'Market leaves its narrative on the dedicated About page');
 });
 
 test('FE-053 S153 inactive Market panes preserve native hiding and explicitly isolate installed Web controls',async()=>{
@@ -419,7 +431,7 @@ test('FE-053 S127 short portrait and landscape keep48px map controls clear of th
   for(const viewport of [{width:320,height:480,baseStage:116},{width:844,height:390,baseStage:26}]){
     const state=fixture();state.dimensions={width:viewport.width,height:viewport.height,fontScale:1};
     const render=await component('index',state);let tree=render();
-    const heading=tree.find(n=>n.type==='Text'&&n.props.accessibilityRole==='header'&&n.props.children==='MirtPage Market')!;
+    const heading=tree.find(n=>n.type==='Text'&&n.props.accessibilityRole==='header'&&n.props.children==='AfricMade Market')!;
     assert.equal(style(heading).position,'absolute');assert.equal(style(heading).height,1,'The localized primary heading remains programmatic without a duplicate visual title row');
     const stageHeight=viewport.baseStage+48;
     (tree.find(n=>n.props.testID==='market-stage')!.props.onLayout as(event:{nativeEvent:{layout:{height:number}}})=>void)({nativeEvent:{layout:{height:stageHeight}}});tree=render();
@@ -465,7 +477,7 @@ test('FE-065 S143 actual Market keeps only compact centered modes and one non-la
   for(const width of [320,390,844,1440]){
     const state=fixture();state.dimensions={width,height:width===844?390:844,fontScale:1};
     const render=await component('index',state);let tree=render();
-    const headings=tree.filter(n=>n.type==='Text'&&n.props.accessibilityRole==='header'&&n.props.children==='MirtPage Market');
+    const headings=tree.filter(n=>n.type==='Text'&&n.props.accessibilityRole==='header'&&n.props.children==='AfricMade Market');
     assert.equal(headings.length,1);assert.equal(style(headings[0]).position,'absolute');assert.equal(style(headings[0]).width,1);assert.equal(style(headings[0]).height,1);
     const row=tree.find(n=>n.props.testID==='market-mode-row')!,children=nodes(row).filter(node=>node.props.accessibilityRole==='tablist');
     assert.equal(children.length,1);assert.equal(style(row).justifyContent,'center');assert.equal(style(row).paddingBottom,undefined);assert.equal(style(children[0]).padding,undefined);assert.equal(style(children[0]).width,undefined,'The switch uses its needed width rather than a framed full-width bar');
@@ -474,7 +486,7 @@ test('FE-065 S143 actual Market keeps only compact centered modes and one non-la
     assert.equal(tree.filter(n=>n.type==='Status').length,0,'A settled empty status does not allocate a toolbar gap');
     state.feed.loading=true;tree=render();assert.equal(tree.filter(n=>n.type==='Status'&&n.props.refreshing===true).length,1,'Actual loading remains visible');
     state.feed.loading=false;state.feed.error='Unable to connect';tree=render();assert.equal(tree.filter(n=>n.type==='Status'&&n.props.error==='Unable to connect').length,1,'The same bounded error/retry remains reachable');
-    assert.ok(!tree.some(n=>n.props.accessibilityLabel==='About MirtPage'||n.type==='Icon'&&n.props.name==='info'||n.type==='Sheet'&&n.props.title==='About MirtPage'));
+    assert.ok(!tree.some(n=>n.props.accessibilityLabel==='About AfricMade'||n.type==='Icon'&&n.props.name==='info'||n.type==='Sheet'&&n.props.title==='About AfricMade'));
   }
 });
 

@@ -302,6 +302,12 @@ export function ProductEditor({
         : String(product.priceMinor / 100),
     ),
     [kind, setKind] = useState(product?.kind==='service'?"":product?.kind || "standard_product"),
+    [orderScope, setOrderScope] = useState(product?.orderScope || "unspecified"),
+    [quantityUnit, setQuantityUnit] = useState(product?.quantityUnit || ""),
+    [highlights, setHighlights] = useState((product?.highlights || []).join("\n")),
+    [minimumOrderSummary, setMinimumOrderSummary] = useState(product?.minimumOrderSummary || ""),
+    [leadTimeSummary, setLeadTimeSummary] = useState(product?.leadTimeSummary || ""),
+    [capacitySummary, setCapacitySummary] = useState(product?.capacitySummary || ""),
     [availability, setAvailability] = useState(
       product?.availability || "available",
     ),
@@ -310,10 +316,10 @@ export function ProductEditor({
     [assets, setAssets] = useState<ImagePicker.ImagePickerAsset[]>([]),
     [video, setVideo] = useState(""),
     [key] = useState(() => Crypto.randomUUID());
-  const values={name,description,price,kind,availability,published,media,assets,video};
+  const values={name,description,price,kind,orderScope,quantityUnit,highlights,minimumOrderSummary,leadTimeSummary,capacitySummary,availability,published,media,assets,video};
   const baseline=useRef(values);
   const signature=JSON.stringify(values),guard=useOwnerEditGuard({dirty:signature!==JSON.stringify(baseline.current),signature,busy:action.busy,isBusy:action.isBusy,discard:()=>{
-    const saved=baseline.current;setName(saved.name);setDescription(saved.description);setPrice(saved.price);setKind(saved.kind);setAvailability(saved.availability);setPublished(saved.published);setMedia(saved.media);setAssets(saved.assets);setVideo(saved.video);
+    const saved=baseline.current;setName(saved.name);setDescription(saved.description);setPrice(saved.price);setKind(saved.kind);setOrderScope(saved.orderScope);setQuantityUnit(saved.quantityUnit);setHighlights(saved.highlights);setMinimumOrderSummary(saved.minimumOrderSummary);setLeadTimeSummary(saved.leadTimeSummary);setCapacitySummary(saved.capacitySummary);setAvailability(saved.availability);setPublished(saved.published);setMedia(saved.media);setAssets(saved.assets);setVideo(saved.video);
   }});
   const save = () => {
     void action.run(async () => {
@@ -331,6 +337,12 @@ export function ProductEditor({
           priceMinor: value === null ? null : Math.round(value * 100),
           ...(isActiveProductKind(kind)?{offeringKind:kind}:{}),
           availability,
+          orderScope,
+          quantityUnit,
+          highlights: highlights.split(/\r?\n/),
+          minimumOrderSummary,
+          leadTimeSummary,
+          capacitySummary,
           isPublished: published,
           expectedContentVersion: home.shop.version,
           idempotencyKey: key,
@@ -370,6 +382,15 @@ export function ProductEditor({
       </View>
       {!kind&&<Copy muted>{t('Choose Ready to ship or Made to order before saving.')}</Copy>}
       {kind&&!isActiveProductKind(kind)&&<Copy muted>{t('The current supply type is kept unless you choose an option.')}</Copy>}
+      <Copy>{t("Order sizes")}</Copy>
+      <View style={s.wrap}>
+        {([
+          ["unspecified", "Ask me about order size"],
+          ["single", "Single items"],
+          ["bulk", "Bulk orders"],
+          ["both", "Single items and bulk orders"],
+        ] as const).map(([value,label]) => <Chip key={value} label={t(label)} selected={orderScope===value} minHeight={48} onPress={()=>{if(!action.isBusy()){guard.changed();setOrderScope(value);}}}/>)}
+      </View>
       <Field
         label={t("Description")}
         value={description}
@@ -384,6 +405,11 @@ export function ProductEditor({
         keyboardType="decimal-pad"
         editable={!action.busy}
       />
+      <Field label={t("Offered by")} value={quantityUnit} onChangeText={value=>{guard.changed();setQuantityUnit(value);}} editable={!action.busy} />
+      <Field label={t("Highlights")} value={highlights} onChangeText={value=>{guard.changed();setHighlights(value);}} multiline editable={!action.busy} />
+      <Field label={t("Minimum order")} value={minimumOrderSummary} onChangeText={value=>{guard.changed();setMinimumOrderSummary(value);}} editable={!action.busy} />
+      <Field label={t("Typical lead time")} value={leadTimeSummary} onChangeText={value=>{guard.changed();setLeadTimeSummary(value);}} editable={!action.busy} />
+      <Field label={t("Supply capacity")} value={capacitySummary} onChangeText={value=>{guard.changed();setCapacitySummary(value);}} editable={!action.busy} />
       <Copy>{t("Photos and videos")}</Copy>
       {media.map((m, i) => (
         <Card key={m.ref}>

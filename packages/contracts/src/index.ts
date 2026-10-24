@@ -25,6 +25,12 @@ export type Offering = {
   published: boolean;
   availability: string;
   quantityMode: string;
+  orderScope?: "unspecified" | "single" | "bulk" | "both";
+  quantityUnit?: string;
+  highlights?: string[];
+  minimumOrderSummary?: string;
+  leadTimeSummary?: string;
+  capacitySummary?: string;
   options: Array<{ name: string; values: string[] }>;
   categoryId?: number | null;
   categoryName?: string;
@@ -244,6 +250,6 @@ export function publicLink(base: string, path: string): string {
     !["https:", "http:"].includes(url.protocol) ||
     url.origin !== new URL(base).origin
   )
-    throw Error("Invalid Suqpage link.");
+    throw Error("Invalid AfricMade link.");
   return url.href;
 }

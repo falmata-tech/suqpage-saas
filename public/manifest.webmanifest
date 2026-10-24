@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "MirtPage",
-  "short_name": "MirtPage",
-  "description": "Business stories and products, clearly organized—without social media clutter. Find what interests you and ask the business directly.",
+  "name": "AfricMade",
+  "short_name": "AfricMade",
+  "description": "Explore African-made goods and supplier showrooms. Ask about single items or bulk orders directly.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -12,13 +12,13 @@
   "dir": "ltr",
   "categories": ["business", "shopping"],
   "icons": [
-    { "src": "/pwa/mirtpage-panels-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/pwa/mirtpage-panels-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/pwa/mirtpage-panels-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/pwa/africmade-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/africmade-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/africmade-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Explore shops", "short_name": "Market", "url": "/", "icons": [{"src": "/pwa/mirtpage-panels-icon-192.png", "sizes": "192x192"}] },
-    { "name": "Daily Featured", "short_name": "Featured", "url": "/featured", "icons": [{"src": "/pwa/mirtpage-panels-icon-192.png", "sizes": "192x192"}] },
-    { "name": "Your account", "short_name": "Account", "url": "/login", "icons": [{"src": "/pwa/mirtpage-panels-icon-192.png", "sizes": "192x192"}] }
+    { "name": "Explore products", "short_name": "Market", "url": "/", "icons": [{"src": "/pwa/africmade-icon-192.png", "sizes": "192x192"}] },
+    { "name": "Daily Featured", "short_name": "Featured", "url": "/featured", "icons": [{"src": "/pwa/africmade-icon-192.png", "sizes": "192x192"}] },
+    { "name": "Your account", "short_name": "Account", "url": "/login", "icons": [{"src": "/pwa/africmade-icon-192.png", "sizes": "192x192"}] }
   ]
 }

@@ -35,7 +35,7 @@ export default function OwnerScreen() {
   if (!session)
     return (
       <Screen>
-        <Copy>{t("Sign in to MirtPage.")}</Copy>
+        <Copy>{t("Sign in to AfricMade.")}</Copy>
         <Button
           label={t("Sign in")}
           onPress={() => router.replace("/account")}

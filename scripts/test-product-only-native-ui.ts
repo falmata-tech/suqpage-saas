@@ -65,7 +65,7 @@ test('FE-067 native product choices retain supply, availability, media and guard
     (field(tree,'Description').props.onChangeText as(value:string)=>void)('Updated details without changing supply');
     tree=render('ProductEditor',props);press(button(tree,'Save changes'));await flush();
     assert.equal(state.writes.length,1);assert.equal(state.writes[0].path,'owner/products/21');
-    assert.deepEqual(JSON.parse(JSON.stringify(state.writes[0].details)),{name:originalProduct.name,description:'Updated details without changing supply',priceMinor:originalProduct.priceMinor,offeringKind:kind,availability:'limited',isPublished:false,expectedContentVersion:8,idempotencyKey:'fixture-idempotency-0',media:originalProduct.media});
+    assert.deepEqual(JSON.parse(JSON.stringify(state.writes[0].details)),{name:originalProduct.name,description:'Updated details without changing supply',priceMinor:originalProduct.priceMinor,offeringKind:kind,availability:'limited',orderScope:'unspecified',quantityUnit:'',highlights:[''],minimumOrderSummary:'',leadTimeSummary:'',capacitySummary:'',isPublished:false,expectedContentVersion:8,idempotencyKey:'fixture-idempotency-0',media:originalProduct.media});
     assert.deepEqual(Array.from(state.writes[0].fields),['details']);assert.equal(state.saved,1);
     const reloaded=await fixture('owner-forms');assert.equal(chip(reloaded.render('ProductEditor',productProps(state.writes[0].details.offeringKind)),kind==='made_to_order'?'Made to order':'Ready to ship').props.selected,true,'Fresh component honors returned saved kind');
   }

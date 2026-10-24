@@ -2,15 +2,15 @@
 export const platformAssetRewrites: ReadonlyArray<{ source: string; destination: string }> = [
   {
     "source": "/brand/africmade-mark.svg",
-    "destination": "/brand/suqpage-mark.svg"
+    "destination": "/brand/africmade-afro-mark-v1.png"
   },
   {
     "source": "/brand/mirtpage-mark-v2.svg",
-    "destination": "/brand/suqpage-mark.svg"
+    "destination": "/brand/africmade-afro-mark-v1.png"
   },
   {
     "source": "/brand/mirtpage-mark.svg",
-    "destination": "/brand/suqpage-mark.svg"
+    "destination": "/brand/africmade-afro-mark-v1.png"
   },
   {
     "source": "/landing/africmade-about-production-v1.webp",

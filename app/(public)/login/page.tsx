@@ -24,14 +24,14 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
       <section className="platform-task-shell login-task-shell" aria-labelledby="login-title">
         <div className="platform-task-context">
           <span className="platform-task-eyebrow">{t("Account access")}</span>
-          <h1 id="login-title">{t("Sign in to MirtPage.")}</h1>
+          <h1 id="login-title">{t("Sign in to AfricMade.")}</h1>
           <p>{t("Use your email to sign in or create an account.")}</p>
           <div className="platform-context-note"><strong>{t("New here?")}</strong><span>{t("Enter your email to get started.")}</span></div>
         </div>
         <div className="platform-form-panel">
           <div className="platform-form-heading"><span>{t("Email sign-in")}</span><h2>{t("Continue to your account")}</h2><p>{t(accessMessage)}</p></div>
           <PasswordlessLoginForm emailEnabled={emailEnabled} initialError={p.error || ""} />
-          {!emailEnabled?<p className="platform-form-note" role="status">{t("Please try again later or contact MirtPage support.")}</p>:null}
+          {!emailEnabled?<p className="platform-form-note" role="status">{t("Please try again later or contact AfricMade support.")}</p>:null}
           <Link className="platform-return-link" href="/transport-partners">{t("Logistics service providers: Ask to be listed")}</Link>
           <Link className="platform-return-link" href="/">{t("Return to Market")}</Link>
         </div>

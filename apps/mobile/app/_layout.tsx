@@ -60,7 +60,7 @@ function Routes() {
       </Stack>
       </PublicScrollInsetProvider>
       {transportVisible&&<View testID="public-transport-overlay" onLayout={event=>setLauncherHeight(Math.max(48,Math.ceil(event.nativeEvent.layout.height)))} style={{pointerEvents:'box-none',position:'absolute',right:12,bottom:60+bottom+12,maxWidth:width-24,zIndex:20}}>
-        <PublicActionDock placement="shell" compact={height<700||width<360} hideInquiry={path==='/inquiry'&&!params.id}/>
+        <PublicActionDock placement="shell" compact={height<700||width<360||path==='/product'} hideInquiry={path==='/inquiry'&&!params.id}/>
       </View>}
       <MainNavigation/>
     </View>

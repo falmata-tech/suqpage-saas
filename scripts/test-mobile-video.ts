@@ -131,7 +131,7 @@ test("FE-053: bounded bridge accepts only readiness and playback failure", () =>
     assert.equal(playerEvent(value), null);
 });
 
-test("FE-070: native YouTube frame uses the MirtPage fallback and retains configured origins", async () => {
+test("FE-070: native YouTube frame uses the AfricMade fallback and retains configured origins", async () => {
   const { build } = await import("esbuild");
   const vm = await import("node:vm");
   const result = await build({

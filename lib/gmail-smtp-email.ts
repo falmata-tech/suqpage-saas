@@ -14,7 +14,7 @@ type SmtpOptions={
   auth:{user:string;pass:string};disableFileAccess:true;disableUrlAccess:true;
 };
 type SmtpMessage={
-  from:{name:'MirtPage';address:string};to:{address:string};subject:string;text:string;
+  from:{name:'AfricMade';address:string};to:{address:string};subject:string;text:string;
   messageId:string;disableFileAccess:true;disableUrlAccess:true;
 };
 type SmtpTransport={
@@ -71,7 +71,7 @@ export async function sendGmailSmtpEmail(
   try{
     transport=(options.createTransport??defaultFactory)(settings);
     const sent=await transport.sendMail({
-      from:{name:'MirtPage',address:config.user},to:{address:message.recipientEmail},
+      from:{name:'AfricMade',address:config.user},to:{address:message.recipientEmail},
       subject:message.subject,text:message.text,
       messageId:`<${message.deliveryKey}@mirtpage.com>`,disableFileAccess:true,disableUrlAccess:true,
     });

@@ -1,5 +1,6 @@
 
 import { useUiText } from "@/lib/i18n/ui";
+import {orderScopeLabels} from "@/lib/order-scope";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import {
   privacyEnhancedYouTubeEmbedUrl,
@@ -562,6 +563,7 @@ export function BankCatalogSection({
                 <h3>{product.name}</h3>
               </div>
               <p>{product.description}</p>
+              {orderScopeLabels(product.orderScope).length ? <small className={styles.productFact}>{orderScopeLabels(product.orderScope).map(label=>t(label)).join(" · ")}</small> : null}
               {product.capacitySummary ? (
                 <small className={styles.productFact}>
                   {t("Capacity:")}{" "}{product.capacitySummary}
@@ -735,7 +737,7 @@ export function BankFooterSection({
         ) : null}
       </div>
       <div className={styles.footerShowroom}>
-        <span>{t("Permanent MirtPage page")}</span>
+        <span>{t("Permanent AfricMade page")}</span>
         <strong>@{context.business.handle}</strong>
       </div>
       <div className={styles.footerContact}>

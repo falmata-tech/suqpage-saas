@@ -70,14 +70,14 @@ assert.match(publicFrame, /<Link href=\{dashboardHref\}/);
 assert.match(publicShell, /dashboardHref=\{user\?workspaceHomeHref\(user\)/, 'The authenticated role supplies its authorized Account destination');
 assert.match(read("components/DashboardShell.tsx"), /href:['"]\/about['"],label:['"]About['"]/, 'Owner navigation retains the About task');
 assert.doesNotMatch(publicFrame, /href: "\/sponsors"/);
-assert.match(publicFrame, /aria-label=\{t\("Explore MirtPage"\)\}/);
+assert.match(publicFrame, /aria-label=\{t\("Explore AfricMade"\)\}/);
 assert.match(mobileNavigation, /href:\s*"\/",\s*label:\s*"Market"/);
 // FE-066/FE-070: four public tasks, About reachable, Login/Account follows the
-// session, and retired business-inbox submission is never a navigation task.
+// session, and the private business inbox stays under Account rather than public navigation.
 assert.match(mobileNavigation, /href:\s*"\/about",\s*label:\s*"About"/);
 assert.match(mobileNavigation, /href:onboarding\?"\/request":signedIn\?dashboardHref:"\/login"/);
 assert.match(mobileNavigation, /label:signedIn\?"Account":"Login"/);
-assert.match(mobileNavigation, /aria-label=\{t\("MirtPage application navigation"\)\}/);
+assert.match(mobileNavigation, /aria-label=\{t\("AfricMade application navigation"\)\}/);
 assert.doesNotMatch(`${publicFrame}\n${mobileNavigation}`, /label:\s*["']Inquiries["']|\/dashboard\/inquiries|login\?next=inquiries/);
 assert.doesNotMatch(mobileNavigation, /t\("More"\)|aria-haspopup="dialog"/);
 assert.doesNotMatch(mobileNavigation, /label: "Home"/);

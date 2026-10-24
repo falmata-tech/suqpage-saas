@@ -11,7 +11,7 @@ export function showroomStatusLookupUrl(requestUrl: string, environment: LookupE
   const configured = new URL(environment.NEXT_PUBLIC_APP_URL || "");
   if (configured.origin !== "https://mirtpage.com" || configured.pathname !== "/" || configured.search || configured.hash
     || configured.username || configured.password) {
-    throw new Error("The hosted showroom status origin is not the reviewed MirtPage site.");
+    throw new Error("The hosted showroom status origin is not the reviewed AfricMade site.");
   }
   return new URL("/api/public/showroom-status", configured.origin);
 }

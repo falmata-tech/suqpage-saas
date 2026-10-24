@@ -39,3 +39,10 @@ export function formatTransportElapsed(elapsedMs:number,locale:string):string{
   const digits=new Intl.NumberFormat(locale,{useGrouping:false});
   return `${digits.format(Math.floor(total/60)).padStart(2,'0')}:${digits.format(total%60).padStart(2,'0')}`;
 }
+
+/** Round up so the display never shows 00:00 before the server handoff. */
+export function formatTransportRemaining(elapsedMs:number,locale:string):string{
+  const remaining=Math.max(0,Math.ceil((TRANSPORT_CALLBACK_AFTER_MS-Math.max(0,elapsedMs))/1000));
+  const digits=new Intl.NumberFormat(locale,{useGrouping:false,minimumIntegerDigits:2});
+  return `${digits.format(Math.floor(remaining/60))}:${digits.format(remaining%60)}`;
+}

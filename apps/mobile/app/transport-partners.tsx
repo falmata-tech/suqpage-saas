@@ -21,8 +21,8 @@ export default function TransportPartnerInterest(){
   }catch(error){if(live.current)setError(error instanceof Error?error.message:'We could not receive your request. Please try again later.');}
   finally{sending.current=false;if(live.current)setBusy(false);}
  }
- return <Screen><Button secondary label={t('About MirtPage')} onPress={()=>router.navigate('/about')}/><Copy muted>{t('For independent logistics service providers')}</Copy><Copy big heading>{t('Get listed on MirtPage')}</Copy>{reference?<><Copy heading>{t('Request received. We’ll contact you about the next steps.')}</Copy><Copy>{t('Reference')}: {reference}</Copy></>:<>
-  <Copy muted>{t('Freight brokerages, parcel express companies, and hub-and-spoke logistics operators can ask to be listed on MirtPage. Tell us about your company and we’ll contact you.')}</Copy>
+ return <Screen><Button secondary label={t('About AfricMade')} onPress={()=>router.navigate('/about')}/><Copy muted>{t('For independent logistics service providers')}</Copy><Copy big heading>{t('Get listed on AfricMade')}</Copy>{reference?<><Copy heading>{t('Request received. We’ll contact you about the next steps.')}</Copy><Copy>{t('Reference')}: {reference}</Copy></>:<>
+  <Copy muted>{t('Freight brokerages, parcel express companies, and hub-and-spoke logistics operators can ask to be listed on AfricMade. Tell us about your company and we’ll contact you.')}</Copy>
   <Field label={t('Company name')} value={draft.companyName} maxLength={160} editable={!busy} onChangeText={v=>change('companyName',v)}/>
   <Field label={t('Contact name')} value={draft.contactName} maxLength={80} editable={!busy} onChangeText={v=>change('contactName',v)}/>
   <Field label={t('Email')} value={draft.email} maxLength={160} autoCapitalize="none" keyboardType="email-address" editable={!busy} onChangeText={v=>change('email',v)}/>

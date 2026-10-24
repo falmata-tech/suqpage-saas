@@ -3,13 +3,14 @@ import {
   MAX_INQUIRY_SELECTIONS,
 } from "../../../lib/product-inquiry";
 import React, { useRef, useState } from "react";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import type { Shop } from "@suqpage/contracts";
 import { useApp, useLoad, request } from "../src/runtime";
 import { Screen, Copy, LinkedText, Card, Button, Chip, Status, s } from "../src/ui";
 import Gallery from "../src/Gallery";
 import ProductSupply from '../src/ProductSupply';
+import {orderScopeLabels} from '../../../lib/order-scope';
 import {visibleCatalogProduct} from '../src/catalog-products';
 import {CatalogSafety} from '../src/CatalogSafety';
 import {useBusinessInquiry} from '../src/use-business-inquiry';
@@ -78,9 +79,17 @@ export default function Product() {
           <Copy big>{product.name}</Copy>
           <Copy muted>{shop.name}</Copy>
           <ProductSupply kind={product.kind} availability={product.availability}/>
-          {product.priceMinor !== null && (
+          {product.priceMinor !== null ? (
             <Copy big>{(product.priceMinor / 100).toLocaleString()} ETB</Copy>
-          )}
+          ) : <Copy>{t("Ask for price")}</Copy>}
+          {orderScopeLabels(product.orderScope).length ? <View style={s.wrap}>{orderScopeLabels(product.orderScope).map(label=><View key={label} style={{backgroundColor:'#fff1e9',borderColor:'#d7b4a3',borderWidth:1,borderRadius:20,paddingHorizontal:12,paddingVertical:8}}><Text style={{color:'#8f340f',fontWeight:'600'}}>{t(label)}</Text></View>)}</View> : null}
+          {(product.quantityUnit || product.minimumOrderSummary || product.leadTimeSummary || product.capacitySummary) ? <Card>
+            {product.quantityUnit ? <Copy>{t("Offered by")}: {product.quantityUnit}</Copy> : null}
+            {product.minimumOrderSummary ? <Copy>{t("Minimum order")}: {product.minimumOrderSummary}</Copy> : null}
+            {product.leadTimeSummary ? <Copy>{t("Typical lead time")}: {product.leadTimeSummary}</Copy> : null}
+            {product.capacitySummary ? <Copy>{t("Supply capacity")}: {product.capacitySummary}</Copy> : null}
+          </Card> : null}
+          {product.highlights?.length ? <Card>{product.highlights.map((fact,index)=><Copy key={`${index}-${fact}`}>• {fact}</Copy>)}</Card> : null}
           <LinkedText>{product.description}</LinkedText>
           {product.options.map((o) => (
             <Card key={o.name}>

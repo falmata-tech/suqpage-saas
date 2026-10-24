@@ -42,6 +42,7 @@ function toBankProduct(product: Product): BankProductView {
     availability: product.availability,
     offeringKind: product.offering_kind,
     quantityMode: product.quantity_mode,
+    orderScope: product.order_scope || "unspecified",
     capacitySummary: product.capacity_summary,
     minimumOrderSummary: product.minimum_order_summary,
     leadTimeSummary: product.lead_time_summary,
@@ -187,7 +188,7 @@ export function InvalidComposition() {
         <p>{t("Page temporarily unavailable")}</p>
         <h1>{t("This design could not be verified.")}</h1>
         <p>
-          {t("No substitute design was loaded. Please try again later or contact MirtPage support.")}</p>
+          {t("No substitute design was loaded. Please try again later or contact AfricMade support.")}</p>
       </div>
     </main>
   );

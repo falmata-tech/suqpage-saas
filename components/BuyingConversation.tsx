@@ -6,7 +6,7 @@ import { useUiText } from "@/lib/i18n/ui";
 import {useLocale} from 'next-intl';
 import { TRANSPORT_COPY } from "@/lib/i18n/transport-copy";
 import { buyingRefreshDelay, type BuyingConversation as Conversation } from "@/lib/buying-conversation-contract";
-import {estimateServerNow,formatTransportElapsed,transportLiveWait} from '@/lib/transport-live-wait';
+import {estimateServerNow,formatTransportRemaining,transportLiveWait} from '@/lib/transport-live-wait';
 import {TRANSPORT_COORDINATOR} from '@/lib/transport-coordinator';
 import {rememberTransportDraft,takeTransportDraft} from "@/lib/tracking-navigation";
 import styles from "./BuyingConversation.module.css";
@@ -154,12 +154,12 @@ export default function BuyingConversation({ initial, active, checking=false, on
     {callbackMode?<section className={styles.callback} aria-labelledby="transport-callback-heading">
       {callbackSubmitted?<>
         <h3 id="transport-callback-heading">{t(TRANSPORT_COPY.callbackReceivedHeading)}</h3>
-        <p>{t(TRANSPORT_COPY.callbackReceived)}</p>
+        <p>{t(TRANSPORT_COPY.callbackReceived,{value1:TRANSPORT_COORDINATOR.name})}</p>
         <ul>{conversation.transportCallback?.phone?<li><strong>{t(TRANSPORT_COPY.callbackPhone)}:</strong> {conversation.transportCallback.phone}</li>:null}{conversation.transportCallback?.email?<li><strong>{t(TRANSPORT_COPY.callbackEmail)}:</strong> {conversation.transportCallback.email}</li>:null}</ul>
         <small>{initial.publicRef}</small>
         <button type="button" className={styles.another} onClick={onAnother} disabled={busy||checking}>{t('Send another request')}</button>
       </>:<>
-        <h3 id="transport-callback-heading">{t(TRANSPORT_COPY.callbackHeading)}</h3>
+        <h3 id="transport-callback-heading">{t(TRANSPORT_COPY.callbackHeading,{value1:TRANSPORT_COORDINATOR.name})}</h3>
         <p>{t(TRANSPORT_COPY.callbackDescription)}</p>
         <form onSubmit={submitCallback}>
           <label htmlFor="transport-callback-phone">{t(TRANSPORT_COPY.callbackPhone)}</label>
@@ -169,20 +169,19 @@ export default function BuyingConversation({ initial, active, checking=false, on
           {error?<p className="public-support-error" role="alert">{t(error)}</p>:null}
           <button type="submit" disabled={busy||checking||!callbackPhone.trim()}>{busy?t('Sending…'):t(TRANSPORT_COPY.callbackSubmit)}</button>
         </form>
-        <button type="button" className={styles.cancelRequest} disabled={busy||checking} onClick={()=>void changeSession('close')}>{t('Cancel request')}</button>
+        <button type="button" className={styles.cancelRequest} disabled={busy||checking} onClick={()=>void changeSession('close')}>{t(TRANSPORT_COPY.tryLater)}</button>
       </>}
       {error&&callbackSubmitted?<p className="public-support-error" role="alert">{t(error)}</p>:null}
     </section>:<>
     <div className={styles.status} data-waiting={awaitingReply} role="status">
-      <strong>{checking||refreshing?t('Checking…'):!connected?t('Connection interrupted. Retrying…'):<>{presentation.awaitingTeam&&<Clock3 aria-hidden="true"/>}{liveWait?.phase==='busy'?t(TRANSPORT_COPY.busyStatus):t(transportChat&&presentation.awaitingTeam?TRANSPORT_COPY.waitingStatus:presentation.statusKey)}</>}</strong>
-      {liveWait?.phase==='busy'?<span className={styles.connection} aria-live="off">{t(TRANSPORT_COPY.elapsed,{value1:formatTransportElapsed(liveWait.elapsedMs,locale)})}</span>:null}
+      <strong>{checking||refreshing?t('Checking…'):!connected?t('Connection interrupted. Retrying…'):<>{presentation.awaitingTeam&&<Clock3 aria-hidden="true"/>}{transportChat&&presentation.awaitingTeam&&liveWaiting?t(TRANSPORT_COPY.waitingStatus,{value1:TRANSPORT_COORDINATOR.name}):t(presentation.statusKey)}</>}</strong>
+      {liveWaiting?<span className={styles.countdown} role="timer" aria-live="off">{t(TRANSPORT_COPY.countdown,{value1:formatTransportRemaining(liveWait?.elapsedMs??0,locale)})}</span>:null}
       <small data-chat-reference={initial.publicRef} style={{gridColumn:1,gridRow:3}}>{initial.publicRef}</small>
       {connected && !checking && !refreshing && presentation.joined ? <span className={styles.connection}><Wifi aria-hidden="true" />{t(presentation.joined.key,presentation.joined.values)}</span> : null}
       {conversation.status !== "closed" ? <button type="button" className={styles.endChat} onClick={() => void changeSession('close')} disabled={busy||checking||refreshing} aria-busy={ending}>{t("End chat")}</button> : null}
       {!connected ? <span>{t("Connection interrupted. Retrying…")}</span> : null}
     </div>
-    {liveWait?.phase==='waiting'&&awaitingReply?<p className={styles.waitingHint}>{t(TRANSPORT_COPY.waiting)}</p>:null}
-    {liveWait?.phase==='busy'?<p className={styles.waitingHint}>{t(TRANSPORT_COPY.busy)}</p>:null}
+    {liveWaiting&&awaitingReply?<p className={styles.waitingHint}>{t(TRANSPORT_COPY.waiting,{value1:TRANSPORT_COORDINATOR.name})}</p>:null}
     {!transportChat&&awaitingReply ? <p className={styles.waitingHint}>{t("Replies appear here automatically. You can return to this chat in this browser.")}</p> : null}
     {!checking&&!refreshing&&connected&&idle.warning?<p className={styles.waitingHint} role="status">{t('This chat will end soon. Send a message to keep it open.')}</p>:null}
     <div ref={history} className={styles.history} role="log" aria-live="polite" aria-relevant="additions" aria-label={t("Support message history")} tabIndex={0}>

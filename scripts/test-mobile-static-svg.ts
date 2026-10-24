@@ -15,7 +15,7 @@ test('FE-053 actual native Photo branch renders SVG without Auth and preserves r
     const result = await build({ entryPoints: ['apps/mobile/src/ui.tsx'], bundle: true, platform: 'node', format: 'cjs', write: false, jsx: 'automatic', loader: {'.png':'dataurl'}, plugins: [{ name: 'controlled-photo-ports', setup(b) {
       b.onResolve({ filter: /^(react|react\/jsx-runtime|react-native|react-native-svg|expo-file-system|expo-crypto)$|^\.\/(runtime|open-link|LoadingBar)$/ }, args => ({ path: args.path, namespace: 'fixture' }));
       b.onLoad({ filter: /.*/, namespace: 'fixture' }, args => ({ loader: 'js', contents:
-        args.path === 'react' ? `export const useState=v=>[photoFixture.state??v,x=>{photoFixture.state=x;}],useEffect=f=>photoFixture.effects.push(f);export default {useState,useEffect};` :
+        args.path === 'react' ? `export const useState=v=>[photoFixture.state??v,x=>{photoFixture.state=x;}],useEffect=f=>photoFixture.effects.push(f),createContext=value=>({value,Provider:'Provider'}),useContext=context=>context.value;export default {useState,useEffect,createContext,useContext};` :
         args.path === 'react/jsx-runtime' ? `export const jsx=(type,props)=>({type,props}),jsxs=jsx;` :
         args.path === 'react-native' ? `export const View='View',Text='Text',Pressable='Pressable',TextInput='TextInput',ScrollView='ScrollView',Image='Image',ActivityIndicator='ActivityIndicator',KeyboardAvoidingView='KeyboardAvoidingView';export const Platform={OS:${JSON.stringify(platform)}},StyleSheet={create:x=>x},Alert={};` :
         args.path === 'react-native-svg' ? `export default 'Svg';export const Path='Path',SvgUri='SvgUri';` :

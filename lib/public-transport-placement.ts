@@ -8,7 +8,7 @@ export function publicTransportPlacement(
 ): TransportLauncherPlacement {
   const path = pathname.replace(/\/+$/, "") || "/";
   if (path === "/") return platform === "native" ? "market" : "shell";
-  if (["/featured", "/about"].includes(path)) return "shell";
+  if (path === "/featured") return "shell";
   if (platform === "web") {
     return path === "/tracking" || /^\/tracking\/[^/]+$/.test(path) || ["/discover", "/privacy", "/terms", "/contact-success"].includes(path)
       || /^\/@[^/]+$/.test(path) ? "shell" : null;

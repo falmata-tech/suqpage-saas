@@ -251,7 +251,18 @@ async function main() {
       1,
     );
     const ownId = home.shop.products[0].id;
-    const currentHome = await (await call("owner/home")).json();
+    let currentHome = await (await call("owner/home")).json();
+    const facts = new FormData();
+    facts.set('details',JSON.stringify({name:'Shelf with sizes',description:'A shelf for a home or a shop.',priceMinor:5000,
+      orderScope:'both',quantityUnit:'piece',highlights:['Made locally'],minimumOrderSummary:'One shelf',leadTimeSummary:'Made after order',capacitySummary:'Ten each week',
+      expectedContentVersion:currentHome.shop.version,idempotencyKey:crypto.randomUUID()}));
+    r=await handleMobileRequest(new Request(`https://suqpage.com/api/mobile/v1/owner/products/${ownId}`,{
+      method:'POST',headers:{authorization:`Bearer ${token}`},body:facts,
+    }),['owner','products',String(ownId)],{identity:port,invalidate(){}});
+    assert.equal(r.status,200);
+    currentHome=await (await call('owner/home')).json();
+    const factOffering=currentHome.shop.products.find((p:{id:number})=>p.id===ownId);
+    assert.deepEqual([factOffering.orderScope,factOffering.quantityUnit,factOffering.highlights,factOffering.minimumOrderSummary],['both','piece',['Made locally'],'One shelf']);
     const hidden = new FormData();
     hidden.set("details", JSON.stringify({ name: "Hidden owner item", description: "Kept for owner editing.",
       priceMinor: null, offeringKind: "made_to_order", availability: "unavailable", isPublished: false,
@@ -263,6 +274,7 @@ async function main() {
     const hiddenItem = (await (await call("owner/home")).json()).shop.products.find((p: {id:number}) => p.id === ownId);
     assert.equal(hiddenItem.published, false);
     assert.equal(hiddenItem.availability, "unavailable");
+    assert.deepEqual([hiddenItem.orderScope,hiddenItem.quantityUnit,hiddenItem.highlights,hiddenItem.minimumOrderSummary],['both','piece',['Made locally'],'One shelf']);
     const videoKey = crypto.randomUUID();
     r = await call("owner/video", {
       target: "product",

@@ -56,7 +56,7 @@ try {
     await page.getByRole("radio", { name: languageNames[next], exact: true }).click();
     locale = next;
     t = createUiText(next === "en" ? {} : JSON.parse(fs.readFileSync(`lib/i18n/messages/${next}.json`, "utf8")));
-    await page.getByRole("button", { name: t("Close"), exact: true }).last().click();
+    if(await page.getByRole("button", { name: t("Close"), exact: true }).last().isVisible()) await page.getByRole("button", { name: t("Close"), exact: true }).last().click();
   }
   async function localizedCapture(state) {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${state}/${locale}: no overflow`);

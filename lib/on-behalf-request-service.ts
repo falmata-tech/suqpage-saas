@@ -72,7 +72,7 @@ export async function createOnBehalfRequest(user: SessionUser, formData: FormDat
         VALUES(?,?,?,?,'submitted',?,?,?,?, 'manager',?,?,'not_required') RETURNING id
       `, [publicRef,businessId,representedClientUserId,requestType,contactName,contactValue,businessName,requestText,user.id,idempotencyKey]);
       const requestId = Number(inserted!.id);
-      await runtimeRun("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,'Suqpage submitted on behalf')", [requestId,user.id,"submitted"]);
+      await runtimeRun("INSERT INTO request_events(request_id,actor_user_id,event_type,detail) VALUES(?,?,?,'AfricMade submitted on behalf')", [requestId,user.id,"submitted"]);
       return { id:requestId, publicRef, duplicate:false, existingProject:false };
     });
   } catch (error) {

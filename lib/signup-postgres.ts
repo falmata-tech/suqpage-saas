@@ -8,7 +8,7 @@ function signupFailure(error: unknown): never {
   if (error instanceof SignupError) throw error;
   if (error instanceof Error && "code" in error && error.code === "23505") {
     const detail = `${error.message} ${"constraint" in error ? String(error.constraint || "") : ""}`.toLowerCase();
-    if (detail.includes("provider_user_id") || detail.includes("auth_identity")) throw new SignupError("This account already has a MirtPage workspace.", 409, "already_linked");
+    if (detail.includes("provider_user_id") || detail.includes("auth_identity")) throw new SignupError("This account already has an AfricMade workspace.", 409, "already_linked");
     if (detail.includes("email")) throw new SignupError("An account already uses this email. Contact support if you cannot access it.", 409, "email_conflict");
     if ((detail.includes("handle") || detail.includes("uq_businesses_2"))) throw new SignupError("This handle is already taken. Choose another.", 409, "handle_conflict");
   }
@@ -27,7 +27,7 @@ export async function createPostgresPublicClientWorkspace(
     for(let attempt=0;attempt<5;attempt++){
      try { return await runner.transaction(async () => {
       const existingLink = await runner.query("SELECT user_id FROM auth_identity_links WHERE provider='supabase' AND provider_user_id=? LIMIT 1", [identity.providerUserId]);
-      if (existingLink.rows.length) throw new SignupError("This account already has a MirtPage workspace.", 409, "already_linked");
+      if (existingLink.rows.length) throw new SignupError("This account already has an AfricMade workspace.", 409, "already_linked");
       const existingEmail = await runner.query("SELECT 1 FROM users WHERE lower(email)=lower(?) LIMIT 1", [input.email]);
       if (existingEmail.rows.length) throw new SignupError("An account already uses this email. Contact support if you cannot access it.", 409, "email_conflict");
       const existingHandle = await runner.query("SELECT 1 FROM business_handles WHERE handle=lower(?) LIMIT 1", [input.handle]);

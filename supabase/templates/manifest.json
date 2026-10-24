@@ -1,67 +1,67 @@
 [
   {
     "key": "confirmation",
-    "subject": "Your MirtPage sign-in code",
+    "subject": "Your AfricMade sign-in code",
     "file": "magic-link.html"
   },
   {
     "key": "magic_link",
-    "subject": "Your MirtPage sign-in code",
+    "subject": "Your AfricMade sign-in code",
     "file": "magic-link.html"
   },
   {
     "key": "invite",
-    "subject": "You are invited to MirtPage",
+    "subject": "You are invited to AfricMade",
     "file": "invite.html"
   },
   {
     "key": "recovery",
-    "subject": "Your MirtPage account access",
+    "subject": "Your AfricMade account access",
     "file": "recovery.html"
   },
   {
     "key": "email_change",
-    "subject": "Confirm your MirtPage email change",
+    "subject": "Confirm your AfricMade email change",
     "file": "email-change.html"
   },
   {
     "key": "reauthentication",
-    "subject": "Your MirtPage verification code",
+    "subject": "Your AfricMade verification code",
     "file": "reauthentication.html"
   },
   {
     "key": "password_changed_notification",
-    "subject": "Your MirtPage password changed",
+    "subject": "Your AfricMade password changed",
     "file": "password-changed-notification.html"
   },
   {
     "key": "email_changed_notification",
-    "subject": "Your MirtPage email changed",
+    "subject": "Your AfricMade email changed",
     "file": "email-changed-notification.html"
   },
   {
     "key": "phone_changed_notification",
-    "subject": "Your MirtPage phone changed",
+    "subject": "Your AfricMade phone changed",
     "file": "phone-changed-notification.html"
   },
   {
     "key": "identity_linked_notification",
-    "subject": "Your MirtPage sign-in method changed",
+    "subject": "Your AfricMade sign-in method changed",
     "file": "identity-linked-notification.html"
   },
   {
     "key": "identity_unlinked_notification",
-    "subject": "Your MirtPage sign-in method changed",
+    "subject": "Your AfricMade sign-in method changed",
     "file": "identity-unlinked-notification.html"
   },
   {
     "key": "mfa_factor_enrolled_notification",
-    "subject": "Your MirtPage verification method changed",
+    "subject": "Your AfricMade verification method changed",
     "file": "mfa-factor-enrolled-notification.html"
   },
   {
     "key": "mfa_factor_unenrolled_notification",
-    "subject": "Your MirtPage verification method changed",
+    "subject": "Your AfricMade verification method changed",
     "file": "mfa-factor-unenrolled-notification.html"
   }
 ]

@@ -11,6 +11,7 @@ import { productMedia } from "../product-media";
 import { legacyPublicContacts } from "../business-profile-contacts";
 import { DISCOVERY_INDUSTRIES } from "../discovery-contract";
 import {isPublicProduct} from '../offerings';
+import {readOrderScope} from '../order-scope';
 import {approvedDemoContactMethods} from '../demo-inquiry-policy';
 import {showroomCategories,showroomProductCategory} from '../showroom-categories';
 export function offeringDto(p: Product): Offering {
@@ -24,6 +25,12 @@ export function offeringDto(p: Product): Offering {
     published: Boolean(p.is_published),
     availability: p.availability,
     quantityMode: p.quantity_mode || "optional",
+    orderScope: readOrderScope(p.order_scope),
+    quantityUnit: p.quantity_unit || "",
+    highlights: p.highlights || [],
+    minimumOrderSummary: p.minimum_order_summary || "",
+    leadTimeSummary: p.lead_time_summary || "",
+    capacitySummary: p.capacity_summary || "",
     options: (p.option_groups || []).map((g) => ({
       name: g.name,
       values: g.values.map((v) => v.value),

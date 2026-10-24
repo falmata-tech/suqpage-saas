@@ -102,7 +102,7 @@ async function main() {
     const savedSharing = await runtimeGet<{ name: string; site_title: string; site_description: string }>(
       "SELECT name,site_title,site_description FROM businesses WHERE handle=?", [business.handle]);
     assert.ok(savedSharing);
-    assert.ok(pageTitles(showroom.body).includes(`${escapedText(savedSharing.site_title.trim() || savedSharing.name)} · MirtPage`),
+    assert.ok(pageTitles(showroom.body).includes(`${escapedText(savedSharing.site_title.trim() || savedSharing.name)} · AfricMade`),
       "Showroom HTML must use the owner's saved title when set");
     if (savedSharing.site_description.trim()) {
       assert.equal(metaDescription(showroom.body), escapedText(savedSharing.site_description.trim()),
@@ -115,7 +115,7 @@ async function main() {
       "Initial showroom HTML needs a real product href");
     const productName = await runtimeGet<{ name: string; description: string }>("SELECT name,description FROM products WHERE id=?", [Number(product.product_id)]);
     assert.ok(productName);
-    assert.ok(pageTitles(detail.body).includes(`${escapedText(productName.name)} · ${escapedText(savedSharing.name)} · MirtPage`),
+    assert.ok(pageTitles(detail.body).includes(`${escapedText(productName.name)} · ${escapedText(savedSharing.name)} · AfricMade`),
       "Product HTML must retain its product-specific title after owner sharing edits");
     assert.ok(detail.body.includes(escapedText(productName.name)) || detail.body.includes(productName.name),
       "Initial product HTML needs the product name");

@@ -14,7 +14,7 @@ const mapStyle = nativeMapStyle(__DEV__, process.env.EXPO_PUBLIC_NATIVE_MAP_FIXT
 
 // Public tile requests only: never attach Supabase tokens or application cookies.
 TransformRequestManager.addHeader({id: 'suqpage-osm-client', match: '^https://tile\\.openstreetmap\\.org/',
-  name: 'User-Agent', value: 'MirtPage/0.1 (+https://mirtpage.com)'});
+  name: 'User-Agent', value: 'AfricMade/0.1 (+https://mirtpage.com)'});
 
 export default forwardRef<MapControls, MapProps>(function MarketMap({shops,groupCapacity=MAP_GROUP_DEFAULT_CAPACITY, groups = [], selectedId, onGroup, onSelect, onZoomChange,onViewChange,initialView, height = 500}, ref) {
   const camera = useRef<CameraRef>(null);

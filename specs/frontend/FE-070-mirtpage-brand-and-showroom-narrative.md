@@ -1,14 +1,82 @@
 ---
 id: FE-070
-title: MirtPage identity and inclusive digital showroom experience
+title: AfricMade identity and supplier-focused digital showroom experience
 status: in_progress
-related: [BE-059, DEP-029, DEP-049, FE-071, ADR-0029]
+related: [BE-059, DEP-029, DEP-049, DEP-051, FE-041, FE-049, FE-071, ADR-0029]
 owners: [product, frontend, localization]
 last_updated: 2026-10-23
 change_level: L2
 ---
 
-# FE-070 — MirtPage identity and digital showrooms
+# FE-070 — AfricMade identity and digital showrooms
+
+## S172 — AfricMade presentation and business sourcing (ready)
+
+The public platform becomes **AfricMade** while its current color palette,
+typography, marketplace, account roles and contact workflows remain. The brand
+celebrates products grown and made in Africa and helps farms, home businesses,
+workshops, manufacturers and other suppliers meet both individual and business
+buyers. Retailers and
+other sellers remain welcome; this positioning introduces no origin restriction,
+verification gate or new moderation rule. Begin with the actual East African
+catalog without claiming continent-wide listings, delivery or official backing.
+Individual and business buyers use the same discovery and enquiry flow. The
+Market and About copy must make a one-item enquiry feel as welcome as a larger
+order; neither audience gets a separate form or
+eligibility rule. Parcel delivery remains a discussion with a selected independent
+logistics provider when offered, not a promise by AfricMade or SharedTrucks.
+Preserve every existing demo business, its example label and its factual product
+data. Where supported by existing data, show packaging or quantity context useful
+to sourcing buyers without inventing supplier terms or changing real listings.
+
+GIVEN a visitor opens Market in English WHEN the page settles THEN the heading
+is “Discover what Africa makes.” and the supporting text is exactly “Explore
+product showrooms from farms, factories and artisans without sifting through
+their social media posts.”
+Amharic and Afaan Oromo express the same meaning naturally. Market keeps this
+copy compact enough to leave room for discovery; About explains the buyer and
+supplier journeys in more detail. Public platform labels use “supplier”, not
+“producer”. The Market description does not require a buyer to decide whether
+their order is small or bulk before browsing; product facts and the inquiry
+actions make both paths available.
+
+GIVEN a visitor opens the native Market screen WHEN it settles THEN the same
+localized heading and supporting text appear as a compact introduction above
+the search modes, without covering the map, product list or main actions. The
+introduction remains legible on a narrow phone while leaving useful space for
+discovery.
+
+GIVEN a buyer opens a product or prepares an enquiry WHEN they select an existing
+channel THEN AfricMade Inbox, configured WhatsApp/Telegram and copy-message keep
+their working behavior and familiar action labels. The prepared message lists
+the selected product, its options, any quantity the visitor supplied, and its
+product link. It asks only about availability; it does not add a pricing or lead-
+time questionnaire. Buyers can add detail in the Inbox editor or destination
+messaging app before sending. No extra field, stock promise, checkout, delivery
+or confirmed order is introduced.
+
+GIVEN a visitor or owner uses web or native Market, showroom, Featured, About,
+account, inbox, transport or shipment records WHEN the platform authors a name,
+email, push, share or error message THEN it says AfricMade where a brand is needed
+and uses plain functional labels elsewhere. No old public MirtPage wordmark/icon
+remains. Merchant-authored content and the separate SharedTrucks identity are
+preserved.
+
+GIVEN a user selects an active language WHEN the same task renders on web and
+native THEN Amharic and Afaan Oromo convey the intent naturally, fit readable
+small screens and preserve names, URLs and user-entered content verbatim.
+Inactive language catalogs remain compatibility data, not selectable languages.
+
+The logo/icon is a distinct owner review gate. Agent-led desktop/phone web and
+Expo task review qualifies the rest of the UI under the current workflow.
+The owner supplied final light- and dark-background PNG wordmarks on
+2026-10-23. Both have the same orange afro-pick symbol and AfricMade lettering.
+Use those exact pixels as the canonical source for web/native wordmarks and
+deterministic icon crops; do not regenerate or reinterpret the mark. Derive
+favicon, PWA, Android adaptive icon, notification badge, email and launch assets
+at their required sizes, checking legibility on both backgrounds.
+Controlling release boundaries are BE-059 and DEP-051; this section does not
+rename the temporary domain or an installed mobile package.
 
 ## S167 — keep unpublished store drafts aligned with current contact and shipment language
 

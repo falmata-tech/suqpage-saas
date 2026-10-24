@@ -7,6 +7,7 @@ import {
 } from "./showroom-manifests";
 import type { ShowroomDesignProposal } from "./showroom-composition";
 import type { Business, Catalog, Category, Collection, Product } from "./types";
+import { isOrderScope, readOrderScope, type OrderScope } from "./order-scope";
 import {
   normalizeOfferingKind,
   normalizeQuantityMode,
@@ -121,6 +122,7 @@ export type RevisionProduct = {
   availability: Product["availability"];
   offeringKind: OfferingKind;
   quantityMode: QuantityMode;
+  orderScope?: OrderScope;
   capacitySummary: string;
   minimumOrderSummary: string;
   leadTimeSummary: string;
@@ -392,6 +394,7 @@ export function parseRevisionContent(
         "availability",
         "offeringKind",
         "quantityMode",
+        "orderScope",
         "capacitySummary",
         "minimumOrderSummary",
         "leadTimeSummary",
@@ -402,6 +405,7 @@ export function parseRevisionContent(
       ],
       "Revision product",
     );
+    if (value.orderScope !== undefined && !isOrderScope(value.orderScope)) throw new RevisionError("Invalid product order size.");
     const itemName = clean(value.name, 140);
     if (!itemName) throw new RevisionError("Every product needs a name.");
     const collectionKey = value.collectionKey ? key(value.collectionKey) : null;
@@ -491,6 +495,7 @@ export function parseRevisionContent(
       availability: productAvailability,
       offeringKind,
       quantityMode,
+      orderScope: readOrderScope(value.orderScope),
       capacitySummary: clean(value.capacitySummary, 180),
       minimumOrderSummary: clean(value.minimumOrderSummary, 140),
       leadTimeSummary: clean(value.leadTimeSummary, 140),
@@ -700,6 +705,7 @@ export function catalogToRevisionSnapshot(catalog: Catalog): RevisionSnapshotV3 
       availability: item.availability,
       offeringKind: normalizeOfferingKind(item.offering_kind),
       quantityMode: normalizeQuantityMode(item.quantity_mode),
+      orderScope: readOrderScope(item.order_scope),
       capacitySummary: item.capacity_summary || "",
       minimumOrderSummary: item.minimum_order_summary || "",
       leadTimeSummary: item.lead_time_summary || "",
@@ -780,6 +786,7 @@ export function snapshotToCatalog(
     availability: item.availability,
     offering_kind: normalizeOfferingKind(item.offeringKind),
     quantity_mode: normalizeQuantityMode(item.quantityMode),
+    order_scope: readOrderScope(item.orderScope),
     capacity_summary: item.capacitySummary || "",
     minimum_order_summary: item.minimumOrderSummary || "",
     lead_time_summary: item.leadTimeSummary || "",

@@ -86,7 +86,7 @@ async function main(){
   await claimSupportConversation(transport,v.id);
   await postAssignedSupportReply(admin,v.id,{audience:'reply',message:'Unread visitor reply for dispatch',idempotencyKey:crypto.randomUUID()});
   const payloads:unknown[]=[],kinds=new Set<string>();
-  const dispatched=await dispatchAttention({send:async(subscription,payload)=>{payloads.push(payload);kinds.add(subscription.kind);assert.equal(payload.title,subscription.kind==='expo'?'MirtPage':'Suqpage','Native presentation changes without breaking the legacy browser wire contract');assert.doesNotMatch(JSON.stringify(payload),/Private carrier|commission details|251911|Addis Ababa|Adama|alert-owner@example/);return {state:'accepted'};}});
+  const dispatched=await dispatchAttention({send:async(subscription,payload)=>{payloads.push(payload);kinds.add(subscription.kind);assert.equal(payload.title,'AfricMade','Both web and native notifications use the current presentation brand');assert.doesNotMatch(JSON.stringify(payload),/Private carrier|commission details|251911|Addis Ababa|Adama|alert-owner@example/);return {state:'accepted'};}});
   assert.ok(dispatched.accepted>=2);assert.ok(payloads.length>=2);assert.deepEqual([...kinds].sort(),['expo','web']);
   const duplicateDispatch=await dispatchAttention({send:async()=>{throw new Error('Already accepted deliveries must not resend');}});assert.equal(duplicateDispatch.processed,0);
   const failedMessage=await postSupportMessage(support,c.id,{message:'Retry-safe owner reply',idempotencyKey:crypto.randomUUID()});

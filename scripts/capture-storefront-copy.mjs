@@ -71,7 +71,7 @@ try{
   if(locale!=='en'){
    await page.getByRole('button',{name:'Language',exact:true}).click();
    await page.getByRole('radio',{name:languageNames[locale],exact:true}).click();
-   await page.getByRole('button',{name:t('Close'),exact:true}).last().click();
+   if(await page.getByRole('button',{name:t('Close'),exact:true}).last().isVisible()) await page.getByRole('button',{name:t('Close'),exact:true}).last().click();
   }
   await expect(page.getByText(t(MARKET_STOREFRONT_COPY.title),{exact:true})).toBeVisible();
   await expect(page.getByText(t(MARKET_STOREFRONT_COPY.description),{exact:true})).toBeVisible();
