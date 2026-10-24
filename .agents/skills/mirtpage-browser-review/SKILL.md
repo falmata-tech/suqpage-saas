@@ -1,12 +1,12 @@
 ---
 name: mirtpage-browser-review
-description: Exercise changed MirtPage UI, UX, layout or navigation as affected visitors, owners, staff and admins in actual Chrome on web and Expo preview. Use for interface changes or usability audits; not backend-only logic or static code review.
+description: Exercise changed AfricMade UI, UX, layout or navigation as affected visitors, owners, staff and admins in actual Chrome on web and Expo preview. Use for interface changes or usability audits; not backend-only logic or static code review.
 ---
 
 For interface work, also load `.agents/skills/mirtpage-interface-design/SKILL.md`;
 it supplies the content, localization and responsive-layout criteria.
 
-Resolve paths from this MirtPage repository root. Follow `AGENTS.md` and read
+Resolve paths from this repository root. Follow `AGENTS.md` and read
 `docs/operations/BROWSER-WORKFLOW-REVIEW.md` for the actual review contract;
 locate only the relevant current checklist section and controlling feature spec.
 Keep source edits, focused tests, browser evidence and the agent's source-bound

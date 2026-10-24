@@ -11,7 +11,7 @@ for(const file of activeFiles){
 assert.deepEqual(visibleOldBrand,[],`Old customer-facing brand remains in: ${visibleOldBrand.join(", ")}`);
 assert.equal(JSON.parse(fs.readFileSync("package.json", "utf8")).name, "suqpage-saas-mvp");
 assert.ok(fs.existsSync("SUQPAGE-MASTER-PROMPT.md"));
-assert.ok(fs.existsSync("public/brand/africmade-afro-mark-v1.png"));
+assert.ok(fs.existsSync("public/brand/africmade-maker-mark-v2.png"));
 const brand=fs.readFileSync("components/AfricMadeBrand.tsx","utf8");
 assert.match(brand,/aria-label=\{t\("AfricMade home"\)\}/);
 assert.match(brand,/PLATFORM_BRAND\.assets\.wordmark/);

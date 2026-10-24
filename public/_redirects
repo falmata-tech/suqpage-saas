@@ -1,7 +1,7 @@
 # Exact legacy asset aliases; keep in sync with lib/platform-assets.ts.
-/brand/africmade-mark.svg /brand/africmade-afro-mark-v1.png 200
-/brand/mirtpage-mark-v2.svg /brand/africmade-afro-mark-v1.png 200
-/brand/mirtpage-mark.svg /brand/africmade-afro-mark-v1.png 200
+/brand/africmade-mark.svg /brand/africmade-maker-mark-v2.png 200
+/brand/mirtpage-mark-v2.svg /brand/africmade-maker-mark-v2.png 200
+/brand/mirtpage-mark.svg /brand/africmade-maker-mark-v2.png 200
 /landing/africmade-about-production-v1.webp /landing/suqpage-about-production-v1.webp 200
 /landing/africmade-public-app-canvas-v1.webp /landing/suqpage-public-app-canvas-v1.webp 200
 /landing/africmade-workspace-context-v1.webp /landing/suqpage-workspace-context-v1.webp 200

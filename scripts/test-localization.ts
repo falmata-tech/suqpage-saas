@@ -467,7 +467,7 @@ test('FE-070: localized Market and About metadata retain the explicit AfricMade 
       const path=file.includes('/about/')?'/about':'/';
       assert.equal(metadata.alternates.canonical,`https://mirtpage.test${path}`);
       assert.equal(metadata.openGraph.url,metadata.alternates.canonical);
-      assert.equal(metadata.openGraph.images[0],'https://mirtpage.test/pwa/africmade-icon-512.png');
+      assert.equal(metadata.openGraph.images[0],'https://mirtpage.test/pwa/africmade-icon-v2-512.png');
       assert.equal(metadata.twitter.title,title);assert.equal(metadata.twitter.description,description);
       assert.equal(metadata.twitter.card,'summary_large_image');
       assert.doesNotMatch(JSON.stringify(metadata),/Suqpage|SuqPage/);

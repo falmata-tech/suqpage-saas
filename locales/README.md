@@ -1,4 +1,4 @@
-# MirtPage interface writing
+# AfricMade interface writing
 
 Write for the action on screen, not the English sentence structure. English,
 Amharic and Afaan Oromo are the active interface languages across public pages
@@ -23,7 +23,7 @@ the stored Locale union describe retained identifiers.
   the transport team about moving their purchases; general guest support stays
   closed. Starting a transport chat is not a confirmed booking. Keep the native
   explanation and the recognizable `(Live Chat)` label together.
-- Keep MirtPage and merchant names unchanged. Never translate merchant content,
+- Keep AfricMade and merchant names unchanged. Never translate merchant content,
   handles, phone numbers, URLs, prices or saved status/role values.
 - Preserve useful English terms when an unfamiliar coined translation would
   confuse people. Do not add filler text, internal notes or pricing claims.
@@ -36,9 +36,11 @@ check cannot establish that wording is natural or that a label fits its control.
 The current contextual revision is agent-authored. Native-speaker review is not
 claimed; feedback can improve wording without changing stored merchant data.
 
-## S145 / FE-070 — local MirtPage presentation
+## S145 / FE-070 — historical MirtPage presentation
 
-MirtPage is the untranslated platform name. The current local proposition is a
+This section records an earlier, superseded wording decision. AfricMade is the
+current untranslated platform name; FE-070 and the master prompt control its
+current public narrative. The earlier proposition was a
 business digital showroom: the business and its story, products and optional
 collections, followed by direct contact through its social accounts. Amharic
 uses ዲጂታል ማሳያ ገጽ; Afaan Oromo explains fuula agarsiisa dijitaalaa. The
@@ -60,7 +62,7 @@ Independent first-language review and final visual approval are not claimed.
 The following S132/S133 references informed earlier wording choices; they do
 not make the superseded internet-page formulation a current requirement.
 
-Primary references consulted for the current draft:
+Primary references consulted for that earlier draft:
 
 - [Google Material writing guidance](https://m1.material.io/style/writing.html)
   and [communication guidance](https://codelabs.developers.google.com/codelabs/material-communication-guidance):

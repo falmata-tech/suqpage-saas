@@ -1,6 +1,6 @@
 ---
 name: mirtpage-release
-description: Prepare and qualify a requested MirtPage Android build, web deployment, hosted setting change or release recovery. Use when delivery work is requested; not copy-only edits or ordinary feature tests.
+description: Prepare and qualify a requested AfricMade Android build, web deployment, hosted setting change or release recovery. Use when delivery work is requested; not copy-only edits or ordinary feature tests.
 ---
 
 Resolve paths from this repository root. Read the active release dependencies in
@@ -9,7 +9,9 @@ Resolve paths from this repository root. Read the active release dependencies in
 this skill supplies no deployment, credential or signing authority.
 
 Verify current identity from `lib/brand.ts`, `apps/mobile/app.json` and the
-app's build configuration: MirtPage, mirtpage.com, Android com.mirtpage.app.
+app's build configuration: AfricMade is the public presentation brand;
+mirtpage.com and Android `com.mirtpage.app` remain compatibility identifiers
+until their separately guarded cutovers.
 Independently confirm any provider account/project/environment through the
 existing operation's target checks. Do not infer a target from the checkout,
 provider slug or historical Suqpage name. Read current evidence summaries and
