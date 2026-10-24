@@ -16,8 +16,8 @@ async function main() {
     assert.match(schema, /^suqpage_test_[a-f0-9]{32}$/);
     assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, LATEST_POSTGRES_MIGRATION_VERSION);
     // Replay migration 73 against the complete current ledger, including the
-    // inquiry and provider-interest tables added in migrations 78–79.
-    assert.equal(LATEST_POSTGRES_MIGRATION_VERSION, 79, 'Update this migration-specific regression deliberately when appending migrations.');
+    // inquiry and provider-interest tables in 78–79 and product scope in 80.
+    assert.equal(LATEST_POSTGRES_MIGRATION_VERSION, 80, 'Update this migration-specific regression deliberately when appending migrations.');
     const businessId = (await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('default-history','Suqpage tenant-authored name','composition','active')").run()).insertedId;
     const otherBusinessId = (await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('default-other','Other business','composition','active')").run()).insertedId;
     const ownerId = (await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES('default-owner@example.test','unused','Owner','owner',?,0)").run(businessId)).insertedId;
@@ -87,7 +87,7 @@ async function main() {
     const owner: SessionUser = { id: ownerId, email: 'default-owner@example.test', name: 'Owner', role: 'owner', access_role: 'client', business_id: businessId, must_change_password: 0 };
     const input = { subject: 'Actual current writer', message: 'A real isolated support request', idempotencyKey: 'mirtpage_default_writer_01' };
     const created = await createSupportConversation(owner, input, 1_800_000_000_000);
-    assert.equal((await db.prepare('SELECT requester_label FROM support_conversations WHERE id=?').get(created.id)).requester_label, 'MirtPage client');
+    assert.equal((await db.prepare('SELECT requester_label FROM support_conversations WHERE id=?').get(created.id)).requester_label, 'AfricMade client');
     await db.prepare("UPDATE support_conversations SET requester_label='Retained previous label' WHERE id=?").run(created.id);
     const afterCreate = await snapshot();
     assert.deepEqual(await createSupportConversation(owner, input, 1_800_000_000_001), { ...created, duplicate: true });
