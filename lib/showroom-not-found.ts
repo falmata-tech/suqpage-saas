@@ -18,5 +18,5 @@ export async function showroomNotFoundHtml(locale: EnabledLocale): Promise<strin
     .code{margin:0 0 8px;color:#c93600;font-size:.9rem;font-weight:800;letter-spacing:.12em}h1{margin:0;font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.18;letter-spacing:-.035em}
     .action{display:inline-flex;align-items:center;justify-content:center;min-height:48px;margin-top:28px;padding:11px 20px;border-radius:10px;background:#c93600;color:#fff;font-weight:750;text-decoration:none}
     .action:hover{background:#a92f00}.action:focus-visible{outline:3px solid #ff4b00;outline-offset:3px}
-  </style></head><body><header><a href="/" aria-label="AfricMade"><img src="/brand/africmade-wordmark-v1.png" alt="AfricMade"></a></header><main><section class="card"><p class="code">404</p><h1>${title}</h1><a class="action" href="/">${back}</a></section></main></body></html>`;
+  </style></head><body><header><a href="/" aria-label="AfricMade"><img src="/brand/africmade-wordmark-v2.png" alt="AfricMade"></a></header><main><section class="card"><p class="code">404</p><h1>${title}</h1><a class="action" href="/">${back}</a></section></main></body></html>`;
 }

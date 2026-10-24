@@ -4,7 +4,7 @@ title: AfricMade identity and supplier-focused digital showroom experience
 status: in_progress
 related: [BE-059, DEP-029, DEP-049, DEP-051, FE-041, FE-049, FE-071, ADR-0029]
 owners: [product, frontend, localization]
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 change_level: L2
 ---
 
@@ -69,12 +69,35 @@ Inactive language catalogs remain compatibility data, not selectable languages.
 
 The logo/icon is a distinct owner review gate. Agent-led desktop/phone web and
 Expo task review qualifies the rest of the UI under the current workflow.
-The owner supplied final light- and dark-background PNG wordmarks on
-2026-10-23. Both have the same orange afro-pick symbol and AfricMade lettering.
+The owner replaced the prior artwork with paired light- and dark-background PNG
+wordmarks on 2026-10-24. Both show an orange field with a smiling maker holding
+a cube, an afro pick, and AfricMade lettering. These replace the previous
+profile-only mark everywhere the platform identity appears.
 Use those exact pixels as the canonical source for web/native wordmarks and
 deterministic icon crops; do not regenerate or reinterpret the mark. Derive
 favicon, PWA, Android adaptive icon, notification badge, email and launch assets
 at their required sizes, checking legibility on both backgrounds.
+Previously published generic and legacy platform icon URLs can remain in saved
+browser shortcuts, PWA installations and email. They must serve derivatives of
+the same approved AfricMade artwork; no previous platform mark or wordmark may
+remain at those URLs. Keep merchant-owned logos and historical protocol IDs
+separate from platform presentation.
+
+GIVEN a visitor opens an existing bookmark or installed PWA that requests a
+generic or former platform icon URL WHEN the asset loads THEN it shows the
+approved AfricMade artwork at the requested size. GIVEN the current web page or
+native app loads WHEN it requests its icon, splash, notification or wordmark
+THEN those configured assets are also generated from that same owner source.
+The favicon, installed app icon and PWA icons use the same high-contrast
+charcoal field and approved orange maker symbol so the mark remains recognizable at
+tab size. The web header and native header show a legible full wordmark without
+crowding controls at narrow phone widths. The native splash shows that same
+approved full wordmark at a readable size on the charcoal field. Keep the
+approved artwork, orange shade, typography and existing palette unchanged.
+
+GIVEN a visitor uses desktop web, 320–390px phone web, or the native app WHEN
+the page or app opens THEN the full wordmark is readable without clipping or
+overlap, and the browser tab, app icon and splash remain recognizably related.
 Controlling release boundaries are BE-059 and DEP-051; this section does not
 rename the temporary domain or an installed mobile package.
 

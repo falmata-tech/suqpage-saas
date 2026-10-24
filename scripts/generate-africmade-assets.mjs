@@ -4,30 +4,31 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 
-// Owner-supplied final artwork. Derivatives are crops/resizes of its pixels;
+// Owner-supplied paired artwork. Derivatives are crops/resizes of its pixels;
 // no generative reconstruction, system font or historical MirtPage mark is used.
-const SOURCE='brand-source/africmade-on-black.png';
-const SOURCE_SHA256='c04a259d645e8c0b60eaf2b0e10c94b7a3336d93544bfe9ad50206457483590b';
+const SOURCES=[
+ {file:'brand-source/africmade-maker-dark.png',sha256:'036694f9c69c1a3c3fb2bf1a3aada98d524a21dec7840715e7448d9fe9cfef17',background:'black',width:1915},
+ {file:'brand-source/africmade-maker-light.png',sha256:'a1ad86cfe1795752c424c9d9cc7bb96dc54dbd4443b14384c09827751051a332',background:'white',width:1916},
+];
 const WORDMARK={left:56,top:132,width:1824,height:500};
+const WORDMARK_OUTPUT={width:1094,height:300};
 const SYMBOL={left:50,top:111,width:550,height:550};
 const TRANSPARENT={r:0,g:0,b:0,alpha:0};
-const WHITE={r:255,g:255,b:255,alpha:255};
+const CHARCOAL={r:32,g:36,b:40,alpha:255};
 
 function rgba(buffer,width,height){return sharp(buffer,{raw:{width,height,channels:4}});}
 
-/** Remove the source's black canvas while preserving its original orange edges. */
-async function extractedArtwork(root){
- const source=await fs.readFile(path.join(root,SOURCE));
- assert.equal(createHash('sha256').update(source).digest('hex'),SOURCE_SHA256,'Approved logo source changed');
+/** Remove the approved canvas without redrawing the owner's mark. */
+async function extractedArtwork(root,{file,sha256,background,width}){
+ const source=await fs.readFile(path.join(root,file));
+ assert.equal(createHash('sha256').update(source).digest('hex'),sha256,'Approved logo source changed');
  const {data,info}=await sharp(source).ensureAlpha().raw().toBuffer({resolveWithObject:true});
- assert.equal(info.width,1916);assert.equal(info.height,821);
+ assert.equal(info.width,width);assert.equal(info.height,821);
  const clear=Buffer.alloc(data.length);
  for(let i=0;i<data.length;i+=4){
-  const alpha=Math.max(data[i],data[i+1],data[i+2]);
+  const alpha=background==='black'?Math.max(data[i],data[i+1],data[i+2]):255-Math.min(data[i],data[i+1],data[i+2]);
   if(alpha<=12)continue;
-  clear[i]=Math.min(255,Math.round(data[i]*255/alpha));
-  clear[i+1]=Math.min(255,Math.round(data[i+1]*255/alpha));
-  clear[i+2]=Math.min(255,Math.round(data[i+2]*255/alpha));
+  for(let channel=0;channel<3;channel++)clear[i+channel]=Math.max(0,Math.min(255,Math.round(background==='black'?data[i+channel]*255/alpha:(data[i+channel]*255-255*(255-alpha))/alpha)));
   clear[i+3]=alpha;
  }
  return {clear,width:info.width,height:info.height};
@@ -40,19 +41,31 @@ async function squareIcon(mark,size,scale,background){
   .composite([{input:foreground,left:Math.floor((size-edge)/2),top:Math.floor((size-edge)/2)}]).png().toBuffer();
 }
 
+function legacySvgImage(png,width,height){
+ const encoded=png.toString('base64');
+ return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="AfricMade"><title>AfricMade</title><image width="${width}" height="${height}" href="data:image/png;base64,${encoded}"/></svg>\n`);
+}
+
+function icoFromPngs(entries){
+ const headerBytes=6+entries.length*16;
+ const ico=Buffer.alloc(headerBytes+entries.reduce((sum,{png})=>sum+png.length,0));
+ ico.writeUInt16LE(1,2);ico.writeUInt16LE(entries.length,4);
+ let offset=headerBytes;
+ entries.forEach(({size,png},index)=>{
+  const entry=6+index*16;
+  ico[entry]=size;ico[entry+1]=size;
+  ico.writeUInt16LE(1,entry+4);ico.writeUInt16LE(32,entry+6);
+  ico.writeUInt32LE(png.length,entry+8);ico.writeUInt32LE(offset,entry+12);
+  png.copy(ico,offset);offset+=png.length;
+ });
+ return ico;
+}
+
 export async function africmadeDerivatives(root=process.cwd()){
- const {clear,width,height}=await extractedArtwork(root);
- const mark=await rgba(clear,width,height).extract(SYMBOL).png().toBuffer();
- const fullWordmark=await rgba(clear,width,height).extract(WORDMARK).raw().toBuffer({resolveWithObject:true});
- const lightPixels=Buffer.from(fullWordmark.data);
- for(let y=0;y<fullWordmark.info.height;y++)for(let x=0;x<fullWordmark.info.width;x++){
-  const sourceX=x+WORDMARK.left;
-  if(sourceX<600||sourceX>=1195)continue;
-  const i=(y*fullWordmark.info.width+x)*4;
-  if(lightPixels[i+3]>0)lightPixels.fill(0,i,i+3);
- }
- const wordmark=await rgba(lightPixels,WORDMARK.width,WORDMARK.height).png().toBuffer();
- const reverse=await rgba(fullWordmark.data,WORDMARK.width,WORDMARK.height).png().toBuffer();
+ const [dark,light]=await Promise.all(SOURCES.map(source=>extractedArtwork(root,source)));
+ const mark=await rgba(dark.clear,dark.width,dark.height).extract(SYMBOL).png().toBuffer();
+ const wordmark=await rgba(light.clear,light.width,light.height).extract(WORDMARK).resize(WORDMARK_OUTPUT.width,WORDMARK_OUTPUT.height).png().toBuffer();
+ const reverse=await rgba(dark.clear,dark.width,dark.height).extract(WORDMARK).resize(WORDMARK_OUTPUT.width,WORDMARK_OUTPUT.height).png().toBuffer();
  const badgePixels=await sharp(mark).resize(96,96).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  for(let i=0;i<badgePixels.data.length;i+=4){if(badgePixels.data[i+3]>0)badgePixels.data.fill(255,i,i+3);}
  const badge=await rgba(badgePixels.data,96,96).png().toBuffer();
@@ -60,23 +73,79 @@ export async function africmadeDerivatives(root=process.cwd()){
  for(let i=0;i<monochromePixels.data.length;i+=4){if(monochromePixels.data[i+3]>0)monochromePixels.data.fill(255,i,i+3);}
  const monochrome=await rgba(monochromePixels.data,512,512).png().toBuffer();
  const output=new Map([
-  ['public/brand/africmade-afro-mark-v1.png',await sharp(mark).resize(512,512).png().toBuffer()],
-  ['public/brand/africmade-wordmark-v1.png',wordmark],
-  ['public/brand/africmade-wordmark-reverse-v1.png',reverse],
-  ['public/brand/africmade-wordmark-email-white-v1.png',await sharp(wordmark).flatten({background:'#ffffff'}).png().toBuffer()],
-  ['public/pwa/africmade-favicon-32.png',await squareIcon(mark,32,.9,WHITE)],
-  ['public/pwa/africmade-apple-touch-icon-180.png',await squareIcon(mark,180,.85,WHITE)],
-  ['public/pwa/africmade-icon-192.png',await squareIcon(mark,192,.85,WHITE)],
-  ['public/pwa/africmade-icon-512.png',await squareIcon(mark,512,.85,WHITE)],
-  ['public/pwa/africmade-maskable-512.png',await squareIcon(mark,512,.64,WHITE)],
+  ['public/brand/africmade-maker-mark-v2.png',await sharp(mark).resize(512,512).png().toBuffer()],
+  ['public/brand/africmade-wordmark-v2.png',wordmark],
+  ['public/brand/africmade-wordmark-reverse-v2.png',reverse],
+  ['public/brand/africmade-wordmark-email-white-v2.png',await sharp(wordmark).flatten({background:'#ffffff'}).png().toBuffer()],
+  ['public/pwa/africmade-favicon-v2-32.png',await squareIcon(mark,32,.98,CHARCOAL)],
+  ['public/pwa/africmade-apple-touch-v2-180.png',await squareIcon(mark,180,.9,CHARCOAL)],
+  ['public/pwa/africmade-icon-v2-192.png',await squareIcon(mark,192,.9,CHARCOAL)],
+  ['public/pwa/africmade-icon-v2-512.png',await squareIcon(mark,512,.9,CHARCOAL)],
+  ['public/pwa/africmade-maskable-v2-512.png',await squareIcon(mark,512,.64,CHARCOAL)],
   ['public/pwa/africmade-badge-96.png',badge],
-  ['apps/mobile/assets/icon.png',await squareIcon(mark,1024,.85,WHITE)],
+  ['apps/mobile/assets/icon.png',await squareIcon(mark,1024,.9,CHARCOAL)],
   ['apps/mobile/assets/africmade-adaptive-foreground.png',await squareIcon(mark,512,.64,TRANSPARENT)],
   ['apps/mobile/assets/africmade-mark.png',await sharp(mark).resize(512,512).png().toBuffer()],
   ['apps/mobile/assets/africmade-wordmark.png',await sharp(wordmark).resize(1094,300).png().toBuffer()],
+  ['apps/mobile/assets/africmade-splash-wordmark.png',await sharp(reverse).resize(1094,300).png().toBuffer()],
   ['apps/mobile/assets/africmade-notification.png',badge],
   ['apps/mobile/assets/africmade-monochrome.png',monochrome],
  ]);
+ output.set('public/favicon.ico',icoFromPngs([
+  {size:16,png:await squareIcon(mark,16,1,CHARCOAL)},
+  {size:32,png:output.get('public/pwa/africmade-favicon-v2-32.png')},
+  {size:48,png:await squareIcon(mark,48,.98,CHARCOAL)},
+ ]));
+ // Saved shortcuts, installed PWAs and old email/asset URLs may still request
+ // these paths. Keep their URLs valid, but never serve the former platform art.
+ const aliases=[
+  ['public/brand/africmade-afro-mark-v1.png','public/brand/africmade-maker-mark-v2.png'],
+  ['public/brand/africmade-wordmark-v1.png','public/brand/africmade-wordmark-v2.png'],
+  ['public/brand/africmade-wordmark-reverse-v1.png','public/brand/africmade-wordmark-reverse-v2.png'],
+  ['public/brand/africmade-wordmark-email-white-v1.png','public/brand/africmade-wordmark-email-white-v2.png'],
+  ['public/pwa/africmade-favicon-32.png','public/pwa/africmade-favicon-v2-32.png'],
+  ['public/pwa/africmade-apple-touch-icon-180.png','public/pwa/africmade-apple-touch-v2-180.png'],
+  ['public/pwa/africmade-icon-192.png','public/pwa/africmade-icon-v2-192.png'],
+  ['public/pwa/africmade-icon-512.png','public/pwa/africmade-icon-v2-512.png'],
+  ['public/pwa/africmade-maskable-512.png','public/pwa/africmade-maskable-v2-512.png'],
+  ['public/favicon.png','public/pwa/africmade-icon-v2-512.png'],
+  ['public/apple-touch-icon.png','public/pwa/africmade-apple-touch-v2-180.png'],
+  ['public/pwa/favicon-32.png','public/pwa/africmade-favicon-v2-32.png'],
+  ['public/pwa/apple-touch-icon.png','public/pwa/africmade-apple-touch-v2-180.png'],
+  ['public/pwa/icon-192.png','public/pwa/africmade-icon-v2-192.png'],
+  ['public/pwa/icon-512.png','public/pwa/africmade-icon-v2-512.png'],
+  ['public/pwa/icon-maskable-512.png','public/pwa/africmade-maskable-v2-512.png'],
+  ['public/pwa/suqpage-favicon-32.png','public/pwa/africmade-favicon-v2-32.png'],
+  ['public/pwa/suqpage-apple-touch-icon.png','public/pwa/africmade-apple-touch-v2-180.png'],
+  ['public/pwa/suqpage-icon-192.png','public/pwa/africmade-icon-v2-192.png'],
+  ['public/pwa/suqpage-icon-512.png','public/pwa/africmade-icon-v2-512.png'],
+  ['public/pwa/suqpage-icon-maskable-512.png','public/pwa/africmade-maskable-v2-512.png'],
+  ['public/pwa/mirtpage-panels-favicon-32.png','public/pwa/africmade-favicon-v2-32.png'],
+  ['public/pwa/mirtpage-panels-apple-touch-icon.png','public/pwa/africmade-apple-touch-v2-180.png'],
+  ['public/pwa/mirtpage-panels-icon-192.png','public/pwa/africmade-icon-v2-192.png'],
+  ['public/pwa/mirtpage-panels-icon-512.png','public/pwa/africmade-icon-v2-512.png'],
+  ['public/pwa/mirtpage-panels-icon-maskable-512.png','public/pwa/africmade-maskable-v2-512.png'],
+  ['public/pwa/mirtpage-panels-badge-96.png','public/pwa/africmade-badge-96.png'],
+  ['public/brand/mirtpage-panels-wordmark-email.png','public/brand/africmade-wordmark-email-white-v2.png'],
+  ['public/brand/mirtpage-panels-wordmark-email-white-v2.png','public/brand/africmade-wordmark-email-white-v2.png'],
+  ['apps/mobile/assets/mirtpage-mark.png','apps/mobile/assets/africmade-mark.png'],
+  ['apps/mobile/assets/mirtpage-wordmark.png','apps/mobile/assets/africmade-wordmark.png'],
+  ['apps/mobile/assets/mirtpage-notification.png','apps/mobile/assets/africmade-notification.png'],
+  ['public/uploads/seed/suqpage/icon.png','public/pwa/africmade-icon-v2-512.png'],
+  ['public/uploads/seed/suqpage/logo.png','public/brand/africmade-wordmark-email-white-v2.png'],
+ ];
+ for(const [legacy,current] of aliases)output.set(legacy,output.get(current));
+ const canonicalMark=output.get('public/brand/africmade-maker-mark-v2.png');
+ const svgAliases=[
+  ['public/brand/suqpage-legacy-mark.svg',canonicalMark,512,512],
+  ['public/brand/suqpage-mark.svg',canonicalMark,512,512],
+  ['public/brand/suqpage-original-mark.svg',canonicalMark,512,512],
+  ['public/brand/suqpage-original-mark-v2.svg',canonicalMark,512,512],
+  ['public/brand/mirtpage-panels-mark.svg',canonicalMark,512,512],
+  ['public/brand/mirtpage-panels-wordmark.svg',wordmark,WORDMARK_OUTPUT.width,WORDMARK_OUTPUT.height],
+  ['public/brand/mirtpage-panels-wordmark-reverse.svg',reverse,WORDMARK_OUTPUT.width,WORDMARK_OUTPUT.height],
+ ];
+ for(const [file,png,width,height] of svgAliases)output.set(file,legacySvgImage(png,width,height));
  return output;
 }
 

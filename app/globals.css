@@ -355,3 +355,10 @@ html:lang(am) .eyebrow,html:lang(ti) .eyebrow{letter-spacing:normal}
 .workspace-breadcrumbs a{display:inline-flex;align-items:center;min-height:44px}
 .support-back-link{display:inline-flex;align-items:center;gap:7px;min-height:44px;max-width:100%;white-space:normal}
 @media(max-width:900px){.workspace-breadcrumbs a{min-height:44px}.workspace-mobile-tabs a>span{white-space:normal;line-height:1.15;min-height:14px}}
+
+/* The complete approved wordmark scales together; never stretch its lettering. */
+.sidebar .workspace-brand { --suqpage-mark-width: 58px; }
+.showroom-host-bar-shell .showroom-host-brand { --suqpage-mark-width: 28px; }
+@media(max-width:900px) {
+  .workspace-mobile-header .workspace-brand { --suqpage-mark-width: 42px; }
+}

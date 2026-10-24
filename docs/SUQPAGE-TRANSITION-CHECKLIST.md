@@ -101,6 +101,63 @@ this work; master §§1–4, 10, 15, 18 and 22–23 need current-state reconcili
 8. [ ] Run fresh Android audit, build one locally signed AAB and derived APK,
    inspect package/artwork/signature, and report physical/Play checks separately.
 
+### S176 — AfricMade icon and brand-asset fallback audit
+
+The owner supplied replacement paired maker-and-cube artwork on 2026-10-24.
+Regenerate every derivative and rerun the source-matched checks; the earlier
+profile-only captures and build do not qualify this identity. Use the light
+variant on white and the dark variant on charcoal, while preserving existing
+merchant logos and release compatibility identifiers.
+
+User request: ensure no active favicon, PWA, native or saved legacy platform
+asset can still show a SuqPage or MirtPage mark, and make the approved
+AfricMade icon/wordmark clearly readable on web, phone and splash. FE-070
+controls the behavior;
+merchant logos and stable protocol IDs remain untouched. This is a follow-up
+to the finished S172 Android artifact; the new artwork needs a later signed build.
+
+1. [x] Inventory configured asset references, generated files and legacy public
+   URLs. The current metadata/manifest/native config use AfricMade, but live
+   `/favicon.png` and generic `/pwa/*` paths still serve former artwork;
+   `/favicon.ico` and root `/apple-touch-icon.png` return an HTML fallback.
+2. [x] Generate high-contrast current and legacy platform icons from the
+   approved source, enlarge the wordmark at web/native entry points and splash,
+   retire old generators that could recreate former artwork, and add a
+   source-bound drift check. Do not change merchant-provided logos.
+3. [x] Verify all affected sizes/URLs and current web/native configuration with
+   focused tests and actual Chrome desktop/phone and Expo preview; review the
+   resulting visuals as agent under DEP-002. Run applicable release gates on the
+   final source. Keep synthetic map tiles in automated browser checks.
+4. [ ] Commit task files only, qualify GitHub checks, publish the web update if
+   admitted, then rebuild one locally signed Android artifact from the same
+   integrated source and verify its binary. The earlier v4 APK is a baseline,
+   not the final resized-brand build; Play and managed names remain separate.
+
+Footprint audit: no tracked review screenshots are shipped from `public/` or
+mobile assets; ignored `.local` captures are test evidence. The 31 MB seed-media
+directory contains on-demand demo content, so deleting it without reference and
+visual checks would break examples. The v4 universal test APK is 155 MB because
+it contains four CPU architectures; its Play AAB is 94 MB and device delivery
+must be measured after the final bundle is built. Current aliases are cached
+fallbacks, not eager page downloads. The observed Expo map-module error comes
+from linked worktree dependencies during preview; native/header visual evidence
+is limited to the rendered header until the final integrated build runs.
+
+S176 final identity evidence: both owner-supplied maker-and-cube PNGs are hash-
+bound. Canonical v2 URLs and every saved legacy platform asset regenerate from
+them; focused icon/PWA/notification and four FE-070 derivative tests pass. Actual
+Chrome navigates home, Featured, login, dashboard entry, showroom and product,
+including reload and 1440/390/320px headers. At 320px, English, Amharic and
+Afaan Oromo leave at least 12px between the wordmark and language control;
+Expo at the same source/API shows AfricMade without an old public brand label.
+Synthetic map tiles guard those browser captures. The 459-test workflow UI suite,
+all 78 `check` subcommands and the clean web-only release stages pass by
+source-matched prefix/focused-fix/suffix evidence; the first composite runs
+stopped at a missing native test mock and then an isolated fixture URL, both
+corrected without changing product behavior. The final web wordmark is 142 KB
+instead of the prior 323 KB. Remote CI, publication and a new signed mobile
+artifact remain pending.
+
 ### S173 — visible product facts for B2C and B2B buyers
 
 Dependency: FE-041 S173 and BE-014 S173 define the order-size contract; S172

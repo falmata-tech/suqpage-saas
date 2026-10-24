@@ -8,7 +8,7 @@ test('FE-053 B03 actual native Support and preview icons have distinct 24px outl
   b.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|react-native|react-native-svg|expo-file-system|expo-crypto|\.\/(?:runtime|LoadingBar|open-link))$/},a=>({path:a.path,namespace:'port'}));
   b.onLoad({filter:/.*/,namespace:'port'},a=>({loader:'js',contents:a.path==='react'?`export const createContext=()=>({}),useContext=()=>0;export default {};`
    :a.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
-   :a.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',TextInput='TextInput',ScrollView='ScrollView',Image='Image',ActivityIndicator='ActivityIndicator',KeyboardAvoidingView='KeyboardAvoidingView',Platform={OS:'android'},StyleSheet={create:value=>value},Alert={};`
+   :a.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',TextInput='TextInput',ScrollView='ScrollView',Image='Image',ActivityIndicator='ActivityIndicator',KeyboardAvoidingView='KeyboardAvoidingView',Platform={OS:'android'},StyleSheet={create:value=>value},Alert={},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`
    :a.path==='react-native-svg'?`export default 'Svg';export const Path='Path',SvgUri='SvgUri';`
    :a.path==='expo-file-system'?`export class File{};export const Paths={};`
    :a.path==='expo-crypto'?`export const randomUUID=()=>{throw Error('Unexpected random ID');};`

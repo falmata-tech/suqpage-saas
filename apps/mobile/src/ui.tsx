@@ -17,6 +17,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  useWindowDimensions,
   type TextInputProps,
   Alert,
   type TextProps,
@@ -91,13 +92,15 @@ export function Icon({
   );
 }
 export function Brand() {
+  const {width}=useWindowDimensions();
+  const height=width<350?36:40;
   return (
     <View style={s.row}>
       <Image
         source={require("../assets/africmade-wordmark.png")}
         accessibilityLabel={PLATFORM_BRAND.name}
         resizeMode="contain"
-        style={{ width: 34 * PLATFORM_BRAND.wordmark.width / PLATFORM_BRAND.wordmark.height, height: 34 }}
+        style={{ width: height * PLATFORM_BRAND.wordmark.width / PLATFORM_BRAND.wordmark.height, height }}
       />
     </View>
   );

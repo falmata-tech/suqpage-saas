@@ -12,7 +12,7 @@ import "./globals.css";
 import "./landing.css";
 import "./discovery.css";
 import "./navigation.css";
-const metadata:Metadata={metadataBase:new URL(appUrl()),applicationName:"AfricMade",title:{default:"AfricMade",template:"%s · AfricMade"},manifest:"/manifest.webmanifest",icons:{icon:[{url:"/brand/africmade-afro-mark-v1.png",type:"image/png"},{url:"/pwa/africmade-favicon-32.png",sizes:"32x32",type:"image/png"}],apple:[{url:"/pwa/africmade-apple-touch-icon-180.png",sizes:"180x180",type:"image/png"}]},appleWebApp:{capable:true,statusBarStyle:"default",title:"AfricMade"},formatDetection:{telephone:false},other:{"mobile-web-app-capable":"yes"}};
+const metadata:Metadata={metadataBase:new URL(appUrl()),applicationName:"AfricMade",title:{default:"AfricMade",template:"%s · AfricMade"},manifest:"/manifest.webmanifest",icons:{icon:[{url:"/brand/africmade-maker-mark-v2.png",type:"image/png"},{url:"/pwa/africmade-favicon-v2-32.png",sizes:"32x32",type:"image/png"}],apple:[{url:"/pwa/africmade-apple-touch-v2-180.png",sizes:"180x180",type:"image/png"}]},appleWebApp:{capable:true,statusBarStyle:"default",title:"AfricMade"},formatDetection:{telephone:false},other:{"mobile-web-app-capable":"yes"}};
 export async function generateMetadata():Promise<Metadata> {
   const t = await getUiText();
   const title=t(MARKET_STOREFRONT_COPY.title),description=t(MARKET_STOREFRONT_COPY.description);

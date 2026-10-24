@@ -54,7 +54,7 @@ a generic website builder, checkout marketplace or unrelated architecture rewrit
 
 ## 2. Product identity
 
-Use **AfricMade**, the owner-supplied afro-pick profile artwork and the canonical
+Use **AfricMade**, the owner-supplied maker-and-cube artwork and the canonical
 values/assets in `lib/brand.ts` consistently across web, mobile, mail and store
 media. The public Market introduction is “Discover what Africa makes.” with
 “Explore product showrooms from farms, factories and artisans without sifting

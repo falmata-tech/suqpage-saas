@@ -1,6 +1,6 @@
 ---
 name: mirtpage-github-workflow
-description: Prepare MirtPage task branches and pull requests, address PR feedback or CI failures, and qualify an authorized merge or integration. Use for GitHub workflow work; not ordinary product coding, a local test run or production deployment alone.
+description: Prepare AfricMade task branches and pull requests, address PR feedback or CI failures, and qualify an authorized merge or integration. Use for GitHub workflow work; not ordinary product coding, a local test run or production deployment alone.
 ---
 
 Resolve paths from this repository root. Read `AGENTS.md` and

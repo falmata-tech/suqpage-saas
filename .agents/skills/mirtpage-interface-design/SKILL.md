@@ -1,11 +1,11 @@
 ---
 name: mirtpage-interface-design
-description: Design or review MirtPage user-facing flows, controls, layouts, copy or localization, especially for phone use and English, Amharic or Afaan Oromo. Not for backend-only changes.
+description: Design or review AfricMade user-facing flows, controls, layouts, copy or localization, especially for phone use and English, Amharic or Afaan Oromo. Not for backend-only changes.
 ---
 
-# MirtPage interface design
+# AfricMade interface design
 
-Load before changing user-facing behavior, language, layout or navigation, and during MirtPage's broader usability review. Follow the accepted meaning and feature spec. Treat language, content hierarchy, interaction and layout as one problem: English is a meaning brief, not a template. Do not assume all African users, devices or buying habits are alike.
+Load before changing user-facing behavior, language, layout or navigation, and during AfricMade's broader usability review. Follow the accepted meaning and feature spec. Treat language, content hierarchy, interaction and layout as one problem: English is a meaning brief, not a template. Do not assume all African users, devices or buying habits are alike.
 
 - Start with the user's real task. Make each action and outcome clear from its label; do not rely on an icon, hidden tooltip or slogan that needs decoding. Keep useful detail when it helps people compare products, understand listed availability or decide what to do.
 - Keep internal record states, schema names and precision modes out of visitor-facing copy and accessibility names. Show the business name and actual city; name owner settings as actions people understand.

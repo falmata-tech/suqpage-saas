@@ -72,7 +72,7 @@ const args = [
       ? ["--dev-client", "--android", "--host", "localhost"]
       : ["--dev-client", "--host", "lan"]),
 ];
-console.log(`Suqpage ${mode} testing: API http://${host}:3102`);
+console.log(`AfricMade ${mode} testing: API http://${host}:3102`);
 const child = spawn(
   process.execPath,
   [path.join(root, "node_modules/expo/bin/cli"), ...args],
