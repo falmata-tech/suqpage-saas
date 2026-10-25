@@ -24,8 +24,10 @@ artifact, Linux import proof, CI and publication receipts.
 
 This website publication does not qualify a new Android binary, installed App
 Links behavior, sender credential, device push or Play testing. DEP-044 S180
-owns the fresh native plan/advisory admission and saved MarketVision Play draft;
-the earlier S179 build approval remains unused and superseded.
+owns the exact approved native plan, its one successful local compilation and
+the saved MarketVision Play draft. The new version 1 AAB and derived APK pass
+independent static inspection; installed-device, FCM and Play qualification
+remain pending. The earlier S179 build approval remains unused and superseded.
 
 ## S179 — selected successor Android package
 
@@ -33,7 +35,9 @@ DEP-044 S180 owns the verified standalone AfricMade Firebase registration and
 the next build's pinned public client identity. The already-created app under
 `suqpage` remains preserved. The unused S179 native plan is superseded. Local
 source check stages, the new-client Expo/export qualification and required remote
-CI/integration pass. Fresh native artifact admission remains pending.
+CI/integration pass. The exact owner-approved local compilation succeeded once;
+independent static binary inspection passes. Device/Play qualification remains
+pending; DEP-044 owns actual permission and sender-verification limits.
 New-project FCM/EAS credential binding and actual push delivery need
 their separate qualification under DEP-043/DEP-044.
 
