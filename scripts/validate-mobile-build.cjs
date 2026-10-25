@@ -5,7 +5,7 @@ const env={...process.env,EXPO_PUBLIC_EAS_PROJECT_ID:process.env.EXPO_PUBLIC_EAS
 if(!['preview','production'].includes(env.SUQPAGE_MOBILE_BUILD_PROFILE||env.EAS_BUILD_PROFILE))throw Error('Choose the preview or production build profile.');
 const build=mobileBuildSettings(env);
 const file=env[build.firebaseFileVariable];
-if(!file)throw Error('MirtPage requires its reviewed Firebase Android configuration.');
+if(!file)throw Error('AfricMade requires its reviewed Firebase Android configuration.');
 const descriptor=fs.openSync(file,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW);
 try{
  const stat=fs.fstatSync(descriptor);

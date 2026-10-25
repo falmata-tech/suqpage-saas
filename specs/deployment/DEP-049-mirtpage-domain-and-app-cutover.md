@@ -4,11 +4,24 @@ title: MirtPage domain, managed services and app release cutover
 status: draft
 related: [FE-021, FE-070, FE-071, BE-059, DEP-029, DEP-051, ADR-0029, FE-072, BE-060, DEP-050, DEP-044, FE-075, BE-062]
 owners: [operations, security, mobile]
-last_updated: 2026-10-23
+last_updated: 2026-10-25
 change_level: L4
 ---
 
 # DEP-049 — MirtPage cutover
+
+## S179 — selected successor Android package
+
+The owner selected `com.africmade.app` for a separate AfricMade Play app on
+2026-10-25. This supersedes `com.mirtpage.app` as the next submission target,
+but does not change the signed MirtPage-package v6 artifact, its Firebase/Play
+registrations, the live website, or existing installed apps. DEP-044 S179 owns
+the new package, authenticated Firebase registration and client download, exact
+app-link association, new native artifact and fresh Play testing. Keep prior app
+records and associations intact; no provider write or new bundle is inferred
+from this decision alone. The later exact Firebase registration approval has
+been executed and independently verified; DEP-044 owns the new app ID, client
+hash and remaining build/Play boundaries.
 
 ## S170 — launch-parity web publication and local Android candidate
 

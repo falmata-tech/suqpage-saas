@@ -19,7 +19,7 @@ function validateMetadata(value:AndroidArtifactMetadata,policy:AndroidSigningPol
 }
 /** Admission compares inspected artifacts, never client-claimed version/signature snapshots. */
 export function validateAndroidRelease(candidate:AndroidArtifactMetadata,policy:AndroidSigningPolicy,previous:AndroidArtifactMetadata|null,firstCanonicalRelease=false){
-  if(policy.packageName!=='com.mirtpage.app'||!policy.certificateSha256)throw Error('Verify and pin the AfricMade signing certificate before distribution.');
+  if(policy.packageName!=='com.africmade.app'||!policy.certificateSha256)throw Error('Verify and pin the AfricMade signing certificate before distribution.');
   const certificate=signingFingerprint(policy.certificateSha256);
   validateMetadata(candidate,policy,certificate);
   if(previous){

@@ -5,6 +5,8 @@ older app. They are not AfricMade upload inputs. The current AfricMade text
 candidate is [the local listing draft](africmade/listing-draft.json) under DEP-044
 S178. Its package/app record, native screenshots, new feature graphic, supported
 listing translations and current Console declarations are not yet qualified;
+the owner selected a new `com.africmade.app` package, so the existing v6
+`com.mirtpage.app` bundle cannot be its submission artifact;
 no AfricMade Play listing or bundle upload is claimed.
 
 This DEP-044 worksheet separates last verified provider outcomes from the newer

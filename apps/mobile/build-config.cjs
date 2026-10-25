@@ -24,7 +24,7 @@ function mobileBuildSettings(env, { validateHosted = true } = {}){
   if(!env.EXPO_PUBLIC_EAS_PROJECT_ID)throw Error('Link the owner’s EAS project before building.');
   if(env.EXPO_PUBLIC_EAS_PROJECT_ID!==policy.expoProjectId)throw Error('Mobile build must use the reviewed AfricMade Expo project.');
  }
- return {profile,hosted,api,auth,dataTarget,projectId:policy.expoProjectId,packageName:policy.packageName,appName:policy.appName,firebaseFileVariable:'MIRTPAGE_GOOGLE_SERVICES_FILE'};
+ return {profile,hosted,api,auth,dataTarget,projectId:policy.expoProjectId,packageName:policy.packageName,appName:policy.appName,firebaseFileVariable:'AFRICMADE_GOOGLE_SERVICES_FILE'};
 }
 function privateMaterial(value,depth=0){
  if(depth>32)return true;
@@ -33,12 +33,16 @@ function privateMaterial(value,depth=0){
  return Object.entries(value).some(([key,nested])=>/private_key|client_secret|session_secret|service_role|keystore_password/i.test(key)||privateMaterial(nested,depth+1));
 }
 function validateFirebaseClient(input,env){
+ if(!/^1:\d+:android:[a-f0-9]+$/.test(policy.firebaseAndroidAppId||''))throw Error('Register and verify the AfricMade Firebase Android app before building.');
  if(!input||typeof input!=='object'||Array.isArray(input))throw Error('Select a Firebase Android client configuration object.');
  if(privateMaterial(input))throw Error('Private credentials must never be used as Firebase Android client configuration.');
  if(env.SUQPAGE_FIREBASE_PROJECT_ID!==policy.firebaseProjectId||input.project_info?.project_id!==policy.firebaseProjectId||String(input.project_info?.project_number)!==policy.firebaseProjectNumber)throw Error('Firebase client must match the reviewed AfricMade project and number.');
- if(!Array.isArray(input.client)||input.client.filter(c=>c?.client_info?.android_client_info?.package_name===policy.packageName&&c.client_info.mobilesdk_app_id===policy.firebaseAndroidAppId).length!==1)throw Error('Firebase Android configuration does not match the registered AfricMade app.');
+ if(!Array.isArray(input.client))throw Error('Firebase Android configuration does not match the registered AfricMade app.');
+ const matchingClients=input.client.filter(c=>c?.client_info?.android_client_info?.package_name===policy.packageName);
+ if(matchingClients.length!==1||matchingClients[0].client_info.mobilesdk_app_id!==policy.firebaseAndroidAppId)throw Error('Firebase Android configuration does not match the registered AfricMade app.');
 }
 function validateFirebaseClientSource(bytes,env){
+ if(!/^[a-f0-9]{64}$/.test(policy.firebaseClientSha256||''))throw Error('Verify the downloaded AfricMade Firebase client before building.');
  if(!Buffer.isBuffer(bytes)||bytes.length>65536)throw Error('Firebase client configuration is invalid or too large.');
  let client;try{client=JSON.parse(bytes.toString('utf8'));}catch{throw Error('Firebase client configuration must be valid JSON.');}
  validateFirebaseClient(client,env);

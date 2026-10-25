@@ -13,8 +13,8 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.mirtpage.app",
-      "scheme": "mirtpage",
+      "package": "com.africmade.app",
+      "scheme": "africmade",
       "adaptiveIcon": {
         "foregroundImage": "./assets/africmade-adaptive-foreground.png",
         "monochromeImage": "./assets/africmade-monochrome.png",

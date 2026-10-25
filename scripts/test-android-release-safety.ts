@@ -5,7 +5,7 @@ import path from 'node:path';
 import {test} from 'node:test';
 import {validateAndroidRelease,signingFingerprint,type AndroidArtifactMetadata} from '../lib/android-release-domain';
 import {inspectAndroidApk,type AndroidToolRunner} from './operations/android-apk-inspection';
-const fingerprint='AB'.repeat(32),policy={packageName:'com.mirtpage.app',certificateSha256:fingerprint};
+const fingerprint='AB'.repeat(32),policy={packageName:'com.africmade.app',certificateSha256:fingerprint};
 const candidate:AndroidArtifactMetadata={packageName:policy.packageName,versionCode:3,debuggable:false,certificateSha256:[fingerprint.toLowerCase()]};
 test('reviewed signer, canonical identity and newer version admit updates/explicit first release',()=>{
  assert.equal(validateAndroidRelease(candidate,policy,{...candidate,versionCode:2}).versionCode,3);

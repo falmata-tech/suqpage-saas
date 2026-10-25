@@ -184,11 +184,11 @@ test("FE-070: native YouTube frame uses the AfricMade fallback and retains confi
   });
 
   for (const { environment, platform, packageId, expected } of [
-    { environment: "standalone", platform: "android", packageId: undefined, expected: "https://com.mirtpage.app" },
-    { environment: "standalone", platform: "android", packageId: "com.mirtpage.app", expected: "https://com.mirtpage.app" },
+    { environment: "standalone", platform: "android", packageId: undefined, expected: "https://com.africmade.app" },
+    { environment: "standalone", platform: "android", packageId: "com.africmade.app", expected: "https://com.africmade.app" },
     { environment: "standalone", platform: "android", packageId: "com.suqpage.app", expected: "https://com.suqpage.app" },
     { environment: "storeClient", platform: "android", packageId: undefined, expected: "https://host.exp.exponent" },
-    { environment: "standalone", platform: "ios", packageId: undefined, expected: "https://com.mirtpage.app" },
+    { environment: "standalone", platform: "ios", packageId: undefined, expected: "https://com.africmade.app" },
   ]) {
     fixture.platform = platform;
     fixture.constants.executionEnvironment = environment;
