@@ -20,6 +20,15 @@ bundle is not that submission artifact. Draft listing text and asset requirement
 may be prepared without a Console write. Do not apply the old Suqpage or
 MirtPage listings, test enrollment, or screenshots to the new app.
 
+The exact owner-approved Firebase registration is verified in project `suqpage`
+(`588262779708`): Android app ID
+`1:588262779708:android:59a6f74422eead73248c39`, nickname AfricMade, package
+`com.africmade.app`, with the existing upload-signer SHA-1 and SHA-256 saved and
+read back after reload. Its authentic downloaded client SHA-256 is
+`fb5623d1ca922e9da8d141d154bd31b5b58e0c0abf48ceeeeb10a143dcee4d8a`.
+The raw client remains private; both prior Android registrations remain.
+This registration does not qualify a compiled artifact or Play app/track.
+
 GIVEN the new package is selected WHEN a native build is prepared THEN its
 installed package and Android custom scheme are `com.africmade.app` and
 `africmade`, while its visible name/artwork remain AfricMade and the current

@@ -19,7 +19,9 @@ registrations, the live website, or existing installed apps. DEP-044 S179 owns
 the new package, authenticated Firebase registration and client download, exact
 app-link association, new native artifact and fresh Play testing. Keep prior app
 records and associations intact; no provider write or new bundle is inferred
-from this decision alone.
+from this decision alone. The later exact Firebase registration approval has
+been executed and independently verified; DEP-044 owns the new app ID, client
+hash and remaining build/Play boundaries.
 
 ## S170 — launch-parity web publication and local Android candidate
 

@@ -1,7 +1,7 @@
 {
   "status": "draft_not_uploaded",
   "source": "DEP-044 S178/S179; listing copy derives from released AfricMade UI, new-package artifact pending",
-  "packageDecision": "new_com.africmade.app_selected_not_registered",
+  "packageDecision": "new_com.africmade.app_firebase_registered_play_pending",
   "currentLocalBuildPackage": "com.mirtpage.app",
   "targetPackage": "com.africmade.app",
   "mainListing": {

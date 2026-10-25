@@ -29,7 +29,7 @@ Play submission and genuine closed-test enrollment remain unverified.
 | --- | --- | --- | --- | --- |
 | AfricMade web | S177 source integrated | Required CI and public routes pass | Agent Chrome desktop/phone review recorded in S177 | Live at mirtpage.com |
 | AfricMade Android, old package | Signed v6 AAB and APK | Static release checks pass; physical device pending | Web/Expo source preview reviewed; installed native pending | Local only, `com.mirtpage.app`; not a new-package Play artifact |
-| AfricMade Android, new package | S179 configuration candidate | Focused and full local checks pass; Firebase registration pending | No new visual changes; installed native pending | Not built or deployed |
+| AfricMade Android, new package | S179 configuration and matching Firebase registration | Focused and full local checks pass; refreshed registered-client checks pass | No new visual changes; installed native pending | Not built or deployed |
 | AfricMade Play app | English/Amharic draft and icon candidate | Draft validation only; Console/declarations/screens pending | Native phone screenshots pending | No new app release or closed-test enrollment |
 
 ## Ordered work
@@ -251,10 +251,10 @@ tracks and do not treat a local bundle as an uploaded release.
 ### S179 — new AfricMade Android package and app record
 
 Dependency: DEP-044's new-package scenarios and DEP-049's separate app-record
-guard. Active step: obtain separate authorization for the exact Firebase Android
-registration, then verify its readback and client download. No new native build,
-Firebase/Play write or upload has occurred. Preserve the released web artifact
-and existing Suqpage/MirtPage apps.
+guard. Active step: pin the verified Firebase registration/client, qualify the
+updated source and prepare a fresh one-build advisory review. The approved
+Firebase app registration is complete; no new native build or Play write/upload
+has occurred. Preserve the released web artifact and existing Suqpage/MirtPage apps.
 
 1. [x] Record the owner's `com.africmade.app` selection, inspect existing build,
    Firebase, app-link, signing and Play contracts, and isolate the task on a
@@ -266,18 +266,21 @@ and existing Suqpage/MirtPage apps.
    `africmade` / version code 1. The final-source `npm run check` passes all
    stages, including 459 browser-workflow cases; clean-install `release:web`
    passes with zero dependency findings and a real local provider smoke.
-   Keep the branch unmerged while registration IDs/bytes are unverified.
-3. [ ] Independently verify the exact Firebase project/account and register the
+   Registration IDs/bytes are now verified; updated source qualification,
+   integration and artifact admission remain separate gates.
+3. [x] Independently verify the exact Firebase project/account and register the
    new Android app; retain provider before/after evidence and its authentic
    downloaded client file. Add the exact new-package app-link association after
    certificate verification, preserving existing associations. Qualify any web
    publication separately. Normal Chrome readback confirms the owner session,
    project `suqpage` / `588262779708`, existing old-package records and absent
    new package. Android SDK independently verified the existing upload signer;
-   the new association is local only. Automatic approval review rejected the
-   persistent Firebase `Register app` write because package selection alone did
-   not authorize that exact hosted mutation. The form was not submitted; obtain
-   explicit authorization and do not retry by another route before then.
+   the new association is local only. The initial automatic approval rejection
+   made no write. The owner subsequently approved exact review `f92a78d5…af993`;
+   the one new app and both fingerprints are saved and independently read back
+   after reload. The authentic client matches the exact new app; its bytes are
+   unchanged by the fingerprint additions. DEP-044 owns the app ID/client hash;
+   protected readback is `.local/africmade-package-s179/firebase/verified.json`.
 4. [ ] Prepare a fresh source-bound audit and exact one-build exception review;
    then locally sign one new-package AAB and derived APK, inspect it and run
    actual native tasks. Do not reuse S177's consumed v6 build exception.

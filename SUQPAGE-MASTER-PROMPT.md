@@ -9,7 +9,8 @@ AfricMade is the current source brand. The website remains at
 **https://mirtpage.com** during the transition; Android retains
 **com.mirtpage.app** in the existing local v6 artifact. The owner has selected
 **com.africmade.app** for a separate future Play submission under DEP-044 S179;
-that package has not yet been built or published. Supabase
+that package has its matching verified Firebase Android registration but has
+not yet been built or published. Supabase
 PostgreSQL, managed Auth and private Storage serve the application. Stable
 historical provider/protocol identifiers remain where compatibility requires
 them. Their spelling does not authorize recreating services or imply that hosted
