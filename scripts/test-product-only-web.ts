@@ -9,7 +9,7 @@ const bundle=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
  import React,{useState} from 'react';import {createRoot} from 'react-dom/client';import {flushSync} from 'react-dom';
  import ProductForm from './components/ProductForm';import Controls from './components/MarketSearchControls';
  const root=createRoot(document.getElementById('root'));let mountId=0;
- function Search(){const[value,setValue]=useState(window.fixture.search);return <Controls scope={window.fixture.scope} value={value} onChange={next=>{window.fixture.changes.push(next);setValue(next);}} metadata={{industries:[],countries:[],places:[]}}/>;}
+ function Search(){const[value,setValue]=useState(window.fixture.search);return <Controls ready={true} scope={window.fixture.scope} value={value} onChange={next=>{window.fixture.changes.push(next);setValue(next);}} metadata={{industries:[],countries:[],places:[]}}/>;}
  window.fixture.mount=(screen,product)=>flushSync(()=>root.render(screen==='search'?<Search key={++mountId}/>:<ProductForm key={++mountId} product={product} catalog={{categories:[]}} businessId={7} contentVersion={3} idempotencyKey='local-product-only-key' staffMode={false} action={async data=>{window.fixture.saves.push(Object.fromEntries(data));}}/>));
 `},bundle:true,write:false,format:'iife',platform:'browser',plugins:[{name:'product-ui-ports',setup(builder){
  builder.onResolve({filter:/^react(?:\/jsx(?:-dev)?-runtime)?$/},args=>({path:require.resolve(args.path)}));

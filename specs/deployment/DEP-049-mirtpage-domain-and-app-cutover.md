@@ -12,16 +12,27 @@ change_level: L4
 
 ## S179 — selected successor Android package
 
+DEP-044 S180 owns the verified standalone AfricMade Firebase registration and
+the next build's pinned public client identity. The already-created app under
+`suqpage` remains preserved. The unused S179 native plan is superseded. Local
+source check stages and the new-client Expo/export qualification pass; remote
+release gates, reviewed integration and fresh artifact admission remain pending.
+New-project FCM/EAS credential binding and actual push delivery need
+their separate qualification under DEP-043/DEP-044.
+
 The owner selected `com.africmade.app` for a separate AfricMade Play app on
 2026-10-25. This supersedes `com.mirtpage.app` as the next submission target,
 but does not change the signed MirtPage-package v6 artifact, its Firebase/Play
-registrations, the live website, or existing installed apps. DEP-044 S179 owns
+registrations, the live website, or existing installed apps. DEP-044 owns
 the new package, authenticated Firebase registration and client download, exact
 app-link association, new native artifact and fresh Play testing. Keep prior app
 records and associations intact; no provider write or new bundle is inferred
-from this decision alone. The later exact Firebase registration approval has
-been executed and independently verified; DEP-044 owns the new app ID, client
-hash and remaining build/Play boundaries.
+from this decision alone. The later explicit request to retire only the old
+SuqPage Play app follows DEP-044's scoped retirement contract; it does not
+authorize deleting Firebase or other applications. The approved standalone
+registration is independently verified; DEP-044 S180 owns its exact identity,
+client hash and remaining
+build/Play boundaries.
 
 ## S170 — launch-parity web publication and local Android candidate
 

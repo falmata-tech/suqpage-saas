@@ -38,7 +38,7 @@ test('FE-065 real populated controls fit578px and606px with every active languag
   import{createUiText}from'./lib/i18n/core';import{emptyMarketSearch}from'./lib/market-search';
   const fixture=window.fixture;window.fixtureT=createUiText(fixture.catalog);
   function App(){const[value,setValue]=useState({...emptyMarketSearch(),query:'Cup',categories:['home','textiles'],countries:['ET'],cities:['ET:addis'],madeToOrder:true});
-   return <section className={styles.activeControls} style={{width:fixture.width+24,boxSizing:'border-box'}}><Controls scope="products" value={value} onChange={setValue} metadata={{places:[],countries:[],industries:[]}}/></section>;}
+   return <section className={styles.activeControls} style={{width:fixture.width+24,boxSizing:'border-box'}}><Controls ready={true} scope="products" value={value} onChange={setValue} metadata={{places:[],countries:[],industries:[]}}/></section>;}
   createRoot(document.getElementById('root')).render(<App/>);
  `},bundle:true,write:false,outfile:'controls.js',platform:'browser',jsx:'automatic',loader:{'.module.css':'local-css'},plugins:[{name:'locale-context-ports',setup(b){
   b.onResolve({filter:/^(?:next-intl|@\/lib\/i18n\/ui)$/},args=>({path:args.path,namespace:'ports'}));

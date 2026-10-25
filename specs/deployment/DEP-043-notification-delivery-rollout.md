@@ -4,11 +4,29 @@ title: Verified notification delivery rollout
 status: in_progress
 related: [DEP-048, BE-050, FE-062, ADR-0026, DEP-042, DEP-044, BE-018, FE-019, FE-036, FE-053, DEP-047, ADR-0031, BE-063]
 owners: [operations, security]
-last_updated: 2026-10-20
+last_updated: 2026-10-25
 change_level: L3
 ---
 
 # DEP-043 — Verified notification delivery rollout
+
+## S180 — standalone AfricMade client; sender qualification pending
+
+DEP-044 S180 owns the independently verified standalone Firebase project and
+`com.africmade.app` Android registration now pinned in the release policy.
+Preview and production profiles pin its public project ID. Focused source
+tests reject the prior `suqpage` client for the same package, including when an
+environment value selects that old project, and reject mismatched number/app ID.
+The prior project, app registrations and credentials remain preserved.
+
+A public Android client file is not an FCM sending key. The new-project FCM
+sender and package-specific EAS credential binding remain unverified; earlier
+Suqpage credential evidence below does not qualify this new project/package.
+Any private credential operation retains its separate explicit authorization,
+recoverable source and provider readback requirements. Do not reuse the old
+project's sending credential for the standalone app or infer actual push
+delivery from source tests. Real-device delivery and internal-tap/logout/expiry
+checks, fresh artifact admission and Play qualification remain pending.
 
 ## S148 — scheduled worker startup boundary (verified)
 
@@ -372,18 +390,19 @@ in S95 below. Hosted migration, Web Push setup, rebuilt APK and actual OS delive
 remain unverified.
 Full gates follow visual approval; DEP-043 remains in progress.
 
-## Configuration and pending owner setup
+## Earlier Suqpage configuration and pending delivery setup
 
-Android uses the existing owner-controlled Expo project. The owner selected
-Firebase project `suqpage` (number `588262779708`). DEP-042 S96 uses one permanent
-application name Suqpage and package `com.suqpage.app` for internal APK and store
-builds: register only that canonical Android app and reuse its matching client
-configuration across hosted profiles. Legacy installed preview APKs retain their
-old identity until replaced by the next admitted canonical APK; no second Firebase
-registration or later app rename is required.
-The build takes its matching Android client configuration via the EAS file
-variable `SUQPAGE_GOOGLE_SERVICES_FILE`, with the explicitly verified
-`SUQPAGE_FIREBASE_PROJECT_ID`; `SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED=1` requires
+The earlier Suqpage builds used the existing owner-controlled Expo project and
+Firebase project `suqpage` (number `588262779708`). DEP-042 S96 selected one
+permanent application name Suqpage and package `com.suqpage.app` for internal
+APK and store builds, using only that canonical Android app and its matching
+client across hosted profiles. Legacy installed preview APKs retained their
+old identity until replaced by the next admitted canonical APK; no second
+Firebase registration or later app rename was required for that release. S180 above now
+controls the successor's standalone client and unverified sender binding.
+Those earlier builds took their matching Android client configuration via the
+EAS file variable `SUQPAGE_GOOGLE_SERVICES_FILE`, with the explicitly verified
+`SUQPAGE_FIREBASE_PROJECT_ID`; `SUQPAGE_MOBILE_NOTIFICATIONS_ENABLED=1` required
 that source. Private FCM V1 credentials are uploaded directly to EAS Credentials,
 never chat, repository or app. Verify Expo enhanced-security status independently.
 The MVP uses standard private-device-token transport with an explicit

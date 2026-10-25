@@ -4,11 +4,35 @@ title: Independent business-map and product-card discovery
 status: in_progress
 related: [FE-074, FE-026, BE-054, DEP-045, FE-030, FE-042, FE-049, FE-053, FE-059, BE-047, ADR-0027, FE-067, BE-044, FE-021, FE-052]
 owners: [product, frontend]
-last_updated: 2026-10-21
+last_updated: 2026-10-25
 change_level: L2
 ---
 
 # FE-065 — Independent business and product discovery
+
+## S180 — first editable search after restoration (locally verified; delivery pending)
+
+[FE-042 S25](FE-042-category-results-and-standard-page-workspaces.md#s22s24-approved-release-evidence)
+still controls initial search readiness. The independent web workspace must
+preserve that contract while restoring its URL/session state.
+
+GIVEN server-rendered Market controls WHEN hydration and initial workspace
+restoration have not committed THEN search, clear and filter controls remain
+disabled. GIVEN those controls first become editable WHEN a visitor immediately
+types a query THEN retain the exact text, update the canonical query and results,
+and preserve the selected scope and filters. Restoration must not overwrite that
+first accepted input. Normal later updates retain the existing focus, typing,
+snapshot and stale-response behavior.
+Readiness does not waive the existing country prerequisite for choosing a city.
+
+The readiness correction preserves labels, native screens, API/data contracts
+and the existing independent-feed behavior. Actual phone review also found that
+the selected Category label broke inside its word. GIVEN Product listings at
+320/390px in English, Amharic or Afaan Oromo WHEN filter counts are visible THEN
+labels wrap only at natural word boundaries, counts stay separate and within
+their buttons, and the filter row fits the viewport. Preserve the current font,
+all labels and at least 44px touch height; give the Category track enough
+intrinsic width rather than hiding or shrinking its text.
 
 ## S158 — city-area pins and separate product discovery (in progress)
 
@@ -482,6 +506,20 @@ Pure scope/URL activation, canonical parsing, country/city, debounce/stale-respo
 and locale contracts; isolated real PostgreSQL business/product independence,
 privacy, category/location unions, custom-product filtering and bounded
 ranking/paging under BE-054/BE-056.
+The stale-page/exclusion browser regression keeps the live intersection observer
+and waits for its held page-two request before changing exclusions, preserving
+all stale-response, queued-callback and exact page/exclusion-history assertions.
+S180 renders the actual web workspace on the server, verifies its controls are
+disabled before hydration, hydrates that same markup with real React, and types
+as soon as the field becomes editable. Assert retained text, canonical query,
+selected filters and the matching controlled HTTP request without sleeps or a
+test-only readiness delay. Component-port evidence remains separate from the
+focused actual-Chrome journey against the real local API at desktop/phone sizes.
+The phone filter regression uses the live controls, production CSS and retained
+en/am/om catalogs at 320/390px. Assert whole-word label geometry, visible selected
+counts, non-overlapping text/count bounds, touch height and viewport fit. Recheck
+those actual local-API filter states after the CSS correction; retain the
+source-matched first-typing journey evidence for unchanged readiness code.
 Actual local browser tests for typing without Enter, switching/clear/history,
 description/source links, empty states, signup and dialogs at 320/390/1440 plus
 all five locales. Native browser evidence is labeled separately from a device.

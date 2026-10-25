@@ -8,9 +8,12 @@ older “Suqpage” heading names are compatibility anchors, not the public bran
 AfricMade is the current source brand. The website remains at
 **https://mirtpage.com** during the transition; Android retains
 **com.mirtpage.app** in the existing local v6 artifact. The owner has selected
-**com.africmade.app** for a separate future Play submission under DEP-044 S179;
-that package has its matching verified Firebase Android registration but has
-not yet been built or published. Supabase
+**com.africmade.app** for a separate future Play submission under DEP-044 S179.
+Its standalone Firebase project **africmade-de81a** and Android registration are
+independently verified, and the public client identity is pinned for the next
+build under DEP-044 S180. Separate FCM/EAS credential binding, artifact and
+device-delivery qualification remain pending. No new-package binary has been
+built or published. Supabase
 PostgreSQL, managed Auth and private Storage serve the application. Stable
 historical provider/protocol identifiers remain where compatibility requires
 them. Their spelling does not authorize recreating services or imply that hosted
@@ -649,6 +652,11 @@ version, destination and entity IDs from clients are hints to validate, not auth
 Native supports visitor/owner tasks only; staff stays on web. API origin, Auth/data
 target, Firebase public client identity, package, signer and permissions require
 actual artifact/configuration admission under DEP-044/DEP-049 and BE-044/BE-059.
+The next `com.africmade.app` build selects the verified standalone AfricMade
+Firebase client from the release policy. Preview and production profiles pin its
+public project ID; old-project clients and mismatched identities fail admission.
+This public client binding does not qualify a new-project FCM sending credential,
+package-specific EAS binding or actual push delivery; DEP-043/DEP-044 own those gates.
 Local development uses separate owner and guest credential keys bound to the
 canonical API/Auth origins; it never restores or deletes production keys as a
 fallback. Production keys remain compatible with existing installations. This

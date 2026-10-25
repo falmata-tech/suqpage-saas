@@ -18,8 +18,11 @@ schema, recovery and launch-parity outcomes remain in their owning specs and
 release records rather than serving as this package's admission evidence.
 
 **Next delivery dependency:** the owner selected a *separate*
-**com.africmade.app** package. S179 must verify its Firebase registration,
-client download, app-link association, new signed artifact and Play app record.
+**com.africmade.app** package. S180's standalone Firebase project and matching
+Android client are independently verified and pinned in source. Local source
+checks are qualified; reviewed integration, fresh build admission, separate FCM/EAS
+credential binding and actual push delivery remain pending. S179/S180 still
+require the app-link, new signed artifact and Play app-record qualification.
 The old package's v6 bundle is not eligible for that new app. Physical Android,
 Play submission and genuine closed-test enrollment remain unverified.
 
@@ -29,8 +32,8 @@ Play submission and genuine closed-test enrollment remain unverified.
 | --- | --- | --- | --- | --- |
 | AfricMade web | S177 source integrated | Required CI and public routes pass | Agent Chrome desktop/phone review recorded in S177 | Live at mirtpage.com |
 | AfricMade Android, old package | Signed v6 AAB and APK | Static release checks pass; physical device pending | Web/Expo source preview reviewed; installed native pending | Local only, `com.mirtpage.app`; not a new-package Play artifact |
-| AfricMade Android, new package | S179 configuration and matching Firebase registration | Focused and full local checks pass; refreshed registered-client checks pass | No new visual changes; installed native pending | Not built or deployed |
-| AfricMade Play app | English/Amharic draft and icon candidate | Draft validation only; Console/declarations/screens pending | Native phone screenshots pending | No new app release or closed-test enrollment |
+| AfricMade Android, new package | S180 standalone Firebase registration and source binding | Local configuration/Expo/export, all 78 check stages, web release and 20 acceptance journeys pass; remote gates pending | No new visual changes; installed native pending | Not built or deployed |
+| AfricMade Play app | Saved AfricMade app and local English/Amharic listing drafts | Saved name/package/Draft verified; pricing/type readback, declarations and native screens pending | Native phone screenshots pending | No bundle upload, release or closed-test enrollment |
 
 ## Ordered work
 
@@ -248,6 +251,78 @@ tracks and do not treat a local bundle as an uploaded release.
    provider state. Physical-device behavior and tester enrollment remain
    independent evidence.
 
+### S180 — standalone AfricMade Firebase project
+
+Dependency: DEP-044 S180 and DEP-049's separate app-record boundaries. Current:
+the standalone Firebase project, Android registration and authentic client are
+independently verified and pinned in source. Complete step 4's remaining checks
+and reviewed integration before fresh build admission. S179's one-build approval
+remains unused; its old-project plan is superseded. No new native compilation
+has started. DEP-044 owns the exact registration/client identity; traceability
+owns provider and focused-test evidence.
+
+1. [x] Record the changed project decision, isolate from current main, preserve
+   unrelated work and the old registration, and define target/failure scenarios.
+   Reconcile the master introduction and runtime identity statements with the
+   independently verified binding while preserving unfinished delivery gates.
+2. [x] Verify owner account and absence of an existing intended project; create
+   the separate AfricMade project on Spark without billing or optional Analytics/
+   AI integrations. Read back its actual ID/number and preserve protected evidence.
+3. [x] Register `com.africmade.app`, add both existing signer fingerprints, reload
+   and download its matching client; assess FCM/EAS credential dependencies.
+   Both fingerprints and the authentic client are verified after reload; a
+   public client does not configure the separate sender credential. FCM/EAS
+   binding and actual push delivery remain unverified.
+4. [ ] Update release policy and project-dependent fixtures, prove old-project
+   rejection and new-client acceptance, run applicable gates, review and commit
+   only task files, then qualify PR/main CI.
+   Source policy and preview/production public project-ID pins are updated;
+   authentic-client admission/rejection, actual Expo config and Hermes export pass.
+   Commit `6164ade` retained the original UI run's one race failure; the corrected
+   affected file passed 21/21 and the exact remaining local tail passed. PR #45
+   browser failure prompted the readiness correction below, now locally
+   qualified; its commit and remote browser qualification remain pending.
+   Readiness follow-up (FE-065 / FE-042 S25):
+   1. [x] Inspect PR #45's failed browser job, record the enabled-before-restoration
+      defect and controlling readiness contract, then reproduce it with actual
+      SSR markup and React hydration before changing production code.
+   2. [x] Gate existing web search/clear/filter controls on workspace readiness;
+      preserve native/lib sources, first accepted typing and restored filters.
+   3. [x] Record the phone Category word-break defect before changing CSS. Give
+      en/am/om labels natural wrapping and intrinsic width at 320/390px while
+      retaining the font, counts and 44px minimum touch height.
+   4. [x] Pass focused tests and actual Chrome/local-API journeys at desktop/phone
+      sizes; inspect screenshots and record agent/parent visual review. Controlled
+      component ports and synthetic map tiles are labelled. Native/Expo SSR and
+      installed-device behavior are unchanged and unclaimed by this correction.
+   5. [x] Qualify all 78 local check stages, 467 workflow-UI cases with zero skips,
+      the physical web-only release gate and all 20 disposable-provider acceptance
+      journeys. Preserve the failed precheck/settled-fixture invocations and one
+      aggregate layout timeout; the unchanged isolated retry passes. No assertion
+      or timeout was relaxed, and no failed invocation is relabelled as passing.
+      [Traceability](../specs/TRACEABILITY.md) owns the source-bound evidence.
+   6. [ ] Commit/push the reviewed correction, qualify required PR/main checks,
+      then publish the exact web artifact through the guarded Netlify workflow.
+      Verify `https://mirtpage.com/.well-known/assetlinks.json` publicly serves
+      the new package and existing signer before step 5's build admission;
+      preserve old package associations. Source-only tests do not qualify the
+      hosted result, which currently still lists only the old packages.
+5. [ ] Prepare the new source-bound local build review and required advisory
+   admission, build once, inspect actual binaries and qualify phone/Play steps
+   separately. Do not execute the superseded S179 build plan.
+   Every Play Console session must select the MarketVision Google account and
+   independently verify the MarketVision developer account/ID first, following
+   the owner's standing instruction in `docs/GOOGLE-PLAY-RELEASE.md`.
+6. [x] Independently verify the owner's completed retirement of the exact old
+   SuqPage Play app in MarketVision. Google confirms that the app is deleted and
+   recoverable until **November 1, 2026**; it exposes no precise deadline time.
+   Protected readback:
+   `.local/africmade-firebase-s180/play-listing-prep/suqpage-deletion-verified.json`.
+   The owner completed deletion; the agent submitted neither deletion nor
+   recovery and read no private transaction-ID input. Other apps, Firebase and
+   application data remain unchanged. This retirement does not qualify the new
+   AfricMade app, artifact or testing history.
+
 ### S179 — new AfricMade Android package and app record
 
 Dependency: DEP-044's new-package scenarios and DEP-049's separate app-record
@@ -281,9 +356,11 @@ has occurred. Preserve the released web artifact and existing Suqpage/MirtPage a
    after reload. The authentic client matches the exact new app; its bytes are
    unchanged by the fingerprint additions. DEP-044 owns the app ID/client hash;
    protected readback is `.local/africmade-package-s179/firebase/verified.json`.
-4. [ ] Prepare a fresh source-bound audit and exact one-build exception review;
-   then locally sign one new-package AAB and derived APK, inspect it and run
-   actual native tasks. Do not reuse S177's consumed v6 build exception.
+4. [ ] Superseded by S180 before compilation: a fresh source-bound audit and
+   exact one-build review were prepared and approved, but the owner then selected
+   a standalone Firebase project. Preserve the unused plan; do not execute it.
+   S180 owns the replacement build, binary inspection and actual native tasks.
+   Do not reuse S177's consumed v6 build exception.
 5. [ ] Create/verify the separate AfricMade Play app and current declarations,
    capture privacy-reviewed screenshots from the new admitted APK, finish
    localized listing/media, and separately qualify upload and testing.
@@ -397,10 +474,13 @@ isolated from R02 and does not change application or native artifacts.
 - [x] Commit/push the reviewed nine-file scope as `3c1b5391ce12deb8565bde4a44e8aca31710f783`
   on `docs/dep-002-retire-vercel`; unrelated work and artifact refs are preserved.
 - [x] Verify the exact project/repository, retain the before-state and disconnect
-  only that Git connection. Fresh provider reload confirms the removal on
-  2026-10-20; project/deployments and the account App installation remain.
+  only that Git connection. Provider reload confirmed removal on 2026-10-20;
+  an independent 2026-10-25 read of the exact project Git settings still shows
+  no connected Git repository. Project/deployments and the account App remain.
   Netlify, domains/secrets and other repositories were not changed. Protected
-  `workflow-improvement-research/vercel-retirement/result.json` records the result.
+  `workflow-improvement-research/vercel-retirement/result.json` records retirement;
+  `.local/africmade-firebase-s180/play-listing-prep/vercel-git-disconnection-readback.json`
+  records the latest read-only verification.
 - [x] After that normal push, GitHub reads at 2026-10-20 23:34:18 UTC observe
   zero status contexts, check runs or deployments for `3c1b539`. Protected
   `vercel-retirement/post-push-observation.json` records this point-in-time
