@@ -196,7 +196,7 @@ MarketVision Technology copyright in the public About footer on web and native
    The isolated browser fixture rendered the waiting link but its external-click
    follow-through was not established; physical Android and the live deployed
    artifact remain separate release checks.
-3. [ ] Run the source-matched local checks and release gates, reconcile master and
+3. [x] Run the source-matched local checks and release gates, reconcile master and
    traceability, then commit only this task's paths. Push a typed PR, qualify all
    required CI checks and merge to the default branch without touching unrelated
    edits. Local S177 evidence: all `npm run check` stages pass by source-matched
@@ -207,14 +207,32 @@ MarketVision Technology copyright in the public About footer on web and native
    rerun. The owner/staff workflow first found a stale “showroom” test label,
    then reached an action while the disposable fixture was slow. Its later
    local-only run also timed out during an initial loading navigation. The
-   unchanged save outcome remains unverified on this source; require the
-   current-head GitHub browser job before qualifying integration. Do not describe
-   the full local acceptance command as passed.
-4. [ ] Publish the exact approved web artifact from the integrated tree and verify
+   unchanged save outcome remains unverified on this source. Do not describe
+   the full local acceptance command as passed. The required current-head
+   GitHub browser job passed, and PR #41 was squash-merged as
+   `888ca451cba48753935a5e5d72339e3e9ed8d233` with the same tree as the
+   approved source; all five post-merge jobs passed in run `40157701773`.
+4. [x] Publish the exact approved web artifact from the integrated tree and verify
    live routes, metadata and canonical/legacy asset bytes; retain the prior deploy.
-5. [ ] Admit one new locally signed AAB and derived APK under DEP-044, verify
+   Netlify published deploy `6add7d62c83b53564aa5b8b2` to `mirtpage.com`
+   from that tree. Independent readback returned 200 for 14 routes, including
+   favicon, manifest, current wordmark, PWA icons, legacy brand alias and health;
+   desktop/phone Chrome checked Market, About, Featured and Login without page
+   errors. The prior deploy `6adcecea7e508db2bb2e0920` remains recoverable.
+   Protected receipts: `.local/s177-brand-review/web-production-result.json`,
+   `web-live-readback.json` and `live-chrome/result.json`.
+5. [x] Admit one new locally signed AAB and derived APK under DEP-044, verify
    package/version/signature/assets/alignment, and report Play/device status
-   separately. No Play upload is included.
+   separately. The one approved local compilation produced AfricMade version 6
+   from merged commit `888ca451`, package `com.mirtpage.app`, with the retained
+   signer. AAB SHA-256 `4570fba3f761107e8105868ba46a9f49ba0e0b93ccf6d0ea8d52a61401b00441`;
+   derived APK SHA-256 `c26c1d7abbe1f9ccb8331cc7c0675d977f48e43bc9dcc1d05574dfbc69500811`.
+   Bundle validity, label, API 36, previous-v5 update compatibility, new launcher/
+   splash/notification assets, blocked-permission absence, 16-KB ZIP/bundle
+   alignment and all 50 64-bit ELF load alignments pass. Protected artifacts and
+   receipts are in `.local/africmade-s177-native-v6/`; focused static receipt is
+   `.local/s177-brand-review/native-v6-inspection.json`. Physical Android,
+   notification delivery, Play upload and Play signing remain unverified.
 
 ### S173 — visible product facts for B2C and B2B buyers
 
