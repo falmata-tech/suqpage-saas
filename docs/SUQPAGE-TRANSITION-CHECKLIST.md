@@ -234,6 +234,31 @@ MarketVision Technology copyright in the public About footer on web and native
    `.local/s177-brand-review/native-v6-inspection.json`. Physical Android,
    notification delivery, Play upload and Play signing remain unverified.
 
+### S178 — AfricMade Google Play listing preparation
+
+DEP-044 controls the successor listing. This is a draft-only task until the exact
+package/app record, admitted Android artifact, real native screenshots and
+current Console declarations are verified. Preserve the historical Suqpage Play
+tracks and do not treat a local bundle as an uploaded release.
+
+1. [x] Draft concise English and supported localized listing text from the
+   current AfricMade capabilities; validate field lengths and avoid checkout,
+   verified-stock or guaranteed-delivery claims. English and Amharic drafts fit
+   the 30/80/4,000 limits in `docs/play-store/africmade/listing-draft.json`;
+   the Amharic text still needs in-context language review before entry. Afaan
+   Oromo is an active app language, but is not listed as a Play listing locale
+   in the current official language list; do not pass it off as uploaded copy.
+2. [ ] Inspect the signed native artifact and capture real, privacy-reviewed
+   phone screenshots; derive a new feature graphic and Play icon from the
+   owner-approved minimal artwork. Verify Google's actual media constraints.
+   The signed v6 binary passed static inspection and the 512px/99 KB Play icon
+   candidate is prepared; a connected phone and real capture are still needed.
+3. [ ] Resolve the exact package and Play app record, then review current Console
+   fields, declarations and test-track state before any proposed write.
+4. [ ] Separately qualify any upload/review request and verify the resulting
+   provider state. Physical-device behavior and tester enrollment remain
+   independent evidence.
+
 ### S173 — visible product facts for B2C and B2B buyers
 
 Dependency: FE-041 S173 and BE-014 S173 define the order-size contract; S172
