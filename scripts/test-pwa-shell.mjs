@@ -18,11 +18,11 @@ assert.ok(manifest.icons.some((icon) => icon.sizes === "512x512" && icon.purpose
 assert.ok(manifest.icons.some((icon) => icon.sizes === "512x512" && icon.purpose === "maskable"));
 
 for (const [file, size] of [
-  ["public/pwa/africmade-favicon-v2-32.png", 32],
-  ["public/pwa/africmade-apple-touch-v2-180.png", 180],
-  ["public/pwa/africmade-icon-v2-192.png", 192],
-  ["public/pwa/africmade-icon-v2-512.png", 512],
-  ["public/pwa/africmade-maskable-v2-512.png", 512],
+  ["public/pwa/africmade-favicon-v3-32.png", 32],
+  ["public/pwa/africmade-apple-touch-v3-180.png", 180],
+  ["public/pwa/africmade-icon-v3-192.png", 192],
+  ["public/pwa/africmade-icon-v3-512.png", 512],
+  ["public/pwa/africmade-maskable-v3-512.png", 512],
 ]) {
   assert.ok(fs.existsSync(path.join(root, file)), `${file} exists`);
   const metadata = await sharp(path.join(root, file)).metadata();
@@ -34,7 +34,7 @@ for (const [file, size] of [
 const worker = read("public/sw.js");
 assert.doesNotThrow(() => new Function(worker), "service worker source parses");
 assert.match(worker, /const CACHE_PREFIX = "africmade-pwa-"/);
-assert.match(worker, /const VERSION = "v2"/);
+assert.match(worker, /const VERSION = "v3"/);
 assert.match(worker, /\[CACHE_PREFIX, "suqpage-pwa-", "mirtpage-pwa-"\]\.some/);
 assert.match(worker, /const PUBLIC_PATHS = new Set\(\["\/", "\/about", "\/featured", "\/discover"/);
 assert.match(worker, /const PRIVATE_PATHS = \["\/api", "\/dashboard", "\/preview", "\/login", "\/request"\]/);

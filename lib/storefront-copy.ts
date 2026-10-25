@@ -1,33 +1,33 @@
 /** Platform copy only. Merchant content never goes through this vocabulary. */
 export const MARKET_STOREFRONT_COPY = {
-  title: "Discover what Africa makes.",
-  description: "Explore product showrooms from farms, factories and artisans without sifting through their social media posts.",
+  title: "Discover African farmers, manufacturers, and artisans in one place.",
+  description: "Learn about their story, product lineup, and their production capacity for bulk purchase or small orders, without getting lost searching through their social media posts.",
 } as const;
 
 export const ABOUT_STOREFRONT_SECTIONS = [
   {
-    id: "customers", label: "For buyers", title: "Find products made in Africa.",
-    description: "Explore products from farms, workshops and manufacturers. Ask about one item or a larger order directly with the supplier.",
+    id: "customers", label: "For buyers", title: "See the business before you ask to buy.",
+    description: "Each supplier's page brings its story, products and any listed supply details together. Browse first, then ask about one item or a larger order without piecing everything together from social posts.",
     action: "Explore products",
     benefits: [
-      { icon: "shop", title: "Find products.", description: "See what businesses make, grow and supply without scrolling through social posts." },
-      { icon: "search", title: "Meet the supplier.", description: "Read its story and browse product options and listed availability." },
-      { icon: "chat", title: "Discuss your order.", description: "Send selected products to its AfricMade Inbox or use its contact links. Agree on details directly with the supplier." },
+      { icon: "shop", title: "Discover the source.", description: "See who grows, makes or supplies the product and where the business works." },
+      { icon: "search", title: "Understand the offer.", description: "Review product options, listed availability and capacity when the supplier provides them." },
+      { icon: "chat", title: "Start a conversation.", description: "Send one product or a list to the supplier's AfricMade Inbox, or use its published contact details." },
     ],
   },
   {
-    id: "businesses", label: "For suppliers", title: "Show buyers what you make or sell.",
-    description: "Give your business one clear place for its story and products. Farms, home businesses, workshops, factories and other sellers can show what they supply and hear from interested buyers.",
-    action: "Create your showroom",
+    id: "businesses", label: "For suppliers", title: "Make your business easier to discover.",
+    description: "Give buyers one dependable page for your story, products and the quantities you can offer. Whether you run a farm, workshop, factory, home business or shop, your work stays visible beyond the next social post.",
+    action: "Create your page",
     benefits: [
-      { icon: "shop", title: "Introduce your business.", description: "Show where you work, what you make, grow or sell, and the story behind it." },
-      { icon: "map", title: "Show what you supply.", description: "Add products, options and listed availability. Organize collections when useful." },
-      { icon: "chat", title: "Connect with buyers.", description: "Get product enquiries in your AfricMade Inbox or through the contact channels you provide, then discuss the sale directly." },
+      { icon: "shop", title: "Tell your story.", description: "Show what you make, grow or supply and the people and work behind it." },
+      { icon: "map", title: "Present your range.", description: "Add product photos, options, availability and any capacity details you choose to share." },
+      { icon: "chat", title: "Hear from buyers.", description: "Receive questions in AfricMade Inbox or through your listed contact methods, then agree on an order directly." },
     ],
   },
 ] as const;
 
 export const CUSTOMER_MAP_COPY = {
   title: "Explore the map.",
-  description: "Find businesses near and far. Open a digital showroom to explore their story and products.",
+  description: "Find businesses near and far. Open their pages to see their stories and products.",
 } as const;

@@ -43,7 +43,7 @@ function Routes() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="shop/[handle]" options={{ title: t("Showroom") }} />
+        <Stack.Screen name="shop/[handle]" options={{ title: t("Business page") }} />
         <Stack.Screen
           name="product"
           options={{ title: t("Products") }}

@@ -401,7 +401,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         style={runtimeTokenVariables as CSSProperties | undefined}
       >
       {!embedded && !businessProfile ? <h1 className="sr-only">{catalog.business.name} {" "}{t("on AfricMade")}</h1> : null}
-      {catalog.business.is_demo && !businessProfile ? <p className="showroom-example-note" role="note">{t("Example showroom. This business and its products are fictional.")}</p> : null}
+      {catalog.business.is_demo && !businessProfile ? <p className="showroom-example-note" role="note">{t("Example page. This business and its products are fictional.")}</p> : null}
       {businessProfile ? <BusinessProfile {...designProps} profile={businessProfile} previewMode={previewMode} embedded={embedded}
         selectedIds={savedCart.map(line => line.product.id)} onBackToProducts={backToProducts} onContact={contactWithSelections}
         productDetail={selected || routedProduct ? <ProductPage isDemo={Boolean(catalog.business.is_demo)} ready={previewMode || hydratedKey === storageKey} catalogLabel={catalogOfferingLabel(catalog.products.filter(product => product.is_published))} key={selected?.id || "unavailable"} product={selected ? {...selected, category_name: showroomProductCategory(catalog.business.id, categories, selected)?.name} : null}

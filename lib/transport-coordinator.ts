@@ -8,6 +8,7 @@ export type TransportCoordinator = Readonly<{
   shortName: string;
   serviceType: LogisticsServiceType;
   logoPath: string;
+  websiteUrl: string;
 }>;
 
 export const TRANSPORT_COORDINATOR: TransportCoordinator = Object.freeze({
@@ -16,6 +17,7 @@ export const TRANSPORT_COORDINATOR: TransportCoordinator = Object.freeze({
   shortName: 'SharedTrucks Logistics',
   serviceType: 'freight_brokerage',
   logoPath: '/brands/sharedtrucks-logistics.png',
+  websiteUrl: 'https://sharedtrucks.com/',
 });
 
 export type TransportCoordinatorSelection =

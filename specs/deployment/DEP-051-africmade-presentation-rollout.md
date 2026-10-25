@@ -4,7 +4,7 @@ title: AfricMade presentation rollout on the current domain and Android identity
 status: ready
 related: [FE-070, FE-049, FE-041, BE-014, BE-059, DEP-049]
 owners: [product, frontend, operations]
-last_updated: 2026-10-23
+last_updated: 2026-10-24
 change_level: L4
 ---
 
@@ -73,3 +73,8 @@ an unexpected hosted mutation stops further writes under DEP-029/DEP-049.
 For Android, use the existing release policy and signer, fresh dependency audit,
 one-source build and independent artifact inspection under DEP-044. A previous
 one-build tooling exception does not automatically cover this artifact.
+The 2026-10-24 minimal-showroom logo replacement uses newly versioned canonical
+asset URLs while old public URLs serve the same new image. The website and next
+local Android artifact must come from one merged, source-matched tree; the prior
+maker-and-cube v5 bundle cannot qualify this new artwork. Preserve the live
+deploy until the exact replacement artifact passes its required gates.

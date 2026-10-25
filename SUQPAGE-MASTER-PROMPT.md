@@ -54,11 +54,13 @@ a generic website builder, checkout marketplace or unrelated architecture rewrit
 
 ## 2. Product identity
 
-Use **AfricMade**, the owner-supplied maker-and-cube artwork and the canonical
+Use **AfricMade**, the owner-supplied minimal orange showroom artwork and the canonical
 values/assets in `lib/brand.ts` consistently across web, mobile, mail and store
-media. The public Market introduction is “Discover what Africa makes.” with
-“Explore product showrooms from farms, factories and artisans without sifting
-through their social media posts.” Individual and business buyers use the same
+media. The public Market introduction is “Discover African farmers,
+manufacturers, and artisans in one place.” It explains that visitors can learn
+about their story, product lineup and production capacity for bulk purchase or
+small orders without getting lost in social media posts. Individual and business
+buyers use the same
 product and inquiry flows, with order options explained on the product page.
 Logos and merchant pictures are not recolored by a showroom accent or locale.
 
@@ -115,6 +117,8 @@ its navy/blue identity appears in the provider choice and shipment records,
 while general site copy remains provider-neutral. Its stable internal ID remains
 `shared-trucks-logistics`. AfricMade staff currently operate that provider's
 queue on its behalf; provider-owned accounts and direct routing are future work.
+After a visitor starts or resumes a transport conversation, the provider profile
+links to the independent provider's website without closing the chat.
 The visible live-wait countdown and callback handoff are defined in §12.
 
 Market groups map markers at city scale without changing saved locations. An
@@ -171,9 +175,13 @@ Featured, About, legal/account pages and workspaces. Use ordinary page/task
 navigation rather than dumping editable records into one long screen or hiding
 primary work in accordions. Saved summaries are read first; Edit opens one focused
 task with clear Save, Cancel and return context.
+The public About footer names Jigjiga, Somali Region, Ethiopia as the business
+location and MarketVision Technology as the copyright holder. AfricMade remains
+the customer-facing product name.
 
-Businesses/map and Products are separate exploration panels with a centered
-switch and reachable edge handles. Businesses is the new-session default; the
+Businesses/map and Products are separate exploration panels with a switch that
+spans the phone width to preserve map space and reachable edge handles.
+Businesses is the new-session default; the
 Products handle starts on the right. Each panel can expose its counterpart without
 showing the inactive panel's controls. Preserve reduced motion and keyboard use.
 

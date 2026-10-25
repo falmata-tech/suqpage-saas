@@ -136,7 +136,7 @@ test("FE-053 actual Market component preserves the mounted panes and follows onl
   assert.equal(typeof handleFrame.props.onMoveShouldSetResponderCapture,'function','The wrapper owns drag capture because Pressable overwrites supplied responder handlers');
   assert.ok(!('onResponderMove' in handle().props),'Pressable keeps its independent click/keyboard responder');
   const modes = tree.filter(node => node.props.accessibilityRole === "tab");
-  assert.ok(modes.every(mode => style(mode).minHeight === 48));
+  assert.ok(modes.every(mode => style(mode).minHeight === 44),'Compact mode tabs keep 44px touch targets');
   assert.deepEqual(modes.map(mode=>mode.props['aria-selected']),[true,false],"Browser selection aliases match the native state");
   assert.ok(tree.some(node => node.type === "Text" && node.props.accessibilityRole === "header" && node.props.children === "AfricMade Market"));
   const gesture = state.gesture!;
@@ -224,7 +224,7 @@ test('FE-053 S153 inactive Market panes preserve native hiding and explicitly is
  }
 });
 
-test("FE-065 actual native controls keep four balanced wrapping filters visible with48px targets", async () => {
+test("FE-065 actual native controls keep four balanced wrapping filters visible with44px targets", async () => {
   const state = fixture(), render = await component("MarketSearchControls", state);
   const tree = render({ scope: "products", value: { query: "chairs", categories: [], countries: ["ET"], cities: [], madeToOrder: false, page: 1 }, onChange() {}, metadata: { categories: [], countries: [], places: [] } });
   const row = tree.find(node => node.props.testID === "products-filters")!;
@@ -241,9 +241,9 @@ test("FE-065 actual native controls keep four balanced wrapping filters visible 
   assert.ok(madeToOrder,'Product supply is a direct labeled toggle');
   assert.equal(madeToOrder.props['aria-checked'],false);
   assert.equal((madeToOrder.props.accessibilityState as {checked:boolean}).checked,false);
-  assert.ok(Number(style(madeToOrder).minHeight)>=48&&Number(style(madeToOrder).minWidth)>=48);
-  assert.ok(buttons.every(button => Number(style(button).minHeight) >= 48));
-  assert.ok(buttons.every(button => Number(style(button).width ?? style(button).minWidth) >= 48));
+  assert.ok(Number(style(madeToOrder).minHeight)>=44&&Number(style(madeToOrder).minWidth)>=44);
+  assert.ok(buttons.every(button => Number(style(button).minHeight) >= 44));
+  assert.ok(buttons.every(button => Number(style(button).width ?? style(button).minWidth) >= 44));
 });
 
 test('FE-065 S117 native detail Back and bare Market return retain both searches and the selected panel, including remount',async()=>{
@@ -473,16 +473,16 @@ test('FE-053 Expo short-map toolbar clears its compiled right inset instead of i
   }
 });
 
-test('FE-065 S143 actual Market keeps only compact centered modes and one non-layout heading without an empty status row',async()=>{
+test('FE-065 S143 actual Market keeps full-width compact modes and one non-layout heading without an empty status row',async()=>{
   for(const width of [320,390,844,1440]){
     const state=fixture();state.dimensions={width,height:width===844?390:844,fontScale:1};
     const render=await component('index',state);let tree=render();
     const headings=tree.filter(n=>n.type==='Text'&&n.props.accessibilityRole==='header'&&n.props.children==='AfricMade Market');
     assert.equal(headings.length,1);assert.equal(style(headings[0]).position,'absolute');assert.equal(style(headings[0]).width,1);assert.equal(style(headings[0]).height,1);
     const row=tree.find(n=>n.props.testID==='market-mode-row')!,children=nodes(row).filter(node=>node.props.accessibilityRole==='tablist');
-    assert.equal(children.length,1);assert.equal(style(row).justifyContent,'center');assert.equal(style(row).paddingBottom,undefined);assert.equal(style(children[0]).padding,undefined);assert.equal(style(children[0]).width,undefined,'The switch uses its needed width rather than a framed full-width bar');
+    assert.equal(children.length,1);assert.equal(style(row).justifyContent,'center');assert.equal(style(row).paddingBottom,undefined);assert.equal(style(children[0]).padding,undefined);assert.equal(style(children[0]).width,'100%','The phone switch spans the map width');
     const tabs=nodes(row).filter(n=>n.props.accessibilityRole==='tab');assert.deepEqual(tabs.map(n=>nodes(n).find(c=>c.type==='Text')!.props.children),['Business locations','Product listings']);
-    assert.ok(tabs.every(n=>Number(style(n).minHeight)>=48));assert.equal(nodes(row).filter(n=>n.type==='Icon'&&['map','package'].includes(String(n.props.name))).length,width<=360?0:2,'Only decorative mode icons disappear on the smallest phones');
+    assert.ok(tabs.every(n=>Number(style(n).minHeight)>=44));assert.equal(nodes(row).filter(n=>n.type==='Icon'&&['map','package'].includes(String(n.props.name))).length,width<=360?0:2,'Only decorative mode icons disappear on the smallest phones');
     assert.equal(tree.filter(n=>n.type==='Status').length,0,'A settled empty status does not allocate a toolbar gap');
     state.feed.loading=true;tree=render();assert.equal(tree.filter(n=>n.type==='Status'&&n.props.refreshing===true).length,1,'Actual loading remains visible');
     state.feed.loading=false;state.feed.error='Unable to connect';tree=render();assert.equal(tree.filter(n=>n.type==='Status'&&n.props.error==='Unable to connect').length,1,'The same bounded error/retry remains reachable');
@@ -510,7 +510,7 @@ test('FE-065 S128 native controls share a measured wide row and retain visible w
       assert.equal(style(root).flexDirection,wide?'row':undefined);assert.equal(style(search).minWidth,wide?220:undefined);assert.equal(style(filters).minWidth,wide?(scope==='products'?398:264):undefined);
       const choices=nodes(filters).filter(n=>n.type==='Pressable');assert.equal(choices.length,scope==='products'?4:3);
       for(const label of ['Category (1)','Country (1)','City (1)',...(scope==='products'?['Made to order']:[])])assert.ok(choices.some(n=>n.props.accessibilityLabel===label),'Every labeled filter stays in the row: '+label);
-      assert.ok(choices.every(n=>Number(style(n).minHeight)>=48&&Number(style(n).minWidth)>=48));assert.ok(!tree.some(n=>n.type==='ScrollView'),'No hidden or scrolling filter menu replaces choices');
+      assert.ok(choices.every(n=>Number(style(n).minHeight)>=44&&Number(style(n).minWidth)>=44));assert.ok(!tree.some(n=>n.type==='ScrollView'),'No hidden or scrolling filter menu replaces choices');
       if(dimensions.fontScale>1.3){assert.equal(style(filters).flexWrap,'wrap');assert.ok(choices.every(n=>style(n).flexBasis==='45%'),'Large native text can wrap into honest full-width cells');}
       if(wide){
         (root.props.onLayout as(event:{nativeEvent:{layout:{width:number}}})=>void)({nativeEvent:{layout:{width:700}}});tree=render(props);assert.equal(style(tree.find(n=>n.props.testID===scope+'-controls')!).flexDirection,undefined,'Actual content width controls layout, not screen width alone');

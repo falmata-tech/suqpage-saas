@@ -135,7 +135,7 @@ export async function adminUpdateBusinessAction(formData:FormData){
   const user=await requireUser();if(!hasCapability(user,"platform:admin"))throw new Error("Administrator access required.");
   const businessId=int(formData,"businessId"),returnBusiness=int(formData,"returnBusiness"),status=text(formData,"status",20),business=await runtimeBusinessById(businessId);
   const returnPath=returnBusiness===businessId?(formData.get('returnTo')==='access'?'/dashboard/access':'/dashboard'):"/dashboard/admin/businesses";
-  const returnParams=returnBusiness===businessId?{business:businessId,error:"Only an established showroom can be suspended or restored."}:{error:"Only an established showroom can be suspended or restored."};
+  const returnParams=returnBusiness===businessId?{business:businessId,error:"Only an established business page can be suspended or restored."}:{error:"Only an established business page can be suspended or restored."};
   if(!business||business.status==="draft"||!operationalStatuses.has(status))go(returnPath,returnParams);
   await runtimeRun("UPDATE businesses SET status=? WHERE id=?",[status,businessId]);
   await audit("admin.business_status_updated",{userId:user.id,businessId,detail:{status}});

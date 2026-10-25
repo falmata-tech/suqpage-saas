@@ -54,6 +54,16 @@
 @media(max-width:760px){.switch button{font-size:.75rem;padding:0 10px;gap:5px}.activeControls{padding:6px 10px 8px}.filters{gap:5px}.filters button{padding:6px 8px;font-size:.6875rem}.panelControls{padding:10px}.panelBody :global(.discovery-search-workspace){padding:10px}.panelBody :global(.discovery-product-result-copy strong){font-size:15px}.panelBody :global(.discovery-product-result-copy p){font-size:12px}.emptyMap{left:12px;top:12px}.stage{min-height:300px}}
 @media(prefers-reduced-motion:reduce){.stage .panel,.stage .mapPanel{transition:none}}
 @media(max-width:760px){
+ .modeBar{padding-inline:0}
+ .switch{width:100%;max-width:none;border-radius:0;border-inline:0;background:#f5f7f6}
+ .switch button{flex:1;min-height:44px;padding-inline:6px;border-radius:0}
+ .switch button[aria-pressed=true]{box-shadow:inset 0 -3px #c54100}
+ .activeControls{padding:4px 10px 6px}
+ .controls{gap:4px}
+ .search{min-height:44px}
+ .search input{min-height:44px;padding-block:6px}
+ .search button,.search .clear{min-height:44px}
+ .filters button{min-height:44px}
  .filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;padding:0;gap:5px;align-items:stretch}
  .controls[data-search-scope=products] .filters{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.5fr)}
  .filters button{min-width:48px;white-space:normal;padding:4px 5px;font-size:.6875rem;line-height:1.25;gap:3px}
@@ -61,7 +71,7 @@
  .filters button>svg{display:none}
  .filters button[aria-pressed]>svg{display:block;flex-shrink:0;width:12px}
 }
-@media(max-width:380px){.switch button>svg{display:none}.switch button{padding-inline:8px}.modeBar{padding-inline:8px;gap:4px}}
+@media(max-width:380px){.switch button>svg{display:none}.switch button{padding-inline:6px}}
 @container market-controls (min-width:35rem){
  .controls{display:grid;grid-template-columns:minmax(220px,1fr) auto;align-items:stretch;gap:8px}
  .filters{display:flex;gap:6px;overflow:visible;padding:0}

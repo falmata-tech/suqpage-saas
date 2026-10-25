@@ -22,7 +22,7 @@ export default async function ShowroomManagementPage({searchParams}:{searchParam
    <div className={styles.logo}>{home.shop.logo?<img src={home.shop.logo} alt=""/>:<Store aria-hidden="true"/>}</div>
    <div className={styles.brand}><h2>{home.shop.name}</h2><p>@{home.shop.handle}</p><span className={styles.status}>{t(home.shop.status==='active'?'Your page is live':home.shop.status==='suspended'?'Suspended':'Private until you publish')}</span></div>
   </section>
-  <section className={styles.management} aria-label={t('Your page')}><Link href="/dashboard/page-editor?view=preview&returnTo=showroom"><Eye aria-hidden="true"/><span><strong>{t('Preview page')}</strong><small>{t('See your showroom as customers see it.')}</small></span><ArrowRight aria-hidden="true"/></Link></section>
+  <section className={styles.management} aria-label={t('Your page')}><Link href="/dashboard/page-editor?view=preview&returnTo=showroom"><Eye aria-hidden="true"/><span><strong>{t('Preview page')}</strong><small>{t('See your page as customers see it.')}</small></span><ArrowRight aria-hidden="true"/></Link></section>
   {[
    {label:'Page content',items:[{href:'/dashboard/page-editor?view=edit&task=about&returnTo=showroom',label:'About the business',icon:PenLine},{href:'/dashboard/profile/cover?returnTo=showroom',label:'Cover photo',icon:Image},{href:'/dashboard/page-editor?view=edit&task=video&returnTo=showroom',label:'Business video',icon:Video}]},
    {label:'Appearance',items:[{href:'/dashboard/page-editor?view=preview&task=color&returnTo=showroom',label:'Page color',icon:Palette}]},

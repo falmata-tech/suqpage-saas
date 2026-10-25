@@ -158,7 +158,7 @@ export default function PublicSupportChat() {
       <section className={`${styles.chatSection} ${receipt ? styles.receivedSection : styles.newConversation} ${receipt ? "has-conversation" : "new-conversation"}`}>
         <header><div><h2 id="public-buying-title">{t(TRANSPORT_COPY.title)}</h2></div><button type="button" onClick={close} aria-label={t("Close")}><X aria-hidden="true" /></button></header>
         <div className={receipt ? styles.chatTools : styles.startTools}>
-          {receipt&&<TransportCoordinator compact/>}
+          {receipt&&<TransportCoordinator compact websiteLink/>}
           <Link href="/tracking" onClick={close}>{t("Shipment records")} →</Link>
         </div>
         <div className={receipt ? styles.conversationBody : styles.intakeArea}>

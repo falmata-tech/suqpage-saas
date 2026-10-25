@@ -16,6 +16,7 @@ test('only the admitted coordinator and omitted legacy selection are accepted', 
   assert.equal(TRANSPORT_COORDINATOR.name, 'SharedTrucks Logistics');
   assert.equal(TRANSPORT_COORDINATOR.serviceType, 'freight_brokerage');
   assert.equal(TRANSPORT_COORDINATOR.logoPath, '/brands/sharedtrucks-logistics.png');
+  assert.equal(TRANSPORT_COORDINATOR.websiteUrl, 'https://sharedtrucks.com/');
 });
 
 test('interest normalizes private input without inventing a provider account', () => {

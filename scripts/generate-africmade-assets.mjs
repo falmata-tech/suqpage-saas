@@ -7,12 +7,12 @@ import sharp from 'sharp';
 // Owner-supplied paired artwork. Derivatives are crops/resizes of its pixels;
 // no generative reconstruction, system font or historical MirtPage mark is used.
 const SOURCES=[
- {file:'brand-source/africmade-maker-dark.png',sha256:'036694f9c69c1a3c3fb2bf1a3aada98d524a21dec7840715e7448d9fe9cfef17',background:'black',width:1915},
- {file:'brand-source/africmade-maker-light.png',sha256:'a1ad86cfe1795752c424c9d9cc7bb96dc54dbd4443b14384c09827751051a332',background:'white',width:1916},
+ {file:'brand-source/africmade-showroom-dark.png',sha256:'f3f9a5b86697eac24c6b88e5ae61ec52be0bbcc19a086f6b311819bd16ae9a41',background:'black',width:1942},
+ {file:'brand-source/africmade-showroom-light.png',sha256:'2c893bd581dfd6d4e88be780588017fc1250e5d0d5731a5aa16101f470326ec9',background:'white',width:1942},
 ];
-const WORDMARK={left:56,top:132,width:1824,height:500};
-const WORDMARK_OUTPUT={width:1094,height:300};
-const SYMBOL={left:50,top:111,width:550,height:550};
+const WORDMARK={left:172,top:240,width:1608,height:312};
+const WORDMARK_OUTPUT={width:1094,height:212};
+const SYMBOL={left:174,top:240,width:312,height:312};
 const TRANSPARENT={r:0,g:0,b:0,alpha:0};
 const CHARCOAL={r:32,g:36,b:40,alpha:255};
 
@@ -23,7 +23,7 @@ async function extractedArtwork(root,{file,sha256,background,width}){
  const source=await fs.readFile(path.join(root,file));
  assert.equal(createHash('sha256').update(source).digest('hex'),sha256,'Approved logo source changed');
  const {data,info}=await sharp(source).ensureAlpha().raw().toBuffer({resolveWithObject:true});
- assert.equal(info.width,width);assert.equal(info.height,821);
+ assert.equal(info.width,width);assert.equal(info.height,809);
  const clear=Buffer.alloc(data.length);
  for(let i=0;i<data.length;i+=4){
   const alpha=background==='black'?Math.max(data[i],data[i+1],data[i+2]):255-Math.min(data[i],data[i+1],data[i+2]);
@@ -66,6 +66,11 @@ export async function africmadeDerivatives(root=process.cwd()){
  const mark=await rgba(dark.clear,dark.width,dark.height).extract(SYMBOL).png().toBuffer();
  const wordmark=await rgba(light.clear,light.width,light.height).extract(WORDMARK).resize(WORDMARK_OUTPUT.width,WORDMARK_OUTPUT.height).png().toBuffer();
  const reverse=await rgba(dark.clear,dark.width,dark.height).extract(WORDMARK).resize(WORDMARK_OUTPUT.width,WORDMARK_OUTPUT.height).png().toBuffer();
+ const emailWordmark=await sharp(wordmark).flatten({background:'#ffffff'}).png().toBuffer();
+ // Hosted Auth HTML still sizes its version-2 URL at 220×60. Keep that URL's
+ // canvas at the old aspect ratio so the new lettering is not stretched.
+ const legacyEmailWordmark=await sharp({create:{width:1094,height:300,channels:4,background:'#ffffff'}})
+  .composite([{input:emailWordmark,left:0,top:44}]).png().toBuffer();
  const badgePixels=await sharp(mark).resize(96,96).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  for(let i=0;i<badgePixels.data.length;i+=4){if(badgePixels.data[i+3]>0)badgePixels.data.fill(255,i,i+3);}
  const badge=await rgba(badgePixels.data,96,96).png().toBuffer();
@@ -73,69 +78,77 @@ export async function africmadeDerivatives(root=process.cwd()){
  for(let i=0;i<monochromePixels.data.length;i+=4){if(monochromePixels.data[i+3]>0)monochromePixels.data.fill(255,i,i+3);}
  const monochrome=await rgba(monochromePixels.data,512,512).png().toBuffer();
  const output=new Map([
-  ['public/brand/africmade-maker-mark-v2.png',await sharp(mark).resize(512,512).png().toBuffer()],
-  ['public/brand/africmade-wordmark-v2.png',wordmark],
-  ['public/brand/africmade-wordmark-reverse-v2.png',reverse],
-  ['public/brand/africmade-wordmark-email-white-v2.png',await sharp(wordmark).flatten({background:'#ffffff'}).png().toBuffer()],
-  ['public/pwa/africmade-favicon-v2-32.png',await squareIcon(mark,32,.98,CHARCOAL)],
-  ['public/pwa/africmade-apple-touch-v2-180.png',await squareIcon(mark,180,.9,CHARCOAL)],
-  ['public/pwa/africmade-icon-v2-192.png',await squareIcon(mark,192,.9,CHARCOAL)],
-  ['public/pwa/africmade-icon-v2-512.png',await squareIcon(mark,512,.9,CHARCOAL)],
-  ['public/pwa/africmade-maskable-v2-512.png',await squareIcon(mark,512,.64,CHARCOAL)],
+  ['public/brand/africmade-showroom-mark-v3.png',await sharp(mark).resize(512,512).png().toBuffer()],
+  ['public/brand/africmade-wordmark-v3.png',wordmark],
+  ['public/brand/africmade-wordmark-reverse-v3.png',reverse],
+  ['public/brand/africmade-wordmark-email-white-v3.png',emailWordmark],
+  ['public/pwa/africmade-favicon-v3-32.png',await squareIcon(mark,32,.98,TRANSPARENT)],
+  ['public/pwa/africmade-favicon-v3-512.png',await squareIcon(mark,512,.98,TRANSPARENT)],
+  ['public/pwa/africmade-apple-touch-v3-180.png',await squareIcon(mark,180,.9,CHARCOAL)],
+  ['public/pwa/africmade-icon-v3-192.png',await squareIcon(mark,192,.9,CHARCOAL)],
+  ['public/pwa/africmade-icon-v3-512.png',await squareIcon(mark,512,.9,CHARCOAL)],
+  ['public/pwa/africmade-maskable-v3-512.png',await squareIcon(mark,512,.64,CHARCOAL)],
   ['public/pwa/africmade-badge-96.png',badge],
   ['apps/mobile/assets/icon.png',await squareIcon(mark,1024,.9,CHARCOAL)],
   ['apps/mobile/assets/africmade-adaptive-foreground.png',await squareIcon(mark,512,.64,TRANSPARENT)],
   ['apps/mobile/assets/africmade-mark.png',await sharp(mark).resize(512,512).png().toBuffer()],
-  ['apps/mobile/assets/africmade-wordmark.png',await sharp(wordmark).resize(1094,300).png().toBuffer()],
-  ['apps/mobile/assets/africmade-splash-wordmark.png',await sharp(reverse).resize(1094,300).png().toBuffer()],
+  ['apps/mobile/assets/africmade-wordmark.png',wordmark],
+  ['apps/mobile/assets/africmade-splash-wordmark.png',reverse],
   ['apps/mobile/assets/africmade-notification.png',badge],
   ['apps/mobile/assets/africmade-monochrome.png',monochrome],
  ]);
  output.set('public/favicon.ico',icoFromPngs([
-  {size:16,png:await squareIcon(mark,16,1,CHARCOAL)},
-  {size:32,png:output.get('public/pwa/africmade-favicon-v2-32.png')},
-  {size:48,png:await squareIcon(mark,48,.98,CHARCOAL)},
+  {size:16,png:await squareIcon(mark,16,1,TRANSPARENT)},
+  {size:32,png:output.get('public/pwa/africmade-favicon-v3-32.png')},
+  {size:48,png:await squareIcon(mark,48,.98,TRANSPARENT)},
  ]));
  // Saved shortcuts, installed PWAs and old email/asset URLs may still request
  // these paths. Keep their URLs valid, but never serve the former platform art.
  const aliases=[
-  ['public/brand/africmade-afro-mark-v1.png','public/brand/africmade-maker-mark-v2.png'],
-  ['public/brand/africmade-wordmark-v1.png','public/brand/africmade-wordmark-v2.png'],
-  ['public/brand/africmade-wordmark-reverse-v1.png','public/brand/africmade-wordmark-reverse-v2.png'],
-  ['public/brand/africmade-wordmark-email-white-v1.png','public/brand/africmade-wordmark-email-white-v2.png'],
-  ['public/pwa/africmade-favicon-32.png','public/pwa/africmade-favicon-v2-32.png'],
-  ['public/pwa/africmade-apple-touch-icon-180.png','public/pwa/africmade-apple-touch-v2-180.png'],
-  ['public/pwa/africmade-icon-192.png','public/pwa/africmade-icon-v2-192.png'],
-  ['public/pwa/africmade-icon-512.png','public/pwa/africmade-icon-v2-512.png'],
-  ['public/pwa/africmade-maskable-512.png','public/pwa/africmade-maskable-v2-512.png'],
-  ['public/favicon.png','public/pwa/africmade-icon-v2-512.png'],
-  ['public/apple-touch-icon.png','public/pwa/africmade-apple-touch-v2-180.png'],
-  ['public/pwa/favicon-32.png','public/pwa/africmade-favicon-v2-32.png'],
-  ['public/pwa/apple-touch-icon.png','public/pwa/africmade-apple-touch-v2-180.png'],
-  ['public/pwa/icon-192.png','public/pwa/africmade-icon-v2-192.png'],
-  ['public/pwa/icon-512.png','public/pwa/africmade-icon-v2-512.png'],
-  ['public/pwa/icon-maskable-512.png','public/pwa/africmade-maskable-v2-512.png'],
-  ['public/pwa/suqpage-favicon-32.png','public/pwa/africmade-favicon-v2-32.png'],
-  ['public/pwa/suqpage-apple-touch-icon.png','public/pwa/africmade-apple-touch-v2-180.png'],
-  ['public/pwa/suqpage-icon-192.png','public/pwa/africmade-icon-v2-192.png'],
-  ['public/pwa/suqpage-icon-512.png','public/pwa/africmade-icon-v2-512.png'],
-  ['public/pwa/suqpage-icon-maskable-512.png','public/pwa/africmade-maskable-v2-512.png'],
-  ['public/pwa/mirtpage-panels-favicon-32.png','public/pwa/africmade-favicon-v2-32.png'],
-  ['public/pwa/mirtpage-panels-apple-touch-icon.png','public/pwa/africmade-apple-touch-v2-180.png'],
-  ['public/pwa/mirtpage-panels-icon-192.png','public/pwa/africmade-icon-v2-192.png'],
-  ['public/pwa/mirtpage-panels-icon-512.png','public/pwa/africmade-icon-v2-512.png'],
-  ['public/pwa/mirtpage-panels-icon-maskable-512.png','public/pwa/africmade-maskable-v2-512.png'],
+  ['public/brand/africmade-maker-mark-v2.png','public/brand/africmade-showroom-mark-v3.png'],
+  ['public/brand/africmade-wordmark-v2.png','public/brand/africmade-wordmark-v3.png'],
+  ['public/brand/africmade-wordmark-reverse-v2.png','public/brand/africmade-wordmark-reverse-v3.png'],
+  ['public/pwa/africmade-favicon-v2-32.png','public/pwa/africmade-favicon-v3-32.png'],
+  ['public/pwa/africmade-apple-touch-v2-180.png','public/pwa/africmade-apple-touch-v3-180.png'],
+  ['public/pwa/africmade-icon-v2-192.png','public/pwa/africmade-icon-v3-192.png'],
+  ['public/pwa/africmade-icon-v2-512.png','public/pwa/africmade-icon-v3-512.png'],
+  ['public/pwa/africmade-maskable-v2-512.png','public/pwa/africmade-maskable-v3-512.png'],
+  ['public/brand/africmade-afro-mark-v1.png','public/brand/africmade-showroom-mark-v3.png'],
+  ['public/brand/africmade-wordmark-v1.png','public/brand/africmade-wordmark-v3.png'],
+  ['public/brand/africmade-wordmark-reverse-v1.png','public/brand/africmade-wordmark-reverse-v3.png'],
+  ['public/brand/africmade-wordmark-email-white-v1.png','public/brand/africmade-wordmark-email-white-v3.png'],
+  ['public/pwa/africmade-favicon-32.png','public/pwa/africmade-favicon-v3-32.png'],
+  ['public/pwa/africmade-apple-touch-icon-180.png','public/pwa/africmade-apple-touch-v3-180.png'],
+  ['public/pwa/africmade-icon-192.png','public/pwa/africmade-icon-v3-192.png'],
+  ['public/pwa/africmade-icon-512.png','public/pwa/africmade-icon-v3-512.png'],
+  ['public/pwa/africmade-maskable-512.png','public/pwa/africmade-maskable-v3-512.png'],
+  ['public/favicon.png','public/pwa/africmade-favicon-v3-512.png'],
+  ['public/apple-touch-icon.png','public/pwa/africmade-apple-touch-v3-180.png'],
+  ['public/pwa/favicon-32.png','public/pwa/africmade-favicon-v3-32.png'],
+  ['public/pwa/apple-touch-icon.png','public/pwa/africmade-apple-touch-v3-180.png'],
+  ['public/pwa/icon-192.png','public/pwa/africmade-icon-v3-192.png'],
+  ['public/pwa/icon-512.png','public/pwa/africmade-icon-v3-512.png'],
+  ['public/pwa/icon-maskable-512.png','public/pwa/africmade-maskable-v3-512.png'],
+  ['public/pwa/suqpage-favicon-32.png','public/pwa/africmade-favicon-v3-32.png'],
+  ['public/pwa/suqpage-apple-touch-icon.png','public/pwa/africmade-apple-touch-v3-180.png'],
+  ['public/pwa/suqpage-icon-192.png','public/pwa/africmade-icon-v3-192.png'],
+  ['public/pwa/suqpage-icon-512.png','public/pwa/africmade-icon-v3-512.png'],
+  ['public/pwa/suqpage-icon-maskable-512.png','public/pwa/africmade-maskable-v3-512.png'],
+  ['public/pwa/mirtpage-panels-favicon-32.png','public/pwa/africmade-favicon-v3-32.png'],
+  ['public/pwa/mirtpage-panels-apple-touch-icon.png','public/pwa/africmade-apple-touch-v3-180.png'],
+  ['public/pwa/mirtpage-panels-icon-192.png','public/pwa/africmade-icon-v3-192.png'],
+  ['public/pwa/mirtpage-panels-icon-512.png','public/pwa/africmade-icon-v3-512.png'],
+  ['public/pwa/mirtpage-panels-icon-maskable-512.png','public/pwa/africmade-maskable-v3-512.png'],
   ['public/pwa/mirtpage-panels-badge-96.png','public/pwa/africmade-badge-96.png'],
-  ['public/brand/mirtpage-panels-wordmark-email.png','public/brand/africmade-wordmark-email-white-v2.png'],
-  ['public/brand/mirtpage-panels-wordmark-email-white-v2.png','public/brand/africmade-wordmark-email-white-v2.png'],
   ['apps/mobile/assets/mirtpage-mark.png','apps/mobile/assets/africmade-mark.png'],
   ['apps/mobile/assets/mirtpage-wordmark.png','apps/mobile/assets/africmade-wordmark.png'],
   ['apps/mobile/assets/mirtpage-notification.png','apps/mobile/assets/africmade-notification.png'],
-  ['public/uploads/seed/suqpage/icon.png','public/pwa/africmade-icon-v2-512.png'],
-  ['public/uploads/seed/suqpage/logo.png','public/brand/africmade-wordmark-email-white-v2.png'],
+  ['public/uploads/seed/suqpage/icon.png','public/pwa/africmade-icon-v3-512.png'],
+  ['public/uploads/seed/suqpage/logo.png','public/brand/africmade-wordmark-email-white-v3.png'],
  ];
  for(const [legacy,current] of aliases)output.set(legacy,output.get(current));
- const canonicalMark=output.get('public/brand/africmade-maker-mark-v2.png');
+ for(const legacy of ['public/brand/africmade-wordmark-email-white-v2.png','public/brand/mirtpage-panels-wordmark-email.png','public/brand/mirtpage-panels-wordmark-email-white-v2.png'])output.set(legacy,legacyEmailWordmark);
+ const canonicalMark=output.get('public/brand/africmade-showroom-mark-v3.png');
  const svgAliases=[
   ['public/brand/suqpage-legacy-mark.svg',canonicalMark,512,512],
   ['public/brand/suqpage-mark.svg',canonicalMark,512,512],

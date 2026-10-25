@@ -204,7 +204,7 @@ export default function FeaturedScreen() {
                       <Text style={f.small}>{slot.shop.city}</Text>
                       <Text style={f.name}>{slot.shop.name}</Text>
                       {slot.shop.isDemo && (
-                        <Text style={f.demo}>{t("Example showroom")}</Text>
+                        <Text style={f.demo}>{t("Example page")}</Text>
                       )}
                       <Text style={f.link}>{t("Explore this business")} →</Text>
                     </View>

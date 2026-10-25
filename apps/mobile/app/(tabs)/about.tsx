@@ -33,6 +33,7 @@ export default function About() {
     <Button secondary icon="truck" label={t(TRANSPORT_COPY.launcherTitle)} onPress={()=>router.navigate('/buying')}/>
     <Button secondary label={t('Logistics service providers: Ask to be listed')} onPress={()=>router.navigate('/transport-partners')}/>
     <View style={{flexDirection:'row',flexWrap:'wrap',gap:10}}><Button secondary label={t('Privacy')} onPress={()=>void openLink(legalPageUrl('privacy'))}/><Button secondary label={t('Terms')} onPress={()=>void openLink(legalPageUrl('terms'))}/></View>
+    <View style={s.companyDetails}><Text style={s.companyText}>{t('Jigjiga, Somali Region, Ethiopia')}</Text><Text style={s.companyText}>© {new Date().getFullYear()} MarketVision Technology</Text></View>
   </ScrollView></Screen>;
 }
 const s = StyleSheet.create({
@@ -52,4 +53,6 @@ const s = StyleSheet.create({
   benefitTitle:{fontSize:16,lineHeight:22,fontWeight:"700",color:colors.ink},
   body:{fontSize:14,lineHeight:22,color:colors.muted},
   mapNote:{gap:8,borderTopWidth:1,borderColor:colors.line,paddingTop:16},
+  companyDetails:{gap:4,borderTopWidth:1,borderColor:colors.line,paddingTop:14},
+  companyText:{fontSize:12,lineHeight:18,color:colors.muted},
 });

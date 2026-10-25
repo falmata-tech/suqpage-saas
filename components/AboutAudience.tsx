@@ -28,6 +28,6 @@ export default function AboutAudience(){
    </div>
    <div className={styles.benefits}>{section.benefits.map(benefit=>{const Icon=icons[benefit.icon];return <article key={benefit.title}><span className={styles.icon}><Icon aria-hidden="true"/></span><div><h3>{t(benefit.title)}</h3><p>{t(benefit.description)}</p></div></article>;})}</div>
   </section>)}
-  <footer className={styles.footer}><Link href="/?chat=transport">{t(TRANSPORT_COPY.launcherTitle)}</Link><Link href="/transport-partners">{t("Logistics service providers: Ask to be listed")}</Link><Link href="/showrooms">{t("Businesses")}</Link><Link href="/privacy">{t("Privacy")}</Link><Link href="/terms">{t("Terms")}</Link><Link href="/account-deletion">{t("Delete account")}</Link></footer>
+  <footer className={styles.footer}><nav aria-label={t('About AfricMade')}><Link href="/?chat=transport">{t(TRANSPORT_COPY.launcherTitle)}</Link><Link href="/transport-partners">{t("Logistics service providers: Ask to be listed")}</Link><Link href="/showrooms">{t("Businesses")}</Link><Link href="/privacy">{t("Privacy")}</Link><Link href="/terms">{t("Terms")}</Link><Link href="/account-deletion">{t("Delete account")}</Link></nav><div className={styles.companyDetails}><span>{t('Jigjiga, Somali Region, Ethiopia')}</span><span>© {new Date().getFullYear()} MarketVision Technology</span></div></footer>
  </div>;
 }

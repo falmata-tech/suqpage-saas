@@ -158,6 +158,64 @@ corrected without changing product behavior. The final web wordmark is 142 KB
 instead of the prior 323 KB. Remote CI, publication and a new signed mobile
 artifact remain pending.
 
+### S177 — minimal AfricMade showroom identity
+
+The owner replaced the maker-and-cube logo with paired minimal showroom PNGs on
+2026-10-24 and requested a clean GitHub integration, web publication and new
+locally signed Android build. FE-070/DEP-051 control this presentation-only
+change. Keep the existing palette, website domain, package/signing identity,
+merchant logos, database, Auth and product behavior. The prior v5 Android bundle
+and web deploy remain recoverable baselines, not evidence for this artwork.
+The owner then requested a transparent orange browser favicon, the Market
+explanation beneath its headline, a new supplier/production-capacity narrative,
+visitor-facing “Page” vocabulary, a stronger About page, a shorter headline
+without “workshops,” and modest white space around the header wordmark. Revise the existing
+FE-070 copy and all active-language surfaces before visual and release gates.
+The latest phone review also requests full-width compact Market tabs and
+shorter search/filter chrome (FE-021), plus a SharedTrucks website link on the
+waiting/active chat profile (FE-076). Include these in the same cross-platform
+browser pass before release gates.
+Show the owner-specified Jigjiga, Somali Region, Ethiopia location and
+MarketVision Technology copyright in the public About footer on web and native
+(FE-070), without renaming the product or merchant pages.
+
+1. [x] Hash and retain the two supplied sources; update FE-070 and the asset
+   generator before changing production references. Derive versioned canonical
+   web/email/PWA/mobile assets and replace every legacy platform fallback.
+2. [x] Test the generated assets and metadata, inspect tab-sized icon and splash,
+   audit public Page wording and About, and use actual Chrome at desktop/phone
+   web plus Expo preview. Record agent
+   visual pass/fail and distinct platform limits. Agent visual pass: installed
+   Chrome checked 27 desktop/phone web brand states in English, Amharic and
+   Afaan Oromo, including the About footer
+   (`.local/s177-brand-review/web-final-v3/verified.json`); Chrome checked
+   the compact Market and About footer in the Expo preview at 320/390px
+   (`.local/s177-brand-review/compact-market/verified.json`). The map used
+   synthetic tiles. Focused provider-link URL checks and installed RNWeb chat
+   layouts pass, including long Afaan Oromo (`.local/s177-brand-review/native-chat-om-390.png`).
+   The isolated browser fixture rendered the waiting link but its external-click
+   follow-through was not established; physical Android and the live deployed
+   artifact remain separate release checks.
+3. [ ] Run the source-matched local checks and release gates, reconcile master and
+   traceability, then commit only this task's paths. Push a typed PR, qualify all
+   required CI checks and merge to the default branch without touching unrelated
+   edits. Local S177 evidence: all `npm run check` stages pass by source-matched
+   composite evidence after two UI harness corrections, and the clean web-only
+   production build, output-trace check, release tail and provider HTTP smoke
+   pass (the smoke needed one bounded retry after local PostgreSQL timed out).
+   Full acceptance passed 18/20; the delayed-search case passed on a focused
+   rerun. The owner/staff workflow first found a stale “showroom” test label,
+   then reached an action while the disposable fixture was slow. Its later
+   local-only run also timed out during an initial loading navigation. The
+   unchanged save outcome remains unverified on this source; require the
+   current-head GitHub browser job before qualifying integration. Do not describe
+   the full local acceptance command as passed.
+4. [ ] Publish the exact approved web artifact from the integrated tree and verify
+   live routes, metadata and canonical/legacy asset bytes; retain the prior deploy.
+5. [ ] Admit one new locally signed AAB and derived APK under DEP-044, verify
+   package/version/signature/assets/alignment, and report Play/device status
+   separately. No Play upload is included.
+
 ### S173 — visible product facts for B2C and B2B buyers
 
 Dependency: FE-041 S173 and BE-014 S173 define the order-size contract; S172
