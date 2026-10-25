@@ -371,7 +371,6 @@ test('FE-065 web exclusions reject old query/page responses and queued map/group
  await page.getByRole('searchbox',{name:'Search businesses',exact:true}).fill('Pending query');
  await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingReads.length)).toBe(1);
  await page.getByRole('button',{name:'Product listings',exact:true}).click();
- if(!(await fixtureReads(page)).some(read=>read.scope==='products'&&read.page===2))await page.getByRole('button',{name:'Load more',exact:true}).click();
  await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingProductReads.length)).toBe(1);
  await exclude(page,[1]);
  await expect(page.locator('.discovery-product-card')).toHaveCount(0);await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','0');

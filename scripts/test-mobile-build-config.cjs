@@ -5,7 +5,8 @@ const actualBuild=require('../apps/mobile/build-config.cjs');
 const policy=require('../apps/mobile/release-policy.json');
 assert.deepEqual(policy.dataTargets,{'mirtpage-production':{apiOrigin:'https://mirtpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}},'Only the verified MirtPage production runtime is admitted');
 assert.equal(policy.appName,'AfricMade');assert.equal(policy.packageName,'com.africmade.app');
-assert.ok(policy.firebaseAndroidAppId===null||/^1:588262779708:android:[a-f0-9]+$/.test(policy.firebaseAndroidAppId),'Firebase app ID must be absent or bound to the reviewed project');
+assert.match(policy.firebaseProjectNumber,/^\d+$/,'Reviewed Firebase project number must be numeric');
+assert.ok(policy.firebaseAndroidAppId===null||new RegExp(`^1:${policy.firebaseProjectNumber}:android:[a-f0-9]+$`).test(policy.firebaseAndroidAppId),'Firebase app ID must be absent or bound to the reviewed project');
 assert.ok(policy.firebaseClientSha256===null||/^[a-f0-9]{64}$/.test(policy.firebaseClientSha256),'Firebase client digest must be absent or a reviewed SHA-256');
 const{mobileBuildSettings}=actualBuild;
 const env={SUQPAGE_MOBILE_BUILD_PROFILE:'preview',SUQPAGE_MOBILE_DATA_TARGET:'mirtpage-production',EXPO_PUBLIC_API_ORIGIN:policy.dataTargets['mirtpage-production'].apiOrigin,EXPO_PUBLIC_SUPABASE_URL:policy.dataTargets['mirtpage-production'].authOrigin,EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',EXPO_PUBLIC_EAS_PROJECT_ID:policy.expoProjectId};
@@ -43,7 +44,7 @@ assert.notEqual(missing.status,0);assert.match(missing.stderr,/approved mobile d
 for(const profile of ['preview','production']){
  for(const extra of [{SUQPAGE_MOBILE_DATA_TARGET:''},{SUQPAGE_MOBILE_DATA_TARGET:'staging'},{SUQPAGE_MOBILE_DATA_TARGET:'__proto__'},{EXPO_PUBLIC_API_ORIGIN:'https://wrong.example'},{EXPO_PUBLIC_SUPABASE_URL:'https://wrong.supabase.co'},{EXPO_PUBLIC_EAS_PROJECT_ID:'foreign-project'},{EAS_BUILD_PROFILE:profile==='preview'?'production':'preview'}])assert.throws(()=>mobileBuildSettings({...env,SUQPAGE_MOBILE_BUILD_PROFILE:profile,...extra}));
 }
-for(const profile of ['preview','production']){assert.equal(profiles.build[profile].env.SUQPAGE_MOBILE_DATA_TARGET,'mirtpage-production');assert.equal(profiles.build[profile].env.EXPO_PUBLIC_API_ORIGIN,'https://mirtpage.com');assert.equal(profiles.build[profile].env.EXPO_PUBLIC_SUPABASE_URL,'https://sjeiiqxgscuqajpgddcc.supabase.co');assert.equal(profiles.build[profile].environment,profile);}
+for(const profile of ['preview','production']){assert.equal(profiles.build[profile].env.SUQPAGE_FIREBASE_PROJECT_ID,policy.firebaseProjectId,'Build-profile env must pin the reviewed standalone Firebase project over stale hosted values');assert.equal(profiles.build[profile].env.SUQPAGE_MOBILE_DATA_TARGET,'mirtpage-production');assert.equal(profiles.build[profile].env.EXPO_PUBLIC_API_ORIGIN,'https://mirtpage.com');assert.equal(profiles.build[profile].env.EXPO_PUBLIC_SUPABASE_URL,'https://sjeiiqxgscuqajpgddcc.supabase.co');assert.equal(profiles.build[profile].environment,profile);}
 assert.equal(profiles.cli.requireCommit,true);assert.equal(profiles.submit.production.android.track,'internal');assert.equal(profiles.submit.production.android.releaseStatus,'draft');
 assert.equal(profiles.submit.production.android.serviceAccountKeyPath,'../../.local/africmade-play-submit/credentials.json','New app cannot borrow the old app-scoped submission source');
 console.log('Mobile build config checks passed: AfricMade package, exact qualified production target, wrong-target denial, public keys and EAS/file/scheme boundaries.');

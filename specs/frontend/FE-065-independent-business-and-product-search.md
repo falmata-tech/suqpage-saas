@@ -4,7 +4,7 @@ title: Independent business-map and product-card discovery
 status: in_progress
 related: [FE-074, FE-026, BE-054, DEP-045, FE-030, FE-042, FE-049, FE-053, FE-059, BE-047, ADR-0027, FE-067, BE-044, FE-021, FE-052]
 owners: [product, frontend]
-last_updated: 2026-10-21
+last_updated: 2026-10-25
 change_level: L2
 ---
 
@@ -482,6 +482,9 @@ Pure scope/URL activation, canonical parsing, country/city, debounce/stale-respo
 and locale contracts; isolated real PostgreSQL business/product independence,
 privacy, category/location unions, custom-product filtering and bounded
 ranking/paging under BE-054/BE-056.
+The stale-page/exclusion browser regression keeps the live intersection observer
+and waits for its held page-two request before changing exclusions, preserving
+all stale-response, queued-callback and exact page/exclusion-history assertions.
 Actual local browser tests for typing without Enter, switching/clear/history,
 description/source links, empty states, signup and dialogs at 320/390/1440 plus
 all five locales. Native browser evidence is labeled separately from a device.

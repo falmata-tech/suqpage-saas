@@ -18,8 +18,11 @@ schema, recovery and launch-parity outcomes remain in their owning specs and
 release records rather than serving as this package's admission evidence.
 
 **Next delivery dependency:** the owner selected a *separate*
-**com.africmade.app** package. S179 must verify its Firebase registration,
-client download, app-link association, new signed artifact and Play app record.
+**com.africmade.app** package. S180's standalone Firebase project and matching
+Android client are independently verified and pinned in source. Local source
+checks are qualified; reviewed integration, fresh build admission, separate FCM/EAS
+credential binding and actual push delivery remain pending. S179/S180 still
+require the app-link, new signed artifact and Play app-record qualification.
 The old package's v6 bundle is not eligible for that new app. Physical Android,
 Play submission and genuine closed-test enrollment remain unverified.
 
@@ -29,7 +32,7 @@ Play submission and genuine closed-test enrollment remain unverified.
 | --- | --- | --- | --- | --- |
 | AfricMade web | S177 source integrated | Required CI and public routes pass | Agent Chrome desktop/phone review recorded in S177 | Live at mirtpage.com |
 | AfricMade Android, old package | Signed v6 AAB and APK | Static release checks pass; physical device pending | Web/Expo source preview reviewed; installed native pending | Local only, `com.mirtpage.app`; not a new-package Play artifact |
-| AfricMade Android, new package | S179 configuration and matching Firebase registration | Focused and full local checks pass; refreshed registered-client checks pass | No new visual changes; installed native pending | Not built or deployed |
+| AfricMade Android, new package | S180 standalone Firebase registration and source binding | Local configuration/Expo/export and check-stage qualification pass; remote release gates pending | No new visual changes; installed native pending | Not built or deployed |
 | AfricMade Play app | English/Amharic draft and icon candidate | Draft validation only; Console/declarations/screens pending | Native phone screenshots pending | No new app release or closed-test enrollment |
 
 ## Ordered work
@@ -248,6 +251,51 @@ tracks and do not treat a local bundle as an uploaded release.
    provider state. Physical-device behavior and tester enrollment remain
    independent evidence.
 
+### S180 — standalone AfricMade Firebase project
+
+Dependency: DEP-044 S180 and DEP-049's separate app-record boundaries. Current:
+the standalone Firebase project, Android registration and authentic client are
+independently verified and pinned in source. Complete step 4's remaining checks
+and reviewed integration before fresh build admission. S179's one-build approval
+remains unused; its old-project plan is superseded. No new native compilation
+has started. DEP-044 owns the exact registration/client identity; traceability
+owns provider and focused-test evidence.
+
+1. [x] Record the changed project decision, isolate from current main, preserve
+   unrelated work and the old registration, and define target/failure scenarios.
+   Reconcile the master introduction and runtime identity statements with the
+   independently verified binding while preserving unfinished delivery gates.
+2. [x] Verify owner account and absence of an existing intended project; create
+   the separate AfricMade project on Spark without billing or optional Analytics/
+   AI integrations. Read back its actual ID/number and preserve protected evidence.
+3. [x] Register `com.africmade.app`, add both existing signer fingerprints, reload
+   and download its matching client; assess FCM/EAS credential dependencies.
+   Both fingerprints and the authentic client are verified after reload; a
+   public client does not configure the separate sender credential. FCM/EAS
+   binding and actual push delivery remain unverified.
+4. [ ] Update release policy and project-dependent fixtures, prove old-project
+   rejection and new-client acceptance, run applicable gates, review and commit
+   only task files, then qualify PR/main CI.
+   Source policy and preview/production public project-ID pins are updated;
+   authentic-client admission/rejection, actual Expo config and Hermes export pass.
+   All local check stages are qualified: the original UI run retains one race
+   failure; the corrected affected file passes 21/21 and the exact remaining
+   tail passes. Review, commit and remote CI remain incomplete.
+5. [ ] Prepare the new source-bound local build review and required advisory
+   admission, build once, inspect actual binaries and qualify phone/Play steps
+   separately. Do not execute the superseded S179 build plan.
+   Every Play Console session must select the MarketVision Google account and
+   independently verify the MarketVision developer account/ID first, following
+   the owner's standing instruction in `docs/GOOGLE-PLAY-RELEASE.md`.
+6. [ ] Independently retire the old SuqPage Play app as the owner now requests.
+   Verify MarketVision account, exact package/app and deletion eligibility;
+   prepare the scoped before-state and any required unpublishing. Explain the
+   seven-day recovery limit and permanent metrics/data loss. Complete deletion
+   only through Google's exact controls with the owner's registration transaction
+   ID entered privately in Console. Verify its result and recovery deadline;
+   preserve Loadgistic, Firebase/data/signing resources and all other apps.
+   This does not block creating the separate AfricMade app or compiling its APK.
+
 ### S179 — new AfricMade Android package and app record
 
 Dependency: DEP-044's new-package scenarios and DEP-049's separate app-record
@@ -281,9 +329,11 @@ has occurred. Preserve the released web artifact and existing Suqpage/MirtPage a
    after reload. The authentic client matches the exact new app; its bytes are
    unchanged by the fingerprint additions. DEP-044 owns the app ID/client hash;
    protected readback is `.local/africmade-package-s179/firebase/verified.json`.
-4. [ ] Prepare a fresh source-bound audit and exact one-build exception review;
-   then locally sign one new-package AAB and derived APK, inspect it and run
-   actual native tasks. Do not reuse S177's consumed v6 build exception.
+4. [ ] Superseded by S180 before compilation: a fresh source-bound audit and
+   exact one-build review were prepared and approved, but the owner then selected
+   a standalone Firebase project. Preserve the unused plan; do not execute it.
+   S180 owns the replacement build, binary inspection and actual native tasks.
+   Do not reuse S177's consumed v6 build exception.
 5. [ ] Create/verify the separate AfricMade Play app and current declarations,
    capture privacy-reviewed screenshots from the new admitted APK, finish
    localized listing/media, and separately qualify upload and testing.

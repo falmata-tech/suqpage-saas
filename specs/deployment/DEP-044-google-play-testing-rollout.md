@@ -10,6 +10,99 @@ change_level: L4
 
 # DEP-044 — Google Play testing and store rollout
 
+## S180 — standalone AfricMade Firebase project (in progress)
+
+GIVEN any Play Console work begins WHEN selecting the signed-in account THEN
+switch to the owner-selected MarketVision Google account, independently verify
+its MarketVision developer-account label and immutable ID, and bind operations
+to that account. Earlier SuqPage/Falmata.app names and historical IDs do not
+select the current account. Resolve unavailable or ambiguous access before
+app-record, credential, declaration, upload or publication writes. Follow the
+[account-selection workflow](../../docs/GOOGLE-PLAY-RELEASE.md#required-account-selection).
+
+The owner selected a separate AfricMade Firebase/Google Cloud project,
+superseding S179's Firebase binding under `suqpage` for the next build.
+The existing registration remains intact. The approved S179 build plan was
+not executed and must not be applied after this target change. The new project
+and authentic client require independent readback
+before changing the release policy; no identity may be invented from a label.
+
+GIVEN the owner requests a standalone project WHEN provisioning it THEN create
+one project named AfricMade under the verified owner account, with its own
+verified project ID/number and one `com.africmade.app` Android registration.
+Use the no-cost Spark plan, leave optional Analytics/AI integrations off, and
+do not attach a billing account or migrate existing application services/data.
+Preserve `suqpage`, its app records, IAM, credentials and existing users.
+
+GIVEN the new Android app is registered WHEN preparing the next build THEN save
+and independently reload both verified upload-signer fingerprints, download the
+authentic matching client, and pin project ID/number, app ID and client hash.
+Reject the old-project client, wrong app/package, mismatched file or missing
+configuration. The package/scheme, existing signer and API/Auth targets stay
+unchanged. Update project-bound tests rather than bypassing admission.
+
+GIVEN hosted EAS values still name the prior project WHEN preview or production
+configuration is evaluated THEN the selected build profile explicitly pins the
+reviewed standalone project ID. For the local compilation, its disposable
+profile also pins the reviewed absolute client-file source and public settings;
+no hosted variable or credential is changed to make local configuration pass.
+
+GIVEN a standalone Firebase client is available WHEN qualifying notifications
+THEN assess the new-project FCM sender and package-specific EAS binding separately.
+A public client file does not configure the private FCM sending credential.
+Do not reuse the old-project credential or claim actual push delivery without
+provider readback and real-device evidence. Any new private credential requires
+its existing separately authorized and recoverable provider workflow.
+
+GIVEN the configuration changes WHEN committing and building THEN run focused
+negative-path, type, spec and applicable release checks, integrate through the
+GitHub workflow, and bind a fresh build review to the resulting source. The
+earlier exact artifact exception does not admit the changed project/source.
+Project creation does not submit a Play app or start its testing clock.
+
+GIVEN the owner requests removal of the old SuqPage Play app WHEN retiring it
+THEN independently verify the MarketVision developer, app and package, inspect
+Google's current deletion eligibility and any required unpublishing, and record
+the scoped before-state before a write. Explain the seven-day recovery window
+and later permanent loss of app data/metrics. Use only the exact app's Console
+controls and keep its registration transaction ID private. Verify the resulting
+state and recovery deadline. Preserve every other app and Firebase/data/signing
+resource. A fresh AfricMade listing/build does not depend on deleting SuqPage;
+the old app's testing history does not transfer to the new package. Provider
+readback, rather than a local test, proves retirement; until then it is pending.
+
+### Verified registration and current qualification
+
+The independently verified owner account now has the standalone project
+AfricMade, ID `africmade-de81a`, number `417974978793`, on Spark with optional
+Gemini and Analytics disabled and no billing account attached. Its registered
+`com.africmade.app` Android app is
+`1:417974978793:android:10ff61b50f150785f04878`. Both existing upload-signer
+fingerprints persisted after reload. The authentic downloaded client is 677
+bytes, SHA-256
+`94145cb4b33413f08e9e2658cd9b96474663d32df6a979b4cd3ededa55e7e117`.
+No existing `suqpage` project or app record was changed.
+
+The release policy pins this project, number, app ID and exact client hash.
+Preview and production EAS profiles explicitly pin its public project ID to
+prevent stale hosted values selecting another project. The focused Firebase
+platform regression passes with synthetic clients, including old-project
+rejection for the same package even when the environment selects `suqpage`,
+wrong number/app ID rejection and retained file/private-material/worker guards.
+Provider verification and focused evidence are mapped in
+[traceability](../TRACEABILITY.md#cross-layer-requirements-and-implementation).
+
+Local configuration/admission, actual Expo configuration and source-matched
+Hermes export pass. All local check stages are qualified using retained passing
+prefix evidence, the corrected 21-case discovery UI module and the exact remaining
+check tail. The original full run remains recorded as failed on the observer/
+fallback-button harness race; no failed execution is relabelled as passing.
+Remote release gates, reviewed integration and fresh source-bound build admission
+remain pending. The approved S179 plan remains unused and superseded;
+no new native compilation has occurred. New-project FCM sending credentials,
+package-specific EAS binding, actual push delivery and Play qualification remain
+unverified under this registration.
+
 ## AfricMade successor listing preparation (draft)
 
 The Suqpage Console history below is retained for the earlier app and does not
@@ -20,14 +113,11 @@ bundle is not that submission artifact. Draft listing text and asset requirement
 may be prepared without a Console write. Do not apply the old Suqpage or
 MirtPage listings, test enrollment, or screenshots to the new app.
 
-The exact owner-approved Firebase registration is verified in project `suqpage`
-(`588262779708`): Android app ID
-`1:588262779708:android:59a6f74422eead73248c39`, nickname AfricMade, package
-`com.africmade.app`, with the existing upload-signer SHA-1 and SHA-256 saved and
-read back after reload. Its authentic downloaded client SHA-256 is
-`fb5623d1ca922e9da8d141d154bd31b5b58e0c0abf48ceeeeb10a143dcee4d8a`.
-The raw client remains private; both prior Android registrations remain.
-This registration does not qualify a compiled artifact or Play app/track.
+The next build uses S180's verified standalone registration above. S179's earlier
+`com.africmade.app` registration under `suqpage` remains preserved alongside the
+prior Android apps; it is no longer the selected build client. Raw downloaded
+clients stay private. Neither registration qualifies a compiled artifact or
+Play app/track.
 
 GIVEN the new package is selected WHEN a native build is prepared THEN its
 installed package and Android custom scheme are `com.africmade.app` and
