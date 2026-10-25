@@ -41,9 +41,9 @@ async function runPostgresFixture() {
     assert.match(discoveryUiSource, /navigator\.geolocation\.getCurrentPosition/);
     assert.match(discoveryMapSource, /<MarketSearchControls[\s\S]*scope=\{panelOpen\?'products':'businesses'\}[\s\S]*metadata=\{panelOpen\?productData:mapData\}/);
     for (const label of ['Category','Country','City']) assert.ok(searchControlsSource.includes(`label:'${label}'`), `Explicit ${label} control remains available`);
-    assert.match(searchControlsSource, /disabled=\{f\.key==='city'&&!value\.countries\.length\}/, 'City requires an explicit selected country');
+    assert.match(searchControlsSource, /disabled=\{(?:!ready\|\|)?f\.key==='city'&&!value\.countries\.length\}/, 'City requires an explicit selected country even when readiness also gates controls');
     assert.ok(searchControlsSource.includes("cities:value.cities.filter(c=>next.includes(c.split(':')[0]))"), 'Changing countries removes cities outside the current selection');
-    assert.match(searchControlsSource, /type="checkbox" checked=\{selected\.includes\(c\.key\)\}/, 'Category and geography are bounded multi-select choices');
+    assert.match(searchControlsSource, /<input\b(?=[^>]*\btype="checkbox")(?=[^>]*\bchecked=\{selected\.includes\(c\.key\)\})/, 'Category and geography remain bound to selected keys regardless of other input attributes');
     assert.match(searchControlsSource, /maxLength=\{80\}/, 'Unsent search text retains the canonical bound');
     assert.match(discoveryUiSource, /discovery-search-panel/);
     assert.match(marketplaceMapSource, /showroom\.primaryIndustryLabel/);

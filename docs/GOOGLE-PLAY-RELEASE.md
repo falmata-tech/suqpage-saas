@@ -23,24 +23,19 @@ lineage and standalone Firebase project under DEP-044 S180. Its new signed
 artifact, Console record, screenshots, declarations and testing require separate
 qualification. The earlier apps' uploads or testing do not qualify this app.
 
-## Requested SuqPage retirement
+## SuqPage retirement
 
-The owner requests deletion of **SuqPage**, package **com.suqpage.app**, app
-**4972244998230912603**, from the verified MarketVision account. Inspect its
-current eligibility and before-state before changing it. Google requires an
-unpublished app with no unresolved review, fewer than 1,000 active devices and
-no rejected/blocked/suspended state; monetized apps with installs require support.
-Use **Advanced settings → App availability → Delete app**, providing the exact
-package and developer registration transaction ID privately in Console. Do not
-copy the transaction ID into chat, evidence or source files.
+The owner deleted **SuqPage**, package **com.suqpage.app**, app
+**4972244998230912603**, from the verified MarketVision account after its scoped
+unpublishing. Independent Console readback verifies the deleted state and recovery
+availability until **November 1, 2026**; no precise hour was exposed. Its package
+had installs and cannot be reused. No registration transaction ID was retained.
+Loadgistic, Firebase, application data and signing resources are unchanged.
 
-Deletion permits recovery for seven days, then permanently removes the app's
-data/metrics. A package with any lifetime installs cannot be reused. Record the
-verified result and deadline; do not infer success from a click. Preserve
-Loadgistic and all Firebase/data/signing resources. If the transaction ID or
-eligibility is unavailable, keep retirement pending and continue the independent
-AfricMade app/build. [Google's deletion requirements](https://support.google.com/googleplay/android-developer/answer/16483176?hl=en)
-govern the actual operation.
+[Google's deletion rules](https://support.google.com/googleplay/android-developer/answer/16483176?hl=en)
+allow recovery for seven days, followed by permanent app data/metrics loss.
+Retirement does not qualify or transfer testing to AfricMade. DEP-044 and
+traceability own the successor's current admission and provider evidence.
 
 ## Historical Suqpage release
 

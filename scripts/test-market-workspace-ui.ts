@@ -1,18 +1,21 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {createRequire} from 'node:module';
 import {after,test} from 'node:test';
+import vm from 'node:vm';
 import {build} from 'esbuild';
 import {chromium,type Browser,type BrowserContext,type Page} from 'playwright';
 import {expect} from '@playwright/test';
 import {emptyMarketWorkspace,serializeMarketWorkspaceSnapshot,type MarketWorkspaceState} from '../lib/market-workspace';
 import {normalizeMarketSearch} from '../lib/market-search';
 import {discoveryLocationLabel} from '../lib/discovery-contract';
+import {createUiText,type UiMessages} from '../lib/i18n/core';
 
 // Actual React, DiscoveryWorkspace, controls, storage and feed hooks. Only router,
 // translation, map rendering and HTTP data ports are controlled; not device/API proof.
 const KEY='suqpage:market-workspace:v1',RETURN_KEY='suqpage:last-marketplace-url:v1';
-const compileWorkspace=(realStyles=false)=>build({stdin:{loader:'jsx',resolveDir:process.cwd(),contents:`
- import React,{useEffect,useState,Fragment,Activity} from 'react';import {createRoot} from 'react-dom/client';
+const compileWorkspace=(realStyles=false,render:'client'|'server'|'hydrate'='client')=>build({stdin:{loader:'jsx',resolveDir:process.cwd(),contents:`
+ import React,{useEffect,useState,Fragment,Activity} from 'react';import {${render==='server'?'renderToString':render==='hydrate'?'hydrateRoot':'createRoot'}} from '${render==='server'?'react-dom/server':'react-dom/client'}';
  import Workspace from './components/DiscoveryWorkspace';import {marketWorkspaceFromParams} from './lib/market-workspace';
  import {useBlockedBusinesses} from './components/useBlockedBusinesses';
  const f=window.fixture;
@@ -47,14 +50,14 @@ const compileWorkspace=(realStyles=false)=>build({stdin:{loader:'jsx',resolveDir
    {path==='/'?preferencesReady&&<Activity mode={f.hidden?'hidden':'visible'}><Workspace discovery={f.data} productDiscovery={f.data} initialExclusions={f.initialExclusions??undefined} initialBusiness={server.business} initialProduct={server.product} view={state.mode==='products'?'search':'map'}/></Activity>:<section><h1>{path}</h1>{path==='/featured'&&<button onClick={()=>{sessionStorage.setItem('${RETURN_KEY}','/featured?day=2');f.go('/@fixture-shop');}}>Open Featured showroom</button>}</section>}
   </Fragment>;
  }
- createRoot(document.getElementById('root')).render(<App/>);
-`},bundle:true,write:false,outfile:'workspace.js',format:'iife',platform:'browser',jsx:'automatic',loader:{'.module.css':'local-css'},plugins:[{name:'market-navigation-ports',setup(b){
+ ${render==='server'?'export const renderWorkspace=()=>renderToString(<App/>);':render==='hydrate'?"hydrateRoot(document.getElementById('root'),<App/>,{onRecoverableError:error=>window.fixture.hydrationErrors.push(error.message)});":"createRoot(document.getElementById('root')).render(<App/>);"}
+`},bundle:true,write:false,outfile:'workspace.js',format:render==='server'?'cjs':'iife',platform:render==='server'?'node':'browser',external:render==='server'?['react','react-dom/server']:[],jsx:'automatic',loader:{'.module.css':'local-css'},plugins:[{name:'market-navigation-ports',setup(b){
  if(!realStyles)b.onResolve({filter:/\.css$/},args=>({path:args.path,namespace:'css'}));
  b.onLoad({filter:/.*/,namespace:'css'},()=>({loader:'js',contents:'export default new Proxy({}, {get:(_,key)=>String(key)});'}));
  b.onResolve({filter:/^(?:next\/(?:navigation|link|image)|next-intl|@\/lib\/i18n\/ui|@\/components\/MarketplaceMap)$/},args=>({path:args.path,namespace:'ports'}));
  b.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'jsx',resolveDir:process.cwd(),contents:
-  args.path==='@/lib/i18n/ui'?`const t=(value,values={})=>value.replace(/\{([^}]+)\}/g,(_,key)=>String(values[key]??'{'+key+'}'));export const useUiText=()=>t;`
-  :args.path==='next-intl'?`export const useLocale=()=>'en';`
+  args.path==='@/lib/i18n/ui'?`import {createUiText} from './lib/i18n/core';const t=createUiText(window.fixture.messages);export const useUiText=()=>t;`
+  :args.path==='next-intl'?`export const useLocale=()=>window.fixture.locale;`
   :args.path==='next/navigation'?`import {useEffect,useState} from 'react';export const useRouter=()=>({push:href=>window.fixture.go(href),replace:href=>window.fixture.go(href),back:()=>history.back()});export function useSearchParams(){const[value,setValue]=useState(()=>location.search);useEffect(()=>{const update=()=>setValue(location.search);window.addEventListener('fixture-navigation',update);window.addEventListener('popstate',update);return()=>{window.removeEventListener('fixture-navigation',update);window.removeEventListener('popstate',update);};},[]);return new URLSearchParams(value);}`
   :args.path==='next/link'?`export default function Link({href,children,onClick,...props}){return <a {...props} href={href} onClick={event=>{onClick?.(event);event.preventDefault();window.fixture.go(href);}}>{children}</a>;}`
   :args.path==='next/image'?`export default function Image({src,alt,...props}){return <img {...props} src={src} alt={alt}/>;}`
@@ -62,43 +65,98 @@ const compileWorkspace=(realStyles=false)=>build({stdin:{loader:'jsx',resolveDir
  }}]});
 const bundle=compileWorkspace();
 let styledBundle:ReturnType<typeof compileWorkspace>|undefined;
+let serverBundle:ReturnType<typeof compileWorkspace>|undefined,hydrationBundle:ReturnType<typeof compileWorkspace>|undefined;
 
 type Fixture={go:(href:string)=>void;goSilent:(href:string)=>void;flush:()=>void;writes:Array<{key:string;value:string}>;requests:string[];reads:Array<{scope:string;page:number;excluded:number[]}>;saveExclusions:(ids:number[])=>Promise<void>;currentSelect:()=>void;currentOpenGroup:()=>void;staleSelect:()=>void;staleOpenGroup:()=>void;pendingReads:Array<()=>void>;abortedReads:number;holdBusiness:boolean;holdProducts?:boolean;pendingProductReads:Array<()=>void>;failBusiness?:boolean;failProducts?:boolean};
 let browser:Browser|undefined;
 after(async()=>{await browser?.close();});
 
-async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;memory?:string;blocked?:boolean;serverParams?:string;withShops?:boolean;holdBusiness?:boolean;holdProducts?:boolean;ignoreAbort?:boolean;initialSdkView?:boolean;discoveryMemory?:string;seedShops?:boolean;excluded?:number[];initialExclusions?:number[]|null;enforceExclusions?:boolean;productPages?:boolean;deferWorkspace?:boolean;realStyles?:boolean;width?:number}={}){
- const compiled=await(options.realStyles?(styledBundle??=compileWorkspace(true)):bundle);
+async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;memory?:string;blocked?:boolean;serverParams?:string;withShops?:boolean;holdBusiness?:boolean;holdProducts?:boolean;ignoreAbort?:boolean;initialSdkView?:boolean;discoveryMemory?:string;seedShops?:boolean;excluded?:number[];initialExclusions?:number[]|null;enforceExclusions?:boolean;productPages?:boolean;deferWorkspace?:boolean;realStyles?:boolean;width?:number;hydrate?:boolean;locale?:'en'|'am'|'om'}={}){
+ const compiled=await(options.hydrate?(hydrationBundle??=compileWorkspace(false,'hydrate')):options.realStyles?(styledBundle??=compileWorkspace(true)):bundle);
  browser??=await chromium.launch({channel:'chrome',headless:true});const context:BrowserContext=await browser.newContext({viewport:{width:options.width||1280,height:900}});t.after(()=>context.close());
  const page=await context.newPage(),errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
  await page.route('http://market.fixture/**',route=>route.fulfill({contentType:'text/html',body:'<div id="root"></div>'}));
  await page.goto('http://market.fixture'+(options.url||'/'));
- await page.evaluate(({key,memory,blocked,serverParams,withShops,holdBusiness,holdProducts,ignoreAbort,initialSdkView,discoveryMemory,seedShops,excluded=[],initialExclusions=[],enforceExclusions=false,productPages=false,deferWorkspace=false})=>{
+ const locale=options.locale||'en',messages:UiMessages=locale==='en'?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,'utf8'));
+ const text=createUiText(messages);
+ await page.evaluate(({key,memory,blocked,serverParams,withShops,holdBusiness,holdProducts,ignoreAbort,initialSdkView,discoveryMemory,seedShops,excluded=[],initialExclusions=[],enforceExclusions=false,productPages=false,deferWorkspace=false,locale,messages})=>{
   const data={showrooms:[],nearbyGroups:[],searchBusinesses:[],searchOrder:[],industries:[],places:[],countries:[],total:0,resultCounts:{businesses:0,products:1},resultPage:{page:1,totalPages:1,totalItems:1,firstItem:1,lastItem:1},featuredNowBusinessId:null,
    searchProducts:[{id:101,businessId:1,name:'Fixture cup',description:'A real React fixture product.',categoryName:'Cups',businessHandle:'fixture-shop',businessName:'Fixture Shop',city:'Addis Ababa',region:'Addis Ababa',primaryIndustryKey:'home',imagePath:'',offeringKind:'standard_product',availability:'available'}]};
   const shops=Array.from({length:2},(_,index)=>({id:index+1,handle:'fixture-'+(index+1),name:'Fixture Business '+(index+1),tagline:'Physical products',description:'',logoPath:'',heroImagePath:'',city:'Fixture city',zone:'',region:'',latitude:9.03,longitude:38.75,fallbackStyle:'workshop',sponsored:false,productionScale:'workshop',isLive:false,livePlatform:'',liveUrl:'',primaryIndustryKey:'textiles',primaryIndustryLabel:'Textiles',primaryIndustryShortLabel:'Textiles',locationMode:'storefront'}));
   if(productPages)data.resultPage={page:1,totalPages:2,totalItems:2,firstItem:1,lastItem:1};
   const initialData=seedShops?{...data,showrooms:shops}:data;
-  const f={writes:[] as Array<{key:string;value:string}>,requests:[] as string[],reads:[],data:initialExclusions?.length?{...initialData,showrooms:initialData.showrooms.filter(v=>!initialExclusions.includes(v.id)),searchProducts:initialData.searchProducts.filter(v=>!initialExclusions.includes(v.businessId))}:initialData,fullData:withShops?{...data,showrooms:shops}:null,pageTwo:productPages?{...data,resultPage:{page:2,totalPages:2,totalItems:2,firstItem:2,lastItem:2},searchProducts:[{...data.searchProducts[0],id:102,name:'Old page cup'}]}:null,excluded,initialExclusions,enforceExclusions,deferWorkspace,entry:1,serverParams,holdBusiness:Boolean(holdBusiness),holdProducts:Boolean(holdProducts),ignoreAbort:Boolean(ignoreAbort),initialSdkView:Boolean(initialSdkView),pendingReads:[],pendingProductReads:[],abortedReads:0};(window as unknown as {fixture:unknown}).fixture=f;
+  const f={writes:[] as Array<{key:string;value:string}>,requests:[] as string[],reads:[],hydrationErrors:[] as string[],locale,messages,data:initialExclusions?.length?{...initialData,showrooms:initialData.showrooms.filter(v=>!initialExclusions.includes(v.id)),searchProducts:initialData.searchProducts.filter(v=>!initialExclusions.includes(v.businessId))}:initialData,fullData:withShops?{...data,showrooms:shops}:null,pageTwo:productPages?{...data,resultPage:{page:2,totalPages:2,totalItems:2,firstItem:2,lastItem:2},searchProducts:[{...data.searchProducts[0],id:102,name:'Old page cup'}]}:null,excluded,initialExclusions,enforceExclusions,deferWorkspace,entry:1,serverParams,holdBusiness:Boolean(holdBusiness),holdProducts:Boolean(holdProducts),ignoreAbort:Boolean(ignoreAbort),initialSdkView:Boolean(initialSdkView),pendingReads:[],pendingProductReads:[],abortedReads:0};(window as unknown as {fixture:unknown}).fixture=f;
   localStorage.setItem('suqpage-blocked-businesses-v1',JSON.stringify(excluded.map(id=>({id,handle:'fixture-'+id,name:'Fixture Business '+id}))));
   history.replaceState({framework:'fixture-router',entry:1},'',location.href);
   if(memory)sessionStorage.setItem(key,memory);
   if(discoveryMemory)sessionStorage.setItem('suqpage:discovery-navigation:v2',discoveryMemory);
   const write=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){f.writes.push({key,value});return write.call(this,key,value);};
   if(blocked)Object.defineProperty(window,'sessionStorage',{configurable:true,get(){throw new DOMException('Storage blocked','SecurityError');}});
- },{key:KEY,memory:options.memory,blocked:options.blocked,serverParams:options.serverParams,withShops:options.withShops,holdBusiness:options.holdBusiness,holdProducts:options.holdProducts,ignoreAbort:options.ignoreAbort,initialSdkView:options.initialSdkView,discoveryMemory:options.discoveryMemory,seedShops:options.seedShops,excluded:options.excluded,initialExclusions:options.initialExclusions,enforceExclusions:options.enforceExclusions,productPages:options.productPages,deferWorkspace:options.deferWorkspace});
+ },{key:KEY,memory:options.memory,blocked:options.blocked,serverParams:options.serverParams,withShops:options.withShops,holdBusiness:options.holdBusiness,holdProducts:options.holdProducts,ignoreAbort:options.ignoreAbort,initialSdkView:options.initialSdkView,discoveryMemory:options.discoveryMemory,seedShops:options.seedShops,excluded:options.excluded,initialExclusions:options.initialExclusions,enforceExclusions:options.enforceExclusions,productPages:options.productPages,deferWorkspace:options.deferWorkspace,locale,messages});
  if(options.realStyles){
   for(const file of ['app/globals.css','app/landing.css','app/discovery.css'])await page.addStyleTag({content:fs.readFileSync(file,'utf8')});
   await page.addStyleTag({content:compiled.outputFiles.find(file=>file.path.endsWith('.css'))!.text});
   await page.addStyleTag({content:'#root>nav{display:none}#root{height:900px}'});
  }
- await page.addScriptTag({content:compiled.outputFiles.find(file=>file.path.endsWith('.js'))!.text});
- await expect(page.getByRole('button',{name:'Product listings',exact:true})).toBeEnabled();
- return {page,errors};
+ const hydrate=async()=>{await page.addScriptTag({content:compiled.outputFiles.find(file=>file.path.endsWith('.js'))!.text});};
+ if(options.hydrate){
+  const server=await(serverBundle??=compileWorkspace(false,'server')),fixture=await page.evaluate(()=>(window as unknown as{fixture:unknown}).fixture);
+  const module={exports:{} as {renderWorkspace:()=>string}},location=new URL(page.url());
+  // Only navigation/HTTP/map ports are controlled. The Node server renderer and
+  // browser hydrator execute the same real React workspace and search controls.
+  vm.runInNewContext(server.outputFiles.find(file=>file.path.endsWith('.js'))!.text,{module,exports:module.exports,require:createRequire(import.meta.url),console,URL,URLSearchParams,window:{fixture},location,history:{replaceState(){},pushState(){},back(){}}});
+  await page.locator('#root').evaluate((element,html)=>{element.innerHTML=html;},module.exports.renderWorkspace());
+ }else{
+  await hydrate();await expect(page.getByRole('button',{name:text('Product listings'),exact:true})).toBeEnabled();
+ }
+ return {page,errors,hydrate};
 }
 const go=(page:Page,href:string)=>page.evaluate(href=>(window as unknown as {fixture:Fixture}).fixture.go(href),href);
 const savedWrites=(page:Page)=>page.evaluate(key=>(window as unknown as {fixture:Fixture}).fixture.writes.filter(write=>write.key===key).map(write=>JSON.parse(write.value).params as string),KEY);
 const remembered:MarketWorkspaceState={mode:'products',business:normalizeMarketSearch({q:'Workshop'}),product:normalizeMarketSearch({q:'Cup',country:['ET'],madeToOrder:true})};
+
+for(const width of[1440,390])test(`FE-042 S25 / FE-065 server controls wait for restoration and preserve first editable typing at ${width}px`,async t=>{
+ const {page,errors,hydrate}=await boot(t,{url:'/?view=search&p.q=Server+cup&p.category=beauty-wellness',width,hydrate:true});
+ const input=page.getByRole('searchbox',{name:'Search products',exact:true});
+ await expect(input).toBeDisabled();
+ for(const name of['Clear search','Clear all',/^Category\s*1$/,'Country','City','Made to order'])await expect(page.getByRole('button',{name,exact:true})).toBeDisabled();
+ await expect(page.getByRole('button',{name:'Product listings',exact:true})).toBeDisabled();
+ assert.equal(await input.inputValue(),'Server cup');
+ await hydrate();
+ // fill waits only for actual editability, with no separate readiness delay.
+ await input.fill('First editable cup');
+ await expect(input).toHaveValue('First editable cup');
+ await expect(page).toHaveURL(url=>url.searchParams.get('p.q')==='First editable cup');
+ assert.deepEqual(new URL(page.url()).searchParams.getAll('p.category'),['beauty-wellness']);
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.requests.some(url=>{const params=new URL(url,location.href).searchParams;return params.get('scope')==='products'&&params.get('q')==='First editable cup'&&params.getAll('category').join(',')==='beauty-wellness';}))).toBe(true);
+ await expect(page.getByRole('button',{name:/^Category\s*1$/,exact:true})).toBeEnabled();
+ await expect(page.getByRole('button',{name:'City',exact:true})).toBeDisabled();
+ await expect(page.getByRole('button',{name:'Product listings',exact:true})).toHaveAttribute('aria-pressed','true');
+ await page.getByRole('button',{name:'Clear search',exact:true}).click();await expect(input).toHaveValue('');
+ await expect(page).toHaveURL(url=>!url.searchParams.has('p.q')&&url.searchParams.get('p.category')==='beauty-wellness');
+ assert.deepEqual(await page.evaluate(()=>(window as unknown as{fixture:{hydrationErrors:string[]}}).fixture.hydrationErrors),[]);
+ assert.deepEqual(errors,[]);
+});
+
+for(const locale of['en','am','om'] as const)for(const width of[320,390])test(`FE-065 S180 selected phone filter words and counts fit ${locale} at ${width}px`,async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=search&p.category=beauty-wellness',realStyles:true,width,locale});
+ const text=createUiText(locale==='en'?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,'utf8')));
+ const filters=page.locator('[data-search-scope="products"]>div').first(),buttons=filters.locator(':scope>button');
+ await expect(buttons).toHaveCount(4);
+ for(const [index,label] of['Category','Country','City','Made to order'].entries())await expect(buttons.nth(index).locator('span')).toHaveText(text(label));
+ await expect(buttons.first().locator('b')).toHaveText('1');
+ const geometry=await buttons.evaluateAll(elements=>elements.map(element=>{
+  const span=element.querySelector('span')!,node=span.firstChild!,label=span.textContent!,rect=element.getBoundingClientRect(),labelRect=span.getBoundingClientRect(),badge=element.querySelector('b')?.getBoundingClientRect();
+  const words=Array.from(label.matchAll(/\S+/gu),match=>{const range=document.createRange();range.setStart(node,match.index!);range.setEnd(node,match.index!+match[0].length);return{word:match[0],lines:new Set(Array.from(range.getClientRects(),r=>Math.round(r.top))).size};});
+  return{label,words,height:rect.height,left:rect.left,right:rect.right,fontSize:parseFloat(getComputedStyle(element).fontSize),fits:element.scrollWidth<=element.clientWidth+1,labelFits:labelRect.left>=rect.left&&labelRect.right<=rect.right,badgeFits:!badge||badge.left>=labelRect.right&&badge.right<=rect.right};
+ }));
+ for(const item of geometry){
+  assert.ok(item.height>=44&&item.fontSize===11,JSON.stringify(item));
+  assert.ok(item.left>=0&&item.right<=width&&item.fits&&item.labelFits&&item.badgeFits,JSON.stringify(item));
+  for(const word of item.words)assert.equal(word.lines,1,JSON.stringify(item));
+ }
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);assert.deepEqual(errors,[]);
+});
 
 test('FE-065 S153 location text keeps literal city/legacy fallback and removes only equivalent labels',()=>{
  const label=discoveryLocationLabel;

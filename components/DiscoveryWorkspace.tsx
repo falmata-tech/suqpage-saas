@@ -316,7 +316,7 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
    </nav>
    </div>
    <div className={independentStyles.activeControls}>
-    <MarketSearchControls key={panelOpen?'products':'businesses'} scope={panelOpen?'products':'businesses'} value={panelOpen?productSearch:businessSearch} onChange={panelOpen?setProductSearch:setBusinessSearch} metadata={panelOpen?productData:mapData}/>
+    <MarketSearchControls key={panelOpen?'products':'businesses'} ready={ready} scope={panelOpen?'products':'businesses'} value={panelOpen?productSearch:businessSearch} onChange={panelOpen?setProductSearch:setBusinessSearch} metadata={panelOpen?productData:mapData}/>
     {!panelOpen&&businesses.error&&<div className={independentStyles.error} role="alert">{t(businesses.error)} <button type="button" onClick={businesses.retry}>{t('Try again')}</button></div>}
    </div>
    <div ref={viewport} className={independentStyles.viewport} data-dragging={moving}>

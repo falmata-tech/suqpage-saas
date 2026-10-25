@@ -32,8 +32,8 @@ Play submission and genuine closed-test enrollment remain unverified.
 | --- | --- | --- | --- | --- |
 | AfricMade web | S177 source integrated | Required CI and public routes pass | Agent Chrome desktop/phone review recorded in S177 | Live at mirtpage.com |
 | AfricMade Android, old package | Signed v6 AAB and APK | Static release checks pass; physical device pending | Web/Expo source preview reviewed; installed native pending | Local only, `com.mirtpage.app`; not a new-package Play artifact |
-| AfricMade Android, new package | S180 standalone Firebase registration and source binding | Local configuration/Expo/export and check-stage qualification pass; remote release gates pending | No new visual changes; installed native pending | Not built or deployed |
-| AfricMade Play app | English/Amharic draft and icon candidate | Draft validation only; Console/declarations/screens pending | Native phone screenshots pending | No new app release or closed-test enrollment |
+| AfricMade Android, new package | S180 standalone Firebase registration and source binding | Local configuration/Expo/export, all 78 check stages, web release and 20 acceptance journeys pass; remote gates pending | No new visual changes; installed native pending | Not built or deployed |
+| AfricMade Play app | Saved AfricMade app and local English/Amharic listing drafts | Saved name/package/Draft verified; pricing/type readback, declarations and native screens pending | Native phone screenshots pending | No bundle upload, release or closed-test enrollment |
 
 ## Ordered work
 
@@ -278,23 +278,50 @@ owns provider and focused-test evidence.
    only task files, then qualify PR/main CI.
    Source policy and preview/production public project-ID pins are updated;
    authentic-client admission/rejection, actual Expo config and Hermes export pass.
-   All local check stages are qualified: the original UI run retains one race
-   failure; the corrected affected file passes 21/21 and the exact remaining
-   tail passes. Review, commit and remote CI remain incomplete.
+   Commit `6164ade` retained the original UI run's one race failure; the corrected
+   affected file passed 21/21 and the exact remaining local tail passed. PR #45
+   browser failure prompted the readiness correction below, now locally
+   qualified; its commit and remote browser qualification remain pending.
+   Readiness follow-up (FE-065 / FE-042 S25):
+   1. [x] Inspect PR #45's failed browser job, record the enabled-before-restoration
+      defect and controlling readiness contract, then reproduce it with actual
+      SSR markup and React hydration before changing production code.
+   2. [x] Gate existing web search/clear/filter controls on workspace readiness;
+      preserve native/lib sources, first accepted typing and restored filters.
+   3. [x] Record the phone Category word-break defect before changing CSS. Give
+      en/am/om labels natural wrapping and intrinsic width at 320/390px while
+      retaining the font, counts and 44px minimum touch height.
+   4. [x] Pass focused tests and actual Chrome/local-API journeys at desktop/phone
+      sizes; inspect screenshots and record agent/parent visual review. Controlled
+      component ports and synthetic map tiles are labelled. Native/Expo SSR and
+      installed-device behavior are unchanged and unclaimed by this correction.
+   5. [x] Qualify all 78 local check stages, 467 workflow-UI cases with zero skips,
+      the physical web-only release gate and all 20 disposable-provider acceptance
+      journeys. Preserve the failed precheck/settled-fixture invocations and one
+      aggregate layout timeout; the unchanged isolated retry passes. No assertion
+      or timeout was relaxed, and no failed invocation is relabelled as passing.
+      [Traceability](../specs/TRACEABILITY.md) owns the source-bound evidence.
+   6. [ ] Commit/push the reviewed correction, qualify required PR/main checks,
+      then publish the exact web artifact through the guarded Netlify workflow.
+      Verify `https://mirtpage.com/.well-known/assetlinks.json` publicly serves
+      the new package and existing signer before step 5's build admission;
+      preserve old package associations. Source-only tests do not qualify the
+      hosted result, which currently still lists only the old packages.
 5. [ ] Prepare the new source-bound local build review and required advisory
    admission, build once, inspect actual binaries and qualify phone/Play steps
    separately. Do not execute the superseded S179 build plan.
    Every Play Console session must select the MarketVision Google account and
    independently verify the MarketVision developer account/ID first, following
    the owner's standing instruction in `docs/GOOGLE-PLAY-RELEASE.md`.
-6. [ ] Independently retire the old SuqPage Play app as the owner now requests.
-   Verify MarketVision account, exact package/app and deletion eligibility;
-   prepare the scoped before-state and any required unpublishing. Explain the
-   seven-day recovery limit and permanent metrics/data loss. Complete deletion
-   only through Google's exact controls with the owner's registration transaction
-   ID entered privately in Console. Verify its result and recovery deadline;
-   preserve Loadgistic, Firebase/data/signing resources and all other apps.
-   This does not block creating the separate AfricMade app or compiling its APK.
+6. [x] Independently verify the owner's completed retirement of the exact old
+   SuqPage Play app in MarketVision. Google confirms that the app is deleted and
+   recoverable until **November 1, 2026**; it exposes no precise deadline time.
+   Protected readback:
+   `.local/africmade-firebase-s180/play-listing-prep/suqpage-deletion-verified.json`.
+   The owner completed deletion; the agent submitted neither deletion nor
+   recovery and read no private transaction-ID input. Other apps, Firebase and
+   application data remain unchanged. This retirement does not qualify the new
+   AfricMade app, artifact or testing history.
 
 ### S179 — new AfricMade Android package and app record
 
@@ -447,10 +474,13 @@ isolated from R02 and does not change application or native artifacts.
 - [x] Commit/push the reviewed nine-file scope as `3c1b5391ce12deb8565bde4a44e8aca31710f783`
   on `docs/dep-002-retire-vercel`; unrelated work and artifact refs are preserved.
 - [x] Verify the exact project/repository, retain the before-state and disconnect
-  only that Git connection. Fresh provider reload confirms the removal on
-  2026-10-20; project/deployments and the account App installation remain.
+  only that Git connection. Provider reload confirmed removal on 2026-10-20;
+  an independent 2026-10-25 read of the exact project Git settings still shows
+  no connected Git repository. Project/deployments and the account App remain.
   Netlify, domains/secrets and other repositories were not changed. Protected
-  `workflow-improvement-research/vercel-retirement/result.json` records the result.
+  `workflow-improvement-research/vercel-retirement/result.json` records retirement;
+  `.local/africmade-firebase-s180/play-listing-prep/vercel-git-disconnection-readback.json`
+  records the latest read-only verification.
 - [x] After that normal push, GitHub reads at 2026-10-20 23:34:18 UTC observe
   zero status contexts, check runs or deployments for `3c1b539`. Protected
   `vercel-retirement/post-push-observation.json` records this point-in-time

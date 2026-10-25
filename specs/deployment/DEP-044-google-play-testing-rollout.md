@@ -103,6 +103,15 @@ no new native compilation has occurred. New-project FCM sending credentials,
 package-specific EAS binding, actual push delivery and Play qualification remain
 unverified under this registration.
 
+The owner has deleted the old SuqPage Play app after its scoped unpublishing.
+Independent MarketVision Console readback verifies deletion and recovery until
+November 1, 2026; no precise hour was exposed. Other apps, Firebase/data and
+signing resources remain unchanged. A single fresh AfricMade creation returned
+app ID `4973191750628656067`; its saved AfricMade name, `com.africmade.app`
+package, Draft state and ten outstanding App content declarations are
+independently verified. Pricing and App-type readback remain pending. It has no uploaded bundle, published release or
+qualifying tester clock.
+
 ## AfricMade successor listing preparation (draft)
 
 The Suqpage Console history below is retained for the earlier app and does not

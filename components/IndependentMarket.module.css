@@ -65,9 +65,9 @@
  .search button,.search .clear{min-height:44px}
  .filters button{min-height:44px}
  .filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;padding:0;gap:5px;align-items:stretch}
- .controls[data-search-scope=products] .filters{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.5fr)}
+ .controls[data-search-scope=products] .filters{grid-template-columns:minmax(min-content,1.25fr) minmax(min-content,1fr) minmax(min-content,.85fr) minmax(min-content,1.5fr)}
  .filters button{min-width:48px;white-space:normal;padding:4px 5px;font-size:.6875rem;line-height:1.25;gap:3px}
- .filters button>span{min-width:0;overflow-wrap:anywhere}
+ .filters button>span{min-width:0;overflow-wrap:normal}
  .filters button>svg{display:none}
  .filters button[aria-pressed]>svg{display:block;flex-shrink:0;width:12px}
 }
