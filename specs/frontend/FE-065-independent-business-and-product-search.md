@@ -219,7 +219,9 @@ filters. At short web heights the introduction can scroll away while at least
 120px of actual map canvas and all controls remain reachable; do not crop the
 map into an inaccessible fixed-height area or hide the supporting text. Verify
 320/390/wide landscape, active en/am/om, enlarged text and plain-background
-readability in focused geometry and actual Chrome. No filter/state/API changes.
+readability in focused geometry and actual Chrome. FE-021's later compact phone
+layout uses 44px-or-larger mode/filter targets to leave more room for the map;
+wide layouts retain 48px-or-larger targets. No filter/state/API changes.
 
 ## S130 — useful mobile previews before opening a full page (ready)
 

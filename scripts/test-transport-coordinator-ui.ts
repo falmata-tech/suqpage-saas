@@ -15,7 +15,7 @@ const bundle=build({entryPoints:['components/TransportCoordinator.tsx'],bundle:t
 }}]});
 for(const locale of ['en','am','om'])test(`sole logistics company ${locale}: intake requires a choice and shipment receipt identifies the brokerage`,async()=>{
  const t=createUiText(locale==='en'?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,'utf8')));
- const module={exports:{} as{default:(props:{selection?:boolean;selectedId?:'shared-trucks-logistics'|null;compact?:boolean})=>React.ReactNode}};
+ const module={exports:{} as{default:(props:{selection?:boolean;selectedId?:'shared-trucks-logistics'|null;compact?:boolean;websiteLink?:boolean})=>React.ReactNode}};
  vm.runInNewContext((await bundle).outputFiles[0].text,{module,exports:module.exports,require:createRequire(import.meta.url),fixture:{t}});
  const fresh=renderToStaticMarkup(React.createElement(module.exports.default,{selection:true}));
  assert.ok(fresh.includes('aria-expanded="false"'));
@@ -27,4 +27,7 @@ for(const locale of ['en','am','om'])test(`sole logistics company ${locale}: int
  const receipt=renderToStaticMarkup(React.createElement(module.exports.default,{compact:true}));
  for(const text of ['SharedTrucks Logistics','sharedtrucks-logistics.png',t('Freight brokerage')])assert.ok(receipt.includes(text));
  assert.ok(!/<button\b/.test(receipt),'Tracking summary stays informational and compact');
+ const chat=renderToStaticMarkup(React.createElement(module.exports.default,{compact:true,websiteLink:true}));
+ assert.match(chat,/<a\b[^>]*href="https:\/\/sharedtrucks\.com\/"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/);
+ assert.ok(chat.includes(t('Website'))&&chat.includes('SharedTrucks Logistics'));
 });

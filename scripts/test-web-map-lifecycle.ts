@@ -39,7 +39,7 @@ async function boot(channel:'chrome'='chrome'){
  await page.setContent('<main id="root"></main>');
  await page.addStyleTag({path:require.resolve('leaflet/dist/leaflet.css')});
  await page.addStyleTag({content:'.discovery-map{width:390px;height:500px}'});
- await page.addScriptTag({content:'window.fixture={maps:[],openedGroups:[],selected:[],views:[],lateInvalidates:0,mapErrors:0,fastUnmount:false};'});
+ await page.addScriptTag({content:'window.__name=value=>value;window.fixture={maps:[],openedGroups:[],selected:[],views:[],lateInvalidates:0,mapErrors:0,fastUnmount:false};'});
  await page.addScriptTag({content:compiled.outputFiles[0].text});
  return {browser,page,errors};
 }
@@ -89,9 +89,13 @@ test('FE-065 phone marker animated zoom can be left immediately without a late S
   await page.evaluate(shop=>{const f=(window as unknown as {fixture:Probe}).fixture;f.focusOnSelect=true;f.mount(shop,false,11);},shop);
   await page.waitForFunction(()=>(window as unknown as {fixture:Probe}).fixture.maps[0]?._loaded);
   assert.equal(await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.maps[0]._zoomAnimated),true,'Actual Leaflet CSS zoom animation must be enabled');
-  await page.getByRole('button',{name:/^Original shop,/}).click();
-  await page.waitForFunction(()=>(window as unknown as {fixture:Probe}).fixture.maps[0]._animatingZoom===true);
-  await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.unmount());
+  const leftDuringZoom=await page.getByRole('button',{name:/^Original shop,/}).evaluate(button=>new Promise<boolean>((resolve,reject)=>{
+   const f=(window as unknown as {fixture:Probe}).fixture,map=f.maps[0];
+   const onZoom=()=>{if(!map._animatingZoom)return;clearTimeout(timer);map.off('zoomanim',onZoom);queueMicrotask(()=>{f.unmount();resolve(true);});};
+   const timer=window.setTimeout(()=>{map.off('zoomanim',onZoom);reject(new Error('Animated zoom did not begin.'));},8000);
+   map.on('zoomanim',onZoom);(button as HTMLButtonElement).click();
+  }));
+  assert.equal(leftDuringZoom,true,'The map unmounts while the installed Leaflet animation is active');
   await page.waitForTimeout(350);
   assert.deepEqual(errors,[],'The SDK250ms zoom fallback must not move a destroyed pane');
   await page.evaluate(shop=>(window as unknown as {fixture:Probe}).fixture.mount({...shop,id:24,name:'Returned shop'},false,11),shop);

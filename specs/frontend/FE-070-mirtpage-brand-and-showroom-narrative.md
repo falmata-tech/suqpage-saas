@@ -30,13 +30,19 @@ data. Where supported by existing data, show packaging or quantity context usefu
 to sourcing buyers without inventing supplier terms or changing real listings.
 
 GIVEN a visitor opens Market in English WHEN the page settles THEN the heading
-is “Discover what Africa makes.” and the supporting text is exactly “Explore
-product showrooms from farms, factories and artisans without sifting through
-their social media posts.”
+is “Discover African farmers, manufacturers, and artisans in one
+place.” and the supporting text directly below it is “Learn about their story,
+product lineup, and their production capacity for bulk purchase or small orders,
+without getting lost searching through their social media posts.”
 Amharic and Afaan Oromo express the same meaning naturally. Market keeps this
-copy compact enough to leave room for discovery; About explains the buyer and
-supplier journeys in more detail. Public platform labels use “supplier”, not
-“producer”. The Market description does not require a buyer to decide whether
+copy compact and places the supporting text directly beneath the headline on
+desktop web, phone web and native. About explains the buyer and
+supplier journeys in more detail using the actual page, catalog and inquiry
+steps, and makes clear that capacity is shown only when a supplier lists it.
+Visitor-facing platform copy calls a business's public destination its “Page”,
+never a “showroom”; code identifiers, URLs, merchant-authored content and
+historical records may retain their technical names. Public platform labels use
+“supplier”, not “producer”. The Market description does not require a buyer to decide whether
 their order is small or bulk before browsing; product facts and the inquiry
 actions make both paths available.
 
@@ -69,10 +75,10 @@ Inactive language catalogs remain compatibility data, not selectable languages.
 
 The logo/icon is a distinct owner review gate. Agent-led desktop/phone web and
 Expo task review qualifies the rest of the UI under the current workflow.
-The owner replaced the prior artwork with paired light- and dark-background PNG
-wordmarks on 2026-10-24. Both show an orange field with a smiling maker holding
-a cube, an afro pick, and AfricMade lettering. These replace the previous
-profile-only mark everywhere the platform identity appears.
+The owner replaced the illustrated maker-and-cube artwork with paired light- and
+dark-background PNG wordmarks on 2026-10-24. Both show a simple orange showroom
+outline beside AfricMade lettering. This minimal mark replaces the illustrated
+mark everywhere the platform identity appears, including legacy asset URLs.
 Use those exact pixels as the canonical source for web/native wordmarks and
 deterministic icon crops; do not regenerate or reinterpret the mark. Derive
 favicon, PWA, Android adaptive icon, notification badge, email and launch assets
@@ -88,18 +94,34 @@ generic or former platform icon URL WHEN the asset loads THEN it shows the
 approved AfricMade artwork at the requested size. GIVEN the current web page or
 native app loads WHEN it requests its icon, splash, notification or wordmark
 THEN those configured assets are also generated from that same owner source.
-The favicon, installed app icon and PWA icons use the same high-contrast
-charcoal field and approved orange maker symbol so the mark remains recognizable at
-tab size. The web header and native header show a legible full wordmark without
-crowding controls at narrow phone widths. The native splash shows that same
+The browser favicon uses the orange showroom symbol on a transparent canvas so
+it stays simple at 16–32 px on light and dark tabs. Installed Android and PWA
+icons retain the approved orange symbol on a full charcoal square for launcher
+masks. The web header and native header show a legible full wordmark with
+visible white space around it and without crowding controls at narrow phone
+widths. The native splash shows that same
 approved full wordmark at a readable size on the charcoal field. Keep the
 approved artwork, orange shade, typography and existing palette unchanged.
 
 GIVEN a visitor uses desktop web, 320–390px phone web, or the native app WHEN
 the page or app opens THEN the full wordmark is readable without clipping or
 overlap, and the browser tab, app icon and splash remain recognizably related.
+GIVEN a browser requests `/favicon.ico`, `/favicon.png` or a versioned/legacy
+favicon URL WHEN it renders the tab THEN the orange mark has no opaque square
+behind it; installed app and PWA launcher icons retain their full-square field.
+GIVEN an existing browser/PWA/email URL still requests a v1/v2 or historical
+platform asset WHEN the updated website serves it THEN it displays a derivative
+of the minimal showroom source, never the retired illustrated logo. GIVEN a
+fresh Android bundle is built WHEN its icon, adaptive/themed/notification assets
+and splash are extracted THEN each visibly matches the same minimal source.
 Controlling release boundaries are BE-059 and DEP-051; this section does not
 rename the temporary domain or an installed mobile package.
+
+GIVEN a visitor reaches the About footer on web or native WHEN the company
+details render THEN the public location reads Jigjiga, Somali Region, Ethiopia
+in the active language and the copyright names MarketVision Technology after
+the current year. This identifies the holding company without replacing
+AfricMade as the product brand or a merchant's own page identity.
 
 ## S167 — keep unpublished store drafts aligned with current contact and shipment language
 

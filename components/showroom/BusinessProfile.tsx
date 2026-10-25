@@ -64,7 +64,7 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
   const BusinessHeading = p.embedded ? "h2" : "h1";
   const contacts = publicContactLinks(profile.contacts || legacyPublicContacts(business)).filter(contact=>["website","tiktok","instagram","facebook"].includes(contact.kind));
   return <div className={styles.profile} data-business-profile data-store-accent={profile.accentColor || undefined} style={storefrontAccentVariables(profile.accentColor) as CSSProperties}>
-    {Boolean(business.is_demo) ? <div className={launchStyles.notice}>{t("Example showroom. This business and its products are fictional.")}</div> : null}
+    {Boolean(business.is_demo) ? <div className={launchStyles.notice}>{t("Example page. This business and its products are fictional.")}</div> : null}
     <section className={styles.cover} aria-label={t("Business introduction")}>
       <CoverMedia key={`${business.id}:${profile.heroImage}:${profile.videoUrl}`} image={profile.heroImage} video={profile.videoUrl} name={business.name} />
       <div className={styles.identity}>

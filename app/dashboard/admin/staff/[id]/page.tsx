@@ -22,7 +22,7 @@ export default async function StaffAccountPage({params,searchParams}:{params:Pro
     <nav className="workspace-breadcrumbs" aria-label={t('Breadcrumb')}><Link href="/dashboard/admin/staff">{t('Staff')}</Link><span aria-hidden="true">/</span><strong aria-current="page">{account.name}</strong></nav>
     <div className="dashboard-head"><div><h1>{account.name}</h1><p>{account.email}</p></div><Link className="small-btn" href="/dashboard/admin/staff">{t('Back to staff')}</Link></div>
     {query.saved==='businesses'?<p className="notice" role="status">{t('Business management access updated.')}</p>:null}
-    <section className="panel"><div className="dashboard-section-head"><div><h2>{t('Manage businesses')}</h2><p>{t('This staff member can manage every business showroom.')}</p></div></div>
+    <section className="panel"><div className="dashboard-section-head"><div><h2>{t('Manage businesses')}</h2><p>{t('This staff member can manage every business page.')}</p></div></div>
       <div className="inline-actions" style={{alignItems:'center',marginTop:12}}>
         <span className={`badge ${grant.enabled?'active':'draft'}`}>{t(grant.enabled?'Business management is on':'Business management is off')}</span>
         <Link className="small-btn" href={`/dashboard/admin/staff/${id}/manage-businesses`}>{t('Edit business access')}</Link>

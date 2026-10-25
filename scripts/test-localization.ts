@@ -175,7 +175,7 @@ test('FE-049: server-only copy is excluded from client messages', async()=>{
   const {clientMessages}=await import('../lib/i18n/client-messages');
   const selected=clientMessages(catalogs.am);
   assert.equal(selected[messageKey('Save')],catalogs.am[messageKey('Save')]);
-  const privacy='AfricMade stores account details, showroom content, support and transport conversations, and shipment-tracking information to operate the service.';
+  const privacy='AfricMade stores account details, business page content, support and transport conversations, and shipment-record information to operate the service.';
   assert.ok(catalogs.am[messageKey(privacy)]);
   assert.equal(selected[messageKey(privacy)],undefined);
   assert.ok(Object.keys(selected).length<Object.keys(catalogs.am).length);
@@ -208,16 +208,16 @@ test('FE-052: both storefront audiences and Market use complete client-safe cata
   }
   // FE-070 presents African suppliers to both individual and business buyers.
   // Coverage checks authored meaning and client delivery, not independent fluency.
-  assert.match(MARKET_STOREFRONT_COPY.title,/Africa makes/i);
-  assert.match(MARKET_STOREFRONT_COPY.description,/product showrooms from farms, factories and artisans/i);
-  assert.match(MARKET_STOREFRONT_COPY.description,/without sifting through their social media posts/i);
-  assert.match(ABOUT_STOREFRONT_SECTIONS[0].benefits[0].description,/without scrolling through social posts/i);
+  assert.match(MARKET_STOREFRONT_COPY.title,/African farmers, manufacturers, and artisans in one place/i);
+  assert.match(MARKET_STOREFRONT_COPY.description,/production capacity for bulk purchase or small orders/i);
+  assert.match(MARKET_STOREFRONT_COPY.description,/without getting lost searching through their social media posts/i);
+  assert.match(ABOUT_STOREFRONT_SECTIONS[0].description,/without piecing everything together from social posts/i);
   for (const locale of ['am','om'] as const) {
     const t=createUiText(catalogs[locale]), title=t(MARKET_STOREFRONT_COPY.title);
     assert.doesNotMatch(title,/ኢንተርኔት|intarneet|interneet/i);
     assert.match(title,locale==='am'?/አፍሪካ.*ያግኙ/:/Afrikaa.*argadhaa/);
-    assert.match(t(MARKET_STOREFRONT_COPY.description),locale==='am'?/የምርት ማሳያ.*ማኅበራዊ ሚዲያ/:/agarsiisa oomishaa.*miidiyaa hawaasaa/);
-    assert.match(t(ABOUT_STOREFRONT_SECTIONS[0].benefits[0].description),locale==='am'?/ማኅበራዊ ሚዲያ/:/miidiyaa hawaasaa/);
+    assert.match(t(MARKET_STOREFRONT_COPY.description),locale==='am'?/ጅምላ.*ማኅበራዊ ሚዲያ/:/gurguddaa.*miidiyaa hawaasaa/);
+    assert.match(t(ABOUT_STOREFRONT_SECTIONS[0].description),locale==='am'?/ማኅበራዊ ሚዲያ/:/miidiyaa hawaasaa/);
     assert.notEqual(t(MARKET_STOREFRONT_COPY.description),MARKET_STOREFRONT_COPY.description);
     for(const section of ABOUT_STOREFRONT_SECTIONS){
       assert.notEqual(t(section.description),section.description);
@@ -366,15 +366,15 @@ test('FE-049/FE-052 S132/S133: active copy explains products, social inquiry and
   // meaning/coverage regressions, not a claim of native-language human review.
   assert.match(am(MARKET_STOREFRONT_COPY.title),/አፍሪካ.*ያግኙ/);
   assert.match(om(MARKET_STOREFRONT_COPY.title),/Afrikaa.*argadhaa/);
-  for(const term of ['እርሻዎችን','ፋብሪካዎችን','የእጅ ጥበበኞችን','የምርት ማሳያ','ማኅበራዊ ሚዲያ'])assert.ok(am(MARKET_STOREFRONT_COPY.description).includes(term),`am: ${term}`);
-  for(const term of ['qonnaan bultootaa','warshaalee','ogeeyyii hojii harkaa','agarsiisa oomishaa','miidiyaa hawaasaa'])assert.ok(om(MARKET_STOREFRONT_COPY.description).includes(term),`om: ${term}`);
-  assert.match(am(ABOUT_STOREFRONT_SECTIONS[0].benefits[0].description),/ማኅበራዊ ሚዲያ/);
-  assert.match(om(ABOUT_STOREFRONT_SECTIONS[0].benefits[0].description),/miidiyaa hawaasaa/);
+  for(const term of ['ጅምላ','አነስተኛ','ማቅረብ','ማኅበራዊ ሚዲያ'])assert.ok(am(MARKET_STOREFRONT_COPY.description).includes(term),`am: ${term}`);
+  for(const term of ['xixiqqaa','gurguddaa','dhiheessuu','miidiyaa hawaasaa'])assert.ok(om(MARKET_STOREFRONT_COPY.description).includes(term),`om: ${term}`);
+  assert.match(am(ABOUT_STOREFRONT_SECTIONS[0].description),/ማኅበራዊ ሚዲያ/);
+  assert.match(om(ABOUT_STOREFRONT_SECTIONS[0].description),/miidiyaa hawaasaa/);
   // About adds supplier context beyond the compact owner-approved Market sentence.
   const amAbout=ABOUT_STOREFRONT_SECTIONS.map(section=>[section.description,...section.benefits.map(benefit=>benefit.description)].map(text=>am(text)).join(' ')).join(' ');
   const omAbout=ABOUT_STOREFRONT_SECTIONS.map(section=>[section.description,...section.benefits.map(benefit=>benefit.description)].map(text=>om(text)).join(' ')).join(' ');
-  for(const term of ['እርሻ','ወርክሾፖች','ፋብሪካ','ከቤት','ሻጮች','ገዢዎች'])assert.ok(amAbout.includes(term),`am About: ${term}`);
-  for(const term of ['qonna','manneen hojii','warshaalee','mana keessaa','gurgurtoonni','bitattootaaf'])assert.ok(omAbout.includes(term),`om About: ${term}`);
+  for(const term of ['እርሻ','ወርክሾፕ','ፋብሪካ','ቤት','ሱቅ','ገዢዎች'])assert.ok(amAbout.includes(term),`am About: ${term}`);
+  for(const term of ['qonna','mana hojii','warsha','mana keessaa','suuqii','bitattoota'])assert.match(omAbout,new RegExp(term,'i'),`om About: ${term}`);
   assert.match(am(TRANSPORT_COPY.launcherTitle),/ማጓጓዣ/);
   assert.match(om(TRANSPORT_COPY.launcherTitle),/geejjiba/i);
   for(const locale of ['am','om'] as const){
@@ -467,7 +467,7 @@ test('FE-070: localized Market and About metadata retain the explicit AfricMade 
       const path=file.includes('/about/')?'/about':'/';
       assert.equal(metadata.alternates.canonical,`https://mirtpage.test${path}`);
       assert.equal(metadata.openGraph.url,metadata.alternates.canonical);
-      assert.equal(metadata.openGraph.images[0],'https://mirtpage.test/pwa/africmade-icon-v2-512.png');
+      assert.equal(metadata.openGraph.images[0],'https://mirtpage.test/pwa/africmade-icon-v3-512.png');
       assert.equal(metadata.twitter.title,title);assert.equal(metadata.twitter.description,description);
       assert.equal(metadata.twitter.card,'summary_large_image');
       assert.doesNotMatch(JSON.stringify(metadata),/Suqpage|SuqPage/);

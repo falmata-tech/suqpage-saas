@@ -24,7 +24,7 @@ export function OwnerProfile({home}: {home: OwnerHome}) {
     </Card>
     {activity && <View style={{flexDirection:'row',gap:8}}>{OWNER_ACTIVITY_METRICS.map(({field,label})=><View key={field} style={{flex:1,minWidth:0,backgroundColor:'white',borderWidth:1,borderColor:colors.line,borderRadius:10,padding:10,gap:4}}><Text style={{fontSize:20,fontWeight:'700',color:colors.ink}}>{String(activity[field])}</Text><Text style={{fontSize:11,lineHeight:16,color:colors.muted}}>{t(label)}</Text></View>)}</View>}
     <View style={{borderWidth:1,borderColor:colors.line,borderRadius:12,overflow:'hidden',backgroundColor:'white'}}>{[
-      {label:'Your page',section:'showroom',icon:'shop',description:'Preview and edit your showroom.'},
+      {label:'Your page',section:'showroom',icon:'shop',description:'Preview and edit your page.'},
       {label:'Products',section:'products',icon:'package',description:'Add and update your products.'},
       {label:'Inbox',section:'inquiries',icon:'chat',description:'Read customer inquiries and follow up.'},
       {label:'Transport chat',section:'transport',icon:'chat',description:'Discuss transport options in live chat.'},

@@ -93,7 +93,7 @@ export function Icon({
 }
 export function Brand() {
   const {width}=useWindowDimensions();
-  const height=width<350?36:40;
+  const height=width<350?32:34;
   return (
     <View style={s.row}>
       <Image

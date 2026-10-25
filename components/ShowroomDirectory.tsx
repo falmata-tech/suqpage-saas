@@ -34,14 +34,14 @@ export default function ShowroomDirectory({
           <input type="hidden" name="showroomIndustry" value={industry} />
         ) : null}
         <label className="directory-search">
-          <span className="sr-only">{t("Search showrooms")}</span>
+          <span className="sr-only">{t("Search businesses")}</span>
           <span className="directory-search-icon" aria-hidden="true" />
           <input
             name="showroomQ"
             defaultValue={query}
             maxLength={120}
             placeholder={t("Search by name, /@handle, product...")}
-            aria-label={t("Search showrooms")}
+            aria-label={t("Search businesses")}
           />
         </label>
         <div className="directory-sort">
@@ -65,7 +65,7 @@ export default function ShowroomDirectory({
         </div>
       </form>
 
-      <nav className="directory-filters" aria-label={t("Showroom industry filters")}>
+      <nav className="directory-filters" aria-label={t("Business category filters")}>
         <Link
           className={industry === "all" ? "active" : ""}
           href={pageHref("/", {
@@ -133,7 +133,7 @@ export default function ShowroomDirectory({
           />
         </>
       ) : (
-        <div className="directory-empty">{t("No showrooms match that search.")}</div>
+        <div className="directory-empty">{t("No businesses match that search.")}</div>
       )}
     </div>
   );

@@ -65,7 +65,7 @@ for(const worker of workers){
    assert.equal(shown.options.silent,silent);assert.equal(shown.options.tag,'suqpage-alert-41');assert.equal(shown.options.renotify,false);
    assert.deepEqual(JSON.parse(JSON.stringify(shown.options.data.destination)),{screen:'transport-chat'});
    if(worker.file==='public/attention-push.js'){
-    assert.equal(shown.options.icon,'/pwa/africmade-icon-v2-192.png');assert.equal(shown.options.badge,'/pwa/africmade-badge-96.png');assert.equal(shown.options.data.notificationId,41);
+    assert.equal(shown.options.icon,'/pwa/africmade-icon-v3-192.png');assert.equal(shown.options.badge,'/pwa/africmade-badge-96.png');assert.equal(shown.options.data.notificationId,41);
    }
   }
   assert.equal(f.shown.length,4);

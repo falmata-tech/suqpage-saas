@@ -1,14 +1,14 @@
 "use client";
 
 import {useId,useRef,useState} from 'react';
-import {Check,ChevronDown} from 'lucide-react';
+import {Check,ChevronDown,ExternalLink} from 'lucide-react';
 import {TRANSPORT_COORDINATOR,type TransportCoordinator as Coordinator} from '@/lib/transport-coordinator';
 import {useUiText} from '@/lib/i18n/ui';
 import {LOGISTICS_PROVIDER_COPY} from '@/lib/i18n/transport-copy';
 import styles from './TransportSupport.module.css';
 
 /** The arranging company is distinct from each shipment leg's carrier. */
-export default function TransportCoordinator({selection=false,compact=false,selectedId=null,onSelect}:{selection?:boolean;compact?:boolean;selectedId?:Coordinator['id']|null;onSelect?:(id:Coordinator['id'])=>void}) {
+export default function TransportCoordinator({selection=false,compact=false,websiteLink=false,selectedId=null,onSelect}:{selection?:boolean;compact?:boolean;websiteLink?:boolean;selectedId?:Coordinator['id']|null;onSelect?:(id:Coordinator['id'])=>void}) {
   const t=useUiText(),[open,setOpen]=useState(false),panelId=useId(),trigger=useRef<HTMLButtonElement>(null);
   const selected=selectedId===TRANSPORT_COORDINATOR.id;
   const logo=(small=false)=><img className={[styles.coordinatorLogo,small?styles.coordinatorLogoCompact:""].filter(Boolean).join(" ")} src={TRANSPORT_COORDINATOR.logoPath} alt={TRANSPORT_COORDINATOR.name} />;
@@ -23,7 +23,7 @@ export default function TransportCoordinator({selection=false,compact=false,sele
       <p>{t(LOGISTICS_PROVIDER_COPY.availability)}</p>
     </div>}
   </div>;
-  return <span className={[styles.coordinator,compact?styles.coordinatorCompact:""].filter(Boolean).join(" ")} data-transport-coordinator={TRANSPORT_COORDINATOR.id}>
-    {logo(compact)}<span className={styles.coordinatorBrandDetails}>{!compact&&<small>{t('Arranging company')}</small>}{badge}</span>
-  </span>;
+  const identity=<>{logo(compact)}<span className={styles.coordinatorBrandDetails}>{!compact&&<small>{t('Arranging company')}</small>}{badge}</span>{websiteLink&&<span className={styles.coordinatorWebsite}>{t('Website')}<ExternalLink size={14} aria-hidden="true"/></span>}</>;
+  const className=[styles.coordinator,compact?styles.coordinatorCompact:"",websiteLink?styles.coordinatorWebsiteLink:""].filter(Boolean).join(" ");
+  return websiteLink?<a className={className} data-transport-coordinator={TRANSPORT_COORDINATOR.id} href={TRANSPORT_COORDINATOR.websiteUrl} target="_blank" rel="noopener noreferrer" aria-label={`${TRANSPORT_COORDINATOR.name} · ${t('Website')}`}>{identity}</a>:<span className={className} data-transport-coordinator={TRANSPORT_COORDINATOR.id}>{identity}</span>;
 }

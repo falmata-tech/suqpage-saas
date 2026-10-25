@@ -25,7 +25,7 @@ export default async function StaffBusinessAccessPage({params}:{params:Promise<{
     <FocusedEditForm action={updateStaffBusinessGrantAction} cancelHref={returnHref} submitLabel={grant.enabled?'Stop business management':'Restore business management'}>
       <input type="hidden" name="userId" value={id}/><input type="hidden" name="version" value={grant.version}/><input type="hidden" name="enabled" value={grant.enabled?'0':'1'}/>
       <p className="field full">{t(grant.enabled?'Business management is on':'Business management is off')}</p>
-      {grant.enabled?<label className="field full check-field"><input type="checkbox" name="confirmRevoke" value="1" required/><span>{t('This immediately stops {value1} from viewing and editing business showrooms. Chat assignments stay the same.',{value1:account.name})}</span></label>:<p className="field full muted">{t('This staff member can manage every business showroom.')}</p>}
+      {grant.enabled?<label className="field full check-field"><input type="checkbox" name="confirmRevoke" value="1" required/><span>{t('This immediately stops {value1} from viewing and editing business pages. Chat assignments stay the same.',{value1:account.name})}</span></label>:<p className="field full muted">{t('This staff member can manage every business page.')}</p>}
     </FocusedEditForm>
   </DashboardShell>;
 }

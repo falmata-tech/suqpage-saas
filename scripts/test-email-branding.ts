@@ -14,7 +14,7 @@ for (const entry of manifest) {
   assert.match(html, /AfricMade/);
   assert.doesNotMatch(html + entry.subject, /mirtpage|africpage|suqpage|<script/i);
   assert.match(entry.subject, /AfricMade/);
-  assert.ok(html.includes(`src="{{ .SiteURL }}${PLATFORM_BRAND.assets.emailWordmark}" alt="AfricMade" width="220" height="60"`));
+  assert.ok(html.includes(`src="{{ .SiteURL }}${PLATFORM_BRAND.assets.emailWordmark}" alt="AfricMade" width="240" height="47"`));
   assert.match(html, /<img[^>]+background-color:#ffffff/,'Email wordmark explicitly keeps its white backing');
   assert.equal((html.match(/<img\b/g) || []).length, 1, 'One canonical wordmark without external tracking images.');
   const notification = entry.key.endsWith("_notification");

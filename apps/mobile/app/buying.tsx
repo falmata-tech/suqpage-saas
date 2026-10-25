@@ -326,10 +326,10 @@ export default function BuyingScreen({owner=false,conversationId,newIntake=false
             <Button secondary label={t(TRANSPORT_COPY.tryLater)} disabled={busy||checking} onPress={()=>void send('close')}/>
           </>}
         </View>:<>
+        <TransportCoordinator compact websiteLink/>
         <View style={conversationLayout.statusRow}>
           <View style={conversationLayout.statusText}>
             <View style={conversationLayout.metadata}>
-              <Text style={conversationLayout.company} accessibilityLabel={TRANSPORT_COORDINATOR.name}>{TRANSPORT_COORDINATOR.shortName}</Text>
               <Copy muted>{conversation.publicRef}</Copy>
             </View>
             <Copy>{t(checking ? "Checking…" : !connected ? "Reconnecting…" : (liveWait?.phase==='waiting'||liveWait?.phase==='busy')&&presentation!.awaitingTeam ? TRANSPORT_COPY.waitingStatus : presentation!.statusKey,{value1:TRANSPORT_COORDINATOR.name})}</Copy>

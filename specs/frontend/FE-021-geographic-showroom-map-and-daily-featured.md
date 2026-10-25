@@ -180,6 +180,13 @@ the search scope clearly without adding explanatory copy that takes map height.
 The current tab remains selected and independently controls the existing map or
 product results.
 
+On a 320–390px phone, the two tabs span the available Market width and use a
+compact but at least 44px-high tap target. Keep the search and filter controls
+at least 44px high, legible in all active languages, and preserve the complete
+homepage message while reducing surrounding chrome so more of the map is
+visible without scrolling. The selected tab, search, filter, map and product
+navigation remain usable after the layout change on phone web and Expo.
+
 Definition of Ready: the historical 66-point reproduction identifies the shared
 city anchors, source radius and initial zoom. A synthetic 66-point regression
 requires at least ten opening city markers, then more groups at zoom 9 and 10,

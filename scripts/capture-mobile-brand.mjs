@@ -10,7 +10,7 @@ assert.ok(["127.0.0.1", "localhost"].includes(new URL(base).hostname), "Local vi
 const output = process.env.SUQPAGE_VISUAL_OUTPUT || ".local/mobile-brand-review";
 fs.mkdirSync(output, { recursive: true, mode: 0o700 });
 const results = [];
-const proof={passed:false,functionalComplete:false,browserMode:process.env.SUQPAGE_BROWSER_HEADLESS==='1'?'installed Google Chrome headless':'installed Google Chrome headed',results,lifecycle:[],unexpectedLifecycle:[],runtimeErrors:[],consoleErrors:[],requestFailures:[],apiFailures:[],unexpectedWrites:[],analyticsControls:[],tileFixtures:[],limits:['Synthetic tiles prove geometry, not public-provider availability.','Cookie-selected locale snapshots are not language-selector interaction proof.','Optional existing protected storage state supplies workspace setup; no credentials are written by this capture.']};
+const proof={passed:false,functionalComplete:false,browserMode:process.env.SUQPAGE_BROWSER_HEADLESS==='1'?'installed Google Chrome headless':'installed Google Chrome headed',results,lifecycle:[],unexpectedLifecycle:[],runtimeErrors:[],consoleErrors:[],requestFailures:[],expectedNavigationAborts:[],apiFailures:[],unexpectedWrites:[],analyticsControls:[],tileFixtures:[],limits:['Synthetic tiles prove geometry, not public-provider availability.','Cookie-selected locale snapshots are not language-selector interaction proof.','Optional existing protected storage state supplies workspace setup; no credentials are written by this capture.']};
 let browser,teardown=false,currentStage='preflight',currentPage;
 const save=()=>fs.writeFileSync(`${output}/verified.json`,JSON.stringify(proof,null,2),{mode:0o600});
 const lifecycle=(event,detail={})=>{proof.lifecycle.push({at:new Date().toISOString(),event,stage:currentStage,...detail});save();};
@@ -38,7 +38,7 @@ try {
       const errors = [];
       page.on("pageerror", error => {errors.push(error.message);proof.runtimeErrors.push({stage:currentStage,message:error.message});});
       page.on('console',message=>{if(message.type()==='error')proof.consoleErrors.push({stage:currentStage,message:message.text()});});
-      page.on('requestfailed',request=>{const url=new URL(request.url());if(url.origin===base)proof.requestFailures.push({stage:currentStage,path:url.pathname,method:request.method(),error:request.failure()?.errorText});});
+      page.on('requestfailed',request=>{const url=new URL(request.url());if(url.origin!==base||['/api/analytics/visit','/api/events','/api/public-events'].includes(url.pathname))return;const failure={stage:currentStage,path:url.pathname,method:request.method(),error:request.failure()?.errorText};if(currentStage.startsWith('/@')&&url.pathname==='/'&&failure.method==='GET'&&failure.error==='net::ERR_ABORTED')proof.expectedNavigationAborts.push(failure);else proof.requestFailures.push(failure);});
       page.on('response',response=>{const url=new URL(response.url());if(url.origin===base&&url.pathname.startsWith('/api/')&&response.status()>=400)proof.apiFailures.push({stage:currentStage,path:url.pathname,status:response.status()});});
       for (const route of locale === "en" ? routes : routes.filter(route => ["/", `/@${shop}`, "/dashboard/products"].includes(route))) {
         currentStage=`${route} ${width} ${locale}`;lifecycle('route.started');
@@ -67,16 +67,29 @@ try {
         assert.ok(geometry.brandHeight>=48,'Brand retains its touch target');
         assert.ok(Math.abs(geometry.artRatio-PLATFORM_BRAND.wordmark.width/PLATFORM_BRAND.wordmark.height)<.005,'Entire canonical outlined artwork scales uniformly');
         assert.ok(Math.abs(geometry.artCenter-geometry.brandCenter)<=1,'Artwork is centered in the target');
-        const expectedHeight=shopPage&&width<=680?24:width<=(dashboard?900:680)?28:32;
+        const expectedHeight=shopPage&&width<=680?28:width<=(dashboard?900:680)?36:48;
         assert.equal(geometry.artHeight,expectedHeight,'Responsive scale preserves the canonical composition');
-        // FE-070 parity replaces independently font-rendered icon/text and its
-        // optical alignment heuristic with one fixed, approved SVG composition.
+        // FE-070 parity scales the complete approved image consistently.
         if (width <= 680) {
           assert.ok(geometry.sameRow && geometry.brandRight <= geometry.languageLeft, "Brand and language fit in one row");
         }
         if (route === "/" && width <= 680) {
           const space = await page.evaluate(() => ({ content: document.querySelector(".public-market-experience").getBoundingClientRect().bottom, tabs: document.querySelector(".public-mobile-tabs").getBoundingClientRect().top }));
           assert.ok(space.content <= space.tabs + 1, "Market stays above bottom navigation");
+        }
+        if (route === "/") {
+          const intro=await page.locator('.market-landing-introduction').evaluate(element=>{
+            const heading=element.querySelector('h1').getBoundingClientRect(),description=element.querySelector('p').getBoundingClientRect();
+            return {headingBottom:heading.bottom,descriptionTop:description.top,descriptionLeft:description.left,headingLeft:heading.left,overflow:description.right>innerWidth+1};
+          });
+          assert.ok(intro.descriptionTop>=intro.headingBottom&&Math.abs(intro.descriptionLeft-intro.headingLeft)<2&&!intro.overflow,'Supporting market copy sits below the headline without overflow');
+        }
+        if (route === "/about") {
+          const footer=page.locator('footer').filter({hasText:'MarketVision Technology'});
+          await expect(footer).toContainText('MarketVision Technology');
+          await expect(footer).toContainText(locale==='am'?'ጅግጅጋ':locale==='om'?'Jigjiga':'Jigjiga');
+          await footer.scrollIntoViewIfNeeded();
+          await page.screenshot({path:`${output}/about-footer-${width}-${locale}.png`,caret:'initial'});
         }
         const label = `${dashboard ? "workspace" : shopPage ? "shop" : route.slice(1) || "market"}-${width}-${locale}`;
         if (locale === "en" || width === 320) await page.screenshot({ path: `${output}/${label}.png`,caret:'initial' });

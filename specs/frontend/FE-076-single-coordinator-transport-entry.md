@@ -94,6 +94,11 @@ Master sections 4,12,13,15,16,18,19 and22 will change after qualification.
    from the first waiting state, and use the provider-named busy/contact message
    only after the three-minute-thirty-second deadline. The two-minute staff
    overdue alert remains internal. The same staff case is retained.
+   Once a request is waiting or active, its SharedTrucks identity is an
+   accessible link to `https://sharedtrucks.com/` that opens outside the chat
+   without ending or resetting the conversation. This link is present on web
+   and native, with a clear label in each active language. A failed external
+   open leaves the chat usable.
 9. GIVEN a phone user opens the transport chat WHEN the form or conversation is
    active THEN the chat uses the available viewport without scrolling the page
    behind it; the reply controls remain visible, the transcript is the primary

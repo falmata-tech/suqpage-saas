@@ -12,13 +12,13 @@
   "dir": "ltr",
   "categories": ["business", "shopping"],
   "icons": [
-    { "src": "/pwa/africmade-icon-v2-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/pwa/africmade-icon-v2-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/pwa/africmade-maskable-v2-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/pwa/africmade-icon-v3-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/africmade-icon-v3-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/africmade-maskable-v3-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Explore products", "short_name": "Market", "url": "/", "icons": [{"src": "/pwa/africmade-icon-v2-192.png", "sizes": "192x192"}] },
-    { "name": "Daily Featured", "short_name": "Featured", "url": "/featured", "icons": [{"src": "/pwa/africmade-icon-v2-192.png", "sizes": "192x192"}] },
-    { "name": "Your account", "short_name": "Account", "url": "/login", "icons": [{"src": "/pwa/africmade-icon-v2-192.png", "sizes": "192x192"}] }
+    { "name": "Explore products", "short_name": "Market", "url": "/", "icons": [{"src": "/pwa/africmade-icon-v3-192.png", "sizes": "192x192"}] },
+    { "name": "Daily Featured", "short_name": "Featured", "url": "/featured", "icons": [{"src": "/pwa/africmade-icon-v3-192.png", "sizes": "192x192"}] },
+    { "name": "Your account", "short_name": "Account", "url": "/login", "icons": [{"src": "/pwa/africmade-icon-v3-192.png", "sizes": "192x192"}] }
   ]
 }

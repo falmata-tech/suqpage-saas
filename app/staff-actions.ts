@@ -180,7 +180,7 @@ export async function saveFeaturedProgramDayAction(formData: FormData):Promise<i
       industryKey: assignment.industry.key,
     } });
   } catch (error) {
-    const message = error instanceof FeaturedProgramSettingsError ? error.message : "Could not save the featured-showroom lineup.";
+    const message = error instanceof FeaturedProgramSettingsError ? error.message : "Could not save the featured business lineup.";
     return {error:message};
   }
   updateTag("public-featured");

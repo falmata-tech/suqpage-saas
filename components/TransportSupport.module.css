@@ -272,6 +272,10 @@
 .coordinatorCompact { border:0; margin:0; padding:3px 0; background:transparent; }
 .coordinatorCompact small { display:none; }
 .coordinatorCompact .coordinatorType { margin-top:2px; font-size:10px; }
+.coordinatorWebsiteLink { min-height:44px; text-decoration:none; cursor:pointer; }
+.coordinatorWebsiteLink:hover { border-color:#56799f; background:#f8fbff; }
+.coordinatorWebsiteLink:focus-visible { outline:3px solid #2459cc; outline-offset:2px; }
+.coordinatorWebsite { display:inline-flex; align-items:center; gap:3px; flex:none; margin-left:auto; color:#194b78; font-size:12px; font-weight:750; }
 
 .partnerEntry { margin:0; padding:4px 18px 16px; font-size:13px; }
 .partnerEntry a { display:inline-flex; min-height:44px; align-items:center; color:#a63108; text-underline-offset:3px; }

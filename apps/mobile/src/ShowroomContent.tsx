@@ -125,7 +125,7 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
           <>
             {shop.isDemo && (
               <Text style={v.demo}>
-                {t("Example showroom. This business and its products are fictional.")}
+                {t("Example page. This business and its products are fictional.")}
               </Text>
             )}
             <View style={accent ? { borderBottomWidth: 4, borderColor: accent.accent } : undefined}>
