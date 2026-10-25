@@ -10,13 +10,30 @@ change_level: L4
 
 # DEP-049 — MirtPage cutover
 
+## S180 — current web publication and separate native admission
+
+PR #45 is merged as main `36e6b1f` with its qualified source tree unchanged.
+All five required PR and main CI jobs pass. The exact reviewed website artifact
+is published on `mirtpage.com` as Netlify deploy `6ade42137f331c939a820177`;
+independent route, asset and optimized-image readback passes. The public App
+Links body now includes `com.africmade.app` with the retained signer and all
+three existing package associations. Provider target and all 41 environment
+objects remain unchanged; the prior deployment remains ready for recovery.
+[Traceability E10](../TRACEABILITY.md#current-release-evidence) owns exact source,
+artifact, Linux import proof, CI and publication receipts.
+
+This website publication does not qualify a new Android binary, installed App
+Links behavior, sender credential, device push or Play testing. DEP-044 S180
+owns the fresh native plan/advisory admission and saved MarketVision Play draft;
+the earlier S179 build approval remains unused and superseded.
+
 ## S179 — selected successor Android package
 
 DEP-044 S180 owns the verified standalone AfricMade Firebase registration and
 the next build's pinned public client identity. The already-created app under
 `suqpage` remains preserved. The unused S179 native plan is superseded. Local
-source check stages and the new-client Expo/export qualification pass; remote
-release gates, reviewed integration and fresh artifact admission remain pending.
+source check stages, the new-client Expo/export qualification and required remote
+CI/integration pass. Fresh native artifact admission remains pending.
 New-project FCM/EAS credential binding and actual push delivery need
 their separate qualification under DEP-043/DEP-044.
 

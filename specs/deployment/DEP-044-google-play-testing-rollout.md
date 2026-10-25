@@ -93,13 +93,21 @@ Provider verification and focused evidence are mapped in
 [traceability](../TRACEABILITY.md#cross-layer-requirements-and-implementation).
 
 Local configuration/admission, actual Expo configuration and source-matched
-Hermes export pass. All local check stages are qualified using retained passing
-prefix evidence, the corrected 21-case discovery UI module and the exact remaining
-check tail. The original full run remains recorded as failed on the observer/
-fallback-button harness race; no failed execution is relabelled as passing.
-Remote release gates, reviewed integration and fresh source-bound build admission
-remain pending. The approved S179 plan remains unused and superseded;
-no new native compilation has occurred. New-project FCM sending credentials,
+Hermes export pass. All 78 local check stages, the web release gate and 20
+disposable-provider acceptance journeys are qualified. Failed local invocations,
+the observer/fallback-button harness race and PR #45's original browser failure
+remain preserved; no failed execution is relabelled as passing. The web readiness
+and phone-label corrections are integrated through PR #45, all required PR/main
+CI passes, and the exact website artifact is published. Independent public
+readback verifies the new package and existing signer alongside all three old
+package associations. [Traceability E10](../TRACEABILITY.md#current-release-evidence)
+owns exact source, gates and publication evidence.
+
+The fresh exact source-bound native plan passes and its review is prepared;
+traceability owns the plan paths, digest and expiry. The required owner advisory
+exception and native build admission remain pending. The approved S179 plan
+remains unused and superseded; no new
+native compilation has occurred. New-project FCM sending credentials,
 package-specific EAS binding, actual push delivery and Play qualification remain
 unverified under this registration.
 
@@ -109,8 +117,12 @@ November 1, 2026; no precise hour was exposed. Other apps, Firebase/data and
 signing resources remain unchanged. A single fresh AfricMade creation returned
 app ID `4973191750628656067`; its saved AfricMade name, `com.africmade.app`
 package, Draft state and ten outstanding App content declarations are
-independently verified. Pricing and App-type readback remain pending. It has no uploaded bundle, published release or
-qualifying tester clock.
+independently verified. Fresh saved-setting readback verifies Free pricing and
+App type; category is Not selected. The Create default store listing entry is
+identified but its form remains unopened, with no saved default listing
+qualified. It has no uploaded bundle, published release or qualifying tester
+clock. [Traceability](../TRACEABILITY.md#current-release-evidence) links the
+protected Play readback separately from web and native qualification.
 
 ## AfricMade successor listing preparation (draft)
 
