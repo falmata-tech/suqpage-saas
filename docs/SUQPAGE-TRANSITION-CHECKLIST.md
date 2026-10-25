@@ -8,11 +8,12 @@ not authorize a provider write or rerun an already completed migration/build.
 
 ## Current position
 
-AfricMade is live on the temporary **mirtpage.com** domain from the merged S177
-source and Netlify deploy `6add7d62c83b53564aa5b8b2`. The current locally
-signed version 6 AAB and derived APK have verified AfricMade presentation but
-the compatibility package **com.mirtpage.app**. PR #41 and its post-merge five-job
-CI run passed; the exact source, web and native evidence is linked in
+AfricMade is live on the temporary **mirtpage.com** domain from merged main
+`36e6b1f` (PR #45), Netlify deploy `6ade42137f331c939a820177`. All five required
+main CI jobs and independent public route/image/App Links readback pass. The
+current locally signed version 6 AAB and derived APK have verified AfricMade presentation but
+the compatibility package **com.mirtpage.app**. The exact current web and earlier
+native evidence is linked in
 [traceability](../specs/TRACEABILITY.md#current-release-evidence). Earlier
 schema, recovery and launch-parity outcomes remain in their owning specs and
 release records rather than serving as this package's admission evidence.
@@ -20,9 +21,11 @@ release records rather than serving as this package's admission evidence.
 **Next delivery dependency:** the owner selected a *separate*
 **com.africmade.app** package. S180's standalone Firebase project and matching
 Android client are independently verified and pinned in source. Local source
-checks are qualified; reviewed integration, fresh build admission, separate FCM/EAS
-credential binding and actual push delivery remain pending. S179/S180 still
-require the app-link, new signed artifact and Play app-record qualification.
+checks and integration are qualified, and the public App Links file includes
+the new package and retained signer. Fresh build admission, separate FCM/EAS
+credential binding, actual push delivery and the new signed artifact remain
+pending. The MarketVision Play app is a verified Free/App draft; category,
+listing, declarations and native/Play qualification remain unfinished.
 The old package's v6 bundle is not eligible for that new app. Physical Android,
 Play submission and genuine closed-test enrollment remain unverified.
 
@@ -30,10 +33,10 @@ Play submission and genuine closed-test enrollment remain unverified.
 
 | Surface | Implemented | Tested | Visually approved | Deployed / delivered |
 | --- | --- | --- | --- | --- |
-| AfricMade web | S177 source integrated | Required CI and public routes pass | Agent Chrome desktop/phone review recorded in S177 | Live at mirtpage.com |
+| AfricMade web | S180 source integrated through PR #45 | All required PR/main CI, qualified local gates and public route/image/App Links readback pass | S180 Chrome/local-API desktop/phone journeys and localized phone controls pass agent/parent review | Deploy `6ade42137f331c939a820177` live at mirtpage.com |
 | AfricMade Android, old package | Signed v6 AAB and APK | Static release checks pass; physical device pending | Web/Expo source preview reviewed; installed native pending | Local only, `com.mirtpage.app`; not a new-package Play artifact |
-| AfricMade Android, new package | S180 standalone Firebase registration and source binding | Local configuration/Expo/export, all 78 check stages, web release and 20 acceptance journeys pass; remote gates pending | No new visual changes; installed native pending | Not built or deployed |
-| AfricMade Play app | Saved AfricMade app and local English/Amharic listing drafts | Saved name/package/Draft verified; pricing/type readback, declarations and native screens pending | Native phone screenshots pending | No bundle upload, release or closed-test enrollment |
+| AfricMade Android, new package | S180 standalone Firebase registration and source binding | Local configuration/Expo/export and source gates pass; public App Links association verified; fresh build admission pending | No new native visual changes; installed native pending | Not built or deployed |
+| AfricMade Play app | Saved AfricMade app and local English/Amharic listing drafts | Name/package/Draft, Free pricing and App type verified; category unselected, listing/declarations/native screens pending | Native phone screenshots pending | No bundle upload, release or closed-test enrollment |
 
 ## Ordered work
 
@@ -246,7 +249,9 @@ tracks and do not treat a local bundle as an uploaded release.
    fields, declarations and test-track state before any proposed write. The owner
    selected new `com.africmade.app` on 2026-10-25; S179 owns its registration,
    artifact and separate Play record. The existing v6 bundle cannot be uploaded
-   to that new app.
+   to that new app. MarketVision readback now verifies the saved new name/package,
+   Draft state, Free pricing and App type. Category is unselected; the default
+   listing entry is identified but unopened, and declarations remain unfinished.
 4. [ ] Separately qualify any upload/review request and verify the resulting
    provider state. Physical-device behavior and tester enrollment remain
    independent evidence.
@@ -255,8 +260,9 @@ tracks and do not treat a local bundle as an uploaded release.
 
 Dependency: DEP-044 S180 and DEP-049's separate app-record boundaries. Current:
 the standalone Firebase project, Android registration and authentic client are
-independently verified and pinned in source. Complete step 4's remaining checks
-and reviewed integration before fresh build admission. S179's one-build approval
+independently verified and pinned in source. Source integration, required CI and
+the exact web publication with public App Links readback pass. Resume step 5's
+fresh native build admission. S179's one-build approval
 remains unused; its old-project plan is superseded. No new native compilation
 has started. DEP-044 owns the exact registration/client identity; traceability
 owns provider and focused-test evidence.
@@ -273,43 +279,39 @@ owns provider and focused-test evidence.
    Both fingerprints and the authentic client are verified after reload; a
    public client does not configure the separate sender credential. FCM/EAS
    binding and actual push delivery remain unverified.
-4. [ ] Update release policy and project-dependent fixtures, prove old-project
+4. [x] Update release policy and project-dependent fixtures, prove old-project
    rejection and new-client acceptance, run applicable gates, review and commit
    only task files, then qualify PR/main CI.
-   Source policy and preview/production public project-ID pins are updated;
-   authentic-client admission/rejection, actual Expo config and Hermes export pass.
-   Commit `6164ade` retained the original UI run's one race failure; the corrected
-   affected file passed 21/21 and the exact remaining local tail passed. PR #45
-   browser failure prompted the readiness correction below, now locally
-   qualified; its commit and remote browser qualification remain pending.
-   Readiness follow-up (FE-065 / FE-042 S25):
-   1. [x] Inspect PR #45's failed browser job, record the enabled-before-restoration
-      defect and controlling readiness contract, then reproduce it with actual
-      SSR markup and React hydration before changing production code.
-   2. [x] Gate existing web search/clear/filter controls on workspace readiness;
-      preserve native/lib sources, first accepted typing and restored filters.
-   3. [x] Record the phone Category word-break defect before changing CSS. Give
-      en/am/om labels natural wrapping and intrinsic width at 320/390px while
-      retaining the font, counts and 44px minimum touch height.
-   4. [x] Pass focused tests and actual Chrome/local-API journeys at desktop/phone
-      sizes; inspect screenshots and record agent/parent visual review. Controlled
-      component ports and synthetic map tiles are labelled. Native/Expo SSR and
-      installed-device behavior are unchanged and unclaimed by this correction.
-   5. [x] Qualify all 78 local check stages, 467 workflow-UI cases with zero skips,
-      the physical web-only release gate and all 20 disposable-provider acceptance
-      journeys. Preserve the failed precheck/settled-fixture invocations and one
-      aggregate layout timeout; the unchanged isolated retry passes. No assertion
-      or timeout was relaxed, and no failed invocation is relabelled as passing.
-      [Traceability](../specs/TRACEABILITY.md) owns the source-bound evidence.
-   6. [ ] Commit/push the reviewed correction, qualify required PR/main checks,
-      then publish the exact web artifact through the guarded Netlify workflow.
-      Verify `https://mirtpage.com/.well-known/assetlinks.json` publicly serves
-      the new package and existing signer before step 5's build admission;
-      preserve old package associations. Source-only tests do not qualify the
-      hosted result, which currently still lists only the old packages.
-5. [ ] Prepare the new source-bound local build review and required advisory
-   admission, build once, inspect actual binaries and qualify phone/Play steps
+   Source policy, profile pins, authentic-client rejection/admission, actual Expo
+   configuration and Hermes export pass. FE-065 / FE-042 S25 readiness and phone
+   label corrections pass focused tests, actual Chrome/local-API journeys and
+   agent/parent visual review. All 78 local check stages, 467 workflow-UI cases,
+   the web release gate and 20 acceptance journeys are qualified. Failed local
+   invocations and PR #45's original browser failure remain preserved; the
+   literal failed `npm run check` is not reported as passing. PR #45 is merged,
+   all required PR/main CI passes, and the exact guarded Netlify publication
+   passes independent route/image readback. The public App Links body includes
+   `com.africmade.app` plus all three old packages and the retained signer.
+   [Traceability E10](../specs/TRACEABILITY.md#current-release-evidence) owns exact
+   source, artifact, CI and publication evidence. Native/Expo SSR and installed
+   device behavior are unclaimed by this web correction.
+5. [ ] Admit the prepared source-bound local build review under the required
+   advisory exception, build once, inspect actual binaries and qualify phone/Play steps
    separately. Do not execute the superseded S179 build plan.
+   Ordered dependencies:
+   1. [ ] Obtain the required owner advisory exception for the already-prepared
+      exact native plan/review linked in traceability before compilation. The
+      fresh plan passes; the owner answer is pending and no new native
+      compilation has occurred.
+   2. [ ] Build the admitted artifact once, independently inspect its package,
+      version, signer, permissions and binary alignment, then qualify installed
+      phone workflows and capture privacy-reviewed native listing screenshots.
+   3. [ ] Separately configure and verify the new-project FCM sender and
+      package-specific EAS credential binding through the authorized recoverable
+      workflow; prove actual real-device push delivery.
+   4. [ ] Finish the saved draft's category, listing and current declarations;
+      qualify any requested upload/review and verify actual Play testing and
+      enrollment independently of local build success.
    Every Play Console session must select the MarketVision Google account and
    independently verify the MarketVision developer account/ID first, following
    the owner's standing instruction in `docs/GOOGLE-PLAY-RELEASE.md`.
