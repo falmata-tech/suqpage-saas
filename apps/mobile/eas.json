@@ -15,5 +15,5 @@
       "env": { "SUQPAGE_MOBILE_BUILD_PROFILE": "production", "SUQPAGE_MOBILE_DATA_TARGET": "mirtpage-production", "EXPO_PUBLIC_API_ORIGIN": "https://mirtpage.com", "EXPO_PUBLIC_SUPABASE_URL": "https://sjeiiqxgscuqajpgddcc.supabase.co" }
     }
   },
-  "submit": { "production": { "android": { "track": "internal", "releaseStatus": "draft", "serviceAccountKeyPath": "../../.local/mirtpage-play-submit/credentials.json" } } }
+  "submit": { "production": { "android": { "track": "internal", "releaseStatus": "draft", "serviceAccountKeyPath": "../../.local/africmade-play-submit/credentials.json" } } }
 }

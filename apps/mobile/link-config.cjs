@@ -5,7 +5,7 @@ const publicPaths = [
   { path: '/login' }, { path: '/account' }, { path: '/transport-plan' }, { path: '/tracking' }, { pathPrefix: '/tracking/' }, { pathPrefix: '/@' },
 ];
 function androidAppLinks(packageName) {
-  if(packageName!=='com.mirtpage.app'||packageName!==policy.packageName)return [];
+  if(packageName!=='com.africmade.app'||packageName!==policy.packageName)return [];
   const target=Object.hasOwn(policy.dataTargets,'mirtpage-production')?policy.dataTargets['mirtpage-production']:null;
   if(!target||target.apiOrigin!=='https://mirtpage.com')return [];
   const identity = associations.find(a => a.target?.namespace === 'android_app' && a.target.package_name === packageName);

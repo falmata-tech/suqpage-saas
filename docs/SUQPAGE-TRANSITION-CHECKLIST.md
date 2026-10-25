@@ -3,48 +3,34 @@
 Current product authority: [master brief](../SUQPAGE-MASTER-PROMPT.md).
 Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 [DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md).
-Updated 2026-10-23. This working board replaces dated `CURRENT` labels; it does
+Updated 2026-10-25. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
 ## Current position
 
-MirtPage is live at **mirtpage.com**. The approved additive production migration
-to schema **79** committed on 2026-10-23: read-only incident follow-up confirms
-the exact ledger, row-level security and unchanged 102 existing inquiries. Its
-one-use runner returned permission error `42501` only on a post-commit read without
-the migration role; do not retry or restore it. The protected backup and plan
-remain local. The now-merged launch-parity source passes `npm run check`, a clean
-web-only `npm run release:web` with zero dependency findings, and a serial
-`npm run test:acceptance` with 20/20 scenarios on patched Next.js 16.4.2.
-The first concurrent acceptance attempt retained its one transient private-media
-connection reset; the isolated journey and subsequent complete serial suite pass.
+AfricMade is live on the temporary **mirtpage.com** domain from the merged S177
+source and Netlify deploy `6add7d62c83b53564aa5b8b2`. The current locally
+signed version 6 AAB and derived APK have verified AfricMade presentation but
+the compatibility package **com.mirtpage.app**. PR #41 and its post-merge five-job
+CI run passed; the exact source, web and native evidence is linked in
+[traceability](../specs/TRACEABILITY.md#current-release-evidence). Earlier
+schema, recovery and launch-parity outcomes remain in their owning specs and
+release records rather than serving as this package's admission evidence.
 
-**Current delivery:** launch-parity PR #37 is merged into `main` as `d4de292`
-(identical source tree to `b1db574`); run `39978434188` attempt 2 passed all five
-required jobs. Netlify deploy `6adbbf85637609345d34fe47` is published on
-**mirtpage.com**; fresh home, health, buying, tracking and partner-page requests
-return HTTP 200. One local version 3 AAB and its derived universal APK are signed
-and independently verified for **com.mirtpage.app**. The exact evidence and
-limits are in [traceability E9](../specs/TRACEABILITY.md#current-release-evidence).
-
-**Next delivery dependency:** use the actual Android phone to qualify this
-version 3 APK and complete the separate MirtPage Play Console review before an
-exact closed-track upload. Raw browser request-cancellation causes, installed
-device behavior, Play availability, twelve genuine opt-ins and the fourteen-day
-test remain separate; none is inferred from web/Expo or static artifact checks.
+**Next delivery dependency:** the owner selected a *separate*
+**com.africmade.app** package. S179 must verify its Firebase registration,
+client download, app-link association, new signed artifact and Play app record.
+The old package's v6 bundle is not eligible for that new app. Physical Android,
+Play submission and genuine closed-test enrollment remain unverified.
 
 ## Surface status
 
 | Surface | Implemented | Tested | Visually approved | Deployed / delivered |
 | --- | --- | --- | --- | --- |
-| B01–03/B06–08/B10 cards, navigation, loading, sponsors and categories | Yes | Focused + d78 full gates/CI; current recovery gates separate | Updated B01–B10 batch approved | Web images/layout/navigation verified on replacement deploy; browser cancellations unresolved; Android static only |
-| B09 physical image routing correction | Yes, exact alias-only file | Focused + c6dd composite check, release, 20/20 acceptance, CI and final local admission pass | Nonvisual correction; no geometry changed | Published/ready; independent inventory + GET/worker pass; Chrome journeys pass but overall receipt false for retained aborts |
-| B04/B05 demo contacts/catalog cleanup | Applied exact finite operations | Independent complete readback | Separate actual data/settings approvals | Live; no repeat data write needed |
-| Opaque Auth-email logo | Source + public PNG + thirteen HTML templates | Pixel/template/Chrome/local gates and guarded hosted readback | Approved light/dark visuals and exact hosted change | Applied/read back; no email sent by this operation, actual inbox rendering remains separate |
-| Owner sign-in email change | Local guarded source/schema | Local two-mailbox/provider/security proof | Prior reviewed layouts; current hosted behavior unqualified | Initiation disabled; exact Auth/settings/notices gate pending |
-| Android version 3 | One local compilation from the merged launch-parity source | AAB/APK package, version, signature, bundle and static integrity verified | Source-matched web/Expo review passed; genuine native captures pending | Local signed AAB and derived APK exist; phone/OS/Play delivery unverified |
-| New MirtPage Alpha | App/listing/tester list saved | Prior console reloads; fresh admission pending | Logo/charcoal graphics approved | No MirtPage release/12 actual opt-ins/14-day test claimed |
-| Workflow/skills/docs consolidation | Skills/checker and reviewed compact docs committed/pushed | App CI passes on 7e; isolated L0 docs checks and root review pass | No UI change | Docs branch integration and actual skill selection remain separate |
+| AfricMade web | S177 source integrated | Required CI and public routes pass | Agent Chrome desktop/phone review recorded in S177 | Live at mirtpage.com |
+| AfricMade Android, old package | Signed v6 AAB and APK | Static release checks pass; physical device pending | Web/Expo source preview reviewed; installed native pending | Local only, `com.mirtpage.app`; not a new-package Play artifact |
+| AfricMade Android, new package | S179 configuration candidate | Focused and full local checks pass; Firebase registration pending | No new visual changes; installed native pending | Not built or deployed |
+| AfricMade Play app | English/Amharic draft and icon candidate | Draft validation only; Console/declarations/screens pending | Native phone screenshots pending | No new app release or closed-test enrollment |
 
 ## Ordered work
 
@@ -254,10 +240,50 @@ tracks and do not treat a local bundle as an uploaded release.
    The signed v6 binary passed static inspection and the 512px/99 KB Play icon
    candidate is prepared; a connected phone and real capture are still needed.
 3. [ ] Resolve the exact package and Play app record, then review current Console
-   fields, declarations and test-track state before any proposed write.
+   fields, declarations and test-track state before any proposed write. The owner
+   selected new `com.africmade.app` on 2026-10-25; S179 owns its registration,
+   artifact and separate Play record. The existing v6 bundle cannot be uploaded
+   to that new app.
 4. [ ] Separately qualify any upload/review request and verify the resulting
    provider state. Physical-device behavior and tester enrollment remain
    independent evidence.
+
+### S179 — new AfricMade Android package and app record
+
+Dependency: DEP-044's new-package scenarios and DEP-049's separate app-record
+guard. Active step: obtain separate authorization for the exact Firebase Android
+registration, then verify its readback and client download. No new native build,
+Firebase/Play write or upload has occurred. Preserve the released web artifact
+and existing Suqpage/MirtPage apps.
+
+1. [x] Record the owner's `com.africmade.app` selection, inspect existing build,
+   Firebase, app-link, signing and Play contracts, and isolate the task on a
+   branch from current main. Official Play/Firebase guidance confirms package
+   identity is permanent and the Firebase Android client must match it.
+2. [x] Update package/scheme configuration and negative tests without weakening
+   hosted-target, Firebase, signer, notification, app-link or privacy guards.
+   The actual Expo config resolves to AfricMade / `com.africmade.app` /
+   `africmade` / version code 1. The final-source `npm run check` passes all
+   stages, including 459 browser-workflow cases; clean-install `release:web`
+   passes with zero dependency findings and a real local provider smoke.
+   Keep the branch unmerged while registration IDs/bytes are unverified.
+3. [ ] Independently verify the exact Firebase project/account and register the
+   new Android app; retain provider before/after evidence and its authentic
+   downloaded client file. Add the exact new-package app-link association after
+   certificate verification, preserving existing associations. Qualify any web
+   publication separately. Normal Chrome readback confirms the owner session,
+   project `suqpage` / `588262779708`, existing old-package records and absent
+   new package. Android SDK independently verified the existing upload signer;
+   the new association is local only. Automatic approval review rejected the
+   persistent Firebase `Register app` write because package selection alone did
+   not authorize that exact hosted mutation. The form was not submitted; obtain
+   explicit authorization and do not retry by another route before then.
+4. [ ] Prepare a fresh source-bound audit and exact one-build exception review;
+   then locally sign one new-package AAB and derived APK, inspect it and run
+   actual native tasks. Do not reuse S177's consumed v6 build exception.
+5. [ ] Create/verify the separate AfricMade Play app and current declarations,
+   capture privacy-reviewed screenshots from the new admitted APK, finish
+   localized listing/media, and separately qualify upload and testing.
 
 ### S173 — visible product facts for B2C and B2B buyers
 

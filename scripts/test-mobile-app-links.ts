@@ -22,10 +22,11 @@ test('FE-053 canonical store/product/public links map identically on cold and wa
   'https://suqpage.com/account':'/account',
  };
  for(const [path,expected]of Object.entries(cases))for(const initial of [true,false])for(const candidate of [path,path.replaceAll('suqpage.com','mirtpage.com').replace(/^suqpage:/,'mirtpage:')])assert.equal(redirectSystemPath({path:candidate,initial}),expected,candidate);
+ assert.equal(redirectSystemPath({path:'africmade://shop/demo-aloe-field-care',initial:true}),'/shop/demo-aloe-field-care');
 });
 test('FE-053 untrusted domains, schemes, malformed handles and private paths never become app authority',()=>{
  for(const path of ['https://suqpage.com.evil.test/@valid-shop','https://evil.test/@valid-shop','https://user:pass@suqpage.com/@valid-shop','http://suqpage.com/@valid-shop','https://suqpage.com:8443/@valid-shop','javascript:alert(1)','file:///private/secret','//evil.test/@valid-shop','https://suqpage.com/@ab','https://suqpage.com/@shop%2Fother','https://suqpage.com/@%ZZ','https://suqpage.com/\n@shop','https://suqpage.com/dashboard/admin','https://suqpage.com/api/mobile/v1/owner','https://suqpage.com/auth/callback?code=secret','/owner/security','/product?handle=valid-shop&id=script','/product?handle=<script>&id=1'])assert.equal(incomingSuqpagePath(path),path==='/product?handle=valid-shop&id=script'?'/shop/valid-shop':'/',path);
- for(const path of ['https://mirtpage.com.evil.test/@valid-shop','https://user:pass@mirtpage.com/@valid-shop','http://mirtpage.com/@valid-shop','https://mirtpage.com:8443/@valid-shop','https://mirtpage.com/dashboard/admin','https://mirtpage.com/api/mobile/v1/owner','https://mirtpage.com/auth/callback?code=secret','mirtpage://shop:8443/valid-shop','suqpage://shop:8443/valid-shop','https://www.mirtpage.com/@valid-shop'])assert.equal(incomingSuqpagePath(path),'/',path);
+ for(const path of ['https://mirtpage.com.evil.test/@valid-shop','https://user:pass@mirtpage.com/@valid-shop','http://mirtpage.com/@valid-shop','https://mirtpage.com:8443/@valid-shop','https://mirtpage.com/dashboard/admin','https://mirtpage.com/api/mobile/v1/owner','https://mirtpage.com/auth/callback?code=secret','africmade://shop:8443/valid-shop','mirtpage://shop:8443/valid-shop','suqpage://shop:8443/valid-shop','https://www.mirtpage.com/@valid-shop'])assert.equal(incomingSuqpagePath(path),'/',path);
 });
 test('FE-053 incoming Market scopes are canonical, bounded and consistent with interactive filters',()=>{
  const raw='https://suqpage.com/market?q=aloe&industry=beauty-wellness&industry=fashion-textiles&industry=unsafe&place=city:Addis&place=region:Amhara&page=2';
@@ -45,27 +46,28 @@ test('FE-053 repeated Market intents still restore the requested state after man
 });
 test('DEP-042 Android claims only registered signing identities and exact public HTTPS routes',()=>{
  const registry=JSON.parse(fs.readFileSync('public/.well-known/assetlinks.json','utf8'));
- assert.equal(registry.length,3);assert.deepEqual(registry[0].relation,['delegate_permission/common.handle_all_urls']);
+ assert.equal(registry.length,4);assert.deepEqual(registry[0].relation,['delegate_permission/common.handle_all_urls']);
  assert.equal(registry[0].target.package_name,'com.suqpage.app.preview');
  assert.deepEqual(registry[0].target.sha256_cert_fingerprints,['06:30:C5:6F:88:DF:87:4F:D2:72:96:D1:AA:08:48:A6:8F:C8:34:5F:70:2F:E6:80:2E:DD:82:55:B7:21:11:83']);
  const policy=JSON.parse(fs.readFileSync('apps/mobile/release-policy.json','utf8'));
  assert.equal(registry[1].target.package_name,'com.suqpage.app','Published old association is not rewritten into a new identity');
- assert.equal(policy.packageName,'com.mirtpage.app');
- assert.equal(registry[2].target.package_name,policy.packageName);assert.equal(registry[2].target.sha256_cert_fingerprints[0].replaceAll(':',''),policy.certificateSha256);
+ assert.equal(policy.packageName,'com.africmade.app');
+ assert.equal(registry[2].target.package_name,'com.mirtpage.app','The prior MirtPage association remains published');
+ assert.equal(registry[3].target.package_name,policy.packageName);assert.equal(registry[3].target.sha256_cert_fingerprints[0].replaceAll(':',''),policy.certificateSha256);
  assert.deepEqual(registry[1].relation,['delegate_permission/common.handle_all_urls']);
  assert.deepEqual(registry[1].target.sha256_cert_fingerprints,registry[0].target.sha256_cert_fingerprints);
  assert.equal(policy.certificateSha256,registry[1].target.sha256_cert_fingerprints[0].replaceAll(':',''));
- for(const packageName of ['com.suqpage.app.preview','com.suqpage.app'])assert.deepEqual(androidAppLinks(packageName),[],'No old-host claim is generated');
- const qualified={relation:['delegate_permission/common.handle_all_urls'],target:{namespace:'android_app',package_name:'com.mirtpage.app',sha256_cert_fingerprints:registry[0].target.sha256_cert_fingerprints}};
+ for(const packageName of ['com.suqpage.app.preview','com.suqpage.app','com.mirtpage.app'])assert.deepEqual(androidAppLinks(packageName),[],'No old-package claim is generated');
+ const qualified={relation:['delegate_permission/common.handle_all_urls'],target:{namespace:'android_app',package_name:'com.africmade.app',sha256_cert_fingerprints:registry[0].target.sha256_cert_fingerprints}};
  const qualifiedPolicy={...policy,dataTargets:{'mirtpage-production':{apiOrigin:'https://mirtpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}}};
  const fixture=(entries:unknown[],selectedPolicy=qualifiedPolicy)=>{const module={exports:{} as {androidAppLinks:(packageName:string)=>Array<{autoVerify:boolean;data:Array<{scheme:string;host:string;path?:string;pathPrefix?:string}>}>}};vm.runInNewContext(fs.readFileSync('apps/mobile/link-config.cjs','utf8'),{module,exports:module.exports,require:(id:string)=>id==='./release-policy.json'?selectedPolicy:entries});return module.exports;};
- assert.equal(fixture([]).androidAppLinks('com.mirtpage.app').length,0,'A qualified target without the registered association is insufficient');
- assert.equal(fixture([qualified],{...qualifiedPolicy,dataTargets:{'mirtpage-production':{apiOrigin:'https://suqpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}}}).androidAppLinks('com.mirtpage.app').length,0,'Old API target cannot enable new-host claims');
- const [filter]=fixture([qualified]).androidAppLinks('com.mirtpage.app');assert.equal(filter.autoVerify,true);
- assert.deepEqual(androidAppLinks('com.mirtpage.app'),JSON.parse(JSON.stringify(fixture([qualified]).androidAppLinks('com.mirtpage.app'))),'The released package claims only the reviewed host, paths and certificate');
- assert.equal(fixture([qualified],{...policy,dataTargets:{}}).androidAppLinks('com.mirtpage.app').length,0,'Withdrawing the production target disables Android claims');
+ assert.equal(fixture([]).androidAppLinks('com.africmade.app').length,0,'A qualified target without the registered association is insufficient');
+ assert.equal(fixture([qualified],{...qualifiedPolicy,dataTargets:{'mirtpage-production':{apiOrigin:'https://suqpage.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}}}).androidAppLinks('com.africmade.app').length,0,'Old API target cannot enable new-host claims');
+ const [filter]=fixture([qualified]).androidAppLinks('com.africmade.app');assert.equal(filter.autoVerify,true);
+ assert.deepEqual(androidAppLinks('com.africmade.app'),JSON.parse(JSON.stringify(fixture([qualified]).androidAppLinks('com.africmade.app'))),'The new package claims only the reviewed host, paths and certificate');
+ assert.equal(fixture([qualified],{...policy,dataTargets:{}}).androidAppLinks('com.africmade.app').length,0,'Withdrawing the production target disables Android claims');
  for(const item of filter.data){assert.equal(item.scheme,'https');assert.equal(item.host,'mirtpage.com');assert.ok(['/@','/tracking/'].includes(item.pathPrefix||'')||['/','/market','/featured','/about','/login','/account','/transport-plan','/tracking'].includes(item.path||''));}
- for(const fingerprints of [['invalid'],['AB:'.repeat(31)+'AB'],[...registry[0].target.sha256_cert_fingerprints,...registry[0].target.sha256_cert_fingerprints]])assert.throws(()=>fixture([{...qualified,target:{...qualified.target,sha256_cert_fingerprints:fingerprints}}]).androidAppLinks('com.mirtpage.app'));
+ for(const fingerprints of [['invalid'],['AB:'.repeat(31)+'AB'],[...registry[0].target.sha256_cert_fingerprints,...registry[0].target.sha256_cert_fingerprints]])assert.throws(()=>fixture([{...qualified,target:{...qualified.target,sha256_cert_fingerprints:fingerprints}}]).androidAppLinks('com.africmade.app'));
  assert.deepEqual(androidAppLinks('evil.package'),[]);
  assert.doesNotMatch(JSON.stringify(registry),/password|privateKey|access_token|secret/i);
 });

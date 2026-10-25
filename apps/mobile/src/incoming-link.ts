@@ -26,7 +26,7 @@ export function incomingSuqpagePath(input: string): string {
     let url = new URL(input, 'https://mirtpage.com');
     if (url.username || url.password || url.port) return '/';
     const canonicalSource=url.protocol==='https:'&&['mirtpage.com','suqpage.com'].includes(url.hostname);
-    if (url.protocol === 'mirtpage:' || url.protocol === 'suqpage:') {
+    if (url.protocol === 'africmade:' || url.protocol === 'mirtpage:' || url.protocol === 'suqpage:') {
       const path = `${url.hostname ? '/' + url.hostname : ''}${url.pathname}` || '/';
       url = new URL(path + url.search, 'https://mirtpage.com');
     } else if (!canonicalSource) return '/';

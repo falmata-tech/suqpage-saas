@@ -4,7 +4,7 @@ title: Google Play testing and store rollout
 status: draft
 related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053, FE-052, FE-049, DEP-046, DEP-049, DEP-051, FE-075]
 owners: [product, operations, security]
-last_updated: 2026-10-24
+last_updated: 2026-10-25
 change_level: L4
 ---
 
@@ -14,10 +14,36 @@ change_level: L4
 
 The Suqpage Console history below is retained for the earlier app and does not
 qualify AfricMade for a Play submission. DEP-051's current local Android bundle
-uses the compatibility package `com.mirtpage.app`; whether the next Console
-submission uses that package or a new AfricMade package must be resolved before
-upload. Draft listing text and asset requirements may be prepared without a
-Console write. Do not apply the old Suqpage listing or screenshots to AfricMade.
+uses the compatibility package `com.mirtpage.app`. The owner selected a new
+`com.africmade.app` package for the next submission on 2026-10-25; the existing
+bundle is not that submission artifact. Draft listing text and asset requirements
+may be prepared without a Console write. Do not apply the old Suqpage or
+MirtPage listings, test enrollment, or screenshots to the new app.
+
+GIVEN the new package is selected WHEN a native build is prepared THEN its
+installed package and Android custom scheme are `com.africmade.app` and
+`africmade`, while its visible name/artwork remain AfricMade and the current
+`mirtpage.com` API/Auth targets, signer, accounts, data and business content stay
+unchanged. It installs alongside the existing packages rather than updating them.
+
+GIVEN the Firebase Android registration, matching downloaded client file,
+package-specific app-link association or verified build target is absent WHEN a
+hosted-target Android build is requested THEN admission fails closed. Never
+reuse the `com.mirtpage.app` Firebase client, fabricate registration bytes or
+drop notification/app-link checks to produce a bundle.
+
+GIVEN the new package and signing certificate are inspected WHEN a first
+canonical bundle is admitted THEN its own version lineage starts at versionCode
+1, with actual package, certificate, manifest, privacy and alignment checks.
+The prior MirtPage v6 artifact is not its predecessor. Public app links remain
+unclaimed until `mirtpage.com` serves an exact new-package certificate association;
+keep the old associations intact. Play signing needs its own readback later.
+
+GIVEN a new AfricMade Play app is created WHEN its listing and tracks are
+prepared THEN verify the exact developer account, app record, package, current
+declarations and signing state. Do not inherit Suqpage or MirtPage tester
+enrollment, release status or review claims; new-package testing starts from its
+own verified opt-ins and provider state.
 
 GIVEN a visitor sees the proposed AfricMade Play listing WHEN reading its title,
 description and images THEN the name and visuals match the signed app; the copy

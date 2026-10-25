@@ -15,7 +15,7 @@ export default function YouTubeFrame({ id, height, onEvent }: PlayerProps) {
       : Platform.OS === "ios"
         ? Constants.expoConfig?.ios?.bundleIdentifier
         : Constants.expoConfig?.android?.package;
-  const origin = "https://" + (appId || "com.mirtpage.app").toLowerCase();
+  const origin = "https://" + (appId || "com.africmade.app").toLowerCase();
   const source = useMemo(
     () => ({ html: playerHtml(id, origin), baseUrl: origin + "/" }),
     [id, origin],
