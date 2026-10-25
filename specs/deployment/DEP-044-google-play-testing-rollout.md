@@ -2,21 +2,51 @@
 id: DEP-044
 title: Google Play testing and store rollout
 status: draft
-related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053, FE-052, FE-049, DEP-046, DEP-049, FE-075]
+related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053, FE-052, FE-049, DEP-046, DEP-049, DEP-051, FE-075]
 owners: [product, operations, security]
-last_updated: 2026-10-20
+last_updated: 2026-10-24
 change_level: L4
 ---
 
 # DEP-044 — Google Play testing and store rollout
 
-The completed Suqpage artifact exceptions below are historical. DEP-049 governs
-the new MirtPage package and requires its own AAB admission. A passing selected
-web CI audit is not a native audit: the full locked-workspace
-`npm audit --omit=dev --audit-level=moderate` remains fail-closed before every
-new AAB, with a fresh exact advisory/source/artifact review and owner approval
-for any one-artifact exception. Neither this CI split nor prior exceptions
-authorize a new MirtPage build or Play rollout.
+## AfricMade successor listing preparation (draft)
+
+The Suqpage Console history below is retained for the earlier app and does not
+qualify AfricMade for a Play submission. DEP-051's current local Android bundle
+uses the compatibility package `com.mirtpage.app`; whether the next Console
+submission uses that package or a new AfricMade package must be resolved before
+upload. Draft listing text and asset requirements may be prepared without a
+Console write. Do not apply the old Suqpage listing or screenshots to AfricMade.
+
+GIVEN a visitor sees the proposed AfricMade Play listing WHEN reading its title,
+description and images THEN the name and visuals match the signed app; the copy
+describes African farms, manufacturers, artisans, small and bulk inquiries and
+independent logistics providers without promising checkout, verified stock,
+instant agent response or shipment delivery.
+
+GIVEN the AfricMade listing is prepared for upload WHEN checking its fields THEN
+the app name is at most 30 characters, short description at most 80 and full
+description at most 4,000. Screenshots come from the admitted native build and
+show real supported tasks without private data. The feature graphic and icon
+use the current owner-supplied minimal mark, not an earlier brand export.
+
+GIVEN the package, Play app record, declaration answers or current screenshots
+are unverified WHEN preparation finishes THEN keep the listing a local draft;
+do not upload a bundle, change a Console listing, request review or claim a
+closed-test result. Existing Suqpage tracks and tester state remain untouched.
+
+Official current limits and media rules: [Play listing fields](https://support.google.com/googleplay/android-developer/answer/9859152),
+[preview assets](https://support.google.com/googleplay/android-developer/answer/9866151),
+and [listing practice](https://support.google.com/googleplay/android-developer/answer/13393723).
+
+The completed Suqpage artifact exceptions below are historical. DEP-051 records
+the separate, locally signed AfricMade version 6 build; it does not authorize a
+Play upload. A passing selected web CI audit is not a native audit: the full
+locked-workspace `npm audit --omit=dev --audit-level=moderate` remains fail-closed
+before every new AAB, with a fresh exact advisory/source/artifact review and
+owner approval for any one-artifact exception. Prior exceptions and the current
+local build do not authorize another compilation or Play rollout.
 
 ## Problem and outcome
 

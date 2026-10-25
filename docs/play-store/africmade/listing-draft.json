@@ -1,0 +1,30 @@
+{
+  "status": "draft_not_uploaded",
+  "source": "DEP-044 S178, AfricMade source tree 9a9b4e104be697f02125c24395f25f1de5570907",
+  "packageDecision": "unresolved_before_console_submission",
+  "currentLocalBuildPackage": "com.mirtpage.app",
+  "mainListing": {
+    "locale": "en-US",
+    "appName": "AfricMade",
+    "shortDescription": "Explore products from African farms, factories and artisans.",
+    "fullDescription": "Discover African farmers, manufacturers and artisans in one place. Learn each business's story, explore its products and see the order sizes or production capacity it has listed before you ask about buying.\n\nBrowse business locations on a map or search product listings by category and place. Product pages bring photos, descriptions, options and listed availability together, so you do not have to search through old social media posts. Some businesses offer single items, bulk orders or both. The business provides and confirms its own product details.\n\nInterested in something? Choose a product, add an optional quantity and send a simple inquiry to the business's AfricMade Inbox. If that business lists WhatsApp or Telegram, you can also use its contact channel. You can discuss custom requirements directly with the business. AfricMade does not send external messages automatically.\n\nHave a farm, factory, workshop, shop or home business? Create a Page for your business and keep your story, products and contact details together. Share your Page when customers want to see what you make or sell, and respond to inquiries in your business Inbox.\n\nNeed to move goods? You can request transport from an independent logistics service provider listed on AfricMade. Discuss the shipment with a live agent when available, or leave contact details for follow-up if agents are busy. Confirm arrangements and terms with the provider.\n\nAfricMade connects buyers and businesses. It is not an online checkout, a stock guarantee or a shipping company. Agree prices, payment, availability and delivery directly with the relevant business or provider."
+  },
+  "localizedDrafts": {
+    "am": {
+      "status": "draft_needs_in_context_language_review",
+      "appName": "AfricMade",
+      "shortDescription": "የአፍሪካ እርሻዎች፣ ፋብሪካዎችና የእጅ ጥበቦች ምርቶችን ያግኙ።",
+      "fullDescription": "የአፍሪካ አርሶ አደሮችን፣ አምራቾችንና የእጅ ጥበበኞችን በአንድ ቦታ ያግኙ። የንግዳቸውን ታሪክ ያንብቡ፣ ምርቶቻቸውን ይመልከቱ፣ ለአንድ ዕቃ ወይም ለጅምላ ግዢ ያስቀመጡትን መረጃ ያግኙ።\n\nበካርታ ላይ የንግዶችን ቦታ ይመልከቱ ወይም ምርቶችን በምድብና በአካባቢ ይፈልጉ። ፎቶዎች፣ መግለጫዎች፣ አማራጮችና ንግዱ ያሳወቀው የመገኘት ሁኔታ በምርቱ ገጽ ላይ አንድ ላይ ይታያሉ። በማኅበራዊ ሚዲያ የቆዩ ልጥፎች ውስጥ መፈለግ አያስፈልግዎትም።\n\nየፈለጉትን ምርት ይምረጡ፣ ከፈለጉ ብዛት ያክሉ፣ ከዚያ ጥያቄዎን ወደ ንግዱ AfricMade Inbox ይላኩ። ንግዱ WhatsApp ወይም Telegram ካስቀመጠ፣ በእነዚያም ሊያነጋግሩት ይችላሉ።\n\nየእርሻ፣ የፋብሪካ፣ የዕደ ጥበብ፣ የሱቅ ወይም ከቤት የሚሠራ ንግድ አለዎት? የራስዎን የንግድ ገጽ ይፍጠሩ፣ ምርቶችዎን ያደራጁ፣ ሊንኩን ለደንበኞች ያጋሩ።\n\nምርት ማጓጓዝ ከፈለጉ፣ በAfricMade ላይ ከተዘረዘረ ገለልተኛ የሎጂስቲክስ አገልግሎት ሰጪ ጋር ይነጋገሩ። ወኪሎቹ በሥራ ላይ ከሆኑ ለኋላ ግንኙነት መገኛዎን መተው ይችላሉ።\n\nAfricMade ገዢዎችንና ንግዶችን ያገናኛል። በመተግበሪያው ውስጥ ክፍያ አይፈጸምም። የዋጋ፣ የምርት መገኘትና የማጓጓዣ ዝርዝሮችን ከንግዱ ወይም ከአገልግሎት ሰጪው ጋር በቀጥታ ያረጋግጡ።"
+    }
+  },
+  "localization": {
+    "am": "Drafted from current app vocabulary; in-context language review required before Console entry.",
+    "om": "Afaan Oromo is an active app language; verify Play Console listing-locale support before preparing an upload."
+  },
+  "media": {
+    "icon": "icon.png: 512x512 PNG, 99,308 bytes, scaled from the approved 1024px native icon; SHA-256 e348ba8833d14fffea124b855c3010ce74eed8783ed23c9498ea53e83b8491e9",
+    "featureGraphic": "not yet created for this logo",
+    "phoneScreenshots": "capture from admitted native artifact; no old Suqpage or MirtPage screenshots"
+  },
+  "providerWrites": 0
+}

@@ -2,7 +2,7 @@
 id: DEP-051
 title: AfricMade presentation rollout on the current domain and Android identity
 status: ready
-related: [FE-070, FE-049, FE-041, BE-014, BE-059, DEP-049]
+related: [FE-070, FE-049, FE-041, BE-014, BE-059, DEP-044, DEP-049]
 owners: [product, frontend, operations]
 last_updated: 2026-10-24
 change_level: L4
