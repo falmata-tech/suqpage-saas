@@ -8,12 +8,13 @@ older “Suqpage” heading names are compatibility anchors, not the public bran
 AfricMade is the current source brand. The website remains at
 **https://mirtpage.com** during the transition; Android retains
 **com.mirtpage.app** in the existing local v6 artifact. The owner has selected
-**com.africmade.app** for a separate future Play submission under DEP-044 S179.
-Its standalone Firebase project **africmade-de81a** and Android registration are
-independently verified, and the public client identity is pinned for the next
-build under DEP-044 S180. Separate FCM/EAS credential binding, artifact and
-device-delivery qualification remain pending. No new-package binary has been
-built or published. Supabase
+**com.africmade.app** for a separate future Play submission. One owner-approved
+local compilation has produced its signed version 1 AAB and derived APK with
+the verified standalone Firebase project **africmade-de81a** and pinned public
+client under [DEP-044 S180](specs/deployment/DEP-044-google-play-testing-rollout.md#s180--standalone-africmade-firebase-project-in-progress).
+Independent static binary inspection passes. Separate FCM/EAS credential binding,
+physical-phone and actual push-delivery qualification, and Play submission/testing
+remain pending. The new artifacts are local only. Supabase
 PostgreSQL, managed Auth and private Storage serve the application. Stable
 historical provider/protocol identifiers remain where compatibility requires
 them. Their spelling does not authorize recreating services or imply that hosted

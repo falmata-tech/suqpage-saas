@@ -11,8 +11,8 @@ not authorize a provider write or rerun an already completed migration/build.
 AfricMade is live on the temporary **mirtpage.com** domain from merged main
 `36e6b1f` (PR #45), Netlify deploy `6ade42137f331c939a820177`. All five required
 main CI jobs and independent public route/image/App Links readback pass. The
-current locally signed version 6 AAB and derived APK have verified AfricMade presentation but
-the compatibility package **com.mirtpage.app**. The exact current web and earlier
+earlier locally signed version 6 AAB and derived APK have verified AfricMade
+presentation but the compatibility package **com.mirtpage.app**. The exact current web and earlier
 native evidence is linked in
 [traceability](../specs/TRACEABILITY.md#current-release-evidence). Earlier
 schema, recovery and launch-parity outcomes remain in their owning specs and
@@ -22,10 +22,12 @@ release records rather than serving as this package's admission evidence.
 **com.africmade.app** package. S180's standalone Firebase project and matching
 Android client are independently verified and pinned in source. Local source
 checks and integration are qualified, and the public App Links file includes
-the new package and retained signer. Fresh build admission, separate FCM/EAS
-credential binding, actual push delivery and the new signed artifact remain
-pending. The MarketVision Play app is a verified Free/App draft; category,
-listing, declarations and native/Play qualification remain unfinished.
+the new package and retained signer. The one owner-approved local compilation
+succeeded, creating the new version 1 AAB and derived APK; independent static
+binary inspection passes. Separate FCM/EAS credential binding, physical-phone
+workflows and actual push delivery remain pending. The MarketVision Play app is
+a verified Free/App draft; category, listing, declarations and native/Play
+qualification remain unfinished.
 The old package's v6 bundle is not eligible for that new app. Physical Android,
 Play submission and genuine closed-test enrollment remain unverified.
 
@@ -35,7 +37,7 @@ Play submission and genuine closed-test enrollment remain unverified.
 | --- | --- | --- | --- | --- |
 | AfricMade web | S180 source integrated through PR #45 | All required PR/main CI, qualified local gates and public route/image/App Links readback pass | S180 Chrome/local-API desktop/phone journeys and localized phone controls pass agent/parent review | Deploy `6ade42137f331c939a820177` live at mirtpage.com |
 | AfricMade Android, old package | Signed v6 AAB and APK | Static release checks pass; physical device pending | Web/Expo source preview reviewed; installed native pending | Local only, `com.mirtpage.app`; not a new-package Play artifact |
-| AfricMade Android, new package | S180 standalone Firebase registration and source binding | Local configuration/Expo/export and source gates pass; public App Links association verified; fresh build admission pending | No new native visual changes; installed native pending | Not built or deployed |
+| AfricMade Android, new package | S180 standalone Firebase registration and source binding; one signed v1 AAB and derived APK created | Source/configuration/App Links gates, one compilation and independent static binary inspection pass | Compiled artwork inspection passes; installed native/screenshots pending | Local only; no Play upload or installed-device qualification |
 | AfricMade Play app | Saved AfricMade app and local English/Amharic listing drafts | Name/package/Draft, Free pricing and App type verified; category unselected, listing/declarations/native screens pending | Native phone screenshots pending | No bundle upload, release or closed-test enrollment |
 
 ## Ordered work
@@ -261,11 +263,13 @@ tracks and do not treat a local bundle as an uploaded release.
 Dependency: DEP-044 S180 and DEP-049's separate app-record boundaries. Current:
 the standalone Firebase project, Android registration and authentic client are
 independently verified and pinned in source. Source integration, required CI and
-the exact web publication with public App Links readback pass. Resume step 5's
-fresh native build admission. S179's one-build approval
-remains unused; its old-project plan is superseded. No new native compilation
-has started. DEP-044 owns the exact registration/client identity; traceability
-owns provider and focused-test evidence.
+the exact web publication with public App Links readback pass. Step 5.1's exact
+owner exception was consumed by step 5.2's one successful local compilation;
+the resulting version 1 AAB and derived APK pass independent static inspection.
+S179's one-build approval remains unused; its old-project plan is superseded.
+Resume step 5.2's physical-phone workflows and screenshots. DEP-044 owns the
+exact registration/client identity and permission/FCM limitations; traceability
+owns exact artifacts and evidence.
 
 1. [x] Record the changed project decision, isolate from current main, preserve
    unrelated work and the old registration, and define target/failure scenarios.
@@ -295,17 +299,20 @@ owns provider and focused-test evidence.
    [Traceability E10](../specs/TRACEABILITY.md#current-release-evidence) owns exact
    source, artifact, CI and publication evidence. Native/Expo SSR and installed
    device behavior are unclaimed by this web correction.
-5. [ ] Admit the prepared source-bound local build review under the required
-   advisory exception, build once, inspect actual binaries and qualify phone/Play steps
-   separately. Do not execute the superseded S179 build plan.
+5. [ ] Qualify phone workflows/screenshots, FCM delivery and Play steps separately
+   after the inspected local build. Its exact one-build exception is now
+   consumed; do not compile again or execute the superseded S179 build plan.
    Ordered dependencies:
-   1. [ ] Obtain the required owner advisory exception for the already-prepared
+   1. [x] Obtain the required owner advisory exception for the already-prepared
       exact native plan/review linked in traceability before compilation. The
-      fresh plan passes; the owner answer is pending and no new native
-      compilation has occurred.
+      exact approval covers one local compilation, without automatic retry,
+      Play upload, credential creation or hosted configuration changes.
    2. [ ] Build the admitted artifact once, independently inspect its package,
       version, signer, permissions and binary alignment, then qualify installed
       phone workflows and capture privacy-reviewed native listing screenshots.
+      Current: the one bounded local build succeeded from source `36e6b1f`,
+      producing version 1 AAB and derived APK. Independent static inspection
+      passes; installed-device behavior and screenshots remain pending.
    3. [ ] Separately configure and verify the new-project FCM sender and
       package-specific EAS credential binding through the authorized recoverable
       workflow; prove actual real-device push delivery.

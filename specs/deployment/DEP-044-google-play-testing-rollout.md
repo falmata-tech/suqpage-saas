@@ -104,12 +104,39 @@ package associations. [Traceability E10](../TRACEABILITY.md#current-release-evid
 owns exact source, gates and publication evidence.
 
 The fresh exact source-bound native plan passes and its review is prepared;
-traceability owns the plan paths, digest and expiry. The required owner advisory
-exception and native build admission remain pending. The approved S179 plan
-remains unused and superseded; no new
-native compilation has occurred. New-project FCM sending credentials,
+the owner explicitly approved its advisory exception for one local compilation.
+Traceability owns the plan, expiry and protected approval receipt. That bounded
+build succeeded from source `36e6b1f`, creating one signed `com.africmade.app`
+version 1 AAB and a universal APK derived from it. Independent static inspection
+passes package/version, SDK 36, non-debuggable manifests, signer, new Firebase
+compiled resources, Hermes/runtime bindings, finite private-material pattern
+scans and compiled artwork. All 100 native libraries match the expected ABIs;
+the 50 64-bit libraries pass 16-KB PT_LOAD alignment, with APK ZIP/AAB page
+alignment verified. The original resource-reference parser stop is preserved; one
+reviewed inspection correction passed without a second compilation.
+Traceability E11 owns exact artifacts and receipts. Physical-phone, actual push
+and Play behavior remain unqualified. The one-compilation approval is consumed
+and permits no automatic retry, Play upload, credential creation or hosted
+configuration change. The approved S179 plan remains unused and superseded.
+New-project FCM sending credentials,
 package-specific EAS binding, actual push delivery and Play qualification remain
 unverified under this registration.
+
+The complete 31-permission inventory includes `SYSTEM_ALERT_WINDOW` without a
+maximum SDK, `READ_EXTERNAL_STORAGE`/`WRITE_EXTERNAL_STORAGE` through SDK 32,
+biometric/fingerprint permissions and Install Referrer without a maximum SDK.
+Static policy admits these declarations; this does not prove runtime use,
+permission-denial behavior, Play policy acceptance or no data collection.
+Installed-device checks and accurate Play declarations remain required.
+
+Read-only metadata verifies that the FCM API is enabled and the exact EAS
+`com.africmade.app` target has zero Android app credential records. This does not
+establish dedicated sender absence or availability. A later bounded read shows
+the proposed sender absent from one visible Admin SDK row, but fresh owner
+identity, exhaustive scoped inventory and allocation availability remain
+unverified. No private credential, IAM or EAS write occurred, and no owner
+credential approval was requested. Traceability links the latest partial
+readback and current proposed review; the earlier blocked check is preserved.
 
 The owner has deleted the old SuqPage Play app after its scoped unpublishing.
 Independent MarketVision Console readback verifies deletion and recovery until
