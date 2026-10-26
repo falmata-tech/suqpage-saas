@@ -202,6 +202,16 @@ frozen. No additional blind retry or weakened readiness gate is authorized.
 4. [ ] **CURRENT:** Review/stage only this CI correction, commit/push without rewriting the
    published task commit, and inspect new exact-head CI. Use actual indicators
    to resolve a demonstrated startup cause; keep unknown causes explicit.
+   - [x] Push the diagnostic-only correction as `3f75b1b`; new run40375102141
+     exposes a separate core operations first-query disconnect after socket
+     readiness. Browser startup remains under observation, with no further rerun.
+   - [x] Verify the installed PostgreSQL image's temporary socket-only server.
+     A read-only two-second initialization fixture reproduces the exact CI
+     disconnect with the old probe. Explicit container-loopback TCP readiness
+     passes every archive/restore assertion in 11.82s; the 30×500ms wait, target
+     isolation and cleanup remain intact. Both public-script static checks pass.
+   - [ ] **CURRENT:** Commit/push the scoped operations correction, inspect the
+     next exact-head five-job run, then resume qualified integration/delivery.
 5. [ ] Once all five required PR/main jobs pass, resume S183's exact website and
    separately admitted Android delivery. Reuse unchanged product evidence.
 

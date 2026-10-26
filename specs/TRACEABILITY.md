@@ -78,6 +78,15 @@ the 383-input native closure remain identical; only three harness scripts change
 Protected focused receipt: `.local/s184-ci-diagnostics/receipt.json`. The next
 source-triggered CI run must supply fresh required-check results.
 
+Run40375102141 on `3f75b1b` passes the complete browser job plus container,
+dependency and postgres; core fails on its operations fixture's first SQL query.
+DEP-002 S184 verifies the installed image's socket-only initialization phase and
+reproduces that exact disconnect with a controlled two-second init fixture.
+Container-loopback TCP readiness passes every archive/restore assertion without
+changing waits, SQL mutation retry behavior or product inputs. Protected evidence:
+`.local/s184-operations-readiness/`. The earlier Supabase-startup failures remain
+unexplained; this successful browser run does not establish their root cause.
+
 ## S181–S182 map, Featured and public footer qualification
 
 FE-065/FE-021 implement the compact phone/native Market, earlier safe group
