@@ -5,24 +5,24 @@ Read this current product brief with [AGENTS.md](AGENTS.md) and
 transcript. Existing numbered headings retain their identities for spec references;
 older “Suqpage” heading names are compatibility anchors, not the public brand.
 
-AfricMade is the current source brand. The website remains at
-**https://mirtpage.com** during the transition; Android retains
-**com.mirtpage.app** in the existing local v6 artifact. The owner has selected
-**com.africmade.app** for a separate future Play submission. One owner-approved
-local compilation has produced its signed version 1 AAB and derived APK with
-the verified standalone Firebase project **africmade-de81a** and pinned public
-client under [DEP-044 S180](specs/deployment/DEP-044-google-play-testing-rollout.md#s180--standalone-africmade-firebase-project-in-progress).
-Independent static binary inspection passes. Separate FCM/EAS credential binding,
-physical-phone and actual push-delivery qualification, and Play submission/testing
-remain pending. The new artifacts are local only. Supabase
+AfricMade is the public brand. **https://africmade.com** serves the current website;
+canonical metadata and the existing application API still use
+**https://mirtpage.com** during the transition. The current Android release target
+is **com.africmade.app**, using the verified standalone Firebase project
+**africmade-de81a** and pinned public client under
+[DEP-044](specs/deployment/DEP-044-google-play-testing-rollout.md).
+Earlier compatibility-package artifacts remain historical. Exact local binary
+admission is recorded separately from physical-phone, FCM/EAS credential binding,
+actual push delivery and Play submission/testing; those later qualifications
+remain pending. Supabase
 PostgreSQL, managed Auth and private Storage serve the application. Stable
 historical provider/protocol identifiers remain where compatibility requires
 them. Their spelling does not authorize recreating services or imply that hosted
 names, email settings or existing store listings have already changed.
 
-The current source prepares Android versionCode 2 with the later discovery and
-mask-safe branding changes. That successor has not yet been compiled or admitted;
-the retained v1 does not contain those changes.
+The current source resolves Android versionCode 2 for the map-first discovery,
+simpler Featured/footer and mask-safe white-field branding. The retained v1 does
+not contain these changes; it cannot substitute for the new candidate.
 
 This brief describes the current source contracts. Implementation, focused tests,
 visual approval, publication and physical/Play qualification are separate states.

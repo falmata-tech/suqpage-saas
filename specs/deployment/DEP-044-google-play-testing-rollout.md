@@ -10,7 +10,7 @@ change_level: L4
 
 # DEP-044 — Google Play testing and store rollout
 
-## S181–S183 — next local Android candidate (ready)
+## S181–S183 — local Android version2 candidate
 
 GIVEN the new discovery/Featured/footer and FE-070 S183 icon/splash corrections
 WHEN preparing the next local successor THEN resolve **versionCode 2** for
@@ -38,6 +38,16 @@ Tests: the existing actual-config test supplies stale base code1 and verifies
 resolved2 for each admitted profile; retain generic version-lineage rejection
 tests. FE-070 S183 owns mask/resource proof. Record current results in traceability
 without relabelling prior source/binary evidence.
+
+The one exact owner-approved compilation from published source `75092ef` has
+produced the signed version2 AAB and its derived universal APK. Independent
+static binary/artwork admission passes, including comparison with the canonical
+v1 APK. The six-high build-tool exception is consumed by this one artifact; no
+automatic retry or new compilation follows from it. The composed proof and
+retained inspection failures are recorded in
+[current delivery evidence](../TRACEABILITY.md#current-s181s184-delivery),
+separately from installed-device, FCM/EAS, push and Play gates. S180's statically
+admitted same-package version1 remains the canonical comparison artifact.
 
 ## S180 — standalone AfricMade Firebase project (in progress)
 
