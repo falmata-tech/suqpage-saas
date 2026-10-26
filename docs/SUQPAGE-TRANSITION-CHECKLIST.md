@@ -8,55 +8,73 @@ not authorize a provider write or rerun an already completed migration/build.
 
 ## Current position
 
-AfricMade is live on the temporary **mirtpage.com** domain from merged main
-`36e6b1f` (PR #45), Netlify deploy `6ade42137f331c939a820177`. All five required
-main CI jobs and independent public route/image/App Links readback pass. The
-earlier locally signed version 6 AAB and derived APK have verified AfricMade
-presentation but the compatibility package **com.mirtpage.app**. The exact current web and earlier
-native evidence is linked in
-[traceability](../specs/TRACEABILITY.md#current-release-evidence). Earlier
-schema, recovery and launch-parity outcomes remain in their owning specs and
-release records rather than serving as this package's admission evidence.
+AfricMade's map-first UI, simpler Featured/footer and white-field installation
+icons are published from main `75092ef` (PR #48), Netlify deploy
+`6adfa7a046c301c50af9b164`. All five required PR/main CI jobs and 29 independent
+public readbacks pass. **africmade.com** serves the artifact in place; the admitted
+canonical address remains **mirtpage.com**. The previous deploy remains ready for
+recovery. [Current delivery evidence](../specs/TRACEABILITY.md#current-s181s184-delivery)
+owns the exact source, gate, provider and browser receipts.
 
-**Next delivery dependency:** the owner selected a *separate*
-**com.africmade.app** package. S180's standalone Firebase project and matching
-Android client are independently verified and pinned in source. Local source
-checks and integration are qualified, and the public App Links file includes
-the new package and retained signer. The one owner-approved local compilation
-succeeded, creating the new version 1 AAB and derived APK; independent static
-binary inspection passes. Separate FCM/EAS credential binding, physical-phone
-workflows and actual push delivery remain pending. The MarketVision Play app is
-a verified Free/App draft; category, listing, declarations and native/Play
-qualification remain unfinished.
-The old package's v6 bundle is not eligible for that new app. Physical Android,
-Play submission and genuine closed-test enrollment remain unverified.
+Live Chrome completes 22 scoped functional checks, with a retained overall
+deadline failure and unproven GET-cancellation causes. A separate settled 390px
+review qualifies inquiry choice-action reachability, quantity and unsent Inbox
+Open/Close. This is qualified read-only web evidence, not a passing complete
+browser invocation or a live inquiry/chat submission.
 
-S181–S183's map-first UI, simpler Featured/footer and uncropped white-field icons
-now pass local qualification. Their source is not yet integrated or published;
-the S180 website/APK above remain the delivered artifacts. The next dependency
-is the reviewed task commit and exact-head GitHub checks, then website publication
-and a separately admitted version2 local Android build.
+One exact owner-approved local version2 build for **com.africmade.app** succeeded;
+the signed AAB and derived APK pass independent composed static admission against
+the verified standalone Firebase project and canonical version1 predecessor.
+Actual compiled launcher/splash artwork passes source-bound visual review. The
+one-build advisory exception is consumed; it authorizes no retry or new build.
+[Current delivery evidence](../specs/TRACEABILITY.md#current-s181s184-delivery)
+retains the failed inspector invocations and composition limits.
+
+**Next delivery dependencies:** physical Android workflows, 16-KB device runtime,
+FCM/EAS binding, actual push delivery and Play qualification remain open. The
+MarketVision Play app is a verified Free/App draft; category, listing, declarations,
+screenshots, upload and genuine closed-test enrollment remain unfinished. The
+old **com.mirtpage.app** v6 artifact cannot be submitted to the new package.
 
 ## Surface status
 
 | Surface | Implemented | Tested | Visually approved | Deployed / delivered |
 | --- | --- | --- | --- | --- |
-| AfricMade web | S180 source integrated through PR #45 | All required PR/main CI, qualified local gates and public route/image/App Links readback pass | S180 Chrome/local-API desktop/phone journeys and localized phone controls pass agent/parent review | Deploy `6ade42137f331c939a820177` live at mirtpage.com |
+| AfricMade web | S181–S184 source integrated through PR #48 | All five required PR/main jobs, composed local gates and 29 public readbacks pass | Local desktop/phone/Expo tasks and focused live inquiry choices pass source-bound review; live 22-task run retains deadline/network limits | Current deploy above serves mirtpage.com and the AfricMade alias |
 | AfricMade Android, old package | Signed v6 AAB and APK | Static release checks pass; physical device pending | Web/Expo source preview reviewed; installed native pending | Local only, `com.mirtpage.app`; not a new-package Play artifact |
-| AfricMade Android, new package | S180 standalone Firebase registration and source binding; one signed v1 AAB and derived APK created | Source/configuration/App Links gates, one compilation and independent static binary inspection pass | Compiled artwork inspection passes; installed native/screenshots pending | Local only; no Play upload or installed-device qualification |
+| AfricMade Android, new package | One signed v2 AAB and derived APK; standalone Firebase/source binding and v1→v2 upgrade policy verified | Source/export gates and composed independent static binary admission pass; failed inspector invocations retained | Actual 31 compiled artwork variants pass agent/root review; installed launcher/splash and phone workflows pending | Local signed v2 ready for owner testing; no Play upload or physical-device qualification |
 | AfricMade Play app | Saved AfricMade app and local English/Amharic listing drafts | Name/package/Draft, Free pricing and App type verified; category unselected, listing/declarations/native screens pending | Native phone screenshots pending | No bundle upload, release or closed-test enrollment |
 
 ## Ordered work
 
+### Delivery documentation reconciliation
+
+Documentation-only follow-up to DEP-049/DEP-044 and S181–S184, isolated on the
+published source. Preserve all original gate and browser outcomes; this update
+does not authorize another build, provider write or Play operation.
+
+1. [x] Verify the integrated source, terminal PR/main CI and exact web publication
+   against the protected receipts; identify stale current-state claims.
+2. [x] Reconcile the checklist, master and controlling spec/evidence references
+   with the published web state and the separately qualified native build.
+3. [x] Record the root operator's terminal v2 build outcome and independent
+   composed binary admission; update native status from that evidence only. Keep
+   physical-phone, FCM/EAS, push, screenshots and Play gates separate.
+4. [x] Validate/review the completed five-file documentation scope: all 226 specs
+   and traceability links pass, with no production-source or artifact change.
+   Publish this isolated record through the authorized GitHub workflow and retain
+   its exact-head PR/main receipts separately from the compiled source identity.
+
 ### S181 — map-first home and visitor UX across web/mobile
 
-Active UI task from current main `88c8b6f`, isolated from the 46 pre-existing root
+Implemented UI task from base `88c8b6f`, isolated from the 46 pre-existing root
 changes. FE-065 S181 owns the compact home/filter workflow; FE-021 S181 owns safe
 earlier group activation. FE-053/FE-049 retain native/localization contracts.
 Master §§2, 3, 5, 10, 18 and 19 describe the changed source; final evidence and
 delivery qualification remain below. Earlier
 S180 phone, FCM and Play dependencies remain open; its v1 APK does not include
-this later UI work. No new build or hosted rollout is implied.
+this later UI work. Source integration, web delivery and separate version2 static
+admission now pass; final documentation and physical/Play qualification remain above.
 
 1. [x] Inspect current web/native layout, cluster activation and controlling
    contracts; record ready acceptance, ownership and the compact-filter tradeoff.
@@ -85,8 +103,8 @@ this later UI work. No new build or hosted rollout is implied.
    Root typecheck, homepage, localization and narrative checks pass; both
    previews read the intended local catalogue. The actual Expo review found an
    intrinsic-height defect in the filter overview; its fix passes 24 narrow/
-   enlarged installed-RNWeb cases and the source is frozen as v5. Actual journeys
-   remain step 5. Web focused tests also reproduce and correct the short/enlarged
+   enlarged installed-RNWeb cases, recorded against the original v5 freeze.
+   Actual journeys pass step5. Web focused tests also reproduce and correct the short/enlarged
    canvas collapse, header overflow and truncated selected-language label.
 5. [x] Exercise actual Chrome desktop/390px/320px web and Expo search/filter/group/
    Page/product/Back/chat journeys, including empty/error/clear recovery and real
@@ -108,9 +126,9 @@ this later UI work. No new build or hosted rollout is implied.
    case pass their bounded reruns. Traceability records the composition and
    browser/platform limits; this is not a passing single full-check invocation
    or Android binary qualification.
-7. [ ] **CURRENT:** Reconcile master/specs/traceability with evidence; review and commit only
-   task paths, then follow the authorized GitHub workflow. Keep source integration,
-   web publication and a newly admitted native build as separate outcomes.
+7. [x] Review/commit only task paths, push and integrate through the authorized
+   GitHub workflow; all five required PR/main checks and exact web publication
+   pass. The docs-only reconciliation and native admission remain separate above.
 
 ### S182 — simpler Featured and public information footer
 
@@ -118,7 +136,8 @@ Later owner requests join the current UI batch without discarding S181. FE-021
 S182 and BE-029 control Featured; the footer's owning presentation contract is
 FE-070. The reviewed preview evidence retains its original source identities;
 the combined delivery runtime is frozen as V8.
-No hosted data/configuration write, native build or Play upload is implied.
+No hosted data/configuration change or Play upload is implied by the UI task.
+The qualified website is published; separate native static admission also passes.
 
 1. [x] Inspect the reference and current UI/schedule. Record a 20:15–21:45 EAT
    window: at most four 20-minute businesses, two two-minute sponsor mentions and
@@ -145,8 +164,9 @@ No hosted data/configuration write, native build or Play upload is implied.
    admin four-business Save/reload/PostgreSQL readback, automatic reset and staff
    denials pass against the disposable provider. Original failed runs remain
    retained; only the two stale test expectations are repaired.
-7. [ ] **CURRENT:** Reconcile evidence and commit/push/integrate through the authorized
-   GitHub workflow, keeping source integration and artifact publication distinct.
+7. [x] Commit/push/integrate through the authorized GitHub workflow and qualify
+   exact web publication. Retain local/remote/browser evidence identities;
+   documentation reconciliation and native admission remain separate above.
 
 ### S183 — uncropped icon and splash; orange on white
 
@@ -170,23 +190,34 @@ Preserve S181/S182 results and failed gate attempts. No new mark or font is need
    checks and Chrome mask previews pass. Header artwork bytes are unchanged;
    original header evidence is reused. No installed v2 launcher/splash is claimed.
 4. [x] Freeze and qualify the combined final inputs: V8 contains 1,386 runtime
-   inputs; gate-code V10 contains 1,836 inputs after two test-only repairs. All78
+   inputs; final gate-code V12 contains 1,836 inputs after the test repairs and
+   S184 harness corrections. All78
    check stages, web release (including real local HTTP smoke) and 20 acceptance
    cases are qualified with source-matched composition. The three failed full
    check attempts and first acceptance failure remain retained. Fresh locked
    native audit still reports 6 high findings; the 1,712-module offline export
    excludes their two root advisory packages and is not a binary/security waiver.
-5. [ ] **CURRENT:** Commit/push/integrate through the GitHub workflow and publish the exact
-   qualified web artifact. Prepare the concrete local version2 build review;
-   fresh advisory acceptance, compilation/static inspection, installed-phone
-   and Play listing/submission remain separate gates.
+5. [x] Commit/push/integrate through the GitHub workflow and publish the exact
+   qualified web artifact; terminal required PR/main checks and independent
+   public readback pass. Retain the prior recoverable deploy.
+6. [x] Prepare the exact source-bound version2 build review and obtain the fresh
+   one-artifact advisory exception. The root operator's single local compilation
+   succeeds in 3015.354s; the exception is consumed, with no automatic retry.
+7. [x] Qualify the resulting AAB/APK against source, canonical v1, upgrade policy,
+   signer/Firebase/Hermes, alignment, permissions and actual compiled artwork.
+   Composed static admission passes; failed inspection invocations and missing
+   per-row numeric-prefix metrics remain explicit in traceability.
+8. [ ] Qualify installed-phone workflows, launcher/splash, screenshots, FCM/EAS/
+   push, 16-KB device runtime and Play listing/submission separately. A local
+   static pass and owner-accessible APK do not start Play's testing clock.
 
 ### S184 — diagnose the repeated CI provider-startup failure
 
-PR48 is pushed as `ae307dc`; core/container/dependency/postgres pass. Browser
+PR48 originally pushed `ae307dc`; core/container/dependency/postgres pass. Browser
 run40368352333 and its one controlled retry fail during disposable Supabase
 startup before any application test. The exact cause remains unknown; retain
-both failed attempts and qualify the mandatory check before merging. DEP-027
+both failed attempts. The diagnostic and TCP-readiness corrections are now
+integrated; all five required PR/main jobs pass. DEP-027
 owns the narrow diagnostic contract; production V8 and native 383 inputs stay
 frozen. No additional blind retry or weakened readiness gate is authorized.
 
@@ -199,7 +230,7 @@ frozen. No additional blind retry or weakened readiness gate is authorized.
    middle; hostile/secret output never enters the summary. All11 readiness cases,
    actual runner failure/cleanup, explicit three-script static binding and
    workflow checks pass. Runtime V8 and native 383 inputs remain identical.
-4. [ ] **CURRENT:** Review/stage only this CI correction, commit/push without rewriting the
+4. [x] Review/stage only this CI correction, commit/push without rewriting the
    published task commit, and inspect new exact-head CI. Use actual indicators
    to resolve a demonstrated startup cause; keep unknown causes explicit.
    - [x] Push the diagnostic-only correction as `3f75b1b`; new run40375102141
@@ -210,10 +241,14 @@ frozen. No additional blind retry or weakened readiness gate is authorized.
      disconnect with the old probe. Explicit container-loopback TCP readiness
      passes every archive/restore assertion in 11.82s; the 30×500ms wait, target
      isolation and cleanup remain intact. Both public-script static checks pass.
-   - [ ] **CURRENT:** Commit/push the scoped operations correction, inspect the
-     next exact-head five-job run, then resume qualified integration/delivery.
-5. [ ] Once all five required PR/main jobs pass, resume S183's exact website and
-   separately admitted Android delivery. Reuse unchanged product evidence.
+   - [x] Commit/push the scoped operations correction and inspect exact-head
+     PR run40379361447 and merged-main run40381053204: all five required jobs pass.
+     The earlier Supabase-startup failures remain unexplained; later success does
+     not establish their root cause.
+5. [x] Resume S183 web delivery after terminal PR/main qualification and reuse
+   unchanged product evidence. The website is published and the separately
+   approved signed v2 build passes composed static admission. Physical/FCM/Play
+   qualification remains open; no further build is authorized.
 
 ### S172 — AfricMade presentation and business-sourcing launch
 

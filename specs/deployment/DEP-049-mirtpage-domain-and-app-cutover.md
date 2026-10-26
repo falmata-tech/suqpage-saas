@@ -4,30 +4,31 @@ title: MirtPage domain, managed services and app release cutover
 status: draft
 related: [FE-021, FE-070, FE-071, BE-059, DEP-029, DEP-051, ADR-0029, FE-072, BE-060, DEP-050, DEP-044, FE-075, BE-062]
 owners: [operations, security, mobile]
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 change_level: L4
 ---
 
 # DEP-049 — MirtPage cutover
 
-## S180 — current web publication and separate native admission
+## Current web publication and separate native admission
 
-PR #45 is merged as main `36e6b1f` with its qualified source tree unchanged.
-All five required PR and main CI jobs pass. The exact reviewed website artifact
-is published on `mirtpage.com` as Netlify deploy `6ade42137f331c939a820177`;
-independent route, asset and optimized-image readback passes. The public App
-Links body now includes `com.africmade.app` with the retained signer and all
-three existing package associations. Provider target and all 41 environment
-objects remain unchanged; the prior deployment remains ready for recovery.
-[Traceability E10](../TRACEABILITY.md#current-release-evidence) owns exact source,
-artifact, Linux import proof, CI and publication receipts.
+PR #48 is merged as main `75092ef`; its tree matches the qualified task source.
+All five required PR and main CI jobs pass. The exact reviewed map-first website,
+simpler Featured/footer and white-field installation icons are published as
+Netlify deploy `6adfa7a046c301c50af9b164`. `africmade.com` serves this artifact
+directly; its canonical metadata still uses the admitted `mirtpage.com` address.
+Independent route, asset, image, manifest, worker-file and App Links readback
+passes. Provider target and all 41 environment records remain unchanged; deploy
+`6ade42137f331c939a820177` remains ready for recovery.
+[Traceability](../TRACEABILITY.md#current-s181s184-delivery) owns
+exact source, CI, artifact, Linux import, publication and browser evidence.
 
-This website publication does not qualify a new Android binary, installed App
-Links behavior, sender credential, device push or Play testing. DEP-044 S180
-owns the exact approved native plan, its one successful local compilation and
-the saved MarketVision Play draft. The new version 1 AAB and derived APK pass
-independent static inspection; installed-device, FCM and Play qualification
-remain pending. The earlier S179 build approval remains unused and superseded.
+Website publication does not qualify an installed Android app, service-worker
+execution, scheduled-worker delivery, sender credential, device push or Play
+testing. DEP-044 owns the separately approved, built and statically admitted
+local version2 successor, its canonical version1 predecessor and the saved
+MarketVision Play draft. Physical Android, FCM and Play qualification remain
+separate gates.
 
 ## S179 — selected successor Android package
 
