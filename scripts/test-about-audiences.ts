@@ -6,6 +6,8 @@ import {build} from 'esbuild';
 import {chromium,type Page} from 'playwright';
 import {createUiText,type UiMessages} from '../lib/i18n/core';
 import {ABOUT_STOREFRONT_SECTIONS} from '../lib/storefront-copy';
+import {PUBLIC_SITE_FOOTER,showPublicSiteFooter} from '../lib/public-site-footer';
+import {TRANSPORT_COPY} from '../lib/i18n/transport-copy';
 
 const require=createRequire(process.cwd()+'/package.json'),nativeRequire=createRequire(process.cwd()+'/apps/mobile/package.json');
 type Dimensions={width:number;height:number;fontScale:number};
@@ -16,8 +18,8 @@ type QA={mount:(kind:'about'|'market')=>void;unmount:()=>void};
 // scale explicitly. No device, basemap, backend or live-navigation proof.
 async function bundle(native:boolean){
  const resolver=native?nativeRequire:require;
- const contents=`import React from'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';import About from '${native?'./apps/mobile/app/(tabs)/about':'./components/AboutAudience'}';${native?`import Market from'./apps/mobile/app/(tabs)/index';`:''}
-  const root=createRoot(document.getElementById('root'));window.qa={mount:kind=>flushSync(()=>root.render(${native?`kind==='market'?<Market/>:`:''}<About/>)),unmount:()=>flushSync(()=>root.render(null))};`;
+ const contents=`import React from'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';import About from '${native?'./apps/mobile/app/(tabs)/about':'./components/AboutAudience'}';${native?`import Market from'./apps/mobile/app/(tabs)/index';`:`import Footer from './components/PublicSiteFooter';`}
+  const root=createRoot(document.getElementById('root'));window.qa={mount:kind=>flushSync(()=>root.render(${native?`kind==='market'?<Market/>:<About/>`:`<><About/><Footer/></>`})),unmount:()=>flushSync(()=>root.render(null))};`;
  return build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents},bundle:true,write:false,outfile:'about.js',platform:'browser',format:'iife',jsx:'automatic',define:native?{global:'globalThis','process.env.EXPO_PUBLIC_API_ORIGIN':'"https://mirtpage.com"'}:undefined,loader:{'.module.css':'local-css'},plugins:[{name:'about-audience-host-ports',setup(b){
   b.onResolve({filter:/^(?:react(?:\/jsx(?:-dev)?-runtime)?|react-dom(?:\/client)?)$/},a=>({path:resolver.resolve(a.path)}));
   b.onResolve({filter:/^(?:react-native|react-native-safe-area-context|expo-router|next\/link|@\/lib\/i18n\/ui)$/},a=>({path:a.path,namespace:'ports'}));
@@ -52,7 +54,22 @@ async function assertAbout(page:Page,fixture:Fixture,native:boolean){
  const geometry=await page.getByRole('tablist').evaluate(root=>{const r=root.getBoundingClientRect();return{left:r.left,right:r.right,controls:[...root.querySelectorAll('[role="tab"]')].map(element=>{const box=element.getBoundingClientRect();return{width:box.width,height:box.height,scroll:element.scrollWidth,client:element.clientWidth};})};});
  assert.ok(geometry.left>=0&&geometry.right<=fixture.dimensions.width+1,JSON.stringify(geometry));for(const control of geometry.controls)assert.ok(control.width>=48&&control.height>=48&&control.scroll<=control.client+1,JSON.stringify({fixture,geometry}));
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'About has no horizontal overflow');
+ const footer=native?page.getByTestId('public-site-footer'):page.locator('[data-public-site-footer]');assert.equal(await footer.count(),1);
+ const utilities=native?footer.getByTestId('public-footer-utilities'):footer.getByRole('navigation',{name:t('Explore AfricMade'),exact:true});
+ const legal=native?footer.getByTestId('public-footer-legal'):footer.getByRole('navigation',{name:t('Information'),exact:true});
+ assert.equal(await utilities.getByRole('link').count(),2);assert.equal(await legal.getByRole('link').count(),3);assert.equal(await footer.getByRole('link').count(),5);assert.equal(await footer.getByText(t(TRANSPORT_COPY.launcherTitle),{exact:true}).count(),0,'Transport belongs with buyer content, not the quiet footer');
+ const transport=page.getByRole('link',{name:t(TRANSPORT_COPY.launcherTitle),exact:native});assert.equal(await transport.count(),1);await transport.click();assert.equal((await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.routes)).at(-1),native?'/buying':'/?chat=transport');
+ for(const link of [...PUBLIC_SITE_FOOTER.utilities,...PUBLIC_SITE_FOOTER.legal]){const action=footer.getByRole('link',{name:t(link.label),exact:true});await action.scrollIntoViewIfNeeded();const box=await action.boundingBox();assert.ok(box&&box.width>=44&&box.height>=44,JSON.stringify({locale:fixture.locale,native,label:link.label,box}));assert.ok(box.x>=0&&box.x+box.width<=fixture.dimensions.width+1,'Footer link stays inside the phone');await action.click();const expected=native&&['/showrooms','/privacy','/terms'].includes(link.href)?'https://mirtpage.com'+link.href:link.href;assert.equal((await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.routes)).at(-1),expected);}
+ const geometryFooter=await footer.evaluate(root=>{const links=[...root.querySelectorAll('a,[role="link"]')].map(el=>{const box=el.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,height:box.height,scroll:el.scrollWidth,client:el.clientWidth};});return{links,text:root.textContent};});
+ for(const link of geometryFooter.links)assert.ok(link.scroll<=link.client+1,'Footer labels wrap instead of overflowing');
+ for(let i=0;i<geometryFooter.links.length;i++)for(let j=i+1;j<geometryFooter.links.length;j++){const a=geometryFooter.links[i],b=geometryFooter.links[j];assert.ok(Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x)<=.5||Math.min(a.y+a.height,b.y+b.height)-Math.max(a.y,b.y)<=.5,'Footer link targets do not overlap');}
+ assert.ok(geometryFooter.text?.includes(t(PUBLIC_SITE_FOOTER.location)));assert.ok(geometryFooter.text?.includes(`© ${new Date().getFullYear()} ${PUBLIC_SITE_FOOTER.company}`));
 }
+
+test('FE-070 quiet footer is limited to public information routes, never the map, chat or merchant task',()=>{
+ for(const path of ['/about','/showrooms','/transport-partners','/privacy','/terms','/account-deletion'])assert.ok(showPublicSiteFooter(path)&&showPublicSiteFooter(path+'/'),path);
+ for(const path of ['/','/featured','/discover','/buying','/tracking','/tracking/record','/inquiry','/product','/@merchant','/shop/merchant','/dashboard','/account','/owner/page','/login','/request','/about-other','/showrooms/merchant'])assert.equal(showPublicSiteFooter(path),false,path);
+});
 
 test('FE-052/065 S143 actual About tabs and RNWeb Market row stay compact, localized and keyboard accessible',{timeout:180000},async()=>{
  const [web,native]=await Promise.all([bundle(false),bundle(true)]),browser=await chromium.launch({channel:process.env.SUQPAGE_BROWSER_CHANNEL||undefined,headless:true,timeout:20000});

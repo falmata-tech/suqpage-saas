@@ -195,9 +195,9 @@ test('FE-052: shared starter and publication-checklist messages reach every clie
 });
 
 test('FE-052: both storefront audiences and Market use complete client-safe catalogs', async () => {
-  const { MARKET_STOREFRONT_COPY, ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } = await import('../lib/storefront-copy');
+  const { MARKET_STOREFRONT_COPY, MARKET_COMPACT_COPY, ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } = await import('../lib/storefront-copy');
   const { clientMessages } = await import('../lib/i18n/client-messages');
-  const values: string[] = [...Object.values(MARKET_STOREFRONT_COPY), ...Object.values(CUSTOMER_MAP_COPY)];
+  const values: string[] = [...Object.values(MARKET_STOREFRONT_COPY), ...Object.values(MARKET_COMPACT_COPY), ...Object.values(CUSTOMER_MAP_COPY)];
   for (const section of ABOUT_STOREFRONT_SECTIONS) {
     values.push(section.label, section.title, section.description, section.action);
     for (const benefit of section.benefits) values.push(benefit.title, benefit.description);
@@ -225,6 +225,27 @@ test('FE-052: both storefront audiences and Market use complete client-safe cata
     }
     for(const benefit of ABOUT_STOREFRONT_SECTIONS[1].benefits){
       assert.notEqual(t(benefit.description),benefit.description,`${locale}: inclusive supporting copy is authored`);
+    }
+  }
+});
+
+test('FE-065 S181: compact discovery and filter navigation have authored active-language client messages', async () => {
+  const {MARKET_COMPACT_COPY} = await import('../lib/storefront-copy');
+  const {clientMessages} = await import('../lib/i18n/client-messages');
+  assert.equal(MARKET_COMPACT_COPY.title, 'Find African suppliers.');
+  for (const locale of enabledLocales) {
+    const t = createUiText(catalogs[locale]);
+    const title = t(MARKET_COMPACT_COPY.title);
+    const count = t('Filters, {count} selected', {count: 2});
+    assert.match(count, /2/);
+    assert.doesNotMatch(count, /\{count\}/);
+    if (locale !== 'en') {
+      const client = clientMessages(catalogs[locale]);
+      for (const message of [MARKET_COMPACT_COPY.title, 'Back to filters', 'Filters, {count} selected']) {
+        assert.ok(client[messageKey(message)], `${locale}: ${message} reaches the interactive client`);
+        assert.notEqual(t(message), message, `${locale}: authored active-language discovery copy`);
+      }
+      assert.match(title, locale === 'am' ? /አፍሪካ.*አቅራቢ/ : /Dhiyeessitoota.*Afrikaa/);
     }
   }
 });
@@ -467,7 +488,7 @@ test('FE-070: localized Market and About metadata retain the explicit AfricMade 
       const path=file.includes('/about/')?'/about':'/';
       assert.equal(metadata.alternates.canonical,`https://mirtpage.test${path}`);
       assert.equal(metadata.openGraph.url,metadata.alternates.canonical);
-      assert.equal(metadata.openGraph.images[0],'https://mirtpage.test/pwa/africmade-icon-v3-512.png');
+      assert.equal(metadata.openGraph.images[0],'https://mirtpage.test/pwa/africmade-icon-v4-512.png');
       assert.equal(metadata.twitter.title,title);assert.equal(metadata.twitter.description,description);
       assert.equal(metadata.twitter.card,'summary_large_image');
       assert.doesNotMatch(JSON.stringify(metadata),/Suqpage|SuqPage/);

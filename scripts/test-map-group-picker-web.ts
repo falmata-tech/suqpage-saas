@@ -3,6 +3,8 @@ import {test} from 'node:test';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {build} from 'esbuild';
+import {chromium} from 'playwright';
+import {expect} from '@playwright/test';
 import {mapClusterIndex,MAP_CITY_ZOOM,MAP_MAX_ZOOM,mapClusterMarkers} from '../lib/map/map-clustering';
 import {currentMapGroup,mapGroupMembers,mapGroupLayout,mapGroupViewport} from '../components/map-group-view';
 import type {DiscoveryShowroom} from '../lib/discovery';
@@ -35,16 +37,18 @@ const bundled=build({entryPoints:['components/DiscoveryWorkspace.tsx'],bundle:tr
 async function component(){const fixture={slots:[] as unknown[],cursor:0,dependencies:[] as unknown[][],effects:[] as Array<()=>void|(()=>void)>};const module={exports:{} as {default:(props:Record<string,unknown>)=>Node;NearbyShowroomsViewer:(props:Record<string,unknown>)=>Node;MapPreviewDialog:(props:Record<string,unknown>)=>Node}};const globals:Record<string,unknown>={module,exports:module.exports,fixture,URLSearchParams};vm.runInNewContext((await bundled).outputFiles[0].text,globals);return{fixture,module,globals,render:(name:keyof typeof module.exports,props:Record<string,unknown>)=>{fixture.cursor=0;return tree(module.exports[name](props));},effects:()=>{const effects=fixture.effects.splice(0);return effects.map(effect=>effect());}};}
 
 test('FE-021 current terminal authority rejects enclosed aggregate, foreign member and stale resize keys',()=>{
- for(const capacity of[1,3,6]){const index=mapClusterIndex(shops,capacity),terminal=mapClusterMarkers(index,[-180,-85,180,85],MAP_MAX_ZOOM);
-  if(capacity===1){assert.ok(terminal.every(item=>item.kind==='shop'&&item.count===1),'A one-business final marker is a shop icon, not a numbered one-circle');continue;}
+ for(const requested of[1,2,3,6]){const index=mapClusterIndex(shops,requested),capacity=index.capacity,terminal=mapClusterMarkers(index,[-180,-85,180,85],MAP_MAX_ZOOM);
+  assert.equal(capacity,Math.max(2,requested),'Dense groups retain the bounded two-card floor rather than overlapping named singles');
   const fixed=terminal.find(item=>item.kind==='cluster')!;assert.ok(fixed);assert.ok(fixed.count>=2&&fixed.count<=capacity);
-  for(const zoom of[1,5,11]){assert.ok(mapClusterMarkers(index,[-180,-85,180,85],zoom).some(item=>item.kind==='aggregate'&&fixed.ids.every(id=>item.ids.includes(id))));assert.equal(currentMapGroup(index,shops,fixed.key,zoom),null,'A known terminal key enclosed in the current outer aggregate cannot open a picker');}
-  for(const zoom of[18,99]){const group=currentMapGroup(index,shops,fixed.key,zoom)!;assert.ok(group);assert.equal(group.count,fixed.count);assert.deepEqual(group.showroomIds,fixed.ids);assert.equal(group.longitude,fixed.anchor[0]);}
+  for(const zoom of[1,5,9]){assert.ok(mapClusterMarkers(index,[-180,-85,180,85],zoom).some(item=>item.kind==='aggregate'&&fixed.ids.every(id=>item.ids.includes(id))));assert.equal(currentMapGroup(index,shops,fixed.key,zoom),null,'A known terminal key enclosed in the current outer aggregate cannot open a picker');}
+  for(const zoom of[10,11,13,18,99]){const exposed=mapClusterMarkers(index,[-180,-85,180,85],zoom).some(item=>item.kind==='cluster'&&item.key===fixed.key),group=currentMapGroup(index,shops,fixed.key,zoom);assert.equal(Boolean(group),exposed,'Only a currently represented terminal is modal authority');if(group){assert.equal(group.count,fixed.count);assert.deepEqual(group.showroomIds,fixed.ids);assert.equal(group.longitude,fixed.anchor[0]);}}
+  assert.ok([10,11,12,13].some(zoom=>currentMapGroup(index,shops,fixed.key,zoom)),'The bounded current group becomes available within city-region zoom');
   const aggregate=mapClusterMarkers(index,[-180,-85,180,85],1).find(item=>item.kind==='aggregate');if(aggregate)assert.equal(currentMapGroup(index,shops,aggregate.key,18),null,'An aggregate is never modal membership authority');
   assert.equal(currentMapGroup(index,shops.filter(shop=>shop.id!==fixed.ids[0]),fixed.key,18),null);
  }
  const desktop=mapClusterIndex(shops,6),large=mapClusterMarkers(desktop,[-180,-85,180,85],18).find(group=>group.count>3)!;assert.ok(large);assert.equal(currentMapGroup(mapClusterIndex(shops,3),shops,large.key,18),null,'Resize cannot reinterpret an old key as a different group');
  assert.equal(mapGroupMembers({key:'old-large',count:11,showroomIds:shops.map(shop=>shop.id),city:'',region:'',latitude:9.03,longitude:38.75},shops),null);
+ const singleton=mapClusterMarkers(mapClusterIndex(shops.slice(0,1),1),[-180,-85,180,85],MAP_MAX_ZOOM);assert.equal(singleton.length,1);assert.equal(singleton[0].kind,'shop');assert.equal(singleton[0].count,1);
 });
 test('FE-021 S140 separated current groups admit all cards below maximum without trusting hidden or changed keys',()=>{
  const source=shops.slice(0,6).map((shop,index)=>({...shop,longitude:index<3?38.75:38.77})),index=mapClusterIndex(source,3);
@@ -58,13 +62,68 @@ test('FE-021 S140 separated current groups admit all cards below maximum without
  assert.equal(currentMapGroup(index,source,outer.key,13),null,'An old aggregate key is never interpreted as a final group');
  const only=source.slice(0,3),single=mapClusterIndex(only);assert.deepEqual(currentMapGroup(single,only,'cluster:1-2-3',6)?.showroomIds,[1,2,3]);
 });
-test('FE-021 adaptive S127 admitted viewport capacity always renders every card with no paging or truncation',()=>{
+test('FE-021 S181 admitted groups retain every card; only a bounded extreme two-card fallback scrolls',()=>{
  for(const[width,height,scale]of[[366,812,1],[760,868,1],[296,448,1],[820,358,1],[296,412,2]]){
   const viewport=mapGroupViewport(width,height,scale);assert.ok(viewport.capacity>=1&&viewport.capacity<=(width>=600?6:3));
   if(width===760)assert.equal(viewport.capacity,6);if(width===366)assert.equal(viewport.capacity,3);
-  for(let count=1;count<=viewport.capacity;count++){const layout=mapGroupLayout(width,height,scale,count);assert.equal(layout.admitted,true);assert.equal(layout.pageSize,count);assert.equal(layout.paged,false);assert.ok(layout.rowHeight>=84);}
+  for(let count=1;count<=viewport.capacity;count++){const layout=mapGroupLayout(width,height,scale,count);assert.equal(layout.admitted,true);assert.equal(layout.pageSize,count);assert.equal(layout.paged,false);assert.ok(layout.rowHeight>=84);if(layout.needsScroll){assert.equal(viewport.capacity,2);assert.ok(count<=2);assert.ok(height-layout.chromeHeight>=48);}else if(scale===1)assert.equal(layout.needsScroll,false);}
   const rejected=mapGroupLayout(width,height,scale,viewport.capacity+1);assert.equal(rejected.admitted,false);assert.equal(rejected.pageSize,0);assert.equal(rejected.paged,false);
  }
+ for(const[width,height,scale]of[[296,0,1],[0,296,1],[296,260,2]]){const viewport=mapGroupViewport(width,height,scale),layout=mapGroupLayout(width,height,scale,2);assert.equal(viewport.capacity,0);assert.equal(layout.admitted,false);assert.equal(layout.needsScroll,false);}
+});
+
+test('FE-021 S181 Back scrolls the selected card before restoring focus only in the bounded fallback',async()=>{
+ for(const viewport of[mapGroupViewport(296,296,2),mapGroupViewport(366,812)]){
+  const c=await component(),members=shops.slice(0,2),group={key:'cluster:1-2',count:2,showroomIds:[1,2],city:'Fixture city',region:'',latitude:9.03,longitude:38.75};let selected:number|null=null;
+  const props=()=>({group,showrooms:members,viewport,featuredNowBusinessId:null,selectedShowroomId:selected,onSelect:(id:number)=>{selected=id;},onBack:()=>{selected=null;},onClose(){},onOpen(){}});
+  let nodes=c.render('NearbyShowroomsViewer',props());c.effects();
+  const needsScroll=mapGroupLayout(viewport.width,viewport.height,viewport.fontScale,2).needsScroll;
+  assert.equal(nodes.find(node=>String(node.props.className).startsWith('nearby-showroom-viewer'))?.props['data-scrollable'],needsScroll);
+  click(nodes.find(node=>node.props['data-showroom-id']===2));nodes=c.render('NearbyShowroomsViewer',props());c.effects();
+  click(nodes.find(node=>node.props.className==='nearby-showroom-back'));nodes=c.render('NearbyShowroomsViewer',props());
+  const events:string[]=[],list=nodes.find(node=>node.props.className==='nearby-showroom-grid')!;
+  (list.props.ref as {current:unknown}).current={querySelector:(selector:string)=>{assert.match(selector,/2/);return{scrollIntoView:(options:unknown)=>{assert.equal((options as {block:string}).block,'nearest');assert.equal((options as {inline:string}).inline,'nearest');events.push('scroll');},focus:(options:unknown)=>{assert.equal((options as {preventScroll:boolean}).preventScroll,true);events.push('focus');}};}};
+  c.effects();assert.deepEqual(events,needsScroll?['scroll','focus']:['focus']);assert.equal(list.props.tabIndex,needsScroll?0:undefined);
+ }
+});
+
+test('FE-021 S181 real dialog keeps both fallback businesses reachable and restores the second card after Back',{timeout:30000},async()=>{
+ const compiled=await build({stdin:{resolveDir:process.cwd(),loader:'jsx',contents:`
+  import React,{useState}from'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';
+  import{NearbyShowroomsViewer}from'./components/DiscoveryWorkspace';
+  const root=createRoot(document.getElementById('root'));
+  window.fixtureT=(text,values={})=>text.replace(/\\{([^}]+)\\}/g,(_,key)=>String(values[key]??key));
+  function App({data}){const[selected,setSelected]=useState(null),[open,setOpen]=useState(true);return open?<NearbyShowroomsViewer group={{key:'cluster:'+data.members.map(s=>s.id).join('-'),count:data.members.length,showroomIds:data.members.map(s=>s.id),city:'Fixture city',region:'',latitude:9.03,longitude:38.75}} showrooms={data.members} viewport={data.viewport} featuredNowBusinessId={null} selectedShowroomId={selected} onSelect={setSelected} onBack={()=>setSelected(null)} onClose={()=>setOpen(false)} onOpen={()=>{}}/>:null;}
+  window.mountPicker=data=>flushSync(()=>root.render(<App key={data.key} data={data}/>));
+ `},bundle:true,write:false,outfile:'picker.js',platform:'browser',jsx:'automatic',loader:{'.module.css':'local-css'},plugins:[{name:'browser-framework-ports',setup(b){
+  b.onResolve({filter:/^(?:next\/(?:image|link|navigation)|next-intl|@\/lib\/i18n\/ui|@\/components\/MarketplaceMap)$/},args=>({path:args.path,namespace:'ports'}));
+  b.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'jsx',resolveDir:process.cwd(),contents:args.path==='@/lib/i18n/ui'?'export const useUiText=()=>window.fixtureT;':args.path==='next-intl'?"export const useLocale=()=> 'en';":args.path==='next/navigation'?'export const useRouter=()=>({}),useSearchParams=()=>new URLSearchParams();':args.path==='next/link'?"import React from'react';export default function Link({children,...props}){return <a {...props}>{children}</a>;}":args.path==='next/image'?"import React from'react';export default function Image(props){return <img {...props}/>;}":'export default ()=>null;'}));
+ }}]});
+ const browser=await chromium.launch({channel:'chrome',headless:true});
+ try{
+  const page=await browser.newPage({viewport:{width:320,height:328}}),errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.setContent('<div class="discovery-map-stage"><div class="discovery-floating-buttons"><button>Reset map</button></div></div><div id="root"></div>');
+  await page.addStyleTag({content:fs.readFileSync('app/globals.css','utf8')+'\n'+fs.readFileSync('app/discovery.css','utf8')+'\n'+compiled.outputFiles.find(file=>file.path.endsWith('.css'))!.text});
+  await page.addScriptTag({content:compiled.outputFiles.find(file=>file.path.endsWith('.js'))!.text});
+  await page.evaluate(()=>document.documentElement.style.fontSize='32px');
+  await page.evaluate(data=>(window as unknown as{mountPicker:(data:unknown)=>void}).mountPicker(data),{key:'short',members:shops.slice(0,2),viewport:mapGroupViewport(296,296,2)});
+  const dialog=page.getByRole('dialog'),list=page.getByRole('region',{name:'Choose a business',exact:true});
+  await expect(dialog).toBeVisible();await expect(list).toBeVisible();
+  const geometry=await list.evaluate(element=>({height:element.clientHeight,scroll:element.scrollHeight,overflow:getComputedStyle(element).overflowY}));
+  assert.ok(geometry.height>=48&&geometry.scroll>geometry.height,JSON.stringify(geometry));assert.equal(geometry.overflow,'auto');
+  await expect(list.getByRole('button')).toHaveCount(2);await list.focus();await page.keyboard.press('End');
+  await expect.poll(()=>list.evaluate(element=>element.scrollTop)).toBeGreaterThan(0);
+  await list.getByRole('button',{name:/^Business 2,/}).click();await expect(dialog.getByRole('heading',{name:'Business 2',exact:true})).toBeVisible();await expect(dialog).toHaveAccessibleName('Business 2');
+  await dialog.getByRole('button',{name:'Back to businesses',exact:true}).click();
+  const second=list.getByRole('button',{name:/^Business 2,/});await expect(second).toBeFocused();
+  const intersection=await second.evaluate(element=>{const row=element.getBoundingClientRect(),body=element.parentElement!.getBoundingClientRect();return Math.min(row.bottom,body.bottom)-Math.max(row.top,body.top);});assert.ok(intersection>=44,String(intersection));
+  const close=dialog.getByRole('button',{name:'Close business list',exact:true}),bounds=await close.boundingBox();assert.ok(bounds&&bounds.y>=0&&bounds.y+bounds.height<=328);await close.click();await expect(dialog).toHaveCount(0);
+  await page.setViewportSize({width:390,height:844});await page.evaluate(()=>document.documentElement.style.fontSize='16px');
+  await page.evaluate(data=>(window as unknown as{mountPicker:(data:unknown)=>void}).mountPicker(data),{key:'normal',members:shops.slice(0,3),viewport:mapGroupViewport(366,812)});
+  await expect(dialog).toBeVisible();const normal=page.locator('.nearby-showroom-grid');await expect(normal.getByRole('button')).toHaveCount(3);
+  const ordinary=await normal.evaluate(element=>({height:element.clientHeight,scroll:element.scrollHeight,overflow:getComputedStyle(element).overflowY}));assert.ok(ordinary.scroll<=ordinary.height+1,JSON.stringify(ordinary));assert.equal(ordinary.overflow,'hidden');
+  await dialog.getByRole('button',{name:'Close business list',exact:true}).click();assert.deepEqual(errors,[]);await page.close();
+ }finally{await browser.close();}
 });
 test('FE-021 adaptive S127 actual modal shows desktop6 together, detail Back and phone-resize dismissal without Next',async()=>{
  const c=await component();let selected:number|null=null,closed=0;const members=shops.slice(0,6),group={key:'cluster:1-2-3-4-5-6',count:6,showroomIds:members.map(shop=>shop.id),city:'Fixture city',region:'',latitude:9.03,longitude:38.75};let viewport=mapGroupViewport(760,868);

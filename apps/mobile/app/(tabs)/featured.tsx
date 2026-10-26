@@ -27,6 +27,7 @@ import {useBlockedBusinesses} from '../../src/blocked-businesses';
 import {CATALOG_CARD_GAP,catalogCardStyle} from '../../src/catalog-card-layout';
 import ResourceLoading from '../../src/ResourceLoading';
 import { featuredBroadcastHeader } from "../../../../lib/featured-broadcast-header";
+import {featuredBoothWalkthroughs} from '../../../../lib/featured-program';
 export default function FeaturedScreen() {
   const blocked=useBlockedBusinesses();
   const { t } = useApp(),
@@ -60,6 +61,7 @@ export default function FeaturedScreen() {
         t,
       })
     : null;
+  const presentationTimes=new Map(program&&current?featuredBoothWalkthroughs(current.dateIso,program.slots.length,now,program.policy).map(entry=>[entry.slot,entry.label]):[]);
   const bottomInset=usePublicScrollInset();
   const categoryScroll = useRef<ScrollView>(null);
   const categoryLayouts = useRef(new Map<number, { x: number; width: number }>());
@@ -89,35 +91,23 @@ export default function FeaturedScreen() {
       <ScrollView contentContainerStyle={{ padding: 18, gap: 16, paddingBottom: Math.max(30,bottomInset) }}
         onLayout={event => setViewportHeight(event.nativeEvent.layout.height)}
         onScroll={event => setScrollY(event.nativeEvent.contentOffset.y)} scrollEventThrottle={100}>
-      <View style={{ gap: 5 }}>
-        <Text style={f.eyebrow}>
-          {current && t(current.industryLabel)} · {program?.date}
-        </Text>
-        <Copy big heading>{t("Daily Featured")}</Copy>
+      <View style={{ gap: 8 }}>
+        <Copy big heading>{t("Daily Featured on TikTok Live")}</Copy>
         {broadcast && (
-          <View testID="featured-broadcast-status" accessibilityLabel={`${broadcast.label}. ${broadcast.title}. ${broadcast.detail} ${broadcast.note}`} style={[f.broadcast, broadcast.phase === "window" && f.broadcastWindow, broadcast.phase === "ended" && f.broadcastEnded]}>
-            <View style={f.broadcastHeading}>
-              <Icon name="star" size={18} color={colors.brand} />
-              <Text style={f.broadcastLabel}>{broadcast.label}</Text>
-            </View>
-            <Text style={f.broadcastTitle}>{broadcast.title}</Text>
-            {!!broadcast.detail && <Text style={f.broadcastText}>{broadcast.detail}</Text>}
-            {!!broadcast.note && <Text style={f.broadcastText}>{broadcast.note}</Text>}
+          <View testID="featured-broadcast-status" style={f.programSummary}>
+            <Text style={f.summaryDate}>{t(current!.dayLabel)} · {current!.dateLabel}</Text>
+            <Text style={f.summaryTime}>{broadcast.timeLabel}</Text>
+            <Text style={[f.summaryStatus,broadcast.phase==='ended'&&{color:colors.muted}]}>{broadcast.statusLabel}</Text>
             {!!broadcast.href && <Pressable accessibilityRole="link" onPress={() => void openLink(broadcast.href)} style={f.broadcastAction}>
               <Text style={f.broadcastActionText}>{broadcast.actionLabel}</Text>
-              <Icon name="arrow" size={15} color={colors.white} />
+              <Icon name="arrow" size={15} color={colors.brand} />
             </Pressable>}
           </View>
         )}
       </View>
-      <ResourceLoading load={load} variant="featured"/>
+      {(load.loading||load.error||!program)&&<ResourceLoading load={load} variant="featured"/>}
       {program && (
         <>
-          {program.sponsors.length > 0 && (
-            <View onLayout={event => setSponsorBounds(event.nativeEvent.layout)}>
-              <SponsorCarousel sponsors={program.sponsors} visible={sponsorVisible} />
-            </View>
-          )}
           <ScrollView
             ref={categoryScroll}
             testID="featured-category-choices"
@@ -188,7 +178,7 @@ export default function FeaturedScreen() {
                 testID={`featured-business-${slot.slot}`}
                 style={[f.item,catalogCardStyle(gridWidth,fontScale)]}
               >
-                {slot.shop ? (
+                {current?.isToday&&slot.revealed&&slot.shop ? (
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={slot.shop.name}
@@ -201,12 +191,12 @@ export default function FeaturedScreen() {
                   >
                     <Photo refPath={slot.shop.heroImagePath} height={145} />
                     <View style={{ padding: 10, gap: 6 }}>
-                      <Text style={f.small}>{slot.shop.city}</Text>
                       <Text style={f.name}>{slot.shop.name}</Text>
+                      <Text style={f.small}>{slot.shop.city}</Text>
+                      <Text testID={`featured-presentation-${slot.slot}`} style={f.presentationTime}>{presentationTimes.get(slot.slot)} {t('EAT')}</Text>
                       {slot.shop.isDemo && (
                         <Text style={f.demo}>{t("Example page")}</Text>
                       )}
-                      <Text style={f.link}>{t("Explore this business")} →</Text>
                     </View>
                   </Pressable>
                 ) : (
@@ -221,11 +211,17 @@ export default function FeaturedScreen() {
                   >
                     <Icon name="shop" size={34} />
                     <Text style={f.name}>{t("Coming soon")}</Text>
+                    <Text testID={`featured-presentation-${slot.slot}`} style={f.presentationTime}>{presentationTimes.get(slot.slot)} {t('EAT')}</Text>
                   </View>
                 )}
               </View>
             ))}
           </View>
+          {program.sponsors.length > 0 && (
+            <View testID="featured-sponsors" onLayout={event => setSponsorBounds(event.nativeEvent.layout)}>
+              <SponsorCarousel sponsors={program.sponsors} visible={sponsorVisible} />
+            </View>
+          )}
         </>
       )}
       </ScrollView>
@@ -233,23 +229,13 @@ export default function FeaturedScreen() {
   );
 }
 const f = StyleSheet.create({
-  eyebrow: { fontSize: 11, fontWeight: "700", color: colors.brand },
-  broadcast: {
-    gap: 5,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 8,
-    backgroundColor: colors.white,
-  },
-  broadcastWindow: { borderColor: "#edbba4", backgroundColor: "#fff8f3" },
-  broadcastEnded: { backgroundColor: "#f1f3f4" },
-  broadcastHeading: { flexDirection: "row", alignItems: "center", gap: 7 },
-  broadcastLabel: { fontSize: 11, fontWeight: "800", color: colors.brand, textTransform: "uppercase" },
-  broadcastTitle: { fontSize: 15, lineHeight: 21, fontWeight: "800", color: colors.ink },
-  broadcastText: { fontSize: 13, lineHeight: 18, color: colors.muted },
-  broadcastAction: { minHeight: 44, alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 7, marginTop: 3, paddingHorizontal: 12, borderRadius: 6, backgroundColor: colors.brand },
-  broadcastActionText: { fontSize: 13, lineHeight: 18, fontWeight: "800", color: colors.white },
+  programSummary:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',columnGap:12,rowGap:5},
+  summaryDate:{fontSize:13,lineHeight:19,color:colors.muted},
+  summaryTime:{fontSize:13,lineHeight:19,fontWeight:'600',color:colors.ink},
+  summaryStatus:{fontSize:12,lineHeight:18,fontWeight:'600',color:colors.brand},
+  broadcastAction:{minHeight:44,alignSelf:'flex-start',flexDirection:'row',alignItems:'center',gap:6,paddingHorizontal:4},
+  broadcastActionText:{fontSize:13,lineHeight:18,fontWeight:'700',color:colors.brand},
+  presentationTime:{fontSize:12,lineHeight:18,fontWeight:'600',color:colors.brand},
   name: { fontSize: 15, lineHeight: 20, fontWeight: "700", color: colors.ink },
   small: { fontSize: 11, lineHeight: 16, color: colors.muted },
   categoryChoices: { gap: 8, alignItems: "stretch" },
@@ -288,11 +274,5 @@ const f = StyleSheet.create({
     color: colors.muted,
     backgroundColor: colors.background,
     padding: 3,
-  },
-  link: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: colors.brand,
-    paddingVertical: 8,
   },
 });

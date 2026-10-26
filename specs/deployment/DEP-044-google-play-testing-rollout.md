@@ -2,13 +2,42 @@
 id: DEP-044
 title: Google Play testing and store rollout
 status: draft
-related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053, FE-052, FE-049, DEP-046, DEP-049, DEP-051, FE-075]
+related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053, FE-052, FE-049, DEP-046, DEP-049, DEP-051, FE-070, FE-075]
 owners: [product, operations, security]
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 change_level: L4
 ---
 
 # DEP-044 — Google Play testing and store rollout
+
+## S181–S183 — next local Android candidate (ready)
+
+GIVEN the new discovery/Featured/footer and FE-070 S183 icon/splash corrections
+WHEN preparing the next local successor THEN resolve **versionCode 2** for
+`com.africmade.app` in development, preview and production configuration, even
+if the base configuration supplies the old code1. Preserve display version,
+package/scheme, verified standalone Firebase project, existing signer and API/Auth
+targets. Hosted EAS profiles/credentials, provider configuration and Play remain
+unchanged.
+
+GIVEN the retained S180 v1 passed canonical static admission WHEN admitting its
+successor THEN compare against that same-package previous APK and require the
+greater version code. Do not reuse first-canonical-release to bypass lineage.
+The old v1 remains a historical artifact and does not contain these later fixes.
+
+GIVEN the final source is frozen WHEN preparing compilation THEN qualify current
+config/negative paths, fresh locked-tool audit and actual Hermes/runtime inventory,
+all relevant local gates and the exact integrated main checks. Bind source, asset
+and native closure, tools/client/signer, outputs and expiry in a fresh plan. A
+consumed v1 exception does not authorize a new artifact. If advisories fail current
+admission, obtain only the concrete new one-artifact security exception before
+compilation. One bounded local AAB build and derived test APK are separate from
+Play upload, real-device, push/FCM and closed-test qualification.
+
+Tests: the existing actual-config test supplies stale base code1 and verifies
+resolved2 for each admitted profile; retain generic version-lineage rejection
+tests. FE-070 S183 owns mask/resource proof. Record current results in traceability
+without relabelling prior source/binary evidence.
 
 ## S180 — standalone AfricMade Firebase project (in progress)
 

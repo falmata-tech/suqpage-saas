@@ -3,8 +3,8 @@ import {pointInMapViewport} from './map-display-location';
 
 /** Interaction zooms use a 256 CSS-pixel world, independently of tile size. */
 export const MAP_MAX_ZOOM = 13;
-/** Fitting terminal circles appear at city scale; only dense overflow uses13. */
-export const MAP_CITY_ZOOM = 12;
+/** First city-region candidate; actual full-scope fitting may require11..13. */
+export const MAP_CITY_ZOOM = 10;
 export const MAP_NATIVE_MAX_ZOOM = MAP_MAX_ZOOM - 1;
 /** Tight outer radius in the normalized256-world map; reveals city regions early. */
 export const MAP_CLUSTER_RADIUS = 6;
@@ -12,6 +12,7 @@ export const MAP_GROUP_DISTANCE_METERS = 3000;
 export const MAP_GROUP_MAX_DISPLACEMENT_METERS = 5000;
 export const MAP_GROUP_OVERFLOW_DISPLACEMENT_METERS = 10000;
 export const MAP_GROUP_MAX_MEMBERS = 6;
+export const MAP_GROUP_MIN_CAPACITY = 2;
 export const MAP_GROUP_DEFAULT_CAPACITY = 3;
 export const MAP_GROUP_FANOUT_PITCH = 56;
 export const MAP_GROUP_FANOUT_ATTEMPTS = 4096;
@@ -22,6 +23,11 @@ export const MAP_GROUP_CHROME_HEIGHT = 176;
 export const MAP_GROUP_DIRECT_CHROME_HEIGHT = 112;
 export const MAP_GROUP_MAX_ROWS = 3;
 const MERCATOR_LATITUDE = 85.051129;
+// The ordinary-font union covers native's98px three-line shop frame and web's
+// shorter frame, including4px clearance above/below the visible label.
+const SHOP_HALF_WIDTH = 51;
+const SHOP_HALF_HEIGHT = 53;
+const SHOP_OFFSET_Y = 18;
 
 export type MapClusterPoint = {
   id: number;
@@ -160,7 +166,7 @@ function balancedSpatialGroups(order: readonly number[], distances: readonly Flo
 /** Input coordinates have already passed the shared public display projection. */
 export function mapClusterIndex(source: readonly MapClusterPoint[], requestedCapacity = MAP_GROUP_DEFAULT_CAPACITY): MapClusterIndex {
   const capacity = Number.isFinite(requestedCapacity)
-    ? Math.max(1, Math.min(MAP_GROUP_MAX_MEMBERS, Math.floor(requestedCapacity))) : MAP_GROUP_DEFAULT_CAPACITY;
+    ? Math.max(MAP_GROUP_MIN_CAPACITY, Math.min(MAP_GROUP_MAX_MEMBERS, Math.floor(requestedCapacity))) : MAP_GROUP_DEFAULT_CAPACITY;
   const points = new Map<number, Readonly<MapClusterPoint>>();
   for (const point of source) {
     if (validPoint(point) && !points.has(point.id)) {
@@ -211,7 +217,7 @@ export function mapClusterIndex(source: readonly MapClusterPoint[], requestedCap
     for (const partition of balancedSpatialGroups(nearest, distances, capacity)) {
       const members = partition.map(index => ordered[index]);
       const ids = members.map(member => member.id).sort((left, right) => left - right);
-      const kind = cohort.length > 1 || members.some(member => member.locationMode === 'area') ? 'cluster' : 'shop';
+      const kind = cohort.length > 1 ? 'cluster' : 'shop';
       const presence = members.some(member => member.featured) ? 'featured' : members.some(member => member.live) ? 'live' : '';
       groups.push(Object.freeze({key: `${kind}:${ids.join('-')}`, kind, ids: Object.freeze(ids),
         count: ids.length, anchor: Object.freeze(groupAnchor(members)), presence}));
@@ -329,10 +335,11 @@ function wrappedPixel(value: number, world: number): number {
 }
 
 type MarkerLayout = {markers: readonly MapClusterMarker[]; clear: boolean};
-const cityLayoutCache = new WeakMap<MapClusterIndex, MarkerLayout>();
+type CityLayout = {zoom: number; layout: MarkerLayout};
+const cityLayoutCache = new WeakMap<MapClusterIndex, CityLayout>();
 
 /** Place full-scope circles before filtering; never use display centers as addresses. */
-function placeMarkers(visible: readonly MapClusterMarker[], zoom: number, displacement: number, sharedGrid = false): MarkerLayout {
+function placeMarkers(visible: readonly MapClusterMarker[], zoom: number, displacement: number, sharedGrid = false, stopOnCollision = false): MarkerLayout {
   const world = 256 * 2 ** zoom;
   const occupied: Footprint[] = [];
   const result: MapClusterMarker[] = [];
@@ -349,21 +356,23 @@ function placeMarkers(visible: readonly MapClusterMarker[], zoom: number, displa
   // glyph/name footprint (plus8px clearance) before placing group badges.
   for (const group of visible.filter(group => group.kind === 'shop')) {
     const anchor = project(group.anchor, world);
-    const footprint = {...anchor, y: anchor.y + 12, halfWidth: 51, halfHeight: 47};
+    const footprint = {...anchor, y: anchor.y + SHOP_OFFSET_Y, halfWidth: SHOP_HALF_WIDTH, halfHeight: SHOP_HALF_HEIGHT};
     clear &&= occupied.every(other => {
       const delta = Math.abs(footprint.x - other.x) % world;
       return Math.min(delta, world - delta) >= footprint.halfWidth + other.halfWidth
         || Math.abs(footprint.y - other.y) >= footprint.halfHeight + other.halfHeight;
     });
+    if (!clear && stopOnCollision) return {markers: [], clear: false};
     occupied.push(footprint);
     result.push(group);
   }
   for (const group of visible.filter(group => group.kind === 'cluster')) {
     const anchor = project(group.anchor, world);
-    // City-only singleton pins show a compact glyph and locality chip instead
-    // of a long shop name. Reserve its 48px tap/visual footprint when spacing.
-    const halfWidth = group.count === 1 ? 24 : 28;
-    const halfHeight = group.count === 1 ? 25 : 28;
+    // A capacity-two remainder is rendered as a named shop, not a numbered1.
+    const halfWidth = group.count === 1 ? SHOP_HALF_WIDTH : 28;
+    const halfHeight = group.count === 1 ? SHOP_HALF_HEIGHT : 28;
+    const offsetY = group.count === 1 ? SHOP_OFFSET_Y : 0;
+    const minY = halfHeight - offsetY, maxY = world - halfHeight - offsetY;
     const metersPerPixel = 2 * Math.PI * 6_371_000 * Math.cos(group.anchor[1] * Math.PI / 180) / world;
     const maxOffset = displacement / metersPerPixel;
     const deltaX = anchor.x - phase.x;
@@ -376,9 +385,9 @@ function placeMarkers(visible: readonly MapClusterMarker[], zoom: number, displa
     for (const step of candidates) {
       if (Math.hypot(step.x, step.y) * MAP_GROUP_FANOUT_PITCH > maxOffset + (sharedGrid ? MAP_GROUP_FANOUT_PITCH : 0)) continue;
       const proposedY = origin.y + step.y * MAP_GROUP_FANOUT_PITCH;
-      if (sharedGrid && (proposedY < 28 || proposedY > world - 28)) continue;
+      if (sharedGrid && (proposedY < minY || proposedY > maxY)) continue;
       const candidate = {x: wrappedPixel(origin.x + step.x * MAP_GROUP_FANOUT_PITCH, world),
-        y: Math.max(28, Math.min(world - 28, proposedY))};
+        y: Math.max(minY, Math.min(maxY, proposedY))};
       const coordinate = unproject(candidate, world);
       if (distanceMeters({longitude: group.anchor[0], latitude: group.anchor[1]},
         {longitude: coordinate[0], latitude: coordinate[1]}) > displacement) continue;
@@ -386,7 +395,7 @@ function placeMarkers(visible: readonly MapClusterMarker[], zoom: number, displa
       for (const other of occupied) {
         const delta = Math.abs(candidate.x - other.x) % world;
         const overlapX = halfWidth + other.halfWidth - Math.min(delta, world - delta);
-        const overlapY = halfHeight + other.halfHeight - Math.abs(candidate.y - other.y);
+        const overlapY = halfHeight + other.halfHeight - Math.abs(candidate.y + offsetY - other.y);
         if (overlapX > 0 && overlapY > 0) {count += 1; area += overlapX * overlapY;}
       }
       if (count < bestCount || count === bestCount && area < bestArea) {
@@ -394,10 +403,13 @@ function placeMarkers(visible: readonly MapClusterMarker[], zoom: number, displa
       }
       if (count === 0) break;
     }
-    // A failed city layout is not exposed: retain its ordinary outer hierarchy
-    // for one district-level expansion. At the bounded final level, keep every ID.
+    // A failed candidate is not exposed. Keep the outer hierarchy until a full
+    // layout fits; at the bounded final fallback retain every current ID.
     clear &&= bestCount === 0;
-    occupied.push({...chosen, halfWidth, halfHeight});
+    // Failed fit candidates are never displayed. Retain complete membership
+    // for normal rendering and the final fallback, but stop rejected probes.
+    if (!clear && stopOnCollision) return {markers: [], clear: false};
+    occupied.push({...chosen, y: chosen.y + offsetY, halfWidth, halfHeight});
     const center: [number, number] = chosen.x === anchor.x && chosen.y === anchor.y
       ? [...group.anchor] : unproject(chosen, world);
     result.push({...group, center});
@@ -408,34 +420,50 @@ function placeMarkers(visible: readonly MapClusterMarker[], zoom: number, displa
 
 function terminalLayout(index: MapClusterIndex, zoom: number): MarkerLayout {
   const visible = index.groups.map(group => marker(group));
-  const ordinary = placeMarkers(visible, zoom, MAP_GROUP_MAX_DISPLACEMENT_METERS);
-  return ordinary.clear ? ordinary : placeMarkers(visible, zoom, MAP_GROUP_OVERFLOW_DISPLACEMENT_METERS, true);
+  const ordinary = placeMarkers(visible, zoom, MAP_GROUP_MAX_DISPLACEMENT_METERS, false, true);
+  return ordinary.clear ? ordinary : placeMarkers(visible, zoom, MAP_GROUP_OVERFLOW_DISPLACEMENT_METERS, true, zoom < MAP_MAX_ZOOM);
 }
 
-function cityLayout(index: MapClusterIndex): MarkerLayout {
-  let result = cityLayoutCache.get(index);
-  if (!result) {result = terminalLayout(index, MAP_CITY_ZOOM); cityLayoutCache.set(index, result);}
-  return result;
+function cityLayout(index: MapClusterIndex): CityLayout {
+  const cached = cityLayoutCache.get(index);
+  if (cached) return cached;
+  for (let zoom = MAP_CITY_ZOOM; zoom <= MAP_MAX_ZOOM; zoom += 1) {
+    const layout = terminalLayout(index, zoom);
+    if (layout.clear || zoom === MAP_MAX_ZOOM) {
+      const result = {zoom, layout};
+      cityLayoutCache.set(index, result);
+      return result;
+    }
+  }
+  throw new Error('Map terminal candidate bounds are inconsistent.');
 }
 
-/** Merge visible markers whose real tap/visual frames collide at this zoom. */
-function mergeScreenOverlaps(index: MapClusterIndex, source: readonly MapClusterMarker[], zoom: number): readonly MapClusterMarker[] {
+/** Merge colliding named pins and neighboring circles, preserving regional aggregates. */
+function mergeScreenOverlaps(index: MapClusterIndex, source: readonly MapClusterMarker[], zoom: number, terminalZoom: number): readonly MapClusterMarker[] {
   if (zoom >= MAP_MAX_ZOOM) return source;
   const world = 256 * 2 ** zoom;
   const markers = [...source];
   const sourceKeys = new Set(source.map(item => item.key));
   const consumed = new Set<string>();
   const mergedTargets = new Set<string>();
+  const localCircleAnchors = new Map<string, readonly (readonly [number, number])[]>();
+  const circleAnchors = (item: MapClusterMarker): readonly (readonly [number, number])[] | undefined =>
+    localCircleAnchors.get(item.key) || (item.kind === 'cluster' && item.count > 1 ? [item.anchor] : undefined);
+  const neighboringCircles = (left: MapClusterMarker, right: MapClusterMarker): boolean => {
+    const a = circleAnchors(left), b = circleAnchors(right);
+    if (!a || !b) return false;
+    return a.some(anchor => b.some(other => distanceMeters(
+      {longitude: anchor[0], latitude: anchor[1]}, {longitude: other[0], latitude: other[1]}) <= MAP_GROUP_DISTANCE_METERS));
+  };
   const footprint = (item: MapClusterMarker) => {
-    if (item.count > 1 || item.kind === 'aggregate') return {halfWidth: 28, halfHeight: 28};
-    const point = index.points.get(item.ids[0]);
-    return point?.locationMode === 'area' ? {halfWidth: 24, halfHeight: 25} : {halfWidth: 51, halfHeight: 47};
+    if (item.count > 1 || item.kind === 'aggregate') return {halfWidth: 28, halfHeight: 28, offsetY: 0};
+    return {halfWidth: SHOP_HALF_WIDTH, halfHeight: SHOP_HALF_HEIGHT, offsetY: SHOP_OFFSET_Y};
   };
   const overlaps = (left: MapClusterMarker, right: MapClusterMarker) => {
     const a = project(left.center, world), b = project(right.center, world);
     const x = Math.abs(a.x - b.x) % world;
-    const dx = Math.min(x, world - x), dy = Math.abs(a.y - b.y);
     const l = footprint(left), r = footprint(right);
+    const dx = Math.min(x, world - x), dy = Math.abs(a.y + l.offsetY - b.y - r.offsetY);
     return dx < l.halfWidth + r.halfWidth && dy < l.halfHeight + r.halfHeight;
   };
   const separationZoom = (left: MapClusterMarker, right: MapClusterMarker) => {
@@ -445,19 +473,22 @@ function mergeScreenOverlaps(index: MapClusterIndex, source: readonly MapCluster
     for (let candidate = start; candidate <= MAP_MAX_ZOOM; candidate += 1) {
       const size = 256 * 2 ** candidate, a = project(left.center, size), b = project(right.center, size);
       const delta = Math.abs(a.x - b.x) % size;
-      const dx = Math.min(delta, size - delta), dy = Math.abs(a.y - b.y);
+      const dx = Math.min(delta, size - delta), dy = Math.abs(a.y + l.offsetY - b.y - r.offsetY);
       if (dx >= l.halfWidth + r.halfWidth || dy >= l.halfHeight + r.halfHeight) return candidate;
     }
     return MAP_MAX_ZOOM;
   };
-  const singletons = source.filter(item => item.count === 1);
-  for (const singleton of singletons) {
-    if (consumed.has(singleton.key)) continue;
-    const current = markers.find(item => item.key === singleton.key);
+  const terminals = source.filter(item => item.count === 1 || item.kind === 'cluster');
+  for (const terminal of terminals) {
+    if (consumed.has(terminal.key)) continue;
+    const current = markers.find(item => item.key === terminal.key);
     if (!current) continue;
     const a = project(current.center, world);
     const candidates = markers.filter(item => item.key !== current.key && !consumed.has(item.key)
       && overlaps(current, item)
+      // Nearby terminal circles may overlap before their safe fanout fits.
+      // Do not join separate city/region aggregates merely for a broad view.
+      && (current.count === 1 || neighboringCircles(current, item))
       && (item.count === 1 || item.key.startsWith('aggregate:')
         || sourceKeys.has(item.key) && item.count > 1 && !mergedTargets.has(item.key)))
       .sort((left, right) => {
@@ -470,7 +501,7 @@ function mergeScreenOverlaps(index: MapClusterIndex, source: readonly MapCluster
     if (!neighbor) continue;
     const members = [...current.ids, ...neighbor.ids].sort((left, right) => left - right);
     const anchor = groupAnchor(members.map(id => index.points.get(id)!).filter(Boolean));
-    const expansionZoom = separationZoom(current, neighbor);
+    const expansionZoom = Math.min(separationZoom(current, neighbor), terminalZoom);
     const presence = members.some(id => index.points.get(id)?.featured) ? 'featured'
       : members.some(id => index.points.get(id)?.live) ? 'live' : '';
     consumed.add(current.key); consumed.add(neighbor.key);
@@ -478,7 +509,10 @@ function mergeScreenOverlaps(index: MapClusterIndex, source: readonly MapCluster
     for (let position = markers.length - 1; position >= 0; position -= 1) {
       if (markers[position].key === current.key || markers[position].key === neighbor.key) markers.splice(position, 1);
     }
-    markers.push({key: `aggregate:${members.join('-')}`, kind: 'aggregate', ids: members,
+    const key = `aggregate:${members.join('-')}`;
+    const currentCircles = circleAnchors(current), neighborCircles = circleAnchors(neighbor);
+    if (currentCircles && neighborCircles) localCircleAnchors.set(key, [...currentCircles, ...neighborCircles]);
+    markers.push({key, kind: 'aggregate', ids: members,
       count: members.length, anchor, center: [...anchor], presence, expansionZoom});
   }
   return markers.sort((left, right) => left.key < right.key ? -1 : left.key > right.key ? 1 : 0);
@@ -489,15 +523,17 @@ function layout(index: MapClusterIndex, zoom: number): readonly MapClusterMarker
   if (cached?.zoom === zoom) return cached.markers;
   const city = cityLayout(index);
   let result: readonly MapClusterMarker[];
-  if (zoom >= MAP_CITY_ZOOM && (city.clear || zoom >= MAP_MAX_ZOOM)) {
-    result = zoom === MAP_CITY_ZOOM ? city.markers : terminalLayout(index, zoom).markers;
+  const terminal = zoom >= city.zoom ? zoom === city.zoom ? city.layout : terminalLayout(index, zoom) : null;
+  if (terminal && (terminal.clear || zoom >= MAP_MAX_ZOOM)) {
+    result = terminal.markers;
   } else {
     const visible = hierarchyMarkers(index, zoom).map(item => item.kind === 'aggregate' && item.count === 1
       ? {...item, kind: 'cluster' as const, expansionZoom: undefined}
       : item.kind === 'aggregate'
-        ? {...item, expansionZoom: city.clear ? Math.min(item.expansionZoom!, MAP_CITY_ZOOM) : item.expansionZoom}
+        ? {...item, expansionZoom: Math.min(MAP_MAX_ZOOM, Math.max(Math.floor(zoom) + 1, Math.min(item.expansionZoom!, city.zoom)))}
         : item);
-    result = mergeScreenOverlaps(index, placeMarkers(visible, zoom, MAP_GROUP_MAX_DISPLACEMENT_METERS).markers, zoom);
+    result = mergeScreenOverlaps(index, placeMarkers(visible, zoom, MAP_GROUP_MAX_DISPLACEMENT_METERS).markers, zoom,
+      Math.min(MAP_MAX_ZOOM, Math.max(Math.floor(zoom) + 1, city.zoom)));
   }
   layoutCache.set(index, {zoom, markers: result});
   return result;
@@ -539,16 +575,18 @@ export type MapGroupPickerLayout = {
   compact: boolean;
   paged: boolean;
   chromeHeight: number;
+  needsScroll: boolean;
 };
 
 /** Compute once for both the current index and its modal; zoom is irrelevant. */
 export function mapGroupCapacity(width: number, height: number, fontScale = 1): number {
   const scale = Number.isFinite(fontScale) ? Math.max(1, fontScale) : 1;
   const availableHeight = Number.isFinite(height) ? height : 0;
+  if (!Number.isFinite(width) || width <= 0 || availableHeight - mapGroupDirectChromeHeight(scale) < 48) return 0;
   const columns = Number.isFinite(width) && width >= 600 ? 2 : 1;
   const rowHeight = Math.ceil(MAP_GROUP_COMPACT_ROW_HEIGHT * scale);
   const rows = Math.floor((availableHeight - mapGroupDirectChromeHeight(scale) + MAP_GROUP_ROW_GAP) / (rowHeight + MAP_GROUP_ROW_GAP));
-  return Math.max(1, Math.min(columns === 2 ? MAP_GROUP_MAX_MEMBERS : MAP_GROUP_DEFAULT_CAPACITY, rows * columns));
+  return Math.max(MAP_GROUP_MIN_CAPACITY, Math.min(columns === 2 ? MAP_GROUP_MAX_MEMBERS : MAP_GROUP_DEFAULT_CAPACITY, rows * columns));
 }
 
 export function mapGroupPickerLayout(width: number, height: number, fontScale = 1, count = MAP_GROUP_DEFAULT_CAPACITY): MapGroupPickerLayout {
@@ -558,7 +596,7 @@ export function mapGroupPickerLayout(width: number, height: number, fontScale = 
   const columns = Number.isFinite(width) && width >= 600 ? 2 : 1;
   const rowHeight = Math.ceil(MAP_GROUP_ROW_HEIGHT * scale);
   const directRows = Math.ceil(Math.max(1, Math.min(MAP_GROUP_MAX_MEMBERS, Number.isFinite(count) ? count : 1)) / columns);
-  const directChrome = mapGroupDirectChromeHeight(scale), common = {admitted, capacity, pageSize: admitted ? count : 0, paged: false, chromeHeight: directChrome};
+  const directChrome = mapGroupDirectChromeHeight(scale), common = {admitted, capacity, pageSize: admitted ? count : 0, paged: false, chromeHeight: directChrome, needsScroll: false};
   if (directChrome + directRows * rowHeight + (directRows - 1) * MAP_GROUP_ROW_GAP <= availableHeight) {
     return {...common, rowHeight, compact: false};
   }
@@ -567,7 +605,9 @@ export function mapGroupPickerLayout(width: number, height: number, fontScale = 
     return {...common, rowHeight: compactHeight, compact: true};
   }
   const fallbackRow = Math.max(MAP_GROUP_ROW_HEIGHT, Math.min(rowHeight, availableHeight - directChrome));
-  return {...common, rowHeight: fallbackRow, compact: true};
+  const fallbackHeight = directChrome + directRows * fallbackRow + (directRows - 1) * MAP_GROUP_ROW_GAP;
+  return {...common, rowHeight: fallbackRow, compact: true,
+    needsScroll: admitted && count <= MAP_GROUP_MIN_CAPACITY && fallbackHeight > availableHeight};
 }
 
 export function mapGroupPageSize(width: number, height: number, fontScale = 1, count = MAP_GROUP_DEFAULT_CAPACITY): number {

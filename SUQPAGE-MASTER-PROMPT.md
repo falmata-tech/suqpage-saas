@@ -20,6 +20,10 @@ historical provider/protocol identifiers remain where compatibility requires
 them. Their spelling does not authorize recreating services or imply that hosted
 names, email settings or existing store listings have already changed.
 
+The current source prepares Android versionCode 2 with the later discovery and
+mask-safe branding changes. That successor has not yet been compiled or admitted;
+the retained v1 does not contain those changes.
+
 This brief describes the current source contracts. Implementation, focused tests,
 visual approval, publication and physical/Play qualification are separate states.
 For the actual deployed source, active recovery, unfinished work and exact evidence,
@@ -63,13 +67,19 @@ a generic website builder, checkout marketplace or unrelated architecture rewrit
 
 Use **AfricMade**, the owner-supplied minimal orange showroom artwork and the canonical
 values/assets in `lib/brand.ts` consistently across web, mobile, mail and store
-media. The public Market introduction is “Discover African farmers,
+media. The desktop Market introduction is “Discover African farmers,
 manufacturers, and artisans in one place.” It explains that visitors can learn
 about their story, product lineup and production capacity for bulk purchase or
 small orders without getting lost in social media posts. Individual and business
 buyers use the same
 product and inquiry flows, with order options explained on the product page.
+Phone web and native Market use “Find African suppliers.” to prioritize the map;
+About and desktop retain the fuller narrative.
 Logos and merchant pictures are not recolored by a showroom accent or locale.
+Launcher and installed-web icons use the approved orange symbol on white with
+mask-safe padding. Android's system splash uses a dedicated padded symbol,
+while app/web headers retain the full wordmark. The browser favicon remains
+transparent orange; typography and source artwork are unchanged (FE-070 S183).
 
 Enabled interface languages are English, Amharic and Afaan Oromo. Native means
 the Expo visitor/owner application, with its own navigation and platform behavior;
@@ -105,8 +115,9 @@ availability, then contact the business directly. Social channels remain useful
 for conversation and the final sale. Do not imply verified stock, a completed
 purchase, automated fulfillment or an exact home address.
 
-Web Market retains a compact visible introduction on a plain background. Mobile
-prioritizes exploration space; About explains benefits to both visitors and
+Web Market retains a compact visible introduction on a plain background. Phone
+web and native use the shorter supplier heading and compact search/filter row;
+About explains benefits to both visitors and
 business owners. Write inviting, professional copy rather than hype or literal
 translations of internal brainstorming. FE-070 and FE-049 control authored copy.
 
@@ -170,6 +181,10 @@ repeat the same story/video in several sections.
 The optional saved page accent belongs to that business's presentation, not its
 owner's account or platform theme. It may tint permitted surfaces and controls;
 canonical branding, photographs and playing video retain their original appearance.
+The Page's floating inquiry-list action uses its validated saved accent with a
+readable label, icon and count on web and native; a missing/invalid accent restores
+the platform default. Moving between businesses cannot carry another Page's colour
+or inquiry items into the current one. Transport retains the platform identity.
 Page settings, live Save, preview and publication retain version and tenant guards.
 Live/sharing controls are authored presentation settings, not proof that a provider
 broadcast started; retain only configured links and truthful status. Sound/push
@@ -182,9 +197,13 @@ Featured, About, legal/account pages and workspaces. Use ordinary page/task
 navigation rather than dumping editable records into one long screen or hiding
 primary work in accordions. Saved summaries are read first; Edit opens one focused
 task with clear Save, Cancel and return context.
-The public About footer names Jigjiga, Somali Region, Ethiopia as the business
-location and MarketVision Technology as the copyright holder. AfricMade remains
-the customer-facing product name.
+Public information pages share a grouped footer: Businesses and logistics-company
+listing links, separate legal/account-deletion links, then Jigjiga, Somali Region,
+Ethiopia and the MarketVision Technology copyright on separate lines. Market,
+Featured, chat, business Pages and private workspaces retain their task-specific
+layouts without that footer. About keeps a small transport entry in its buyer
+content. AfricMade remains the customer-facing product name. Market navigation
+uses a storefront symbol; the map symbol identifies Business locations.
 
 Businesses/map and Products are separate exploration panels with a switch that
 spans the phone width to preserve map space and reachable edge handles.
@@ -194,9 +213,16 @@ showing the inactive panel's controls. Preserve reduced motion and keyboard use.
 
 Featured's category name is primary, with decorative art and secondary day/date.
 Its scheduled day/category mapping stays intact: fixed Monday–Sunday dates use the
-Ethiopia-local week, with current-day agenda/timing and up to six eligible businesses
+Ethiopia-local week, with current-day timing and up to four eligible businesses
 chosen automatically or by an authorized date override. This virtual presentation
 is not a physical event or an integration that starts social-media broadcasts.
+The 8:15–9:45 PM EAT window fits four twenty-minute businesses, two two-minute
+sponsor mentions and three-minute changeovers where a sponsor break does not
+supply the transition. Underfilled agendas finish earlier. A concise date/time/
+status row and timed business cards replace duplicate agenda text; a manually
+chosen category stays selected. “Scheduled now” identifies the scheduled window,
+not a verified live broadcast. Historical manual rows are preserved while public
+projection and new selections obey the four-business cap.
 
 Sponsors are clearly labelled promotional placements in an independent, manually ordered global
 pool of up to five eligible showrooms or validated external ads. External ads never
@@ -351,7 +377,6 @@ shop marker with the business name;
 numbered area circles represent multiple businesses. If an overview marker
 overlaps another, the businesses share a multi-business count until separated.
 The city is shown in previews without inferring a street location.
-Visual approval and rollout remain pending.
 City-only businesses and their products remain searchable through country/city
 filters.
 
@@ -370,6 +395,9 @@ merchant names and same-named cities' country/canonical identities. Search uses
 parameterized Unicode-aware matching and bounded typo candidates after all
 visibility/type/geographic filters; product matches do not impersonate business
 identity matches. No cross-language semantic search is claimed.
+Compact views keep one readable search field and labelled Filters button. The
+filter overview opens one group at a time, with Back, Clear all and Done; it
+retains the same independent query/filter contracts as the wide controls.
 
 Preserve the selected scope and each scope's criteria/position through details,
 Back and Market return. Memory is bounded public tab/app state scoped to API origin
@@ -381,13 +409,16 @@ valid measured dimensions and ignore hidden zero-size/disposed work.
 
 Outer numbered clusters zoom into smaller groups. An exposed final group opens
 its exact viewport-admitted business preview at the current camera, without forcing
-maximum zoom or spreading icons/connector lines. Group size adapts so all admitted
-previews fit together without paging; isolated businesses may stand alone. Preserve
+maximum zoom or spreading icons/connector lines. Group size adapts to fit admitted
+previews without paging. Short or enlarged layouts retain two businesses in one
+bounded scrolling preview rather than splitting them into overlapping named pins;
+isolated businesses may stand alone. Preserve
 selection/camera and current callbacks when returning from a showroom. Worldwide
 navigation remains available within FE-058 limits; initial/reset geography remains
 Ethiopia and must not move an existing exact storefront pin. Current nearby-group
 compactness uses the shared three-kilometer neighborhood and viewport limits
-(up to six large-screen/three phone cards, reduced for short/enlarged layouts), not
+(up to six large-screen/three phone cards, with the two-business short-layout
+fallback), not
 a global fixed three. Any final marker representing one business uses the shop
 icon, including city-only businesses, and opens that business directly; no map
 zoom may display a numbered **1** circle. City-only markers stay at their
@@ -397,7 +428,9 @@ more businesses. Exact/current zoom and
 group-spacing bounds remain in FE-021/FE-058.
 
 The centralized OSM basemap supplies visual context only; server catalog/location
-authority remains separate. Request visible tiles with attribution and normal cache
+authority remains separate. Attribution stays readable inside the map canvas,
+clear of navigation, handles and floating actions. Request visible tiles with
+attribution and normal cache
 behavior, never proxy/prefetch/scrape/bulk-download or service-worker-cache community
 tiles. A failed basemap keeps markers/camera/controls usable with honest Retry;
 obsolete canceled work is not a current error. Private tracking referrer privacy
@@ -818,8 +851,16 @@ Allow long Oromo text and appropriate script typography; the Latin AfricMade art
 is constant. Automated completeness/layout coverage is not independent native-speaker
 endorsement, translated user data or cross-language search. FE-049/FE-070 govern
 copy; rollout evidence remains separate.
+Compact filter labels, Featured schedule/status and public footer links follow
+the same active-language contract; they must fit at narrow widths and enlarged
+text without replacing meaning with icons or clipping actions.
 
 ## 19. UX and accessibility requirements
+
+Brand resource checks prove full-symbol containment within launcher and system-
+splash masks at every generated Android density. A mask preview or Expo browser
+does not qualify the native launcher/cold-start experience: identify and inspect
+the new binary, then exercise the installed result separately (FE-070/DEP-044).
 
 Use responsive standard workspaces and focused tasks on desktop, phone web and
 the native app. Keep selected/current navigation unambiguous, actions discoverable,
@@ -829,6 +870,9 @@ handle targets retain their own contracts. Panels/dialogs fit the viewport, use 
 usable scroll region, safe areas, focus containment/restoration and an accessible
 close/back route. Avoid document overflow, clipped buttons and unnecessary vertical
 chrome that steals map/chat space. Respect reduced motion.
+On short screens with enlarged text, the Market workspace can scroll to a
+usable map instead of compressing its canvas behind fixed actions. Keep the
+language selector inside the header and its touch target at least 44px.
 
 Solve confusion through page structure and interaction before adding more copy.
 Related tasks belong together; choices, progress, saved state and recovery should

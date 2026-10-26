@@ -1,7 +1,40 @@
 import type {Page} from '@playwright/test';
 import {test, expect} from './fixtures';
 import { execFileSync } from "node:child_process";
+import {createRequire} from 'node:module';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from "node:path";
+import pg from 'pg';
+
+const {browserSupabasePorts,inspectBrowserServices,browserServicesReady}=createRequire(path.resolve('package.json'))('./scripts/acceptance-supabase-readiness.mjs') as {
+  browserSupabasePorts():{api:number;db:number};
+  inspectBrowserServices(projectId:string):unknown;
+  browserServicesReady(projectId:string,services:unknown):boolean;
+};
+
+// This case writes only through the real admin form. Refuse it before sign-in
+// unless the target is the runner's current disposable project, not a dev DB.
+function disposableFeaturedTarget(baseURL:string|undefined){
+  const environment=process.env,credentials=environment.SUQPAGE_TEST_CREDENTIALS||'',runnerRoot=path.dirname(credentials),ports=browserSupabasePorts();
+  if(environment.SUQPAGE_RUNTIME_PROFILE!=='browser-test'||environment.SUQPAGE_LOCAL_SUPABASE_PROFILE!=='browser-test'||environment.SUQPAGE_DATABASE_DRIVER!=='postgres'||!baseURL||baseURL!==environment.SUQPAGE_TEST_BASE_URL||credentials!==environment.SUQPAGE_CREDENTIAL_PATH||path.basename(credentials)!=='credentials.txt'||path.dirname(runnerRoot)!==os.tmpdir()||!/^suqpage-acceptance-[A-Za-z0-9]+$/.test(path.basename(runnerRoot)))throw new Error('Featured mutation acceptance requires its disposable runner target.');
+  const connectionString=environment.SUQPAGE_POSTGRES_URL||'';let origin:URL,provider:URL,database:URL;
+  try{origin=new URL(baseURL);provider=new URL(environment.SUQPAGE_SUPABASE_URL||'');database=new URL(connectionString);}catch{throw new Error('Featured acceptance requires valid disposable app/API/database bindings.');}
+  if(origin.protocol!=='http:'||origin.hostname!=='127.0.0.1'||!origin.port||provider.protocol!=='http:'||!['127.0.0.1','localhost'].includes(provider.hostname)||Number(provider.port)!==ports.api||environment.NEXT_PUBLIC_SUPABASE_URL!==environment.SUQPAGE_SUPABASE_URL||!['127.0.0.1','localhost'].includes(database.hostname)||Number(database.port)!==ports.db||connectionString!==environment.SUQPAGE_POSTGRES_DIRECT_URL||connectionString!==environment.SUQPAGE_LOCAL_POSTGRES_URL)throw new Error('Featured acceptance database/API bindings differ from its disposable runner.');
+  const config=fs.readFileSync(path.join(runnerRoot,'supabase-browser-project/supabase/config.toml'),'utf8'),projectId=/^project_id = "([^"]+)"$/m.exec(config)?.[1]||'';
+  if(!/^suqpage-browser-[0-9]+$/.test(projectId)||Number(/^\[api\]\r?\n[\s\S]*?^port = (\d+)$/m.exec(config)?.[1])!==ports.api||Number(/^\[db\]\r?\n[\s\S]*?^port = (\d+)$/m.exec(config)?.[1])!==ports.db||!browserServicesReady(projectId,inspectBrowserServices(projectId)))throw new Error('Featured acceptance disposable project identity/readiness is not verified.');
+  return {origin:origin.origin,connectionString};
+}
+async function readFeaturedOverride(target:ReturnType<typeof disposableFeaturedTarget>,dateIso:string){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(dateIso))throw new Error('A canonical Featured date is required.');
+  const client=new pg.Client({connectionString:target.connectionString,connectionTimeoutMillis:5000,statement_timeout:5000,options:'-c default_transaction_read_only=on'});
+  try{
+    await client.connect();
+    const day=await client.query<{mode:string}>('SELECT mode FROM featured_program_days WHERE date_iso=$1',[dateIso]);
+    const lineup=await client.query<{business_id:number;position:number}>('SELECT business_id,position FROM featured_program_lineup WHERE date_iso=$1 ORDER BY position,business_id',[dateIso]);
+    return {day:day.rows,lineup:lineup.rows.map(row=>({businessId:Number(row.business_id),position:Number(row.position)}))};
+  }finally{await client.end();}
+}
 
 const mailpitURL = process.env.SUQPAGE_TEST_MAILPIT_URL!;
 let loginAttempt = 0;
@@ -135,12 +168,39 @@ test('linked products offer a prepared message and first-party inbox contact',as
   }
 });
 
-test('administrator and staff remain within workspace permissions',async({page})=>{
+test('administrator and staff remain within workspace permissions',async({page,baseURL})=>{
+  // Adds two real admin saves, reloads and readback to the existing two sign-ins.
+  test.setTimeout(180_000);
+  const target=disposableFeaturedTarget(baseURL);
   await loginWithEmailCode(page,'admin@mirtpage.local');
   for(const route of ['/dashboard/admin/businesses','/dashboard/admin/staff','/dashboard/admin/page-reviews','/dashboard/admin/businesses?location=pending','/dashboard/support/agents','/dashboard/admin/sponsors','/dashboard/admin/featured-schedule']){
     const response=await page.goto(route);expect(response?.status()).toBe(200);await expect(page.locator('main')).toBeVisible();
     await expect(page.locator('a[href*="/dashboard/requests"],a[href*="/dashboard/design-bank"]')).toHaveCount(0);
   }
+  if(new URL(page.url()).origin!==target.origin)throw new Error('Featured form is not on the verified disposable app.');
+  const dateInput=page.getByLabel('Program date',{exact:true}),currentDate=await dateInput.inputValue(),monday=new Date(`${currentDate}T12:00:00Z`);
+  monday.setUTCDate(monday.getUTCDate()-(monday.getUTCDay()+6)%7);const dateIso=monday.toISOString().slice(0,10);
+  await dateInput.fill(dateIso);await page.getByRole('button',{name:'Open date',exact:true}).click();
+  await expect(page.locator('.featured-lineup-panel h2')).toContainText('Electronics');
+  await expect(readFeaturedOverride(target,dateIso)).resolves.toEqual({day:[],lineup:[]});
+  await page.locator('.featured-lineup-panel').getByRole('link',{name:'Edit',exact:true}).click();
+  await page.getByRole('radio',{name:/^Manual\b/}).check();
+  const eligible=page.getByRole('group',{name:'Eligible featured pages',exact:true}),checkboxes=eligible.locator('input[name="businessId"]');
+  expect(await checkboxes.count()).toBeGreaterThanOrEqual(5);
+  const candidates=await eligible.locator('.featured-business-row').evaluateAll(rows=>rows.slice(0,5).map(row=>({id:Number((row.querySelector('input[name="businessId"]') as HTMLInputElement).value),name:row.querySelector('strong')!.textContent!})));
+  const checked=eligible.locator('input[name="businessId"]:checked');while(await checked.count())await checked.first().uncheck();
+  for(const business of candidates.slice(0,4))await eligible.locator(`input[name="businessId"][value="${business.id}"]`).check();
+  await expect(checked).toHaveCount(4);await expect(page.locator('.featured-lineup-capacity strong')).toHaveText('4 of 4 selected');
+  const fourth=eligible.locator(`input[name="businessId"][value="${candidates[3].id}"]`),fifth=eligible.locator(`input[name="businessId"][value="${candidates[4].id}"]`);
+  await expect(fifth).toBeDisabled();await fourth.uncheck();await expect(fifth).toBeEnabled();await fourth.check();await expect(fifth).toBeDisabled();
+  for(const [index,business]of candidates.slice(0,4).entries())await eligible.locator(`input[name="position-${business.id}"]`).fill(String(4-index));
+  await page.getByRole('button',{name:'Save lineup',exact:true}).click();await expect(page).toHaveURL(new RegExp(`date=${dateIso}&saved=lineup$`));await expect(page.getByText('The lineup was saved and the public timetable recalculated.',{exact:true})).toBeVisible();
+  await page.reload();await expect(page.locator('.featured-schedule-summary')).toContainText('Manual lineup');
+  const manualOrder=candidates.slice(0,4).reverse();await expect(page.locator('.featured-lineup-panel .compact-business-row strong')).toHaveText(manualOrder.map(business=>business.name));
+  await expect(readFeaturedOverride(target,dateIso)).resolves.toEqual({day:[{mode:'manual'}],lineup:manualOrder.map((business,index)=>({businessId:business.id,position:index+1}))});
+  await page.locator('.featured-lineup-panel').getByRole('link',{name:'Edit',exact:true}).click();await page.getByRole('radio',{name:/^Automatic\b/}).check();await page.getByRole('button',{name:'Save lineup',exact:true}).click();await expect(page).toHaveURL(new RegExp(`date=${dateIso}&saved=lineup$`));
+  await page.reload();await expect(page.locator('.featured-schedule-summary')).toContainText('Automatic');await expect(readFeaturedOverride(target,dateIso)).resolves.toEqual({day:[],lineup:[]});
+  await expect(page.locator('.featured-lineup-panel .compact-business-row')).toHaveCount(4);
   await signOut(page);await loginWithEmailCode(page,'team-1@demo.mirtpage.local');
   await page.goto('/dashboard/admin');await expect(page).not.toHaveURL(/\/dashboard\/admin/);
   await page.goto('/dashboard/inquiries');await expect(page).toHaveURL(/\/dashboard$/);

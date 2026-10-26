@@ -12,6 +12,14 @@ fs.mkdirSync(out, {recursive: true, mode: 0o700});
 const browser = await chromium.launch();
 const evidence = [], tileFixtures = [];
 
+async function expectCategoryCount(page, count) {
+  const compact = page.getByRole('button', {name: /^Filters, \d+ selected$/});
+  if (await compact.isVisible()) await compact.click();
+  await expect(page.getByRole('button', {name: count ? `Category ${count}` : 'Category', exact: true})).toBeVisible();
+  const dialog = page.getByRole('dialog');
+  if (await dialog.isVisible()) await dialog.getByRole('button', {name: 'Done', exact: true}).click();
+}
+
 // FE-065 AC9 supersedes the old five-card Next/Previous control. Keep this
 // caller-compatible entry point and use real API batches as the authority.
 async function products(context, page = 1) {
@@ -48,7 +56,7 @@ try {
       await expect(page.getByRole('heading', {name: 'Products', exact: true, level: 2})).toBeVisible();
       await expect.poll(() => productIds(page)).toEqual(firstIds);
       await expect(page.getByRole('searchbox', {name: 'Search products', exact: true})).toHaveValue('');
-      await expect(page.getByRole('button', {name: 'Category 1', exact: true})).toBeVisible();
+      await expectCategoryCount(page, 1);
       await expect(page.locator('.discovery-pagination,.discovery-business-results')).toHaveCount(0);
 
       await page.getByRole('button', {name: 'Business locations', exact: true}).click();
@@ -78,7 +86,7 @@ try {
 
       await page.reload();
       await expect.poll(() => productIds(page)).toEqual(firstIds);
-      await expect(page.getByRole('button', {name: 'Category 1', exact: true})).toBeVisible();
+      await expectCategoryCount(page, 1);
       assert.equal(new URL(page.url()).searchParams.get('p.category'), 'electronics');
       await page.getByRole('button', {name: 'Business locations', exact: true}).click();
       await expect(page.getByRole('searchbox', {name: 'Search businesses', exact: true})).toHaveValue('Studio');

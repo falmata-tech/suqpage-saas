@@ -8,6 +8,111 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/SUQPAGE-TRANSITION-CHECKLIST.md).
 
+## S183 icon and splash mask qualification
+
+FE-070 S183 retains the owner-supplied artwork and changes only export geometry
+and white fields; DEP-044 selects the next Android code2 over canonical v1.
+The old adaptive/monochrome and wide splash fail the new significant-ink mask
+tests. The corrected sources pass seven brand cases, all five installed Expo
+splash-plugin densities (zero significant ink outside the system safe circle),
+PWA checks, eleven attention-worker compatibility cases and localized metadata.
+Favicon, source mark, full wordmark and email bytes remain identical. The actual
+configuration test resolves2 for all three profiles with a stale base1 supplied.
+Protected evidence: `.local/s183-brand-review/focused-receipt.json`,
+`chrome-2026-10-26T15-02-50.380Z/` in that folder, and
+`.local/s182-native-prep/version2-config-focused.json`.
+
+Parent and agent inspected orange-on-white launcher/themed/PWA/touch/splash
+previews in actual Chrome. These emulate documented masks with actual generated
+PNG resources; they are not installed Android launches or a new compiled binary.
+Current runtime freeze is `.local/s181-review/production-freeze-v8.json`
+(`358a3690…ccd0bd`, 1,386 inputs); source/test/tool inputs are also frozen in
+`.local/s183-brand-review/gate-code-freeze-v10.json` (1,836 inputs,
+`5f7f4467…7f5817`). V9/V10 change only the obsolete web lifecycle wait and
+one remaining compact-filter capture assertion; production V8 stays unchanged.
+The restarted previews use the intended checkout/local API. Unchanged S181/S182
+header/wordmark, task and data-contract evidence keeps its original identity.
+
+The first complete gate stopped on an obsolete cosmetic header assertion. The
+second passed eighteen stages then found old direct-filter/fixed-zoom test
+expectations; corrected native component and lifecycle files pass7/7 and6/6.
+The third complete run passed 40 main stages, then found the equivalent old web
+fixed-zoom wait; its complete nine-case Chrome lifecycle file now passes. Reusing
+483 unchanged UI cases plus those nine, and the passing remaining 37 main stages,
+qualifies all 78 check stages. This is source-matched composition under DEP-002;
+the original full run remains failed, not relabelled as one successful invocation.
+Protected gate evidence is `.local/s182-gates/check-qualification.json`.
+
+Web release passes in the independent root/contracts-only install in 428.7s,
+including the production build,104 trace-privacy checks, real disposable-provider
+HTTP smoke and zero-vulnerability web audits. Full acceptance passes19 cases;
+the remaining stale direct Category assertion is corrected to open the actual
+Filters overview, and its entire human-search case passes in a fresh disposable
+stack. All20 cases are qualified, with the first run's failure retained. Actual
+admin four-business Save/reload/PostgreSQL readback, automatic reset and staff
+denial pass. Receipts: `.local/s182-gates/release-web-attempt01.json` and
+`acceptance-qualification.json` beside it; the combined terminal summary is
+`local-gates-uncommitted.json` in that directory. Direct tests use installed
+Chrome; five delegated capture scripts retain their own headless Chromium.
+
+Fresh native audit still fails with six high reports rooted in node-forge and
+zod. The383-input, 1,712-module offline Hermes export passes and contains neither
+root advisory package; broader reported Expo/MapLibre packages do occur, so no
+general runtime clearance or exploitability finding is claimed. Protected summary:
+`.local/s183-native-prep/preparation-summary.json`. Exact GitHub integration,
+web publication, a fresh one-artifact native exception/compilation and installed-
+device/Play qualification remain pending; no stale artifact is renamed as new.
+
+## S181–S182 map, Featured and public footer qualification
+
+FE-065/FE-021 implement the compact phone/native Market, earlier safe group
+activation and a neutral Market icon; FE-054 owns business-coloured inquiry
+actions. FE-021/FE-033/BE-029 implement the four-business 8:15–9:45 PM EAT program
+and simpler Featured. FE-070 owns the grouped information-page footer. Runtime
+inputs are frozen in protected `.local/s181-review/production-freeze-v7.json`
+(`e20b1314…f052d`, 1,381 files). V6 changes only two web CSS files from V5:
+the short/enlarged canvas scroll fallback and bounded 44px language selector.
+The six-case en/am/om header/canvas regression reproduces both defects before
+the fix and passes afterward. V7 changes only the narrow web brand size so the
+full selected-language label fits; its real About→footer→Market retake passes.
+This is source qualification, not publication.
+
+| Acceptance | Focused implementation evidence |
+| --- | --- |
+| Compact controls, scope/Back, loading and locales | `test-market-workspace-ui.ts`, `test-native-discovery-previews.ts`, `test-mobile-market-layout.ts`, `test-web-market-short-layout.ts`; 46 web and 30 native layout cases plus 24 actual installed-RNWeb intrinsic-height cases pass. The latter reproduces and fixes the filter-overview overlap found during Chrome review. |
+| Safe groups and named pins | `test-map-clustering.ts`, `test-mobile-map-groups.ts`, `test-map-group-picker-web.ts`, `test-mobile-map.ts`; 35 shared, 19 native-group and two picker integrations pass, including short/enlarged two-business scrolling and conserved coordinates/IDs. |
+| Business inquiry accents | `test-floating-inquiry-web.ts`, `test-mobile-public-action-dock.ts`; validated colours, contrast, defaults and A→B isolation pass. Protected focused receipt: `.local/s181-cart-accent/focused-review.json`. |
+| Featured timing, capacity and privacy | `test-featured-schedule.ts`, `test-discovery.ts`, `test-clock-display.ts`, `test-featured-broadcast-header.ts`, web sponsor/loading and native Featured cases; isolated PostgreSQL fifth-selection rejection/history preservation, 18 native and 13 web cases pass. Retained-today/future-category privacy was reproduced before its guard fix. |
+| Footer layout and destinations | `test-about-audiences.ts`, `test-transport-partner-interest-ui.ts`, `test-public-transport-launcher.ts`; grouped links, route allowlist and 320px en/am/om enlarged layouts pass. Protected receipt: `.local/s181-footer-review/focused-review.json`. |
+
+Actual Expo Chrome completes 36 checks and 31 states in en/am/om, including a
+21-business Addis cluster, terminal preview/Page/Back, filters, a declared one-shot
+failed search followed by a real API retry, Featured, transport intake/Cancel and
+footer navigation. Receipt: `.local/s181-native-layout/browser-attempt02/receipt.json`;
+agent visual decision: `actual-expo-visual-decision-v5.json` in that parent folder.
+It uses real local application/catalogue data and synthetic map tiles; no public
+catalogue writes or real messages are sent. This does not qualify installed Android,
+MapLibre events, device keyboard, push or independent native-speaker fluency.
+V6 changes no native or shared-runtime inputs, so that Expo evidence is retained
+with its original V5 identity rather than relabelled as another run.
+
+Actual web qualification completes 42 functional steps across retained V5/V6
+states plus the V7 header retake. Receipt:
+`.local/s181-web-focused/s181-s182-web-functional-visual-qualification-v7.json`.
+Four actual web/Expo cart cases prove default palette, list isolation and return;
+all active marked local demos lack saved accents, so custom colours are qualified
+only by installed-renderer and PostgreSQL/DTO regressions. Nine actual footer
+locale/width cases exercise 57 destination/states. Their source-bound scoped
+visual decisions are `visual-assessment.json` under
+`.local/s181-cart-accent/actual-2026-10-26T10-42-44-941Z/` and
+`.local/s181-footer-review/actual-2026-10-26T10-45-49-917Z/`.
+The parent admission is `.local/s181-review/agent-visual-admission-v7.json`.
+Background web GET cancellations retain unproven cause (including observed HTTP
+200 RSC responses); do not call these reviews network-error-free.
+The combined local check/release/disposable-provider gates above now qualify this
+unchanged runtime behavior; their retained source identities are not rewritten.
+The S180 deployed website and earlier APK do not contain these changes.
+
 ## S168 current local transport reply qualification
 
 BE-018/FE-019 use the first public staff reply as the stable 3:30 live-wait

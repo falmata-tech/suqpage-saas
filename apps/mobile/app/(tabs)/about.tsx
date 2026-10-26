@@ -4,13 +4,13 @@ import { View, Text, Pressable,ScrollView, StyleSheet,Platform } from "react-nat
 import { router } from "expo-router";
 import { ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } from "../../../../lib/storefront-copy";
 import {TRANSPORT_COPY} from '../../../../lib/i18n/transport-copy';
-import { Screen, Button, Icon, colors, useOpenLink } from "../../src/ui";
+import { Screen, Button, Icon, colors } from "../../src/ui";
 import { useApp } from "../../src/runtime";
 import { createMarketNavigationIntent } from "../../src/incoming-link";
-import { legalPageUrl } from "../../src/public-origin";
+import PublicSiteFooter from '../../src/PublicSiteFooter';
 
 export default function About() {
-  const { t } = useApp(),openLink=useOpenLink();
+  const { t } = useApp();
   const bottomInset=usePublicScrollInset();
   const scroll = useRef<ScrollView>(null);
   const tabs=useRef<Array<View|null>>([]),[audience,setAudience]=useState<typeof ABOUT_STOREFRONT_SECTIONS[number]['id']>('customers');
@@ -28,12 +28,9 @@ export default function About() {
         <View style={s.icon}><Icon name={benefit.icon} size={21} color={colors.brand}/></View>
         <View style={{flex:1,gap:6}}><Text accessibilityRole="header" style={s.benefitTitle}>{t(benefit.title)}</Text><Text style={s.body}>{t(benefit.description)}</Text></View>
       </View>)}</View>
-      {section.id === "customers" && <View style={s.mapNote}><Text style={s.benefitTitle}>{t(CUSTOMER_MAP_COPY.title)}</Text><Text style={s.body}>{t(CUSTOMER_MAP_COPY.description)}</Text><Button secondary icon="map" label={t("Explore the map")} onPress={() => router.navigate(`/?view=map&_intent=${createMarketNavigationIntent()}`)} /></View>}
+      {section.id === "customers" && <View style={s.mapNote}><Text style={s.benefitTitle}>{t(CUSTOMER_MAP_COPY.title)}</Text><Text style={s.body}>{t(CUSTOMER_MAP_COPY.description)}</Text><Button secondary icon="map" label={t("Explore the map")} onPress={() => router.navigate(`/?view=map&_intent=${createMarketNavigationIntent()}`)} /><Pressable accessibilityRole="link" accessibilityLabel={t(TRANSPORT_COPY.launcherTitle)} onPress={()=>router.navigate('/buying')} style={s.transportLink}><Text style={s.transportText}>{t(TRANSPORT_COPY.launcherTitle)} →</Text></Pressable></View>}
     </View>
-    <Button secondary icon="truck" label={t(TRANSPORT_COPY.launcherTitle)} onPress={()=>router.navigate('/buying')}/>
-    <Button secondary label={t('Logistics service providers: Ask to be listed')} onPress={()=>router.navigate('/transport-partners')}/>
-    <View style={{flexDirection:'row',flexWrap:'wrap',gap:10}}><Button secondary label={t('Privacy')} onPress={()=>void openLink(legalPageUrl('privacy'))}/><Button secondary label={t('Terms')} onPress={()=>void openLink(legalPageUrl('terms'))}/></View>
-    <View style={s.companyDetails}><Text style={s.companyText}>{t('Jigjiga, Somali Region, Ethiopia')}</Text><Text style={s.companyText}>© {new Date().getFullYear()} MarketVision Technology</Text></View>
+    <PublicSiteFooter/>
   </ScrollView></Screen>;
 }
 const s = StyleSheet.create({
@@ -53,6 +50,6 @@ const s = StyleSheet.create({
   benefitTitle:{fontSize:16,lineHeight:22,fontWeight:"700",color:colors.ink},
   body:{fontSize:14,lineHeight:22,color:colors.muted},
   mapNote:{gap:8,borderTopWidth:1,borderColor:colors.line,paddingTop:16},
-  companyDetails:{gap:4,borderTopWidth:1,borderColor:colors.line,paddingTop:14},
-  companyText:{fontSize:12,lineHeight:18,color:colors.muted},
+  transportLink:{minHeight:44,minWidth:44,maxWidth:'100%',paddingVertical:8,justifyContent:'center',alignSelf:'flex-start'},
+  transportText:{fontSize:14,lineHeight:20,color:colors.brand},
 });

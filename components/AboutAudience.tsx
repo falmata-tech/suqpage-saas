@@ -24,10 +24,9 @@ export default function AboutAudience(){
   {ABOUT_STOREFRONT_SECTIONS.map(section=><section key={section.id} id={`for-${section.id}`} role="tabpanel" aria-labelledby={`about-tab-${section.id}`} hidden={audience!==section.id} className={`${styles.section} ${section.id==="businesses"?styles.business:""}`}>
    <div className={styles.intro}><h2>{t(section.title)}</h2><p>{t(section.description)}</p>
     <Link className={styles.action} href={section.id==="customers"?"/":"/login"}>{t(section.action)} <ArrowRight aria-hidden="true"/></Link>
-    {section.id==="customers"&&<Link className={styles.mapLink} href="/?view=map"><MapPin aria-hidden="true"/><span><strong>{t(CUSTOMER_MAP_COPY.title)}</strong>{t(CUSTOMER_MAP_COPY.description)}</span></Link>}
+    {section.id==="customers"&&<><Link className={styles.mapLink} href="/?view=map"><MapPin aria-hidden="true"/><span><strong>{t(CUSTOMER_MAP_COPY.title)}</strong>{t(CUSTOMER_MAP_COPY.description)}</span></Link><Link className={styles.transportLink} href="/?chat=transport">{t(TRANSPORT_COPY.launcherTitle)} <ArrowRight size={16} aria-hidden="true"/></Link></>}
    </div>
    <div className={styles.benefits}>{section.benefits.map(benefit=>{const Icon=icons[benefit.icon];return <article key={benefit.title}><span className={styles.icon}><Icon aria-hidden="true"/></span><div><h3>{t(benefit.title)}</h3><p>{t(benefit.description)}</p></div></article>;})}</div>
   </section>)}
-  <footer className={styles.footer}><nav aria-label={t('About AfricMade')}><Link href="/?chat=transport">{t(TRANSPORT_COPY.launcherTitle)}</Link><Link href="/transport-partners">{t("Logistics service providers: Ask to be listed")}</Link><Link href="/showrooms">{t("Businesses")}</Link><Link href="/privacy">{t("Privacy")}</Link><Link href="/terms">{t("Terms")}</Link><Link href="/account-deletion">{t("Delete account")}</Link></nav><div className={styles.companyDetails}><span>{t('Jigjiga, Somali Region, Ethiopia')}</span><span>© {new Date().getFullYear()} MarketVision Technology</span></div></footer>
  </div>;
 }

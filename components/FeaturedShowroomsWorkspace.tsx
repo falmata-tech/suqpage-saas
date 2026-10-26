@@ -9,7 +9,7 @@ import Image from "next/image";
 import CategoryIllustration from "./CategoryIllustration";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarClock, ChevronDown, ExternalLink, Radio, X } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { DiscoveryShowroom, FeaturedShowroomsView, SponsorPlacement, WeeklyFeaturedProgram } from "@/lib/discovery";
@@ -17,7 +17,6 @@ import {
   buildFeaturedProgramAgenda,
   featuredProgramDisplayOrder,
   featuredProgramTimeLabel,
-  resolveFeaturedProgramSessions,
   type FeaturedBoothWalkthrough,
   type FeaturedProgramAgendaEntry,
 } from "@/lib/featured-program";
@@ -85,26 +84,26 @@ function FeaturedGallery({ featured, walkthroughs, featuredNowBusinessId, now }:
   const [selected, setSelected] = useState<DiscoveryShowroom | null>(null);
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
-  const sessions = useMemo(() => resolveFeaturedProgramSessions(featured.boothCount, featured.programPolicy), [featured.boothCount, featured.programPolicy]);
   const displayBooths = useMemo(() => {
     if (!featured.isToday || now === null) return featured.booths;
     const bySlot = new Map(featured.booths.map((booth) => [booth.slot, booth]));
     return featuredProgramDisplayOrder(walkthroughs, now).map((slot) => bySlot.get(slot)).filter((booth): booth is WeeklyFeaturedProgram["booths"][number] => Boolean(booth));
   }, [featured.booths, featured.isToday, now, walkthroughs]);
   useEffect(() => setSelected(null), [featured.dateLabel, featured.industryCode]);
+  const visibleSelection = featured.isToday && selected && featured.booths.some(booth => booth.revealed && booth.showroom.id === selected.id) ? selected : null;
 
-  if (!featured.booths.length) return <div className="discovery-empty"><h3>{t("Today's featured lineup is being prepared.")}</h3><p>{t("More businesses will appear as they publish their pages.")}</p></div>;
+  if (!featured.booths.length) return <div className="discovery-empty"><h3>{t(featured.isToday ? "Today's featured lineup is being prepared." : "No businesses are scheduled for this day")}</h3><p>{t("More businesses will appear as they publish their pages.")}</p></div>;
   return <div className="featured-gallery-wrap"><div className="featured-gallery" aria-label={t("{value1}, {value2} featured businesses", { value1: featured.title, value2: featured.boothCount })}>
     {displayBooths.map((booth) => {
       const walkthrough = walkthroughs.find((entry) => entry.slot === booth.slot);
-      const walkthroughLabel = walkthrough ? `${walkthrough.label} EAT` : `${featuredProgramTimeLabel(sessions.evening.startMinute, sessions.evening.endMinute)} EAT`;
+      const walkthroughLabel = walkthrough ? `${walkthrough.label} EAT` : `${featuredProgramTimeLabel(featured.programPolicy.startMinute, featured.programPolicy.endMinute)} EAT`;
       const isCurrent = Boolean(featured.isToday && booth.revealed && booth.showroom.id === featuredNowBusinessId);
-      if (!booth.revealed) return <article key={booth.reference} data-featured-slot={booth.slot} className="featured-card featured-card-preview" aria-label={t("{value1}, upcoming business, {value2}", { value1: booth.reference, value2: walkthroughLabel })}><span className="featured-card-media"><span className="featured-card-placeholder" aria-hidden="true"><i /><i /><i /></span>{SUQPAGE_TIKTOK_URL ? <b>{booth.reference}</b> : null}</span><span className="featured-card-copy"><small>{t("Featured schedule")}</small><strong>{t("Participant announced that day")}</strong><span>{walkthroughLabel}</span></span></article>;
+      if (!featured.isToday || !booth.revealed) return <article key={booth.slot} data-featured-slot={booth.slot} className="featured-card featured-card-preview" aria-label={`${t("Participant announced that day")} · ${walkthroughLabel}`}><span className="featured-card-media"><span className="featured-card-placeholder" aria-hidden="true"><i /><i /><i /></span></span><span className="featured-card-copy"><strong>{t("Participant announced that day")}</strong><time>{walkthroughLabel}</time></span></article>;
       const showroom = booth.showroom;
       const presence = showroomPresence(showroom, featuredNowBusinessId, t);
-      return <button disabled={!ready} key={showroom.id} data-business-id={showroom.id} data-hero-image={showroom.heroImagePath || undefined} data-walkthrough-current={isCurrent || undefined} data-presence={presence.kind || undefined} type="button" className={`featured-card${isCurrent ? " walkthrough-current" : presence.kind === "live" ? " merchant-live" : ""}${selected?.id === showroom.id ? " selected" : ""}`} onClick={() => setSelected(showroom)} aria-label={SUQPAGE_TIKTOK_URL ? t("{value1}, {value2}, {value3}, walkthrough {value4}{value5}", { value1: booth.reference, value2: showroom.name, value3: showroom.city, value4: walkthroughLabel, value5: presence.label ? `, ${t(presence.label)}` : "" }) : t("{value1}, {value2}, {value3}. View details.", {value1:showroom.name,value2:t(showroom.primaryIndustryLabel),value3:showroom.city})}><span className="featured-card-media"><ShowroomImage showroom={showroom} />{SUQPAGE_TIKTOK_URL ? <b>{booth.reference}</b> : null}{presence.kind ? <i className={`featured-card-presence featured-card-presence-${presence.kind}`}>{t(presence.shortLabel)}</i> : null}</span><span className="featured-card-copy"><small>{showroom.city} · {t(showroom.primaryIndustryShortLabel)}</small><strong>{showroom.name}</strong>{showroom.isDemo ? <span className={launchStyles.example}>{t("Example page")}</span> : null}<span>{presence.label || (SUQPAGE_TIKTOK_URL ? walkthroughLabel : t("Explore this business"))}</span></span></button>;
+      return <button disabled={!ready} key={showroom.id} data-business-id={showroom.id} data-hero-image={showroom.heroImagePath || undefined} data-walkthrough-current={isCurrent || undefined} data-presence={presence.kind || undefined} type="button" className={`featured-card${isCurrent ? " walkthrough-current" : presence.kind === "live" ? " merchant-live" : ""}${visibleSelection?.id === showroom.id ? " selected" : ""}`} onClick={() => setSelected(showroom)} aria-label={`${t("{value1}, {value2}, {value3}. View details.", {value1:showroom.name,value2:t(showroom.primaryIndustryLabel),value3:showroom.city})} ${walkthroughLabel}${presence.label ? ` · ${t(presence.label)}` : ""}`}><span className="featured-card-media"><ShowroomImage showroom={showroom} />{presence.kind ? <i className={`featured-card-presence featured-card-presence-${presence.kind}`}>{t(presence.shortLabel)}</i> : null}</span><span className="featured-card-copy"><small>{showroom.city}</small><strong>{showroom.name}</strong>{showroom.isDemo ? <span className={launchStyles.example}>{t("Example page")}</span> : null}<time>{walkthroughLabel}</time></span></button>;
     })}
-  </div>{selected ? <ShowroomPreview showroom={selected} onClose={() => setSelected(null)} onOpen={rememberCurrentPublicWorkspace} presence={showroomPresence(selected, featuredNowBusinessId, t)} /> : null}</div>;
+  </div>{visibleSelection ? <ShowroomPreview showroom={visibleSelection} onClose={() => setSelected(null)} onOpen={rememberCurrentPublicWorkspace} presence={showroomPresence(visibleSelection, featuredNowBusinessId, t)} /> : null}</div>;
 }
 
 function FeaturedWeekNav({ featured }: { featured: WeeklyFeaturedProgram }) {
@@ -140,57 +139,16 @@ function FeaturedWeekNav({ featured }: { featured: WeeklyFeaturedProgram }) {
   </nav>;
 }
 
-function sponsorForSlot(placements: SponsorPlacement[], slot: number | undefined) {
-  return slot && placements.length ? placements[(slot - 1) % placements.length] : null;
-}
-
-function TodayProgramSchedule({ featured, agenda, sponsorPlacements }: { featured: WeeklyFeaturedProgram; agenda: FeaturedProgramAgendaEntry[]; sponsorPlacements: SponsorPlacement[] }) {
-  const t = useUiText();
-  if (!featured.isToday) return null;
-  const sessions = resolveFeaturedProgramSessions(featured.boothCount, featured.programPolicy);
-  const sessionSummary = featured.boothCount ? `${featuredProgramTimeLabel(sessions.evening.startMinute, sessions.evening.endMinute)} EAT` : "";
-  const boothName = (slot: number) => {
-    const booth = featured.booths[slot - 1];
-    return booth?.revealed ? booth.showroom.name : `Booth ${slot}`;
-  };
-  const sessionSection = (session: "evening", label: string) => {
-    const entries = agenda.filter((entry) => entry.session === session && (entry.kind === "booth" || entry.kind === "sponsor_break"));
-    if (!entries.length) return null;
-    const resolved = sessions[session];
-    return <section className={`featured-agenda-session featured-agenda-${session}`} aria-label={t("{value1} featured schedule", { value1: label })}><header><span>{t(label)}</span><strong>{featuredProgramTimeLabel(resolved.startMinute, resolved.endMinute)} {" "}{t("EAT")}</strong></header><ol>{entries.map((entry) => entry.kind === "booth"
-      ? <li key={`booth-${entry.slot}`} className={entry.current ? "current" : undefined} aria-current={entry.current ? "time" : undefined}><time>{entry.label}</time><span><b>{boothName(entry.slot)}</b><small>{t("Booth")}{" "}{String(entry.slot).padStart(2, "0")}</small></span></li>
-      : <li key={`${entry.kind}-${entry.start}`} className={`featured-agenda-break${entry.current ? " current" : ""}`} aria-current={entry.current ? "time" : undefined}><time>{entry.timeLabel}</time><span><b>{sponsorForSlot(sponsorPlacements, entry.sponsorSlot)?.name || t(entry.label)}</b><small>{entry.sponsorSlot ? t("Sponsor spotlight") : t("Program break")}</small></span></li>)}</ol></section>;
-  };
-  return <details className="featured-agenda"><summary><CalendarClock aria-hidden="true" /><span><small>{t("Today's schedule")}</small><strong>{sessionSummary || t("No presentations scheduled")}</strong></span><em>{featured.boothCount} {featured.boothCount === 1 ? t("business") : t("businesses")}</em><ChevronDown className="featured-agenda-chevron" aria-hidden="true" /></summary><div className="featured-agenda-body">{sessionSection("evening", "Evening session")}<p>{t("Five-minute changeovers are included between listed presentations unless a sponsor break is shown.")}</p></div></details>;
-}
-
-
-function FeaturedBroadcastStatus({ featured, selectedDay, now, agenda, sponsorPlacements }: { featured: WeeklyFeaturedProgram; selectedDay: WeeklyFeaturedProgram["schedule"][number] | undefined; now: number | null; agenda: FeaturedProgramAgendaEntry[]; sponsorPlacements: SponsorPlacement[] }) {
+function FeaturedBroadcastStatus({ featured, selectedDay, now }: { featured: WeeklyFeaturedProgram; selectedDay: WeeklyFeaturedProgram["schedule"][number] | undefined; now: number | null }) {
   const t = useUiText();
   if (!selectedDay) return null;
-  const status = featuredBroadcastHeader({
-    day: selectedDay,
-    boothCount: featured.boothCount,
-    now: now ?? Date.parse(`${selectedDay.dateIso}T00:00:00+03:00`),
-    policy: featured.programPolicy,
-    tiktokUrl: SUQPAGE_TIKTOK_URL,
-    youtubeUrl: SUQPAGE_YOUTUBE_URL,
-    t,
-  });
-  const activeEntry = agenda.find((entry) => entry.current);
-  const activeWalkthrough = activeEntry?.kind === "booth" ? activeEntry : null;
-  const activeBooth = activeWalkthrough ? featured.booths[activeWalkthrough.slot - 1] : null;
-  const activeBusiness = activeBooth?.revealed ? activeBooth.showroom.name : null;
-  const activeSponsor = activeEntry?.kind === "sponsor_break" ? sponsorForSlot(sponsorPlacements, activeEntry.sponsorSlot) : null;
-  const currentActivity = status.phase === "window"
-    ? activeWalkthrough
-      ? t("Now featuring {value1}", { value1: activeBusiness || activeBooth?.reference || t("Featured business") })
-      : activeSponsor
-        ? t("Sponsor spotlight: {value1}", { value1: activeSponsor.name })
-        : ""
-    : "";
-  const detail = [currentActivity, status.detail, status.note].filter(Boolean).join(" · ");
-  return <aside className={`featured-program featured-program-${status.phase}`} aria-label={t("Daily Featured status")}><span><Radio aria-hidden="true" />{status.label}</span><strong>{status.title}</strong>{detail ? <small>{detail}</small> : null}{status.href ? <a href={status.href} target="_blank" rel="noreferrer">{status.actionLabel}<ExternalLink aria-hidden="true" /></a> : null}</aside>;
+  const status = featuredBroadcastHeader({ day: selectedDay, boothCount: featured.boothCount,
+    now: now ?? Date.parse(`${selectedDay.dateIso}T00:00:00+03:00`), policy: featured.programPolicy,
+    tiktokUrl: SUQPAGE_TIKTOK_URL, youtubeUrl: SUQPAGE_YOUTUBE_URL, t });
+  return <div className={`featured-program featured-program-${status.phase}`} aria-label={t("Daily Featured status")}>
+    <span>{t(selectedDay.dayLabel)} · {selectedDay.dateLabel}</span><time>{status.timeLabel}</time><span className="featured-program-status">{status.statusLabel}</span>
+    {status.href ? <a href={status.href} target="_blank" rel="noreferrer">{status.actionLabel}<ExternalLink aria-hidden="true" /></a> : null}
+  </div>;
 }
 
 function WeeklyFeatured({ featured, sponsorPlacements, featuredNowBusinessId }: { featured: WeeklyFeaturedProgram; sponsorPlacements: SponsorPlacement[]; featuredNowBusinessId: number | null }) {
@@ -215,12 +173,10 @@ function WeeklyFeatured({ featured, sponsorPlacements, featuredNowBusinessId }: 
     const date = new Date(broadcastNow + 3 * 60 * 60 * 1000).toISOString().slice(0,10);
     if (date !== today.dateIso) router.refresh();
   }, [broadcastNow, today, router]);
-  useEffect(() => {
-    if (featured.isToday || !today) return;
-    const timer = window.setTimeout(() => router.replace(featuredHref(today.weekday), { scroll: false }), 6_000);
-    return () => window.clearTimeout(timer);
-  }, [featured.isToday, featured.selectedWeekday, router, today]);
-  return <section className={`daily-featured featured-theme-${featured.industryCode.toLowerCase()}`} aria-labelledby="daily-featured-title"><div className="featured-program-header"><header className="daily-featured-head"><div><span className="discovery-kicker">{t(featured.industryLabel)} · {t(featured.dayLabel)} · {featured.dateLabel} {" "}{t("· Ethiopia")}</span><h1 id="daily-featured-title">{t(featured.title)}</h1><p>{featured.isToday ? t("Explore today’s {value1} businesses. See their products, then get in touch.", { value1: t(featured.industryLabel).toLowerCase() }) : t("See what’s coming on {value1}. Businesses appear here on their featured day.", { value1: t(featured.dayLabel) })}</p></div><FeaturedBroadcastStatus featured={featured} selectedDay={selectedDay} now={broadcastNow} agenda={agenda} sponsorPlacements={sponsorPlacements} /></header><TodayProgramSchedule featured={featured} agenda={agenda} sponsorPlacements={sponsorPlacements} /></div><div className="featured-experience"><FeaturedWeekNav featured={featured} /><FeaturedGallery featured={featured} walkthroughs={walkthroughs} featuredNowBusinessId={currentBusinessId} now={broadcastNow} /><SponsorCarousel placements={sponsorPlacements} onOpenShowroom={rememberCurrentPublicWorkspace} /></div></section>;
+  return <section className={`daily-featured featured-theme-${featured.industryCode.toLowerCase()}`} aria-labelledby="daily-featured-title">
+    <header className="featured-program-header daily-featured-head"><h1 id="daily-featured-title">{t("Daily Featured on TikTok Live")}</h1><FeaturedBroadcastStatus featured={featured} selectedDay={selectedDay} now={broadcastNow} /></header>
+    <div className="featured-experience"><FeaturedWeekNav featured={featured} /><FeaturedGallery featured={featured} walkthroughs={walkthroughs} featuredNowBusinessId={currentBusinessId} now={broadcastNow} /><SponsorCarousel placements={sponsorPlacements} onOpenShowroom={rememberCurrentPublicWorkspace} /></div>
+  </section>;
 }
 
 export default function FeaturedShowroomsWorkspace({ discovery, sponsoredShowrooms }: { discovery: FeaturedShowroomsView; sponsoredShowrooms: SponsorPlacement[] }) {

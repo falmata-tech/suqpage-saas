@@ -2,13 +2,54 @@
 id: FE-054
 title: Restrained business storefront accents
 status: in_progress
-related: [FE-040, FE-053, BE-031, BE-041, BE-044]
+related: [FE-040, FE-041, FE-053, BE-031, BE-041, BE-044]
 owners: [product, frontend]
-last_updated: 2026-10-06
+last_updated: 2026-10-26
 change_level: L2
 ---
 
 # FE-054 — Storefront accent proposal
+
+## S181 — the business's floating inquiry action (ready)
+
+L1 presentation correction on desktop web, phone web and Expo/native. The saved
+accent described in master §5.1 also belongs to that business Page's floating
+**Inquiry list** action. FE-041's per-business saved selections, count, inquiry
+composer, route/hydration guards and public-navigation exclusions remain intact.
+
+- GIVEN a business Page or its product view with saved inquiry items WHEN its
+  floating Inquiry list action appears THEN use that current business's saved
+  page accent and the existing shared contrast-safe palette for its surface,
+  label, icon, border and item-count badge on both web and native. A web portal
+  must retain those colors even outside the Page's styled subtree.
+- GIVEN absent, reset or invalid cached accent data WHEN the action renders THEN
+  retain the existing platform-default appearance. Bright, white and dark colors
+  retain readable foreground/badge contrast; keyboard focus stays visible.
+- GIVEN a visitor switches from business A to B WHEN each current catalog and
+  saved list is ready THEN the action reflects B's accent and B's count only.
+  A's color must not survive B's reset/default, loading or hidden states. Market
+  and Featured still have no global saved-list launcher. The platform shell,
+  transport action, media and other businesses are not recolored.
+- GIVEN the colored action WHEN opened, dismissed, edited or cleared THEN preserve
+  existing inquiry behavior, accessible names, at least 48px action height,
+  focus restoration and phone/safe-area clearance. No additional inquiry fields,
+  persistence, backend projection, tenant scope or publication changes are made.
+
+Definition of Ready: the current published Page/Shop projection is the color
+source; validation and contrast use the existing pure helper. There is no new
+setting, dependency, schema or hosted operation. Rollback removes only rendering
+overrides and preserves saved accents/lists. The change affects presentation,
+not authored/localized words. Root task tracking owns the ordered implementation
+and actual source-bound Chrome review on desktop/phone web and Expo; no full gate
+starts before that review passes.
+
+Focused tests: `test-floating-inquiry-web.ts` exercises the real portal, color
+extremes/default and A/B list/color isolation; `test-mobile-public-action-dock.ts`
+checks the current Shop palette and unchanged transport/navigation. Existing
+`test-storefront-accent.ts` retains validation, contrast, tenant, publication and
+native-projection coverage. Actual Page/product Add → Inquiry list → Close,
+switch-to-another-Page and default-accent review supplement controlled component
+evidence. Record verified results in traceability after the source is frozen.
 
 ## Problem and readiness
 

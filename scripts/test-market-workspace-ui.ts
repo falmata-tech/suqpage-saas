@@ -71,7 +71,7 @@ type Fixture={go:(href:string)=>void;goSilent:(href:string)=>void;flush:()=>void
 let browser:Browser|undefined;
 after(async()=>{await browser?.close();});
 
-async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;memory?:string;blocked?:boolean;serverParams?:string;withShops?:boolean;holdBusiness?:boolean;holdProducts?:boolean;ignoreAbort?:boolean;initialSdkView?:boolean;discoveryMemory?:string;seedShops?:boolean;excluded?:number[];initialExclusions?:number[]|null;enforceExclusions?:boolean;productPages?:boolean;deferWorkspace?:boolean;realStyles?:boolean;width?:number;hydrate?:boolean;locale?:'en'|'am'|'om'}={}){
+async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;memory?:string;blocked?:boolean;serverParams?:string;withShops?:boolean;holdBusiness?:boolean;holdProducts?:boolean;ignoreAbort?:boolean;initialSdkView?:boolean;discoveryMemory?:string;seedShops?:boolean;excluded?:number[];initialExclusions?:number[]|null;enforceExclusions?:boolean;productPages?:boolean;deferWorkspace?:boolean;realStyles?:boolean;width?:number;hydrate?:boolean;filterChoices?:boolean;locale?:'en'|'am'|'om'}={}){
  const compiled=await(options.hydrate?(hydrationBundle??=compileWorkspace(false,'hydrate')):options.realStyles?(styledBundle??=compileWorkspace(true)):bundle);
  browser??=await chromium.launch({channel:'chrome',headless:true});const context:BrowserContext=await browser.newContext({viewport:{width:options.width||1280,height:900}});t.after(()=>context.close());
  const page=await context.newPage(),errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
@@ -79,8 +79,8 @@ async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;
  await page.goto('http://market.fixture'+(options.url||'/'));
  const locale=options.locale||'en',messages:UiMessages=locale==='en'?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,'utf8'));
  const text=createUiText(messages);
- await page.evaluate(({key,memory,blocked,serverParams,withShops,holdBusiness,holdProducts,ignoreAbort,initialSdkView,discoveryMemory,seedShops,excluded=[],initialExclusions=[],enforceExclusions=false,productPages=false,deferWorkspace=false,locale,messages})=>{
-  const data={showrooms:[],nearbyGroups:[],searchBusinesses:[],searchOrder:[],industries:[],places:[],countries:[],total:0,resultCounts:{businesses:0,products:1},resultPage:{page:1,totalPages:1,totalItems:1,firstItem:1,lastItem:1},featuredNowBusinessId:null,
+ await page.evaluate(({key,memory,blocked,serverParams,withShops,holdBusiness,holdProducts,ignoreAbort,initialSdkView,discoveryMemory,seedShops,excluded=[],initialExclusions=[],enforceExclusions=false,productPages=false,deferWorkspace=false,filterChoices=false,locale,messages})=>{
+  const data={showrooms:[],nearbyGroups:[],searchBusinesses:[],searchOrder:[],industries:filterChoices?[{key:'textiles',shortLabel:'Textiles'},{key:'home',shortLabel:'Furniture'}]:[],places:filterChoices?[{key:'ET:addis',city:'Addis Ababa',countryCode:'ET'},{key:'KE:nairobi',city:'Nairobi',countryCode:'KE'}]:[],countries:filterChoices?[{code:'ET'},{code:'KE'}]:[],total:0,resultCounts:{businesses:0,products:1},resultPage:{page:1,totalPages:1,totalItems:1,firstItem:1,lastItem:1},featuredNowBusinessId:null,
    searchProducts:[{id:101,businessId:1,name:'Fixture cup',description:'A real React fixture product.',categoryName:'Cups',businessHandle:'fixture-shop',businessName:'Fixture Shop',city:'Addis Ababa',region:'Addis Ababa',primaryIndustryKey:'home',imagePath:'',offeringKind:'standard_product',availability:'available'}]};
   const shops=Array.from({length:2},(_,index)=>({id:index+1,handle:'fixture-'+(index+1),name:'Fixture Business '+(index+1),tagline:'Physical products',description:'',logoPath:'',heroImagePath:'',city:'Fixture city',zone:'',region:'',latitude:9.03,longitude:38.75,fallbackStyle:'workshop',sponsored:false,productionScale:'workshop',isLive:false,livePlatform:'',liveUrl:'',primaryIndustryKey:'textiles',primaryIndustryLabel:'Textiles',primaryIndustryShortLabel:'Textiles',locationMode:'storefront'}));
   if(productPages)data.resultPage={page:1,totalPages:2,totalItems:2,firstItem:1,lastItem:1};
@@ -92,7 +92,7 @@ async function boot(t:{after:(fn:()=>Promise<void>)=>void},options:{url?:string;
   if(discoveryMemory)sessionStorage.setItem('suqpage:discovery-navigation:v2',discoveryMemory);
   const write=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){f.writes.push({key,value});return write.call(this,key,value);};
   if(blocked)Object.defineProperty(window,'sessionStorage',{configurable:true,get(){throw new DOMException('Storage blocked','SecurityError');}});
- },{key:KEY,memory:options.memory,blocked:options.blocked,serverParams:options.serverParams,withShops:options.withShops,holdBusiness:options.holdBusiness,holdProducts:options.holdProducts,ignoreAbort:options.ignoreAbort,initialSdkView:options.initialSdkView,discoveryMemory:options.discoveryMemory,seedShops:options.seedShops,excluded:options.excluded,initialExclusions:options.initialExclusions,enforceExclusions:options.enforceExclusions,productPages:options.productPages,deferWorkspace:options.deferWorkspace,locale,messages});
+ },{key:KEY,memory:options.memory,blocked:options.blocked,serverParams:options.serverParams,withShops:options.withShops,holdBusiness:options.holdBusiness,holdProducts:options.holdProducts,ignoreAbort:options.ignoreAbort,initialSdkView:options.initialSdkView,discoveryMemory:options.discoveryMemory,seedShops:options.seedShops,excluded:options.excluded,initialExclusions:options.initialExclusions,enforceExclusions:options.enforceExclusions,productPages:options.productPages,deferWorkspace:options.deferWorkspace,filterChoices:options.filterChoices,locale,messages});
  if(options.realStyles){
   for(const file of ['app/globals.css','app/landing.css','app/discovery.css'])await page.addStyleTag({content:fs.readFileSync(file,'utf8')});
   await page.addStyleTag({content:compiled.outputFiles.find(file=>file.path.endsWith('.css'))!.text});
@@ -141,7 +141,8 @@ for(const width of[1440,390])test(`FE-042 S25 / FE-065 server controls wait for 
 for(const locale of['en','am','om'] as const)for(const width of[320,390])test(`FE-065 S180 selected phone filter words and counts fit ${locale} at ${width}px`,async t=>{
  const {page,errors}=await boot(t,{url:'/?view=search&p.category=beauty-wellness',realStyles:true,width,locale});
  const text=createUiText(locale==='en'?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,'utf8')));
- const filters=page.locator('[data-search-scope="products"]>div').first(),buttons=filters.locator(':scope>button');
+ await page.getByRole('button',{name:text('Filters, {count} selected',{count:1}),exact:true}).click();
+ const filters=page.locator('[data-filter-menu]'),buttons=filters.locator(':scope>button');
  await expect(buttons).toHaveCount(4);
  for(const [index,label] of['Category','Country','City','Made to order'].entries())await expect(buttons.nth(index).locator('span')).toHaveText(text(label));
  await expect(buttons.first().locator('b')).toHaveText('1');
@@ -151,11 +152,84 @@ for(const locale of['en','am','om'] as const)for(const width of[320,390])test(`F
   return{label,words,height:rect.height,left:rect.left,right:rect.right,fontSize:parseFloat(getComputedStyle(element).fontSize),fits:element.scrollWidth<=element.clientWidth+1,labelFits:labelRect.left>=rect.left&&labelRect.right<=rect.right,badgeFits:!badge||badge.left>=labelRect.right&&badge.right<=rect.right};
  }));
  for(const item of geometry){
-  assert.ok(item.height>=44&&item.fontSize===11,JSON.stringify(item));
+  assert.ok(item.height>=44&&item.fontSize>=13,JSON.stringify(item));
   assert.ok(item.left>=0&&item.right<=width&&item.fits&&item.labelFits&&item.badgeFits,JSON.stringify(item));
   for(const word of item.words)assert.equal(word.lines,1,JSON.stringify(item));
  }
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);assert.deepEqual(errors,[]);
+});
+
+for(const width of[320,390])test(`FE-065 S181 compact filters keep one dialog, country prerequisites, scope and focus at ${width}px`,async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=map&b.q=Wood&p.q=Cup',realStyles:true,width,filterChoices:true});
+ const trigger=(scope:string)=>page.locator(`[data-search-scope="${scope}"]>button`),dialog=page.getByRole('dialog');
+ await expect(trigger('businesses')).toHaveAttribute('aria-label','Filters, 0 selected');
+ await expect(page.getByRole('button',{name:'Category',exact:true})).toBeHidden();
+ await trigger('businesses').click();await expect(dialog).toHaveCount(1);
+ await dialog.evaluate(element=>element.addEventListener('close',()=>element.setAttribute('data-observed-close','true')));
+ await expect(dialog.getByRole('button',{name:'City',exact:true})).toBeDisabled();
+ await expect(dialog.getByRole('button',{name:'Made to order',exact:true})).toHaveCount(0);
+ await dialog.getByRole('button',{name:'Category',exact:true}).click();
+ await expect(dialog.getByRole('heading',{name:'Categories',exact:true})).toBeVisible();
+ await dialog.getByRole('checkbox',{name:'Textiles',exact:true}).check();
+ await page.getByRole('button',{name:'Back to filters',exact:true}).click();
+ await dialog.locator('[data-filter-menu]>button').nth(1).click();
+ await dialog.getByRole('checkbox').nth(0).check();
+ await page.getByRole('button',{name:'Back to filters',exact:true}).click();
+ await expect(dialog.getByRole('button',{name:'City',exact:true})).toBeEnabled();
+ await dialog.getByRole('button',{name:'City',exact:true}).click();await dialog.getByRole('checkbox').first().check();
+ await page.getByRole('button',{name:'Back to filters',exact:true}).click();
+ await expect(dialog).not.toHaveAttribute('data-observed-close','true');
+ await expect(trigger('businesses')).toHaveAttribute('aria-label','Filters, 3 selected');
+ await dialog.locator('[data-filter-menu]>button').nth(1).click();
+ await dialog.getByRole('checkbox').nth(0).uncheck();await dialog.getByRole('checkbox').nth(1).check();
+ await expect(page).toHaveURL(url=>url.searchParams.getAll('b.country').join(',')==='KE'&&!url.searchParams.has('b.city'));
+ await expect(trigger('businesses')).toHaveAttribute('aria-label','Filters, 2 selected');
+ await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);await expect(trigger('businesses')).toBeFocused();
+ await page.getByRole('button',{name:'Product listings',exact:true}).click();
+ await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
+ await expect(trigger('products')).toHaveAttribute('aria-label','Filters, 0 selected');
+ await trigger('products').click();await dialog.getByRole('button',{name:'Made to order',exact:true}).click();
+ await expect(trigger('products')).toHaveAttribute('aria-label','Filters, 1 selected');
+ await dialog.getByRole('button',{name:'Clear all',exact:true}).click();
+ await expect(trigger('products')).toHaveAttribute('aria-label','Filters, 0 selected');
+ await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('');
+ await expect(page).toHaveURL(url=>url.searchParams.get('b.q')==='Wood'&&url.searchParams.get('b.category')==='textiles'&&url.searchParams.get('b.country')==='KE'&&!url.searchParams.has('p.q')&&!url.searchParams.has('p.madeToOrder'));
+ await dialog.getByRole('button',{name:'Done',exact:true}).click();await expect(trigger('products')).toBeFocused();
+ await page.getByRole('button',{name:'Business locations',exact:true}).click();
+ await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Wood');
+ await expect(trigger('businesses')).toHaveAttribute('aria-label','Filters, 2 selected');
+ assert.deepEqual(errors,[]);
+});
+
+for(const width of[320,390])test(`FE-065 S181 phone drawer uses full-width travel and retains saved camera on drag return at ${width}px`,async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=map',realStyles:true,width,withShops:true,seedShops:true});
+ const viewport=page.locator('[data-dragging]'),panel=page.locator('#discovery-search-panel'),map=page.locator('.discovery-map-shell');
+ await page.getByRole('button',{name:'Move fixture map',exact:true}).click();
+ const savedView=()=>page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)||'null')?.mapView,DISCOVERY_KEY);
+ const expectedView={center:[1.25,36.75],zoom:11};await expect.poll(savedView).toEqual(expectedView);
+ const mountedMap=await page.locator('[data-fixture-map]').elementHandle();assert.ok(mountedMap);
+ const bounds=await viewport.boundingBox();assert.ok(bounds);
+ assert.ok(Math.abs((await map.boundingBox())!.width-bounds.width)<=1);
+ const handle=await page.getByRole('button',{name:'View products',exact:true}).boundingBox();assert.ok(handle);
+ await page.mouse.move(handle.x+handle.width/2,handle.y+handle.height/2);await page.mouse.down();
+ await page.mouse.move(handle.x+handle.width/2-bounds.width*.4,handle.y+handle.height/2,{steps:6});
+ const travel=await panel.evaluate(element=>new DOMMatrix(getComputedStyle(element).transform).m41);
+ assert.ok(Math.abs(travel-bounds.width*.6)<=1,JSON.stringify({travel,width:bounds.width}));
+ await page.mouse.up();await expect(page.getByRole('button',{name:'Product listings',exact:true})).toHaveAttribute('aria-pressed','true');
+ assert.ok(Math.abs((await panel.boundingBox())!.width-bounds.width)<=1);
+ const back=await page.getByRole('button',{name:'Map only',exact:true}).boundingBox();assert.ok(back);
+ await page.mouse.move(back.x+back.width/2,back.y+back.height/2);await page.mouse.down();
+ await page.mouse.move(back.x+back.width/2+bounds.width*.7,back.y+back.height/2,{steps:6});await page.mouse.up();
+ await expect(page.getByRole('button',{name:'Business locations',exact:true})).toHaveAttribute('aria-pressed','true');
+ assert.deepEqual(await savedView(),expectedView);assert.equal(await mountedMap.evaluate(element=>element.isConnected),true);
+ assert.ok(Math.abs((await map.boundingBox())!.width-bounds.width)<=1);assert.deepEqual(errors,[]);
+});
+
+test('FE-065 S181 closing a compact filter after widening restores a visible filter control',async t=>{
+ const {page,errors}=await boot(t,{url:'/?view=map',realStyles:true,width:390});
+ await page.getByRole('button',{name:'Filters, 0 selected',exact:true}).click();await expect(page.getByRole('dialog')).toBeVisible();
+ await page.setViewportSize({width:1440,height:900});await page.getByRole('dialog').getByRole('button',{name:'Done',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Category',exact:true})).toBeFocused();assert.deepEqual(errors,[]);
 });
 
 test('FE-065 S153 location text keeps literal city/legacy fallback and removes only equivalent labels',()=>{

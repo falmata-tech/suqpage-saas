@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import vm from "node:vm";
+import fs from 'node:fs';
+import path from 'node:path';
 import {createRequire} from 'node:module';
 import { build } from "esbuild";
-import {ABOUT_STOREFRONT_SECTIONS,MARKET_STOREFRONT_COPY} from "../lib/storefront-copy";
+import {ABOUT_STOREFRONT_SECTIONS,MARKET_COMPACT_COPY,MARKET_STOREFRONT_COPY} from "../lib/storefront-copy";
+import {emptyMarketSearch,type MarketSearch} from '../lib/market-search';
+import {mapGroupPickerLayout} from '../lib/map/map-clustering';
+import {createUiText} from '../lib/i18n/core';
 
 type Element = { type: string | ((props: Record<string, unknown>) => Element); props: Record<string, unknown> & { children?: unknown } };
 type Gesture = { dx: number; dy: number; vx: number };
@@ -46,7 +51,7 @@ const bundled = build({ entryPoints: ["apps/mobile/app/(tabs)/index.tsx", "apps/
         : args.path === "MapGroupPicker" ? `export default 'MapGroupPicker';`
         : args.path === "PublicActionDock" ? `export default 'PublicActionDock';`
         : args.path === "chrome" ? `export const BuyingLauncher='BuyingLauncher',IconButton='IconButton',Sheet='Sheet',CategoryArt='CategoryArt';`
-        : `export const Screen='Screen',Copy='Copy',Photo='Photo',Status='Status',Icon='Icon',Button='Button',Field='Field',colors={ink:'#222',line:'#ddd',brand:'#c43a00',soft:'#fff1e9'},useOpenLink=()=>async()=>{};`,
+        : `export const Screen='Screen',Copy='Copy',Photo='Photo',Status='Status',Icon='Icon',Button='Button',Field='Field',colors={ink:'#222',line:'#ddd',brand:'#c43a00',soft:'#fff1e9'},useOpenLink=()=>async url=>{fixture.openedLinks.push(url);};`,
     }));
   },
 }] });
@@ -58,7 +63,7 @@ function fixture() {
     reduce: undefined as ((value: boolean) => void) | undefined, back: undefined as (() => boolean) | undefined,
     platform: 'android',dimensions:{width:390,height:844,fontScale:1},focused:true,params:{} as Record<string,string|string[]>,storage:new Map<string,string>(),storageDenied:false,storageWrites:[] as string[],
     browserListeners:new Map<string,()=>void>(),historyWrites:[] as Array<{state:unknown;url:string}>,historyState:{key:'framework-history-key'},locationSearch:'',locationPathname:'/',
-    locale:'en',keyboardDismissals: 0, routes: [] as unknown[], t: (value: string) => value,
+    locale:'en',keyboardDismissals: 0, routes: [] as unknown[],openedLinks:[] as string[], t: (value: string,values?:Record<string,string|number>) => values?value.replace(/\{([A-Za-z][A-Za-z0-9_]*)\}/g,(token,key:string)=>Object.hasOwn(values,key)?String(values[key]):token):value,
     feed: { batch: { data: { showrooms: [], categories: [], places: [], countries: [] }, items: [] as unknown[] }, loading: false, snapshotCurrent:true,initialLoading:false,displayedSnapshotKey:'scope=products',get updating():boolean{return this.loading;}, error: "", moreError: "", retry() {}, loadMore() {} },
   };
 }
@@ -74,17 +79,42 @@ test('FE-074 native Market retains the displayed feed/scroll during criteria upd
 });
 const nodes = (element: Element): Element[] => [element, ...[element.props.children].flat(Infinity).filter((value): value is Element => value !== null && typeof value === "object" && "props" in value).flatMap(nodes)];
 function style(element: Element) { return Object.assign({}, ...[element.props.style].flat().filter(value => value && typeof value === "object")) as Record<string, unknown>; }
-test('FE-070 native Market shows the same concise introduction without covering discovery',async()=>{
+test('FE-065 S181 native Market replaces the marketing paragraph with one compact visible heading',async()=>{
  const state=fixture();state.dimensions={width:320,height:700,fontScale:1};
  const render=await component('index',state),tree=render();
  const intro=tree.find(node=>node.props.testID==='market-introduction');
  assert.ok(intro,'Native Market has a visible introduction');
  const copy=nodes(intro).filter(node=>node.type==='Text').map(node=>node.props.children);
- assert.ok(copy.includes(MARKET_STOREFRONT_COPY.title));
- assert.ok(copy.includes(MARKET_STOREFRONT_COPY.description));
+ assert.deepEqual(copy,[MARKET_COMPACT_COPY.title]);
+ assert.ok(!tree.some(node=>node.props.children===MARKET_STOREFRONT_COPY.title||node.props.children===MARKET_STOREFRONT_COPY.description),'The complete narrative stays off the native map screen');
  assert.ok(tree.indexOf(intro)<tree.findIndex(node=>node.props.testID==='market-mode-row'));
  assert.ok(tree.indexOf(intro)<tree.findIndex(node=>node.props.testID==='market-stage'));
  assert.equal(style(intro).position,undefined,'Introduction takes layout space instead of blocking the map');
+});
+test('FE-065 S181 attribution belongs to the full-width map and clears its measured transport action',async()=>{
+ type Box={x:number;y:number;width:number;height:number};
+ const overlaps=(a:Box,b:Box)=>a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
+ for(const viewport of [{width:390,height:844,stage:500,legalHeight:17},{width:320,height:480,stage:164,legalHeight:32},{width:844,height:390,stage:74,legalHeight:17}]){
+  const state=fixture();state.dimensions={width:viewport.width,height:viewport.height,fontScale:1};
+  const render=await component('index',state);let tree=render();
+  (tree.find(node=>node.props.testID==='market-stage')!.props.onLayout as(event:{nativeEvent:{layout:{height:number}}})=>void)({nativeEvent:{layout:{height:viewport.stage}}});tree=render();
+  let attribution=tree.find(node=>node.props.testID==='market-map-attribution')!;
+  assert.ok(nodes(tree.find(node=>node.props.testID==='market-map-panel')!).includes(attribution),'The legal link floats inside the same hidden/mounted map pane');
+  assert.equal(style(attribution).position,'absolute');assert.equal(style(attribution).bottom,0);assert.equal(attribution.props.accessibilityRole,'link');
+  assert.ok(nodes(attribution).some(node=>node.type==='Text'&&node.props.children==='© OpenStreetMap contributors'));
+  (attribution.props.onLayout as(event:{nativeEvent:{layout:{height:number}}})=>void)({nativeEvent:{layout:{height:viewport.legalHeight}}});tree=render();attribution=tree.find(node=>node.props.testID==='market-map-attribution')!;
+  const a=style(attribution),placement=style(tree.find(node=>node.props.testID==='market-public-actions')!),compact=tree.find(node=>node.type==='PublicActionDock')!.props.compact;
+  const legalWidth=Number(a.maxWidth),legal:Box={x:a.left==='auto'?viewport.width-Number(a.right)-legalWidth:Number(a.left),y:viewport.stage-Number(a.bottom)-viewport.legalHeight,width:legalWidth,height:viewport.legalHeight};
+  const dockWidth=compact?168:200,dock:Box={x:placement.left===undefined?viewport.width-Number(placement.right)-dockWidth:Number(placement.left),y:viewport.stage-Number(placement.bottom)-48,width:dockWidth,height:48};
+  assert.ok(!overlaps(legal,dock),JSON.stringify({viewport,legal,dock}));
+  assert.ok(legal.x>=0&&legal.x+legal.width<=viewport.width&&legal.y>=0&&legal.y+legal.height<=viewport.stage,'Attribution stays inside the available canvas');
+  if(viewport.stage>=180){
+   (attribution.props.onLayout as(event:{nativeEvent:{layout:{height:number}}})=>void)({nativeEvent:{layout:{height:37}}});tree=render();
+   assert.ok(Number(style(tree.find(node=>node.props.testID==='market-public-actions')!).bottom)>=44,'A wrapping attribution increases CTA clearance instead of intercepting it');
+  }
+  await(attribution.props.onPress as()=>Promise<void>)();assert.deepEqual(state.openedLinks,['https://www.openstreetmap.org/copyright']);
+  assert.equal(style(tree.find(node=>node.props.testID==='market-map-panel')!).width,viewport.width,'No counterpart strip is reserved beside the canvas');
+ }
 });
 function resetHooks(state:ReturnType<typeof fixture>) {
   for(const effect of state.effects)effect?.cleanup?.();
@@ -125,6 +155,11 @@ test("FE-053 actual Market component preserves the mounted panes and follows onl
   (controls()[0].props.onChange as (value: Record<string, unknown>) => void)({ ...(controls()[0].props.value as Record<string, unknown>), query: "Local workshop" });
   tree = render();
   assert.equal(map().props.height, 500, "No permanent70px spacer is subtracted from the map");
+  const mapPane=tree.find(node=>node.props.testID==='market-map-panel')!,drawer=tree.find(node=>node.props.testID==='search-drawer')!;
+  assert.equal(style(mapPane).width,390,'S181 removes the reserved blank right strip from the map');
+  assert.equal(style(drawer).width,390);assert.equal(style(drawer).left,0,'The product pane fills the canvas behind its floating handle');
+  assert.deepEqual(Array.from((style(mapPane).transform as Array<{translateX:{outputRange:number[]}}>)[0].translateX.outputRange),[0,-390]);
+  assert.deepEqual(Array.from((style(drawer).transform as Array<{translateX:{outputRange:number[]}}>)[0].translateX.outputRange),[390,0]);
   assert.equal(style(tree.find(node => node.type === "AnimatedView" && style(node).left === 0)!).top, 0);
   assert.equal(style(tree.find(node=>node.type==='AnimatedView'&&style(node).left===0)!).pointerEvents,'auto');assert.equal(style(tree.find(node=>node.props.testID==='search-drawer')!).pointerEvents,'none');
   assert.ok(!tree.filter(node=>node.type==='AnimatedView').some(node=>Object.hasOwn(node.props,'pointerEvents')),'RNWeb pane hit testing uses supported style properties');
@@ -224,26 +259,128 @@ test('FE-053 S153 inactive Market panes preserve native hiding and explicitly is
  }
 });
 
-test("FE-065 actual native controls keep four balanced wrapping filters visible with44px targets", async () => {
-  const state = fixture(), render = await component("MarketSearchControls", state);
-  const tree = render({ scope: "products", value: { query: "chairs", categories: [], countries: ["ET"], cities: [], madeToOrder: false, page: 1 }, onChange() {}, metadata: { categories: [], countries: [], places: [] } });
-  const row = tree.find(node => node.props.testID === "products-filters")!;
-  assert.equal(row.type, "View");assert.equal(style(row).flexDirection,"row");
-  assert.ok(!tree.some(node=>node.type==='ScrollView'),'The four choices do not require horizontal scrolling');
-  const filters=nodes(row).filter(node=>node.type==='Pressable');assert.equal(filters.length,4);assert.deepEqual(filters.map(node=>style(node).flex),[1,1,1,1.5],'Custom wording receives room while each geographic control keeps48px');
-  assert.ok(nodes(row).filter(node=>node.type==='Text'&&style(node).fontSize===12).every(node=>node.props.numberOfLines===undefined),'Words may wrap instead of clipping');
-  assert.ok(!nodes(row).some(node=>node.props.accessibilityLabel==='Clear all'));
-  assert.ok(nodes(tree.find(node=>node.props.testID==='products-search')!).some(node=>node.props.accessibilityLabel==='Clear all'),'Global reset lives beside search, separate from query-only clear');
-  const buttons = tree.filter(node => node.type === "Pressable" && node.props.accessibilityRole === "button");
-  for (const label of ["Category", "Country (1)", "City", "Clear all", "Clear search"]) assert.ok(buttons.some(button => button.props.accessibilityLabel === label), `${label} remains labeled and reachable`);
-  assert.ok(!buttons.some(button => button.props.accessibilityLabel === "Type"));
-  const madeToOrder=tree.find(node=>node.type==='Pressable'&&node.props.accessibilityRole==='checkbox'&&node.props.accessibilityLabel==='Made to order')!;
-  assert.ok(madeToOrder,'Product supply is a direct labeled toggle');
-  assert.equal(madeToOrder.props['aria-checked'],false);
-  assert.equal((madeToOrder.props.accessibilityState as {checked:boolean}).checked,false);
-  assert.ok(Number(style(madeToOrder).minHeight)>=44&&Number(style(madeToOrder).minWidth)>=44);
-  assert.ok(buttons.every(button => Number(style(button).minHeight) >= 44));
-  assert.ok(buttons.every(button => Number(style(button).width ?? style(button).minWidth) >= 44));
+test('FE-065 S181 compact native filters use one sheet and preserve selection, country/city, clear and focus semantics',async()=>{
+ const state=fixture(),render=await component('MarketSearchControls',state),changes:MarketSearch[]=[];
+ let value:MarketSearch={...emptyMarketSearch(),query:'chairs'},tree:Element[]=[];
+ const metadata={categories:[{key:'furniture',label:'Furniture'}],countries:[{code:'ET'},{code:'KE'}],places:[{key:'ET:Addis Ababa',label:'Addis Ababa',countryCode:'ET'},{key:'KE:Nairobi',label:'Nairobi',countryCode:'KE'}]};
+ const redraw=()=>tree=render({scope:'products',value,onChange:(next:MarketSearch)=>{value=next;changes.push(next);},metadata});
+ const press=(node:Element|undefined)=>{assert.ok(node,'Expected an actionable control');(node.props.onPress as()=>void)();};
+ const button=(label:string)=>tree.find(node=>node.props.accessibilityLabel===label||node.type==='Button'&&node.props.label===label);
+ const option=(label:string)=>tree.find(node=>node.props.accessibilityRole==='checkbox'&&nodes(node).some(child=>child.type==='Text'&&child.props.children===label));
+ const sheet=()=>tree.find(node=>node.type==='Sheet'&&node.props.visible===true)!;
+ const filterCount=()=>tree.find(node=>node.props.testID==='products-filter-count')?.props.children;
+ redraw();
+ const search=tree.find(node=>node.props.testID==='products-search')!,trigger=tree.find(node=>node.props.testID==='products-filter-trigger')!;
+ assert.ok(!tree.some(node=>node.props.testID==='products-filters'),'Closed compact controls do not reserve a second filter row');
+ assert.equal(style(tree.find(node=>node.props.testID==='products-controls')!).flexDirection,'row');
+ assert.ok(!nodes(search).some(node=>node.props.accessibilityLabel==='Clear all'),'Query clearing stays separate from resetting filters');
+ assert.ok(Number(style(trigger).minHeight)>=44&&Number(style(trigger).minWidth)>=44);
+ let focused=0;(trigger.props.ref as {current:unknown}).current={focus:()=>focused++};
+ press(trigger);redraw();
+ assert.equal(sheet().props.title,'Filters');assert.equal(tree.filter(node=>node.type==='Sheet'&&node.props.visible===true).length,1);
+ const overview=tree.find(node=>node.props.testID==='products-filters')!;
+ assert.equal(style(overview).flexDirection,'column','A phone sheet gives each meaningful filter a full row');
+ assert.equal(nodes(overview).filter(node=>node.type==='Pressable').length,4);
+ assert.ok(nodes(overview).filter(node=>node.type==='Pressable').every(node=>Number(style(node).minHeight)>=48));
+ assert.equal(button('City')!.props.disabled,true,'Country is still required before selecting a city');
+ press(button('Country'));redraw();assert.equal(sheet().props.title,'Country');
+ press(option('Ethiopia'));redraw();assert.deepEqual(Array.from(value.countries),['ET']);assert.equal(value.query,'chairs');
+ press(button('Back to filters'));redraw();assert.equal(filterCount(),1);assert.equal(button('City')!.props.disabled,false);
+ press(button('City'));redraw();press(option('Addis Ababa · Ethiopia'));redraw();assert.deepEqual(Array.from(value.cities),['ET:Addis Ababa']);
+ press(button('Back to filters'));redraw();press(button('Made to order'));redraw();assert.equal(value.madeToOrder,true);assert.equal(filterCount(),3);
+ press(button('Category'));redraw();press(option('Furniture'));redraw();press(button('Back to filters'));redraw();assert.equal(filterCount(),4);
+ assert.equal(tree.find(node=>node.props.testID==='products-filter-trigger')!.props.accessibilityLabel,'Filters, 4 selected');
+ press(button('Country (1)'));redraw();press(option('Kenya'));redraw();press(option('Ethiopia'));redraw();
+ assert.deepEqual(Array.from(value.countries),['KE']);assert.deepEqual(Array.from(value.cities),[],'Removing a country clears its incompatible city');
+ assert.deepEqual(Array.from(value.categories),['furniture']);assert.equal(value.madeToOrder,true);assert.equal(value.query,'chairs');
+ press(button('Back to filters'));redraw();assert.equal(filterCount(),3);
+ press(button('Category (1)'));redraw();press(button('Clear'));redraw();assert.deepEqual(Array.from(value.categories),[]);assert.deepEqual(Array.from(value.countries),['KE']);assert.equal(value.query,'chairs');
+ press(button('Done'));redraw();assert.ok(!sheet());assert.equal(focused,1,'Done restores the original compact trigger after unmounting the sheet');
+ press(button('Clear search'));redraw();assert.equal(value.query,'');assert.deepEqual(Array.from(value.countries),['KE']);assert.equal(value.madeToOrder,true);
+ press(tree.find(node=>node.props.testID==='products-filter-trigger'));redraw();press(button('Clear all'));redraw();
+ assert.deepEqual(JSON.parse(JSON.stringify(value)),emptyMarketSearch(),'Clear all resets only the search scope owned by this component');
+ (sheet().props.onClose as()=>void)();redraw();assert.equal(focused,2,'Close/Escape/native dismissal share trigger restoration');
+ assert.ok(changes.length>8&&changes.every(change=>change.page===1),'Each admitted criteria change resets pagination');
+});
+
+test('FE-065 S181 native filter readiness distinguishes an initial read from loaded empty facets',async()=>{
+ for(const width of [390,844]){
+  const state=fixture();state.dimensions={width,height:844,fontScale:1};const render=await component('MarketSearchControls',state);
+  const props={scope:'businesses',value:emptyMarketSearch(),onChange(next:MarketSearch){props.value=next;},metadata:null as null|{categories:never[];countries:never[];places:never[]}};
+  let tree=render(props);const entry=()=>tree.find(node=>width===390?node.props.testID==='businesses-filter-trigger':node.props.accessibilityLabel==='Category')!;
+  assert.equal(entry().props.disabled,true,'Unresolved metadata must not open an empty choices sheet');
+  (entry().props.onPress as()=>void)();tree=render(props);assert.ok(!tree.some(node=>node.type==='Sheet'&&node.props.visible===true),'Even a queued press cannot display initial loading as empty facets');
+  (tree.find(node=>node.type==='TextInput')!.props.onChangeText as(value:string)=>void)('Search while loading');tree=render(props);assert.equal(props.value.query,'Search while loading','Search remains editable while facets load');
+  props.metadata={categories:[],countries:[],places:[]};tree=render(props);assert.equal(entry().props.disabled,false);
+  (entry().props.onPress as()=>void)();tree=render(props);
+  if(width===390){(tree.find(node=>node.props.accessibilityLabel==='Category')!.props.onPress as()=>void)();tree=render(props);}
+  assert.ok(tree.some(node=>node.type==='Sheet'&&node.props.visible===true));assert.ok(tree.some(node=>node.type==='Copy'&&node.props.children==='No matches found'),'A completed empty facet result remains an honest empty state');
+  props.metadata=null;tree=render(props);tree=render(props);assert.ok(!tree.some(node=>node.type==='Sheet'&&node.props.visible===true),'Losing ready metadata cannot leave a stale empty options portal');
+ }
+});
+test('FE-065 S181 native option search exposes no-match recovery inside the same sheet',async()=>{
+ const state=fixture(),render=await component('MarketSearchControls',state);
+ const props={scope:'businesses',value:emptyMarketSearch(),onChange(){},metadata:{categories:Array.from({length:9},(_,index)=>({key:'option-'+index,label:'Option '+index})),countries:[],places:[]}};
+ let tree=render(props);
+ (tree.find(node=>node.props.testID==='businesses-filter-trigger')!.props.onPress as()=>void)();tree=render(props);
+ (tree.find(node=>node.props.accessibilityLabel==='Category')!.props.onPress as()=>void)();tree=render(props);
+ (tree.find(node=>node.type==='Field'&&node.props.label==='Filter options')!.props.onChangeText as(value:string)=>void)('no such option');tree=render(props);
+ assert.ok(tree.some(node=>node.type==='Copy'&&node.props.children==='No matches found'));assert.equal(tree.filter(node=>node.props.accessibilityRole==='checkbox').length,0);
+ (tree.find(node=>node.type==='Field'&&node.props.label==='Filter options')!.props.onChangeText as(value:string)=>void)('Option 2');tree=render(props);
+ assert.equal(tree.filter(node=>node.props.accessibilityRole==='checkbox').length,1);
+ (tree.find(node=>node.type==='Button'&&node.props.label==='Back to filters')!.props.onPress as()=>void)();tree=render(props);
+ (tree.find(node=>node.props.accessibilityLabel==='Category')!.props.onPress as()=>void)();tree=render(props);
+ assert.equal(tree.find(node=>node.type==='Field'&&node.props.label==='Filter options')!.props.value,'','Returning to a choice starts with all current options');
+ assert.equal(tree.filter(node=>node.type==='Sheet'&&node.props.visible===true).length,1,'No nested modal was introduced');
+});
+test('FE-065 S181 wide filter dismissal restores its direct trigger without relaying out the toolbar',async()=>{
+ const state=fixture();state.dimensions={width:1440,height:1000,fontScale:1};
+ const render=await component('MarketSearchControls',state),props={scope:'businesses',value:emptyMarketSearch(),onChange(){},metadata:{categories:[],countries:[],places:[]}};
+ let tree=render(props),focused=0;
+ const category=tree.find(node=>node.props.accessibilityLabel==='Category')!;
+ (category.props.ref as(value:{focus:()=>void})=>void)({focus:()=>focused++});
+ (category.props.onPress as()=>void)();tree=render(props);
+ assert.equal(tree.find(node=>node.type==='Sheet'&&node.props.visible===true)!.props.title,'Categories');
+ (tree.find(node=>node.type==='Button'&&node.props.label==='Back to filters')!.props.onPress as()=>void)();tree=render(props);
+ const rows=tree.filter(node=>node.props.testID==='businesses-filters');
+ assert.equal(rows.length,2);assert.equal(style(rows[0]).flexDirection,'row','The mounted wide toolbar does not become the modal overview');assert.equal(style(rows[1]).flexDirection,'column');
+ (tree.find(node=>node.type==='Sheet'&&node.props.visible===true)!.props.onClose as()=>void)();tree=render(props);
+ assert.equal(focused,1);assert.ok(!tree.some(node=>node.type==='Sheet'&&node.props.visible===true));
+});
+test('FE-065 S181 native filter dismissal returns to a visible enabled trigger after responsive changes',async()=>{
+ for(const startsWide of [false,true]){
+  const state=fixture();state.dimensions={width:startsWide?844:390,height:startsWide?390:844,fontScale:1};
+  const render=await component('MarketSearchControls',state),value={...emptyMarketSearch(),query:'retained search',countries:['ET']},props={scope:'businesses',value,onChange(){},metadata:{categories:[],countries:[],places:[]}};
+  let tree=render(props),oldFocus=0,newFocus=0;
+  if(startsWide){
+   const country=tree.find(node=>node.props.accessibilityLabel==='Country (1)')!;
+   (country.props.ref as(value:{focus:()=>void}|null)=>void)({focus:()=>oldFocus++});(country.props.onPress as()=>void)();tree=render(props);
+   (country.props.ref as(value:null)=>void)(null);
+  }else{
+   const trigger=tree.find(node=>node.props.testID==='businesses-filter-trigger')!;
+   (trigger.props.ref as {current:unknown}).current={focus:()=>oldFocus++};(trigger.props.onPress as()=>void)();tree=render(props);
+   (trigger.props.ref as {current:unknown}).current=null;
+  }
+  state.dimensions={width:startsWide?390:844,height:startsWide?844:390,fontScale:1};
+  (tree.find(node=>node.props.testID==='businesses-controls')!.props.onLayout as(event:{nativeEvent:{layout:{width:number}}})=>void)({nativeEvent:{layout:{width:startsWide?366:820}}});tree=render(props);
+  if(startsWide)(tree.find(node=>node.props.testID==='businesses-filter-trigger')!.props.ref as {current:unknown}).current={focus:()=>newFocus++};
+  else(tree.find(node=>node.props.accessibilityLabel==='Category')!.props.ref as(value:{focus:()=>void})=>void)({focus:()=>newFocus++});
+  (tree.find(node=>node.type==='Sheet'&&node.props.visible===true)!.props.onClose as()=>void)();tree=render(props);
+  assert.equal(oldFocus,0,'The disappeared compact/direct trigger cannot receive focus');assert.equal(newFocus,1,'Dismissal chooses the current visible filter trigger');assert.equal(props.value.query,'retained search');assert.deepEqual(props.value.countries,['ET']);
+ }
+});
+test('FE-065 S181 a dismissed old filter sheet cannot steal focus from a different scope or inactive screen',async()=>{
+ for(const boundary of ['scope','screen']){
+  const state=fixture(),render=await component('MarketSearchControls',state),props={scope:'businesses',active:true,value:emptyMarketSearch(),onChange(){},metadata:{categories:[],countries:[],places:[]}};
+  let tree=render(props),focused=0;
+  const trigger=tree.find(node=>node.props.testID==='businesses-filter-trigger')!;(trigger.props.ref as {current:unknown}).current={focus:()=>focused++};
+  (trigger.props.onPress as()=>void)();tree=render(props);
+  (tree.find(node=>node.type==='Sheet'&&node.props.visible===true)!.props.onClose as()=>void)();
+  if(boundary==='scope')props.scope='products';else props.active=false;
+  tree=render(props);tree=render(props);
+  assert.equal(focused,0,'No queued dismissal may focus an old or inactive task');assert.ok(!tree.some(node=>node.type==='Sheet'&&node.props.visible===true));
+  props.active=true;tree=render(props);assert.equal(focused,0,'Returning to the task does not revive old focus work');
+ }
 });
 
 test('FE-065 S117 native detail Back and bare Market return retain both searches and the selected panel, including remount',async()=>{
@@ -407,8 +544,11 @@ test('FE-053 adaptive Market passes one modal capacity to its map and clears inv
   (tree.find(n=>n.type==='MarketMap')!.props.onViewChange as(value:unknown)=>void)({center:[37.6,9.1],zoom:12});(tree.find(n=>n.type==='MarketMap')!.props.onZoomChange as(value:number)=>void)(12);tree=render();
   (tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)(shops);tree=render();assert.equal((tree.find(n=>n.type==='MapGroupPicker')!.props.shops as typeof shops).length,6);
   (tree.find(n=>n.type==='MapGroupPicker')!.props.onSelect as(value:typeof shops[number])=>void)(shops[2]);tree=render();assert.ok(tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true));
-  state.dimensions={width:320,height:480,fontScale:2};tree=render();tree=render();assert.equal(tree.find(n=>n.type==='MarketMap')!.props.groupCapacity,1);assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true));assert.ok(!tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true),'Resize cannot leave a stale detail portal');assert.deepEqual(JSON.parse(JSON.stringify(tree.find(n=>n.type==='MarketMap')!.props.initialView)),{center:[37.6,9.1],zoom:12},'Capacity changes do not move the map');
-  (tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)([shops[0]]);tree=render();assert.equal((tree.find(n=>n.type==='MapGroupPicker')!.props.shops as typeof shops).length,1,'A current forced single remains an admissible group');assert.equal(tree.find(n=>n.type==='MapGroupPicker')!.props.visible,true);
+  state.dimensions={width:320,height:480,fontScale:2};tree=render();tree=render();assert.equal(tree.find(n=>n.type==='MarketMap')!.props.groupCapacity,2,'S181 keeps a bounded two-business group instead of forced overlapping singleton labels');assert.ok(!tree.some(n=>n.type==='MapGroupPicker'&&n.props.visible===true));assert.ok(!tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true),'Resize cannot leave a stale detail portal');assert.deepEqual(JSON.parse(JSON.stringify(tree.find(n=>n.type==='MarketMap')!.props.initialView)),{center:[37.6,9.1],zoom:12},'Capacity changes do not move the map');
+  (tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)(shops.slice(0,2));tree=render();
+  const small=tree.find(n=>n.type==='MapGroupPicker'&&n.props.visible===true)!;assert.ok(small,'The new current two-business group remains actionable after the old larger group is cleared');assert.deepEqual(Array.from(small.props.shops as typeof shops,s=>s.id),[1,2]);
+  const layout=mapGroupPickerLayout(296,456,2,2);assert.equal(layout.admitted,true);assert.equal(layout.needsScroll,true);assert.equal(layout.paged,false,'Only this bounded accessibility fallback scrolls; it is not a new paged catalogue');
+  (tree.find(n=>n.type==='MarketMap')!.props.onGroup as(value:typeof shops)=>void)([shops[0]]);tree=render();assert.deepEqual(Array.from(tree.find(n=>n.type==='MapGroupPicker')!.props.shops as typeof shops,s=>s.id),[1,2],'A stale former-single callback cannot split the current admitted pair');assert.equal(tree.find(n=>n.type==='MapGroupPicker')!.props.visible,true);
 });
 
 test('FE-053 S140 group picker and retained detail require a current terminal representation, while isolated preview remains available',async()=>{
@@ -500,21 +640,32 @@ test('FE-052 S143 native About selects one audience and preserves its deliberate
  (tabs()[0].props.onPress as()=>void)();tree=render();(tree.find(node=>node.type==='Button'&&node.props.label===ABOUT_STOREFRONT_SECTIONS[0].action)!.props.onPress as()=>void)();assert.equal(state.routes.at(-1),'/');assert.ok(tree.some(node=>node.type==='Button'&&node.props.label==='Explore the map'));
 });
 
-test('FE-065 S128 native controls share a measured wide row and retain visible wrapping phone/enlarged filters',async()=>{
+test('FE-065 S181 native controls retain direct wide filters and a single labelled compact row at phone or enlarged sizes',async()=>{
   for(const dimensions of [{width:844,height:390,fontScale:1},{width:1440,height:1000,fontScale:1},{width:390,height:844,fontScale:1},{width:320,height:480,fontScale:1},{width:844,height:390,fontScale:2}]){
     for(const scope of ['businesses','products'] as const){
       const state=fixture();state.dimensions=dimensions;const render=await component('MarketSearchControls',state);
       const props={scope,value:{query:'chairs',categories:['furniture'],countries:['ET'],cities:['ET:Addis Ababa'],madeToOrder:true,page:1},onChange(){},metadata:{categories:[],countries:[],places:[]}};
-      let tree=render(props),root=tree.find(n=>n.props.testID===scope+'-controls')!,search=tree.find(n=>n.props.testID===scope+'-search')!,filters=tree.find(n=>n.props.testID===scope+'-filters')!;
+      let tree=render(props),root=tree.find(n=>n.props.testID===scope+'-controls')!,search=tree.find(n=>n.props.testID===scope+'-search')!;
       const wide=dimensions.width-24>=760&&dimensions.fontScale<=1.3;
-      assert.equal(style(root).flexDirection,wide?'row':undefined);assert.equal(style(search).minWidth,wide?220:undefined);assert.equal(style(filters).minWidth,wide?(scope==='products'?398:264):undefined);
+      assert.equal(style(root).flexDirection,'row');assert.equal(style(search).minWidth,wide?220:0);
+      assert.equal(style(nodes(search).find(node=>node.type==='TextInput')!).fontSize,16,'Search text remains readable and avoids phone-web focus magnification');
+      if(!wide){
+       const trigger=tree.find(node=>node.props.testID===scope+'-filter-trigger')!;
+       assert.ok(trigger);assert.ok(!tree.some(node=>node.props.testID===scope+'-filters'));
+       assert.ok(nodes(trigger).filter(node=>node.type==='Text').every(node=>node.props.numberOfLines===undefined),'Active-language filter text may wrap honestly');
+       assert.ok(Number(style(trigger).minHeight)>=44&&Number(style(trigger).minWidth)>=44);
+       (trigger.props.onPress as()=>void)();tree=render(props);
+      }else assert.ok(!tree.some(node=>node.props.testID===scope+'-filter-trigger'));
+      const filters=tree.find(n=>n.props.testID===scope+'-filters')!;
+      assert.equal(style(filters).minWidth,wide?(scope==='products'?398:264):undefined);
+      assert.equal(style(filters).flexDirection,wide?'row':'column');
       const choices=nodes(filters).filter(n=>n.type==='Pressable');assert.equal(choices.length,scope==='products'?4:3);
-      for(const label of ['Category (1)','Country (1)','City (1)',...(scope==='products'?['Made to order']:[])])assert.ok(choices.some(n=>n.props.accessibilityLabel===label),'Every labeled filter stays in the row: '+label);
-      assert.ok(choices.every(n=>Number(style(n).minHeight)>=44&&Number(style(n).minWidth)>=44));assert.ok(!tree.some(n=>n.type==='ScrollView'),'No hidden or scrolling filter menu replaces choices');
-      if(dimensions.fontScale>1.3){assert.equal(style(filters).flexWrap,'wrap');assert.ok(choices.every(n=>style(n).flexBasis==='45%'),'Large native text can wrap into honest full-width cells');}
+      for(const label of ['Category (1)','Country (1)','City (1)',...(scope==='products'?['Made to order']:[])])assert.ok(choices.some(n=>n.props.accessibilityLabel===label),'Every labelled choice remains reachable: '+label);
+      assert.ok(choices.every(n=>Number(style(n).minHeight)>=44&&Number(style(n).minWidth)>=44));assert.ok(!tree.some(n=>n.type==='ScrollView'),'The toolbar adds no horizontal scroller; its existing Sheet owns option scrolling');
+      if(dimensions.fontScale>1.3)assert.ok(choices.every(n=>style(n).flexBasis==='auto'&&style(n).flexShrink===0&&nodes(n).filter(c=>c.type==='Text').every(c=>c.props.numberOfLines===undefined)),'Enlarged text keeps intrinsic wrapping rows in the existing vertical sheet');
       if(wide){
-        (root.props.onLayout as(event:{nativeEvent:{layout:{width:number}}})=>void)({nativeEvent:{layout:{width:700}}});tree=render(props);assert.equal(style(tree.find(n=>n.props.testID===scope+'-controls')!).flexDirection,undefined,'Actual content width controls layout, not screen width alone');
-        (tree.find(n=>n.props.testID===scope+'-controls')!.props.onLayout as(event:{nativeEvent:{layout:{width:number}}})=>void)({nativeEvent:{layout:{width:760}}});tree=render(props);assert.equal(style(tree.find(n=>n.props.testID===scope+'-controls')!).flexDirection,'row');
+        (root.props.onLayout as(event:{nativeEvent:{layout:{width:number}}})=>void)({nativeEvent:{layout:{width:700}}});tree=render(props);assert.ok(tree.some(n=>n.props.testID===scope+'-filter-trigger'),'Measured space, not screen width alone, chooses compact controls');
+        (tree.find(n=>n.props.testID===scope+'-controls')!.props.onLayout as(event:{nativeEvent:{layout:{width:number}}})=>void)({nativeEvent:{layout:{width:760}}});tree=render(props);assert.ok(!tree.some(n=>n.props.testID===scope+'-filter-trigger'));assert.ok(tree.some(n=>n.props.testID===scope+'-filters'));
       }
     }
   }
@@ -559,4 +710,39 @@ test('FE-065 S130 selected business country uses the current locale without dang
  let sheet=choose(base);const expected=new Intl.DisplayNames(['am'],{type:'region'}).of('ET');assert.ok(nodes(sheet).some(n=>n.type==='Copy'&&n.props.children==='Addis Ababa · '+expected));assert.ok(nodes(sheet).some(n=>n.props.children===base.description));
  sheet=choose({...base,city:'',region:'',countryCode:''});assert.ok(!nodes(sheet).some(n=>n.type==='Copy'&&n.props.muted===true),'Missing location adds no empty separator line');
  sheet=choose({...base,city:'Nairobi',region:'Nairobi',countryCode:''});assert.ok(nodes(sheet).some(n=>n.type==='Copy'&&n.props.children==='Nairobi'));assert.ok(!nodes(sheet).some(n=>String(n.props.children).includes('Nairobi · Nairobi')));
+});
+
+test('FE-065 S181 installed RNWeb filter overview keeps intrinsic rows above actions and Category pointer reachable',{timeout:120000},async()=>{
+ const root=process.cwd(),nativeWeb=path.join(root,'node_modules/react-native-web/dist/index.js'),ts=await import('typescript'),{chromium}=await import('playwright');
+ // Reuse the installed RNWeb/React browser-fixture boundary. The changed controls,
+ // Sheet/IconButton, Button, and their style declarations are actual source.
+ // Only device scale/insets, translation/read data and decorative art are ports.
+ const sourceDeclarations=(file:string,functions:string[],variables:string[])=>{
+  const source=ts.createSourceFile(file,fs.readFileSync(file,'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),found:string[]=[];
+  for(const name of functions){const declaration=source.statements.find(node=>ts.isFunctionDeclaration(node)&&node.name?.text===name);assert.ok(declaration,`${file}:${name}`);found.push(declaration.getText(source));}
+  for(const name of variables){const declarations=source.statements.filter(ts.isVariableStatement).flatMap(node=>[...node.declarationList.declarations]),declaration=declarations.find(node=>node.name.getText(source)===name);assert.ok(declaration,`${file}:${name}`);found.push(`export const ${declaration.getText(source)};`);}
+  return found.join('\n');
+ };
+ const actualSheet=sourceDeclarations('apps/mobile/src/chrome.tsx',['Sheet','IconButton'],['c']),actualButton=sourceDeclarations('apps/mobile/src/ui.tsx',['Button','Copy'],['colors','s']);
+ const code=(await build({stdin:{resolveDir:root,loader:'tsx',contents:`import React,{useState}from'react';import{createRoot}from'react-dom/client';import Controls from'./apps/mobile/src/MarketSearchControls';function Preview(){const[value,setValue]=useState({query:'',categories:[],countries:[],cities:[],madeToOrder:false,page:1});return <div style={{padding:8}}><Controls scope={window.filterFixture.scope} value={value} onChange={setValue} metadata={{categories:[{key:'furniture',label:'Furniture'}],countries:[{code:'ET'}],places:[{key:'ET:Addis Ababa',label:'Addis Ababa',countryCode:'ET'}]}}/></div>;}createRoot(document.getElementById('root')).render(<Preview/>);`},bundle:true,write:false,format:'iife',define:{'process.env.NODE_ENV':'"production"'},plugins:[{name:'market-filter-real-sheet-ports',setup(b){
+  b.onResolve({filter:/^(?:react|react\/jsx-runtime|react\/jsx-dev-runtime|react-dom|react-dom\/client)$/},args=>({path:path.join(root,'node_modules',args.path==='react'?'react/index.js':args.path==='react-dom'?'react-dom/index.js':args.path+'.js')}));
+  b.onResolve({filter:/^(?:react-native|react-native-safe-area-context|\.\/(?:runtime|ui|chrome))$/},args=>({path:args.path,namespace:'filter-preview-port'}));
+  b.onLoad({filter:/.*/,namespace:'filter-preview-port'},args=>({loader:'tsx',resolveDir:root,contents:
+   args.path==='react-native'?`import React from'react';import *as N from ${JSON.stringify(nativeWeb)};export const{View,Pressable,ScrollView,Modal,TextInput,Platform,StyleSheet}=N;export const useWindowDimensions=()=>window.filterFixture.dimensions;export function Text({style,...props}){const value=N.StyleSheet.flatten(style)||{},scale=window.filterFixture.dimensions.fontScale;return <N.Text {...props} style={[style,{...(value.fontSize?{fontSize:value.fontSize*scale}:{}),...(value.lineHeight?{lineHeight:value.lineHeight*scale}:{})}]}/>;}`
+   :args.path==='react-native-safe-area-context'?`export const useSafeAreaInsets=()=>({top:0,bottom:0,left:0,right:0});`
+   :args.path==='./runtime'?`import{createUiText}from'./lib/i18n/core';export const useApp=()=>({t:createUiText(window.filterFixture.messages),locale:window.filterFixture.locale});`
+   :args.path==='./chrome'?`import React,{useEffect}from'react';import{View,Text,Pressable,Modal,ScrollView,StyleSheet}from'react-native';import{useSafeAreaInsets}from'react-native-safe-area-context';import{useApp}from'./runtime';import{Icon,colors}from'./ui';const registerOverlay=()=>()=>{};export const CategoryArt=({size})=><View style={{width:size,height:size,flexShrink:0}}/>;${actualSheet}`
+   :`import React from'react';import{View,Text,Pressable,StyleSheet}from'react-native';import{storefrontAccent}from'./lib/storefront-accent';export const Icon=({size=22})=><View style={{width:size,height:size,flexShrink:0}}/>;export const Field=()=>null;${actualButton}`
+  }));
+ }}]})).outputFiles[0].text;
+ const browser=await chromium.launch({headless:true});
+ try{for(const locale of ['en','am','om'])for(const width of [320,390])for(const fontScale of [1,2])for(const scope of ['businesses','products']){
+  const page=await browser.newPage({viewport:{width,height:width===320?568:844}}),errors:string[]=[];page.setDefaultTimeout(8000);page.on('pageerror',error=>errors.push(error.message));await page.route('**/*',route=>route.abort());
+  const messages=locale==='en'?{}:JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,'utf8')) as Record<string,string>,t=createUiText(messages);
+  await page.setContent('<style>html,body,#root{margin:0;width:100%;height:100%}</style><div id="root"></div>');await page.evaluate(value=>{(window as unknown as{filterFixture:unknown}).filterFixture=value;},{locale,messages,scope,dimensions:{width,height:width===320?568:844,fontScale}});await page.addScriptTag({content:code});
+  await page.getByTestId(scope+'-filter-trigger').click();const sheet=page.getByRole('dialog');await sheet.waitFor();const overview=sheet.getByTestId(scope+'-filters');
+  const geometry=await overview.evaluate(element=>{const box=element.getBoundingClientRect(),rows=[...element.querySelectorAll('[role="button"],[role="checkbox"]')].map(row=>{const r=row.getBoundingClientRect();return{top:r.top,bottom:r.bottom,height:r.height};}),actions=element.nextElementSibling!.getBoundingClientRect();return{top:box.top,bottom:box.bottom,height:box.height,rows,actions:{top:actions.top,bottom:actions.bottom,height:actions.height}};});
+  const details=JSON.stringify({locale,width,fontScale,scope,geometry});assert.equal(geometry.rows.length,scope==='products'?4:3,details);assert.ok(geometry.height>=geometry.rows.reduce((sum,row)=>sum+row.height,0)+(geometry.rows.length-1)*8-1,'Overview reserves intrinsic height for every complete row '+details);assert.ok(geometry.rows.every(row=>row.height>=48&&row.top>=geometry.top-.5&&row.bottom<=geometry.bottom+.5),'Rows stay inside the intrinsic overview '+details);assert.ok(geometry.actions.top>=geometry.rows.at(-1)!.bottom+7,'Actions cannot overlay any filter choice '+details);
+  await sheet.getByRole('button',{name:t('Category'),exact:true}).click();await sheet.getByText(t('Categories'),{exact:true}).waitFor();await sheet.getByRole('button',{name:t('Back to filters'),exact:true}).click();await sheet.getByRole('button',{name:t('Done'),exact:true}).click();await page.getByTestId(scope+'-filter-trigger').waitFor();assert.equal(await sheet.count(),0);assert.deepEqual(errors,[]);await page.close();
+ }}finally{await browser.close();}
 });

@@ -3,6 +3,7 @@ import * as Crypto from 'expo-crypto';
 import {router} from 'expo-router';
 import {useApp,request} from '../src/runtime';
 import {Screen,Copy,Field,Button,Status} from '../src/ui';
+import PublicSiteFooter from '../src/PublicSiteFooter';
 const empty={companyName:'',contactName:'',email:'',phone:'',message:''};
 export default function TransportPartnerInterest(){
  const{t,locale}=useApp(),[draft,setDraft]=useState(empty),[reference,setReference]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
@@ -29,5 +30,5 @@ export default function TransportPartnerInterest(){
   <Field label={t('Phone (optional)')} value={draft.phone} maxLength={40} keyboardType="phone-pad" editable={!busy} onChangeText={v=>change('phone',v)}/>
   <Field label={t('About your company')} value={draft.message} maxLength={4000} multiline style={{minHeight:130}} editable={!busy} onChangeText={v=>change('message',v)}/>
   <Status error={error}/><Button label={t(busy?'Sending…':'Send request')} disabled={busy||!draft.companyName.trim()||!draft.contactName.trim()||!draft.email.trim()||!draft.message.trim()} onPress={()=>void submit()}/>
- </>}</Screen>;
+ </>}<PublicSiteFooter/></Screen>;
 }

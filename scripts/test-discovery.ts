@@ -58,7 +58,7 @@ async function runPostgresFixture() {
     assert.match(nearbyViewerSource, /data-paginated="false"/);
     assert.doesNotMatch(discoveryUiSource, /SharedLocationPanel|shared-location-floor|shared-location-more|buildScrollableSharedLocationVenueLayout/);
     assert.doesNotMatch(nearbyViewerSource, /Row \{row\}|padStart|pagination|Show more/, "nearby cards expose no scheduled references, pagination, or incremental loading");
-    assert.match(discoveryUiSource, /<b>\{booth\.reference\}<\/b>/, "Daily Featured Showrooms retains scheduled booth references");
+    assert.doesNotMatch(featuredUiSource, /<b>\{booth\.reference\}<\/b>/, "Internal schedule references do not appear as visitor badges");
     assert.doesNotMatch(discoveryUiSource, /discovery-industries-static/);
     assert.doesNotMatch(discoveryUiSource, /function IndustryStartChooser/);
     assert.match(discoveryUiSource, /className="featured-gallery"/);
@@ -133,13 +133,13 @@ async function runPostgresFixture() {
     assert.match(discoveryCssSource, /\.featured-gallery\s*\{[^}]*grid-template-columns/);
     assert.match(discoveryCssSource, /\.featured-card-media > img/);
     assert.doesNotMatch(discoveryCssSource, /\.featured-floor|\.featured-booth/);
-    assert.equal(featuredBroadcastPhase("2026-08-09",6,new Date("2026-08-09T20:29:59+03:00")),"scheduled");
-    assert.equal(featuredBroadcastPhase("2026-08-09",6,new Date("2026-08-09T20:30:00+03:00")),"live");
-    assert.equal(featuredBroadcastPhase("2026-08-09",6,new Date("2026-08-10T00:00:00+03:00")),"ended");
-    const walkthroughsAtStart=featuredBoothWalkthroughs("2026-08-09",6,new Date("2026-08-09T20:30:00+03:00"));
-    assert.equal(walkthroughsAtStart.length,6);assert.equal(walkthroughsAtStart[0].label,"8:30 PM–9:00 PM");
+    assert.equal(featuredBroadcastPhase("2026-08-09",4,new Date("2026-08-09T20:14:59+03:00")),"scheduled");
+    assert.equal(featuredBroadcastPhase("2026-08-09",4,new Date("2026-08-09T20:15:00+03:00")),"live");
+    assert.equal(featuredBroadcastPhase("2026-08-09",4,new Date("2026-08-09T21:45:00+03:00")),"ended");
+    const walkthroughsAtStart=featuredBoothWalkthroughs("2026-08-09",4,new Date("2026-08-09T20:15:00+03:00"));
+    assert.equal(walkthroughsAtStart.length,4);assert.equal(walkthroughsAtStart[0].label,"8:15 PM–8:35 PM");
     assert.equal(walkthroughsAtStart.filter(row=>row.current).length,1);
-    assert.equal(buildFeaturedProgramAgenda("2026-08-09",6,0).filter(row=>row.kind==='sponsor_break').length,4);
+    assert.equal(buildFeaturedProgramAgenda("2026-08-09",4,0).filter(row=>row.kind==='sponsor_break').length,2);
     assert.doesNotMatch(discoveryUiSource, /VenueLandscaping|venue-bench|venue-planter/);
     assert.match(featuredPageSource, /components\/FeaturedShowroomsWorkspace/);
     assert.doesNotMatch(featuredUiSource, /d3-(?:geo|selection|transition|zoom)|supercluster/i, "Daily Featured does not import the geographic map engine");
@@ -346,7 +346,7 @@ async function runPostgresFixture() {
             const machineryView = await getDiscoveryView({ industry: "machinery-tools", featuredDay: 4, now: monday });
             assert.equal(machineryView.total, 1, "a cross-listed showroom remains eligible through its non-primary industry membership");
             assert.equal(machineryView.showrooms[0].primaryIndustryKey, "electronics", "filter membership does not rewrite stable primary visual metadata");
-            assert.equal(view.featured.boothCount, 6, "automatic Daily Featured projection is capped at six");
+            assert.equal(view.featured.boothCount, 4, "automatic Daily Featured projection is capped at four");
             assert.equal(view.featured.mode, "featured");
             assert.equal(view.featured.isToday, true);
             assert.equal(view.featured.selectedWeekday, 1);
@@ -355,7 +355,7 @@ async function runPostgresFixture() {
             assert.equal(view.featured.schedule.find((day) => day.isToday)?.dayLabel, "Monday");
             assert.ok(view.showrooms.every((showroom) => showroom.heroImagePath === `/heroes/${showroom.handle}.webp`), "map detail records project each business page hero image");
             assert.ok(view.featured.booths.every((booth) => booth.revealed && booth.showroom.heroImagePath === `/heroes/${booth.showroom.handle}.webp`), "today's Daily Featured uses each business page hero image");
-            assert.deepEqual(view.featured.booths.map((booth) => booth.slot), Array.from({ length: 6 }, (_, index) => index + 1), "the bounded Daily Featured lineup receives one continuous floor slot per business");
+            assert.deepEqual(view.featured.booths.map((booth) => booth.slot), Array.from({ length: 4 }, (_, index) => index + 1), "the bounded Daily Featured lineup receives one continuous slot per business");
             assert.equal(new Set(view.featured.booths.map((booth) => booth.reference)).size, view.featured.booths.length, "Daily Featured booth references are unique");
             assert.match(view.featured.booths[0].reference, /^ELC-B\d{2}$/);
             const activeFeaturedTime = new Date("2026-07-27T20:32:00+03:00");
@@ -389,7 +389,7 @@ async function runPostgresFixture() {
             assert.equal(search.total, 1, "published offering text is searchable");
             assert.equal(search.showrooms[0].city, "Addis Ababa");
             assert.equal(search.nearbyGroups.length, 0, "a single searched result remains an isolated storefront marker");
-            assert.equal(search.featured.booths.length, 6, "map search does not narrow the independently scheduled bounded Daily Featured");
+            assert.equal(search.featured.booths.length, 4, "map search does not narrow the independently scheduled bounded Daily Featured");
             assert.deepEqual(search.sponsoredShowrooms.map((showroom) => showroom.handle), view.sponsoredShowrooms.map((showroom) => showroom.handle), "map search does not alter the global sponsor pool");
             assert.deepEqual(search.suggestions[0], {
                 kind: "offering",
@@ -557,7 +557,7 @@ async function runPostgresFixture() {
             const missingHeroMedia = await getDiscoveryView({ industry: "electronics", featuredDay: 1, now: monday });
             assert.equal(missingHeroMedia.total, 50, "missing hero setup does not erase an otherwise eligible geographic page");
             assert.equal(missingHeroMedia.showrooms.find((showroom) => showroom.handle === "bishoftu-repair")?.heroImagePath, "", "the map detail record does not substitute retained booth artwork for a missing page hero");
-            assert.equal(missingHeroMedia.featured.boothCount, 6, "a business without its published page hero does not receive a Daily Featured slot and the projection remains capped");
+            assert.equal(missingHeroMedia.featured.boothCount, 4, "a business without its published page hero does not receive a Daily Featured slot and the projection remains capped");
             assert.equal(missingHeroMedia.featured.booths.some((booth) => booth.revealed && booth.showroom.handle === "bishoftu-repair"), false, "the page missing its hero is excluded even when enough replacements preserve capacity");
             console.log(`Geographic page discovery and weekly category Daily Featured tests passed; 10,000-page grouping completed in ${groupingDurationMs.toFixed(1)}ms.`);
         }

@@ -218,11 +218,18 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
  const [mapZoom,setMapZoom]=useState(5);
  const mapRef=useRef<MarketplaceMapController|null>(null),mapViewRef=useRef<MapView>({center:[9.145,40.4897],zoom:5});
  const businessButton=useRef<HTMLButtonElement>(null),viewport=useRef<HTMLDivElement>(null),dragged=useRef(false);
+ const [paneGeometry,setPaneGeometry]=useState({width:320,edge:16});
+ useLayoutEffect(()=>{
+  const element=viewport.current;if(!element)return;
+  const measure=()=>{const width=element.clientWidth;if(width<=0)return;const raw=parseFloat(getComputedStyle(element).getPropertyValue('--market-pane-edge')),edge=Number.isFinite(raw)?Math.max(0,Math.min(16,raw)):16;setPaneGeometry(previous=>previous.width===width&&previous.edge===edge?previous:{width,edge});};
+  measure();const observer=new ResizeObserver(measure);observer.observe(element);window.addEventListener('resize',measure);
+  return()=>{observer.disconnect();window.removeEventListener('resize',measure);};
+ },[]);
  const dragStart=useRef<{x:number;progress:number;width:number}|null>(null);
  const [dragProgress,setDragProgress]=useState<number|null>(null);
  function panelDragStart(event:React.PointerEvent<HTMLButtonElement>){
   if(event.button!==0)return;
-  dragged.current=false;dragStart.current={x:event.clientX,progress:panelOpen?1:0,width:Math.max(1,(viewport.current?.clientWidth||320)-32)};
+  dragged.current=false;dragStart.current={x:event.clientX,progress:panelOpen?1:0,width:Math.max(1,paneGeometry.width-2*paneGeometry.edge)};
   event.currentTarget.setPointerCapture(event.pointerId);
  }
  function panelDragMove(event:React.PointerEvent<HTMLButtonElement>){
@@ -237,7 +244,7 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
  function cancelPanelDrag(){dragStart.current=null;setDragProgress(null);dragged.current=true;}
  const moving=dragProgress!==null;
  const progress=dragProgress??(panelOpen?1:0);
- const paneWidth=Math.max(1,(viewport.current?.clientWidth||320)-16);
+ const paneTravel=Math.max(1,paneGeometry.width-2*paneGeometry.edge);
 
  const navigationScope=marketSearchParams('businesses',businessSearch).toString();
  const mapData=businesses.data,groupViewport=useMapGroupViewport();
@@ -320,13 +327,13 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
     {!panelOpen&&businesses.error&&<div className={independentStyles.error} role="alert">{t(businesses.error)} <button type="button" onClick={businesses.retry}>{t('Try again')}</button></div>}
    </div>
    <div ref={viewport} className={independentStyles.viewport} data-dragging={moving}>
-   <aside id="discovery-search-panel" className={independentStyles.panel} data-open={panelOpen} style={moving?{transform:`translateX(${(1-progress)*(paneWidth-16)}px)`,transition:'none'}:undefined} aria-label={t('Products')} aria-hidden={!panelOpen} inert={!panelOpen} onKeyDown={event=>{if(event.key==='Escape'&&!event.defaultPrevented){setPanelOpen(false);requestAnimationFrame(()=>businessButton.current?.focus());}}}>
+   <aside id="discovery-search-panel" className={independentStyles.panel} data-open={panelOpen} style={moving?{transform:`translateX(${(1-progress)*paneTravel}px)`,transition:'none'}:undefined} aria-label={t('Products')} aria-hidden={!panelOpen} inert={!panelOpen} onKeyDown={event=>{if(event.key==='Escape'&&!event.defaultPrevented){setPanelOpen(false);requestAnimationFrame(()=>businessButton.current?.focus());}}}>
     {products.error&&<div className={independentStyles.error} role="alert">{t(products.error)} <button type="button" onClick={products.retry}>{t('Try again')}</button></div>}
     <div className={independentStyles.panelBody}><MarketplaceSearchResults discovery={productData} items={products.batch?.items||[]} loading={products.loading} failed={Boolean(products.error)} hasMore={products.hasMore} loadingMore={products.loadingMore} moreError={products.moreError} onMore={products.loadMore} enabled={panelOpen} resetKey={products.displayedSnapshotKey} snapshotCurrent={products.snapshotCurrent}/></div>
    </aside>
    <button type="button" className={independentStyles.peek} data-side={panelOpen?'map':'products'} style={moving?{left:Math.max(16,(viewport.current?.clientWidth||320)-64)-progress*Math.max(0,(viewport.current?.clientWidth||320)-80),right:'auto'}:undefined} aria-label={t(panelOpen?'Map only':'View products')} title={t(panelOpen?'Map only':'View products')} onClick={event=>{if(event.detail===0||!dragged.current)setPanelOpen(!panelOpen);dragged.current=false;}} onPointerDown={panelDragStart} onPointerMove={panelDragMove} onPointerUp={panelDragEnd} onPointerCancel={cancelPanelDrag} onLostPointerCapture={()=>{if(dragStart.current)cancelPanelDrag();}}><i aria-hidden="true"/>{panelOpen?<ChevronRight size={18}/>:<ChevronLeft size={18}/>}</button>
    <span className="sr-only" aria-live="polite">{t(nearMeStatus)}</span>
-   <div className={'discovery-map-shell '+independentStyles.mapPanel} data-open={!panelOpen} data-snapshot-current={businesses.snapshotCurrent} aria-busy={businesses.pending} style={moving?{transform:`translateX(${-progress*(paneWidth-16)}px)`,transition:'none'}:undefined} aria-hidden={panelOpen} inert={panelOpen}><div className="discovery-map-stage">
+   <div className={'discovery-map-shell '+independentStyles.mapPanel} data-open={!panelOpen} data-snapshot-current={businesses.snapshotCurrent} aria-busy={businesses.pending} style={moving?{transform:`translateX(${-progress*paneTravel}px)`,transition:'none'}:undefined} aria-hidden={panelOpen} inert={panelOpen}><div className="discovery-map-stage">
    {!panelOpen&&businesses.pending&&<div className={independentStyles.mapUpdating}><MarketUpdating/></div>}
    {!businesses.pending&&!businesses.error&&mapData.showrooms.length===0&&<div className={independentStyles.emptyMap} role="status"><p>{t('No businesses with public map locations match these filters.')}</p><button type="button" onClick={()=>setPanelOpen(true)}>{t('Browse product listings')}</button></div>}
    {mapData.resultCounts.businesses>mapData.showrooms.length&&<p className={independentStyles.mapLimit}>{t('Showing {count} businesses. Search or filter to see more.',{count:mapData.showrooms.length})}</p>}
@@ -403,12 +410,12 @@ export function NearbyShowroomsViewer({group,showrooms:sourceShowrooms,featuredN
  const selected=showrooms.find(showroom=>showroom.id===selectedShowroomId)||null,layout=mapGroupLayout(viewport.width,viewport.height,viewport.fontScale,showrooms.length);
  const valid=Boolean(members&&showrooms.length<=viewport.capacity&&layout.admitted);
  useEffect(()=>{closeRef.current?.focus({preventScroll:true});},[group.key]);
- useEffect(()=>{if(selected){lastSelectedId.current=selected.id;backRef.current?.focus({preventScroll:true});}else if(lastSelectedId.current!==null)listRef.current?.querySelector<HTMLButtonElement>(`[data-showroom-id="${lastSelectedId.current}"]`)?.focus({preventScroll:true});},[selectedShowroomId,group.key]);
+ useEffect(()=>{if(selected){lastSelectedId.current=selected.id;backRef.current?.focus({preventScroll:true});}else if(lastSelectedId.current!==null){const button=listRef.current?.querySelector<HTMLButtonElement>(`[data-showroom-id="${lastSelectedId.current}"]`);if(layout.needsScroll)button?.scrollIntoView({block:'nearest',inline:'nearest'});button?.focus({preventScroll:true});}},[selectedShowroomId,group.key,layout.needsScroll]);
  useEffect(()=>{if(!valid)onClose();},[valid,onClose]);
  if(!valid)return null;
- return <MapPreviewDialog labelledBy="nearby-showroom-title" onClose={onClose} restoreGroupKey={group.key} wide><aside className={`nearby-showroom-viewer${selected?' detail-open':''}`} data-compact={layout.compact} data-paginated="false" data-capacity={viewport.capacity}>
+ return <MapPreviewDialog labelledBy="nearby-showroom-title" onClose={onClose} restoreGroupKey={group.key} wide><aside className={`nearby-showroom-viewer${selected?' detail-open':''}`} data-compact={layout.compact} data-scrollable={layout.needsScroll} data-paginated="false" data-capacity={viewport.capacity}>
   <header>{selected?<button ref={backRef} className="nearby-showroom-back" type="button" onClick={onBack}><ArrowLeft aria-hidden="true"/><span>{t('Back to businesses')}</span></button>:<div className="nearby-showroom-heading"><h2 id="nearby-showroom-title">{t('Choose a business')}</h2><p>{showrooms.length===1?t('1 business'):t('{count} businesses',{count:showrooms.length})}</p></div>}<button ref={closeRef} type="button" onClick={onClose} aria-label={t('Close business list')}><X aria-hidden="true"/></button></header>
-  {selected?<NearbyShowroomDetail showroom={selected} presence={showroomPresence(selected,featuredNowBusinessId,t)} onOpen={onOpen}/>:<div ref={listRef} className="nearby-showroom-grid" style={{'--group-row-height':`${layout.rowHeight}px`,'--group-columns':viewport.width>=600?2:1} as CSSProperties}>
+  {selected?<NearbyShowroomDetail showroom={selected} presence={showroomPresence(selected,featuredNowBusinessId,t)} onOpen={onOpen}/>:<div ref={listRef} className="nearby-showroom-grid" role={layout.needsScroll?'region':undefined} aria-label={layout.needsScroll?t('Choose a business'):undefined} tabIndex={layout.needsScroll?0:undefined} style={{'--group-row-height':`${layout.rowHeight}px`,'--group-columns':viewport.width>=600?2:1,'--group-body-max-height':`${Math.max(0,viewport.height-layout.chromeHeight)}px`} as CSSProperties}>
    {showrooms.map(showroom=>{const presence=showroomPresence(showroom,featuredNowBusinessId,t),location=showroom.city||showroom.zone||showroom.region||t(showroom.primaryIndustryShortLabel);return <button key={showroom.id} type="button" data-showroom-id={showroom.id} data-industry={showroom.primaryIndustryKey} data-presence={presence.kind||undefined} className={presence.kind||undefined} onClick={()=>onSelect(showroom.id)} aria-label={t('{value1}, {value2}, {value3}.{value4} View details.',{value1:showroom.name,value2:showroom.primaryIndustryLabel,value3:[location,presence.label].filter(Boolean).join('. '),value4:''})}><span className="nearby-showroom-media"><ShowroomImage showroom={showroom}/>{presence.kind?<i>{presence.shortLabel}</i>:null}</span><span className="nearby-showroom-copy"><small className="nearby-showroom-location">{location}</small><strong>{showroom.name}</strong>{showroom.isDemo?<span className={launchStyles.example}>{t('Example page')}</span>:null}<em>{t('View details')}</em></span></button>;})}
   </div>}
  </aside></MapPreviewDialog>;

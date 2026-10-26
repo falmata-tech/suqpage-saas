@@ -3,7 +3,7 @@
 Current product authority: [master brief](../SUQPAGE-MASTER-PROMPT.md).
 Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 [DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md).
-Updated 2026-10-25. This working board replaces dated `CURRENT` labels; it does
+Updated 2026-10-26. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
 ## Current position
@@ -31,6 +31,12 @@ qualification remain unfinished.
 The old package's v6 bundle is not eligible for that new app. Physical Android,
 Play submission and genuine closed-test enrollment remain unverified.
 
+S181–S183's map-first UI, simpler Featured/footer and uncropped white-field icons
+now pass local qualification. Their source is not yet integrated or published;
+the S180 website/APK above remain the delivered artifacts. The next dependency
+is the reviewed task commit and exact-head GitHub checks, then website publication
+and a separately admitted version2 local Android build.
+
 ## Surface status
 
 | Surface | Implemented | Tested | Visually approved | Deployed / delivered |
@@ -41,6 +47,139 @@ Play submission and genuine closed-test enrollment remain unverified.
 | AfricMade Play app | Saved AfricMade app and local English/Amharic listing drafts | Name/package/Draft, Free pricing and App type verified; category unselected, listing/declarations/native screens pending | Native phone screenshots pending | No bundle upload, release or closed-test enrollment |
 
 ## Ordered work
+
+### S181 — map-first home and visitor UX across web/mobile
+
+Active UI task from current main `88c8b6f`, isolated from the 46 pre-existing root
+changes. FE-065 S181 owns the compact home/filter workflow; FE-021 S181 owns safe
+earlier group activation. FE-053/FE-049 retain native/localization contracts.
+Master §§2, 3, 5, 10, 18 and 19 describe the changed source; final evidence and
+delivery qualification remain below. Earlier
+S180 phone, FCM and Play dependencies remain open; its v1 APK does not include
+this later UI work. No new build or hosted rollout is implied.
+
+1. [x] Inspect current web/native layout, cluster activation and controlling
+   contracts; record ready acceptance, ownership and the compact-filter tradeoff.
+2. [x] Implement the short phone/native heading, full-width larger map, one-row
+   search/Filters overview and readable floating attribution on both platforms.
+   Preserve wide controls, full desktop/About narrative and active locale meaning.
+   - [x] Add the owner's later neutral Market-icon request: use a storefront
+     symbol across public web and native navigation, retaining the map icon for
+     Business locations. Focused and actual desktop/phone web/Expo navigation
+     evidence passes; owner navigation retains the same destination/icon contract.
+   - [x] Apply the later business-Page inquiry-list request under FE-054:
+     the floating list uses that business's validated saved accent and readable
+     foreground on web and native. Preserve cart scope, quantity, inquiry and
+     return behavior. Custom colours/contrast/A→B values pass installed-renderer
+     and isolated PostgreSQL/DTO tests; four actual web/Expo cases prove default
+     palette, A→B cart isolation and return. All 66 active marked local demos lack
+     saved accents, so no actual saved-colour pair is claimed or manufactured.
+3. [x] Qualify bounded first-safe city grouping at normalized zoom 10–13, named
+   singleton footprints and current-scope picker authority without changing data.
+   Resolve demonstrated pre-fit circle overlap and dense one-card-capacity name
+   crowding with the bounded two-business scroll fallback on both platforms.
+4. [x] Run focused geometry, interaction, localization, map/group and type checks;
+   verify both local previews use this source and the intended loopback API.
+   Retained focused receipts qualify 46 web cases, 30 native layout cases,
+   35 shared map cases, 19 native-group cases and two RNWeb picker integrations.
+   Root typecheck, homepage, localization and narrative checks pass; both
+   previews read the intended local catalogue. The actual Expo review found an
+   intrinsic-height defect in the filter overview; its fix passes 24 narrow/
+   enlarged installed-RNWeb cases and the source is frozen as v5. Actual journeys
+   remain step 5. Web focused tests also reproduce and correct the short/enlarged
+   canvas collapse, header overflow and truncated selected-language label.
+5. [x] Exercise actual Chrome desktop/390px/320px web and Expo search/filter/group/
+   Page/product/Back/chat journeys, including empty/error/clear recovery and real
+   local readback for disposable fixture writes. Inspect en/am/om and enlarged
+   text. Record findings, screenshots, limits and agent visual pass/fail.
+   - [x] Resolve the demonstrated 320×420 enlarged-text layout: keep language
+     selection/heading visible and let the user scroll to a usable map instead
+     of compressing its canvas behind fixed actions. Recheck actual hit targets,
+     group/Page/Back and the ordinary-width ratios; retain the failed review.
+     V6 Chrome verifies a scrollable 240px canvas, second-card keyboard/focus
+     return, 54.89% ordinary 320px map and 69.64% 390px map. V7 gives the full
+     selected language name room at 320px; the actual About→footer→Market
+     retake passes with the complete selected text and 44px target. The source-
+     bound agent visual decision is recorded in traceability. Background GET
+     cancellation causes remain unqualified; this is no error-free network claim.
+6. [x] Qualify all 78 check stages, web release and all 20 acceptance cases on the
+   frozen runtime. Preserve failed full invocations and reuse unchanged passing
+   stages; the repaired complete web lifecycle file and affected human-search
+   case pass their bounded reruns. Traceability records the composition and
+   browser/platform limits; this is not a passing single full-check invocation
+   or Android binary qualification.
+7. [ ] **CURRENT:** Reconcile master/specs/traceability with evidence; review and commit only
+   task paths, then follow the authorized GitHub workflow. Keep source integration,
+   web publication and a newly admitted native build as separate outcomes.
+
+### S182 — simpler Featured and public information footer
+
+Later owner requests join the current UI batch without discarding S181. FE-021
+S182 and BE-029 control Featured; the footer's owning presentation contract is
+FE-070. The reviewed preview evidence retains its original source identities;
+the combined delivery runtime is frozen as V8.
+No hosted data/configuration write, native build or Play upload is implied.
+
+1. [x] Inspect the reference and current UI/schedule. Record a 20:15–21:45 EAT
+   window: at most four 20-minute businesses, two two-minute sponsor mentions and
+   three-minute changeovers where a sponsor break does not supply the transition.
+   Keep historical manual rows and category eligibility; reject a fifth selection.
+2. [x] Simplify web/native Featured to one heading and schedule/status row,
+   category selector and timed cards; remove duplicate agenda/intro and automatic
+   six-second return to today. Match loading, locales, sponsor and Back behavior.
+3. [x] Restructure the reusable information footer: Businesses/listing utility
+   links, separate legal links, location and copyright lines. Remove duplicate
+   transport CTA; preserve full-height Market/chat and business identity.
+4. [x] Run focused schedule/capacity/security, status, locale, card/sponsor/loading,
+   footer and type checks. Freeze all S181/S182 runtime inputs together.
+   Shared schedule/discovery PostgreSQL fixtures, five status cases, 18 native
+   Featured cases, 13 web cases across retained runs, grouped-footer cases and
+   both typechecks pass. Actual browser/save/readback evidence remains below.
+5. [x] Complete actual desktop/phone web and Expo map/filter/Page/inquiry/transport
+   journeys, Featured category/time/Back and two-Page inquiry-accent checks; record
+   agent visual decision, real readback and fixture/platform limits.
+   Cart and all nine locale/width footer cases pass their scoped visual review;
+   the final 320px selected-language correction is separately retested. Real
+   admin Save/capacity/readback runs in the disposable-provider acceptance gate.
+6. [x] Complete combined local check/release/acceptance qualification. Actual
+   admin four-business Save/reload/PostgreSQL readback, automatic reset and staff
+   denials pass against the disposable provider. Original failed runs remain
+   retained; only the two stale test expectations are repaired.
+7. [ ] **CURRENT:** Reconcile evidence and commit/push/integrate through the authorized
+   GitHub workflow, keeping source integration and artifact publication distinct.
+
+### S183 — uncropped icon and splash; orange on white
+
+The owner's later native-brand finding joins the active delivery batch. FE-070
+S183 controls geometry/appearance; DEP-044 controls the next version2 admission.
+Preserve S181/S182 results and failed gate attempts. No new mark or font is needed.
+
+1. [x] Inspect approved sources, current derivatives and retained S180 APK
+   resources. The wide system-splash wordmark and oversized adaptive/themed art
+   cross Android's safe circles; transparent-corner checks missed the defect.
+   Record current-vs-installed limits and the owner's white-background choice.
+2. [x] Add failing mask-bound regressions; correct the existing generator/config
+   for padded orange-on-white launcher/splash and safe monochrome placement.
+   Align installed-web/touch icons with fresh canonical URLs; preserve clear
+   transparent favicon, full wordmarks, email art and compatibility aliases.
+   Advance native code to2 and verify actual configuration overrides stale1.
+3. [x] Exercise the actual installed splash plugin's resource generation, all
+   density/mask checks and actual Chrome preview/header review. Record agent
+   visual decision and physical Android limits; no routine owner visual pause.
+   Seven brand tests, five installed-plugin density outputs, PWA/worker/metadata
+   checks and Chrome mask previews pass. Header artwork bytes are unchanged;
+   original header evidence is reused. No installed v2 launcher/splash is claimed.
+4. [x] Freeze and qualify the combined final inputs: V8 contains 1,386 runtime
+   inputs; gate-code V10 contains 1,836 inputs after two test-only repairs. All78
+   check stages, web release (including real local HTTP smoke) and 20 acceptance
+   cases are qualified with source-matched composition. The three failed full
+   check attempts and first acceptance failure remain retained. Fresh locked
+   native audit still reports 6 high findings; the 1,712-module offline export
+   excludes their two root advisory packages and is not a binary/security waiver.
+5. [ ] **CURRENT:** Commit/push/integrate through the GitHub workflow and publish the exact
+   qualified web artifact. Prepare the concrete local version2 build review;
+   fresh advisory acceptance, compilation/static inspection, installed-phone
+   and Play listing/submission remain separate gates.
 
 ### S172 — AfricMade presentation and business-sourcing launch
 

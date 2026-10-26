@@ -10,9 +10,9 @@ export const PLATFORM_BRAND = {
     wordmarkReverse: "/brand/africmade-wordmark-reverse-v3.png",
     notificationBadge: "/pwa/africmade-badge-96.png",
     favicon: "/pwa/africmade-favicon-v3-32.png",
-    apple: "/pwa/africmade-apple-touch-v3-180.png",
-    icon192: "/pwa/africmade-icon-v3-192.png",
-    icon512: "/pwa/africmade-icon-v3-512.png",
-    maskable512: "/pwa/africmade-maskable-v3-512.png",
+    apple: "/pwa/africmade-apple-touch-v4-180.png",
+    icon192: "/pwa/africmade-icon-v4-192.png",
+    icon512: "/pwa/africmade-icon-v4-512.png",
+    maskable512: "/pwa/africmade-maskable-v4-512.png",
   },
 } as const;

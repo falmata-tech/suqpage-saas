@@ -1,4 +1,4 @@
-const VERSION = "v3";
+const VERSION = "v4";
 importScripts('/attention-push.js');
 const CACHE_PREFIX = "africmade-pwa-";
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${VERSION}`;
@@ -9,9 +9,9 @@ const APP_SHELL = [
   OFFLINE_URL,
   "/manifest.webmanifest",
   "/brand/africmade-showroom-mark-v3.png",
-  "/pwa/africmade-icon-v3-192.png",
-  "/pwa/africmade-icon-v3-512.png",
-  "/pwa/africmade-maskable-v3-512.png"
+  "/pwa/africmade-icon-v4-192.png",
+  "/pwa/africmade-icon-v4-512.png",
+  "/pwa/africmade-maskable-v4-512.png"
 ];
 
 const PRIVATE_PATHS = ["/api", "/dashboard", "/preview", "/login", "/request"];

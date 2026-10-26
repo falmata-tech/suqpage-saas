@@ -1,4 +1,4 @@
-.stage{position:relative;isolation:isolate;height:100%;min-height:420px;overflow:hidden;background:#f5f7f5;display:flex!important;flex-direction:column}
+.stage{--market-pane-edge:16px;position:relative;isolation:isolate;height:100%;min-height:420px;overflow:hidden;background:#f5f7f5;display:flex!important;flex-direction:column}
 .modeBar{display:flex;justify-content:center;align-items:center;padding:0 12px;flex-shrink:0;min-width:0}
 .switch{position:relative;z-index:12;align-self:center;display:flex;gap:2px;padding:0;margin:0;background:#eaf0ec;border:1px solid #d7e1df;border-radius:10px;max-width:100%;min-width:0}
 .switch button{min-height:48px;min-width:48px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 14px;border:0;border-radius:8px;background:transparent;font-size:.875rem;line-height:1.3;font-weight:750;color:#465d63;cursor:pointer}
@@ -8,6 +8,7 @@
 .viewport{position:relative;isolation:isolate;flex:1;min-height:0;overflow:hidden;background:#e8eeeb}
 .viewport :global(.discovery-floating-tools){top:12px!important}
 .controls{display:flex;flex-direction:column;gap:6px;min-width:0}
+.compactFilters{display:none}
 .search{display:flex;gap:9px;align-items:center;background:#fff;border:1px solid #ccd9d7;border-radius:10px;min-height:50px;margin:0;padding:0 12px;box-shadow:0 3px 12px #2035370b;color:#576972}
 .search input{width:100%;min-width:0;min-height:46px;border:0!important;box-shadow:none!important;background:transparent;padding:8px 0;font-size:.9375rem;outline-offset:3px}
 .search button{display:grid;place-items:center;min-width:48px;min-height:48px;border:0;background:none;color:#52636b;cursor:pointer}
@@ -17,13 +18,13 @@
 .filters button[data-active=true]{border-color:#d34a08;color:#bc3d05;background:#fff3eb}
 .supply{display:block;margin-top:4px;font-size:12px;font-weight:650;color:#4b625b;line-height:1.4}
 .filters button:disabled{opacity:.65;cursor:default}
-.filters b{display:grid;place-items:center;min-width:1.0625rem;min-height:1.0625rem;padding:0 3px;background:#c94100;color:white;border-radius:9px;font-size:.625rem;line-height:1}
+.filters b,.compactFilters b,.filterMenu b{display:grid;place-items:center;min-width:1.0625rem;min-height:1.0625rem;padding:0 3px;background:#c94100;color:white;border-radius:9px;font-size:.625rem;line-height:1}
 .filters .clear{border:0;background:#fff8;box-shadow:none;color:#ab3d07}
 .search .clear{border-left:1px solid #dce5e3;padding:4px 6px;font-size:12px;font-weight:650;min-width:48px;min-height:48px;color:#ab3d07}
-.stage .panel{position:absolute;left:16px;top:0!important;bottom:0;height:auto!important;z-index:1;width:calc(100% - 16px);display:flex;flex-direction:column;background:#fbfcfc;border-left:1px solid #cbd7d5;box-shadow:-6px 0 20px #2035371a;transition:transform .28s ease;transform:translateX(calc(100% - 16px))}
+.stage .panel{position:absolute;left:var(--market-pane-edge);top:0!important;bottom:0;height:auto!important;z-index:1;width:calc(100% - var(--market-pane-edge));display:flex;flex-direction:column;background:#fbfcfc;border-left:1px solid #cbd7d5;box-shadow:-6px 0 20px #2035371a;transition:transform .28s ease;transform:translateX(calc(100% - var(--market-pane-edge)))}
 .stage .panel[data-open=true]{z-index:8;transform:translateX(0)}
-.stage .mapPanel{width:calc(100% - 16px)!important;height:auto!important;position:absolute;left:0;right:16px;top:0;bottom:0;z-index:8;border-right:1px solid #cbd7d5;box-shadow:6px 0 20px #20353720;transition:transform .28s ease;transform:translateX(0);border-radius:0 14px 0 0}
-.stage .mapPanel[data-open=false]{transform:translateX(calc(-100% + 16px));z-index:1;pointer-events:none}
+.stage .mapPanel{width:calc(100% - var(--market-pane-edge))!important;height:auto!important;position:absolute;left:0;right:var(--market-pane-edge);top:0;bottom:0;z-index:8;border-right:1px solid #cbd7d5;box-shadow:6px 0 20px #20353720;transition:transform .28s ease;transform:translateX(0);border-radius:0 14px 0 0}
+.stage .mapPanel[data-open=false]{transform:translateX(calc(-100% + var(--market-pane-edge)));z-index:1;pointer-events:none}
 .panelBody :global(.discovery-product-results){grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px}
 .panelBody :global(.discovery-product-card){border:1px solid #d7e1df;border-radius:10px;background:#fff;overflow:hidden}
 .feedFooter{padding:18px 8px;min-height:60px;text-align:center;color:#54646b;font-size:13px}.feedFooter button{min-height:44px;padding:8px 20px;border:1px solid #d7e1df;border-radius:9px;background:#fff;color:#ad3806;cursor:pointer}
@@ -47,21 +48,29 @@
 .error{padding:12px;background:#fff4ec;color:#963b10;font-size:14px}
 .filterDialog{padding:18px;border:1px solid #d4dfdc;border-radius:16px;width:min(390px,calc(100vw - 28px));max-height:min(560px,80dvh);box-shadow:0 14px 50px #142b3633;color:#293d43}
 .filterDialog::backdrop{background:#142b3659}
+.filterDialog[open]{display:flex;flex-direction:column;overflow:hidden}
 .dialogHeading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.dialogHeading h2{font-size:20px;margin:0}.dialogHeading button{min-width:48px;min-height:48px;border:0;background:#f1f5f4;border-radius:8px;display:grid;place-items:center}
+.dialogHeading,.dialogFooter{flex-shrink:0}.dialogHeading h2{flex:1;min-width:0;overflow-wrap:anywhere}
 .filterDialog>input{width:100%;min-height:48px;margin-bottom:8px}
-.options{max-height:340px;overflow:auto}.options label{display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 4px;font-size:14px;cursor:pointer}.options input{accent-color:#c54100;width:18px;height:18px;flex-shrink:0}
+.options{max-height:340px;min-height:0;overflow:auto}.options label{display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 4px;font-size:14px;cursor:pointer}.options input{accent-color:#c54100;width:18px;height:18px;flex-shrink:0}
+.filterMenu{display:grid;gap:8px;min-height:0;overflow:auto}
+.filterMenu button{display:flex;align-items:center;gap:10px;min-height:48px;min-width:0;padding:10px 12px;border:1px solid #ccd9d7;border-radius:8px;background:#fff;color:#344c55;font-size:.875rem;font-weight:650;text-align:start;cursor:pointer}
+.filterMenu button>span{flex:1;min-width:0;overflow-wrap:anywhere}.filterMenu button>svg{flex-shrink:0}.filterMenu button:disabled{opacity:.6;cursor:default}
+.filterMenu button[data-active=true]{border-color:#d34a08;color:#bc3d05;background:#fff3eb}
+.filterMenu button:focus-visible,.compactFilters:focus-visible{outline:3px solid #2459cc;outline-offset:2px}
 .dialogFooter{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid #e1e8e6;padding-top:12px;margin-top:12px}.dialogFooter button{min-height:48px;padding:8px 18px;border:1px solid #d4dfdc;border-radius:8px;background:white}.dialogFooter :global(.brand){background:#c54100;color:white;border-color:#c54100}
 @media(max-width:760px){.switch button{font-size:.75rem;padding:0 10px;gap:5px}.activeControls{padding:6px 10px 8px}.filters{gap:5px}.filters button{padding:6px 8px;font-size:.6875rem}.panelControls{padding:10px}.panelBody :global(.discovery-search-workspace){padding:10px}.panelBody :global(.discovery-product-result-copy strong){font-size:15px}.panelBody :global(.discovery-product-result-copy p){font-size:12px}.emptyMap{left:12px;top:12px}.stage{min-height:300px}}
 @media(prefers-reduced-motion:reduce){.stage .panel,.stage .mapPanel{transition:none}}
 @media(max-width:760px){
+ .stage{--market-pane-edge:0px}
  .modeBar{padding-inline:0}
  .switch{width:100%;max-width:none;border-radius:0;border-inline:0;background:#f5f7f6}
  .switch button{flex:1;min-height:44px;padding-inline:6px;border-radius:0}
  .switch button[aria-pressed=true]{box-shadow:inset 0 -3px #c54100}
- .activeControls{padding:4px 10px 6px}
+ .activeControls{padding:4px 8px 6px}
  .controls{gap:4px}
  .search{min-height:44px}
- .search input{min-height:44px;padding-block:6px}
+ .search input{min-height:44px;padding-block:6px;font-size:1rem}
  .search button,.search .clear{min-height:44px}
  .filters button{min-height:44px}
  .filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;padding:0;gap:5px;align-items:stretch}
@@ -80,6 +89,22 @@
 @container market-controls (min-width:35rem) and (max-width:45.999rem){
  .filters button>svg{display:none}
 }
+/* One labelled filter entry preserves the phone map rather than another toolbar. */
+@media(max-width:760px){
+ .controls{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:6px}
+ .controls>.filters{display:none}
+ .search{padding-inline:8px;gap:6px}
+ .search .clear{display:none}
+ .compactFilters{display:flex;align-items:center;justify-content:center;gap:5px;min-width:44px;min-height:44px;max-width:9rem;padding:6px 9px;border:1px solid #ccd9d7;border-radius:8px;background:#fff;color:#344c55;font-size:.8125rem;font-weight:650;line-height:1.25;cursor:pointer}
+ .compactFilters>span{min-width:0;overflow-wrap:anywhere}.compactFilters>svg{flex-shrink:0}
+ .compactFilters[data-active=true]{border-color:#d34a08;color:#bc3d05;background:#fff3eb}
+ .stage .mapPanel{border-right:0;border-radius:0}
+}
+@media(max-width:380px){.compactFilters>svg{display:none}}
+@container market-controls (max-width:18rem){
+ .controls:has(>.compactFilters){grid-template-columns:minmax(0,1fr)}
+ .compactFilters{justify-self:end;max-width:100%}
+}
 @media(max-width:900px) and (max-height:650px){
  .viewport :global(.discovery-floating-tools){width:102px!important;right:10px!important}
  .viewport :global(.discovery-floating-buttons){display:grid!important;grid-template-columns:48px 48px;grid-template-rows:48px 48px;gap:6px}
@@ -89,8 +114,10 @@
  .viewport :global(.discovery-floating-buttons button:nth-child(2)){grid-column:2;grid-row:1}
  .viewport :global(.discovery-floating-buttons button:nth-child(3)){grid-column:2;grid-row:2}
 }
-/* Short screens keep the real map inside its viewport, with one tools row. */
+/* Short screens scroll the workspace instead of compressing the actual canvas. */
 @media(max-height:600px){
+ :global(.public-market-experience) .stage:global(.discovery-workbench){height:auto;min-height:100%}
+ .viewport{min-height:240px}
  .stage .mapPanel{min-height:0!important}
  .viewport :global(.discovery-floating-tools){top:8px!important;left:8px!important;right:auto!important;width:210px!important}
  .viewport :global(.discovery-floating-buttons){display:flex!important;flex-direction:row!important;flex-wrap:nowrap;gap:6px}

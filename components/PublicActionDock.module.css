@@ -25,10 +25,10 @@
   width: 100%;
   min-height: 48px;
   padding: 10px 12px;
-  border: 1px solid #ead3c5;
+  border: 1px solid var(--store-edge, #ead3c5);
   border-radius: 12px;
-  background: #fff;
-  color: #a43107;
+  background: var(--store-accent, #fff);
+  color: var(--store-on, #a43107);
   box-shadow: 0 4px 16px #3d251c20;
   font: 700 14px/1.25 var(--font-body), Arial, sans-serif;
   cursor: pointer;
@@ -43,11 +43,11 @@
   height: 26px;
   padding: 0 5px;
   border-radius: 20px;
-  background: #b83200;
-  color: #fff;
+  background: var(--store-on, #b83200);
+  color: var(--store-accent, #fff);
   font-size: 13px;
 }
-.inquiry:hover { background: #fff3eb; border-color: #c85322; }
+.inquiry:hover { background: var(--store-accent, #fff3eb); border-color: var(--store-edge, #c85322); }
 .inquiry:focus-visible { outline: 3px solid #2459cc; outline-offset: 3px; }
 @media (max-width: 720px) {
   .dock { right: max(12px, env(safe-area-inset-right)); bottom: calc(76px + env(safe-area-inset-bottom)); max-width: min(200px, calc(100vw - 24px)); }

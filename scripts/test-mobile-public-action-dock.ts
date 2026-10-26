@@ -9,6 +9,7 @@ import am from '../lib/i18n/messages/am.json';
 import om from '../lib/i18n/messages/om.json';
 import so from '../lib/i18n/messages/so.json';
 import ti from '../lib/i18n/messages/ti.json';
+import {accentContrast,storefrontAccent} from '../lib/storefront-accent';
 
 type Element={type:string|((props:Record<string,unknown>)=>unknown);props:Record<string,unknown>&{children?:unknown}};
 type Basket={shop:Shop;items:Array<{product:Offering;quantity:string;options:Record<string,string>}>};
@@ -82,6 +83,19 @@ test('FE-036 native floating inquiry appears only for its current business while
   fixture.path='/shop/'+fixture.shop.handle;tree=render();fixture.modal=true;const before=fixture.routes.length;press(find(tree,'public-inquiry-list'));press(find(tree,'public-transport-launcher'));assert.equal(fixture.routes.length,before,'Retained background handlers cannot navigate during composition');fixture.modal=false;
   assert.deepEqual(render({placement:'market'}),[],'A retained hidden Market cannot duplicate the public root dock');fixture.path='/';assert.deepEqual(render({placement:'shell'}),[],'The public root leaves Market placement to its mounted stage');
   for(const path of ['/account','/owner/page','/owner/setup','/owner/support','/login','/request','/buying','/dashboard/admin/staff','/blocked-businesses']){fixture.path=path;assert.deepEqual(render(),[],path);}
+});
+
+test('FE-054 native floating inquiry uses only the current Shop accent with readable defaults and unchanged transport',async()=>{
+ const{fixture,render}=await component('PublicActionDock'),ready=product(1),first=shop([ready]);fixture.basket={shop:first,items:[item(ready)]};fixture.shop=first;fixture.path='/shop/'+first.handle;
+ const transportBefore=style(find(render(),'public-transport-launcher'));
+ for(const accentColor of [undefined,'#087F75','#B6FF00','#FFFFFF','#000000','invalid','']){
+  fixture.shop={...first,accentColor};const tree=render(),list=find(tree,'public-inquiry-list'),palette=storefrontAccent(accentColor),badge=find(tree,'inquiry-list-count'),label=nodes(list).find(node=>node.type==='Text'&&text(node)==='Inquiry list')!,icon=nodes(list).find(node=>node.type==='Icon')!;
+  assert.equal(style(list).backgroundColor,palette?.accent||'white');assert.equal(style(list).borderColor,palette?.edge||'#c43a00');assert.equal(style(label).color,palette?.on||'#c43a00');assert.equal(icon.props.color,palette?.on||'#c43a00');assert.equal(style(badge).backgroundColor,palette?.on||'#c43a00');assert.equal(style(badge).color,palette?.accent||'white');
+  assert.ok(Number(style(list).minHeight)>=48);assert.equal(text(badge),'1');assert.deepEqual(style(find(tree,'public-transport-launcher')),transportBefore,'Only the business action changes color');if(palette)assert.ok(accentContrast(String(style(label).color),String(style(list).backgroundColor))>=4.5&&accentContrast(String(style(badge).color),String(style(badge).backgroundColor))>=4.5);
+ }
+ fixture.shop={...first,accentColor:'#087F75'};fixture.path='/shop/second-shop';assert.equal(find(render(),'public-inquiry-list'),undefined,'A previous Shop color/action is absent before the new current Shop arrives');
+ const second={...first,id:99,handle:'second-shop',accentColor:'#7900FF',products:[product(9)]};fixture.shop=second;fixture.baskets.set(second.id,[item(second.products[0])]);let tree=render();assert.equal(style(find(tree,'public-inquiry-list')).backgroundColor,'#7900FF');press(find(tree,'public-inquiry-list'));assert.deepEqual(JSON.parse(JSON.stringify(fixture.routes.at(-1))),{pathname:'/inquiry',params:{handle:second.handle}});
+ fixture.shop={...second,accentColor:''};tree=render();assert.equal(style(find(tree,'public-inquiry-list')).backgroundColor,'white','Reset removes the prior saved color');assert.equal(fixture.basketWrites,0,'Changing action presentation never changes saved items');
 });
 
 test('FE-053 compact dock keeps both translated labels and actual48px controls; transport opens intake directly',async()=>{

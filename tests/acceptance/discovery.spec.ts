@@ -1,4 +1,24 @@
 import {test,expect} from './fixtures';
+import type {Page} from '@playwright/test';
+
+async function openFilters(page:Page) {
+ const trigger=page.getByRole('button',{name:/^Filters, \d+ selected$/});
+ if(await trigger.isVisible()){await trigger.click();return page.getByRole('dialog');}
+ return page;
+}
+async function openFilter(page:Page,name:'Category'|'Country'|'City') {
+ const controls=await openFilters(page);
+ await controls.getByRole('button',{name:new RegExp(`^${name}(?:\\s*\\d+)?$`)}).click();
+}
+async function closeFilterOverview(page:Page) {
+ const dialog=page.getByRole('dialog');
+ if(await dialog.isVisible())await dialog.getByRole('button',{name:'Done',exact:true}).click();
+}
+async function clearCriteria(page:Page) {
+ const controls=await openFilters(page);
+ await controls.getByRole('button',{name:'Clear all',exact:true}).click();
+ await closeFilterOverview(page);
+}
 
 test('FE-065 business and product searches type live, retain independent filters and clear to default browsing',async({page,request})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/');
@@ -13,16 +33,16 @@ test('FE-065 business and product searches type live, retain independent filters
  await product.fill('selam');const card=page.locator('.discovery-product-card').first();await expect(card.locator('strong')).toHaveText(result.searchProducts[0].name);
  await expect(card.locator('p')).toHaveText(result.searchProducts[0].description);await expect(card.locator('p')).toBeVisible();
  await expect(card.getByRole('link',{name:'From '+result.searchProducts[0].businessName,exact:true})).toHaveAttribute('href',`/@${result.searchProducts[0].businessHandle}?ref=discovery`);
- await page.getByRole('button',{name:'Country',exact:true}).click();await page.getByRole('checkbox',{name:'Ethiopia',exact:true}).check();await page.getByRole('button',{name:'Done',exact:true}).click();
- await page.getByRole('button',{name:'Made to order',exact:true}).click();await expect(page.getByRole('button',{name:'Made to order',exact:true})).toHaveAttribute('aria-pressed','true');await page.getByRole('button',{name:'Made to order',exact:true}).click();await expect(product).toBeVisible();
- await page.getByRole('button',{name:'City',exact:true}).click();const cities=page.getByRole('dialog').getByRole('checkbox');await expect(cities).not.toHaveCount(0);await cities.nth(0).check();await cities.nth(1).check();await page.getByRole('button',{name:'Done',exact:true}).click();
- await expect(page.getByRole('button',{name:'City 2',exact:true})).toBeVisible();
- await page.getByRole('button',{name:'Country 1',exact:true}).click();await page.getByRole('checkbox',{name:'Ethiopia',exact:true}).uncheck();await page.getByRole('button',{name:'Done',exact:true}).click();await expect(page.getByRole('button',{name:'City',exact:true})).toBeDisabled();
+ await openFilter(page,'Country');await page.getByRole('checkbox',{name:'Ethiopia',exact:true}).check();await page.getByRole('button',{name:'Done',exact:true}).click();
+ const productFilters=await openFilters(page);await productFilters.getByRole('button',{name:'Made to order',exact:true}).click();await expect(productFilters.getByRole('button',{name:'Made to order',exact:true})).toHaveAttribute('aria-pressed','true');await productFilters.getByRole('button',{name:'Made to order',exact:true}).click();await closeFilterOverview(page);await expect(product).toBeVisible();
+ await openFilter(page,'City');const cities=page.getByRole('dialog').getByRole('checkbox');await expect(cities).not.toHaveCount(0);await cities.nth(0).check();await cities.nth(1).check();await page.getByRole('button',{name:'Done',exact:true}).click();
+ const selectedFilters=await openFilters(page);await expect(selectedFilters.getByRole('button',{name:'City 2',exact:true})).toBeVisible();await closeFilterOverview(page);
+ await openFilter(page,'Country');await page.getByRole('checkbox',{name:'Ethiopia',exact:true}).uncheck();await page.getByRole('button',{name:'Done',exact:true}).click();const clearedCity=await openFilters(page);await expect(clearedCity.getByRole('button',{name:'City',exact:true})).toBeDisabled();await closeFilterOverview(page);
  await page.getByRole('button',{name:'Business locations',exact:true}).click();await expect(business).toHaveValue('selam');
- await page.getByRole('button',{name:'Country',exact:true}).click();await expect(page.getByRole('checkbox',{name:'Ethiopia',exact:true})).not.toBeChecked();await page.getByRole('button',{name:'Done',exact:true}).click();
- await page.getByRole('button',{name:'Clear all',exact:true}).click();await expect(business).toHaveValue('');await expect.poll(async()=>Number(await map.getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
+ await openFilter(page,'Country');await expect(page.getByRole('checkbox',{name:'Ethiopia',exact:true})).not.toBeChecked();await page.getByRole('button',{name:'Done',exact:true}).click();
+ await clearCriteria(page);await expect(business).toHaveValue('');await expect.poll(async()=>Number(await map.getAttribute('data-map-marker-count'))).toBeGreaterThan(0);
  await page.getByRole('button',{name:'Product listings',exact:true}).click();await expect(product).toHaveValue('selam');
- await page.reload();await expect(product).toHaveValue('selam');await page.getByRole('button',{name:'Clear all',exact:true}).click();await expect(page.locator('.discovery-product-card').first()).toBeVisible();
+ await page.reload();await expect(product).toHaveValue('selam');await clearCriteria(page);await expect(page.locator('.discovery-product-card').first()).toBeVisible();
 });
 
 test('FE-065 a slower prior reply never replaces newer typing',async({page,request})=>{
@@ -44,7 +64,7 @@ test('FE-065 failed searches retry and clearing cancels pending results',async({
  await product.fill('selam');await expect(page.getByRole('alert').filter({hasText:'Search is unavailable.'})).toBeVisible();
  await page.unroute('**/api/discovery?**');await page.getByRole('button',{name:'Try again',exact:true}).click();await expect(page.locator('.discovery-product-card').first()).toBeVisible();
  await page.route('**/api/discovery?**',async route=>{await new Promise(resolve=>setTimeout(resolve,700));await route.continue().catch(()=>{});});
- await product.fill('other pending query');await page.waitForTimeout(300);await page.getByRole('button',{name:'Clear all',exact:true}).click();
+ await product.fill('other pending query');await page.waitForTimeout(300);await clearCriteria(page);
  await page.waitForTimeout(900);await expect(page.locator('.discovery-product-card').first()).toBeVisible();await expect(page.locator('.discovery-product-card').first()).toBeVisible();
 });
 

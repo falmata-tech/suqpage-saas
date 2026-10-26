@@ -1,7 +1,7 @@
 import {readMarketSearch, MarketSearchError, type MarketSearch} from '@/lib/market-search';
 import Link from 'next/link';
 
-import { MARKET_STOREFRONT_COPY } from "@/lib/storefront-copy";
+import { MARKET_COMPACT_COPY, MARKET_STOREFRONT_COPY } from "@/lib/storefront-copy";
 import { getUiText } from "@/lib/i18n/server";
 import { Suspense } from "react";
 import DiscoveryWorkspace from "@/components/DiscoveryWorkspace";
@@ -68,7 +68,7 @@ export default async function MarketPage({ searchParams }: {
         url: publicSeoUrl("/"), description: t(MARKET_STOREFRONT_COPY.description),
       }) }} />
       <header className="market-landing-introduction">
-        <h1>{t(MARKET_STOREFRONT_COPY.title)}</h1>
+        <h1><span className="market-landing-full-title">{t(MARKET_STOREFRONT_COPY.title)}</span><span className="market-landing-compact-title">{t(MARKET_COMPACT_COPY.title)}</span></h1>
         <p>{t(MARKET_STOREFRONT_COPY.description)}</p>
       </header>
       <Suspense fallback={<MarketWorkspaceLoading />}><MarketWorkspace searchParams={searchParams} /></Suspense>

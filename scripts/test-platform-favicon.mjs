@@ -11,7 +11,7 @@ try{
  let page=await context.newPage();
  async function check(){
   await expect.poll(async()=>page.locator('link[rel="icon"]').evaluateAll(nodes=>nodes.map(n=>new URL(n.href).pathname).sort()).catch(()=>[])).toEqual([...expected].sort());
-  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href','/pwa/africmade-apple-touch-v3-180.png');
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href','/pwa/africmade-apple-touch-v4-180.png');
  }
  for(const route of ['/','/featured','/login','/dashboard']){
   await page.goto(base+route,{waitUntil:'domcontentloaded'});await check();
@@ -33,7 +33,7 @@ try{
   assert.ok(logo.x>=0&&logo.x+logo.width+4<=language.x,`Header controls do not overlap at ${width}px`);
   if(captureDir){fs.mkdirSync(captureDir,{recursive:true});await page.screenshot({path:`${captureDir}/africmade-header-${width}.png`});}
  }
- for(const icon of [...expected,'/pwa/africmade-apple-touch-v3-180.png'])assert.equal((await page.request.get(base+icon)).status(),200);
+ for(const icon of [...expected,'/pwa/africmade-apple-touch-v4-180.png'])assert.equal((await page.request.get(base+icon)).status(),200);
  assert.ok(!fs.readFileSync('app/dashboard/settings/page.tsx','utf8').includes('name="favicon"'));
  tileFixture.assertNoExternalRequests();
  console.log('PASS AfricMade favicon and Apple icon on home/Featured/login/dashboard entry/business/product, product navigation and reload; icon assets return 200.');

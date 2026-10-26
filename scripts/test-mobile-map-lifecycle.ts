@@ -3,6 +3,9 @@ import {test} from 'node:test';
 import {createRequire} from 'node:module';
 import {build} from 'esbuild';
 import {chromium} from 'playwright';
+const {installMapTileFixture}=createRequire(import.meta.url)('./testing/map-tile-fixture.mjs') as {
+ installMapTileFixture(context:import('playwright').BrowserContext):Promise<{assertNoExternalRequests():void}>;
+};
 
 // React and ReactDOM must come from the matching installed native pair. The
 // application adapter and installed Leaflet/marker indexing are real; only
@@ -140,24 +143,37 @@ test('FE-053 S140 actual Expo Leaflet opens exposed groups below maximum with cu
 test('FE-021 S154 actual Expo Leaflet21 area businesses reach fitting city groups at phone and desktop widths',{timeout:45000},async()=>{
  const browser=await chromium.launch({channel:'chrome',headless:true,timeout:20000}),errors:string[]=[];
  try{for(const[width,capacity,expected]of[[390,3,7],[1440,6,4]]){
-  const page=await browser.newPage({viewport:{width,height:844}});page.setDefaultTimeout(8000);page.on('pageerror',error=>errors.push(error.stack||error.message));
-  await page.route('https://**',route=>route.abort('blockedbyclient'));
+  const page=await browser.newPage({viewport:{width,height:844},serviceWorkers:'block'});page.setDefaultTimeout(8000);page.on('pageerror',error=>errors.push(error.stack||error.message));
+  await page.context().route('https://**',route=>route.abort('blockedbyclient'));
+  const tiles=await installMapTileFixture(page.context());
   await page.setContent('<main id="root" style="width:'+width+'px;height:600px"></main>');
   await page.addStyleTag({path:nativeRequire.resolve('leaflet/dist/leaflet.css')});
   await page.addScriptTag({content:'window.fixture={maps:[],selected:[],markerUnmounts:0,groupAttempts:[],openedGroups:[],selectedHandlers:[]};'});await page.addScriptTag({content:(await bundled).outputFiles[0].text});
   const shops=Array.from({length:21},(_,i)=>({id:i+1,handle:'city-'+i,name:'City business '+i,description:'',heroImagePath:'',city:'Addis Ababa',region:'',latitude:9.03,longitude:38.75,locationMode:'area'}));
-  type Probe={maps:Array<{_loaded:boolean;getZoom:()=>number;getCenter:()=>{lat:number;lng:number};setView:(center:number[],zoom:number,options:{animate:boolean})=>void}>;mountFreshness:(rows:typeof shops,capacity:number)=>void;openedGroups:Array<{ids:number[]}>;unmount:()=>void};
+  type Probe={maps:Array<{_loaded:boolean;getZoom:()=>number;getCenter:()=>{lat:number;lng:number};setView:(center:number[],zoom:number,options:{animate:boolean})=>void}>;mountFreshness:(rows:typeof shops,capacity:number)=>void;groupAttempts:Array<{zoom:number;generation:number}>;openedGroups:Array<{ids:number[];generation:number}>;unmount:()=>void};
   await page.evaluate(({shops,capacity})=>(window as unknown as{fixture:Probe}).fixture.mountFreshness(shops,capacity),{shops,capacity});
   await page.waitForFunction(()=>(window as unknown as{fixture:Probe}).fixture.maps[0]?._loaded);
   await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.maps[0].setView([9.03,38.75],6,{animate:false}));
   await page.getByRole('button',{name:'21 businesses. Zoom in.',exact:true}).click();
-  await page.waitForFunction(()=>document.getElementById('parent-zoom')?.textContent==='12');
+  // S181 selects the first safe city layout in10..13. One aggregate activation
+  // must expose the complete expected terminal set, not stop at an intermediate
+  // zoom or rely on the retired fixed zoom12 threshold.
+  await page.waitForFunction(expected=>{
+   const zoom=Number(document.getElementById('parent-zoom')?.textContent);
+   const terminals=[...document.querySelectorAll('button[aria-label]')].filter(button=>/businesses\. View businesses\.$/.test(button.getAttribute('aria-label')||''));
+   return Number.isInteger(zoom)&&zoom>=10&&zoom<=13&&terminals.length===expected;
+  },expected);
   const buttons=page.getByRole('button',{name:/businesses\. View businesses\./});await buttons.nth(expected-1).waitFor();assert.equal(await buttons.count(),expected);
   const before=await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return{zoom:m.getZoom(),center:m.getCenter()};});
+  assert.ok(Number.isInteger(before.zoom)&&before.zoom>=10&&before.zoom<=13,'One overview click reaches an accepted safe city layout');
+  assert.equal(Number(await page.locator('#parent-zoom').textContent()),before.zoom,'Parent authority follows the actual SDK zoom');
+  assert.equal(await page.getByRole('button',{name:/businesses\. Zoom in\./}).count(),0,'The complete city is exposed as terminal groups');
   for(let i=0;i<expected;i++){const button=buttons.nth(i);assert.equal(await button.evaluate(el=>{const r=el.getBoundingClientRect();return el===document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);}),true,'Each current circle has its own exposed pointer target');await button.click();}
   const opened=await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.openedGroups);assert.deepEqual(opened.flatMap(item=>item.ids).sort((a,b)=>a-b),shops.map(item=>item.id));assert.ok(opened.every(item=>item.ids.length<=capacity));
+  assert.ok(opened.every(item=>item.generation===0));
+  assert.deepEqual(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.groupAttempts),Array.from({length:expected},()=>({zoom:before.zoom,generation:0})),'Every exposed group reaches the current parent callback');
   assert.deepEqual(await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return{zoom:m.getZoom(),center:m.getCenter()};}),before,'Every terminal click opens in place');
-  await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.unmount());await page.close();
+  tiles.assertNoExternalRequests();await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.unmount());await page.close();
  }}finally{await browser.close();}assert.deepEqual(errors,[]);
 });
 
