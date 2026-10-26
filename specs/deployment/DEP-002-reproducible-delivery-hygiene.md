@@ -4,11 +4,45 @@ title: Reproducible delivery and repository hygiene
 status: in_progress
 related: [FE-035, BE-003, BE-025, DEP_BASE, ADR-0002, ADR-0003, DEP-010, DEP-022, DEP-025]
 owners: [operations, security]
-last_updated: 2026-10-21
+last_updated: 2026-10-26
 change_level: L3
 ---
 
 # DEP-002 — Reproducible delivery and repository hygiene
+
+## S184 — operations fixture waits for permanent PostgreSQL (ready)
+
+The required operations check loses its first TCP query after the existing
+socket-default `pg_isready` succeeds. Verify the exact PostgreSQL image's
+initialization contract before implementation; the temporary initialization
+server must not qualify a host TCP connection. This L1 test-harness correction
+changes no application or backup/restore contract; master §22 remains unchanged.
+
+GIVEN the disposable PostgreSQL image is initializing with a temporary socket
+server WHEN operations fixtures wait for readiness THEN wait for the permanent
+TCP listener at container loopback before the first SQL mutation. Keep the
+existing finite wait, random host port/password and owned-container cleanup.
+Do not retry SQL mutations, broaden targets or suppress connection failures.
+
+GIVEN controlled initialization keeps the temporary server available for a short
+finite interval WHEN the real operations test runs THEN the old socket probe
+must fail the regression and the corrected TCP probe must permit all existing
+archive integrity, explicit-approval, populated-target denial and restore cases.
+Prefer a small disposable initialization fixture in the existing test, rather
+than a reusable readiness framework. Retain RED/GREEN and actual image evidence.
+
+Mapping: `scripts/test-operations.mjs`, its exact installed image entrypoint,
+`check:workflow-scripts` before entry execution, and the required core CI job.
+CI provider-start diagnostics remain owned by DEP-027 S184; neither local fix
+substitutes for terminal exact-head remote checks.
+
+Installed-image inspection confirms initialization appends `listen_addresses=''`
+and stops that server before executing the final TCP-enabled PostgreSQL server.
+The controlled old-probe run reproduces `Connection terminated unexpectedly`
+in 17.04s. Explicit TCP readiness passes all existing operations assertions
+in 11.82s; the original wait and owned cleanup remain unchanged. Both static
+guards pass. Protected image/RED/GREEN evidence is under
+`.local/s184-operations-readiness/`; required CI remains separately qualified.
 
 ## Retire Vercel publishing for this repository (L0 documentation)
 

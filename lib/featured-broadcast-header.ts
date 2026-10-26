@@ -17,6 +17,8 @@ export type FeaturedBroadcastHeaderDay = {
 
 export type FeaturedBroadcastHeader = {
   phase: "scheduled" | "window" | "ended" | "empty";
+  statusLabel: string;
+  timeLabel: string;
   label: string;
   title: string;
   detail: string;
@@ -36,9 +38,12 @@ export function featuredBroadcastHeader(input: {
 }): FeaturedBroadcastHeader {
   const { day, boothCount, now, policy, tiktokUrl, youtubeUrl, t } = input;
   const label = t(day.isToday ? "Today's schedule" : "Program preview");
+  const timeLabel = `${featuredProgramTimeLabel(policy.startMinute, policy.endMinute)} EAT`;
   if (boothCount === 0) {
     return {
       phase: "empty",
+      statusLabel: t("No businesses scheduled"),
+      timeLabel,
       label,
       title: t(day.isToday ? "No businesses are scheduled today" : "No businesses are scheduled for this day"),
       detail: "",
@@ -56,6 +61,8 @@ export function featuredBroadcastHeader(input: {
   if (phase === "scheduled") {
     return {
       phase,
+      statusLabel: t("Scheduled"),
+      timeLabel,
       label,
       title: day.isToday
         ? t("TikTok Live is scheduled for {value1} EAT today", { value1: start })
@@ -72,6 +79,8 @@ export function featuredBroadcastHeader(input: {
   if (phase === "live") {
     return {
       phase: "window",
+      statusLabel: t("Scheduled now"),
+      timeLabel,
       label,
       title: t("Scheduled TikTok Live window is open"),
       detail: t("Today's scheduled window: {value1} EAT", { value1: window }),
@@ -83,6 +92,8 @@ export function featuredBroadcastHeader(input: {
 
   return {
     phase,
+    statusLabel: t("Ended"),
+    timeLabel,
     label,
     title: t(day.isToday ? "Today's featured program has ended" : "This featured program day has passed"),
     detail: t("Scheduled window: {value1} EAT", { value1: window }),

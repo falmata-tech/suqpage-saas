@@ -421,7 +421,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         <InvalidComposition />
       )}
       {contactFallback && <a href={contactFallback.href} target="_blank" rel="noopener noreferrer">{contactFallback.label} ↗</a>}
-      {!previewMode && !embedded ? <InquiryFloatingAction count={cartCount} handle={catalog.business.handle} onOpen={openCart} dialogOpen={drawer && cartReady} /> : null}
+      {!previewMode && !embedded ? <InquiryFloatingAction count={cartCount} handle={catalog.business.handle} accentColor={businessProfile?.accentColor} onOpen={openCart} dialogOpen={drawer && cartReady} /> : null}
       {compositionManifest && !previewMode && !embedded ? (
         <nav className="showroom-mobile-nav" aria-label={t("Page sections")}>
           <a href="#showroom-home"><Home aria-hidden="true" /><span>{t("Home")}</span></a>

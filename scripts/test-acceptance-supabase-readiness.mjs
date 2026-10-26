@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import {spawnSync} from "node:child_process";
+import {fileURLToPath} from "node:url";
+import * as readiness from "./acceptance-supabase-readiness.mjs";
 import {
   browserCliStartTimeoutMs, browserServices, browserServicesReady, browserSupabasePorts, remapBrowserSupabaseConfigPorts, inspectBrowserServices, probeBrowserEndpoints,
   waitForBrowserSupabaseReady,
@@ -10,6 +16,61 @@ const apiPort = 56321;
 const healthyServices = () => Object.fromEntries(browserServices.map((name) => [
   name, { label: projectId, status: "running", health: name === "rest" ? "none" : "healthy" },
 ]));
+
+test("DEP-027 S184 startup summary returns only validated metadata and fixed observed indicators", () => {
+  const summary = readiness.summarizeBrowserSupabaseStartFailure;
+  assert.equal(typeof summary, "function");
+  const empty = {status:null,systemErrorCode:null,signal:null,observedIndicators:["unknown"]};
+  for (const input of [null,undefined,{},"untrusted",{status:"1",signal:"SIGTERM\nsecret",error:{code:"EACCES\nsecret"},stdout:"unrecognized private text"}]) {
+    assert.deepEqual(summary(input),empty);
+  }
+  assert.deepEqual(summary({status:1,signal:"SIGTERM",error:{code:"ETIMEDOUT",message:"secret/path"}}),{...empty,status:1,systemErrorCode:"ETIMEDOUT",signal:"SIGTERM"});
+  for(const status of [-1,256,Infinity,NaN,1.5])assert.equal(summary({status}).status,null);
+  const fixtures=[
+    ["docker_unavailable","Cannot connect to the Docker daemon. Is the docker daemon running?"],
+    ["docker_api_incompatible","client version 1.42 is too old. Minimum supported API version is 1.44"],
+    ["image_pull_or_registry","failed to pull image: manifest unknown"],
+    ["network_failure","dial tcp: connection refused"],
+    ["port_conflict","Bind failed: address already in use"],
+    ["invalid_configuration","failed to parse configuration: invalid config"],
+    ["unsupported_cli_option","unknown flag: --secret-option"],
+    ["permission_denied","permission denied"],
+    ["resource_exhaustion","no space left on device; out of memory"],
+    ["container_health","container health check failed"],
+    ["database_bootstrap","database bootstrap failed"],
+  ];
+  for(const[indicator,message]of fixtures){
+    const output=summary({status:1,stdout:Buffer.from("SERVICE_ROLE_KEY=fixture-secret-token\nDB_URL=postgres://private-user:private-password@private.invalid/db\n"),stderr:`${message}\n/private/sensitive-fixture https://private.invalid/?token=fixture-secret-token`});
+    assert.ok(output.observedIndicators.includes(indicator),indicator);
+    assert.ok(output.observedIndicators.every(value=>fixtures.some(([allowed])=>value===allowed)));
+    assert.deepEqual(Object.keys(output),["status","systemErrorCode","signal","observedIndicators"]);
+    assert.doesNotMatch(JSON.stringify(output),/fixture-secret|private-user|private-password|private\.invalid|sensitive-fixture|secret-option|SERVICE_ROLE_KEY|DB_URL|1\.42|1\.44/);
+    assert.ok(JSON.stringify(output).length<512);
+  }
+  assert.deepEqual(summary({status:1,stdout:"x".repeat(20_000)+"permission denied",stderr:null}).observedIndicators,["permission_denied"],"A late error survives bounded CLI progress sampling");
+  assert.deepEqual(summary({status:1,stdout:Buffer.from("x".repeat(20_000)+"minimum supported API version is 1.44")}).observedIndicators,["docker_api_incompatible"],"Late Buffer output follows the same bounded contract");
+  assert.deepEqual(summary({status:1,stdout:"x".repeat(3_000)+"permission denied"+"x".repeat(18_000)}).observedIndicators,["unknown"],"An indicator in the excluded middle is not inspected");
+});
+
+test("DEP-027 S184 real acceptance runner sanitizes captured startup failure and still cleans up", {timeout:30000}, () => {
+  const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),".."),fixture=fs.mkdtempSync(path.join(os.tmpdir(),"suqpage-startup-summary-test-"));
+  fs.chmodSync(fixture,0o700);const bin=path.join(fixture,"bin"),events=path.join(fixture,"events.jsonl"),secret="S184_FIXTURE_SECRET_MUST_NOT_ESCAPE";
+  fs.mkdirSync(bin,{mode:0o700});const configBefore=fs.readFileSync(path.join(root,"supabase/config.toml"));
+  const executable=`#!/usr/bin/env node\nconst fs=require('node:fs');const command=process.argv[2],args=process.argv.slice(3);fs.appendFileSync(${JSON.stringify(events)},JSON.stringify({command,args})+'\\n',{mode:0o600});if(command==='start'){console.log(${JSON.stringify("SERVICE_ROLE_KEY="+secret+"\nDB_URL=postgres://fixture-user:fixture-password@private.invalid/db")});console.error(${JSON.stringify("Cannot connect to the Docker daemon at unix:///private/s184-secret.sock\n"+secret)});process.exit(1);}if(command==='stop')process.exit(0);process.exit(90);\n`;
+  fs.writeFileSync(path.join(bin,"supabase"),executable,{mode:0o700});
+  fs.writeFileSync(path.join(bin,"docker"),`#!/usr/bin/env node\nrequire('node:fs').appendFileSync(${JSON.stringify(events)},JSON.stringify({command:'docker'})+'\\n');process.exit(90);\n`,{mode:0o700});
+  try{
+    const result=spawnSync(process.execPath,[path.join(root,"scripts/acceptance-runner.mjs")],{cwd:root,env:{...process.env,PATH:bin+path.delimiter+process.env.PATH,TMPDIR:fixture,TMP:fixture,TEMP:fixture},encoding:"utf8",timeout:20000,maxBuffer:256*1024});
+    assert.equal(result.error,undefined);assert.equal(result.status,1);assert.equal(result.signal,null);
+    const output=result.stdout+result.stderr;
+    assert.doesNotMatch(output,new RegExp(secret));assert.doesNotMatch(output,/fixture-user|fixture-password|private\.invalid|s184-secret\.sock|SERVICE_ROLE_KEY|DB_URL/);
+    const calls=fs.readFileSync(events,"utf8").trim().split("\n").map(line=>JSON.parse(line));assert.deepEqual(calls.map(call=>call.command),["start","stop"],"No Docker, status, build or provider step runs after failed startup");
+    const project=calls[0].args[1];assert.ok(project.startsWith(fixture+path.sep));assert.deepEqual(calls[0].args,["--workdir",project,"--ignore-health-check"]);assert.deepEqual(calls[1].args,["--workdir",project,"--no-backup"]);
+    const acceptanceRoot=path.dirname(project),runId=path.basename(acceptanceRoot);assert.equal(fs.existsSync(acceptanceRoot),false,"Disposable project is removed after failed start");assert.equal(fs.existsSync(path.join(root,".next-acceptance",runId)),false);assert.equal(fs.existsSync(path.join(root,`.acceptance-tsconfig-${runId}.json`)),false);assert.deepEqual(fs.readFileSync(path.join(root,"supabase/config.toml")),configBefore);
+    const match=output.match(/^Error: Supabase startup failed: (\{[^\n]+\})$/m);assert.ok(match,"Actual entry must expose only the JSON-safe startup summary");
+    assert.deepEqual(JSON.parse(match[1]),{status:1,systemErrorCode:null,signal:null,observedIndicators:["docker_unavailable"]});assert.ok(!output.includes(project),"Captured CLI paths are not exposed");
+  }finally{fs.rmSync(fixture,{recursive:true,force:true});}
+});
 
 test("DEP-027 CLI startup has its own five-minute bound before independent readiness", () => {
   assert.equal(browserCliStartTimeoutMs, 300_000);

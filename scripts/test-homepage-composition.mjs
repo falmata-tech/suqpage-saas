@@ -62,7 +62,7 @@ assert.match(featured, /sponsoredShowrooms=\{sponsoredShowrooms\}/);
 assert.doesNotMatch(featured, /DiscoveryWorkspace discovery/);
 
 assert.match(publicShell, /currentUser\(\)/);
-assert.match(publicFrame, /href: "\/", label: "Market"/);
+assert.match(publicFrame, /href: "\/", label: "Market", icon: Store/, 'Market navigation represents businesses and product listings rather than only the map');
 assert.match(publicFrame, /href: "\/featured", label: "Featured", icon: Star/);
 assert.match(mobileNavigation, /href:\s*"\/featured",\s*label:\s*"Featured",\s*icon:\s*Star/);
 assert.doesNotMatch(`${publicFrame}\n${mobileNavigation}`, /CalendarClock/);
@@ -71,7 +71,8 @@ assert.match(publicShell, /dashboardHref=\{user\?workspaceHomeHref\(user\)/, 'Th
 assert.match(read("components/DashboardShell.tsx"), /href:['"]\/about['"],label:['"]About['"]/, 'Owner navigation retains the About task');
 assert.doesNotMatch(publicFrame, /href: "\/sponsors"/);
 assert.match(publicFrame, /aria-label=\{t\("Explore AfricMade"\)\}/);
-assert.match(mobileNavigation, /href:\s*"\/",\s*label:\s*"Market"/);
+assert.match(mobileNavigation, /href:\s*"\/",\s*label:\s*"Market",\s*icon:\s*Store/);
+assert.match(read("components/DashboardShell.tsx"), /href:['"]\/['"],label:['"]Market['"],icon:['"]workspace['"]/);
 // FE-066/FE-070: four public tasks, About reachable, Login/Account follows the
 // session, and the private business inbox stays under Account rather than public navigation.
 assert.match(mobileNavigation, /href:\s*"\/about",\s*label:\s*"About"/);
@@ -183,7 +184,9 @@ assert.match(discoveryCss, /\.public-market-experience \.discovery-marketplace,[
 assert.match(discoveryCss, /\.featured-gallery\s*\{[^}]*grid-template-columns/);
 assert.doesNotMatch(discoveryUi, /featured-floor|featured-floor-actions|Zoom in to featured showroom floor|Fit featured showroom floor/);
 assert.match(discoveryCss, /\.featured-card\.walkthrough-current/);
-assert.match(discoveryCss, /\.featured-program-header\s*\{[^}]*border-bottom:\s*0/);
+// S182 replaces the old borderless panel. Rendered heading/time/status and
+// narrow-layout coverage belongs to test-featured-sponsor-layout.ts; a cosmetic
+// border value is no longer a homepage composition contract.
 assert.match(discoveryCss, /\.discovery-filter-sheet::backdrop/);
 assert.match(discoveryCss, /\.discovery-industry-menu\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*100%/);
 assert.match(discoveryCss, /\.discovery-preview-scrim\s*\{[^}]*rgb\(11 29 58 \/ 14%\)/);

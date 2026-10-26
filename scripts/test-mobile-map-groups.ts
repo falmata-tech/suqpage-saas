@@ -22,7 +22,7 @@ const bundled=build({entryPoints:['apps/mobile/src/MapGroupPicker.tsx','apps/mob
  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'js',contents:
   a.path==='react'?`export const useState=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return[fixture.states[i],next=>fixture.states[i]=typeof next==='function'?next(fixture.states[i]):next];},useRef=initial=>{const i=fixture.cursor++;return fixture.states[i]||(fixture.states[i]={current:initial});},useMemo=fn=>fn(),useEffect=(create,deps)=>{const i=fixture.effectCursor++,old=fixture.effects[i];if(!old||deps.some((value,j)=>value!==old.deps[j]))fixture.pending.push(()=>{old?.cleanup?.();fixture.effects[i]={deps,cleanup:create()};});},useImperativeHandle=(_ref,create)=>fixture.controls=create(),forwardRef=fn=>fn;export default {};`
   :a.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
-  :a.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',Modal='Modal',Platform={get OS(){return fixture.platform||'android';}},StyleSheet={create:value=>value,absoluteFill:{position:'absolute'}},useWindowDimensions=()=>fixture.dimensions;`
+  :a.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',ScrollView='ScrollView',Modal='Modal',Platform={get OS(){return fixture.platform||'android';}},StyleSheet={create:value=>value,absoluteFill:{position:'absolute'}},useWindowDimensions=()=>fixture.dimensions;`
   :a.path==='react-native-safe-area-context'?`export const useSafeAreaInsets=()=>fixture.insets;`
   :a.path==='react-native-svg'?`export default 'Svg';export const Path='Path',Rect='Rect';`
   :a.path==='@maplibre/maplibre-react-native'?`export const Map='Map',Camera='Camera',Marker='Marker',GeoJSONSource='GeoJSONSource',Layer='Layer',TransformRequestManager={addHeader:value=>fixture.headers.push(value)};`
@@ -96,13 +96,13 @@ test('FE-053 native group identities stay fixed across zoom for admitted screen 
  assert.deepEqual(currentGroupMembers(index,shops,[ids[0],ids[1]],18),[],'An arbitrary current pair is not authority for part of a three-member group');
  const area=shop(71,{locationMode:'area'}),point=shopCoordinate(area)!,areaIndex=markerIndex([area]),areaMarker=visibleMarkers(areaIndex,[area],[],bounds,18)[0];assert.deepEqual(areaMarker.center,point,'City-only pin uses its canonical anchor without per-business offset');assert.equal(areaMarker.kind,'shop','A sole city-only business uses the shop glyph, never a numbered one-business circle');assert.equal(areaMarker.shop?.id,area.id);assert.equal(areaMarker.shops,undefined);
  const dense=Array.from({length:200},(_,i)=>shop(i+1)),denseMarkers=visibleMarkers(markerIndex(dense),dense,[],bounds,18);assert.equal(denseMarkers.length,67);assert.ok(denseMarkers.every(marker=>marker.count===2||marker.count===3));assert.equal(denseMarkers.reduce((sum,marker)=>sum+marker.count,0),200);
- for(const capacity of [1,2,3,4,6]){const adaptive=markerIndex(shops,capacity),atLow=visibleMarkers(adaptive,shops,[],bounds,2),atHigh=visibleMarkers(adaptive,shops,[],bounds,18);assert.equal(adaptive.capacity,capacity);assert.ok(atLow.every(m=>m.expansionZoom!==undefined));assert.ok(atHigh.every(m=>m.expansionZoom===undefined));assert.ok(atHigh.every(m=>m.count===1?m.kind==='shop':m.kind==='cluster'&&m.count<=capacity));assert.equal(atHigh.reduce((sum,m)=>sum+m.count,0),shops.length);}
+ for(const capacity of [1,2,3,4,6]){const adaptive=markerIndex(shops,capacity),atLow=visibleMarkers(adaptive,shops,[],bounds,2),atHigh=visibleMarkers(adaptive,shops,[],bounds,18);assert.equal(adaptive.capacity,Math.max(2,capacity));assert.ok(atLow.every(m=>m.expansionZoom!==undefined));assert.ok(atHigh.every(m=>m.expansionZoom===undefined));assert.ok(atHigh.every(m=>m.count===1?m.kind==='shop':m.kind==='cluster'&&m.count<=adaptive.capacity));assert.equal(atHigh.reduce((sum,m)=>sum+m.count,0),shops.length);if(capacity===1)assert.ok(atHigh.every(m=>m.count===2),'A stale capacity-one request is clamped to pairs instead of dense one-business markers');}
  assert.equal(nextMapZoom(19,1),MAP_MAX_ZOOM);assert.equal(nextMapZoom(18,1,MAP_NATIVE_MAX_ZOOM),12);
 });
 
 test('FE-021/FE-053 a city-only singleton is a shop marker with a direct, accessible preview',async()=>{
- const app=await component('MarketMap'),shops=[shop(1,{locationMode:'area'}),shop(2)],opened:number[][]=[],selected:number[]=[];
- const props={shops,groupCapacity:1,onSelect:(s:MapShop)=>selected.push(s.id),onGroup:(members:MapShop[])=>opened.push(Array.from(members,s=>s.id))};let tree=app.render(props);(tree.find(n=>n.type==='Map')!.props.onRegionDidChange as(e:unknown)=>void)({nativeEvent:{center:[38.75,9.03],zoom:12,bounds:[38,8,40,10]}});tree=app.render(props);
+ const app=await component('MarketMap'),shops=[shop(1,{locationMode:'area'}),shop(2,{longitude:39.5})],opened:number[][]=[],selected:number[]=[];
+ const props={shops,groupCapacity:2,onSelect:(s:MapShop)=>selected.push(s.id),onGroup:(members:MapShop[])=>opened.push(Array.from(members,s=>s.id))};let tree=app.render(props);(tree.find(n=>n.type==='Map')!.props.onRegionDidChange as(e:unknown)=>void)({nativeEvent:{center:[38.75,9.03],zoom:12,bounds:[38,8,40,10]}});tree=app.render(props);
  const pins=tree.filter(n=>n.type==='MapMarker'),city= pins.find(n=>(n.props.item as{shop?:MapShop}).shop?.id===1)!;assert.equal(pins.length,2);assert.equal((city.props.item as{kind:string}).kind,'shop');assert.match(String(city.props.label),/Business 1\. Fixture city\. Open page preview/);assert.doesNotMatch(String(city.props.label),/City only/);press(city);assert.deepEqual(selected,[1]);assert.deepEqual(opened,[]);app.unmount();
 });
 
@@ -114,15 +114,16 @@ test('FE-021 Expo city-area singleton marker names the business without internal
  assert.ok(!labels.includes('City only'),'Internal mode text must not appear on the marker.');app.unmount();
 });
 
-test('FE-053 S154/S160 native21 city-area pins expose groups at raw11 and terminal taps never move the camera',async()=>{
+test('FE-053 S181 native21 city-area pins expose safe groups at raw10 and terminal taps never move the camera',async()=>{
  const app=await component('MarketMap'),shops=Array.from({length:21},(_,i)=>shop(i+1,{locationMode:'area'})),groups:number[][]=[],calls:Array<{center:[number,number];zoom:number}>=[];
  // Snapshot each observation so assert's empty-array narrowing does not make
  // the mutable callback log never[] before the next controlled SDK event.
  const observedGroups=():number[][]=>groups.map(ids=>[...ids]);
  const props={shops,onSelect(){throw Error('An aggregate cannot select an individual shop');},onGroup:(rows:MapShop[])=>groups.push(Array.from(rows,s=>s.id))};let tree=app.render(props);const camera=tree.find(n=>n.type==='Camera')!;(camera.props.ref as{current:unknown}).current={easeTo:(view:{center:[number,number];zoom:number})=>calls.push(view)};
  const settle=(zoom:number)=>{(tree.find(n=>n.type==='Map')!.props.onRegionDidChange as(e:unknown)=>void)({nativeEvent:{center:[38.75,9.03],zoom,bounds:[38,8,40,10]}});tree=app.render(props);};
- settle(5);const aggregate=tree.find(n=>n.type==='MapMarker'&&(n.props.item as{kind:string}).kind==='aggregate')!;assert.ok(aggregate);const aggregateItem=aggregate.props.item as{expansionZoom:number;center:[number,number];count:number};assert.equal(aggregate.props.label,aggregateItem.count+' businesses. Zoom in.');press(aggregate);assert.equal(aggregateItem.count,21);assert.equal(calls.at(-1)!.zoom,11);assert.equal(calls.at(-1)!.zoom,aggregateItem.expansionZoom-1);assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1)!.center)),Array.from(aggregateItem.center));assert.deepEqual(observedGroups(),[]);
- settle(11);const cityMarkers=tree.filter(n=>n.type==='MapMarker');assert.equal(cityMarkers.length,7);assert.ok(cityMarkers.every(node=>!String(node.props.label).includes('City only')),'Map accessibility labels omit internal location modes');const terminal=cityMarkers.find(n=>(n.props.item as{kind:string}).kind==='cluster')!;assert.ok(terminal);const terminalItem=terminal.props.item as{expansionZoom?:number;shops:MapShop[]};assert.equal(terminalItem.expansionZoom,undefined);assert.ok(String(terminal.props.label).includes('View businesses.'));const terminalIds=Array.from(terminalItem.shops,s=>s.id);assert.deepEqual(currentGroupMembers(markerIndex(shops),shops,terminalIds,12).map(s=>s.id),terminalIds);const commands=calls.length;press(terminal);assert.equal(groups.length,1);assert.ok(groups[0].length<=3);assert.equal(calls.length,commands,'A separated terminal at native raw11 opens in place');
+ settle(5);const aggregate=tree.find(n=>n.type==='MapMarker'&&(n.props.item as{kind:string}).kind==='aggregate')!;assert.ok(aggregate);const aggregateItem=aggregate.props.item as{expansionZoom:number;center:[number,number];count:number};assert.equal(aggregate.props.label,aggregateItem.count+' businesses. Zoom in.');press(aggregate);assert.equal(aggregateItem.count,21);assert.equal(calls.at(-1)!.zoom,10);assert.equal(calls.at(-1)!.zoom,aggregateItem.expansionZoom-1);assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1)!.center)),Array.from(aggregateItem.center));assert.deepEqual(observedGroups(),[]);
+ settle(9);assert.ok(tree.some(n=>n.type==='MapMarker'&&(n.props.item as{kind:string}).kind==='aggregate'),'Native normalized10 retains the aggregate while the whole21-business layout does not fit');
+ settle(10);const cityMarkers=tree.filter(n=>n.type==='MapMarker');assert.equal(cityMarkers.length,7);assert.ok(cityMarkers.every(node=>!String(node.props.label).includes('City only')),'Map accessibility labels omit internal location modes');const terminal=cityMarkers.find(n=>(n.props.item as{kind:string}).kind==='cluster')!;assert.ok(terminal);const terminalItem=terminal.props.item as{expansionZoom?:number;shops:MapShop[]};assert.equal(terminalItem.expansionZoom,undefined);assert.ok(String(terminal.props.label).includes('View businesses.'));const terminalIds=Array.from(terminalItem.shops,s=>s.id);assert.deepEqual(currentGroupMembers(markerIndex(shops),shops,terminalIds,11).map(s=>s.id),terminalIds);const commands=calls.length;press(terminal);assert.equal(groups.length,1);assert.ok(groups[0].length<=3);assert.equal(calls.length,commands,'A separated terminal at native raw10 opens in place');
  settle(12);const ready=tree.find(n=>n.type==='MapMarker'&&(n.props.item as{kind:string}).kind==='cluster')!;assert.equal((ready.props.item as{expansionZoom?:number}).expansionZoom,undefined);press(ready);assert.equal(groups.length,2);assert.equal(calls.length,commands,'The same terminal remains a preview at maximum');app.unmount();
 });
 
@@ -184,6 +185,34 @@ test('FE-053 adaptive picker shares safe-area/font capacity and rejects oversize
  }
 });
 
+test('FE-053 S181 two-business fallback scrolls its selected card into view before restoring focus',async()=>{
+ const app=await component('MapGroupPicker');app.fixture.dimensions={width:320,height:480,fontScale:2};
+ const shops=[shop(1),shop(2)],events:Array<{kind:'scroll'|'focus';y?:number;animated?:boolean;id?:number}>=[];let visible=true;
+ const props=()=>({visible,shops,initialAnchor:2,onSelect(){visible=false;},onClose(){visible=false;}});
+ const render=()=>{let value=app.render(props());value=app.render(props());return value;};let tree=render();
+ const availableHeight=480-24,layout=mapGroupPickerLayout(320-24,availableHeight,2,2);assert.equal(layout.admitted,true);assert.equal(layout.capacity,2);assert.equal(layout.needsScroll,true);
+ const attach=()=>{
+  const scroll=tree.find(node=>node.props.testID==='map-group-scroll')!;assert.ok(scroll);assert.equal(tree.filter(node=>node.type==='ScrollView').length,1);assert.equal(style(scroll).maxHeight,availableHeight-layout.chromeHeight);assert.equal(style(scroll).minHeight,0);
+  assert.ok(!nodes(scroll).some(node=>node.props.accessibilityLabel==='Close business list'||node.props.accessibilityRole==='header'),'Header and dismissal stay outside the one scrolling body');
+  assert.equal(tree.filter(node=>/^map-group-business-\d+$/.test(String(node.props.testID))).length,2,'Both members remain mounted; no hidden pages or truncation');
+  (scroll.props.ref as{current:unknown}).current={scrollTo:(value:{y:number;animated:boolean})=>events.push({kind:'scroll',...value})};
+  const second=tree.find(node=>node.props.testID==='map-group-business-2')!;(second.props.ref as(value:FocusTarget)=>void)({focus:()=>events.push({kind:'focus',id:2})});
+  return{scroll,second};
+ };
+ let attached=attach();assert.deepEqual(events,[],'The fallback must wait for content layout instead of focusing a hidden second card');
+ (attached.scroll.props.onContentSizeChange as()=>void)();assert.deepEqual(events,[{kind:'scroll',y:layout.rowHeight+8,animated:false},{kind:'focus',id:2}]);
+ press(attached.second);tree=app.render(props());assert.equal(tree.length,0);assert.equal(app.fixture.overlays,0);
+ visible=true;tree=render();attached=attach();events.splice(0);(attached.scroll.props.onContentSizeChange as()=>void)();assert.deepEqual(events,[{kind:'scroll',y:layout.rowHeight+8,animated:false},{kind:'focus',id:2}],'Reopening restores the chosen second card through the same single scroll region');
+ press(tree.find(node=>node.props.accessibilityLabel==='Close business list')!);tree=app.render(props());assert.equal(tree.length,0);assert.equal(app.fixture.overlays,0);app.unmount();
+});
+
+test('FE-053 S181 zero or unusable picker geometry never leaves an invisible modal lock',async()=>{
+ for(const dimensions of [{width:0,height:0,fontScale:1},{width:320,height:240,fontScale:2}]){
+  const app=await component('MapGroupPicker');app.fixture.dimensions=dimensions;const tree=app.render({visible:true,shops:[shop(1),shop(2)],onSelect(){},onClose(){}});
+  assert.equal(tree.length,0);assert.equal(app.fixture.overlays,0);app.unmount();
+ }
+});
+
 test('FE-053 map return cache binds public references to API/scope/expiry and tolerates denied storage without snapshots',async()=>{
  type Port={readMapReturnSession:(origin:string,scope:string)=>MapReturnContext|null;rememberMapReturnSession:(origin:string,scope:string,value:MapReturnContext)=>void;parseMapReturnSession:(raw:string|null,origin:string,scope:string,now?:number)=>MapReturnContext|null};
  const output=(await bundled).outputFiles.find(file=>file.path.endsWith('/map-return-session.js'))!,module={exports:{}as Port},storage=new Map<string,string>();let denied=false;
@@ -201,7 +230,7 @@ test('FE-065 S130 map group rows keep location and full accessible merchant deta
  for(const dimensions of [{width:390,height:844,fontScale:1},{width:320,height:480,fontScale:1},{width:844,height:390,fontScale:1},{width:320,height:480,fontScale:2}]){
   const app=await component('MapGroupPicker');app.fixture.dimensions=dimensions;const w=Math.min(700,dimensions.width-24),h=dimensions.height-24,count=mapGroupCapacity(w,h,dimensions.fontScale),shops=Array.from({length:count},(_,i)=>shop(i+1,{name:'A long merchant business name '+i,description:'Full literal merchant description, with products and styles.',city:i?'':'',region:'Legacy city'}));let tree=app.render({visible:true,shops,onSelect(){},onClose(){}});tree=app.render({visible:true,shops,onSelect(){},onClose(){}});
   for(const value of shops){const card=tree.find(n=>n.props.testID==='map-group-business-'+value.id)!;assert.ok(card);assert.equal(card.props.accessibilityLabel,[value.name,value.description,'Legacy city'].join('. '));const texts=nodes(card).filter(n=>n.type==='Text'),location=texts.find(n=>n.props.testID==='map-group-location-'+value.id);assert.equal(location?.props.children,'Legacy city');assert.equal(location?.props.numberOfLines,1);const layout=mapGroupPickerLayout(w,h,dimensions.fontScale,count);assert.equal(style(card).height,layout.rowHeight);const name=texts.find(n=>n.props.children===value.name)!;assert.equal(name.props.numberOfLines,layout.compact?1:2);const contentBudget=layout.rowHeight-2*(layout.rowHeight<108?8:10)-2;const used=texts.reduce((height,node)=>height+Number(style(node).lineHeight)*dimensions.fontScale*Number(node.props.numberOfLines),0)+(texts.length-1)*4;assert.ok(used<=contentBudget,'No typography shrink or hidden row overflow: '+JSON.stringify({dimensions,used,contentBudget}));if(dimensions.fontScale===1)assert.ok(texts.some(n=>n.props.testID==='map-group-description-'+value.id));}
-  assert.ok(!tree.some(n=>n.type==='ScrollView'||n.type==='FlatList'||n.props.accessibilityLabel==='Next'));app.unmount();
+  const expectedLayout=mapGroupPickerLayout(w,h,dimensions.fontScale,count);assert.equal(tree.filter(n=>n.type==='ScrollView').length,expectedLayout.needsScroll?1:0);assert.ok(!tree.some(n=>n.type==='FlatList'||n.props.accessibilityLabel==='Next'));app.unmount();
  }
 });
 

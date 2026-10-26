@@ -5,6 +5,9 @@ import {build} from 'esbuild';
 import {chromium,type Page} from 'playwright';
 import type {Map as LeafletMap} from 'leaflet';
 import type {DiscoveryShowroom} from '../lib/discovery';
+const {installMapTileFixture}=createRequire(import.meta.url)('./testing/map-tile-fixture.mjs') as {
+ installMapTileFixture(context:import('playwright').BrowserContext):Promise<{assertNoExternalRequests():void}>;
+};
 
 // Installed Leaflet, actual React and the production web adapter/markers. Only
 // translations and external tiles are controlled; no database/provider/device proof.
@@ -33,15 +36,16 @@ type Probe={polylineCount:()=>number;openedGroups:string[];maps:MapProbe[];selec
 
 async function boot(channel:'chrome'='chrome'){
  const compiled=await bundle,browser=await chromium.launch({channel,headless:true,timeout:20000}),errors:string[]=[];
- const page=await browser.newPage({viewport:{width:390,height:844}});page.on('pageerror',error=>errors.push(error.stack||error.message));
+ const page=await browser.newPage({viewport:{width:390,height:844},serviceWorkers:'block'});page.on('pageerror',error=>errors.push(error.stack||error.message));
  page.setDefaultTimeout(8000);
- await page.route('https://**',route=>route.abort('blockedbyclient'));
+ await page.context().route('https://**',route=>route.abort('blockedbyclient'));
+ const tiles=await installMapTileFixture(page.context());
  await page.setContent('<main id="root"></main>');
  await page.addStyleTag({path:require.resolve('leaflet/dist/leaflet.css')});
  await page.addStyleTag({content:'.discovery-map{width:390px;height:500px}'});
  await page.addScriptTag({content:'window.__name=value=>value;window.fixture={maps:[],openedGroups:[],selected:[],views:[],lateInvalidates:0,mapErrors:0,fastUnmount:false};'});
  await page.addScriptTag({content:compiled.outputFiles[0].text});
- return {browser,page,errors};
+ return {browser,page,errors,tiles};
 }
 const mount=(page:Page,value:DiscoveryShowroom,fast=false)=>page.evaluate(({value,fast})=>(window as unknown as {fixture:Probe}).fixture.mount(value,fast),{value,fast});
 
@@ -177,18 +181,28 @@ test('FE-021 S140 outer aggregates expand while exposed terminal circles open be
 
 test('FE-021 S154 actual web21 area businesses open every city group once at390/1440 without street zoom',{timeout:45000},async()=>{
  for(const[width,capacity,expected]of[[390,3,7],[1440,6,4]]){
-  const{browser,page,errors}=await boot('chrome');
+  const{browser,page,errors,tiles}=await boot('chrome');
   try{
    await page.setViewportSize({width,height:844});await page.addStyleTag({content:'.discovery-map{width:'+width+'px;height:600px}'});
    const cohort=Array.from({length:21},(_,i)=>({...shop,id:i+1,name:'City shop '+i,locationMode:'area' as const}));
    await page.evaluate(({cohort,capacity})=>(window as unknown as{fixture:Probe}).fixture.mount(cohort,false,5,null,capacity),{cohort,capacity});
    await page.getByRole('button',{name:'21 businesses. Zoom in.',exact:true}).click();
-   await page.waitForFunction(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return m.getZoom()===12&&!m._animatingZoom;});
+   // S181 exposes the first safe city layout in10..13; one click must reach
+   // the complete terminal set rather than the retired fixed zoom12 threshold.
+   await page.waitForFunction(expected=>{
+    const m=(window as unknown as{fixture:Probe}).fixture.maps[0],zoom=m.getZoom();
+    return Number.isInteger(zoom)&&zoom>=10&&zoom<=13&&!m._animatingZoom
+     &&document.querySelectorAll('[data-map-group-kind="cluster"]').length===expected
+     &&document.querySelectorAll('[data-map-group-kind="aggregate"]').length===0;
+   },expected);
    const buttons=page.getByRole('button',{name:/businesses\. View businesses\./});await buttons.nth(expected-1).waitFor();assert.equal(await buttons.count(),expected);
    const before=await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return{zoom:m.getZoom(),center:m.getCenter()};});
+   assert.ok(Number.isInteger(before.zoom)&&before.zoom>=10&&before.zoom<=13,'One overview activation reaches an accepted safe city layout');
+   assert.equal(Number(await page.locator('.discovery-map').getAttribute('data-map-zoom')),before.zoom,'Normalized marker state agrees with the rawSDK camera');
+   assert.equal(await page.locator('[data-map-group-kind="aggregate"]').count(),0);
    for(let i=0;i<expected;i++){const button=buttons.nth(i);assert.equal(await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}),true,'Each separated current group remains pointer accessible');await button.click();}
-   const keys=await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.openedGroups);assert.equal(new Set(keys).size,expected);assert.deepEqual(keys.flatMap(key=>key.replace('cluster:','').split('-').map(Number)).sort((a,b)=>a-b),cohort.map(item=>item.id));
-   assert.deepEqual(await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return{zoom:m.getZoom(),center:m.getCenter()};}),before);assert.equal(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.polylineCount()),0);assert.deepEqual(errors,[]);
+   const keys=await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.openedGroups);assert.equal(new Set(keys).size,expected);assert.deepEqual(keys.flatMap(key=>key.replace('cluster:','').split('-').map(Number)).sort((a,b)=>a-b),cohort.map(item=>item.id));assert.ok(keys.every(key=>key.replace('cluster:','').split('-').length<=capacity),'Each opened group retains the current bounded capacity');
+   assert.deepEqual(await page.evaluate(()=>{const m=(window as unknown as{fixture:Probe}).fixture.maps[0];return{zoom:m.getZoom(),center:m.getCenter()};}),before);assert.equal(await page.evaluate(()=>(window as unknown as{fixture:Probe}).fixture.polylineCount()),0);assert.deepEqual(errors,[]);tiles.assertNoExternalRequests();
   }finally{await browser.close();}
  }
 });

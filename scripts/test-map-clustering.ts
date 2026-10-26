@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {mapDisplayLocation} from '../lib/map/map-display-location';
 import {DENSE_DEMO_BUSINESSES} from '../lib/dense-demo-seed';
 import {
-  MAP_MAX_ZOOM, MAP_NATIVE_MAX_ZOOM, MAP_CITY_ZOOM, MAP_GROUP_OVERFLOW_DISPLACEMENT_METERS, MAP_GROUP_DISTANCE_METERS, MAP_GROUP_MAX_MEMBERS, MAP_GROUP_DEFAULT_CAPACITY,
+  MAP_MAX_ZOOM, MAP_NATIVE_MAX_ZOOM, MAP_CITY_ZOOM, MAP_GROUP_OVERFLOW_DISPLACEMENT_METERS, MAP_GROUP_DISTANCE_METERS, MAP_GROUP_MAX_MEMBERS, MAP_GROUP_MIN_CAPACITY, MAP_GROUP_DEFAULT_CAPACITY,
   MAP_GROUP_FANOUT_PITCH, MAP_GROUP_FANOUT_ATTEMPTS, MAP_GROUP_MAX_DISPLACEMENT_METERS, MAP_GROUP_ROW_HEIGHT, MAP_GROUP_COMPACT_ROW_HEIGHT,
   clampMapZoom, normalizeNativeMapZoom, mapClusterIndex, mapClusterMarkers, mapFixedGroup, mapExposedGroup,
   mapGroupPageSize, mapGroupPickerLayout, mapGroupCapacity, mapGroupChromeHeight, mapGroupDirectChromeHeight,
@@ -20,6 +20,75 @@ const pixel = ([longitude, latitude]: readonly number[], zoom: number): [number,
   return [(longitude + 180) / 360 * size, (.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * size];
 };
 
+test('S181 each scope chooses its first complete safe fit while rejected probes retain every member', () => {
+  for (const [count,capacity,firstFit,terminalCount] of [[6,3,10,2],[21,3,11,7],[21,6,10,4],[200,3,12,67],[200,6,12,34],[200,2,13,100],[199,2,13,100]]) {
+    const source = Array.from({length:count},(_,item)=>({...point(item+1,38.75,9.03),locationMode:'area' as const}));
+    const index = mapClusterIndex(source,capacity), expected = source.map(item=>item.id);
+    for (let zoom=MAP_CITY_ZOOM;zoom<firstFit;zoom+=1) {
+      const hidden = mapClusterMarkers(index,world,zoom);
+      assert.deepEqual(hidden.flatMap(item=>item.ids).sort((a,b)=>a-b),expected,'An aborted fit probe never becomes an incomplete displayed set');
+      assert.equal(hidden.length,1);assert.equal(hidden[0].kind,'aggregate');assert.equal(hidden[0].expansionZoom,firstFit);
+      for (const group of index.groups) assert.equal(mapExposedGroup(index,group.ids,zoom),null);
+    }
+    const visible = mapClusterMarkers(index,world,firstFit), snapshot = JSON.stringify(visible);
+    assert.equal(visible.length,terminalCount);
+    assert.ok(visible.every(item=>item.expansionZoom===undefined&&item.count<=capacity&&item.kind===(item.count===1?'shop':'cluster')));
+    assert.deepEqual(visible.flatMap(item=>item.ids).sort((a,b)=>a-b),expected);
+    for (const item of visible) assert.equal(mapExposedGroup(index,item.ids,firstFit)?.key,item.key);
+    visible[0].ids.push(999);visible[0].center[0]=0;
+    assert.equal(JSON.stringify(mapClusterMarkers(index,world,firstFit)),snapshot,'Public results cannot corrupt a cached fitting layout');
+    assert.ok(mapClusterMarkers(index,world,5).some(item=>item.kind==='aggregate'),'Zooming out restores geographic aggregates');
+    assert.equal(JSON.stringify(mapClusterMarkers(index,world,firstFit)),snapshot,'A return to the city keeps exact membership and deterministic spacing');
+  }
+});
+
+test('S181 cached city fitting is not repeated for ordinary below-fit zoom gestures', () => {
+  const index=mapClusterIndex(Array.from({length:200},(_,item)=>point(item+1,38.75,9.03)),2);
+  mapClusterMarkers(index,world,5);
+  const original=Math.hypot;let probes=0;
+  Math.hypot=(...values:number[])=>{probes+=1;return original(...values);};
+  try {
+    for(const zoom of [6,7,6,5])assert.equal(mapClusterMarkers(index,world,zoom)[0].count,200);
+    assert.equal(probes,0,'A cached full-scope fit must not repeat circle-spacing probes on each gesture');
+  } finally {Math.hypot=original;}
+});
+
+test('S181 genuine city singletons reserve readable shop names while staying at their canonical pins', () => {
+  const source=[{...point(1),locationMode:'area' as const},{...point(2,longitudeAtMeters(9000)),locationMode:'area' as const}];
+  const index=mapClusterIndex(source);
+  assert.ok(index.groups.every(group=>group.kind==='shop'));
+  const tooClose=mapClusterMarkers(index,world,10);
+  assert.equal(tooClose.length,1);assert.equal(tooClose[0].kind,'aggregate');assert.equal(tooClose[0].count,2);assert.equal(tooClose[0].expansionZoom,11);
+  const clear=mapClusterMarkers(index,world,11);assert.equal(clear.length,2);
+  for(const item of clear){assert.equal(item.kind,'shop');assert.equal(item.expansionZoom,undefined);assert.deepEqual(item.center,item.anchor);}
+  const [left,right]=clear.map(item=>pixel(item.center,11));
+  assert.ok(Math.abs(left[0]-right[0])>=101.99||Math.abs(left[1]-right[1])>=105.99,'Both actual named-shop frames fit without overlapping labels');
+});
+
+test('S181 a group clears the named city-shop frame including its below-anchor label area', () => {
+  const source=[{...point(1),locationMode:'area' as const},...Array.from({length:3},(_,item)=>point(item+2,0,longitudeAtMeters(9000)))];
+  const index=mapClusterIndex(source),visible=mapClusterMarkers(index,world,10);
+  assert.equal(visible.length,2);assert.ok(visible.every(item=>item.kind!=='aggregate'));
+  const shop=visible.find(item=>item.ids.includes(1))!,group=visible.find(item=>item.count===3)!;
+  assert.equal(shop.kind,'shop');assert.deepEqual(shop.center,[0,0]);
+  const a=pixel(shop.center,10),b=pixel(group.center,10);
+  assert.ok(Math.abs(a[0]-b[0])>=78.99||Math.abs(a[1]+18-b[1])>=80.99,'Named-shop102x106(+18y) and group56x56 frames remain separate');
+});
+
+test('S181 nearby pre-fit terminal circles remain one zoomable aggregate until their safe frames fit', () => {
+  for(const count of [6,9]){
+    const source=Array.from({length:count},(_,item)=>point(item+1,38.75+Math.floor(item/3)*.02,9.03));
+    const index=mapClusterIndex(source,3),crowded=mapClusterMarkers(index,world,9);
+    assert.equal(crowded.length,1);assert.equal(crowded[0].kind,'aggregate');assert.equal(crowded[0].count,count);assert.equal(crowded[0].expansionZoom,10);
+    for(const group of index.groups)assert.equal(mapExposedGroup(index,group.ids,9),null,'Overlapping local circles cannot bypass the retained aggregate');
+    const clear=mapClusterMarkers(index,world,10);assert.equal(clear.length,count/3);assert.ok(clear.every(item=>item.kind==='cluster'&&item.expansionZoom===undefined));assertSeparated(clear,10);
+  }
+  const separateRegions=Array.from({length:6},(_,item)=>point(item+1,item<3?38.75:39.25,9.03));
+  const regional=mapClusterMarkers(mapClusterIndex(separateRegions,3),world,5);
+  assert.equal(regional.length,2,'Separate regions are not merged merely because their country-overview circle frames overlap');
+  assert.ok(regional.every(item=>item.count===3));
+});
+
 test('S155 opening zoom shows separate regional groups for the66-city portfolio', () => {
   const cities: Array<[count: number, longitude: number, latitude: number]> = [
     [21, 38.8, 9], [9, 39.3, 8.5], [8, 38.5, 7], [7, 36.8, 7.7],
@@ -34,7 +103,7 @@ test('S155 opening zoom shows separate regional groups for the66-city portfolio'
   assert.ok(initial.length >= 8, 'the opening view shows several city regions instead of one country-spanning badge');
   assert.ok(Math.max(...initial.map(item => item.count)) <= 22, 'only nearby overlapping groups combine at the country overview');
   const regional = mapClusterMarkers(index, world, 9);
-  const cityPins = mapClusterMarkers(index, world, MAP_CITY_ZOOM);
+  const cityPins = mapClusterMarkers(index, world, 11);
   assert.ok(regional.length >= initial.length, 'a coarse zoom count splits into as many or more local groups while preserving every canonical city anchor');
   assert.ok(cityPins.length > regional.length && Math.max(...cityPins.map(item => item.count)) <= MAP_GROUP_DEFAULT_CAPACITY,
     'the city-level click reveals reachable numbered circles without inventing sub-city locations');
@@ -62,26 +131,30 @@ test('S155 synthetic Addis points cluster without adding per-business city offse
   assert.deepEqual(closer.flatMap(item => item.ids).sort((a, b) => a - b), source.map(item => item.id).sort((a, b) => a - b));
 });
 
-test('S154 city-level displays seven fitting phone groups before any street-detail zoom', () => {
+test('S181 first safe city layout exposes phone groups at11 and desktop groups at10', () => {
   const saved = Array.from({length:21}, (_, item) => ({...point(item + 1, 38.75, 9.03), locationMode:'area' as const}));
   const before = JSON.stringify(saved), source = saved.map(mapDisplayLocation);
   for (const capacity of [3,6]) {
-    const index = mapClusterIndex(source,capacity), visible = mapClusterMarkers(index,world,12);
+    const firstFit = capacity === 3 ? 11 : 10;
+    const index = mapClusterIndex(source,capacity), visible = mapClusterMarkers(index,world,firstFit);
     assert.equal(visible.length,capacity===3?7:4);
     assert.equal(visible.length,index.groups.length,'City zoom exposes every fitting fixed group, not a single21 aggregate');
     assert.ok(visible.every(item=>item.kind==='cluster'&&item.count<=capacity&&item.expansionZoom===undefined));
     assert.deepEqual(visible.flatMap(item=>item.ids).sort((a,b)=>a-b),saved.map(item=>item.id));
-    for (const item of visible) assert.equal(mapExposedGroup(index,item.ids,12)?.key,item.key);
+    for (const item of visible) assert.equal(mapExposedGroup(index,item.ids,firstFit)?.key,item.key);
+    const beforeFit = mapClusterMarkers(index,world,firstFit - 1);
+    assert.ok(beforeFit.some(item=>item.kind==='aggregate'),'An unsafe earlier layout never exposes overlapping terminal targets');
+    for (const item of index.groups) assert.equal(mapExposedGroup(index,item.ids,firstFit - 1),null);
     const outer=mapClusterMarkers(index,world,6)[0];
-    assert.equal(outer.kind,'aggregate');assert.ok(outer.expansionZoom!>6&&outer.expansionZoom!<=MAP_CITY_ZOOM,'A city aggregate expands in bounded steps before the terminal preview level');assert.ok(mapClusterMarkers(index,world,outer.expansionZoom!).length>mapClusterMarkers(index,world,6).length,'One aggregate activation reveals geographic children');
+    assert.equal(outer.kind,'aggregate');assert.equal(outer.expansionZoom,firstFit,'The aggregate targets the first complete safe fit, not the fixed old12 or dense fallback13');assert.ok(mapClusterMarkers(index,world,outer.expansionZoom!).length>mapClusterMarkers(index,world,6).length,'One aggregate activation reveals geographic children');
   }
   assert.equal(JSON.stringify(saved),before,'Visual spacing never mutates saved address coordinates');
 });
 
 test('fixed3km membership, finite5/10km display spacing and matched city/district scales', () => {
   assert.equal(MAP_GROUP_DISTANCE_METERS, 3000); assert.equal(MAP_GROUP_MAX_DISPLACEMENT_METERS,5000); assert.equal(MAP_GROUP_OVERFLOW_DISPLACEMENT_METERS,10000);
-  assert.equal(MAP_GROUP_MAX_MEMBERS, 6); assert.equal(MAP_GROUP_DEFAULT_CAPACITY, 3);
-  assert.equal(MAP_CITY_ZOOM,12); assert.equal(MAP_MAX_ZOOM,13); assert.equal(MAP_NATIVE_MAX_ZOOM,12);
+  assert.equal(MAP_GROUP_MAX_MEMBERS, 6); assert.equal(MAP_GROUP_MIN_CAPACITY,2); assert.equal(MAP_GROUP_DEFAULT_CAPACITY, 3);
+  assert.equal(MAP_CITY_ZOOM,10); assert.equal(MAP_MAX_ZOOM,13); assert.equal(MAP_NATIVE_MAX_ZOOM,12);
   assert.equal(clampMapZoom(19), MAP_MAX_ZOOM); assert.equal(clampMapZoom(0), 1);
   assert.equal(clampMapZoom(Number.NaN), 6); assert.equal(clampMapZoom(12.75), 12.75);
   assert.equal(normalizeNativeMapZoom(17), MAP_MAX_ZOOM); assert.equal(normalizeNativeMapZoom(1), 2);
@@ -105,14 +178,15 @@ test('a city-only singleton stays a shop marker at every zoom and keeps its cano
   const city = {...point(42, 38.75, 9.03), locationMode: 'area' as const};
   assert.deepEqual(mapDisplayLocation(city), city, 'City-only coordinates are never fanned out into a guessed storefront location');
   const index = mapClusterIndex([city]);
-  assert.equal(index.groups[0]?.kind, 'cluster', 'The fixed group key retains current-member authority');
+  assert.equal(index.groups[0]?.kind, 'shop', 'A genuinely isolated city pin reserves the same named-shop frame as an exact pin');
   for (const zoom of [1, 5, 9, MAP_CITY_ZOOM, MAP_MAX_ZOOM]) {
     const marker = mapClusterMarkers(index, world, zoom)[0];
     assert.equal(marker.kind, 'shop'); assert.equal(marker.count, 1); assert.equal(marker.expansionZoom, undefined);
     assert.deepEqual(marker.anchor, [38.75, 9.03]);
     assert.equal(marker.center[0], 38.75); assert.equal(marker.center[1], 9.03);
   }
-  assert.ok(mapExposedGroup(index, [42], MAP_MAX_ZOOM), 'The singleton remains a current, reachable business marker');
+  assert.equal(mapExposedGroup(index, [42], MAP_MAX_ZOOM),null,'A genuine shop opens directly, not through terminal-group authority');
+  assert.equal(mapFixedGroup(index, [42])?.key,'shop:42');
 });
 
 test('an overlapping overview singleton joins a zoomable multi-business count, then separates as a shop pin', () => {
@@ -295,29 +369,33 @@ test('bounded whole-world/polar fallback keeps every ID and never enlarges fixed
   }
 });
 
-test('one all-fit sizing policy admits desktop6/phone3, compact short rows and no paging or truncation', () => {
+test('one sizing policy keeps desktop6/phone3 all-fit and bounds short-screen fallback to two scrolling cards', () => {
   assert.equal(MAP_GROUP_ROW_HEIGHT, 108); assert.equal(MAP_GROUP_COMPACT_ROW_HEIGHT, 84);
   assert.equal(mapGroupCapacity(1440, 800), 6); assert.equal(mapGroupCapacity(320, 456), 3);
-  assert.equal(mapGroupCapacity(296, 388), 3); assert.equal(mapGroupCapacity(296, 388, 2), 1);
+  assert.equal(mapGroupCapacity(296, 388), 3); assert.equal(mapGroupCapacity(296, 388, 2), 2);
   const normal = mapGroupPickerLayout(320, 456, 1, 3);
-  assert.deepEqual(normal, {admitted:true,capacity:3,pageSize:3,paged:false,chromeHeight:112,rowHeight:108,compact:false});
+  assert.deepEqual(normal, {admitted:true,capacity:3,pageSize:3,paged:false,chromeHeight:112,needsScroll:false,rowHeight:108,compact:false});
   assert.equal(mapGroupPickerLayout(296,388,1,3).rowHeight,84);
   const desktop=mapGroupPickerLayout(760,800,1,6);
-  assert.equal(desktop.admitted,true);assert.equal(desktop.pageSize,6);assert.equal(desktop.paged,false);
-  const enlarged=mapGroupPickerLayout(296,388,2,1);
-  assert.equal(enlarged.admitted,true);assert.equal(enlarged.pageSize,1);assert.equal(enlarged.rowHeight,164);assert.equal(enlarged.paged,false);
+  assert.equal(desktop.admitted,true);assert.equal(desktop.pageSize,6);assert.equal(desktop.paged,false);assert.equal(desktop.needsScroll,false);
+  const enlarged=mapGroupPickerLayout(296,388,2,2);
+  assert.equal(enlarged.admitted,true);assert.equal(enlarged.pageSize,2);assert.equal(enlarged.rowHeight,164);assert.equal(enlarged.paged,false);assert.equal(enlarged.needsScroll,true);
+  const partial=mapGroupPickerLayout(296,296,2,2);assert.equal(partial.admitted,true);assert.equal(partial.capacity,2);assert.equal(partial.needsScroll,true);assert.equal(partial.rowHeight,108);
+  for(const [width,height,scale]of [[0,0,1],[296,240,2],[Number.NaN,456,1]]){const unusable=mapGroupPickerLayout(width,height,scale,2);assert.equal(unusable.admitted,false);assert.equal(unusable.capacity,0);assert.equal(unusable.pageSize,0);assert.equal(unusable.needsScroll,false);}
   const stale=mapGroupPickerLayout(296,388,2,3);
   assert.equal(stale.admitted,false);assert.equal(stale.pageSize,0);assert.equal(stale.paged,false);
   assert.equal(mapGroupChromeHeight(1.5),264);assert.equal(mapGroupDirectChromeHeight(1.5),168);
   for(const width of [296,390,599,600,1440])for(const height of [240,296,388,456,800])for(const scale of [1,1.25,1.5,2]){
     const capacity=mapGroupCapacity(width,height,scale);
-    assert.ok(capacity>=1&&capacity<=(width>=600?6:3));
+    const bodyHeight=height-mapGroupDirectChromeHeight(scale);
+    assert.ok(bodyHeight<48?capacity===0:capacity>=2&&capacity<=(width>=600?6:3));
     for(const count of [1,2,3,4,5,6,200]){
       const layout=mapGroupPickerLayout(width,height,scale,count);
       assert.equal(layout.paged,false);assert.equal(layout.admitted,count<=capacity);
       assert.equal(layout.pageSize,layout.admitted?count:0);
+      if(layout.needsScroll){assert.ok(layout.admitted&&count<=2&&bodyHeight>=48);assert.ok(layout.chromeHeight+Math.ceil(count/(width>=600?2:1))*layout.rowHeight>height);}
       assert.equal(mapGroupPageSize(width,height,scale,count),layout.pageSize);
-      if(layout.admitted&&mapGroupDirectChromeHeight(scale)+108<=height){
+      if(layout.admitted&&!layout.needsScroll&&mapGroupDirectChromeHeight(scale)+108<=height){
         const rows=Math.ceil(count/(width>=600?2:1));
         assert.ok(layout.chromeHeight+rows*layout.rowHeight+(rows-1)*8<=height);
       }
@@ -328,15 +406,15 @@ test('one all-fit sizing policy admits desktop6/phone3, compact short rows and n
   assert.equal(mapGroupPageSize(Number.NaN,Number.NaN),0);
 });
 
-test('capacities1through6 preserve every current member and distinguish forced circles from truly isolated shops',()=>{
+test('requested capacities clamp to2through6 and preserve every member with at most one unavoidable remainder per cohort',()=>{
   const source=[...Array.from({length:13},(_,index)=>point(index+1,38.75,9.03)),point(99,50,20)];
   for(let capacity=1;capacity<=6;capacity++){
     const index=mapClusterIndex(source,capacity),cohort=index.groups.filter(group=>!group.ids.includes(99));
-    assert.equal(index.capacity,capacity);
+    const effective=Math.max(2,capacity);assert.equal(index.capacity,effective);
     assert.deepEqual(index.groups.flatMap(group=>[...group.ids]).sort((a,b)=>a-b),source.map(row=>row.id));
-    assert.ok(cohort.every(group=>group.kind==='cluster'&&group.count<=capacity));
+    assert.ok(cohort.every(group=>group.kind==='cluster'&&group.count<=effective));
     const forced=cohort.filter(group=>group.count===1);
-    assert.equal(forced.length,capacity===1?13:capacity===2?1:0);
+    assert.equal(forced.length,effective===2?1:0);
     assert.equal(index.groups.find(group=>group.ids.includes(99))?.kind,'shop');
     for(const group of index.groups)assert.equal(mapFixedGroup(index,[...group.ids].reverse())?.key,group.key);
     const initial=index.groups.map(group=>({key:group.key,ids:[...group.ids],count:group.count}));
@@ -438,11 +516,12 @@ test('plain-circle display positions stay within finite10km while broad hierarch
       if(latitude===9.03&&zoom<=6)assert.ok(markers.every(marker=>marker.center[0]===marker.anchor[0]&&marker.center[1]===marker.anchor[1]),'Wide map must not manufacture remote badge locations');
     }
   }
-  const dense=mapClusterMarkers(mapClusterIndex(Array.from({length:200},(_,item)=>({...point(item+1,38.75,9.03),locationMode:'area' as const})),1),world,MAP_MAX_ZOOM);
-  assert.equal(dense.length,200);assert.ok(dense.every(marker=>marker.kind==='shop'&&marker.count===1));
+  const dense=mapClusterMarkers(mapClusterIndex(Array.from({length:199},(_,item)=>({...point(item+1,38.75,9.03),locationMode:'area' as const})),1),world,MAP_MAX_ZOOM);
+  assert.equal(dense.length,100);assert.equal(dense.filter(marker=>marker.kind==='shop'&&marker.count===1).length,1,'The old capacity-one input is clamped to pairs, leaving only its unavoidable odd remainder');
   for(let left=0;left<dense.length;left++)for(let right=left+1;right<dense.length;right++){
     const a=pixel(dense[left].center,MAP_MAX_ZOOM),b=pixel(dense[right].center,MAP_MAX_ZOOM);
-    assert.ok(Math.abs(a[0]-b[0])>=47.99||Math.abs(a[1]-b[1])>=49.99,'Compact city-only shop glyphs and locality chips do not overlap');
+    const l=dense[left].count===1?{w:51,h:53,y:18}:{w:28,h:28,y:0},r=dense[right].count===1?{w:51,h:53,y:18}:{w:28,h:28,y:0};
+    assert.ok(Math.abs(a[0]-b[0])>=l.w+r.w-.01||Math.abs(a[1]+l.y-b[1]-r.y)>=l.h+r.h-.01,'The named remainder and count circles reserve their complete display frames');
   }
 });
 
@@ -455,14 +534,29 @@ function assertSeparated(markers: ReturnType<typeof mapClusterMarkers>, zoom: nu
   }
 }
 
-test('S154 dense city overflow stays aggregated until one bounded district expansion with no hidden modal bypass',()=>{
+test('S181 minimum-two groups keep all IDs and full named remainder frames clear at the finite final zoom',()=>{
+  for(const count of [3,21,199,200])for(const [longitude,latitude]of [[38.75,9.03],[179.9999,0],[-179.9999,9.03],[38.75,85.051129],[38.75,-85.051129]]){
+    const source=Array.from({length:count},(_,item)=>({...point(item+1,longitude,latitude),locationMode:'area' as const}));
+    const index=mapClusterIndex(source,1),final=mapClusterMarkers(index,world,MAP_MAX_ZOOM),size=256*2**MAP_MAX_ZOOM;
+    assert.equal(index.capacity,2,'Old or stale capacity-one inputs cannot recreate a city of overlapping named pins');
+    assert.equal(final.length,Math.ceil(count/2));assert.equal(final.filter(item=>item.kind==='shop').length,count%2);
+    assert.deepEqual(final.flatMap(item=>item.ids).sort((a,b)=>a-b),source.map(item=>item.id));
+    for(let left=0;left<final.length;left++)for(let right=left+1;right<final.length;right++){
+      const a=pixel(final[left].center,MAP_MAX_ZOOM),b=pixel(final[right].center,MAP_MAX_ZOOM),dx=Math.abs(a[0]-b[0])%size;
+      const l=final[left].count===1?{w:51,h:53,y:18}:{w:28,h:28,y:0},r=final[right].count===1?{w:51,h:53,y:18}:{w:28,h:28,y:0};
+      assert.ok(Math.min(dx,size-dx)>=l.w+r.w-.01||Math.abs(a[1]+l.y-b[1]-r.y)>=l.h+r.h-.01,'The complete102x106 named remainder frame and56x56 count-circle frames must not collide');
+    }
+  }
+});
+
+test('S181 dense paired city overflow stays aggregated until one bounded district expansion with no hidden modal bypass',()=>{
   const source=Array.from({length:200},(_,item)=>point(item+1,0,0)), before=JSON.stringify(source);
-  const index=mapClusterIndex(source,1),city=mapClusterMarkers(index,world,MAP_CITY_ZOOM);
+  const index=mapClusterIndex(source,2),city=mapClusterMarkers(index,world,MAP_CITY_ZOOM);
   assert.equal(city.length,1);assert.equal(city[0].kind,'aggregate');assert.equal(city[0].count,200);
   assert.equal(city[0].expansionZoom,MAP_MAX_ZOOM);
   for(const group of index.groups)assert.equal(mapExposedGroup(index,group.ids,MAP_CITY_ZOOM),null,'A hidden fixed leaf never authorizes a modal');
   const district=mapClusterMarkers(index,world,city[0].expansionZoom!);
-  assert.equal(district.length,200);assert.ok(district.every(item=>item.kind==='shop'&&item.count===1&&item.expansionZoom===undefined));
+  assert.equal(district.length,100);assert.ok(district.every(item=>item.kind==='cluster'&&item.count===2&&item.expansionZoom===undefined));
   assert.deepEqual(district.flatMap(item=>item.ids).sort((a,b)=>a-b),source.map(item=>item.id));assertSeparated(district,MAP_MAX_ZOOM);
   assert.ok(district.some(item=>haversine(point(1,...item.anchor),point(2,...item.center))>MAP_GROUP_MAX_DISPLACEMENT_METERS),'The finite10km fallback is necessary for200 coincident targets');
   for(const item of district){assert.deepEqual(item.anchor,[0,0]);assert.ok(haversine(point(1,...item.anchor),point(2,...item.center))<=10000.00001);assert.equal(mapExposedGroup(index,item.ids,MAP_MAX_ZOOM)?.key,item.key);}
@@ -473,7 +567,7 @@ test('S154 bounded final layout qualifies200 targets at equator, dateline and bo
   for(const [longitude,latitude] of [[0,0],[179.9999,0],[-179.9999,9.03],[38.75,85.051129],[38.75,-85.051129]])for(const capacity of [1,3,6]){
     const source=Array.from({length:200},(_,item)=>point(item+1,longitude,latitude)),index=mapClusterIndex(source,capacity);
     const final=mapClusterMarkers(index,world,MAP_MAX_ZOOM);
-    assert.equal(final.length,index.groups.length);assert.ok(final.every(item=>item.count===1?item.kind==='shop':item.kind==='cluster'&&item.count<=capacity));assertSeparated(final,MAP_MAX_ZOOM);
+    assert.equal(index.capacity,Math.max(2,capacity));assert.equal(final.length,index.groups.length);assert.ok(final.every(item=>item.count===1?item.kind==='shop':item.kind==='cluster'&&item.count<=index.capacity));assertSeparated(final,MAP_MAX_ZOOM);
     assert.deepEqual(final.flatMap(item=>item.ids).sort((a,b)=>a-b),source.map(item=>item.id));
     for(const item of final){assert.ok(item.center.every(Number.isFinite));assert.ok(Math.abs(item.center[1])<=85.051129);assert.ok(haversine(point(1,...item.anchor),point(2,...item.center))<=10000.00001);}
     assert.deepEqual(final,mapClusterMarkers(mapClusterIndex([...source].reverse(),capacity),world,MAP_MAX_ZOOM));
@@ -485,20 +579,21 @@ test('S154 near-coincident200 anchors share fallback spacing rather than overlap
   for(const jitter of [.00001,.001,.01,.03]){
     const source=Array.from({length:200},(_,item)=>point(item+1,(random()-.5)*jitter,(random()-.5)*jitter));
     const index=mapClusterIndex(source,1),final=mapClusterMarkers(index,world,MAP_MAX_ZOOM);
-    assert.equal(final.length,200);assertSeparated(final,MAP_MAX_ZOOM);
+    assert.equal(final.length,100);assertSeparated(final,MAP_MAX_ZOOM);
     assert.deepEqual(final.flatMap(item=>item.ids).sort((a,b)=>a-b),source.map(item=>item.id));
     for(const item of final)assert.ok(haversine(point(1,...item.anchor),point(2,...item.center))<=10000.00001);
   }
 });
 
-test('S154 ordinary city groups use minimal nearby positions and panning never repacks their full-scope layout',()=>{
+test('S181 earlier city groups retain bounded spacing and panning never repacks their full-scope layout',()=>{
   const source=Array.from({length:21},(_,item)=>mapDisplayLocation({...point(item+1,38.75,9.03),locationMode:'area' as const}));
-  const index=mapClusterIndex(source,3),city=mapClusterMarkers(index,world,MAP_CITY_ZOOM);assertSeparated(city,MAP_CITY_ZOOM);
-  assert.ok(city.every(item=>haversine(point(1,...item.anchor),point(2,...item.center))<=5000.00001),'Ordinary current city groups need no10km fallback');
+  const index=mapClusterIndex(source,3),city=mapClusterMarkers(index,world,11);assertSeparated(city,11);
+  assert.equal(city.length,7);
+  assert.ok(city.every(item=>haversine(point(1,...item.anchor),point(2,...item.center))<=10000.00001),'The earlier readable layout stays within the existing finite spacing bound');
   const chosen=city.find(item=>item.center[0]!==item.anchor[0])!;assert.ok(chosen);
   const [x,y]=chosen.center, bounds:MapClusterBounds=[x-.000001,y-.000001,x+.000001,y+.000001];
-  assert.deepEqual(mapClusterMarkers(index,bounds,MAP_CITY_ZOOM),[chosen]);
-  assert.deepEqual(mapClusterMarkers(index,world,MAP_CITY_ZOOM),city);
+  assert.deepEqual(mapClusterMarkers(index,bounds,11),[chosen]);
+  assert.deepEqual(mapClusterMarkers(index,world,11),city);
 });
 
 test('outer counts sum real shops and expansion progresses to exact all-fit terminal groups',()=>{
@@ -545,7 +640,7 @@ test('hierarchy handles nearby dateline terminal groups and exact public scope a
     assert.equal(ids.length,200);assert.equal(new Set(ids).size,200);
     assert.ok(markers.every(item=>item.count===item.ids.length));
     if(zoom<MAP_MAX_ZOOM){assert.equal(markers.length,1);assert.equal(markers[0].kind,'aggregate');assert.equal(markers[0].expansionZoom,MAP_MAX_ZOOM);}
-    else assert.ok(markers.every(item=>item.kind==='shop'&&item.count===1));
+    else assert.ok(markers.every(item=>item.kind==='cluster'&&item.count===2));
   }
   assert.deepEqual(mapClusterMarkers(index,world,MAP_MAX_ZOOM),mapClusterMarkers(index,world,normalizeNativeMapZoom(17)));
   assert.deepEqual(mapClusterMarkers(index,world,6),mapClusterMarkers(mapClusterIndex([...source].reverse()),world,6));
@@ -559,7 +654,7 @@ test('fixed neighborhood membership survives screen partitions that render one-m
       const hasPeer=source.some(peer=>peer.id!==item.id&&haversine(item,peer)<=MAP_GROUP_DISTANCE_METERS);
       const terminal=index.groups.find(group=>group.ids.includes(item.id))!;
       assert.equal(terminal.kind,hasPeer?'cluster':'shop');
-      if(hasPeer&&terminal.count===1)assert.ok(capacity===1||capacity===2,'Only unavoidable capacity remainders become counted singletons');
+      if(hasPeer&&terminal.count===1)assert.equal(index.capacity,2,'Only an unavoidable odd remainder becomes a named one-business marker');
     }
     assert.equal(index.groups.find(group=>group.ids.includes(99))?.key,'shop:99');
   }

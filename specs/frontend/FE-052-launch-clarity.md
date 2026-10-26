@@ -2,7 +2,7 @@
 id: FE-052
 title: Clear launch journeys and natural interface language
 status: in_progress
-related: [FE-066, BE-001, BE-032, FE-049, FE-030, FE-033, FE-046, DEP-030, FE-036, FE-053, DEP-044, FE-067, FE-065]
+related: [FE-066, BE-001, BE-032, FE-049, FE-030, FE-033, FE-046, DEP-030, FE-036, FE-053, DEP-044, FE-067, FE-065, FE-070]
 owners: [product, frontend, backend]
 last_updated: 2026-10-15
 change_level: L3

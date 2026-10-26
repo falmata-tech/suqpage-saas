@@ -31,6 +31,11 @@
   display: grid; grid-template-columns: repeat(var(--group-columns,2), minmax(0,1fr)); grid-auto-rows: var(--group-row-height,108px);
   flex: none; min-height: 0; gap: 8px; padding: 0 12px; overflow: hidden; background: #fff;
 }
+.dialog :global(.nearby-showroom-viewer[data-scrollable="true"] .nearby-showroom-grid) {
+  flex: 1 1 auto; max-height: var(--group-body-max-height); overflow-y: auto;
+  overscroll-behavior: contain; scroll-padding-block: 4px;
+}
+.dialog :global(.nearby-showroom-viewer[data-scrollable="true"] .nearby-showroom-grid:focus-visible) { outline: 3px solid var(--mp-focus); outline-offset: -3px; }
 .dialog :global(.nearby-showroom-grid > button) {
   min-height: var(--group-row-height,108px); height: var(--group-row-height,108px); grid-template-columns: 78px minmax(0,1fr);
   border: 1px solid var(--mp-line); border-left: 4px solid var(--industry-accent,var(--mp-teal)); border-radius: 8px;

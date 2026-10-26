@@ -63,7 +63,9 @@ test('FE-056 actual main navigation says Account for owners and Login for visito
  const{fixture,render}=await component('main-navigation');let tree=render('default');assert.ok(button(tree,'Account'));assert.ok(!button(tree,'Dashboard')&&!button(tree,'Inquiries'));fixture.app.session=null as never;tree=render('default');assert.ok(button(tree,'Login'));assert.ok(!button(tree,'Account'));
  for(const session of[null,{user:{id:'owner'}}])for(const[current,label]of[['/','Market'],['/shop/fixture','Market'],['/product','Market'],['/featured','Featured'],['/about','About'],['/account',session?'Account':'Login'],['/owner/products',session?'Account':'Login']]){
   fixture.app.session=session as never;fixture.path=current!;tree=render('default');const tabs=tree.filter(node=>node.props.accessibilityRole==='tab');assert.equal(tabs.length,4);
+  const market=tabs.find(tab=>tab.props.accessibilityLabel==='Market')!;assert.ok(nodes(market).some(node=>name(node)==='Icon'&&node.props.name==='shop'),'Market uses the existing storefront icon across both discovery views');
   for(const tab of tabs){const selected=tab.props.accessibilityLabel===label;assert.equal((tab.props.accessibilityState as{selected:boolean}).selected,selected);assert.equal(tab.props['aria-selected'],selected,'Explicit DOM state agrees with native selected state');}
+  press(market);assert.deepEqual(JSON.parse(JSON.stringify(fixture.routes.at(-1))),{kind:'navigate',route:'/'});
  }
 });
 test('FE-053 actual main navigation exposes selected tab state through installed RNWeb markup',async()=>{

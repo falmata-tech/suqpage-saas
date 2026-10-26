@@ -2,7 +2,7 @@
 id: FE-055
 title: Discoverable account deletion requests
 status: in_progress
-related: [FE-053, FE-049, DEP-042, DEP-044, BE-053]
+related: [FE-053, FE-049, DEP-042, DEP-044, BE-053, FE-070]
 owners: [product, frontend, operations]
 last_updated: 2026-10-09
 change_level: L1

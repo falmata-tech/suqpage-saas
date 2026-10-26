@@ -413,7 +413,7 @@ export function OwnerNavigation({ active = "overview" }: { active?: string }) {
           style={c.menuRow}
         >
           <Text style={c.menuText}>{t("Market")}</Text>
-          <Icon name="map" />
+          <Icon name="shop" />
         </Pressable>
         <Pressable
           accessibilityRole="button"

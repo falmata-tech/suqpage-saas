@@ -23,7 +23,7 @@ import {markerIndex,currentGroupMembers} from '../../src/map-markers';
 import {ResourceSkeleton} from '../../src/ResourceLoading';
 import {useBlockedBusinesses} from '../../src/blocked-businesses';
 import type {MapControls,MapViewpoint} from '../../src/map-contract';
-import {MARKET_STOREFRONT_COPY} from '../../../../lib/storefront-copy';
+import {MARKET_COMPACT_COPY} from '../../../../lib/storefront-copy';
 const EMPTY_SHOPS:MapShop[]=[];
 const PANEL_EDGE=16;
 const horizontalHandleMove=({dx,dy}:{dx:number;dy:number})=>Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.3;
@@ -51,7 +51,7 @@ export default function MarketScreen() {
  const [pickerPosition,setPickerPosition]=useState<MapGroupPosition>({page:returned?.page||0,anchor:returned?.anchor??null});
  const camera=useRef<MapViewpoint>(returned?{center:returned.camera.center,zoom:Platform.OS==='web'?returned.camera.zoom:Math.max(1,returned.camera.zoom-1)}:initialMapView);
  const groupTrigger=useRef<{focus?:()=>void;isConnected?:boolean}|null>(null);
- const [dockHeight,setDockHeight]=useState(48);
+ const [dockHeight,setDockHeight]=useState(48),[attributionHeight,setAttributionHeight]=useState(19);
  const [mapZoom,setMapZoom]=useState(camera.current.zoom);
  const map=useRef<MapControls>(null),results=useRef<FlatList<SearchItem>>(null),progress=useRef(new Animated.Value(panel?1:0)).current;
  const panelState=useRef(panel),progressValue=useRef(panel?1:0),dragStart=useRef(0),dragOrigin=useRef(panel),dragged=useRef(false),animation=useRef<Animated.CompositeAnimation|null>(null);
@@ -62,7 +62,7 @@ export default function MarketScreen() {
   onMoveShouldSetPanResponder:(_,g)=>horizontalHandleMove(g),
   onMoveShouldSetPanResponderCapture:(_,g)=>horizontalHandleMove(g),
   onPanResponderGrant:()=>{dragged.current=true;dragOrigin.current=panelState.current;dragStart.current=progressValue.current;animation.current?.stop();Keyboard.dismiss();},
-  onPanResponderMove:(_,g)=>progress.setValue(Math.max(0,Math.min(1,dragStart.current-g.dx/Math.max(1,width-PANEL_EDGE*2)))),
+  onPanResponderMove:(_,g)=>progress.setValue(Math.max(0,Math.min(1,dragStart.current-g.dx/Math.max(1,width)))),
   onPanResponderRelease:(_,g)=>settlePanel(Math.abs(g.dx)>=48?g.dx<0:dragOrigin.current),
   onPanResponderTerminate:()=>settlePanel(dragOrigin.current),
   onPanResponderTerminationRequest:()=>true,
@@ -107,24 +107,26 @@ export default function MarketScreen() {
  function openGroup(members:MapShop[]){if(!mapReady)return;const ids=[...new Set(members.map(shop=>shop.id))].sort((a,b)=>a-b);if(!currentGroupMembers(currentMapIndex,shops,ids,camera.current.zoom+(Platform.OS==='web'?0:1)).length)return;if(Platform.OS==='web')groupTrigger.current=document.activeElement as HTMLElement|null;setSelected(null);setNearbyIds(ids);setPickerPosition({page:0,anchor:null});saveReturn(ids,{page:0,anchor:null});}
  function closeGroup(){const ids=nearbyIds.join(',');setSelected(null);setNearbyIds([]);setPickerPosition({page:0,anchor:null});saveReturn([],{page:0,anchor:null});if(Platform.OS==='web')requestAnimationFrame(()=>requestAnimationFrame(()=>{const trigger=groupTrigger.current;if(trigger?.isConnected)trigger.focus?.();else document.querySelector<HTMLElement>(`[data-map-group-ids="${ids}"] [role="button"]`)?.focus();}));}
  function loadMore(){if(panel&&!products.moreError)products.loadMore();}
- const drawerWidth=width-PANEL_EDGE,items=blocked.ready?(products.batch?.items||[]).filter(i=>i.kind==='product'):[];
+ const drawerWidth=width,items=blocked.ready?(products.batch?.items||[]).filter(i=>i.kind==='product'):[];
+ const narrowShortMap=stageHeight<180&&width<600;
+ const mapDockBottom=panel?24:Math.max(24,attributionHeight+7);
  return <Screen scroll={false}>
   <Text accessibilityRole="header" style={m.programmaticTitle}>{t('AfricMade Market')}</Text>
   <View testID="market-introduction" style={m.intro}>
-   <Text accessibilityRole="header" style={m.introTitle}>{t(MARKET_STOREFRONT_COPY.title)}</Text>
-   <Text style={m.introDescription}>{t(MARKET_STOREFRONT_COPY.description)}</Text>
+   <Text accessibilityRole="header" style={m.introTitle}>{t(MARKET_COMPACT_COPY.title)}</Text>
   </View>
   <View testID="market-mode-row" style={m.modeRow}><View style={m.modeSwitch} accessibilityRole="tablist" accessibilityLabel={t('Search for')}>{[{key:'businesses',label:'Business locations',icon:'map'},{key:'products',label:'Product listings',icon:'package'}].map(mode=><Pressable key={mode.key} accessibilityRole="tab" accessibilityState={{selected:panel===(mode.key==='products')}} aria-selected={panel===(mode.key==='products')} onPress={()=>settlePanel(mode.key==='products')} style={[m.modeButton,panel===(mode.key==='products')&&m.activeMode]}>{width>360&&<Icon name={mode.icon} size={16}/>}<Text style={m.modeText}>{t(mode.label)}</Text></Pressable>)}</View></View>
-  <View style={m.activeControls}><MarketSearchControls scope={panel?'products':'businesses'} value={panel?productSearch:businessSearch} onChange={panel?setProductSearch:setBusinessSearch} metadata={(panel?productData:businessData)||null}/>{Boolean(panel?products.error:businesses.error)&&<Status error={panel?products.error:businesses.error} retry={panel?products.retry:businesses.retry}/>}</View>
+  <View style={m.activeControls}><MarketSearchControls active={focused} scope={panel?'products':'businesses'} value={panel?productSearch:businessSearch} onChange={panel?setProductSearch:setBusinessSearch} metadata={(panel?productData:businessData)||null}/>{Boolean(panel?products.error:businesses.error)&&<Status error={panel?products.error:businesses.error} retry={panel?products.retry:businesses.retry}/>}</View>
   <View testID="market-stage" style={m.stage} onLayout={e=>setStageHeight(e.nativeEvent.layout.height)}>
-   <Animated.View aria-hidden={panel} {...(Platform.OS==='web'?{inert:panel}:{})} accessibilityElementsHidden={panel} importantForAccessibility={panel?'no-hide-descendants':'auto'} style={[m.mapPanel,{pointerEvents:panel?'none':'auto',width:drawerWidth,zIndex:panel?1:8,transform:[{translateX:progress.interpolate({inputRange:[0,1],outputRange:[0,-(width-PANEL_EDGE*2)]})}]}]}>
+   <Animated.View testID="market-map-panel" aria-hidden={panel} {...(Platform.OS==='web'?{inert:panel}:{})} accessibilityElementsHidden={panel} importantForAccessibility={panel?'no-hide-descendants':'auto'} style={[m.mapPanel,{pointerEvents:panel?'none':'auto',width:drawerWidth,zIndex:panel?1:8,transform:[{translateX:progress.interpolate({inputRange:[0,1],outputRange:[0,-width]})}]}]}>
     <MarketMap ref={map} height={Math.max(100,stageHeight)} shops={shops} groupCapacity={groupCapacity} onSelect={chooseBusiness} groups={blocked.ready?businessData?.nearbyGroups:[]} selectedId={selectedShop?.id} onGroup={openGroup} onZoomChange={setMapZoom} initialView={camera.current} onViewChange={rememberView}/>
     {!panel&&businesses.loading&&<View testID="map-updating" style={[m.updating,stageHeight<180&&{left:'auto',right:12}]}><Status refreshing/></View>}
     <View testID="map-tools" style={[m.mapTools,stageHeight<380&&{flexDirection:'row'},stageHeight<180&&{left:12,right:'auto',top:8}]}><IconButton touchSize={48} label={t('Zoom in')} icon="plus" disabled={mapZoom>=(Platform.OS==='web'?MAP_MAX_ZOOM:MAP_NATIVE_MAX_ZOOM)} onPress={()=>map.current?.zoom(1)}/><IconButton touchSize={48} label={t('Zoom out')} icon="minus" disabled={mapZoom<=1} onPress={()=>map.current?.zoom(-1)}/><IconButton touchSize={48} label={t('Reset map')} icon="target" onPress={()=>map.current?.reset()}/></View>
     {!businesses.loading&&!businesses.error&&shops.length===0&&<View accessibilityRole="summary" style={m.mapHint}><Text style={m.small}>{t('No businesses with public map locations match these filters.')}</Text><Pressable accessibilityRole="button" onPress={()=>settlePanel(true)} style={m.mapHintAction}><Text style={m.mapHintActionText}>{t('Browse product listings')}</Text></Pressable></View>}
-    {(businessData?.total||0)>shops.length&&<View style={m.mapLimit}><Text style={m.small}>{t('Showing {count} businesses. Search or filter to see more.',{count:shops.length})}</Text></View>}
+    {(businessData?.total||0)>shops.length&&<View style={[m.mapLimit,{bottom:dockHeight+mapDockBottom+12}]}><Text style={m.small}>{t('Showing {count} businesses. Search or filter to see more.',{count:shops.length})}</Text></View>}
+    <Pressable testID="market-map-attribution" accessibilityRole="link" onLayout={event=>setAttributionHeight(Math.max(19,Math.ceil(event.nativeEvent.layout.height)))} onPress={()=>void openLink('https://www.openstreetmap.org/copyright')} hitSlop={{top:2,bottom:2,left:3,right:3}} style={[m.attribution,{maxWidth:narrowShortMap?Math.max(100,width-190):Math.min(240,width-10)},narrowShortMap&&{left:'auto',right:5}]}><Text style={m.attributionText}>© OpenStreetMap contributors</Text></Pressable>
    </Animated.View>
-   <Animated.View testID="search-drawer" aria-hidden={!panel} {...(Platform.OS==='web'?{inert:!panel}:{})} accessibilityElementsHidden={!panel} importantForAccessibility={panel?'auto':'no-hide-descendants'} style={[m.drawer,{pointerEvents:panel?'auto':'none',zIndex:panel?8:1,width:drawerWidth,transform:[{translateX:progress.interpolate({inputRange:[0,1],outputRange:[width-PANEL_EDGE*2,0]})}]}]}>
+   <Animated.View testID="search-drawer" aria-hidden={!panel} {...(Platform.OS==='web'?{inert:!panel}:{})} accessibilityElementsHidden={!panel} importantForAccessibility={panel?'auto':'no-hide-descendants'} style={[m.drawer,{pointerEvents:panel?'auto':'none',zIndex:panel?8:1,width:drawerWidth,transform:[{translateX:progress.interpolate({inputRange:[0,1],outputRange:[width,0]})}]}]}>
     <FlatList ref={results} testID="product-feed" data={items} keyExtractor={item=>String(item.id)} keyboardShouldPersistTaps="handled" contentContainerStyle={{padding:12,gap:12,paddingBottom:dockHeight+36}} initialNumToRender={6} windowSize={5} maxToRenderPerBatch={6} onEndReached={loadMore} onEndReachedThreshold={0.3}
      ListHeaderComponent={<View style={{minHeight:24,flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:8}}><Text accessibilityRole="header" style={{fontSize:16,fontWeight:'700',color:colors.ink}}>{t('Products')}</Text>{panel&&products.updating&&<Status refreshing/>}</View>}
      ListEmptyComponent={products.initialLoading?<ResourceSkeleton variant="search"/>:!products.loading&&!products.error?<View style={{paddingVertical:24,gap:10}}><Copy big>{t('No matches found')}</Copy><Copy muted>{t('Try another product, category or city.')}</Copy></View>:null}
@@ -133,29 +135,29 @@ export default function MarketScreen() {
    </Animated.View>
    {/* Pressable owns its responder handlers; the wrapper takes over handle drags. */}
    <Animated.View {...handleGesture.panHandlers} style={[m.panelPeek,{transform:[{translateX:progress.interpolate({inputRange:[0,1],outputRange:[width-80,0]})}]}]}><Pressable accessibilityRole="button" accessibilityLabel={t(panel?'Map only':'View products')} onPressIn={()=>{dragged.current=false;}} onPress={()=>{if(!dragged.current)settlePanel(!panel);dragged.current=false;}} style={m.handleButton}><View style={m.grip}/><Icon name={panel?'arrow':'back'} size={18}/></Pressable></Animated.View>
-   <View testID="market-public-actions" onLayout={event=>setDockHeight(Math.max(48,Math.ceil(event.nativeEvent.layout.height)))} style={[m.buying,stageHeight<180?width>=600?{right:80,bottom:8}:panel?{right:12,bottom:8}:{left:12,bottom:8}:stageHeight<320?{left:Math.max(16,(width-Math.min(244,width-24))/2),bottom:24}:{right:panel?7:12,bottom:24}]}><PublicActionDock placement="market" horizontal={stageHeight>=180&&stageHeight<320} compact={panel||stageHeight<320}/></View>
+   <View testID="market-public-actions" onLayout={event=>setDockHeight(Math.max(48,Math.ceil(event.nativeEvent.layout.height)))} style={[m.buying,stageHeight<180?width>=600?{right:80,bottom:8}:panel?{right:12,bottom:8}:{left:12,bottom:8}:stageHeight<320?{left:Math.max(16,(width-Math.min(244,width-24))/2),bottom:mapDockBottom}:{right:12,bottom:mapDockBottom}]}><PublicActionDock placement="market" horizontal={stageHeight>=180&&stageHeight<320} compact={panel||stageHeight<320}/></View>
   </View>
-  <Pressable accessibilityRole="link" onPress={()=>void openLink('https://www.openstreetmap.org/copyright')} style={{backgroundColor:'white',padding:5}}><Text style={{textAlign:'right',fontSize:11,color:colors.ink}}>© OpenStreetMap contributors</Text></Pressable>
   {nearby.length>0&&<MapGroupPicker visible={focused&&mapReady&&!selectedShop} shops={nearby} initialPage={pickerPosition.page} initialAnchor={pickerPosition.anchor} onPositionChange={rememberPosition} onClose={closeGroup} onSelect={shop=>{if(mapReady){rememberPosition({...pickerPosition,anchor:shop.id});setSelected(shop);}}}/>}
   <Sheet visible={focused&&Boolean(selectedShop)} title={t('Business')} onClose={()=>nearbyIds.length?closeGroup():setSelected(null)}>{selectedShop&&<>{nearby.length>0&&<Button secondary label={t('Back to businesses')} onPress={()=>setSelected(null)}/>}<Photo refPath={selectedShop.heroImagePath} height={180}/><Copy big>{selectedShop.name}</Copy>{Boolean(selectedLocation)&&<Copy muted>{selectedLocation}</Copy>}<Copy>{selectedShop.description}</Copy><Button label={t('Explore this business')} onPress={()=>{const handle=selectedShop.handle;saveReturn();setSelected(null);router.push({pathname:'/shop/[handle]',params:{handle}});}}/></>}</Sheet>
  </Screen>;
 }
 const m=StyleSheet.create({
  programmaticTitle:{position:'absolute',width:1,height:1,overflow:'hidden',color:'transparent'},
- intro:{paddingHorizontal:10,paddingTop:6,paddingBottom:7,gap:3,backgroundColor:'white'},
- introTitle:{fontSize:18,lineHeight:22,fontWeight:'800',color:colors.ink},
- introDescription:{fontSize:12.5,lineHeight:17,color:colors.muted},
+ intro:{paddingHorizontal:10,paddingTop:4,paddingBottom:5,backgroundColor:'white'},
+ introTitle:{fontSize:16,lineHeight:21,fontWeight:'800',color:colors.ink},
  modeRow:{flexDirection:'row',alignItems:'center',justifyContent:'center',paddingHorizontal:0,backgroundColor:'white'},
  modeSwitch:{width:'100%',flexDirection:'row',gap:2,backgroundColor:'#f5f7f6',borderTopWidth:1,borderBottomWidth:1,borderColor:colors.line},
  modeButton:{flex:1,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:5,minWidth:44,minHeight:44,paddingHorizontal:6},activeMode:{backgroundColor:colors.soft,borderBottomWidth:3,borderBottomColor:colors.brand},modeText:{fontSize:12,fontWeight:'700',color:colors.ink,flexShrink:1,textAlign:'center'},
  updating:{pointerEvents:'none',position:'absolute',top:12,left:12,backgroundColor:'white',padding:6,borderRadius:5},
- activeControls:{paddingHorizontal:10,paddingBottom:6,gap:4,backgroundColor:'white',borderBottomWidth:1,borderColor:colors.line},
- mapPanel:{position:'absolute',left:0,top:0,bottom:0,overflow:'hidden',borderRightWidth:1,borderColor:colors.line,borderTopRightRadius:14,backgroundColor:'#dfe9e8'},
+ activeControls:{paddingHorizontal:8,paddingTop:4,paddingBottom:4,gap:4,backgroundColor:'white',borderBottomWidth:1,borderColor:colors.line},
+ mapPanel:{position:'absolute',left:0,top:0,bottom:0,overflow:'hidden',backgroundColor:'#dfe9e8'},
  mapTools:{position:'absolute',right:12,top:12,gap:7},mapHint:{position:'absolute',top:12,left:12,right:70,backgroundColor:'#fffffff5',padding:10,borderRadius:10,borderWidth:1,borderColor:colors.line,gap:7},mapHintAction:{alignSelf:'flex-start',minHeight:44,justifyContent:'center',paddingHorizontal:12,borderRadius:8,backgroundColor:colors.brand},mapHintActionText:{color:'white',fontWeight:'700',fontSize:12},mapLimit:{position:'absolute',left:12,bottom:100,right:65,padding:8,borderRadius:8,backgroundColor:'white'},
- drawer:{position:'absolute',left:PANEL_EDGE,top:0,bottom:0,backgroundColor:'white',borderLeftWidth:1,borderColor:colors.line,boxShadow:'-4px 0 14px #0002'},
+ drawer:{position:'absolute',left:0,top:0,bottom:0,backgroundColor:'white',borderLeftWidth:1,borderColor:colors.line,boxShadow:'-4px 0 14px #0002'},
  panelPeek:{position:'absolute',zIndex:11,left:PANEL_EDGE,top:'50%',marginTop:-24,height:48,width:48,backgroundColor:'#fffaf6',borderWidth:1,borderColor:colors.line,borderRadius:14,boxShadow:'0 3px 12px #20353726'},handleButton:{minWidth:48,minHeight:48,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:6},
  grip:{width:3,height:18,borderRadius:2,backgroundColor:'#d5a48b'},
  buying:{position:'absolute',zIndex:14},
+ attribution:{position:'absolute',zIndex:12,left:5,bottom:0,paddingHorizontal:4,paddingVertical:1,borderRadius:3,backgroundColor:'#fffffff0'},
+ attributionText:{fontSize:11,lineHeight:15,color:colors.ink},
   stage: {
     flex: 1,
     minHeight: 0,

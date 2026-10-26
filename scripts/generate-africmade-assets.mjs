@@ -14,7 +14,7 @@ const WORDMARK={left:172,top:240,width:1608,height:312};
 const WORDMARK_OUTPUT={width:1094,height:212};
 const SYMBOL={left:174,top:240,width:312,height:312};
 const TRANSPARENT={r:0,g:0,b:0,alpha:0};
-const CHARCOAL={r:32,g:36,b:40,alpha:255};
+const WHITE={r:255,g:255,b:255,alpha:255};
 
 function rgba(buffer,width,height){return sharp(buffer,{raw:{width,height,channels:4}});}
 
@@ -74,7 +74,9 @@ export async function africmadeDerivatives(root=process.cwd()){
  const badgePixels=await sharp(mark).resize(96,96).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  for(let i=0;i<badgePixels.data.length;i+=4){if(badgePixels.data[i+3]>0)badgePixels.data.fill(255,i,i+3);}
  const badge=await rgba(badgePixels.data,96,96).png().toBuffer();
- const monochromePixels=await sharp(mark).resize(512,512).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ // The 108dp adaptive layer must retain all ink inside its 66dp safe circle.
+ const adaptive=await squareIcon(mark,512,.48,TRANSPARENT);
+ const monochromePixels=await sharp(adaptive).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  for(let i=0;i<monochromePixels.data.length;i+=4){if(monochromePixels.data[i+3]>0)monochromePixels.data.fill(255,i,i+3);}
  const monochrome=await rgba(monochromePixels.data,512,512).png().toBuffer();
  const output=new Map([
@@ -84,16 +86,18 @@ export async function africmadeDerivatives(root=process.cwd()){
   ['public/brand/africmade-wordmark-email-white-v3.png',emailWordmark],
   ['public/pwa/africmade-favicon-v3-32.png',await squareIcon(mark,32,.98,TRANSPARENT)],
   ['public/pwa/africmade-favicon-v3-512.png',await squareIcon(mark,512,.98,TRANSPARENT)],
-  ['public/pwa/africmade-apple-touch-v3-180.png',await squareIcon(mark,180,.9,CHARCOAL)],
-  ['public/pwa/africmade-icon-v3-192.png',await squareIcon(mark,192,.9,CHARCOAL)],
-  ['public/pwa/africmade-icon-v3-512.png',await squareIcon(mark,512,.9,CHARCOAL)],
-  ['public/pwa/africmade-maskable-v3-512.png',await squareIcon(mark,512,.64,CHARCOAL)],
+  ['public/pwa/africmade-apple-touch-v4-180.png',await squareIcon(mark,180,.72,WHITE)],
+  ['public/pwa/africmade-icon-v4-192.png',await squareIcon(mark,192,.72,WHITE)],
+  ['public/pwa/africmade-icon-v4-512.png',await squareIcon(mark,512,.72,WHITE)],
+  // Web maskable icons have their own 80%-diameter safe circle.
+  ['public/pwa/africmade-maskable-v4-512.png',await squareIcon(mark,512,.64,WHITE)],
   ['public/pwa/africmade-badge-96.png',badge],
-  ['apps/mobile/assets/icon.png',await squareIcon(mark,1024,.9,CHARCOAL)],
-  ['apps/mobile/assets/africmade-adaptive-foreground.png',await squareIcon(mark,512,.64,TRANSPARENT)],
+  ['apps/mobile/assets/icon.png',await squareIcon(mark,1024,.72,WHITE)],
+  ['apps/mobile/assets/africmade-adaptive-foreground.png',adaptive],
   ['apps/mobile/assets/africmade-mark.png',await sharp(mark).resize(512,512).png().toBuffer()],
   ['apps/mobile/assets/africmade-wordmark.png',wordmark],
   ['apps/mobile/assets/africmade-splash-wordmark.png',reverse],
+  ['apps/mobile/assets/africmade-splash-icon.png',adaptive],
   ['apps/mobile/assets/africmade-notification.png',badge],
   ['apps/mobile/assets/africmade-monochrome.png',monochrome],
  ]);
@@ -105,6 +109,10 @@ export async function africmadeDerivatives(root=process.cwd()){
  // Saved shortcuts, installed PWAs and old email/asset URLs may still request
  // these paths. Keep their URLs valid, but never serve the former platform art.
  const aliases=[
+  ['public/pwa/africmade-apple-touch-v3-180.png','public/pwa/africmade-apple-touch-v4-180.png'],
+  ['public/pwa/africmade-icon-v3-192.png','public/pwa/africmade-icon-v4-192.png'],
+  ['public/pwa/africmade-icon-v3-512.png','public/pwa/africmade-icon-v4-512.png'],
+  ['public/pwa/africmade-maskable-v3-512.png','public/pwa/africmade-maskable-v4-512.png'],
   ['public/brand/africmade-maker-mark-v2.png','public/brand/africmade-showroom-mark-v3.png'],
   ['public/brand/africmade-wordmark-v2.png','public/brand/africmade-wordmark-v3.png'],
   ['public/brand/africmade-wordmark-reverse-v2.png','public/brand/africmade-wordmark-reverse-v3.png'],

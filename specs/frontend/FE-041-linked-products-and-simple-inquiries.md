@@ -2,7 +2,7 @@
 id: FE-041
 title: Linked product pages and simple single or grouped inquiries
 status: in_progress
-related: [FE-074, FE-066, FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, BE-014, DEP-030, DEP-051, FE-042, FE-049, FE-053, BE-044, FE-075, FE-070]
+related: [FE-074, FE-066, FE-050, FE-047, FE-044, FE-001, FE-016, FE-030, FE-036, FE-040, BE-001, BE-014, DEP-030, DEP-051, FE-042, FE-049, FE-053, BE-044, FE-075, FE-070, FE-054]
 owners: [product, frontend, security]
 last_updated: 2026-10-23
 change_level: L2

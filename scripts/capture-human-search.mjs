@@ -11,6 +11,12 @@ const browser=await chromium.launch();const evidence=[],tiles=[];
 const market=page=>page.getByRole('main').getByRole('region',{name:'AfricMade Market',exact:true});
 const results=page=>market(page).getByRole('region',{name:'Products',exact:true});
 const visibleIds=page=>results(page).locator('.discovery-product-link').evaluateAll(links=>links.map(link=>Number(new URL(link.href).searchParams.get('product'))));
+async function expectCategoryCount(page,count){
+ const compact=page.getByRole('button',{name:/^Filters, \d+ selected$/});
+ if(await compact.isVisible())await compact.click();
+ await expect(page.getByRole('button',{name:count?`Category ${count}`:'Category',exact:true})).toBeVisible();
+ const dialog=page.getByRole('dialog');if(await dialog.isVisible())await dialog.getByRole('button',{name:'Done',exact:true}).click();
+}
 async function search(context,query,category='beauty-wellness'){
  const params=new URLSearchParams({scope:'products',q:query});if(category)params.set('category',category);
  const response=await context.request.get(`${base}/api/discovery?${params}`);assert.equal(response.status(),200,'Real search API succeeds');
@@ -36,7 +42,7 @@ try {
    await expect(page).toHaveURL(url=>url.searchParams.get('p.q')===query,{timeout:15000});
    await expect.poll(()=>visibleIds(page),{timeout:15000}).toEqual(current.map(item=>item.id));
    assert.deepEqual(new URL(page.url()).searchParams.getAll('p.category'),['beauty-wellness']);
-   await expect(page.getByRole('button',{name:'Category 1',exact:true})).toBeVisible();
+   await expectCategoryCount(page,1);
   }
   let releaseDelayed,held=0;
   const delayed=new Promise(resolve=>{releaseDelayed=resolve;});
@@ -67,18 +73,18 @@ try {
   await expect(page.getByRole('heading',{name:'Products',exact:true,level:2})).toBeVisible();
   await page.getByRole('button',{name:'Business locations',exact:true}).click();
   await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('');
-  await expect(page.getByRole('button',{name:'Category',exact:true})).toBeVisible();
+  await expectCategoryCount(page,0);
   await expect(market(page).locator('.leaflet-container')).toBeVisible();
   await expect.poll(()=>tileFixture.servedCount()).toBeGreaterThan(0);
   await page.getByRole('button',{name:'Product listings',exact:true}).click();
   await expect(input).toHaveValue('lotion');
-  await expect(page.getByRole('button',{name:'Category 1',exact:true})).toBeVisible();
+  await expectCategoryCount(page,1);
   await page.screenshot({path:`${out}/lotion-${width}.png`,fullPage:true,caret:'initial'});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'No horizontal overflow');
   await targetCard.locator('.discovery-product-link').click();
   await expect(page.locator('[data-product-page]')).toBeVisible();
   await page.goBack();await page.waitForLoadState('domcontentloaded');await expect(input).toHaveValue('lotion');
-  await expect(page.getByRole('button',{name:'Category 1',exact:true})).toBeVisible();
+  await expectCategoryCount(page,1);
   assert.equal((await search(context,'%')).length,0,'Literal punctuation cannot broaden the SQL search');
   await input.fill('%');await input.press('Enter');
   await expect(page).toHaveURL(url=>url.searchParams.get('p.q')==='%');

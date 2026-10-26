@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useLayoutEffect, useState, type C
 import { createPortal } from "react-dom";
 import { ClipboardList } from "lucide-react";
 import { useUiText } from "@/lib/i18n/ui";
+import { storefrontAccentVariables } from "@/lib/storefront-accent";
 import styles from "./PublicActionDock.module.css";
 
 type DockHost = {
@@ -41,11 +42,12 @@ export function PublicActionDockProvider({ children, enabled, transport }: {
   </DockContext.Provider>;
 }
 
-export function InquiryFloatingAction({ count, handle, onOpen, dialogOpen = false }: {
+export function InquiryFloatingAction({ count, handle, onOpen, dialogOpen = false, accentColor }: {
   count: number;
   handle: string;
   onOpen: () => void;
   dialogOpen?: boolean;
+  accentColor?: string;
 }) {
   const t = useUiText();
   const host = useContext(DockContext);
@@ -56,6 +58,7 @@ export function InquiryFloatingAction({ count, handle, onOpen, dialogOpen = fals
   }, [dialogOpen, setInquiryOpen]);
   if (count <= 0) return null;
   const action = <button type="button" className={styles.inquiry} data-inquiry-floating
+    style={storefrontAccentVariables(accentColor) as CSSProperties}
     aria-label={t("View inquiry list, {value1} {value2}", { value1: count, value2: t(count === 1 ? "item" : "items") })}
     aria-haspopup="dialog" aria-expanded={dialogOpen} onClick={onOpen}>
     <ClipboardList size={20} aria-hidden="true" />

@@ -10,14 +10,14 @@ export type FeaturedProgramPolicy = {
 };
 
 export const DEFAULT_FEATURED_PROGRAM_POLICY: FeaturedProgramPolicy = Object.freeze({
-  startMinute: 20 * 60 + 30,
-  endMinute: 24 * 60,
-  presentationMinutes: 30,
-  changeoverMinutes: 5,
-  sponsorMentionCount: 4,
-  sponsorMentionMinutes: 5,
+  startMinute: 20 * 60 + 15,
+  endMinute: 21 * 60 + 45,
+  presentationMinutes: 20,
+  changeoverMinutes: 3,
+  sponsorMentionCount: 2,
+  sponsorMentionMinutes: 2,
 });
-export const MAX_FEATURED_SHOWROOMS = 6;
+export const MAX_FEATURED_SHOWROOMS = 4;
 export type FeaturedBroadcastPhase = "scheduled" | "live" | "ended";
 export type FeaturedProgramSession = "evening";
 export type FeaturedBoothWalkthrough = {
@@ -49,7 +49,7 @@ export function featuredProgramTimeLabel(startMinute: number, endMinute: number)
 }
 
 // A category recurs weekly. Rotating its alphabetical pool avoids a permanent
-// first-six shortlist while keeping the same lineup throughout a given date.
+// fixed shortlist while keeping the same lineup throughout a given date.
 export function automaticFeaturedLineup<T>(dateIso: string, eligible: readonly T[]): T[] {
   validateFeaturedProgramDate(dateIso);
   if (!eligible.length) return [];

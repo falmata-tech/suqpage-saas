@@ -2,13 +2,87 @@
 id: FE-065
 title: Independent business-map and product-card discovery
 status: in_progress
-related: [FE-074, FE-026, BE-054, DEP-045, FE-030, FE-042, FE-049, FE-053, FE-059, BE-047, ADR-0027, FE-067, BE-044, FE-021, FE-052]
+related: [FE-074, FE-026, BE-054, DEP-045, FE-030, FE-042, FE-049, FE-053, FE-059, BE-047, ADR-0027, FE-067, BE-044, FE-021, FE-052, FE-070]
 owners: [product, frontend]
-last_updated: 2026-10-25
+last_updated: 2026-10-26
 change_level: L2
 ---
 
 # FE-065 — Independent business and product discovery
+
+## S181 — map-first discovery and visitor workflow review (ready)
+
+L1 interface/interaction refinement on desktop web, phone web and Expo/native.
+The map is the primary home task. This section supersedes S128/S109's requirement
+to expose every filter button on compact screens; wide layouts retain direct
+filters. API membership, search semantics, publication, contacts and chat routing
+are unchanged. FE-021 S181 owns earlier, safe group activation; FE-053 and FE-049
+retain native accessibility and meaning-led localization requirements. Affected
+master sections are §§5, 10, 18 and 19.
+
+1. GIVEN phone web or the native Market WHEN the page opens THEN show the short
+   heading **Find African suppliers.**, with natural Amharic/Afaan Oromo wording,
+   rather than the full marketing paragraph. Keep the programmatic heading and
+   the full product explanation on desktop web/About. Do not translate merchant
+   data or change the platform's African-made, bulk-and-small-order audience.
+2. GIVEN a compact viewport WHEN no filter dialog is open THEN search and a
+   labelled **Filters** action share one row, with at least 44px targets and a
+   visible active-filter count. Keep search clearing distinct from **Clear all**.
+   Phone web inputs use at least 16px text.
+3. GIVEN Filters WHEN opened THEN use one existing dialog/sheet with an overview
+   and existing Category/Country/City option views, plus Made to order only for
+   products. Back returns to the overview; Done, Close, Escape and supported
+   dismissal restore the trigger. No nested modal or hidden-only icon is required.
+   Selections apply with the existing semantics; Country still precedes City,
+   changing countries clears incompatible cities, and Clear all clears only the
+   active scope. Search readiness, loading/error feedback and multi-select counts
+   remain truthful. Wide layouts retain their direct filter access.
+4. GIVEN ordinary text at 390×844 or 320×568 WHEN Market is settled THEN the
+   visible map occupies at least 60% or 50% respectively of that viewport.
+   Remove avoidable outer gutters and reserved marketing/footer height rather
+   than shrinking touch targets or meaningful labels. The map fills its available
+   phone width; counterpart handles may float over it without a blank side strip.
+   At enlarged text or longer translations, readable wrapping and reachable
+   controls take priority over these ordinary-font ratios. When those controls
+   leave too little usable height on a short screen, allow the workspace to
+   scroll to a usable map rather than compressing its canvas behind fixed
+   navigation or the transport action. Preserve visible headings, language
+   selection, at least 44px targets and the existing map-camera return behavior.
+5. GIVEN the map WHEN attribution and transport controls render THEN the full
+   OpenStreetMap contributors link floats inside its lower edge, remains legible
+   and clickable, and clears the transport action, navigation and safe areas.
+   Do not allocate a separate native white attribution footer or hide attribution.
+   The compact legal link need not become another full-width 44px toolbar.
+6. GIVEN independent business/product criteria, a group or a business preview
+   WHEN switching panels, opening a Page/product, returning, changing language,
+   clearing filters or recovering an empty/error result THEN retain the existing
+   scoped query, camera, exclusion and stale-response fences. Product filters
+   never silently change business-map criteria. Hidden panel controls stay inert.
+7. GIVEN public Market navigation on desktop web, phone web or Expo/native WHEN
+   its icon is shown THEN use the same recognizable storefront symbol with the
+   existing localized Market label. Market includes both Business locations and
+   Product listings; only the Business locations view retains its map symbol.
+   Preserve navigation destinations, selected state and accessible names.
+
+FE-021 S181's short/enlarged two-business picker fallback is the sole exception
+to all-fit group cards: keep one bounded scroll body, current membership and a
+reachable close route, and reveal the selected card before restoring its focus.
+It does not turn a city aggregate into an unbounded scrolling catalogue.
+
+Definition of Ready: scope, compact filter tradeoff, thresholds, localization,
+accessibility, failure/return behavior and unchanged data/security boundaries are
+explicit. Verify actual 1440px desktop, 390px/320px phone web and localhost:8082
+Expo with synthetic map tiles and the intended local API/source. Exercise search,
+country/city/category, active counts, clear/back, map groups, Page/product return
+and transport intake/recovery; use disposable local fixtures and authoritative
+readback for actual writes. Apply FE-076/BE-063 before any transport-copy or
+routing edit. Record the agent's source-bound visual decision before full gates.
+No native artifact, hosted data/configuration or deployment is admitted by preview.
+
+Tests: `test-web-market-short-layout.ts`, `test-market-workspace-ui.ts`,
+`test-mobile-market-layout.ts`, existing map/group/lifecycle and transport
+launcher regressions, localization checks and actual Chrome/API journeys. Record
+unexercised physical Android, keyboard, provider and language-review limits.
 
 ## S180 — first editable search after restoration (locally verified; delivery pending)
 

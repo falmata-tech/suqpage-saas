@@ -4,6 +4,11 @@ export const MARKET_STOREFRONT_COPY = {
   description: "Learn about their story, product lineup, and their production capacity for bulk purchase or small orders, without getting lost searching through their social media posts.",
 } as const;
 
+/** Keep discovery prominent on phones; the full introduction remains on web/About. */
+export const MARKET_COMPACT_COPY = {
+  title: "Find African suppliers.",
+} as const;
+
 export const ABOUT_STOREFRONT_SECTIONS = [
   {
     id: "customers", label: "For buyers", title: "See the business before you ask to buy.",

@@ -82,7 +82,7 @@ export default async function DashboardShell({ user, business, children, support
       {href:'/dashboard/account',label:'Account settings',icon:'account'},
     ]),
     group('Explore',[
-      {href:'/',label:'Market',icon:'discovery'},
+      {href:'/',label:'Market',icon:'workspace'},
       {href:'/featured',label:'Featured',icon:'schedule'},
       {href:'/about',label:'About',icon:'library'},
     ]),

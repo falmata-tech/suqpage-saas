@@ -18,7 +18,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/africmade-adaptive-foreground.png",
         "monochromeImage": "./assets/africmade-monochrome.png",
-        "backgroundColor": "#202428"
+        "backgroundColor": "#ffffff"
       }
     },
     "web": {
@@ -31,9 +31,10 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/africmade-splash-wordmark.png",
-          "imageWidth": 280,
-          "backgroundColor": "#202428"
+          "image": "./assets/africmade-splash-icon.png",
+          "imageWidth": 288,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
         }
       ],
       "expo-router",

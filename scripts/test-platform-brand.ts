@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import {createRequire} from 'node:module';
 import {test} from 'node:test';
 import sharp from 'sharp';
@@ -14,6 +16,64 @@ const {africmadeDerivatives,generateAfricMadeAssets}=require('./generate-africma
 };
 
 async function pixels(file:string){return sharp(file).ensureAlpha().raw().toBuffer({resolveWithObject:true});}
+
+async function assertInkWithinCircle(file:string,radiusRatio:number,transparent:boolean){
+ const {data,info}=await pixels(file),center=(info.width-1)/2,radius=info.width*radiusRatio;
+ assert.equal(info.width,info.height,`${file}: square platform canvas`);
+ let ink=0,outside=0;
+ for(let y=0;y<info.height;y++)for(let x=0;x<info.width;x++){
+  const offset=(y*info.width+x)*4;
+  // Opaque app/touch fields are white; measure the orange symbol, not its field.
+  if(data[offset+3]<128||(!transparent&&!(data[offset]>180&&data[offset+1]<180&&data[offset+2]<100)))continue;
+  ink++;if(Math.hypot(x-center,y-center)>radius)outside++;
+ }
+ assert.ok(ink>info.width*info.height*.02,`${file}: recognizable nonempty mark`);
+ assert.equal(outside,0,`${file}: significant mark pixels must remain inside the platform mask circle`);
+}
+
+test('FE-070 S183 full launcher/adaptive/themed marks fit their actual mask circles',async()=>{
+ for(const file of ['apps/mobile/assets/africmade-adaptive-foreground.png','apps/mobile/assets/africmade-monochrome.png'])await assertInkWithinCircle(file,33/108,true);
+ for(const file of ['apps/mobile/assets/icon.png','public'+PLATFORM_BRAND.assets.apple,'public'+PLATFORM_BRAND.assets.icon192,'public'+PLATFORM_BRAND.assets.icon512]){
+  await assertInkWithinCircle(file,.48,false);
+  const {data}=await pixels(file);assert.deepEqual([...data.subarray(0,4)],[255,255,255,255],`${file}: white field`);
+ }
+ await assertInkWithinCircle('public'+PLATFORM_BRAND.assets.maskable512,.4,false);
+ const foreground=await pixels('apps/mobile/assets/africmade-adaptive-foreground.png'),themed=await pixels('apps/mobile/assets/africmade-monochrome.png');
+ for(let i=3;i<foreground.data.length;i+=4)assert.equal(themed.data[i],foreground.data[i],'Adaptive and themed masks share placement and alpha');
+});
+
+test('FE-070 S183 installed Expo plugin keeps every splash density inside the system mask',async t=>{
+ let packageFile:string;
+ try{packageFile=require.resolve('expo-splash-screen/package.json');}catch(error){
+  if((error as NodeJS.ErrnoException).code==='MODULE_NOT_FOUND'){t.skip('Expo splash plugin omitted by the web-only install; permanent asset/mask tests still run.');return;}throw error;
+ }
+ const {setSplashImageDrawablesAsync}=require(path.join(path.dirname(packageFile),'plugin/build/withAndroidSplashImages.js')) as {setSplashImageDrawablesAsync:(config:Record<string,unknown>,projectRoot:string)=>Promise<void>};
+ const mobile=JSON.parse(fs.readFileSync('apps/mobile/app.json','utf8')).expo;
+ const options=mobile.plugins.find((entry:unknown)=>Array.isArray(entry)&&entry[0]==='expo-splash-screen')[1];
+ const source=path.resolve('apps/mobile',options.image),directory=fs.mkdtempSync(path.join(os.tmpdir(),'africmade-splash-mask-'));
+ try{
+  const images=Object.fromEntries(['mdpi','hdpi','xhdpi','xxhdpi','xxxhdpi'].map(density=>[density,source]));
+  await setSplashImageDrawablesAsync({...images,imageWidth:options.imageWidth},directory);
+  for(const [density,multiplier]of Object.entries({mdpi:1,hdpi:1.5,xhdpi:2,xxhdpi:3,xxxhdpi:4})){
+   const file=path.join(directory,`android/app/src/main/res/drawable-${density}/splashscreen_logo.png`),meta=await sharp(file).metadata();
+   assert.equal(meta.width,288*multiplier);assert.equal(meta.height,288*multiplier);
+   await assertInkWithinCircle(file,96/288,true);
+  }
+  assert.equal(options.image,'./assets/africmade-splash-icon.png');assert.equal(options.imageWidth,288);assert.equal(options.resizeMode,'contain');assert.equal(options.backgroundColor,'#ffffff');
+ }finally{fs.rmSync(directory,{recursive:true,force:true});}
+});
+
+test('FE-070 S183 favicon, supplied mark, lettering and email bytes remain unchanged',()=>{
+ for(const [file,digest]of [
+  ['public/brand/africmade-showroom-mark-v3.png','fad6102e67707f8fa847d95c788a2cc71dbff52e092b7ca5dcf4447b04bcdbe2'],
+  ['public/pwa/africmade-favicon-v3-32.png','88e94ef7e96620e692dc5bec8d191fafe30a5f3119e0e5260007c593e2f5293a'],
+  ['public/favicon.png','90da68679845b49d93b01bc7e2bec04fb5d3da69146f6728a3a40a0670085524'],
+  ['public/favicon.ico','d840c8bef06a2bd82cc15c49586657501dd6062b19477da7fb6d84c1f102e7a9'],
+  ['public/brand/africmade-wordmark-v3.png','c686aa88afee3c747661b2c5b83aab0fcc8742230ed0d7552238b4fc297f9017'],
+  ['public/brand/africmade-wordmark-reverse-v3.png','e5ca139309dc24679b6e70f51ba179ea9b31f3ade6c98de3d0169c8923c69a5f'],
+  ['public/brand/africmade-wordmark-email-white-v3.png','6de02c62110cbcc762b6a37242f5beaf34f7fde23e40be5dbb2f32ce8b3ec716'],
+ ])assert.equal(createHash('sha256').update(fs.readFileSync(file)).digest('hex'),digest,file);
+});
 
 // A saved owner source is the only input. Reproducibility catches accidental
 // substitution of a prior mark, a changed hue or a platform-specific crop.
@@ -36,31 +96,35 @@ test('FE-070 supplied AfricMade artwork generates every canonical derivative',as
 
 test('FE-070 saved icon and wordmark URLs cannot serve a former platform mark',async()=>{
  const pairs:[string,string][]=[
+  ['public/pwa/africmade-apple-touch-v3-180.png','public/pwa/africmade-apple-touch-v4-180.png'],
+  ['public/pwa/africmade-icon-v3-192.png','public/pwa/africmade-icon-v4-192.png'],
+  ['public/pwa/africmade-icon-v3-512.png','public/pwa/africmade-icon-v4-512.png'],
+  ['public/pwa/africmade-maskable-v3-512.png','public/pwa/africmade-maskable-v4-512.png'],
   ['public/brand/africmade-maker-mark-v2.png','public/brand/africmade-showroom-mark-v3.png'],
   ['public/brand/africmade-wordmark-v2.png','public/brand/africmade-wordmark-v3.png'],
   ['public/brand/africmade-wordmark-reverse-v2.png','public/brand/africmade-wordmark-reverse-v3.png'],
   ['public/pwa/africmade-favicon-v2-32.png','public/pwa/africmade-favicon-v3-32.png'],
-  ['public/pwa/africmade-apple-touch-v2-180.png','public/pwa/africmade-apple-touch-v3-180.png'],
-  ['public/pwa/africmade-icon-v2-192.png','public/pwa/africmade-icon-v3-192.png'],
-  ['public/pwa/africmade-icon-v2-512.png','public/pwa/africmade-icon-v3-512.png'],
-  ['public/pwa/africmade-maskable-v2-512.png','public/pwa/africmade-maskable-v3-512.png'],
+  ['public/pwa/africmade-apple-touch-v2-180.png','public/pwa/africmade-apple-touch-v4-180.png'],
+  ['public/pwa/africmade-icon-v2-192.png','public/pwa/africmade-icon-v4-192.png'],
+  ['public/pwa/africmade-icon-v2-512.png','public/pwa/africmade-icon-v4-512.png'],
+  ['public/pwa/africmade-maskable-v2-512.png','public/pwa/africmade-maskable-v4-512.png'],
   ['public/brand/africmade-afro-mark-v1.png','public/brand/africmade-showroom-mark-v3.png'],
   ['public/brand/africmade-wordmark-v1.png','public/brand/africmade-wordmark-v3.png'],
   ['public/brand/africmade-wordmark-reverse-v1.png','public/brand/africmade-wordmark-reverse-v3.png'],
   ['public/brand/africmade-wordmark-email-white-v1.png','public/brand/africmade-wordmark-email-white-v3.png'],
   ['public/pwa/africmade-favicon-32.png','public/pwa/africmade-favicon-v3-32.png'],
-  ['public/pwa/africmade-apple-touch-icon-180.png','public/pwa/africmade-apple-touch-v3-180.png'],
-  ['public/pwa/africmade-icon-192.png','public/pwa/africmade-icon-v3-192.png'],
-  ['public/pwa/africmade-icon-512.png','public/pwa/africmade-icon-v3-512.png'],
-  ['public/pwa/africmade-maskable-512.png','public/pwa/africmade-maskable-v3-512.png'],
+  ['public/pwa/africmade-apple-touch-icon-180.png','public/pwa/africmade-apple-touch-v4-180.png'],
+  ['public/pwa/africmade-icon-192.png','public/pwa/africmade-icon-v4-192.png'],
+  ['public/pwa/africmade-icon-512.png','public/pwa/africmade-icon-v4-512.png'],
+  ['public/pwa/africmade-maskable-512.png','public/pwa/africmade-maskable-v4-512.png'],
   ['public/favicon.png','public/pwa/africmade-favicon-v3-512.png'],
-  ['public/apple-touch-icon.png','public/pwa/africmade-apple-touch-v3-180.png'],
-  ['public/pwa/icon-192.png','public/pwa/africmade-icon-v3-192.png'],
-  ['public/pwa/icon-512.png','public/pwa/africmade-icon-v3-512.png'],
-  ['public/pwa/icon-maskable-512.png','public/pwa/africmade-maskable-v3-512.png'],
+  ['public/apple-touch-icon.png','public/pwa/africmade-apple-touch-v4-180.png'],
+  ['public/pwa/icon-192.png','public/pwa/africmade-icon-v4-192.png'],
+  ['public/pwa/icon-512.png','public/pwa/africmade-icon-v4-512.png'],
+  ['public/pwa/icon-maskable-512.png','public/pwa/africmade-maskable-v4-512.png'],
   ['public/pwa/favicon-32.png','public/pwa/africmade-favicon-v3-32.png'],
-  ['public/pwa/apple-touch-icon.png','public/pwa/africmade-apple-touch-v3-180.png'],
-  ['public/uploads/seed/suqpage/icon.png','public/pwa/africmade-icon-v3-512.png'],
+  ['public/pwa/apple-touch-icon.png','public/pwa/africmade-apple-touch-v4-180.png'],
+  ['public/uploads/seed/suqpage/icon.png','public/pwa/africmade-icon-v4-512.png'],
   ['public/uploads/seed/suqpage/logo.png','public/brand/africmade-wordmark-email-white-v3.png'],
   ['apps/mobile/assets/mirtpage-mark.png','apps/mobile/assets/africmade-mark.png'],
   ['apps/mobile/assets/mirtpage-wordmark.png','apps/mobile/assets/africmade-wordmark.png'],
@@ -69,10 +133,10 @@ test('FE-070 saved icon and wordmark URLs cannot serve a former platform mark',a
  for(const prefix of ['suqpage','mirtpage-panels']){
   for(const [suffix,current] of [
    ['favicon-32.png','africmade-favicon-v3-32.png'],
-   ['apple-touch-icon.png','africmade-apple-touch-v3-180.png'],
-   ['icon-192.png','africmade-icon-v3-192.png'],
-   ['icon-512.png','africmade-icon-v3-512.png'],
-   ['icon-maskable-512.png','africmade-maskable-v3-512.png'],
+   ['apple-touch-icon.png','africmade-apple-touch-v4-180.png'],
+   ['icon-192.png','africmade-icon-v4-192.png'],
+   ['icon-512.png','africmade-icon-v4-512.png'],
+   ['icon-maskable-512.png','africmade-maskable-v4-512.png'],
   ])pairs.push([`public/pwa/${prefix}-${suffix}`,`public/pwa/${current}`]);
  }
  pairs.push(['public/pwa/mirtpage-panels-badge-96.png','public/pwa/africmade-badge-96.png']);
@@ -118,7 +182,7 @@ test('FE-070 small, maskable and Android icons use the minimal showroom silhouet
  assert.ok(visible>10000,'The themed icon contains the approved silhouette');
  for(const file of ['public'+PLATFORM_BRAND.assets.icon192,'apps/mobile/assets/icon.png']){
   const icon=await pixels(file);
-  assert.deepEqual([...icon.data.subarray(0,3)],[32,36,40],`${file} needs the shared charcoal field`);
+  assert.deepEqual([...icon.data.subarray(0,4)],[255,255,255,255],`${file} needs the white field`);
  }
  for(const file of ['public'+PLATFORM_BRAND.assets.favicon,'public/favicon.png']){
   const icon=await pixels(file);
@@ -143,8 +207,8 @@ test('FE-070 web, email, PWA and native configuration point to current artwork',
  assert.equal(mobile.android.adaptiveIcon.foregroundImage,'./assets/africmade-adaptive-foreground.png');
  assert.equal(mobile.android.adaptiveIcon.monochromeImage,'./assets/africmade-monochrome.png');
  const splash=mobile.plugins.find((entry:unknown)=>Array.isArray(entry)&&entry[0]==='expo-splash-screen');
- assert.deepEqual(splash,['expo-splash-screen',{image:'./assets/africmade-splash-wordmark.png',imageWidth:280,backgroundColor:'#202428'}]);
- assert.equal(mobile.android.adaptiveIcon.backgroundColor,'#202428');
+ assert.deepEqual(splash,['expo-splash-screen',{image:'./assets/africmade-splash-icon.png',imageWidth:288,resizeMode:'contain',backgroundColor:'#ffffff'}]);
+ assert.equal(mobile.android.adaptiveIcon.backgroundColor,'#ffffff');
  assert.match(fs.readFileSync('apps/mobile/src/ui.tsx','utf8'),/africmade-wordmark\.png/);
  for(const asset of ['africmade-mark.png','africmade-wordmark.png','africmade-splash-wordmark.png','africmade-notification.png'])assert.ok(fs.existsSync(`apps/mobile/assets/${asset}`));
  assert.ok(fs.existsSync('public/brand/suqpage-mark.svg'),'Old bookmarked asset URLs remain available');

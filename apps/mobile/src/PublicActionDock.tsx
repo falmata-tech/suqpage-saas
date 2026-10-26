@@ -3,6 +3,7 @@ import {Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {router,useGlobalSearchParams,usePathname} from 'expo-router';
 import type {Shop} from '@suqpage/contracts';
 import {publicTransportPlacement} from '../../../lib/public-transport-placement';
+import {storefrontAccent} from '../../../lib/storefront-accent';
 import {BuyingLauncher} from './chrome';
 import {overlayIsOpen} from './overlay-visibility';
 import {request,useApp,useLoad} from './runtime';
@@ -18,13 +19,13 @@ export default function PublicActionDock({compact=false,hideInquiry=false,placem
   const handle=active?(path.startsWith('/shop/')?path.slice('/shop/'.length):path==='/product'?(Array.isArray(params.handle)?params.handle[0]:params.handle)||'':''):'';
   const load=useLoad(()=>handle?request<Shop>('shops/'+encodeURIComponent(handle)):Promise.resolve(null),[handle]);
   const shop=handle&&blocked.ready&&load.data?.handle===handle&&!blocked.list.some(item=>item.id===load.data!.id)?load.data:null;
-  const inquiry=useBusinessInquiry(shop),count=inquiry.items.length;
+  const inquiry=useBusinessInquiry(shop),count=inquiry.items.length,accent=storefrontAccent(shop?.accentColor);
   if(!currentPlacement||(placement&&placement!==currentPlacement))return null;
   return <View testID="public-action-dock" style={{width:Math.min(horizontal?244:compact?168:200,width-24),gap:8,flexDirection:horizontal?'row':'column'}}>
-    {shop&&count>0&&!hideInquiry&&<Pressable testID="public-inquiry-list" accessibilityRole="button" accessibilityLabel={`${t('View inquiry list')} (${count})`} onPress={()=>{if(!overlayIsOpen())router.push({pathname:'/inquiry',params:{handle:shop.handle}});}} style={[d.inquiry,compact&&{padding:8},horizontal&&{width:68,padding:8,flexShrink:0}]}>
-      <Icon name="package" size={18} color={colors.brand}/>
-      {!horizontal&&<Text style={[d.label,compact&&{fontSize:12}]}>{t('Inquiry list')}</Text>}
-      <Text testID="inquiry-list-count" accessibilityElementsHidden style={d.count}>{count}</Text>
+    {shop&&count>0&&!hideInquiry&&<Pressable testID="public-inquiry-list" accessibilityRole="button" accessibilityLabel={`${t('View inquiry list')} (${count})`} onPress={()=>{if(!overlayIsOpen())router.push({pathname:'/inquiry',params:{handle:shop.handle}});}} style={[d.inquiry,accent&&{backgroundColor:accent.accent,borderColor:accent.edge},compact&&{padding:8},horizontal&&{width:68,padding:8,flexShrink:0}]}>
+      <Icon name="package" size={18} color={accent?.on||colors.brand}/>
+      {!horizontal&&<Text style={[d.label,accent&&{color:accent.on},compact&&{fontSize:12}]}>{t('Inquiry list')}</Text>}
+      <Text testID="inquiry-list-count" accessibilityElementsHidden style={[d.count,accent&&{backgroundColor:accent.on,color:accent.accent}]}>{count}</Text>
     </Pressable>}
     <View style={horizontal?{flex:1}:undefined}><BuyingLauncher compact={compact}/></View>
   </View>;

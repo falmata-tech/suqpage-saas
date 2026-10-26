@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Text } from "react-native";
 import { useApp } from "../src/runtime";
 import { Screen, Card, Copy, Button, Status, openLink, colors } from "../src/ui";
+import PublicSiteFooter from '../src/PublicSiteFooter';
 
 export default function AccountDeletion() {
   const { t } = useApp();
@@ -23,5 +24,6 @@ export default function AccountDeletion() {
       <Status error={error} />
       <Text selectable style={{ color: colors.ink, fontSize: 16 }}>falmata.dawano@gmail.com</Text>
     </Card>
+    <PublicSiteFooter/>
   </Screen>;
 }

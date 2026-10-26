@@ -91,8 +91,8 @@ export default async function FeaturedSchedulePage({ searchParams }: {
       </section>
 
       <section className="panel featured-policy">
-        <h2>{t("8:30 PM–12:00 AM EAT")}</h2>
-        <p>{t("Six businesses, four sponsor mentions. Times are arranged automatically.")}</p>
+        <h2>{t("8:15 PM–9:45 PM EAT")}</h2>
+        <p>{t("Four businesses, two short sponsor mentions. Times are arranged automatically.")}</p>
         <Link className="small-btn" href="/dashboard/admin/sponsors">{t("Manage sponsors")}</Link>
       </section>
 
@@ -121,7 +121,7 @@ export default async function FeaturedSchedulePage({ searchParams }: {
       </section>
 
       <section className="panel featured-agenda-preview">
-        <div className="featured-lineup-heading"><div><span className="eyebrow">{t("Generated preview")}</span><h2>{t("Broadcast agenda")}</h2><p>{t("Each business has 30 minutes. Smaller lineups finish earlier.")}</p></div></div>
+        <div className="featured-lineup-heading"><div><span className="eyebrow">{t("Generated preview")}</span><h2>{t("Broadcast agenda")}</h2><p>{t("Each business has 20 minutes. Smaller lineups finish earlier.")}</p></div></div>
         <ol tabIndex={0} aria-label={t("Generated Daily Featured broadcast agenda")}>
           {agenda.map((entry, index) => <li className={`agenda-${entry.kind}`} key={`${entry.kind}-${entry.start}-${index}`}>
             <time>{entry.kind === "booth" ? entry.label : entry.timeLabel}</time>

@@ -4,11 +4,102 @@ title: Geographic Showroom map and Daily Featured Showrooms
 status: in_progress
 related: [FE-074, FE-053, FE-058, FE-001, FE-003, FE-013, FE-017, FE-018, FE-020, FE-022, FE-024, FE-027, FE-028, FE-030, FE-033, FE-034, FE-036, FE-037, FE-048, BE-019, BE-020, BE-021, BE-023, BE-029, BE-041, DEP-016, DEP-017, DEP-024, DEP-026, DEP-049, ADR-0011, ADR-0016, FE-065]
 owners: [product, frontend, design]
-last_updated: 2026-10-22
+last_updated: 2026-10-26
 change_level: L3
 ---
 
 # FE-021 - Geographic Showroom map and Daily Featured Showrooms
+
+## S182 — a simpler Featured program (ready)
+
+The owner selected a daily 8:15–9:45 PM EAT booking window and a quieter visitor
+presentation. BE-029 owns the four-business capacity and exact timing. Keep the
+weekly category/day mapping, current eligibility, sponsor independence and
+non-today identity redaction. Master §§5, 10, 18 and 19 are affected.
+
+1. GIVEN Featured on desktop/phone web or native WHEN it opens THEN show one
+   **Daily Featured on TikTok Live** heading, one wrapping selected-day/date,
+   official time range and concise schedule status, followed by the category
+   selector and business cards. Remove repeated introductory prose, a separate
+   multi-paragraph status panel and the duplicate visitor agenda. Keep readable
+   en/am/om wording, complete category names and reachable 44px actions.
+2. GIVEN a schedule phase WHEN its status renders THEN distinguish Scheduled,
+   Scheduled now, Ended and No businesses scheduled. A clock window does not
+   prove TikTok is broadcasting. Offer at most one relevant external action,
+   only with its validated destination; no invented live signal or dead link.
+3. GIVEN a business card WHEN displayed THEN its image, business name, city and
+   own presentation time are apparent. Always show that time even without a
+   TikTok destination or with a separate business-presence label. Retain Example
+   page disclosure. Future-day cards show their times without revealing identity;
+   internal booth reference codes are not visitor content.
+4. GIVEN a visitor chooses another day's category WHEN six seconds or more pass
+   THEN retain that choice until navigation or another explicit selection. Keep
+   selected-category visibility, preview/Page/Back and exclusion fences. Do not
+   automatically return the visitor to today.
+5. GIVEN up to four businesses WHEN laid out THEN use a balanced desktop grid
+   and readable responsive cards. Sponsors are secondary after the business list
+   on phone. Their existing independent rotation, pause/visibility/accessibility
+   and advertising labels remain intact; programme mentions do not alter it.
+   Loading placeholders reserve the new hierarchy rather than the old panels.
+
+Ready: no new schema, stream integration, hosted mutation or app build is needed.
+Verify the schedule model/capacity, shared status helper, existing localized
+category/sponsor/loading suites and actual Chrome web/Expo day selection,
+card/Page/Back and empty/missing-link states before the combined full gates.
+
+## S181 — actionable city groups before street-level zoom (ready)
+
+L1 shared map interaction refinement, paired with FE-065 S181's larger canvas.
+This supersedes the fixed normalized zoom-12 terminal threshold. It changes no
+canonical coordinates, public eligibility, data scope or basemap provider.
+Ordinary three-/six-business all-fit capacities remain. The bounded two-business
+fallback below supersedes the one-business capacity on short/enlarged screens.
+
+GIVEN the current full public scope, viewport and bounded preview capacity WHEN
+building its terminal layout THEN choose the earliest collision-free layout at
+normalized integer zoom 10, 11, 12 or 13. Preserve the existing zoom-13 dense
+fallback and finite display-only group spacing. Cache the fit decision for its
+index/viewport rather than repeating all candidate work on every gesture.
+
+GIVEN two nearby terminal circles within the existing three-kilometer
+neighborhood overlap before that safe layout WHEN the hierarchy is displayed
+THEN retain a zoomable aggregate until the circles can separate.
+Do not present overlapping terminal hit areas as independent choices or merge
+regional markers that already fit separately merely to simplify the view.
+
+GIVEN an overview aggregate below its safe city layout WHEN activated THEN zoom
+toward its expansion level using that earlier safe level where applicable.
+GIVEN an exposed terminal group WHEN activated THEN open its exact current,
+capacity-bounded business picker without changing the camera. Do not force
+street-level/max zoom when a readable city layout already fits, open an oversized
+aggregate as a terminal, or admit stale/excluded membership. Web, Expo and native
+share the decision and preserve the existing normalized/native zoom conversion.
+
+GIVEN a final marker containing one business WHEN rendered THEN it remains a
+named shop marker, never a numbered 1. Its layout reserves the actual named-shop
+footprint rather than the retired locality-chip footprint. Canonical city anchors
+and exact storefront coordinates remain unchanged; public labels show business
+names/cities without internal precision terminology. Closing previews and
+returning from a Page preserve the current selection, filters and camera.
+
+GIVEN a short or enlarged-text viewport that cannot fit two complete cards WHEN
+forming current groups THEN admit at most two businesses to the compact fallback
+instead of fanning out a dense city's businesses into individual overlapping
+name labels. Its picker uses one bounded vertical scroll region, without paging,
+and keeps the heading/close route reachable. Both businesses retain their names,
+current membership and selectable targets. Returning to the second business
+scrolls it into view before restoring focus. Normal three-/six-card pickers
+remain all-fit. Zero/unusable viewport measurements do not admit an invisible
+picker; supported short/enlarged layouts retain a usable scroll body.
+
+Readiness/tests: cover early clear fits, a crowded city, short/narrow capacity,
+coincident/dense 200-point bounds, deterministic membership, zoom-out merging,
+singleton labels and current-scope validation in `test-map-clustering.ts`,
+`test-mobile-map-groups.ts`, web picker and map lifecycle suites. Measure cold and
+cached fitting cost before accepting the four-level search. Exercise real Chrome
+desktop/phone/Expo gestures and picker return with declared synthetic tiles;
+native SDK/physical-device event proof remains separate. FE-065 S181 owns the
+compact filter/attribution geometry and agent visual/full-gate sequence.
 
 ## S159 — truthful Daily Featured broadcast header (in progress)
 

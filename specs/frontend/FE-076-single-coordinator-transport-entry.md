@@ -2,7 +2,7 @@
 id: FE-076
 title: Transport help and provider listing interest
 status: in_progress
-related: [BE-063, FE-068, FE-069, FE-049, FE-053, FE-077, BE-064]
+related: [BE-063, FE-068, FE-069, FE-049, FE-053, FE-077, BE-064, FE-070]
 owners: [product, frontend, mobile]
 last_updated: 2026-10-21
 change_level: L2

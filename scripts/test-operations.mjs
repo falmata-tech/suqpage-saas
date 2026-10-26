@@ -11,8 +11,10 @@ const password=crypto.randomBytes(24).toString('hex');
 let pool;
 function run(command,args,env=process.env,allowFailure=false){const r=spawnSync(command,args,{env,encoding:'utf8'});if(!allowFailure&&r.status!==0)throw new Error(`${command} operation failed: ${(r.stderr||'').slice(-2000)}`);return r;}
 try{
- run('docker',['run','-d','--rm','--name',container,'-p','127.0.0.1::5432','-e',`POSTGRES_PASSWORD=${password}`,'postgres:17.10-alpine']);
- let ready=false;for(let n=0;n<30;n++){if(run('docker',['exec',container,'pg_isready','-U','postgres'],process.env,true).status===0){ready=true;break;}await new Promise(r=>setTimeout(r,500));}assert.ok(ready);
+ // Keep initialization socket-only long enough to reject a false-ready probe.
+ const initialization=path.join(root,'readiness.sql');fs.writeFileSync(initialization,'SELECT pg_sleep(2);\n',{mode:0o644});
+ run('docker',['run','-d','--rm','--name',container,'-p','127.0.0.1::5432','--mount',`type=bind,source=${initialization},target=/docker-entrypoint-initdb.d/10-readiness.sql,readonly`,'-e',`POSTGRES_PASSWORD=${password}`,'postgres:17.10-alpine']);
+ let ready=false;for(let n=0;n<30;n++){if(run('docker',['exec',container,'pg_isready','-h','127.0.0.1','-U','postgres'],process.env,true).status===0){ready=true;break;}await new Promise(r=>setTimeout(r,500));}assert.ok(ready);
  const port=run('docker',['port',container,'5432/tcp']).stdout.trim().match(/:(\d+)$/)?.[1];assert.ok(port);
  const url=`postgresql://postgres:${password}@127.0.0.1:${port}/postgres`;
  pool=new pg.Pool({connectionString:url,max:1});

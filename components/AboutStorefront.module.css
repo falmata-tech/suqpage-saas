@@ -34,4 +34,5 @@
 }
 @media (max-width: 380px) { .page { padding-inline: 10px; } .section { padding: 24px 16px; } .intro h2 { font-size: 1.5rem; } .benefits article { gap: 12px; } .audiences button { padding-inline:10px; } }
 
-.footer{display:grid;gap:14px;padding:24px 8px;font-size:14px}.footer nav{display:flex;gap:8px 20px;flex-wrap:wrap}.footer a{color:#53686d;min-height:44px;display:inline-flex;align-items:center;text-decoration:underline;text-underline-offset:4px}.companyDetails{display:flex;gap:4px 18px;flex-wrap:wrap;border-top:1px solid #dce5e3;padding-top:14px;color:#53686d;font-size:12px;line-height:1.5}
+.transportLink { display:inline-flex;align-items:center;gap:8px;min-height:44px;max-width:100%;margin-top:8px;color:#a63400;font-size:.875rem;text-decoration:none;overflow-wrap:anywhere; }
+.transportLink svg { flex:none; }

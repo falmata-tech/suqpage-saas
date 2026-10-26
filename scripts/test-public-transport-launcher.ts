@@ -37,7 +37,8 @@ async function shell(entry: string) {
   const result = await build({entryPoints: [entry],bundle: true,write: false,format: "cjs",platform: "node",plugins: [{name: "public-launcher-ports",setup(b) {
     b.onResolve({filter: /^@\/components\/PublicActionDock$/}, args => ({path: args.path, namespace: "ports"}));
     b.onResolve({filter: /^(react(?:\/jsx-runtime)?|react-native|react-native-safe-area-context|expo-router|expo-status-bar|react-native-svg|next\/navigation|next\/link|lucide-react)$/}, args => ({path: args.path, namespace: "ports"}));
-    b.onResolve({filter: /(?:^|\/)(?:runtime|ui|main-navigation|AttentionAlerts|blocked-businesses|use-business-inquiry|use-transport-unread|overlay-visibility|LanguageSelector|SuqpageBrand|NavigationPendingIndicator|PublicMobileNavigation|PublicSupportChat|i18n\/ui|owner-edit-navigation)$/}, args => ({path: args.path.endsWith('/i18n/ui')?'uiText':args.path.split("/").at(-1)!, namespace: "ports"}));
+    // Footer presentation/navigation is exercised with real RNWeb in test-about-audiences.
+    b.onResolve({filter: /(?:^|\/)(?:runtime|ui|main-navigation|AttentionAlerts|blocked-businesses|use-business-inquiry|use-transport-unread|overlay-visibility|LanguageSelector|SuqpageBrand|NavigationPendingIndicator|PublicMobileNavigation|PublicSupportChat|PublicSiteFooter|i18n\/ui|owner-edit-navigation)$/}, args => ({path: args.path.endsWith('/i18n/ui')?'uiText':args.path.split("/").at(-1)!, namespace: "ports"}));
     b.onLoad({filter: /.*/,namespace: "ports"}, args => ({loader: "jsx",contents:
       args.path === "react" ? "export const useState=value=>[value,()=>{}],useEffect=()=>{},createContext=initial=>({Provider:props=>({type:'ScrollInsetProvider',props}),initial}),useContext=context=>context.initial;export default {};"
       : args.path === "react/jsx-runtime" ? "export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';"
@@ -48,7 +49,7 @@ async function shell(entry: string) {
       : args.path === "react-native-svg" ? "export const SvgXml='SvgXml';"
       : args.path === "next/navigation" ? "export const usePathname=()=>fixture.path;"
       : args.path === "next/link" ? "export default props=>({type:'a',props});"
-      : args.path === "lucide-react" ? "export const FileText='Icon',Info='Icon',LayoutDashboard='Icon',LogIn='Icon',Map='Icon',Menu='Icon',Shield='Icon',Star='Icon';"
+      : args.path === "lucide-react" ? "export const FileText='Icon',Info='Icon',LayoutDashboard='Icon',LogIn='Icon',Map='Icon',Menu='Icon',Shield='Icon',Star='Icon',Store='Icon';"
       : args.path === "runtime" ? "export const useApp=()=>({t:value=>value,session:fixture.signedIn?{user:{id:'owner'}}:null,basket:fixture.basket}),useLoad=()=>({data:fixture.basket?.shop||null,loading:false,error:''}),request=async()=>{throw Error('Unexpected API read');},RuntimeProvider=props=>props.children,languageNames={en:'English'},locales=['en'],enabledLocales=['en'],API='http://127.0.0.1:3102';"
       : args.path === "use-business-inquiry" ? "export const useBusinessInquiry=shop=>({items:shop&&fixture.basket?.shop.id===shop.id?fixture.basket.items:[]});"
       : args.path === "ui" ? "export const Brand='Brand',Icon='NativeIcon',colors={ink:'#222',line:'#ddd',brand:'#c43a00',background:'#f6f8f7'},useOpenLink=()=>()=>{};"

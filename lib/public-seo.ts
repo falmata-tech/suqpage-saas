@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 
 export const SITEMAP_PAGE_SIZE = 10_000;
 export const SITEMAP_STATIC_PATHS = ["/", "/about", "/featured", "/showrooms", "/privacy", "/terms"] as const;
-export const BRAND_SOCIAL_IMAGE = "/pwa/africmade-icon-v3-512.png";
+export const BRAND_SOCIAL_IMAGE = "/pwa/africmade-icon-v4-512.png";
 export const DIRECTORY_PAGE_SIZE = 24;
 
 export type PublicSeoEntry = { handle: string; product_id: number | string | null };

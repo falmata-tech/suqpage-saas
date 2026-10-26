@@ -4,7 +4,7 @@ import { useUiText } from "@/lib/i18n/ui";
 
 import LanguageSelector from "@/components/LanguageSelector";
 import Link from "next/link";
-import { FileText, Info, LayoutDashboard, LogIn, Map, Menu, Shield, Star } from "lucide-react";
+import { FileText, Info, LayoutDashboard, LogIn, Store, Menu, Shield, Star } from "lucide-react";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import SuqpageBrand from "@/components/SuqpageBrand";
@@ -13,9 +13,11 @@ import PublicMobileNavigation from "@/components/PublicMobileNavigation";
 import PublicSupportChat from "@/components/PublicSupportChat";
 import { PublicActionDockProvider } from "@/components/PublicActionDock";
 import {publicTransportPlacement} from "@/lib/public-transport-placement";
+import PublicSiteFooter from "@/components/PublicSiteFooter";
+import {showPublicSiteFooter} from "@/lib/public-site-footer";
 
 const exploreDestinations = [
-  { href: "/", label: "Market", icon: Map },
+  { href: "/", label: "Market", icon: Store },
   { href: "/featured", label: "Featured", icon: Star },
 ] as const;
 
@@ -58,7 +60,7 @@ function PublicAppFrameContent({ children, signedIn, dashboardHref="/dashboard" 
         </nav>
       </section>
     </aside>
-    <NavigationPendingMain className={`public-app-main${showroomOpen ? " public-app-showroom-main" : ""}`}>{children}</NavigationPendingMain>
+    <NavigationPendingMain className={`public-app-main${showroomOpen ? " public-app-showroom-main" : ""}`}>{children}{showPublicSiteFooter(pathname)&&<PublicSiteFooter/>}</NavigationPendingMain>
     {showroomOpen ? null : <PublicMobileNavigation signedIn={signedIn} dashboardHref={dashboardHref} />}
   </div></PublicActionDockProvider>;
 }

@@ -4,7 +4,7 @@ title: Local Supabase development runtime
 status: in_progress
 related: [DEP-042, DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015, DEP-050, BE-062]
 owners: [development, backend, operations]
-last_updated: 2026-10-20
+last_updated: 2026-10-26
 change_level: L3
 ---
 
@@ -15,6 +15,43 @@ Current persistence contract: BE-035/DEP-031 and ADR-0020 supersede every retain
 SQLite fixture, fallback and copy-tool exception in this specification. Only native
 PostgreSQL setup/tests/archives are executable. Earlier migration-parity evidence
 below is historical; current acceptance uses PostgreSQL-only fixtures.
+
+## S184 — private-safe browser provider startup diagnostics (ready)
+
+PR48's first run and one controlled retry stop at disposable Supabase startup,
+before the application build or browser tests. The underlying reason is unknown
+because captured CLI output is deliberately suppressed. This L1 harness change
+adds bounded diagnostic indicators, without changing startup, readiness, retries,
+ports, cleanup or any product behavior. Master §22's privacy and independent-gate
+rules remain unchanged; no product section requires a behavior update.
+
+GIVEN captured local Supabase startup fails WHEN the acceptance runner reports
+the failure THEN it still exits unsuccessfully and emits only validated exit/
+system-error metadata and fixed allowlisted indicators of known startup failures.
+Never echo captured text, paths, URLs, configuration, tokens, credentials or an
+arbitrary error message. Unknown output produces an explicit unknown indicator;
+observed indicators do not establish a root cause.
+
+GIVEN CLI output contains secrets mixed with a known failure WHEN summarized
+THEN no supplied secret or raw output reaches the returned diagnostic or process
+log. GIVEN the real runner is exercised with an inert failing CLI fixture THEN
+the error remains nonzero, reports only safe metadata, and cleans up its own
+temporary project without invoking Docker or an external provider. Existing
+six-service/HTTP readiness checks and five-minute bounds remain mandatory.
+
+Tests: `scripts/test-acceptance-supabase-readiness.mjs` covers nullable/unknown
+results, fixed indicators, malicious/secret output and the real runner's inert
+failure path; `check:workflow-scripts` validates both changed public entrypoints
+and their local imports before execution. Actual required browser CI must still
+pass before integration; diagnostics alone do not qualify that gate.
+
+Focused qualification passes the actual inert runner failure/cleanup, all 11
+readiness cases, explicit three-script syntax/binding and workflow checks. The
+first regression fails before implementation; a further retained regression
+reproduces progress hiding a late error, then passes bounded head/tail sampling.
+Observed indicators remain hypotheses, and the original CI failures stay failed.
+Protected receipt: `.local/s184-ci-diagnostics/receipt.json`; current external CI
+and delivery qualification remain separate.
 
 ## S153 — finite local mail-catcher quota (implemented; runtime qualification pending)
 

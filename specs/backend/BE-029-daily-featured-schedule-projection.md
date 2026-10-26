@@ -4,7 +4,7 @@ title: Daily Featured schedule policy and override projection
 status: in_progress
 related: [BE-020, BE-023, BE-027, FE-021, FE-033, FE-037, DEP-020, DEP-023, DEP-024]
 owners: [backend, security, operations]
-last_updated: 2026-09-24
+last_updated: 2026-10-26
 change_level: L3
 ---
 
@@ -12,8 +12,8 @@ change_level: L3
 
 ## Problem and outcome
 
-S36 replaces the previous two-session schedule with the official 8:30 PM–midnight
-Ethiopia broadcast. Automatic selection must be fair across weeks, bounded to six
+S182 uses the official 8:15–9:45 PM EAT booking window. Automatic selection must
+be fair across weeks, bounded to four
 businesses and consistent with the manual admin preview and public page.
 
 ## Scope
@@ -26,22 +26,25 @@ cron, queue or TikTok integration is introduced.
 
 ## Domain language and invariants
 
-- Fixed EAT start 1230, latest end 1440, presentation duration 30, changeover 5,
-  sponsor duration 5 and four sponsor mentions. Six presentations plus four
-  mentions and two changeovers total 210 minutes. Small lineups finish earlier;
-  empty lineups have no agenda. Midnight is next-day epoch time, labeled 12:00 AM.
-- `MAX_FEATURED_SHOWROOMS` is six. Invalid counts/dates/times are rejected. All
+- Fixed EAT start 1215, latest end 1305, presentation duration 20, changeover 3,
+  sponsor duration 2 and two sponsor mentions. Four presentations plus two
+  mentions and two changeovers total 90 minutes. A sponsor break already supplies
+  the transition at that boundary; do not add another changeover. Small lineups
+  finish earlier; empty lineups have no agenda. The visitor's official booking
+  range stays 8:15–9:45 PM, while card times and phase follow the actual agenda.
+- `MAX_FEATURED_SHOWROOMS` is four. Invalid counts/dates/times are rejected. All
   generated intervals are positive, contiguous and inside the official window.
 - Automatic rotates a deterministic alphabetical eligible pool weekly. A given
   date and unchanged pool retain the same order; all businesses eventually rotate
   through. Sponsorship does not influence that editorial order.
 - Manual rows are intersected with current active, published, approved,
   non-excluded, media-complete businesses in the date's category. An empty stale
-  manual set falls back to Automatic. Old oversized sets project at most six.
+  manual set falls back to Automatic. Old oversized sets project at most four;
+  retain their stored history instead of deleting rows for the new capacity.
 - Non-today public views redact business identities. During a break or after the
   last segment no business is Featured now. Client and server use the same agenda.
-- Four chronological sponsor slots resolve to the ordered active sponsor pool,
-  repeating when it has fewer than four entries. Missing sponsors remain empty
+- Two chronological sponsor slots resolve to the ordered active sponsor pool,
+  repeating when it has fewer than two entries. Missing sponsors remain empty
   inventory. No sponsored adjacency implies endorsement.
 
 ## Contracts
@@ -53,7 +56,7 @@ cron, queue or TikTok integration is introduced.
   `featuredBroadcastPhase` identifies scheduled/live/ended using that range.
 - `featuredProgramDisplayOrder` rotates around the current/last completed
   presentation without mutating the stored lineup.
-- `automaticFeaturedLineup` selects up to six without duplicate identities.
+- `automaticFeaturedLineup` selects up to four without duplicate identities.
   Admin and public apply matching eligibility and alphabetical ordering first.
 - `saveFeaturedProgramDay` validates dates, eligible IDs, maximum count and actor;
   it atomically replaces one date's manual rows or removes that override to resume
@@ -67,21 +70,23 @@ cron, queue or TikTok integration is introduced.
 
 ## Scenarios
 
-GIVEN no override WHEN the weekly eligible pool is read THEN up to six businesses
+GIVEN no override WHEN the weekly eligible pool is read THEN up to four businesses
 rotate deterministically, without a daily materialization job.
 
-GIVEN a valid manual date WHEN staff submit a seventh or ineligible business THEN
+GIVEN a valid manual date WHEN staff submit a fifth or ineligible business THEN
 reject before persistence and retain the previous order.
+The administrator can choose another category-appropriate date for additional
+businesses; the cap never shortens presentations or silently queues a new write.
 
 GIVEN the public automatic view is cached WHEN staff save a manual reordered
 lineup THEN the next public load shows that saved lineup. Returning to Automatic
 restores the rotating set. Admin preview and public order agree.
 
-GIVEN six participants WHEN the clock reaches 8:30 PM THEN the first presentation
-starts; at midnight no presentation or sponsor segment remains current.
+GIVEN four participants WHEN the clock reaches 8:15 PM THEN the first presentation
+starts; at 9:45 PM no presentation or sponsor segment remains current.
 
 GIVEN a smaller lineup WHEN the agenda is generated THEN each presentation remains
-30 minutes and the evening finishes before midnight without overlaps.
+20 minutes and the evening finishes before 9:45 PM without overlaps.
 
 ## Quality impact
 

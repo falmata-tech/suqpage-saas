@@ -4,7 +4,7 @@ title: Automatic and adjustable Daily Featured scheduling
 status: in_progress
 related: [FE-036, FE-052, FE-021, FE-024, FE-026, FE-030, FE-037, BE-023, BE-027, BE-029, DEP-020, DEP-023, DEP-024]
 owners: [product, frontend, operations]
-last_updated: 2026-10-05
+last_updated: 2026-10-26
 change_level: L3
 ---
 
@@ -12,45 +12,46 @@ change_level: L3
 
 ## Problem and outcome
 
-The official Daily Featured broadcast window is 8:30 PM–12:00 AM Ethiopia time.
-The prior two-session policy and 40-business capacity are superseded. Automatic
-lineups showcase at most six eligible businesses with four five-minute sponsor
+The official Daily Featured booking window is 8:15 PM–9:45 PM EAT.
+Earlier timing and capacity rules are superseded by S182. Automatic
+lineups showcase at most four eligible businesses with two two-minute sponsor
 mentions. Staff can replace and order a date's lineup, then restore Automatic.
 
-## S36 — evening broadcast (implemented and focused-tested locally)
+## S182 — comfortable evening capacity (ready)
 
-- GIVEN six eligible businesses WHEN the agenda is generated THEN six 30-minute
-  presentations, four five-minute sponsor mentions and two five-minute changeovers
-  fill 8:30 PM through midnight, with no overlap or morning/intermission session.
-- GIVEN fewer than six businesses THEN use only eligible businesses, at most
-  30 minutes each; retain four sponsor mentions and finish within the official
+- GIVEN four eligible businesses WHEN the agenda is generated THEN four 20-minute
+  presentations, two two-minute sponsor mentions and two three-minute changeovers
+  fill 8:15–9:45 PM, with no overlap or morning/intermission session.
+- GIVEN fewer than four businesses THEN use only eligible businesses, at most
+  20 minutes each; retain two sponsor mentions and finish within the official
   window rather than invent businesses or stretch presentations. Zero businesses
   yields an empty agenda. Adjacent sponsor mentions may share a boundary on small
-  lineups. Midnight belongs to the following date and displays 12:00 AM.
+  lineups. Additional businesses need another category-appropriate date; reject
+  a fifth selection before persistence and retain the previous saved order.
 - Automatic is the default without daily setup or a cron job. A deterministic
-  weekly rotation selects up to six from the category's eligible pool. Admin and
+  weekly rotation selects up to four from the category's eligible pool. Admin and
   public use the same eligibility/order/selection contract. Sponsor mentions use
-  the ordered active placement pool, repeating when fewer than four are available;
+  the ordered active placement pool, repeating when fewer than two are available;
   absent placements leave clearly unassigned inventory, never invented sponsors.
-- Manual mode selects/reorders up to six for a date; save recalculates all times.
+- Manual mode selects/reorders up to four for a date; save recalculates all times.
   Returning to Automatic removes only that date's override. Stale/ineligible
-  candidates remain excluded; old oversized overrides expose at most six without
+  candidates remain excluded; old oversized overrides expose at most four without
   deleting stored history. Public cache invalidation makes manual edits visible.
 - The official time window and segment durations are fixed product rules; retire
   the old morning/evening policy form and write action. Retain its historical DB
   row without using it as current authority. No schema change is required.
 - Scheduling is a Suqpage rundown; it does not start or schedule TikTok itself.
   Ads remain separate from editorial selection. Current sponsor and business
-  states must agree with the agenda at starts, transitions and midnight.
+  states must agree with the agenda at starts, transitions and the actual end.
 
 Ready: bounded scheduling change under existing admin/eligibility ports. Tests
-cover capacity/totals/midnight/empty and small lineups, weekly rotation, manual
+cover capacity/totals/end/empty and small lineups, weekly rotation, manual
 save/revert and privacy/reveal rules. Capture public/admin at desktop and phone;
-visual approval precedes full release gates. Master §§3/5/19 and operations docs
+agent visual review precedes full release gates. Master §§3/5/19 and operations docs
 need current single-evening behavior. Older sections below are retained history
 where they describe morning/intermission/global-policy or 40-business behavior.
 
-## S36 verification
+## Earlier S36 verification (superseded timing; not S182 evidence)
 
 Schedule/clock, discovery, localization, homepage composition and typecheck pass.
 Tests cover 0–6 participants, exact 210-minute full agendas, four mentions,

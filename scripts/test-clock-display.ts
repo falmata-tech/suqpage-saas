@@ -7,7 +7,7 @@ for(let minute=0;minute<1440;minute++){
  const parts=clockInputParts(machine);assert.equal(clockInputValue(parts.hour,parts.minute,parts.period),machine);
 }
 assert.equal(featuredProgramTimeLabel(480,780),'8:00 AM–1:00 PM');
-const booths=featuredBoothWalkthroughs('2026-08-09',6,Date.parse('2026-08-09T20:30:00+03:00'));
-assert.equal(booths[0].start,Date.parse('2026-08-09T20:30:00+03:00'));
-assert.equal(booths[0].label,'8:30 PM–9:00 PM');
-console.log('PASS 12-hour labels, noon/midnight, 1,440 input round trips and unchanged Featured timestamps.');
+const booths=featuredBoothWalkthroughs('2026-08-09',4,Date.parse('2026-08-09T20:15:00+03:00'));
+assert.equal(booths[0].start,Date.parse('2026-08-09T20:15:00+03:00'));
+assert.equal(booths[0].label,'8:15 PM–8:35 PM');
+console.log('PASS 12-hour labels, noon/midnight, 1,440 input round trips and Featured EAT timestamps.');

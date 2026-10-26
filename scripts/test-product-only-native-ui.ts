@@ -111,15 +111,19 @@ test('FE-067 native Made to order toggle combines criteria, exposes state and cl
   const {state,render}=await fixture('MarketSearchControls');state.platform='web';let value={...originalSearch},changes=0;
   const props={scope:'products',value,onChange:(next:typeof value)=>{value=JSON.parse(JSON.stringify(next));props.value=value;changes++;},metadata:{categories:[],countries:[],places:[]}};
   let tree=render('default',props);
-  const toggle=()=>tree.find(node=>node.type==='Pressable'&&node.props.accessibilityRole==='checkbox'&&node.props.accessibilityLabel==='Made to order')!;
-  assert.ok(toggle());assert.ok(!nodes(toggle()).some(node=>node.type==='Icon'),'Unchecked phone filter keeps the decorative package hidden');assert.equal(toggle().props['aria-checked'],false);assert.equal((toggle().props.accessibilityState as {checked:boolean}).checked,false);
+  const overview=()=>tree.find(node=>node.type==='Sheet'&&node.props.visible===true&&node.props.title==='Filters');
+  const toggle=()=>overview()&&nodes(overview()).find(node=>node.type==='Pressable'&&node.props.accessibilityRole==='checkbox'&&node.props.accessibilityLabel==='Made to order');
+  const openFilters=(scope:string)=>{const trigger=tree.find(node=>node.type==='Pressable'&&node.props.testID===`${scope}-filter-trigger`)!;assert.ok(trigger);assert.equal(trigger.props.accessibilityRole,'button');press(trigger);tree=render('default',props);assert.ok(overview(),'The real Filters trigger opens its visible overview before choices are used');};
+  assert.equal(overview(),undefined);assert.equal(toggle(),undefined,'Phone product filters are opened through the labelled overview');
   assert.ok(!tree.some(node=>node.props.accessibilityLabel==='Type'||text(node)==='Services'));
   assert.equal(tree.find(node=>node.type==='TextInput')!.props.accessibilityLabel,'Search products');
-  let prevented=0;const keyboard=toggle().props.onKeyDown as(event:{key:string;repeat?:boolean;preventDefault:()=>void})=>void;keyboard({key:' ',preventDefault:()=>prevented++});assert.equal(prevented,1);tree=render('default',props);assert.deepEqual(value,{...originalSearch,madeToOrder:true,page:1});assert.equal(toggle().props['aria-checked'],true);assert.ok(nodes(toggle()).some(node=>node.type==='Icon'&&node.props.name==='check'&&node.props.size===12),'Checked phone filter has a visible non-color indicator');
-  const currentKeyboard=toggle().props.onKeyDown as typeof keyboard;currentKeyboard({key:' ',repeat:true,preventDefault:()=>prevented++});assert.equal(value.madeToOrder,true,'Holding Space must not repeatedly toggle');currentKeyboard({key:'Enter',preventDefault:()=>prevented++});assert.equal(value.madeToOrder,true,'RN Web owns Enter to avoid double activation');press(toggle());tree=render('default',props);assert.equal(value.madeToOrder,false);press(toggle());tree=render('default',props);
-  press(tree.find(node=>node.props.accessibilityLabel==='Clear all')!);tree=render('default',props);
-  assert.deepEqual(value,{query:'',categories:[],countries:[],cities:[],madeToOrder:false,page:1});assert.equal(toggle().props['aria-checked'],false);
-  const priorChanges=changes;tree=render('default',{...props,scope:'businesses'});assert.ok(!toggle());assert.equal(changes,priorChanges);
+  openFilters('products');assert.ok(toggle());assert.ok(nodes(toggle()).some(node=>node.type==='Icon'&&node.props.name==='package'&&node.props.size===18),'The overview gives the unchecked choice its visible package icon');assert.equal(toggle()!.props['aria-checked'],false);assert.equal((toggle()!.props.accessibilityState as {checked:boolean}).checked,false);
+  let prevented=0;const keyboard=toggle()!.props.onKeyDown as(event:{key:string;repeat?:boolean;preventDefault:()=>void})=>void;keyboard({key:' ',preventDefault:()=>prevented++});assert.equal(prevented,1);tree=render('default',props);assert.deepEqual(value,{...originalSearch,madeToOrder:true,page:1});assert.equal(toggle()!.props['aria-checked'],true);assert.ok(nodes(toggle()).some(node=>node.type==='Icon'&&node.props.name==='check'&&node.props.size===18),'Checked overview filter has a visible non-color indicator');
+  const currentKeyboard=toggle()!.props.onKeyDown as typeof keyboard;currentKeyboard({key:' ',repeat:true,preventDefault:()=>prevented++});assert.equal(value.madeToOrder,true,'Holding Space must not repeatedly toggle');currentKeyboard({key:'Enter',preventDefault:()=>prevented++});assert.equal(value.madeToOrder,true,'RN Web owns Enter to avoid double activation');press(toggle()!);tree=render('default',props);assert.equal(value.madeToOrder,false);press(toggle()!);tree=render('default',props);
+  press(button(nodes(overview()),'Clear all'));tree=render('default',props);
+  assert.deepEqual(value,{query:'',categories:[],countries:[],cities:[],madeToOrder:false,page:1});assert.equal(toggle()!.props['aria-checked'],false);assert.equal(button(nodes(overview()),'Clear all').props.disabled,true);
+  press(button(nodes(overview()),'Done'));tree=render('default',props);assert.equal(overview(),undefined);assert.equal(toggle(),undefined);
+  const priorChanges=changes;props.scope='businesses';tree=render('default',props);openFilters('businesses');assert.ok(!toggle());assert.equal(changes,priorChanges);
   assert.equal(tree.find(node=>node.type==='TextInput')!.props.accessibilityLabel,'Search businesses');
 });
 

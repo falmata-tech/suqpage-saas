@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import {TRANSPORT_COPY} from "../lib/i18n/transport-copy.ts";
-import {MARKET_STOREFRONT_COPY,ABOUT_STOREFRONT_SECTIONS} from "../lib/storefront-copy.ts";
+import {MARKET_STOREFRONT_COPY,MARKET_COMPACT_COPY,ABOUT_STOREFRONT_SECTIONS} from "../lib/storefront-copy.ts";
 
 function read(file) {
   return fs.readFileSync(file, "utf8");
@@ -82,9 +82,12 @@ assert.doesNotMatch(publicNarrative, /water bottling|bottled water|diaper (?:com
 
 assert.match(about, /ABOUT_STOREFRONT_SECTIONS/);
 const nativeAbout=read('apps/mobile/app/(tabs)/about.tsx');
+const footer=read('lib/public-site-footer.ts');
+assert.match(footer,/Jigjiga, Somali Region, Ethiopia/);
+assert.match(footer,/MarketVision Technology/);
+assert.match(read('components/PublicAppFrame.tsx'),/showPublicSiteFooter[\s\S]*PublicSiteFooter/);
+assert.match(nativeAbout,/PublicSiteFooter/);
 for(const surface of [about,nativeAbout]){
-  assert.match(surface,/Jigjiga, Somali Region, Ethiopia/);
-  assert.match(surface,/MarketVision Technology/);
   assert.doesNotMatch(surface,/©\s*\{new Date\(\)\.getFullYear\(\)\}\s*AfricMade/,'The holding company owns the footer copyright');
 }
 assert.match(storefrontCopy, /For buyers/);
@@ -125,8 +128,10 @@ assert.doesNotMatch(storefrontCopy,/automatically import|guaranteed stock|checko
 assert.ok(!MARKET_STOREFRONT_COPY.description.includes('name and phone'),'Form instructions belong to the inquiry task, not the hero');
 const nativeMarket=read('apps/mobile/app/(tabs)/index.tsx');
 assert.match(nativeMarket, /testID="market-introduction"/);
-assert.match(nativeMarket, /t\(MARKET_STOREFRONT_COPY.title\)/);
-assert.match(nativeMarket, /t\(MARKET_STOREFRONT_COPY.description\)/);
+assert.match(nativeMarket, /t\(MARKET_COMPACT_COPY.title\)/);
+assert.doesNotMatch(nativeMarket, /t\(MARKET_STOREFRONT_COPY.description\)/, 'Phone discovery gives its map the space previously occupied by marketing copy');
+assert.equal(MARKET_COMPACT_COPY.title, 'Find African suppliers.');
+assert.match(home, /t\(MARKET_COMPACT_COPY.title\)/, 'Phone web and native share the same compact meaning');
 assert.doesNotMatch(nativeMarket, /setIntro|name="info"/, 'Native Market copy stays inline without a redundant sheet');
 assert.match(read('apps/mobile/app/(tabs)/about.tsx'), /ABOUT_STOREFRONT_SECTIONS/);
 assert.match(about, /section.id\s*===\s*"customers"\s*\?\s*"\/"\s*:\s*"\/login"/);

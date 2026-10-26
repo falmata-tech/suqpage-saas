@@ -9,7 +9,7 @@ function Copy({title=false,compact=false}:{title?:boolean;compact?:boolean}) {
   return <div className={styles.copy}><Block className={styles.short}/>{title&&<Block className={styles.title}/>}<Block className={styles.line}/>{!compact&&<Block className={`${styles.line} ${styles.short}`}/>}</div>;
 }
 function Cards({products=false}:{products?:boolean}) {
-  const cards=Array.from({length:6},(_,index)=><div key={index} className={styles.card}><Block className={styles.media}/><div className={`${styles.copy} ${styles.cardCopy}`}><Block className={styles.short}/><Block className={styles.title}/><Block className={styles.line}/>{products&&<Block className={styles.line}/>}</div></div>);
+  const cards=Array.from({length:products?6:4},(_,index)=><div key={index} className={styles.card}><Block className={styles.media}/><div className={`${styles.copy} ${styles.cardCopy}`}><Block className={styles.short}/><Block className={styles.title}/><Block className={styles.line}/>{products&&<Block className={styles.line}/>}</div></div>);
   return products?<div className={styles.products}>{cards}</div>:<div className={styles.galleryWrap}><div className={styles.gallery}>{cards}</div></div>;
 }
 function WorkspaceDataLoading({ variant }: { variant: "market" | "featured" }) {
@@ -18,7 +18,7 @@ function WorkspaceDataLoading({ variant }: { variant: "market" | "featured" }) {
     <div className={styles.controls}><Block className={styles.search}/><div className={styles.filters}><Block/><Block/><Block/></div></div>
     <div className={styles.map}><div className={styles.mapTools}><Block/><Block/><Block/><Block/></div><Block className={styles.mapPeek}/></div>
   </div>:<div className={`${styles.surface} ${styles.featured}`} aria-hidden="true" data-loading-layout="featured">
-    <div className={styles.featuredHead}><Copy title compact/><Block className={styles.featuredStatus}/></div>
+    <div className={styles.featuredHead}><Block className={styles.title}/><Block className={styles.line}/></div>
     <div className={styles.featuredBody}><div className={styles.week}>{Array.from({length:7},(_,index)=><div className={styles.category} key={index}><Block className={styles.categoryArt}/><div className={styles.copy}><Block className={styles.line}/><Block className={styles.line}/></div><Block className={styles.categoryDate}/></div>)}</div><Cards/><div className={styles.sponsors}><Block/><Block/><Block/></div></div>
   </div>;
 }

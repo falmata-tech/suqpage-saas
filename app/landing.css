@@ -373,6 +373,8 @@
 /* FE-036 routed public marketplace application */
 .public-app-shell { display: grid; position: relative; min-height: 100dvh; grid-template-columns: 212px minmax(0, 1fr); grid-template-rows: 66px minmax(0, 1fr); background: var(--mp-canvas); }
 .public-app-header { display: flex; position: sticky; z-index: 70; top: 0; grid-column: 1 / -1; grid-row: 1; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid var(--mp-line); background: rgb(255 255 255 / 96%); backdrop-filter: blur(16px); }
+.public-app-header > .language-selector { flex: 0 1 auto; }
+.public-app-header .language-selector select { flex: 1 1 auto; min-width: 0; min-height: 44px; max-width: 100%; }
 .public-app-brand { font-size: 1rem; }
 .public-app-purpose { color: #64767c; font-size: .7rem; font-weight: 750; }
 .public-app-rail { display: flex; position: sticky; z-index: 40; top: 66px; height: calc(100dvh - 66px); grid-column: 1; grid-row: 2; flex-direction: column; gap: 18px; padding: 18px 13px 16px; border-right: 1px solid var(--mp-line); background: rgb(255 255 255 / 94%); backdrop-filter: blur(14px); }
@@ -554,22 +556,29 @@
   .public-market-experience .public-experience-head p { font-size: .75rem; line-height: 1.4; }
 }
 @media (max-height: 600px) {
-  .public-market-experience { grid-template-rows:auto minmax(360px,1fr); overflow-y:auto; }
+  .public-market-experience { grid-template-rows:auto minmax(min-content,1fr); overflow-y:auto; }
 }
 
 /* Web is the landing page: explain the value briefly, then let the map lead. */
 .public-app-main:has(> .public-market-experience) { background:#f7f8f6; }
 .market-landing-introduction { padding:8px 12px 12px; min-width:0; }
 .market-landing-introduction h1 { margin:0; color:var(--mp-navy); font-size:clamp(1.25rem,1.9vw,1.625rem); font-weight:750; line-height:1.22; letter-spacing:-.015em; text-wrap:balance; overflow-wrap:anywhere; }
+.market-landing-compact-title { display:none; }
 .market-landing-introduction p { max-width:68ch; margin:6px 0 0; color:#52666d; font-size:.9375rem; line-height:1.45; overflow-wrap:anywhere; }
 @media(max-width:760px) {
  .market-landing-introduction { padding:6px 10px 7px; background:#fff; }
- .market-landing-introduction h1 { font-size:1.125rem; line-height:1.22; text-wrap:pretty; }
- .market-landing-introduction p { margin-top:4px; font-size:.8125rem; line-height:1.35; }
+ .market-landing-introduction h1 { font-size:1.0625rem; line-height:1.25; text-wrap:pretty; }
+ .market-landing-full-title,.market-landing-introduction p { display:none; }
+ .market-landing-compact-title { display:inline; }
 }
 
 /* Give the full signature breathing room in the header without shrinking the touch target. */
 .public-app-header .suqpage-brand { --suqpage-mark-width: 48px; }
 @media(max-width:680px) {
   .public-app-header .suqpage-brand { --suqpage-mark-width: 36px; }
+}
+@media(max-width:380px) {
+  .public-app-header { gap:6px; }
+  .public-app-header .suqpage-brand { --suqpage-mark-width:32px; }
+  .public-app-header .language-selector > svg { display:none; }
 }
