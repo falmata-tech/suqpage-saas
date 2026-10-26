@@ -3,7 +3,7 @@ import fs from "node:fs";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
-import { browserCliStartTimeoutMs, browserSupabasePorts, remapBrowserSupabaseConfigPorts, waitForBrowserSupabaseReady } from "./acceptance-supabase-readiness.mjs";
+import { browserCliStartTimeoutMs, browserSupabasePorts, remapBrowserSupabaseConfigPorts, summarizeBrowserSupabaseStartFailure, waitForBrowserSupabaseReady } from "./acceptance-supabase-readiness.mjs";
 
 const port = await new Promise((resolve, reject) => {
   const server = net.createServer();
@@ -101,6 +101,9 @@ function run(command, args, { capture = false, allowFailure = false, environment
   });
   if (!allowFailure && result.status !== 0) {
     // Captured CLI output can contain provider credentials; keep failures sanitized.
+    if (capture && command === "supabase" && args[0] === "start") {
+      throw new Error(`Supabase startup failed: ${JSON.stringify(summarizeBrowserSupabaseStartFailure(result))}`);
+    }
     throw new Error(`${command} exited with ${result.status}`);
   }
   return capture ? result.stdout : "";

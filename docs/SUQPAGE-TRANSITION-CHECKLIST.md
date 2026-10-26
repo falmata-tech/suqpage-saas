@@ -181,6 +181,30 @@ Preserve S181/S182 results and failed gate attempts. No new mark or font is need
    fresh advisory acceptance, compilation/static inspection, installed-phone
    and Play listing/submission remain separate gates.
 
+### S184 — diagnose the repeated CI provider-startup failure
+
+PR48 is pushed as `ae307dc`; core/container/dependency/postgres pass. Browser
+run40368352333 and its one controlled retry fail during disposable Supabase
+startup before any application test. The exact cause remains unknown; retain
+both failed attempts and qualify the mandatory check before merging. DEP-027
+owns the narrow diagnostic contract; production V8 and native 383 inputs stay
+frozen. No additional blind retry or weakened readiness gate is authorized.
+
+1. [x] Inspect both primary job logs and classify the recurrence as acceptance
+   infrastructure startup, with its underlying cause unproven.
+2. [x] Record the ready fixed-indicator/no-raw-output contract and unchanged
+   master/privacy/readiness boundaries before changing the harness.
+3. [x] Add the fixed-shape safe summary and actual inert failure-path regression.
+   Bounded head/tail inspection recognizes late errors and ignores the excluded
+   middle; hostile/secret output never enters the summary. All11 readiness cases,
+   actual runner failure/cleanup, explicit three-script static binding and
+   workflow checks pass. Runtime V8 and native 383 inputs remain identical.
+4. [ ] **CURRENT:** Review/stage only this CI correction, commit/push without rewriting the
+   published task commit, and inspect new exact-head CI. Use actual indicators
+   to resolve a demonstrated startup cause; keep unknown causes explicit.
+5. [ ] Once all five required PR/main jobs pass, resume S183's exact website and
+   separately admitted Android delivery. Reuse unchanged product evidence.
+
 ### S172 — AfricMade presentation and business-sourcing launch
 
 Owner direction: use the AfricMade name across web and native, retaining the

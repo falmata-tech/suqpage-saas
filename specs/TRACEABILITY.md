@@ -63,6 +63,21 @@ general runtime clearance or exploitability finding is claimed. Protected summar
 web publication, a fresh one-artifact native exception/compilation and installed-
 device/Play qualification remain pending; no stale artifact is renamed as new.
 
+Task commit `ae307dc` is pushed in PR48. Required run40368352333 and its one
+controlled retry pass core/container/dependency/postgres but fail browser at
+disposable Supabase startup, before application build or test execution. The
+underlying CLI reason is unproven because raw captured output remains private.
+Protected exact-head receipts are `.local/s183-github/pr-ci-40368352333-attempt01.json`
+and `pr-ci-40368352333-attempt02-terminal.json` in that directory. DEP-027 S184
+qualifies safe diagnostic indicators before another source-triggered CI run;
+the required check is not bypassed and no production deployment has occurred.
+S184's fixed-shape diagnostics pass all 11 readiness cases, actual inert runner
+failure/cleanup, explicit static binding and workflow tests. Bounded head/tail
+sampling preserves late errors without echoing captured output. Runtime V8 and
+the 383-input native closure remain identical; only three harness scripts change.
+Protected focused receipt: `.local/s184-ci-diagnostics/receipt.json`. The next
+source-triggered CI run must supply fresh required-check results.
+
 ## S181–S182 map, Featured and public footer qualification
 
 FE-065/FE-021 implement the compact phone/native Market, earlier safe group
