@@ -22,7 +22,7 @@ const bundle=build({entryPoints:['apps/mobile/app/buying.tsx','apps/mobile/app/t
   :a.path==='expo-clipboard'?`export const setStringAsync=async()=>{throw Error('Unexpected clipboard action');};`
   :a.path==='./open-link'?`export const openLink=async()=>{throw Error('Unexpected external action');};`
   :a.path==='./runtime'?`export const transportStorageKey='suqpage-transport';export const API='https://api.example.test',useApp=()=>({t:(key,values={})=>key.replace(/\\{(\\w+)\\}/g,(_,name)=>String(values[name]??'')),locale:'en',session:{user:{id:fixture.owner}},ownerRequest:async(path,body)=>{fixture.ownerCalls.push({path,body});if(body)throw Error('Unexpected chat command');return{conversation:fixture.chat,defaults:{name:'PRIVATE OWNER',phone:'PRIVATE PHONE'}};}});export class ApiFailure extends Error{};export const request=()=>{throw Error('Unexpected guest API');},secure={getItem:()=>{throw Error('Unexpected guest storage');},setItem:()=>{throw Error('Unexpected guest storage');},removeItem:()=>{throw Error('Unexpected guest storage');}};`
-  :a.path==='./ui'?`export const Screen='Screen',Copy='Copy',Card='Card',Field='Field',Button='Button',Status='Status',colors={line:'#ddd',soft:'#eee'};`
+  :a.path==='./ui'?`export const Screen='Screen',Copy='Copy',Card='Card',Field='Field',Button='Button',Status='Status',Icon='Icon',useOpenLink=()=>()=>{},colors={line:'#ddd',soft:'#eee'};`
   :a.path==='./AttentionAlerts'?`export const TransportAlerts='TransportAlerts';`
   :`export const ChatReadTranscript='ChatReadTranscript';export default 'ChatReadSentinel';`
  }));

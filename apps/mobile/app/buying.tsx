@@ -5,7 +5,7 @@ import { AppState, View, Text, Pressable, StyleSheet, ScrollView, useWindowDimen
 import * as Crypto from "expo-crypto";
 import type { Buying } from "@suqpage/contracts";
 import { useApp, request, secure, transportStorageKey, ApiFailure } from "../src/runtime";
-import { Screen, Copy, Field, Button, Status, colors } from "../src/ui";
+import { Screen, Copy, Field, Button, Status, Icon, colors, useOpenLink } from "../src/ui";
 import ChatReadSentinel,{ChatReadTranscript} from '../src/ChatReadSentinel';
 import {TransportAlerts} from '../src/AttentionAlerts';
 import { supportIdlePresentation } from '../../../lib/support-idle-contract';
@@ -13,15 +13,16 @@ import {clientChatPresentation} from '../../../lib/support-client-state';
 import type {OwnerTransportCommand,OwnerTransportConversation,OwnerTransportState} from '../../../lib/owner-transport-contract';
 import TransportCoordinator from "../src/TransportCoordinator";
 import {TRANSPORT_COORDINATOR} from "../../../lib/transport-coordinator";
-import {estimateServerNow,formatTransportRemaining,transportLiveWait} from "../../../lib/transport-live-wait";
+import {advanceTransportClock,estimateServerNow,formatTransportRemaining,transportLiveWait} from "../../../lib/transport-live-wait";
 type TransportConversation=Buying|OwnerTransportConversation;
 // A single in-memory return draft survives a web-stack remount. Never store it
 // on disk, in navigation URLs, or across a different actor/chat identity.
 let trackingReturnDraft:{scope:string;token:string;reference:string;expiresAt:number;name:string;phone:string;origin:string;destination:string;message:string;coordinatorId:typeof TRANSPORT_COORDINATOR.id|null}|null=null;
 export default function BuyingScreen({owner=false,conversationId,newIntake=false}:{owner?:boolean;conversationId?:string;newIntake?:boolean}={}) {
   const {height:viewportHeight}=useWindowDimensions();
-  const shortViewport=viewportHeight<650;
+  const shortViewport=viewportHeight<620;
   const { t, locale,session,ownerRequest } = useApp();
+  const openLink=useOpenLink();
   const ownerId=owner?session?.user.id||'':'';
   const scope=owner?'owner:'+ownerId:'visitor',scopeRef=useRef(scope);scopeRef.current=scope;
   const [loadedScope,setLoadedScope]=useState('');
@@ -55,16 +56,24 @@ export default function BuyingScreen({owner=false,conversationId,newIntake=false
   const currentConversation = useRef(conversation);
   currentConversation.current = conversation;
   const serverClock=useRef({serverNow:Date.now(),clientAt:performance.now()});
+  const clockConversation=useRef('');
   const idle=conversation?supportIdlePresentation(conversation,Date.now()):{warning:false,autoEnded:false};
   const presentation=conversation?clientChatPresentation(conversation):null;
-  useEffect(()=>{if(!conversation)return;const serverNow=conversation.serverNow??Date.now();serverClock.current={serverNow,clientAt:performance.now()};setClockNow(serverNow);},[conversation?.serverNow]);
+  useEffect(()=>{
+    if(!conversation)return;
+    const serverNow=conversation.serverNow??Date.now(),clientAt=performance.now();
+    const next=clockConversation.current===conversation.publicRef
+      ?advanceTransportClock(serverClock.current,serverNow,clientAt)
+      :{serverNow,clientAt};
+    clockConversation.current=conversation.publicRef;serverClock.current=next;setClockNow(next.serverNow);
+  },[conversation?.publicRef,conversation?.serverNow]);
   const firstStaffReplyAt=conversation?(conversation.firstStaffReplyAt!==undefined?conversation.firstStaffReplyAt:conversation.messages.reduce<number|null>((first,item)=>item.sender==='staff'?Math.min(first??item.createdAt,item.createdAt):first,null)):null;
   const liveWait=conversation?transportLiveWait({status:conversation.status,waitStartedAt:conversation.transportWaitStartedAt??conversation.createdAt,agentJoined:conversation.agentJoined,agentJoinedAt:conversation.agentJoinedAt,firstStaffReplyAt},clockNow):null;
   const callbackMode=Boolean(conversation&&liveWait?.phase==='inbox');
   const callbackSubmitted=Boolean(conversation?.transportCallback?.submitted);
   const terminalClosed=conversation?.status==='closed'&&!idle.autoEnded;
   const callbackAttempt=useRef<{signature:string;key:string}|null>(null);
-  useEffect(()=>{if(!conversation||conversation.status==='closed'||callbackMode)return;const timer=setInterval(()=>setClockNow(estimateServerNow(serverClock.current.serverNow,serverClock.current.clientAt,performance.now())),1000);return()=>clearInterval(timer);},[Boolean(conversation),conversation?.status,callbackMode]);
+  useEffect(()=>{if(!conversation||conversation.status==='closed'||callbackMode)return;const timer=setInterval(()=>setClockNow(previous=>Math.max(previous,estimateServerNow(serverClock.current.serverNow,serverClock.current.clientAt,performance.now()))),1000);return()=>clearInterval(timer);},[Boolean(conversation),conversation?.status,callbackMode]);
   useEffect(()=>{
     if(!conversation)return;
     setCallbackPhone(conversation.transportCallback?.phone||phone);
@@ -329,21 +338,19 @@ export default function BuyingScreen({owner=false,conversationId,newIntake=false
         <TransportCoordinator compact websiteLink/>
         <View style={conversationLayout.statusRow}>
           <View style={conversationLayout.statusText}>
-            <View style={conversationLayout.metadata}>
-              <Copy muted>{conversation.publicRef}</Copy>
-            </View>
             <Copy>{t(checking ? "Checking…" : !connected ? "Reconnecting…" : (liveWait?.phase==='waiting'||liveWait?.phase==='busy')&&presentation!.awaitingTeam ? TRANSPORT_COPY.waitingStatus : presentation!.statusKey,{value1:TRANSPORT_COORDINATOR.name})}</Copy>
-            {(liveWait?.phase==='waiting'||liveWait?.phase==='busy')?<Copy>{t(TRANSPORT_COPY.countdown,{value1:formatTransportRemaining(liveWait.elapsedMs,locale)})}</Copy>:null}
+            {(liveWait?.phase==='waiting'||liveWait?.phase==='busy')?<View accessible style={conversationLayout.timerBadge} accessibilityLabel={t(TRANSPORT_COPY.countdown,{value1:formatTransportRemaining(liveWait.elapsedMs,locale)})}><Text style={conversationLayout.timerText}>{formatTransportRemaining(liveWait.elapsedMs,locale)}</Text></View>:null}
             {!checking&&connected&&presentation?.joined&&<Copy>{t(presentation.joined.key,presentation.joined.values)}</Copy>}
+            <Copy muted>{conversation.publicRef}</Copy>
           </View>
           {conversation.status!=='closed'&&<View style={conversationLayout.endAction}>
             <Button secondary wrapLabel disabled={busy||checking} label={t('End chat')} onPress={()=>void send('close')}/>
           </View>}
         </View>
-        {(liveWait?.phase==='waiting'||liveWait?.phase==='busy')&&presentation?.awaitingTeam&&!checking?<Copy muted>{t(TRANSPORT_COPY.waiting,{value1:TRANSPORT_COORDINATOR.name})}</Copy>:null}
         {!checking&&connected&&idle.warning?<Copy>{t('This chat will end soon. Send a message to keep it open.')}</Copy>:null}
         <ChatReadTranscript identity={`${scope}:${conversation.publicRef}`} active={!checking&&connected&&!callbackMode} onRead={async messageId=>{if(!live.current||scopeRef.current!==scope)return;if(owner){if(!('id'in conversation))throw Error('Support could not be updated.');await ownerRequest('owner/transport',{action:'read',conversationId:conversation.id,messageId,publicRef:conversation.publicRef} satisfies OwnerTransportCommand);}else await request('transport',{buyingToken:token,body:{action:'read',messageId,publicRef:conversation.publicRef}});}}>
-          <ScrollView ref={transcriptRef} style={[conversationLayout.transcript,shortViewport&&conversationLayout.shortTranscript]} scrollEnabled={!shortViewport} contentContainerStyle={conversationLayout.transcriptContent} keyboardShouldPersistTaps="handled" scrollEventThrottle={100} onScroll={event=>{const {contentOffset,contentSize,layoutMeasurement}=event.nativeEvent;transcriptNearBottom.current=contentOffset.y+layoutMeasurement.height>=contentSize.height-48;}} onContentSizeChange={()=>{if(!shortViewport&&transcriptNearBottom.current)requestAnimationFrame(()=>transcriptRef.current?.scrollToEnd({animated:false}));}}>
+          <ScrollView ref={transcriptRef} style={[conversationLayout.transcript,shortViewport&&conversationLayout.shortTranscript]} scrollEnabled={!shortViewport} contentContainerStyle={[conversationLayout.transcriptContent,conversation.messages.length===0&&conversationLayout.emptyTranscript]} keyboardShouldPersistTaps="handled" scrollEventThrottle={100} onScroll={event=>{const {contentOffset,contentSize,layoutMeasurement}=event.nativeEvent;transcriptNearBottom.current=contentOffset.y+layoutMeasurement.height>=contentSize.height-48;}} onContentSizeChange={()=>{if(!shortViewport&&transcriptNearBottom.current)requestAnimationFrame(()=>transcriptRef.current?.scrollToEnd({animated:false}));}}>
+            {(liveWait?.phase==='waiting'||liveWait?.phase==='busy')&&presentation?.awaitingTeam&&!checking&&conversation.messages.length===0&&viewportHeight>=700?<View style={conversationLayout.waitingCard}><Icon name="chat" size={22} color="#52786c"/><Text style={conversationLayout.waitingCopy}>{t(TRANSPORT_COPY.waiting,{value1:TRANSPORT_COORDINATOR.name})}</Text></View>:null}
             {conversation.messages.map((m) => (
               <View key={m.id} style={[conversationLayout.bubble,{alignSelf:m.sender==='visitor'?'flex-end':'flex-start',backgroundColor:m.sender==='visitor'?colors.soft:'white'}]}>
                 <Copy>{m.body}</Copy>
@@ -389,6 +396,12 @@ export default function BuyingScreen({owner=false,conversationId,newIntake=false
           <Button icon="chat" label={t("Start chat")} disabled={busy||!coordinatorId||!name.trim()||!phone.trim()||!origin.trim()||!destination.trim()} onPress={()=>void send("start")}/>
         </View>}
       </>}
+      <View style={conversationLayout.credit}>
+        <Text style={conversationLayout.creditText}>{t('Powered by')} </Text>
+        <Pressable accessibilityRole="link" accessibilityLabel="CargoChatter" onPress={()=>void openLink('https://cargochatter.com/')} style={conversationLayout.creditLink}>
+          <Text style={conversationLayout.creditName}>CargoChatter</Text>
+        </Pressable>
+      </View>
     </Screen>
   );
 }
@@ -396,12 +409,12 @@ export default function BuyingScreen({owner=false,conversationId,newIntake=false
 const intake = StyleSheet.create({
   row: { flexDirection: "row", gap: 12, alignItems: "flex-end" },
   cell: { flex: 1, minWidth: 0 },
-  route: { backgroundColor: colors.soft, borderColor: "#f0cbb8", borderWidth: 1, borderRadius: 12, padding: 12 },
-  details: { minHeight: 68, borderWidth: 1, borderColor: "#cad3d7", borderRadius: 8, backgroundColor: "white", color: colors.ink, padding: 12, fontSize: 16, textAlignVertical: "top" },
+  route: { backgroundColor: '#f7faf8', borderColor: "#dbe8e1", borderWidth: 1, borderRadius: 14, padding: 12 },
+  details: { minHeight: 68, borderWidth: 1, borderColor: "#cadbd3", borderRadius: 12, backgroundColor: "white", color: colors.ink, padding: 12, fontSize: 16, textAlignVertical: "top" },
 });
 
 const conversationLayout=StyleSheet.create({
-  fullScreen:{flex:1,minHeight:0,width:'100%',maxWidth:760,alignSelf:'center',padding:12,gap:10},
+  fullScreen:{flex:1,minHeight:0,width:'100%',maxWidth:760,alignSelf:'center',padding:12,gap:10,backgroundColor:'#fff'},
   shortScreen:{flex:0,minHeight:0},
   utilities:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',gap:8},
   utility:{flexGrow:1,flexShrink:1,minWidth:0},
@@ -409,21 +422,29 @@ const conversationLayout=StyleSheet.create({
   intakeUtility:{minHeight:44,flexShrink:1,justifyContent:'center',paddingHorizontal:10,paddingVertical:8,borderWidth:1,borderColor:colors.line,borderRadius:8,backgroundColor:'white'},
   intakeUtilityText:{fontSize:13,lineHeight:18,fontWeight:'600',color:colors.ink,textAlign:'center'},
   intake:{gap:12,paddingBottom:18},
-  statusRow:{flexDirection:'row',flexWrap:'wrap',alignItems:'flex-start',gap:10},
+  statusRow:{flexDirection:'row',flexWrap:'wrap',alignItems:'flex-start',gap:10,padding:12,borderWidth:1,borderColor:'#dbe8e1',borderRadius:14,backgroundColor:'#f2f8f5'},
   statusText:{flex:1,minWidth:156,gap:3},
   company:{fontSize:13,lineHeight:20,fontWeight:'600',color:colors.muted},
-  metadata:{flexDirection:'row',flexWrap:'wrap',alignItems:'baseline',gap:6},
+  timerBadge:{alignSelf:'flex-start',paddingHorizontal:9,paddingVertical:5,borderWidth:1,borderColor:'#d1e3d9',borderRadius:999,backgroundColor:'#fff'},
+  timerText:{fontSize:12,lineHeight:17,fontWeight:'700',fontVariant:['tabular-nums'],color:'#275a4d'},
   endAction:{maxWidth:'100%'},
-  transcript:{flex:1,minHeight:0,borderWidth:1,borderColor:colors.line,borderRadius:10,backgroundColor:'#edf2f2'},
+  transcript:{flex:1,minHeight:0,borderWidth:1,borderColor:'#e4ece9',borderRadius:14,backgroundColor:'#fbfdfc'},
   shortTranscript:{flexGrow:0,minHeight:100},
   transcriptContent:{flexGrow:1,justifyContent:'flex-end',gap:10,padding:12},
-  bubble:{maxWidth:'90%',borderRadius:14,padding:12,gap:5},
+  emptyTranscript:{justifyContent:'center'},
+  bubble:{maxWidth:'90%',borderRadius:16,padding:12,gap:5,borderWidth:1,borderColor:'#e4ece9'},
+  waitingCard:{alignSelf:'center',alignItems:'center',maxWidth:300,gap:10,padding:20,borderWidth:1,borderColor:'#e5eee9',borderRadius:16,backgroundColor:'#fff'},
+  waitingCopy:{fontSize:13,lineHeight:20,color:'#506960',textAlign:'center'},
   replyArea:{flexShrink:0,paddingTop:2},
   composer:{flexDirection:'row',alignItems:'flex-end',gap:8},
   composerInput:{flex:1,minWidth:0},
   composerSend:{flexShrink:0,minWidth:92},
-  messageField:{minHeight:52,maxHeight:128,padding:10,textAlignVertical:'top'},
+  messageField:{minHeight:52,maxHeight:128,padding:10,textAlignVertical:'top',borderWidth:1,borderColor:'#cadbd3',borderRadius:12,backgroundColor:'#fff',color:colors.ink,fontSize:16},
   closedActions:{gap:8},
   callback:{flex:1,minHeight:0,justifyContent:'flex-start',gap:12,width:'100%',maxWidth:520,alignSelf:'center',paddingVertical:20},
-  callbackDetails:{backgroundColor:colors.soft,borderRadius:10,padding:12,gap:6},
+  callbackDetails:{backgroundColor:'#f2f8f5',borderRadius:14,padding:12,gap:6},
+  credit:{flexShrink:0,minHeight:36,flexDirection:'row',flexWrap:'wrap',alignItems:'center',justifyContent:'center',paddingVertical:6,paddingHorizontal:12,borderTopWidth:1,borderTopColor:'#e8eeec',backgroundColor:'#fafcfb'},
+  creditText:{fontSize:11,lineHeight:17,color:'#71817e'},
+  creditLink:{minHeight:30,justifyContent:'center'},
+  creditName:{fontSize:11,lineHeight:17,fontWeight:'700',color:'#315f55'},
 });

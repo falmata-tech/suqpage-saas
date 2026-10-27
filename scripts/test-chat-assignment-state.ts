@@ -59,7 +59,7 @@ const bundle = build({
           export const request=(path,options)=>window.harness.call(path,options);
           export class ApiFailure extends Error{};
         ` : args.path === "../src/ui" ? `
-          import React from 'react';export const Screen=({children})=><main>{children}</main>,Card=({children})=><section>{children}</section>,Copy=({children})=><p>{children}</p>,colors={};
+          import React from 'react';export const Screen=({children})=><main>{children}</main>,Card=({children})=><section>{children}</section>,Copy=({children})=><p>{children}</p>,Icon=()=>null,useOpenLink=()=>()=>{},colors={};
           export const Field=({label,onChangeText,...props})=><label>{label}<textarea aria-label={label} {...props} onChange={e=>onChangeText(e.target.value)}/></label>;
           export const Button=({label,onPress,disabled})=><button disabled={disabled} onClick={onPress}>{label}</button>;
           export const Status=({loading,error})=><div role='status'>{loading?'Loading':''}{error}</div>;

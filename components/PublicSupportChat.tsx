@@ -9,6 +9,7 @@ import { Truck, X } from "lucide-react";
 import TransportCoordinator from "./TransportCoordinator";
 import {TRANSPORT_COORDINATOR} from "@/lib/transport-coordinator";
 import TransportIntake from "./TransportIntake";
+import TransportChatCredit from "./TransportChatCredit";
 import { createPortal } from "react-dom";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
@@ -166,6 +167,7 @@ export default function PublicSupportChat() {
       {!loaded ? <LoadingBar/> : receipt ? <><BuyingConversation key={receipt.publicRef} endpoint={endpoint} initial={receipt} active={open&&sessionReady} checking={!sessionReady} fitViewport onAnother={() => void anotherRequest()} />{error ? <p role="alert">{t(error)}</p> : null}</> :
             <TransportIntake draft={{name,phone,origin,destination,message,coordinatorId}} onChange={(field,value)=>({name:setName,phone:setPhone,origin:setOrigin,destination:setDestination,message:setMessage}[field])(value)} onSelectCoordinator={setCoordinatorId} onSubmit={submit} busy={busy} ready={sessionReady} error={error}/>}
         </div>
+        <TransportChatCredit/>
       </section>
     </dialog>,document.body) : null}
   </>;

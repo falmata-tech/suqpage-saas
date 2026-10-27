@@ -6,7 +6,7 @@ import { useUiText } from "@/lib/i18n/ui";
 import {useLocale} from 'next-intl';
 import { TRANSPORT_COPY } from "@/lib/i18n/transport-copy";
 import { buyingRefreshDelay, type BuyingConversation as Conversation } from "@/lib/buying-conversation-contract";
-import {estimateServerNow,formatTransportRemaining,transportLiveWait} from '@/lib/transport-live-wait';
+import {advanceTransportClock,estimateServerNow,formatTransportRemaining,transportLiveWait} from '@/lib/transport-live-wait';
 import {TRANSPORT_COORDINATOR} from '@/lib/transport-coordinator';
 import {rememberTransportDraft,takeTransportDraft} from "@/lib/tracking-navigation";
 import styles from "./BuyingConversation.module.css";
@@ -23,6 +23,7 @@ export default function BuyingConversation({ initial, active, checking=false, on
   const [conversation, setConversation] = useState(initial);
   const [clockNow,setClockNow]=useState(initial.serverNow??Date.now());
   const serverClock=useRef({serverNow:initial.serverNow??Date.now(),clientAt:performance.now()});
+  const clockConversation=useRef(initial.publicRef);
   const draftKey=`transport-reply:${draftScope}:${endpoint}:${initial.publicRef}`;
   const [message, setMessage] = useState(()=>takeTransportDraft<string>(draftKey)||"");
   const [callbackPhone,setCallbackPhone]=useState(initial.transportCallback?.phone||'');
@@ -45,7 +46,13 @@ export default function BuyingConversation({ initial, active, checking=false, on
   const history = useRef<HTMLDivElement>(null);
   const firstScroll = useRef(true);
   const currentConversation=useRef(conversation);currentConversation.current=conversation;
-  useEffect(()=>{const serverNow=conversation.serverNow??Date.now();serverClock.current={serverNow,clientAt:performance.now()};setClockNow(serverNow);},[conversation.serverNow]);
+  useEffect(()=>{
+    const serverNow=conversation.serverNow??Date.now(),clientAt=performance.now();
+    const next=clockConversation.current===conversation.publicRef
+      ?advanceTransportClock(serverClock.current,serverNow,clientAt)
+      :{serverNow,clientAt};
+    clockConversation.current=conversation.publicRef;serverClock.current=next;setClockNow(next.serverNow);
+  },[conversation.publicRef,conversation.serverNow]);
   const idle=supportIdlePresentation(conversation,Date.now());
   const presentation=clientChatPresentation(conversation);
   const firstStaffReplyAt=conversation.firstStaffReplyAt!==undefined?conversation.firstStaffReplyAt:conversation.messages.reduce<number|null>((first,item)=>item.sender==='staff'?Math.min(first??item.createdAt,item.createdAt):first,null);
@@ -55,7 +62,7 @@ export default function BuyingConversation({ initial, active, checking=false, on
   const callbackMode=transportChat&&liveWait?.phase==='inbox';
   const callbackSubmitted=Boolean(conversation.transportCallback?.submitted);
   const terminalClosed=conversation.status==='closed'&&!idle.autoEnded;
-  useEffect(()=>{if(!transportChat||!active||callbackMode)return;const timer=setInterval(()=>setClockNow(estimateServerNow(serverClock.current.serverNow,serverClock.current.clientAt,performance.now())),1000);return()=>clearInterval(timer);},[transportChat,active,callbackMode]);
+  useEffect(()=>{if(!transportChat||!active||callbackMode)return;const timer=setInterval(()=>setClockNow(previous=>Math.max(previous,estimateServerNow(serverClock.current.serverNow,serverClock.current.clientAt,performance.now()))),1000);return()=>clearInterval(timer);},[transportChat,active,callbackMode]);
   useVisibleChatRead(history,active&&!callbackMode,async messageId=>{
     const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'read',messageId,publicRef:initial.publicRef,...(conversationId?{conversationId}:{})}),signal:AbortSignal.timeout(8000)});
     if(!response.ok)throw new Error('read');
@@ -150,7 +157,7 @@ export default function BuyingConversation({ initial, active, checking=false, on
   }
   const liveWaiting=liveWait?.phase==='waiting'||liveWait?.phase==='busy';
   return <div className={`${styles.conversation}${fitViewport?` ${styles.fitViewport}`:''}`}>
-    {!callbackMode&&showAlerts && <AttentionAlerts identity={initial.publicRef} endpoint={endpoint.includes('transport')?'/api/attention?channel=transport':'/api/attention?channel=buying'} onOpen={()=>{if(history.current)history.current.scrollTop=history.current.scrollHeight;}}/>}
+    {!callbackMode&&showAlerts && <div className={styles.alertBar}><AttentionAlerts identity={initial.publicRef} endpoint={endpoint.includes('transport')?'/api/attention?channel=transport':'/api/attention?channel=buying'} onOpen={()=>{if(history.current)history.current.scrollTop=history.current.scrollHeight;}}/></div>}
     {callbackMode?<section className={styles.callback} aria-labelledby="transport-callback-heading">
       {callbackSubmitted?<>
         <h3 id="transport-callback-heading">{t(TRANSPORT_COPY.callbackReceivedHeading)}</h3>
@@ -175,16 +182,16 @@ export default function BuyingConversation({ initial, active, checking=false, on
     </section>:<>
     <div className={styles.status} data-waiting={awaitingReply} role="status">
       <strong>{checking||refreshing?t('Checking…'):!connected?t('Connection interrupted. Retrying…'):<>{presentation.awaitingTeam&&<Clock3 aria-hidden="true"/>}{transportChat&&presentation.awaitingTeam&&liveWaiting?t(TRANSPORT_COPY.waitingStatus,{value1:TRANSPORT_COORDINATOR.name}):t(presentation.statusKey)}</>}</strong>
-      {liveWaiting?<span className={styles.countdown} role="timer" aria-live="off">{t(TRANSPORT_COPY.countdown,{value1:formatTransportRemaining(liveWait?.elapsedMs??0,locale)})}</span>:null}
+      {liveWaiting?<span className={styles.countdown} role="timer" aria-live="off" aria-label={t(TRANSPORT_COPY.countdown,{value1:formatTransportRemaining(liveWait?.elapsedMs??0,locale)})}>{formatTransportRemaining(liveWait?.elapsedMs??0,locale)}</span>:null}
       <small data-chat-reference={initial.publicRef} style={{gridColumn:1,gridRow:3}}>{initial.publicRef}</small>
       {connected && !checking && !refreshing && presentation.joined ? <span className={styles.connection}><Wifi aria-hidden="true" />{t(presentation.joined.key,presentation.joined.values)}</span> : null}
       {conversation.status !== "closed" ? <button type="button" className={styles.endChat} onClick={() => void changeSession('close')} disabled={busy||checking||refreshing} aria-busy={ending}>{t("End chat")}</button> : null}
       {!connected ? <span>{t("Connection interrupted. Retrying…")}</span> : null}
     </div>
-    {liveWaiting&&awaitingReply?<p className={styles.waitingHint}>{t(TRANSPORT_COPY.waiting,{value1:TRANSPORT_COORDINATOR.name})}</p>:null}
     {!transportChat&&awaitingReply ? <p className={styles.waitingHint}>{t("Replies appear here automatically. You can return to this chat in this browser.")}</p> : null}
     {!checking&&!refreshing&&connected&&idle.warning?<p className={styles.waitingHint} role="status">{t('This chat will end soon. Send a message to keep it open.')}</p>:null}
-    <div ref={history} className={styles.history} role="log" aria-live="polite" aria-relevant="additions" aria-label={t("Support message history")} tabIndex={0}>
+    <div ref={history} className={styles.history} data-empty={conversation.messages.length===0} role="log" aria-live="polite" aria-relevant="additions" aria-label={t("Support message history")} tabIndex={0}>
+      {liveWaiting&&awaitingReply?<div className={styles.waitingCard}><Clock3 aria-hidden="true"/><p>{t(TRANSPORT_COPY.waiting,{value1:TRANSPORT_COORDINATOR.name})}</p></div>:null}
       {conversation.messages.map(item => <article key={item.id} data-sender={item.sender}>
         <strong>{item.sender === "visitor" ? t("You") : item.senderName}</strong>
         <p>{item.body}</p><div className={styles.messageMeta}><time dateTime={new Date(item.createdAt).toISOString()}>{new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", hour12: true }).format(item.createdAt)}</time>{item.sender === "visitor" ? <span data-receipt={item.read?'read':'sent'}><Check aria-hidden="true" />{t(item.read?'Read':'Sent')}</span> : null}</div>

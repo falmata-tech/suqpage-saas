@@ -509,6 +509,10 @@ timed-out request and start a separate one. Owner transport is bound to the curr
 it does not adopt a guest browser token or merge with private owner Support.
 The first public staff reply before that cutoff keeps the case live even after
 later replies or reassignment; a first reply after the cutoff cannot reopen it.
+The countdown follows the server's original wait timestamp and never moves
+backward within one conversation. Web and native transport windows carry a quiet
+CargoChatter presentation credit; AfricMade still stores and routes these chats
+until a separate managed-service integration is implemented and verified.
 
 Shipment records are an **independent organizer of an arranged journey**, not live
 carrier tracking. The customer-facing list is **Shipment records**; one arranged

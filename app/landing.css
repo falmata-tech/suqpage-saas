@@ -444,15 +444,15 @@
 .public-more-group > span { color: #718187; font-size: .58rem; font-weight: 900; text-transform: uppercase; }
 .public-more-sheet .public-more-group nav { padding-top: 0; }
 
-.public-support-dialog { box-sizing: border-box; position: fixed; z-index: 100; inset: auto 18px 16px auto; width: min(410px,calc(100vw - 36px)); height: min(760px,calc(100dvh - 32px)); min-height: min(440px,calc(100dvh - 32px)); max-width: none; max-height: calc(100dvh - 32px); margin: 0; padding: 0; overflow: hidden; border: 1px solid var(--mp-line-strong); border-radius: 8px; background: #fff; color: var(--mp-navy); box-shadow: 0 24px 60px rgb(11 29 58 / 26%); }
+.public-support-dialog { box-sizing: border-box; position: fixed; z-index: 100; inset: auto 18px 16px auto; width: min(430px,calc(100vw - 36px)); height: min(760px,calc(100dvh - 32px)); min-height: min(440px,calc(100dvh - 32px)); max-width: none; max-height: calc(100dvh - 32px); margin: 0; padding: 0; overflow: hidden; border: 1px solid #dce8e2; border-radius: 20px; background: #fff; color: var(--mp-navy); box-shadow: 0 24px 70px rgb(19 53 44 / 19%); }
 .public-support-dialog::backdrop { background: rgb(11 29 58 / 12%); }
 .public-support-dialog > section { display: grid; width:100%; height:100%; min-height:0; max-height: inherit; grid-template-rows:auto auto minmax(0,1fr); }
-.public-support-dialog > section.new-conversation,.public-support-dialog > section.has-conversation { grid-template-rows: auto auto minmax(0,1fr); }
-.public-support-dialog header { display: flex; min-height: 58px; align-items: center; justify-content: space-between; padding: 6px 12px 6px 16px; border-bottom: 1px solid var(--mp-line); }
+.public-support-dialog > section.new-conversation,.public-support-dialog > section.has-conversation { grid-template-rows: auto auto minmax(0,1fr) auto; }
+.public-support-dialog header { display: flex; min-height: 58px; align-items: center; justify-content: space-between; padding: 6px 12px 6px 16px; border-bottom: 1px solid #e6eeea; background:#fcfefd; }
 .public-support-dialog header > div { display: grid; gap: 1px; }
 .public-support-dialog header span { color: var(--mp-teal); font-size: .58rem; font-weight: 900; text-transform: uppercase; }
 .public-support-dialog h2 { margin: 0; font-size: 1.12rem; }
-.public-support-dialog header button { display: grid; width: 44px; height: 44px; place-items: center; border: 0; border-radius: 6px; background: transparent; color: var(--mp-navy); cursor: pointer; }
+.public-support-dialog header button { display: grid; width: 44px; height: 44px; place-items: center; border: 0; border-radius: 12px; background: transparent; color: var(--mp-navy); cursor: pointer; }
 .public-support-dialog header button:hover { background: var(--mp-teal-soft); }
 .public-support-dialog header button:focus-visible { outline: 3px solid var(--mp-focus); }
 .public-support-loading { min-height: 180px; margin: 0; padding: 30px 18px; color: var(--mp-muted); }
