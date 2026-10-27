@@ -4,7 +4,7 @@ title: MirtPage domain, managed services and app release cutover
 status: draft
 related: [FE-021, FE-070, FE-071, BE-059, DEP-029, DEP-051, ADR-0029, FE-072, BE-060, DEP-050, DEP-044, FE-075, BE-062]
 owners: [operations, security, mobile]
-last_updated: 2026-10-26
+last_updated: 2026-10-27
 change_level: L4
 ---
 
@@ -12,16 +12,17 @@ change_level: L4
 
 ## Current web publication and separate native admission
 
-PR #48 is merged as main `75092ef`; its tree matches the qualified task source.
+PR #50 is merged as main `08999f3`; its tree matches the qualified task source.
 All five required PR and main CI jobs pass. The exact reviewed map-first website,
-simpler Featured/footer and white-field installation icons are published as
-Netlify deploy `6adfa7a046c301c50af9b164`. `africmade.com` serves this artifact
-directly; its canonical metadata still uses the admitted `mirtpage.com` address.
-Independent route, asset, image, manifest, worker-file and App Links readback
-passes. Provider target and all 41 environment records remain unchanged; deploy
-`6ade42137f331c939a820177` remains ready for recovery.
-[Traceability](../TRACEABILITY.md#current-s181s184-delivery) owns
-exact source, CI, artifact, Linux import, publication and browser evidence.
+simpler Featured/footer, white-field installation icons and S185 transport chat
+presentation are published as Netlify deploy `6ae0a7fb4ccd545c7dd13f55`.
+`africmade.com` serves this artifact directly; its canonical metadata still uses
+the admitted `mirtpage.com` address. Independent route, asset, image, manifest,
+worker-file and App Links readback passes. The transport form loads in settled
+390px and desktop Chrome views. Provider target and all 41 environment records
+remain unchanged; deploy `6adfa7a046c301c50af9b164` remains ready for recovery.
+[Traceability](../TRACEABILITY.md#current-s186-chat-web-publication) owns exact
+source, CI, artifact, Linux import, publication and browser evidence.
 
 Website publication does not qualify an installed Android app, service-worker
 execution, scheduled-worker delivery, sender credential, device push or Play
