@@ -637,6 +637,30 @@ no managed-service adapter or hosted write is in scope. Current step: 5.
    integration are separate work; no hosted write or Android artifact was
    authorized by S185.
 
+### S186 — publish the qualified S185 website and identify the Android install file
+
+Dependency: FE-019 S185, DEP-049 publication and DEP-044 native admission.
+
+1. [x] Merge qualified PR #50 and verify all five required post-merge main CI
+   jobs on `08999f3`; the merged tree matches the locally checked PR head.
+2. [x] Pass the source-matched web release gate, inspect the complete Netlify
+   artifact and actual isolated Linux server import, and preserve the four
+   Android App Links entries.
+3. [x] Publish one exact production-context website artifact as deploy
+   `6ae0a7fb4ccd545c7dd13f55`, then independently read back the provider,
+   environment fingerprint and 29 live routes/assets. The previous ready deploy
+   remains recoverable.
+4. [x] Open the deployed transport chat in installed Chrome at desktop and
+   390px. The settled intake form and CargoChatter credit render, close/reopen
+   works, and the read-only check reports no page or application request errors.
+   The initial phone screenshot was captured during loading; the settled follow-up
+   is the visual evidence. Map tiles used the synthetic fixture.
+5. [x] Identify the signed `com.africmade.app` versionCode 2 universal APK and
+   disclose that it was compiled from `75092ef`, before S185. No new native
+   compilation, Play upload or physical Android check occurred in S186.
+
+Traceability E14 owns exact receipts and remaining hosted/device limits.
+
 ### S174 — Transport live-agent countdown and provider follow-up
 
 FE-019 S174 is the controlling visitor/owner contract; the 2:00 staff overdue
