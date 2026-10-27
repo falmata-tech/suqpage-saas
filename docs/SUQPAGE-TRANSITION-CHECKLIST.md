@@ -676,6 +676,10 @@ same-package v2 APK. Current step: 2. No hosted or Play write is in scope.
 2. [ ] Freeze the exact source/lock/assets and run focused, release, acceptance,
    config, audit and Hermes/runtime inventory checks. Bind five green integrated
    main CI jobs before compilation; retain any failed gate honestly.
+   - [ ] PR #52 browser CI failed twice before tests at disposable Supabase
+     startup. Classify the image-pull/registry subtype with a private-safe,
+     fixed-indicator DEP-027 correction and rerun the changed exact head. Keep
+     the other four passing jobs and local 20/20 acceptance evidence distinct.
 3. [ ] Prepare a one-artifact review with previous v2 comparison, expiry, output
    names, bounded compilation and exact locked-audit findings. Obtain the fresh
    DEP-044 owner exception if the native audit fails. An earlier exception is

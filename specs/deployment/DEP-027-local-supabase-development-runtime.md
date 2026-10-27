@@ -53,6 +53,14 @@ Observed indicators remain hypotheses, and the original CI failures stay failed.
 Protected receipt: `.local/s184-ci-diagnostics/receipt.json`; current external CI
 and delivery qualification remain separate.
 
+S187's browser job again failed before application tests on two attempts. The
+fixed summary identified image-pull/registry and database-startup indicators,
+but could not distinguish a missing image, rate limit, access denial, or
+transport failure. Extend only its allowlisted indicators for those causes;
+keep the same bounded sampling, nonzero exit, no raw provider text, cleanup,
+service/HTTP readiness, and no automatic retry. A new exact-head CI result must
+pass before the Android source is integrated or built.
+
 ## S153 — finite local mail-catcher quota (implemented; runtime qualification pending)
 
 GIVEN the permanent local development project uses only its internal Docker mail
