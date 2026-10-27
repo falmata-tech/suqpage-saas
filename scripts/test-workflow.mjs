@@ -44,44 +44,41 @@ assert(!core.includes("- run: npm run build"), "Core CI must not drift into a pa
 assert(!core.includes("- run: npm run check"), "Core CI must not drift into a partial duplicate of the release script");
 
 assert.match(browser, /node-version: 24\.18\.1/, "Browser CI must use the supported Node baseline");
-assert.match(browser, /- run: npm run test:acceptance/, "Browser CI must run Chromium acceptance");
-function assertBrowserGhcrAuth(source) {
-  const permissions = source.match(/^    permissions:\n((?:      [^\n]+\n)+)/m);
-  assert.equal(permissions?.[1], "      contents: read\n      packages: read\n",
-    "Browser CI must grant only content and package read access to its ephemeral token");
-  const login = `      - name: Authenticate public GHCR pulls\n        env:\n          GHCR_TOKEN: \${{ secrets.GITHUB_TOKEN }}\n        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin\n`;
-  const acceptance = "      - run: npm run test:acceptance\n";
-  const logout = "      - name: Log out of GHCR\n        if: always()\n        run: docker logout ghcr.io";
-  const loginAt = source.indexOf(login);
-  const acceptanceAt = source.indexOf(acceptance);
-  assert(loginAt >= 0 && acceptanceAt > loginAt,
-    "Browser CI must log in to GHCR through stdin before provider-backed acceptance");
-  assert.equal((source.match(/GHCR_TOKEN/g) ?? []).length, 2,
-    "Browser CI must only reference the token in the login environment and stdin command");
-  assert(source.trimEnd().endsWith(logout),
-    "Browser CI must unconditionally log out of GHCR as its final step");
+function assertBrowserRegistryOverride(source) {
+  const acceptance = "      - run: npm run test:acceptance\n        env:\n          SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io\n";
+  const acceptanceAt = source.indexOf("      - run: npm run test:acceptance\n");
+  const nextStepAt = source.indexOf("\n      - ", acceptanceAt + 1);
+  assert(acceptanceAt >= 0 && nextStepAt > acceptanceAt,
+    "Browser CI must keep provider-backed acceptance as a required step");
+  assert.equal(source.slice(acceptanceAt, nextStepAt + 1), acceptance,
+    "Only the required browser acceptance step may select the Docker Hub CLI registry");
+  assert(!/^    permissions:/m.test(source),
+    "Browser CI must retain the workflow's default contents-read permission");
+  assert(!/ghcr\.io|docker login|docker logout|GHCR_TOKEN|GITHUB_TOKEN|packages:\s*(read|write)/i.test(source),
+    "Browser CI must not reintroduce GHCR authentication or package permissions");
+  assert(!/continue-on-error:/.test(source),
+    "Browser CI must fail when required acceptance fails");
 }
-assertBrowserGhcrAuth(browser);
+assertBrowserRegistryOverride(browser);
+assert.equal((workflow.match(/SUPABASE_INTERNAL_IMAGE_REGISTRY/g) ?? []).length, 1,
+  "Only browser acceptance may override the Supabase CLI image registry");
 for (const [name, mutation] of [
-  ["write permission", (value) => value.replace("packages: read", "packages: write")],
-  ["ambient credential", (value) => value.replace("secrets.GITHUB_TOKEN", "secrets.GHCR_PAT")],
-  ["literal credential", (value) => value.replace("${{ secrets.GITHUB_TOKEN }}", "fixed-personal-token")],
-  ["non-stdin login", (value) => value.replace("--password-stdin", "--password $GHCR_TOKEN")],
-  ["late login", (value) => {
-    const step = value.slice(value.indexOf("      - name: Authenticate public GHCR pulls\n"), value.indexOf("      - run: npm ci\n"));
-    return value.replace(step, "").replace("      - run: npm run test:acceptance\n", `      - run: npm run test:acceptance\n${step}`);
-  }],
-  ["token output", (value) => value.replace("      - run: npm ci", "      - run: echo $GHCR_TOKEN\n      - run: npm ci")],
+  ["missing override", (value) => value.replace("SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io", "SUPABASE_INTERNAL_IMAGE_REGISTRY: ghcr.io")],
+  ["job-wide override", (value) => value.replace("      - run: npm run test:acceptance\n        env:\n          SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io\n", "      - run: npm run test:acceptance\n")
+    .replace("    steps:\n", "    env:\n      SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io\n    steps:\n")],
+  ["GHCR login", (value) => value.replace("      - run: npm ci\n", "      - run: docker login ghcr.io\n      - run: npm ci\n")],
+  ["package grant", (value) => value.replace("    steps:\n", "    permissions:\n      contents: read\n      packages: read\n    steps:\n")],
+  ["skipped acceptance", (value) => value.replace("      - run: npm run test:acceptance\n", "      - run: npm run test:acceptance\n        if: false\n")],
+  ["forgiven acceptance", (value) => value.replace("      - run: npm run test:acceptance\n", "      - run: npm run test:acceptance\n        continue-on-error: true\n")],
   ["missing acceptance", (value) => value.replace("      - run: npm run test:acceptance\n", "")],
-  ["conditional cleanup", (value) => value.replace("        if: always()\n        run: docker logout ghcr.io", "        if: success()\n        run: docker logout ghcr.io")],
 ]) {
-  assert.throws(() => assertBrowserGhcrAuth(mutation(browser)), undefined,
-    `Browser GHCR contract must reject ${name}`);
+  assert.throws(() => assertBrowserRegistryOverride(mutation(browser)), undefined,
+    `Browser registry contract must reject ${name}`);
 }
 assert.match(workflow, /^permissions:\n  contents: read\n/m,
   "Workflow default must retain read-only repository access");
-assert(!/packages:\s*(read|write)/.test(core + container + dependency + postgres),
-  "Only browser CI may request package access");
+assert(!/packages:\s*(read|write)/.test(workflow),
+  "CI does not need package access for public Docker Hub pulls");
 assert.match(container, /node-version: 24\.18\.1/, "Container CI must use the supported Node baseline");
 assert.match(container, /- run: npm run test:container/, "Container CI must exercise the production image");
 assert.match(dependency, /node-version: 24\.18\.1/, "Dependency CI must use the supported Node baseline");

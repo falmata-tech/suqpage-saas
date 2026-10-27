@@ -685,12 +685,18 @@ same-package v2 APK. Current step: 2. No hosted or Play write is in scope.
      `image_pull_rate_limited` and `registry_ghcr_reference` indicators. This
      identifies the registry reference, not an independently proven registry
      response body; both attempts remain failed.
-   - [x] Prepare DEP-027 S187 in an isolated branch: browser-job-only
-     `contents: read` and `packages: read`, ephemeral `GITHUB_TOKEN` login to
-     GHCR through `--password-stdin` before provider startup, and unconditional
-     logout at job end. The focused workflow test guards permissions, order,
-     acceptance retention and cleanup. It, public-script binding, YAML parsing
-     and spec validation pass locally. No native compilation or provider write
+   - [x] The first DEP-027 S187 correction added browser-only `packages: read`
+     and ephemeral GHCR login/logout; local workflow, binding, YAML and spec
+     checks passed. Exact-head run 40570983404 proved login and logout worked,
+     but the same `image_pull_rate_limited` and `registry_ghcr_reference` fixed
+     indicators accompanied failure before tests.
+     That attempted correction is superseded, not a passing browser gate.
+   - [x] Replace the ineffective GHCR authentication and package grant with a
+     browser-acceptance-step-only `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io`
+     override. Keep default `contents: read`, required acceptance and nonzero
+     failure. The focused workflow contract rejects reintroduced login,
+     permission and bypass; public-script binding, workflow, YAML and spec
+     checks pass locally. No native build or provider configuration change
      belongs to this step.
    - [ ] After the current source-matched local check finishes, integrate the
      reviewed CI correction into PR #52 and bind all five required jobs to the

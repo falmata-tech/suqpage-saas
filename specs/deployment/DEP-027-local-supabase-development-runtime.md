@@ -64,37 +64,46 @@ keep the same bounded sampling, nonzero exit, no raw provider text, cleanup,
 service/HTTP readiness, and no automatic retry. A new exact-head CI result must
 pass before the Android source is integrated or built.
 
-## S187 — authenticated public GHCR pull in required browser CI (ready)
+## S187 — alternate public registry for required browser CI (ready)
 
 Exact-head PR #52 run `40566014452` stopped before tests with fixed
-`image_pull_rate_limited` and `registry_ghcr_reference` indicators. The browser
-job must authenticate Docker to public GHCR before disposable Supabase startup
-using only that job's ephemeral GitHub `GITHUB_TOKEN`, with `packages: read` and
-retained `contents: read`. Pass the token through a step environment variable and
-Docker `--password-stdin`; do not print it or persist a personal token. Always
-log out of GHCR at the end of the browser job. Keep the required browser
-acceptance command and all other CI jobs and permissions unchanged. This changes
-CI image-pull admission only; master §22's existing gate/privacy contract still
-describes current behavior and needs no edit.
+`image_pull_rate_limited` and `registry_ghcr_reference` indicators. Run
+`40570983404` then proved the browser job's ephemeral GHCR login and logout
+succeeded, yet the same rate-limit and GHCR-reference indicators appeared before
+tests. GHCR authentication is ineffective for this failure and must be removed
+along with the browser-only `packages: read` grant. Keep the workflow's default
+`contents: read` permission.
+
+The browser acceptance step alone sets
+`SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io` for the pinned Supabase CLI. The
+[Supabase CLI issue #5785](https://github.com/supabase/cli/issues/5785) records
+the CLI's `docker.io` override and the setup action's GHCR default. Do not add
+Docker credentials, change image tags, alter local or hosted provider settings,
+or spread the override to other CI jobs. Keep the required browser acceptance
+command and its nonzero failure behavior. This changes CI image-pull routing
+only; master §22's existing gate/privacy contract still describes current
+behavior and needs no edit.
 
 ```gherkin
-Scenario: Required browser CI pulls a public GHCR image
-  GIVEN the browser job has its own read-only package and content permissions
-  WHEN disposable Supabase starts and pulls a public GHCR image
-  THEN Docker has already logged in with the job's ephemeral GitHub token
+Scenario: Required browser CI starts disposable Supabase with a public registry override
+  GIVEN the workflow retains default read-only repository access
+  WHEN the browser acceptance command starts disposable Supabase
+  THEN that step alone selects docker.io through the supported CLI environment variable
   AND provider-backed browser acceptance remains required
 
-Scenario: Browser CI ends after success or failure
-  GIVEN the browser job attempted its GHCR login
-  WHEN any later step succeeds or fails
-  THEN the final cleanup attempts Docker logout from GHCR
-  AND no credential is emitted by the workflow
+Scenario: Browser CI encounters another image-pull failure
+  GIVEN the public registry override is active only during browser acceptance
+  WHEN the image pull or subsequent acceptance fails
+  THEN the browser job fails instead of skipping or forgiving acceptance
+  AND no GHCR authentication or package permission is reintroduced
 ```
 
-The focused static workflow test must reject missing/narrowed permissions,
-absent or misplaced login, literal/printed tokens, a missing acceptance command,
-and missing unconditional logout. Local static/spec checks qualify the source;
-an exact-head remote browser pass is still required before S187 integration.
+The focused static workflow test must reject a missing or misplaced override,
+GHCR authentication or package permission, a missing acceptance command, and a
+skipped or forgiven acceptance failure. Local static/spec checks qualify the
+source; an exact-head remote browser pass is still required before S187
+integration. The previous authenticated-GHCR commit remains historical failed
+evidence, not the current contract.
 
 ## S153 — finite local mail-catcher quota (implemented; runtime qualification pending)
 
