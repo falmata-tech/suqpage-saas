@@ -680,10 +680,21 @@ same-package v2 APK. Current step: 2. No hosted or Play write is in scope.
      startup. Classify the image-pull/registry subtype with a private-safe,
      fixed-indicator DEP-027 correction and rerun the changed exact head. Keep
      the other four passing jobs and local 20/20 acceptance evidence distinct.
-   - [ ] Exact-head run 40562411981 identified image-pull rate limiting before
-     tests. Record only fixed registry references on the next run and use the
-     observed source to choose a supported image registry; do not weaken the
-     browser acceptance gate or retry the same unchanged head blindly.
+   - [x] Exact-head run 40562411981 identified image-pull rate limiting before
+     tests. Run 40566014452 then supplied fixed
+     `image_pull_rate_limited` and `registry_ghcr_reference` indicators. This
+     identifies the registry reference, not an independently proven registry
+     response body; both attempts remain failed.
+   - [x] Prepare DEP-027 S187 in an isolated branch: browser-job-only
+     `contents: read` and `packages: read`, ephemeral `GITHUB_TOKEN` login to
+     GHCR through `--password-stdin` before provider startup, and unconditional
+     logout at job end. The focused workflow test guards permissions, order,
+     acceptance retention and cleanup. It, public-script binding, YAML parsing
+     and spec validation pass locally. No native compilation or provider write
+     belongs to this step.
+   - [ ] After the current source-matched local check finishes, integrate the
+     reviewed CI correction into PR #52 and bind all five required jobs to the
+     changed exact head. A local workflow test cannot replace browser acceptance.
 3. [ ] Prepare a one-artifact review with previous v2 comparison, expiry, output
    names, bounded compilation and exact locked-audit findings. Obtain the fresh
    DEP-044 owner exception if the native audit fails. An earlier exception is

@@ -4,7 +4,7 @@ title: Local Supabase development runtime
 status: in_progress
 related: [DEP-042, DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015, DEP-050, BE-062]
 owners: [development, backend, operations]
-last_updated: 2026-10-26
+last_updated: 2026-10-27
 change_level: L3
 ---
 
@@ -63,6 +63,38 @@ These are observations, not proof of which registry refused the pull. Always
 keep the same bounded sampling, nonzero exit, no raw provider text, cleanup,
 service/HTTP readiness, and no automatic retry. A new exact-head CI result must
 pass before the Android source is integrated or built.
+
+## S187 — authenticated public GHCR pull in required browser CI (ready)
+
+Exact-head PR #52 run `40566014452` stopped before tests with fixed
+`image_pull_rate_limited` and `registry_ghcr_reference` indicators. The browser
+job must authenticate Docker to public GHCR before disposable Supabase startup
+using only that job's ephemeral GitHub `GITHUB_TOKEN`, with `packages: read` and
+retained `contents: read`. Pass the token through a step environment variable and
+Docker `--password-stdin`; do not print it or persist a personal token. Always
+log out of GHCR at the end of the browser job. Keep the required browser
+acceptance command and all other CI jobs and permissions unchanged. This changes
+CI image-pull admission only; master §22's existing gate/privacy contract still
+describes current behavior and needs no edit.
+
+```gherkin
+Scenario: Required browser CI pulls a public GHCR image
+  GIVEN the browser job has its own read-only package and content permissions
+  WHEN disposable Supabase starts and pulls a public GHCR image
+  THEN Docker has already logged in with the job's ephemeral GitHub token
+  AND provider-backed browser acceptance remains required
+
+Scenario: Browser CI ends after success or failure
+  GIVEN the browser job attempted its GHCR login
+  WHEN any later step succeeds or fails
+  THEN the final cleanup attempts Docker logout from GHCR
+  AND no credential is emitted by the workflow
+```
+
+The focused static workflow test must reject missing/narrowed permissions,
+absent or misplaced login, literal/printed tokens, a missing acceptance command,
+and missing unconditional logout. Local static/spec checks qualify the source;
+an exact-head remote browser pass is still required before S187 integration.
 
 ## S153 — finite local mail-catcher quota (implemented; runtime qualification pending)
 

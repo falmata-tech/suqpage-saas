@@ -15,10 +15,10 @@ const showroomBrief = fs.readFileSync("showroom-projects/_template/BRIEF.md", "u
 const showroomReview = fs.readFileSync("showroom-projects/_template/reviews/REVIEW.md", "utf8");
 
 function job(name, nextName) {
-  const start = workflow.indexOf(`  ${name}:\n`);
+  const start = workflow.search(new RegExp(`^  ${name}:\\n`, "m"));
   assert.notEqual(start, -1, `GitHub Actions must define the ${name} job`);
-  const end = nextName ? workflow.indexOf(`  ${nextName}:\n`, start + 1) : workflow.length;
-  assert.notEqual(end, -1, `Could not determine the end of the ${name} job`);
+  const end = nextName ? workflow.search(new RegExp(`^  ${nextName}:\\n`, "m")) : workflow.length;
+  assert(end > start, `Could not determine the end of the ${name} job`);
   return workflow.slice(start, end);
 }
 
@@ -45,6 +45,43 @@ assert(!core.includes("- run: npm run check"), "Core CI must not drift into a pa
 
 assert.match(browser, /node-version: 24\.18\.1/, "Browser CI must use the supported Node baseline");
 assert.match(browser, /- run: npm run test:acceptance/, "Browser CI must run Chromium acceptance");
+function assertBrowserGhcrAuth(source) {
+  const permissions = source.match(/^    permissions:\n((?:      [^\n]+\n)+)/m);
+  assert.equal(permissions?.[1], "      contents: read\n      packages: read\n",
+    "Browser CI must grant only content and package read access to its ephemeral token");
+  const login = `      - name: Authenticate public GHCR pulls\n        env:\n          GHCR_TOKEN: \${{ secrets.GITHUB_TOKEN }}\n        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin\n`;
+  const acceptance = "      - run: npm run test:acceptance\n";
+  const logout = "      - name: Log out of GHCR\n        if: always()\n        run: docker logout ghcr.io";
+  const loginAt = source.indexOf(login);
+  const acceptanceAt = source.indexOf(acceptance);
+  assert(loginAt >= 0 && acceptanceAt > loginAt,
+    "Browser CI must log in to GHCR through stdin before provider-backed acceptance");
+  assert.equal((source.match(/GHCR_TOKEN/g) ?? []).length, 2,
+    "Browser CI must only reference the token in the login environment and stdin command");
+  assert(source.trimEnd().endsWith(logout),
+    "Browser CI must unconditionally log out of GHCR as its final step");
+}
+assertBrowserGhcrAuth(browser);
+for (const [name, mutation] of [
+  ["write permission", (value) => value.replace("packages: read", "packages: write")],
+  ["ambient credential", (value) => value.replace("secrets.GITHUB_TOKEN", "secrets.GHCR_PAT")],
+  ["literal credential", (value) => value.replace("${{ secrets.GITHUB_TOKEN }}", "fixed-personal-token")],
+  ["non-stdin login", (value) => value.replace("--password-stdin", "--password $GHCR_TOKEN")],
+  ["late login", (value) => {
+    const step = value.slice(value.indexOf("      - name: Authenticate public GHCR pulls\n"), value.indexOf("      - run: npm ci\n"));
+    return value.replace(step, "").replace("      - run: npm run test:acceptance\n", `      - run: npm run test:acceptance\n${step}`);
+  }],
+  ["token output", (value) => value.replace("      - run: npm ci", "      - run: echo $GHCR_TOKEN\n      - run: npm ci")],
+  ["missing acceptance", (value) => value.replace("      - run: npm run test:acceptance\n", "")],
+  ["conditional cleanup", (value) => value.replace("        if: always()\n        run: docker logout ghcr.io", "        if: success()\n        run: docker logout ghcr.io")],
+]) {
+  assert.throws(() => assertBrowserGhcrAuth(mutation(browser)), undefined,
+    `Browser GHCR contract must reject ${name}`);
+}
+assert.match(workflow, /^permissions:\n  contents: read\n/m,
+  "Workflow default must retain read-only repository access");
+assert(!/packages:\s*(read|write)/.test(core + container + dependency + postgres),
+  "Only browser CI may request package access");
 assert.match(container, /node-version: 24\.18\.1/, "Container CI must use the supported Node baseline");
 assert.match(container, /- run: npm run test:container/, "Container CI must exercise the production image");
 assert.match(dependency, /node-version: 24\.18\.1/, "Dependency CI must use the supported Node baseline");
