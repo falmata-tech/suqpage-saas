@@ -680,6 +680,10 @@ same-package v2 APK. Current step: 2. No hosted or Play write is in scope.
      startup. Classify the image-pull/registry subtype with a private-safe,
      fixed-indicator DEP-027 correction and rerun the changed exact head. Keep
      the other four passing jobs and local 20/20 acceptance evidence distinct.
+   - [ ] Exact-head run 40562411981 identified image-pull rate limiting before
+     tests. Record only fixed registry references on the next run and use the
+     observed source to choose a supported image registry; do not weaken the
+     browser acceptance gate or retry the same unchanged head blindly.
 3. [ ] Prepare a one-artifact review with previous v2 comparison, expiry, output
    names, bounded compilation and exact locked-audit findings. Obtain the fresh
    DEP-044 owner exception if the native audit fails. An earlier exception is
