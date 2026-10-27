@@ -8,6 +8,26 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/SUQPAGE-TRANSITION-CHECKLIST.md).
 
+## S187 Android version3 source preparation
+
+DEP-044 S187 advances `com.africmade.app` to Android `versionCode` 3 for the
+merged S185 transport chat while preserving the existing signer, Firebase
+client, package and API target. The source-matched focused config, mobile media,
+native typecheck, identity, narrative and five countdown tests pass. The full
+source `npm run check` passes after one controlled retry outside the sandboxed
+loopback restriction; the original `EPERM` database-port failure is retained.
+An isolated root/contracts `npm run release:web` passes with zero web audit
+findings after one sandbox-DNS retry, and serial acceptance passes 20/20.
+Protected `.local/s187-native-prep/` holds those logs, the 384-entry native
+source candidate and locked audit. The fresh native audit reports four high and
+zero critical build-tool findings rooted in `node-forge` and `zod`. A separate
+source-bound offline Android Hermes export contains 1,712 modules and neither
+advisory root; its receipt is under `.local/s187-native-build/export-attempt01/`.
+This export is an inventory, not general runtime clearance. The prior version2
+owner exception is consumed. A new exact one-artifact exception, integrated
+main CI, signed compilation, binary inspection and installed-device proof remain
+separate pending gates.
+
 ## Current S186 chat web publication
 
 PR #50 merged as `08999f30572c21fc652b37f06069436a49bd55c6`, tree
@@ -562,7 +582,7 @@ related layers, test criteria and detailed completion evidence.
 | [DEP-024] Daily Featured schedule migration and rollout | in_progress | [FE-021], [FE-033], [BE-023], [BE-027], [BE-029], [DEP-020], [DEP-023] | S36 single 8:30 PM–midnight EAT agenda | [Test plan][DEP-024-tests]: `test-featured-schedule.ts`, `test-postgres-runtime.ts` |
 | [DEP-025] PWA cache and standalone-shell rollout | in_progress | [FE-034], [FE-036], [FE-037], [DEP-002], [DEP-020], [DEP-023], [DEP_BASE] | Current public routes, query/referral contracts, active component hooks, Daily Featured program modules, Marketplace admin, exact… | [Test plan][DEP-025-tests]: `pwa-cleanup-worker.js` |
 | [DEP-026] Netlify and bounded Supabase capabilities rollout | in_progress | [DEP-042], [DEP-039], [FE-019], [FE-021], [FE-038], [BE-018], [BE-023], [BE-024], [BE-026], [BE-027], [BE-030], [BE-031], [DEP-015], [DEP-020], [DEP-023], [DEP-027], [DEP-028], [ADR-0014], [ADR-0015], [ADR-0016], [ADR-0017] | Selectable identity adapter, immutable provider-to-Suqpage identity links, operator-only bcrypt migration, managed password/Google… | [Test plan][DEP-026-tests]: `test-netlify-native.mjs` |
-| [DEP-027] Local Supabase development runtime | in_progress | [DEP-042], [DEP-031], [FE-038], [BE-024], [BE-027], [BE-030], [BE-031], [DEP-023], [DEP-026], [DEP-028], [ADR-0013], [ADR-0014], [ADR-0015], [DEP-050] | Loopback-only Supabase CLI runtime with PostgreSQL 17, local Auth/private Storage, guarded setup, and SQLite restricted to… | S184 fixed-shape diagnostics pass eleven readiness cases, actual inert failure/cleanup and public-script static binding without revealing captured CLI output. Required PR/main browser jobs now pass; original Supabase-startup failures retain unproven cause. [S183/S184 evidence](#s183-icon-and-splash-mask-qualification) and [current delivery](#current-s181s184-delivery) own receipts. [Test plan][DEP-027-tests]: `test-acceptance-supabase-readiness.mjs`, `test-local-dev-launcher.mjs`. |
+| [DEP-027] Local Supabase development runtime | in_progress | [DEP-042], [DEP-031], [FE-038], [BE-024], [BE-027], [BE-030], [BE-031], [DEP-023], [DEP-026], [DEP-028], [ADR-0013], [ADR-0014], [ADR-0015], [DEP-050] | Loopback-only Supabase CLI runtime with PostgreSQL 17, local Auth/private Storage, guarded setup, and SQLite restricted to… | S184 fixed-shape diagnostics pass eleven readiness cases, actual inert failure/cleanup and public-script static binding without revealing captured CLI output. Earlier required PR/main browser jobs passed; original Supabase-startup failures retain unproven cause. S187 run `40570983404` proved GHCR login/logout but still failed before tests with fixed `image_pull_rate_limited` and `registry_ghcr_reference` indicators. The replacement acceptance-step-only Docker Hub override and `test-workflow.mjs` guard pass local workflow/static/spec/YAML checks; changed-head remote browser acceptance is pending. [S183/S184 evidence](#s183-icon-and-splash-mask-qualification) and [current delivery](#current-s181s184-delivery) own prior receipts. [Test plan][DEP-027-tests]: `test-acceptance-supabase-readiness.mjs`, `test-local-dev-launcher.mjs`, `test-workflow.mjs`. |
 | [DEP-028] Suqpage identity and passwordless production cutover | in_progress | [FE-038], [FE-039], [BE-030], [BE-031], [DEP-026], [DEP-027], [DEP-029], [ADR-0017] | Market/About/auth/setup copy, Suqpage page actions, Google display-name hint, additive private onboarding category, and separate… | [Test plan][DEP-028-tests] |
 | [DEP-029] Guarded production Auth configuration changes | in_progress | [FE-070], [BE-059], [DEP-049], [DEP-048], [DEP-032], [DEP-028], [ADR-0014], [DEP-050] | scripts/production-auth-config.ts, mandatory hosted-configuration rules in AGENTS.md, and the recovery runbook | [Test plan][DEP-029-tests]: `test-production-auth-config.ts` |
 | [DEP-030] Data-preserving Suqpage self-service rollout | in_progress | [FE-052], [DEP-036], [DEP-034], [DEP-032], [DEP-031], [FE-041], [FE-040], [BE-032], [ADR-0018], [FE-042], [BE-033], [FE-043], [BE-034], [DEP-045] | Product options/visibility commands, owner identity/location proposal, admin exact-version geographic approval, private identity… | [Test plan][DEP-030-tests] |

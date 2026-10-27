@@ -4,11 +4,46 @@ title: Google Play testing and store rollout
 status: draft
 related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053, FE-052, FE-049, DEP-046, DEP-049, DEP-051, FE-070, FE-075]
 owners: [product, operations, security]
-last_updated: 2026-10-26
+last_updated: 2026-10-27
 change_level: L4
 ---
 
 # DEP-044 — Google Play testing and store rollout
+
+## S187 — local Android version3 with S185 chat
+
+The next installable AfricMade candidate includes the S185 transport chat
+presentation and stable countdown already merged to main. It advances only the
+Android build number for the same `com.africmade.app` package. Display name,
+version name, signer, standalone Firebase client, API/Auth targets, App Links,
+permissions and Play draft remain on their admitted sources. There is no hosted
+build, Play upload or provider configuration change in this step.
+
+GIVEN the signed canonical version2 APK and the merged S185 source WHEN the
+development, preview or production Expo profile resolves Android configuration
+THEN `versionCode` is 3, even if the base Expo configuration supplies 1 or 2.
+The package remains `com.africmade.app`, the scheme remains `africmade`, and
+the reviewed runtime targets and public Firebase client are unchanged.
+
+GIVEN the current source and lockfile are frozen WHEN a local v3 compilation is
+prepared THEN compare against the same-package version2 APK, verify exact source,
+tools, client, signer, archive/runtime inventory, focused UI and config tests,
+required release gates and integrated main CI. A fresh locked native audit must
+pass or receive a new, explicit, one-artifact owner exception for its exact
+findings and plan digest. The consumed v2 exception never carries forward.
+One bounded local AAB compilation may produce a derived universal test APK;
+native static inspection must bind both before the APK is called admitted.
+
+GIVEN an Expo preview of S185 succeeds WHEN reporting v3 readiness THEN keep
+that preview separate from the signed binary and physical-phone evidence. An
+installed-device workflow, actual FCM delivery, managed CargoChatter routing,
+Play upload and testing require their own gates. A failed compilation has no
+automatic retry or broader provider permission.
+
+Tests: actual resolved-config regression in `scripts/test-mobile-build-config.cjs`,
+S185 web/Expo transport workflow evidence, `npm run check`, `npm run release:web`,
+`npm run test:acceptance`, locked native audit/export and independent v3 binary
+inspection. Traceability records results and limits after each gate.
 
 ## S181–S183 — local Android version2 candidate
 

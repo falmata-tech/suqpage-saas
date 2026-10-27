@@ -15,10 +15,10 @@ const showroomBrief = fs.readFileSync("showroom-projects/_template/BRIEF.md", "u
 const showroomReview = fs.readFileSync("showroom-projects/_template/reviews/REVIEW.md", "utf8");
 
 function job(name, nextName) {
-  const start = workflow.indexOf(`  ${name}:\n`);
+  const start = workflow.search(new RegExp(`^  ${name}:\\n`, "m"));
   assert.notEqual(start, -1, `GitHub Actions must define the ${name} job`);
-  const end = nextName ? workflow.indexOf(`  ${nextName}:\n`, start + 1) : workflow.length;
-  assert.notEqual(end, -1, `Could not determine the end of the ${name} job`);
+  const end = nextName ? workflow.search(new RegExp(`^  ${nextName}:\\n`, "m")) : workflow.length;
+  assert(end > start, `Could not determine the end of the ${name} job`);
   return workflow.slice(start, end);
 }
 
@@ -44,7 +44,41 @@ assert(!core.includes("- run: npm run build"), "Core CI must not drift into a pa
 assert(!core.includes("- run: npm run check"), "Core CI must not drift into a partial duplicate of the release script");
 
 assert.match(browser, /node-version: 24\.18\.1/, "Browser CI must use the supported Node baseline");
-assert.match(browser, /- run: npm run test:acceptance/, "Browser CI must run Chromium acceptance");
+function assertBrowserRegistryOverride(source) {
+  const acceptance = "      - run: npm run test:acceptance\n        env:\n          SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io\n";
+  const acceptanceAt = source.indexOf("      - run: npm run test:acceptance\n");
+  const nextStepAt = source.indexOf("\n      - ", acceptanceAt + 1);
+  assert(acceptanceAt >= 0 && nextStepAt > acceptanceAt,
+    "Browser CI must keep provider-backed acceptance as a required step");
+  assert.equal(source.slice(acceptanceAt, nextStepAt + 1), acceptance,
+    "Only the required browser acceptance step may select the Docker Hub CLI registry");
+  assert(!/^    permissions:/m.test(source),
+    "Browser CI must retain the workflow's default contents-read permission");
+  assert(!/ghcr\.io|docker login|docker logout|GHCR_TOKEN|GITHUB_TOKEN|packages:\s*(read|write)/i.test(source),
+    "Browser CI must not reintroduce GHCR authentication or package permissions");
+  assert(!/continue-on-error:/.test(source),
+    "Browser CI must fail when required acceptance fails");
+}
+assertBrowserRegistryOverride(browser);
+assert.equal((workflow.match(/SUPABASE_INTERNAL_IMAGE_REGISTRY/g) ?? []).length, 1,
+  "Only browser acceptance may override the Supabase CLI image registry");
+for (const [name, mutation] of [
+  ["missing override", (value) => value.replace("SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io", "SUPABASE_INTERNAL_IMAGE_REGISTRY: ghcr.io")],
+  ["job-wide override", (value) => value.replace("      - run: npm run test:acceptance\n        env:\n          SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io\n", "      - run: npm run test:acceptance\n")
+    .replace("    steps:\n", "    env:\n      SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io\n    steps:\n")],
+  ["GHCR login", (value) => value.replace("      - run: npm ci\n", "      - run: docker login ghcr.io\n      - run: npm ci\n")],
+  ["package grant", (value) => value.replace("    steps:\n", "    permissions:\n      contents: read\n      packages: read\n    steps:\n")],
+  ["skipped acceptance", (value) => value.replace("      - run: npm run test:acceptance\n", "      - run: npm run test:acceptance\n        if: false\n")],
+  ["forgiven acceptance", (value) => value.replace("      - run: npm run test:acceptance\n", "      - run: npm run test:acceptance\n        continue-on-error: true\n")],
+  ["missing acceptance", (value) => value.replace("      - run: npm run test:acceptance\n", "")],
+]) {
+  assert.throws(() => assertBrowserRegistryOverride(mutation(browser)), undefined,
+    `Browser registry contract must reject ${name}`);
+}
+assert.match(workflow, /^permissions:\n  contents: read\n/m,
+  "Workflow default must retain read-only repository access");
+assert(!/packages:\s*(read|write)/.test(workflow),
+  "CI does not need package access for public Docker Hub pulls");
 assert.match(container, /node-version: 24\.18\.1/, "Container CI must use the supported Node baseline");
 assert.match(container, /- run: npm run test:container/, "Container CI must exercise the production image");
 assert.match(dependency, /node-version: 24\.18\.1/, "Dependency CI must use the supported Node baseline");

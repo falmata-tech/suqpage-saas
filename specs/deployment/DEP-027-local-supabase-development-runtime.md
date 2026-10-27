@@ -4,7 +4,7 @@ title: Local Supabase development runtime
 status: in_progress
 related: [DEP-042, DEP-031, FE-038, BE-024, BE-027, BE-030, BE-031, DEP-023, DEP-026, DEP-028, ADR-0013, ADR-0014, ADR-0015, DEP-050, BE-062]
 owners: [development, backend, operations]
-last_updated: 2026-10-26
+last_updated: 2026-10-27
 change_level: L3
 ---
 
@@ -52,6 +52,58 @@ reproduces progress hiding a late error, then passes bounded head/tail sampling.
 Observed indicators remain hypotheses, and the original CI failures stay failed.
 Protected receipt: `.local/s184-ci-diagnostics/receipt.json`; current external CI
 and delivery qualification remain separate.
+
+S187's browser job again failed before application tests on two attempts. The
+fixed summary identified image-pull/registry and database-startup indicators,
+but could not distinguish a missing image, rate limit, access denial, or
+transport failure. Extend only its allowlisted indicators for those causes;
+if a retry shows rate limiting, add fixed registry-reference indicators so the
+next result can distinguish a public ECR reference from GHCR or Docker Hub.
+These are observations, not proof of which registry refused the pull. Always
+keep the same bounded sampling, nonzero exit, no raw provider text, cleanup,
+service/HTTP readiness, and no automatic retry. A new exact-head CI result must
+pass before the Android source is integrated or built.
+
+## S187 — alternate public registry for required browser CI (ready)
+
+Exact-head PR #52 run `40566014452` stopped before tests with fixed
+`image_pull_rate_limited` and `registry_ghcr_reference` indicators. Run
+`40570983404` then proved the browser job's ephemeral GHCR login and logout
+succeeded, yet the same rate-limit and GHCR-reference indicators appeared before
+tests. GHCR authentication is ineffective for this failure and must be removed
+along with the browser-only `packages: read` grant. Keep the workflow's default
+`contents: read` permission.
+
+The browser acceptance step alone sets
+`SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io` for the pinned Supabase CLI. The
+[Supabase CLI issue #5785](https://github.com/supabase/cli/issues/5785) records
+the CLI's `docker.io` override and the setup action's GHCR default. Do not add
+Docker credentials, change image tags, alter local or hosted provider settings,
+or spread the override to other CI jobs. Keep the required browser acceptance
+command and its nonzero failure behavior. This changes CI image-pull routing
+only; master §22's existing gate/privacy contract still describes current
+behavior and needs no edit.
+
+```gherkin
+Scenario: Required browser CI starts disposable Supabase with a public registry override
+  GIVEN the workflow retains default read-only repository access
+  WHEN the browser acceptance command starts disposable Supabase
+  THEN that step alone selects docker.io through the supported CLI environment variable
+  AND provider-backed browser acceptance remains required
+
+Scenario: Browser CI encounters another image-pull failure
+  GIVEN the public registry override is active only during browser acceptance
+  WHEN the image pull or subsequent acceptance fails
+  THEN the browser job fails instead of skipping or forgiving acceptance
+  AND no GHCR authentication or package permission is reintroduced
+```
+
+The focused static workflow test must reject a missing or misplaced override,
+GHCR authentication or package permission, a missing acceptance command, and a
+skipped or forgiven acceptance failure. Local static/spec checks qualify the
+source; an exact-head remote browser pass is still required before S187
+integration. The previous authenticated-GHCR commit remains historical failed
+evidence, not the current contract.
 
 ## S153 — finite local mail-catcher quota (implemented; runtime qualification pending)
 

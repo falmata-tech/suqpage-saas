@@ -661,6 +661,56 @@ Dependency: FE-019 S185, DEP-049 publication and DEP-044 native admission.
 
 Traceability E14 owns exact receipts and remaining hosted/device limits.
 
+### S187 — signed Android successor for the current chat
+
+Dependency: FE-019 S185, DEP-044 S187, merged main `7787a98` and canonical
+same-package v2 APK. Current step: 2. No hosted or Play write is in scope.
+
+1. [x] Advance and test resolved Android `versionCode` to 3 for every admitted
+   profile while preserving package, signer, Firebase client, API/Auth targets,
+   App Links, artwork and version name. S185 web/Expo chat source parity and
+   retained phone preview are reviewed; focused config/media, native typecheck,
+   five timer tests and the full source `npm run check` pass. A clean install
+   exposed an undeclared Xcode UUID import and mobile CSS type declaration;
+   these are fixed without changing app behavior.
+2. [ ] Freeze the exact source/lock/assets and run focused, release, acceptance,
+   config, audit and Hermes/runtime inventory checks. Bind five green integrated
+   main CI jobs before compilation; retain any failed gate honestly.
+   - [ ] PR #52 browser CI failed twice before tests at disposable Supabase
+     startup. Classify the image-pull/registry subtype with a private-safe,
+     fixed-indicator DEP-027 correction and rerun the changed exact head. Keep
+     the other four passing jobs and local 20/20 acceptance evidence distinct.
+   - [x] Exact-head run 40562411981 identified image-pull rate limiting before
+     tests. Run 40566014452 then supplied fixed
+     `image_pull_rate_limited` and `registry_ghcr_reference` indicators. This
+     identifies the registry reference, not an independently proven registry
+     response body; both attempts remain failed.
+   - [x] The first DEP-027 S187 correction added browser-only `packages: read`
+     and ephemeral GHCR login/logout; local workflow, binding, YAML and spec
+     checks passed. Exact-head run 40570983404 proved login and logout worked,
+     but the same `image_pull_rate_limited` and `registry_ghcr_reference` fixed
+     indicators accompanied failure before tests.
+     That attempted correction is superseded, not a passing browser gate.
+   - [x] Replace the ineffective GHCR authentication and package grant with a
+     browser-acceptance-step-only `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io`
+     override. Keep default `contents: read`, required acceptance and nonzero
+     failure. The focused workflow contract rejects reintroduced login,
+     permission and bypass; public-script binding, workflow, YAML and spec
+     checks pass locally. No native build or provider configuration change
+     belongs to this step.
+   - [ ] After the current source-matched local check finishes, integrate the
+     reviewed CI correction into PR #52 and bind all five required jobs to the
+     changed exact head. A local workflow test cannot replace browser acceptance.
+3. [ ] Prepare a one-artifact review with previous v2 comparison, expiry, output
+   names, bounded compilation and exact locked-audit findings. Obtain the fresh
+   DEP-044 owner exception if the native audit fails. An earlier exception is
+   consumed and does not cover this v3 artifact.
+4. [ ] Compile one local signed AAB, derive its universal APK, and independently
+   inspect identity, signing, SDK, private data, resource masks, native alignment,
+   runtime and version lineage. No automatic compilation retry.
+5. [ ] Report the installable path and SHA-256 after static admission; keep real
+   Android, push, managed CargoChatter and Play outcomes separate.
+
 ### S174 — Transport live-agent countdown and provider follow-up
 
 FE-019 S174 is the controlling visitor/owner contract; the 2:00 staff overdue
