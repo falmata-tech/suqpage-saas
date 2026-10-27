@@ -17,7 +17,7 @@ test('FE-053 actual native Photo branch renders SVG without Auth and preserves r
       b.onLoad({ filter: /.*/, namespace: 'fixture' }, args => ({ loader: 'js', contents:
         args.path === 'react' ? `export const useState=v=>[photoFixture.state??v,x=>{photoFixture.state=x;}],useEffect=f=>photoFixture.effects.push(f),createContext=value=>({value,Provider:'Provider'}),useContext=context=>context.value;export default {useState,useEffect,createContext,useContext};` :
         args.path === 'react/jsx-runtime' ? `export const jsx=(type,props)=>({type,props}),jsxs=jsx;` :
-        args.path === 'react-native' ? `export const View='View',Text='Text',Pressable='Pressable',TextInput='TextInput',ScrollView='ScrollView',Image='Image',ActivityIndicator='ActivityIndicator',KeyboardAvoidingView='KeyboardAvoidingView';export const Platform={OS:${JSON.stringify(platform)}},StyleSheet={create:x=>x},Alert={};` :
+        args.path === 'react-native' ? `export const View='View',Text='Text',Pressable='Pressable',TextInput='TextInput',ScrollView='ScrollView',Image='Image',ActivityIndicator='ActivityIndicator',KeyboardAvoidingView='KeyboardAvoidingView';export const Platform={OS:${JSON.stringify(platform)}},StyleSheet={create:x=>x},Alert={},useWindowDimensions=()=>({width:390,height:844});` :
         args.path === 'react-native-svg' ? `export default 'Svg';export const Path='Path',SvgUri='SvgUri';` :
         args.path === './runtime' ? `export const API='https://suqpage.com',useApp=()=>({session:{access_token:'private-test-token'}}),mediaUrl=ref=>'https://suqpage.com'+ref,auth={auth:{getSession:async()=>({data:{session:{access_token:'current-session-token'}}})}};` :
         args.path === './LoadingBar' ? `export default ()=>null;` :

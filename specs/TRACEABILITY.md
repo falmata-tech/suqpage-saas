@@ -8,6 +8,26 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/SUQPAGE-TRANSITION-CHECKLIST.md).
 
+## S187 Android version3 source preparation
+
+DEP-044 S187 advances `com.africmade.app` to Android `versionCode` 3 for the
+merged S185 transport chat while preserving the existing signer, Firebase
+client, package and API target. The source-matched focused config, mobile media,
+native typecheck, identity, narrative and five countdown tests pass. The full
+source `npm run check` passes after one controlled retry outside the sandboxed
+loopback restriction; the original `EPERM` database-port failure is retained.
+An isolated root/contracts `npm run release:web` passes with zero web audit
+findings after one sandbox-DNS retry, and serial acceptance passes 20/20.
+Protected `.local/s187-native-prep/` holds those logs, the 384-entry native
+source candidate and locked audit. The fresh native audit reports four high and
+zero critical build-tool findings rooted in `node-forge` and `zod`. A separate
+source-bound offline Android Hermes export contains 1,712 modules and neither
+advisory root; its receipt is under `.local/s187-native-build/export-attempt01/`.
+This export is an inventory, not general runtime clearance. The prior version2
+owner exception is consumed. A new exact one-artifact exception, integrated
+main CI, signed compilation, binary inspection and installed-device proof remain
+separate pending gates.
+
 ## Current S186 chat web publication
 
 PR #50 merged as `08999f30572c21fc652b37f06069436a49bd55c6`, tree

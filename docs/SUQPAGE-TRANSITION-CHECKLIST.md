@@ -661,6 +661,31 @@ Dependency: FE-019 S185, DEP-049 publication and DEP-044 native admission.
 
 Traceability E14 owns exact receipts and remaining hosted/device limits.
 
+### S187 — signed Android successor for the current chat
+
+Dependency: FE-019 S185, DEP-044 S187, merged main `7787a98` and canonical
+same-package v2 APK. Current step: 2. No hosted or Play write is in scope.
+
+1. [x] Advance and test resolved Android `versionCode` to 3 for every admitted
+   profile while preserving package, signer, Firebase client, API/Auth targets,
+   App Links, artwork and version name. S185 web/Expo chat source parity and
+   retained phone preview are reviewed; focused config/media, native typecheck,
+   five timer tests and the full source `npm run check` pass. A clean install
+   exposed an undeclared Xcode UUID import and mobile CSS type declaration;
+   these are fixed without changing app behavior.
+2. [ ] Freeze the exact source/lock/assets and run focused, release, acceptance,
+   config, audit and Hermes/runtime inventory checks. Bind five green integrated
+   main CI jobs before compilation; retain any failed gate honestly.
+3. [ ] Prepare a one-artifact review with previous v2 comparison, expiry, output
+   names, bounded compilation and exact locked-audit findings. Obtain the fresh
+   DEP-044 owner exception if the native audit fails. An earlier exception is
+   consumed and does not cover this v3 artifact.
+4. [ ] Compile one local signed AAB, derive its universal APK, and independently
+   inspect identity, signing, SDK, private data, resource masks, native alignment,
+   runtime and version lineage. No automatic compilation retry.
+5. [ ] Report the installable path and SHA-256 after static admission; keep real
+   Android, push, managed CargoChatter and Play outcomes separate.
+
 ### S174 — Transport live-agent countdown and provider follow-up
 
 FE-019 S174 is the controlling visitor/owner contract; the 2:00 staff overdue

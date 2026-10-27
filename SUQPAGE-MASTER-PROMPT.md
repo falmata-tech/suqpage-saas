@@ -20,9 +20,10 @@ historical provider/protocol identifiers remain where compatibility requires
 them. Their spelling does not authorize recreating services or imply that hosted
 names, email settings or existing store listings have already changed.
 
-The current source resolves Android versionCode 2 for the map-first discovery,
-simpler Featured/footer and mask-safe white-field branding. The retained v1 does
-not contain these changes; it cannot substitute for the new candidate.
+The current source resolves Android versionCode 3 for the map-first discovery,
+simpler Featured/footer, mask-safe white-field branding and S185 transport-chat
+presentation. The retained signed v2 predates S185 and cannot substitute for
+the new candidate; source configuration alone is not a signed v3 artifact.
 
 This brief describes the current source contracts. Implementation, focused tests,
 visual approval, publication and physical/Play qualification are separate states.
