@@ -16,7 +16,19 @@ const validTime=(value:unknown):value is number=>typeof value==='number'&&Number
 
 export function estimateServerNow(serverNow:number,sampledMonotonicAt:number,currentMonotonicAt:number):number{
   if(!validTime(serverNow)||!Number.isFinite(sampledMonotonicAt)||!Number.isFinite(currentMonotonicAt))return validTime(serverNow)?serverNow:0;
-  return serverNow+Math.max(0,currentMonotonicAt-sampledMonotonicAt);
+  // performance.now() has fractional milliseconds; the wait-state contract uses
+  // safe integer timestamps. Fractional estimates were rejected as invalid and
+  // reset the visible countdown to 03:30 after the first tick.
+  return Math.min(8_640_000_000_000_000,serverNow+Math.max(0,Math.floor(currentMonotonicAt-sampledMonotonicAt)));
+}
+
+/** A delayed refresh must never put a waiting customer's visible clock back. */
+export function advanceTransportClock(
+  previous:{serverNow:number;clientAt:number},
+  reportedServerNow:number,
+  clientAt:number,
+):{serverNow:number;clientAt:number}{
+  return {serverNow:Math.max(estimateServerNow(previous.serverNow,previous.clientAt,clientAt),validTime(reportedServerNow)?reportedServerNow:0),clientAt};
 }
 
 /** Uses server-supplied timestamps; a reconnect or device clock change cannot restart the queue wait. */

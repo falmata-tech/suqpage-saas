@@ -1,13 +1,13 @@
-.dialog :global(section.new-conversation),.dialog .receivedSection { display:grid; grid-template-rows:auto auto minmax(0,1fr); height:100%; max-height:inherit; min-height:0; overflow:hidden; }
+.dialog :global(section.new-conversation),.dialog .receivedSection { display:grid; grid-template-rows:auto auto minmax(0,1fr) auto; height:100%; max-height:inherit; min-height:0; overflow:hidden; }
 .chatSection { box-sizing:border-box; width:100%; min-width:0; }
 .intakeArea { min-height:0; overflow-y:auto; overscroll-behavior:contain; }
 .conversationBody { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
 .conversationBody > p[role="alert"] { flex:none; margin:0; padding:8px 12px; }
-.startTools,.chatTools { display:flex; min-width:0; min-height:52px; align-items:center; justify-content:flex-end; gap:8px; padding:4px 14px; }
-.chatTools { display:grid; grid-template-columns:minmax(0,1fr); gap:4px; align-items:center; border-bottom:1px solid #e5ebeb; }
+.startTools,.chatTools { display:flex; min-width:0; min-height:52px; align-items:center; justify-content:flex-end; gap:8px; padding:4px 14px; background:#fff; }
+.chatTools { display:grid; grid-template-columns:minmax(0,1fr); gap:4px; align-items:center; border-bottom:1px solid #e6edeb; }
 .chatTools > [data-transport-coordinator] { width:100%; min-width:0; }
 .chatTools > a { justify-self:end; max-width:100%; white-space:normal; text-align:center; }
-.startTools > a,.chatTools > a { display:inline-flex; min-height:48px; align-items:center; justify-content:center; border:1px solid #dbe2e5; border-radius:9px; padding:6px 12px; color:#a43107; font-size:13px; font-weight:650; text-decoration:none; white-space:nowrap; }
+.startTools > a,.chatTools > a { display:inline-flex; min-height:44px; align-items:center; justify-content:center; border:1px solid #d9e6e1; border-radius:12px; padding:6px 12px; color:#315f55; font-size:13px; font-weight:650; text-decoration:none; white-space:nowrap; background:#f8fbfa; }
 .startTools > a:focus-visible,.chatTools > a:focus-visible { outline:3px solid #2459cc; outline-offset:2px; }
 .dialog :global(.public-support-contact-fields) label { font-size:13px; gap:6px; }
 .dialog :global(.public-support-contact-fields) input { font-size:16px; min-height:46px; }
@@ -146,7 +146,12 @@
  .staffConversation .conversationMain :global(.support-reply){align-self:start}
 }
 
-.dialog .receivedSection { display:grid; grid-template-rows:auto minmax(0,1fr); }
+.dialog .receivedSection { display:grid; grid-template-rows:auto auto minmax(0,1fr) auto; }
+
+.chatCredit { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:3px; min-height:32px; padding:5px 12px calc(5px + env(safe-area-inset-bottom)); border-top:1px solid #e8eeec; background:#fafcfb; color:#71817e; font-size:11px; line-height:1.3; text-align:center; }
+.chatCredit a { color:#315f55; font-weight:750; text-decoration:none; }
+.chatCredit a:hover { text-decoration:underline; }
+.chatCredit a:focus-visible { outline:3px solid #315f55; outline-offset:2px; border-radius:2px; }
 .receipt { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:40px 24px; min-height:min(420px,55dvh); overflow-y:auto; text-align:center; background:#f5faf8; }
 .receipt > svg { width:64px; height:64px; flex:none; color:#087f6d; }
 .receipt h3 { margin:0; font-size:24px; line-height:1.25; }
@@ -181,8 +186,8 @@
 .replyAudience select:focus-visible { outline:3px solid #263c42; outline-offset:2px; }
 
 /* Buying chat entry: message first, then the two follow-up details. */
-.welcome { display:grid; gap:6px; padding:14px 16px 6px; background:linear-gradient(135deg,#fff4ec,#fff 80%); }
-.welcomeIcon { display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:#ffe4d2; color:#a63108; }
+.welcome { display:grid; gap:6px; padding:14px 16px 6px; background:linear-gradient(135deg,#f2f8f5,#fff 83%); }
+.welcomeIcon { display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:#e7f1eb; color:#315f55; }
 .welcomeIcon svg { width:22px; height:22px; }
 .welcome h3 { margin:0; font-size:19px; line-height:1.2; letter-spacing:-.02em; }
 .welcome p { margin:0; max-width:40ch; color:#4d6065; font-size:13px; line-height:1.42; }
@@ -203,9 +208,9 @@
 
 /* Route and contact pairs stay together on phones as well as desktop. */
 .dialog .intake :global(.public-support-contact-fields) { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:0; }
-.dialog .intake .routePair { padding:12px; border:1px solid #f0cbb8; border-radius:12px; background:#fff5ee; }
+.dialog .intake .routePair { padding:12px; border:1px solid #dbe8e1; border-radius:14px; background:#f7faf8; }
 .fieldLabel { display:flex; align-items:center; gap:6px; min-width:0; }
-.fieldLabel svg { flex:none; color:#b83200; }
+.fieldLabel svg { flex:none; color:#52786c; }
 .dialog .intake { gap:9px; padding:10px 14px 12px; border-top:0; }
 .dialog .intake textarea { min-height:54px; margin-top:-6px; }
 .welcome { grid-template-columns:36px minmax(0,1fr); align-items:center; column-gap:10px; padding-bottom:6px; }

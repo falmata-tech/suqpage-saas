@@ -4,11 +4,44 @@ title: Responsive client and staff support inbox
 status: in_progress
 related: [FE-060, BE-048, FE-049, FE-053, FE-056, ADR-0023, FE-024, FE-026, FE-036, BE-018, BE-024, DEP-015, DEP-026, ADR-0009, ADR-0012, BE-032, BE-040, BE-042, DEP-039, FE-057, FE-062, DEP-043, BE-050, FE-068]
 owners: [frontend, customer-support]
-last_updated: 2026-10-23
+last_updated: 2026-10-27
 change_level: L3
 ---
 
 # FE-019 - Responsive client and staff support inbox
+
+## S185 — CargoChatter presentation and stable transport countdown (implemented locally; rollout pending)
+
+AfricMade is CargoChatter's first host platform. For now, transport conversations
+continue through AfricMade's existing queue and staff; the managed chat migration
+is future work and must not be asserted as complete. The visitor and owner
+transport chat on web and native uses a clean, soft visual hierarchy inspired by
+CargoChatter's public demonstration, while retaining AfricMade's own navigation,
+the independent provider identity, all intake fields, the live conversation and
+the existing callback and recovery paths. A quiet, accessible **Powered by
+CargoChatter** link sits at the bottom of each transport intake, waiting/live
+conversation and callback state and opens `https://cargochatter.com/` without
+resetting the request. It is presentation credit, not a claim that CargoChatter
+already stores, routes or manages messages. The footer must remain visible above
+phone safe areas and the keyboard, without covering the reply composer.
+
+GIVEN an open transport request with a server-created wait timestamp WHEN web or
+native receives another snapshot for the same conversation THEN its displayed
+countdown never increases, including after a stale or delayed response. A new
+conversation resets to that conversation's server time. Join/reply still removes
+the countdown, and at 3:30 the current callback handoff takes over without a
+client-created extra request. The staff 2:00 overdue rule is unchanged.
+
+GIVEN a visitor or owner opens the transport chat on desktop web, phone web or
+Expo WHEN they select the provider, start a request, wait, reply or leave contact
+details THEN the header, provider, status, transcript/composer and footer remain
+aligned and readable. English, Amharic and Afaan Oromo labels can wrap without
+overlap; small and short screens scroll only the appropriate region. The chat
+remains usable if the CargoChatter site cannot open.
+
+Focused tests: `scripts/test-transport-live-wait.ts`, transport UI/layout and
+localization checks; actual Chrome desktop, phone and Expo visitor/owner review.
+Related FE-076, FE-049, FE-053 and BE-018 retain their existing authority.
 
 ## S174 — visible live-agent countdown and provider follow-up (ready)
 

@@ -609,6 +609,34 @@ signed Android artifact. The approved owner artwork is integrated. Fresh
 read-only GitHub verification on 2026-10-24 confirms remote `main` at
 `3cb29e7`, matching the S172 branch base.
 
+### S185 — CargoChatter chat presentation and timer stability
+
+Dependency: FE-019 S185 and existing FE-076/FE-053 web/native transport chat;
+no managed-service adapter or hosted write is in scope. Current step: 5.
+
+1. [x] Inspect CargoChatter's public demo and record source limits, current
+   transport screens and the countdown reset cause; specify the visual and
+   cross-platform acceptance in FE-019.
+2. [x] Keep the existing chat workflow, align intake/conversation/callback on
+   web and Expo, add the localized CargoChatter footer, and make the server-time
+   countdown non-increasing within one conversation.
+3. [x] Run focused clock, UI and localization tests. Exercise visitor and owner
+   entry, wait, refresh, reply/exit and callback in Chrome 1440/390 and Expo;
+   self-review screenshots and record authoritative outcomes/limits. The
+   S185 clock and owner-focused tests pass. Real local web and Expo guest
+   Start → End → new-request readbacks passed; owner Chrome controller tests
+   pass. The protected `.local/s185-review/` shows desktop/phone intake and
+   wait, phone callback, 320px Amharic/Afaan Oromo scroll clearance, and Expo
+   previews. Chrome was run headless; installed Android was not exercised.
+4. [x] Run the applicable full gates and update master/traceability. The
+   source-matched `npm run check`, clean-install `npm run release:web` and
+   `npm run test:acceptance` (20/20) pass. The all-target release command
+   reached only its production audit and stopped on four existing high
+   `node-forge`/`zod` mobile-toolchain reports; this is not a web gate pass.
+5. [x] Commit only task files. Remote publication and managed-service
+   integration are separate work; no hosted write or Android artifact was
+   authorized by S185.
+
 ### S174 — Transport live-agent countdown and provider follow-up
 
 FE-019 S174 is the controlling visitor/owner contract; the 2:00 staff overdue

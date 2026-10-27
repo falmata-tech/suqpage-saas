@@ -212,6 +212,26 @@ unchanged runtime behavior; their retained source identities are not rewritten.
 The current website and E13's statically admitted version2 contain these changes.
 E11's predecessor does not; installed-device qualification remains separate.
 
+## S185 transport chat presentation and countdown qualification
+
+FE-019 S185 changes transport chat presentation and fixes a client clock that
+previously rejected fractional `performance.now()` elapsed time and reset the
+countdown to 3:30. The CargoChatter footer is presentation credit only;
+AfricMade remains the chat operator. Focused clock, owner workspace and native
+controller tests, current web/Expo screenshots, and live local guest Start →
+End → new-request API readbacks are retained under `.local/s185-review/`.
+The source-matched `npm run check`, CI-equivalent clean-install
+`npm run release:web` and `npm run test:acceptance` (20/20) pass; protected
+local gate logs are `.local/s185-check-final.log`,
+`.local/s185-release-web-clean.log` and `.local/s185-acceptance.log`.
+The all-target release gate failed only at its final production audit on four
+pre-existing `node-forge`/`zod` Expo build-tool reports, so it is not claimed
+as passing. The earlier web-target attempt correctly rejected the combined
+web/native install before the clean web install was used.
+The public CargoChatter demo's referenced CSS returned 404 during review, so
+this is a stylistic adaptation, not a pixel-identical recreation. Installed
+Android and managed-service integration remain unverified/future work.
+
 ## S168 current local transport reply qualification
 
 BE-018/FE-019 use the first public staff reply as the stable 3:30 live-wait

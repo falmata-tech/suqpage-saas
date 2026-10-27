@@ -1,5 +1,5 @@
 import React,{useState} from 'react';
-import {View,Text,Pressable,StyleSheet,Image} from 'react-native';
+import {View,Text,Pressable,StyleSheet,Image,useWindowDimensions} from 'react-native';
 import {TRANSPORT_COORDINATOR,type TransportCoordinator as Coordinator} from '../../../lib/transport-coordinator';
 import {LOGISTICS_PROVIDER_COPY} from '../../../lib/i18n/transport-copy';
 import {useApp} from './runtime';
@@ -8,6 +8,7 @@ import {Copy,Icon,colors,useOpenLink} from './ui';
 /** The current provider remains a choice and uses its supplied navy/blue wordmark. */
 export default function TransportCoordinator({selection=false,compact=false,websiteLink=false,selectedId=null,onSelect}:{selection?:boolean;compact?:boolean;websiteLink?:boolean;selectedId?:Coordinator['id']|null;onSelect?:(id:Coordinator['id'])=>void}) {
   const {t}=useApp(),[open,setOpen]=useState(false),openWebsite=useOpenLink();
+  const narrow=useWindowDimensions().width<360;
   const selected=selectedId===TRANSPORT_COORDINATOR.id;
   const logo=(small=false)=><Image source={require('../assets/brands/sharedtrucks-logistics.png')} resizeMode="contain" accessible accessibilityLabel={TRANSPORT_COORDINATOR.name} style={[styles.logo,small&&styles.smallLogo]}/>;
   const badge=<Text style={styles.type}>{t(LOGISTICS_PROVIDER_COPY.freightBrokerage)}</Text>;
@@ -23,7 +24,7 @@ export default function TransportCoordinator({selection=false,compact=false,webs
       <Text style={styles.availability}>{t(LOGISTICS_PROVIDER_COPY.availability)}</Text>
     </View>}
   </View>;
-  const identity=<>{logo(compact)}<View style={styles.text}>{!compact&&<Copy muted>{t('Arranging company')}</Copy>}{badge}</View>{websiteLink&&<View style={styles.website}><Text style={styles.websiteText}>{t('Website')}</Text><Icon name="arrow" size={14} color="#194b78"/></View>}</>;
+  const identity=<>{logo(compact)}<View style={styles.text}>{!compact&&<Copy muted>{t('Arranging company')}</Copy>}{badge}</View>{websiteLink&&<View style={[styles.website,narrow&&compact&&styles.narrowWebsite]}><Text style={styles.websiteText}>{t('Website')}</Text><Icon name="arrow" size={14} color="#194b78"/></View>}</>;
   const style=[styles.company,compact&&styles.compact,websiteLink&&styles.websiteLink];
   return websiteLink?<Pressable accessibilityRole="link" accessibilityLabel={`${TRANSPORT_COORDINATOR.name} · ${t('Website')}`} onPress={()=>void openWebsite(TRANSPORT_COORDINATOR.websiteUrl)} style={style} testID="transport-coordinator-website">{identity}</Pressable>:<View style={style} testID="transport-coordinator">{identity}</View>;
 }
@@ -47,5 +48,6 @@ const styles=StyleSheet.create({
   compact:{margin:0,paddingVertical:3,paddingHorizontal:0,borderWidth:0,backgroundColor:'transparent'},
   websiteLink:{alignSelf:'stretch',maxWidth:'100%',minHeight:44,flexShrink:1,flexWrap:'wrap',paddingHorizontal:8,borderWidth:1,borderColor:'#cbd6e2',backgroundColor:'#f8fbff'},
   website:{flexDirection:'row',alignItems:'center',gap:2,flexShrink:1,minWidth:0},
+  narrowWebsite:{width:'100%',justifyContent:'flex-end'},
   websiteText:{fontSize:11,fontWeight:'700',color:'#194b78',flexShrink:1},
 });

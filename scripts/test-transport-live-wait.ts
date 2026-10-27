@@ -1,6 +1,21 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {estimateServerNow,formatTransportElapsed,formatTransportRemaining,transportLiveWait,TRANSPORT_BUSY_AFTER_MS,TRANSPORT_INBOX_AFTER_MS} from '../lib/transport-live-wait';
+import {advanceTransportClock,estimateServerNow,formatTransportElapsed,formatTransportRemaining,transportLiveWait,TRANSPORT_BUSY_AFTER_MS,TRANSPORT_INBOX_AFTER_MS} from '../lib/transport-live-wait';
+
+test('S185: delayed refreshes cannot increase the same chat countdown',()=>{
+  const start=1_800_000_000_000;
+  let sample={serverNow:start+60_000,clientAt:10_000};
+  sample=advanceTransportClock(sample,start+55_000,20_000);
+  assert.equal(formatTransportRemaining(sample.serverNow-start,'en'),'02:20');
+  sample=advanceTransportClock(sample,start+61_000,30_000);
+  assert.equal(formatTransportRemaining(sample.serverNow-start,'en'),'02:10');
+  sample=advanceTransportClock(sample,start+90_000,35_000);
+  assert.equal(formatTransportRemaining(sample.serverNow-start,'en'),'02:00');
+  assert.equal(formatTransportRemaining((start+500)-start,'en'),'03:30','a new chat may start at its own server time');
+  const fractional=estimateServerNow(start,10.25,11.75);
+  assert.equal(fractional,start+1);
+  assert.equal(transportLiveWait({status:'waiting',waitStartedAt:start},fractional).elapsedMs,1,'browser monotonic samples must remain valid integer server times');
+});
 
 test('S162: assigned customer wait shows busy at 2:00 and inbox handoff at 3:30 exactly',()=>{
   const start=1_800_000_000_000,snapshot={status:'open',waitStartedAt:start};

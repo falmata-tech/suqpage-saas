@@ -10,6 +10,7 @@ import {TRANSPORT_COORDINATOR} from '@/lib/transport-coordinator';
 import {rememberTransportDraft,takeTransportDraft,clearTransportDraft} from "@/lib/tracking-navigation";
 import BuyingConversation from "./BuyingConversation";
 import TransportIntake, { type TransportDraft } from "./TransportIntake";
+import TransportChatCredit from "./TransportChatCredit";
 import transportStyles from "./TransportSupport.module.css";
 import styles from "./OwnerTransportWorkspace.module.css";
 
@@ -54,6 +55,7 @@ export default function OwnerTransportWorkspace({ initial, draftScope="" }: { in
       <div className={styles.eyebrow}><MessageCircle size={16} aria-hidden="true" />{t("Live Chat")}</div>
       {conversation ? <BuyingConversation key={conversation.publicRef} initial={conversation} draftScope={draftScope} active endpoint={`/api/owner-transport?conversation=${conversation.id}`} conversationId={conversation.id} showAlerts={false} onAnother={() => router.push("/dashboard/transport?new=1")} />
         : <TransportIntake owner draft={draft} onChange={(field, value) => setDraft(previous => ({ ...previous, [field]: value }))} onSelectCoordinator={coordinatorId=>setDraft(previous=>({...previous,coordinatorId}))} onSubmit={start} busy={busy} ready error={error} />}
+      <TransportChatCredit/>
     </section>
   </>;
 }

@@ -38,7 +38,7 @@ const bundle=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
    export const request=(path,options={})=>window.fixture.call(path,options.body);export const secure={getItem:async()=> 'local-token',setItem:async()=>window.fixture.storage.push('set'),removeItem:async()=>window.fixture.storage.push('remove')};export class ApiFailure extends Error{};
   `:
   /(?:^\.\/|src\/)ui$/.test(args.path)?`
-   import React from 'react';export const Screen=({children})=><main>{children}</main>,Card=({children})=><section>{children}</section>,Copy=({children})=><p>{children}</p>,colors={},s={};export const Chip=()=>null,openLink=()=>{};
+   import React from 'react';export const Screen=({children})=><main>{children}</main>,Card=({children})=><section>{children}</section>,Copy=({children})=><p>{children}</p>,Icon=()=>null,colors={},s={};export const Chip=()=>null,openLink=()=>{},useOpenLink=()=>()=>{};
    export const Field=({label,onChangeText,editable,...props})=><label>{label}<textarea aria-label={label} disabled={editable===false} {...props} onChange={e=>onChangeText(e.target.value)}/></label>;
    export const Button=({label,onPress,disabled,secondary=false})=><button disabled={disabled} data-secondary={secondary} onClick={onPress}>{label}</button>;export const Status=({loading,error})=><div role='status'>{loading?'Loading':''}{error}</div>;
   `:

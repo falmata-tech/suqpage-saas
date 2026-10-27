@@ -43,7 +43,7 @@ const ui=String.raw`
 import React from'react';export const colors={},s={row:{},wrap:{}},Icon=()=>null;
 export const Screen=({children})=><main>{children}</main>,Copy=({children,heading})=>heading?<h1>{children}</h1>:<p>{children}</p>,Card=({children})=><section>{children}</section>;
 export const Field=({label,value,onChangeText,editable=true})=><label>{label}<textarea aria-label={label} value={value||''} disabled={!editable} onChange={event=>onChangeText(event.target.value)}/></label>;
-export const Button=({label,onPress,disabled})=><button disabled={disabled} onClick={onPress}>{label}</button>,Chip=Button,Status=({loading,error})=><div>{loading?<span role="progressbar">Loading</span>:null}{error?<span role="alert">{error}</span>:null}</div>,openLink=()=>{throw Error('Unexpected external link');};
+export const Button=({label,onPress,disabled})=><button disabled={disabled} onClick={onPress}>{label}</button>,Chip=Button,Status=({loading,error})=><div>{loading?<span role="progressbar">Loading</span>:null}{error?<span role="alert">{error}</span>:null}</div>,openLink=()=>{throw Error('Unexpected external link');},useOpenLink=()=>()=>{throw Error('Unexpected external link');};
 `;
 const runtime=String.raw`
 import{useEffect,useState}from'react';export const transportStorageKey='suqpage-transport';export const useApp=()=>({t:window.fixture.t,locale:'en',session:window.fixture.session,ownerRequest:window.fixture.call});
@@ -82,11 +82,11 @@ test('FE-019/FE-053 actual customer React views preserve drafts through explicit
   async function page(kind:string,items?:Snapshot[]){const p=await browser.newPage();p.on('pageerror',error=>errors.push(error.message));await p.route('http://localhost:45893/**',route=>route.fulfill({contentType:'text/html',body:'<style>*{box-sizing:border-box}body{margin:0}</style><div id="root"></div>'}));await p.goto('http://localhost:45893/');await p.addScriptTag({content:code});if(items)await p.evaluate(items=>(window as unknown as{qa:{list:(items:Snapshot[])=>void}}).qa.list(items),items);await p.evaluate(kind=>(window as unknown as{qa:{mount:(kind:string)=>void}}).qa.mount(kind),kind);return p;}
   for(const kind of ['web','native-visitor','native-owner','support'])await t.test(kind+' hides internal routing and updates response/presence separately',async()=>{const p=await page(kind);try{
     await expect(p.getByText(kind.startsWith('native')?'Waiting for a live agent at SharedTrucks Logistics':'Waiting for our team',{exact:true})).toBeVisible();await expect(p.getByText('SUP-FIXTURE-71',{exact:true})).toBeVisible();assert.doesNotMatch(await p.locator('body').innerText(),/Internal assignee|Assigned to|Overdue|123456|Chat connected/);
-    if(kind.startsWith('native'))await expect(p.getByText(/Live chat wait: 03:\d\d left/)).toBeVisible();
+    if(kind.startsWith('native'))await expect(p.getByText(/^03:\d\d$/)).toBeVisible();
     const input=p.getByRole('textbox',{name:kind==='web'?'Reply':'Message',exact:true});await input.fill('Unsaved participant reply');
     await patch(p,{status:'open',replyState:'overdue',agentJoined:false,assignedUserName:'Reassigned internally'});await expect.poll(async()=>(await calls(p)).length).toBeGreaterThan(1);await expect(input).toHaveValue('Unsaved participant reply');assert.doesNotMatch(await p.locator('body').innerText(),/Reassigned internally|Assigned to|Overdue|123456/);
     await patch(p,{status:'open',replyState:'needs_reply',agentJoined:true,assignedUserName:'Joined agent'});await expect(p.getByText('Joined agent joined your chat',{exact:true})).toBeVisible();await expect(p.getByText('Waiting for our team',{exact:true})).toBeVisible();await expect(input).toHaveValue('Unsaved participant reply');
-    if(kind.startsWith('native'))await expect(p.getByText(/Live chat wait:/)).toHaveCount(0);
+    if(kind.startsWith('native'))await expect(p.getByText(/^03:\d\d$/)).toHaveCount(0);
     await patch(p,{status:'open',replyState:'waiting_customer',agentJoined:true,assignedUserName:'Joined agent'});await expect(p.getByText('Waiting for your reply',{exact:true})).toBeVisible();await expect(input).toHaveValue('Unsaved participant reply');
     await patch(p,{status:'closed',replyState:null,agentJoined:true,assignedUserName:'Historical agent',resolvedAt:null});await expect(p.getByText('Chat ended',{exact:true})).toBeVisible();await expect(p.getByText('Waiting for your reply',{exact:true})).toHaveCount(0);assert.doesNotMatch(await p.locator('body').innerText(),/Historical agent|joined your chat|Assigned to/);if(kind==='web')await expect(p.getByText('Our team can still follow up by phone.',{exact:true})).toBeVisible();else if(kind.startsWith('native'))await expect(p.getByText('Our team can still follow up by phone.',{exact:true})).toHaveCount(0);
     await patch(p,{status:'closed',resolvedAt:456});
@@ -99,10 +99,11 @@ test('FE-019/FE-053 actual customer React views preserve drafts through explicit
    }finally{await p.close();}});
   for(const kind of ['native-visitor','web-transport'])await t.test(kind+' hands off from countdown to provider-named contact choice at the server deadline',async()=>{
    const p=await page(kind);try{
-    await expect(p.getByText(/Live chat wait: 03:\d\d left/)).toBeVisible();
+    await expect(p.getByText(/^03:\d\d$/)).toBeVisible();
+    if(kind==='web-transport')await expect(p.getByRole('timer',{name:/Live chat wait:/})).toBeVisible();
     const now=Date.now();await patch(p,{status:'open',transportWaitStartedAt:now-210_000,serverNow:now,agentJoined:false} as Snapshot);
     await expect(p.getByText('All live agents at SharedTrucks Logistics are busy helping other customers right now.',{exact:true})).toBeVisible();
-    await expect(p.getByText(/Live chat wait:/)).toHaveCount(0);
+    await expect(p.getByText(/^03:\d\d$/)).toHaveCount(0);
     await expect(p.getByRole('button',{name:'Try again later',exact:true})).toBeVisible();
     await expect(p.getByRole('button',{name:'Send contact details',exact:true})).toBeVisible();
     assert.equal((await calls(p)).filter(item=>item.body).length,0,'Deadline handoff never silently sends contact details');
@@ -168,7 +169,8 @@ test('FE-019 N12 installed RNWeb transport keeps compact utilities and one reach
    for(const label of[labels[0],labels[1],...(owner?[labels[3],labels[4]]:[labels[2]])]){
     const action=page.getByRole('button',{name:label,exact:true});await expect(action).toHaveCount(1);const box=await action.boundingBox();assert.ok(box&&box.width>=48&&box.height>=48);assert.ok(box.x>=0&&box.x+box.width<=viewport.width+1);assert.ok(await action.evaluate(n=>n.scrollWidth<=n.clientWidth+1),'Localized utility text must wrap inside its control');
    }
-   assert.equal(await page.evaluate(()=>Array.from(document.querySelectorAll('div')).filter(n=>getComputedStyle(n).overflowY==='auto'&&n.clientHeight>0).length),1,'Only the existing Screen owns scrolling');
+   const scrollRegions=await page.evaluate(()=>Array.from(document.querySelectorAll('div')).map(n=>({overflow:getComputedStyle(n).overflowY,height:n.clientHeight,scrollHeight:n.scrollHeight})).filter(n=>n.overflow!=='visible'));
+   assert.equal(scrollRegions.filter(n=>['auto','scroll'].includes(n.overflow)&&n.height>0).length,1,`Exactly one chat region owns vertical scrolling: ${JSON.stringify(scrollRegions)}`);
    const field=page.getByRole('textbox',{name:labels[6],exact:true});await field.fill('Preserved draft');const send=page.getByRole('button',{name:labels[5],exact:true});await send.scrollIntoViewIfNeeded();const sendBox=await send.boundingBox();assert.ok(sendBox&&sendBox.y+sendBox.height<=viewport.height-60+1,`The full Send action can scroll above persistent navigation: ${JSON.stringify({locale,owner,viewport,sendBox})}`);const overflow=await page.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,innerWidth,items:[...document.querySelectorAll('*')].filter(n=>n.getBoundingClientRect().right>innerWidth+1).slice(0,5).map(n=>({tag:n.tagName,text:n.textContent?.slice(0,40),right:n.getBoundingClientRect().right}))}));assert.ok(overflow.scrollWidth<=overflow.innerWidth,`No page-wide horizontal overflow: ${JSON.stringify({locale,owner,viewport,overflow})}`);
    assert.equal(await field.inputValue(),'Preserved draft');
   }
