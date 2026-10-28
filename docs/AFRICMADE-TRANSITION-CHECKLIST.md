@@ -78,17 +78,24 @@ held from Play because old names remain in its compiled content. Master §§2,
    heading invocation exposed stale test assumptions; those are fixed, not
    counted as a product failure. Installed Android and hosted provider state
    remain separate release gates.
-4. [ ] Pass source-matched `npm run check`, release and acceptance gates, update
+4. [x] Pass source-matched `npm run check`, release and acceptance gates, update
    master/traceability and stage only reviewed task files. Integrate via the
    authorized GitHub workflow and confirm terminal main CI.
    Local complete check, clean web-only release (including provider smoke and
    zero web audit findings), and 20/20 acceptance pass; traceability records
-   these as local only. Source commit `f941139a` is complete; PR/main CI remain.
+   these as local only. PR #54 merged as main `d6aea16f`, whose tree equals the
+   checked branch; all five PR and main CI jobs passed. Hosted release remains
+   step 5.
 5. [ ] Coordinate any necessary hosted identity changes with exact protected
    plans, then publish and verify `africmade.com` and legacy compatibility.
-6. [ ] Prepare a fresh DEP-044 native build review/advisory exception, compile
-   one successor AAB/APK, inspect it independently, and only then resume the
-   MarketVision Play listing, declarations, screenshots, upload and testing.
+6. [ ] Under DEP-044 S188, advance the new-package Android code to 4 and replace
+   the stale dark Play icon with the current white-background native artwork.
+   Prove resolved-config and icon parity before a fresh build review. Prepare
+   a new one-artifact advisory exception, compile and independently inspect
+   the successor AAB/APK, and only then resume the MarketVision Play listing,
+   declarations, screenshots, upload and testing. Version4 config, exact
+   white-field icon parity, full check, clean web release and 20/20 acceptance
+   pass locally; signed build and Play actions remain open.
 
 
 ### Delivery documentation reconciliation

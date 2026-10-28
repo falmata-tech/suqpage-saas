@@ -202,3 +202,19 @@ test('FE-070 web, email, PWA and native configuration point to current artwork',
  for(const asset of ['africmade-mark.png','africmade-wordmark.png','africmade-splash-wordmark.png','africmade-notification.png'])assert.ok(fs.existsSync(`apps/mobile/assets/${asset}`));
  assert.ok(platformAssetRewrites.some(route=>route.source==='/brand/suqpage-mark.svg'&&route.destination===PLATFORM_BRAND.assets.mark),'Old bookmarked asset URL resolves to the current mark');
 });
+
+test('DEP-044 S188 Play icon and package match the next AfricMade build',async()=>{
+ const listing=JSON.parse(fs.readFileSync('docs/play-store/africmade/listing-draft.json','utf8')) as {
+  targetPackage:string;currentLocalBuildPackage:string;expectedNextVersionCode:number;media:{icon:string};
+ };
+ assert.equal(listing.targetPackage,'com.africmade.app');
+ assert.equal(listing.currentLocalBuildPackage,listing.targetPackage);
+ assert.equal(listing.expectedNextVersionCode,4);
+ const store=fs.readFileSync('docs/play-store/africmade/icon.png');
+ assert.ok(store.equals(fs.readFileSync('public/pwa/africmade-icon-v4-512.png')),'Play icon must use the current white-background app artwork');
+ const hash=createHash('sha256').update(store).digest('hex');
+ assert.ok(listing.media.icon.includes(hash),'Listing must record the exact uploaded icon digest');
+ const dimensions=await sharp(store).metadata();
+ assert.equal(dimensions.width,512);assert.equal(dimensions.height,512);
+ await assertInkWithinCircle('docs/play-store/africmade/icon.png',.48,false);
+});
