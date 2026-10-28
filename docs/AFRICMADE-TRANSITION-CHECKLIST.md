@@ -83,7 +83,7 @@ held from Play because old names remain in its compiled content. Master §§2,
    authorized GitHub workflow and confirm terminal main CI.
    Local complete check, clean web-only release (including provider smoke and
    zero web audit findings), and 20/20 acceptance pass; traceability records
-   these as local only. Git review, commit, PR/main CI remain.
+   these as local only. Source commit `f941139a` is complete; PR/main CI remain.
 5. [ ] Coordinate any necessary hosted identity changes with exact protected
    plans, then publish and verify `africmade.com` and legacy compatibility.
 6. [ ] Prepare a fresh DEP-044 native build review/advisory exception, compile

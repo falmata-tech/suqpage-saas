@@ -1,4 +1,4 @@
-# MirtPage GitHub and agent workflow
+# AfricMade GitHub and agent workflow
 
 DEP-002 owns this contributor workflow. AGENTS.md retains staging, security and
 authorization rules; DEP-049 owns release admission. These instructions do not
