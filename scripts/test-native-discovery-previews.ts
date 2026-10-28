@@ -5,7 +5,7 @@ import path from 'node:path';
 import {build} from 'esbuild';
 import {chromium} from 'playwright';
 import {mapGroupCapacity,mapGroupPickerLayout} from '../lib/map/map-clustering';
-import type {MapShop,Shop} from '@suqpage/contracts';
+import type {MapShop,Shop} from '@africmade/contracts';
 
 // Actual MapGroupPicker/ShowroomContent and installed RNWeb/React renderer.
 // Device dimensions/insets, translation, photos, inquiry store and router are

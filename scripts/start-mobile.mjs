@@ -60,7 +60,7 @@ if (mode === "android")
       stdio: "inherit",
     });
     if (result.status !== 0)
-      throw Error("Start the Suqpage Android emulator first, then retry.");
+      throw Error("Start the AfricMade Android emulator first, then retry.");
   }
 const args = [
   "start",

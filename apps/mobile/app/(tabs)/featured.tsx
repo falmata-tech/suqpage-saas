@@ -10,7 +10,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
-import type { Featured } from "@suqpage/contracts";
+import type { Featured } from "@africmade/contracts";
 import { request, useLoad, useApp } from "../../src/runtime";
 import {
   Screen,

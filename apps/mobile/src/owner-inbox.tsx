@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import { View, AppState } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import * as Crypto from "expo-crypto";
-import type { Page, Inquiry, Conversation, Message } from "@suqpage/contracts";
+import type { Page, Inquiry, Conversation, Message } from "@africmade/contracts";
 import { useApp, useLoad } from "./runtime";
 import { Copy, Card, Field, Button, Chip, Status, s, openLink } from "./ui";
 import { useAction, ActionStatus } from "./owner-forms";

@@ -6,13 +6,13 @@
       "environment": "preview",
       "autoIncrement": true,
       "android": { "buildType": "apk" },
-      "env": { "SUQPAGE_FIREBASE_PROJECT_ID": "africmade-de81a", "SUQPAGE_MOBILE_BUILD_PROFILE": "preview", "SUQPAGE_MOBILE_DATA_TARGET": "mirtpage-production", "EXPO_PUBLIC_API_ORIGIN": "https://mirtpage.com", "EXPO_PUBLIC_SUPABASE_URL": "https://sjeiiqxgscuqajpgddcc.supabase.co" }
+      "env": { "AFRICMADE_FIREBASE_PROJECT_ID": "africmade-de81a", "AFRICMADE_MOBILE_BUILD_PROFILE": "preview", "AFRICMADE_MOBILE_DATA_TARGET": "africmade-production", "EXPO_PUBLIC_API_ORIGIN": "https://africmade.com", "EXPO_PUBLIC_SUPABASE_URL": "https://sjeiiqxgscuqajpgddcc.supabase.co" }
     },
     "production": {
       "environment": "production",
       "autoIncrement": true,
       "android": { "buildType": "app-bundle" },
-      "env": { "SUQPAGE_FIREBASE_PROJECT_ID": "africmade-de81a", "SUQPAGE_MOBILE_BUILD_PROFILE": "production", "SUQPAGE_MOBILE_DATA_TARGET": "mirtpage-production", "EXPO_PUBLIC_API_ORIGIN": "https://mirtpage.com", "EXPO_PUBLIC_SUPABASE_URL": "https://sjeiiqxgscuqajpgddcc.supabase.co" }
+      "env": { "AFRICMADE_FIREBASE_PROJECT_ID": "africmade-de81a", "AFRICMADE_MOBILE_BUILD_PROFILE": "production", "AFRICMADE_MOBILE_DATA_TARGET": "africmade-production", "EXPO_PUBLIC_API_ORIGIN": "https://africmade.com", "EXPO_PUBLIC_SUPABASE_URL": "https://sjeiiqxgscuqajpgddcc.supabase.co" }
     }
   },
   "submit": { "production": { "android": { "track": "internal", "releaseStatus": "draft", "serviceAccountKeyPath": "../../.local/africmade-play-submit/credentials.json" } } }

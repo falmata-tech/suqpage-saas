@@ -10,6 +10,44 @@ change_level: L2
 
 # FE-070 — AfricMade identity and digital showrooms
 
+## S188 — complete current AfricMade presentation before Play (ready)
+
+The owner requests an audit of all code, files and assets for former platform
+names before the new Play submission. This is a repository-wide inventory, with
+current customer and operator presentation as the release-critical result.
+Master §§2, 5.2, 11, 15, 18 and 19 and BE-059/DEP-049 describe the affected
+identity and compatibility boundaries. Existing tenant content, data and active
+sessions must survive the change. The signed version3 Android bundle is not
+eligible for Play because its compiled config and JavaScript still contain former
+names; DEP-044 controls a new, separately admitted artifact.
+
+1. GIVEN a visitor, business owner or staff member uses current web, phone web
+   or Expo screens WHEN a platform-authored name, page address, help text, error,
+   notification, email, share item or SEO tag appears THEN it says AfricMade or
+   uses `africmade.com`. Preserve merchant-authored text and the independent
+   SharedTrucks name. English, Amharic and Afaan Oromo convey the same meaning.
+2. GIVEN a web browser requests current metadata, PWA, icon, splash, manifest,
+   robots/sitemap or a former static icon URL WHEN it renders THEN the visible
+   identity and image are AfricMade. Legacy asset URLs may remain as aliases
+   serving current art, never former pixels.
+3. GIVEN Expo resolves its current app config and bundle WHEN inspected THEN
+   the app/launcher/splash and configured slug, iOS identifier and schemes use
+   AfricMade. Safe parsing of old public links remains compatible. No hidden
+   identifier is treated as proof of public branding by itself.
+4. GIVEN a current filename, component, package or CSS selector can be renamed
+   without changing persisted or deployed wire semantics WHEN it is updated
+   THEN references and focused tests follow it. A compatibility identifier must
+   be documented and tested rather than silently renamed or hidden from the
+   audit. Historical evidence and immutable spec IDs remain traceable.
+
+Definition of Ready: the active surfaces, three languages, old-link behavior,
+data/tenant boundaries, current artwork, source versus hosted state and native
+rebuild need are explicit. No new feature, schema reset, media deletion or
+provider write is implied. Rollback restores source and prior web deploy while
+legacy identifiers remain accepted. Tests cover changed copy/URLs, link parsing,
+app config, metadata/assets and the affected desktop/phone web/Expo workflows.
+Any hosted rename or signed binary follows DEP-049/DEP-044 independently.
+
 ## S183 — complete, readable launcher and splash artwork (ready)
 
 The owner reports cropped native icons/splash and selects the existing orange
@@ -493,7 +531,7 @@ cache invalidation.
 
 Meaningful regression coverage belongs in scripts/test-platform-brand.ts and
 scripts/test-email-branding.ts; deterministic generation remains checked by
-scripts/generate-mirtpage-icons.mjs. Exercise actual Chrome static email previews
+scripts/generate-africmade-assets.mjs. Exercise actual Chrome static email previews
 on desktop/phone in light/dark surfaces, preserving code/link placeholders and
 without sending or redeeming an OTP. Capture visuals and wait for owner visual
 approval before full/release gates. This source correction does not publish the

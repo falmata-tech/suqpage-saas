@@ -1,5 +1,5 @@
 {
-  "name": "@suqpage/mobile",
+  "name": "@africmade/mobile",
   "version": "0.1.0",
   "private": true,
   "main": "expo-router/entry",
@@ -14,7 +14,7 @@
   "dependencies": {
     "@maplibre/maplibre-react-native": "11.4.0",
     "@supabase/supabase-js": "^2.112.3",
-    "@suqpage/contracts": "0.1.0",
+    "@africmade/contracts": "0.1.0",
     "@types/geojson": "7946.0.16",
     "expo": "~57.0.25",
     "expo-clipboard": "~57.0.2",

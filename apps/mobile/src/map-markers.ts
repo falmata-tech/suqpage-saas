@@ -1,5 +1,5 @@
 import {mapClusterIndex,mapClusterMarkers,mapExposedGroup,MAP_GROUP_DEFAULT_CAPACITY,type MapClusterBounds} from '../../../lib/map/map-clustering';
-import type { MapShop, NearbyGroup } from "@suqpage/contracts";
+import type { MapShop, NearbyGroup } from "@africmade/contracts";
 import { shopCoordinate } from "./native-map-model";
 
 export type MapBounds = MapClusterBounds;

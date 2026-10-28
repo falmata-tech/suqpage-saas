@@ -4,7 +4,7 @@ set -euo pipefail
 release_target="${SUQPAGE_RELEASE_TARGET:-all}"
 if [[ "$release_target" == "web" ]]; then
   node scripts/check-web-install.cjs
-  npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate
+  npm audit --workspace=@africmade/contracts --include-workspace-root --audit-level=moderate
 elif [[ "$release_target" != "all" ]]; then
   printf 'Unknown release target.\n' >&2
   exit 1
@@ -92,7 +92,7 @@ node --import tsx scripts/test-media-reconciliation.ts
 
 printf '\n=== Production dependency audit ===\n'
 if [[ "$release_target" == "web" ]]; then
-  npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate
+  npm audit --workspace=@africmade/contracts --include-workspace-root --audit-level=moderate
 else
   npm audit --omit=dev --audit-level=moderate
 fi

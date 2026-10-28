@@ -9,7 +9,7 @@ const releaseScript = fs.readFileSync("scripts/release.sh", "utf8");
 const acceptanceRunner = fs.readFileSync("scripts/acceptance-runner.mjs", "utf8");
 const typecheckScript = fs.readFileSync("scripts/typecheck.mjs", "utf8");
 const agentContract = fs.readFileSync("AGENTS.md", "utf8");
-const masterPrompt = fs.readFileSync("SUQPAGE-MASTER-PROMPT.md", "utf8");
+const masterPrompt = fs.readFileSync("AFRICMADE-MASTER-PROMPT.md", "utf8");
 const showroomWorkflow = fs.readFileSync("showroom-projects/WORKFLOW.md", "utf8");
 const showroomBrief = fs.readFileSync("showroom-projects/_template/BRIEF.md", "utf8");
 const showroomReview = fs.readFileSync("showroom-projects/_template/reviews/REVIEW.md", "utf8");
@@ -30,8 +30,8 @@ const postgres = job("postgres");
 
 assert.match(workflow, /workflow_dispatch:/, "GitHub Actions must support an operator-triggered run");
 assert.match(core, /node-version: 24\.18\.1/, "Core CI must use the supported Node baseline");
-const webInstall = "SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@suqpage/contracts --include-workspace-root";
-const webAudit = "npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate";
+const webInstall = "SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@africmade/contracts --include-workspace-root";
+const webAudit = "npm audit --workspace=@africmade/contracts --include-workspace-root --audit-level=moderate";
 assert.ok(core.includes(`- run: ${webInstall}`), "Core CI must install only web and shared contracts from the lockfile");
 assert.equal((core.match(/- run: npm run test:workflow\n/g) ?? []).length, 1,
   "Core CI must run the shared offline workflow gate exactly once");
@@ -104,7 +104,7 @@ for (const [action, tag] of [
 assert.equal(packageJson.scripts.release, "bash scripts/release.sh");
 assert.equal(packageJson.scripts["release:web"], "SUQPAGE_RELEASE_TARGET=web bash scripts/release.sh");
 assert.match(releaseScript, /node scripts\/check-web-install\.cjs/, "Web release must reject an installation containing native tools");
-assert.match(releaseScript, /npm audit --workspace=@suqpage\/contracts --include-workspace-root --audit-level=moderate/, "Web release must audit selected build dependencies");
+assert.match(releaseScript, /npm audit --workspace=@africmade\/contracts --include-workspace-root --audit-level=moderate/, "Web release must audit selected build dependencies");
 assert.match(releaseScript, /npm audit --omit=dev --audit-level=moderate/, "Android admission must retain the full monorepo audit without a waiver");
 assert.equal(packageJson.scripts["test:container"], "node scripts/test-container.mjs");
 assert.equal(packageJson.scripts["test:trace"], "node scripts/test-build-trace.mjs");

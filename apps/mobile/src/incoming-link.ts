@@ -20,15 +20,15 @@ export function marketLinkState(input: MarketLinkInput) {
 }
 
 /** OS/browser input is navigation only; identity and public eligibility remain server authority. */
-export function incomingSuqpagePath(input: string): string {
+export function incomingAfricMadePath(input: string): string {
   try {
     if (!input || input.length > 16384 || /[\u0000-\u001f\u007f\\]/u.test(input)) return '/';
-    let url = new URL(input, 'https://mirtpage.com');
+    let url = new URL(input, 'https://africmade.com');
     if (url.username || url.password || url.port) return '/';
-    const canonicalSource=url.protocol==='https:'&&['mirtpage.com','suqpage.com'].includes(url.hostname);
+    const canonicalSource=url.protocol==='https:'&&['africmade.com','mirtpage.com','suqpage.com'].includes(url.hostname);
     if (url.protocol === 'africmade:' || url.protocol === 'mirtpage:' || url.protocol === 'suqpage:') {
       const path = `${url.hostname ? '/' + url.hostname : ''}${url.pathname}` || '/';
-      url = new URL(path + url.search, 'https://mirtpage.com');
+      url = new URL(path + url.search, 'https://africmade.com');
     } else if (!canonicalSource) return '/';
     const path = decodeURIComponent(url.pathname).replace(/\/$/, '') || '/';
     if(path==='/transport-plan'){

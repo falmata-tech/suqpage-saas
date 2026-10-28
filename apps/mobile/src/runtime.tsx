@@ -15,7 +15,7 @@ import {
   type Locale,
   type Shop,
   type Offering,
-} from "@suqpage/contracts";
+} from "@africmade/contracts";
 import { PUBLIC_ORIGIN } from "./public-origin";
 import { credentialStorageKeys } from "./credential-storage-keys";
 import {useResourceLoad} from './use-resource-load';

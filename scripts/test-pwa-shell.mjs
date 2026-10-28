@@ -78,7 +78,7 @@ assert.match(read("components/PublicAppFrame.tsx"), /showroomOpen \? null : <Pub
 for (const route of ['privacy','terms','account-deletion','contact-success','login','request']) {
   const file=`app/(public)/${route}/page.tsx`;
   assert.ok(fs.existsSync(path.join(root,file)),`${route} uses the public layout`);
-  assert.doesNotMatch(read(file),/<PublicMobileNavigation|<SuqpageBrand|<LanguageSelector|<main[ >]/,`${route} does not duplicate the shell/header/main`);
+  assert.doesNotMatch(read(file),/<PublicMobileNavigation|<AfricMadeBrand|<LanguageSelector|<main[ >]/,`${route} does not duplicate the shell/header/main`);
 }
 assert.match(read('app/invite/[token]/page.tsx'),/<PublicMobileNavigation \/>/);
 assert.match(read("app/discover/page.tsx"), /redirect\(/);

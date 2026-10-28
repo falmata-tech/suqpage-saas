@@ -1,15 +1,15 @@
 {
   "expo": {
     "name": "AfricMade",
-    "slug": "suqpage",
+    "slug": "africmade",
     "owner": "falmatad",
     "version": "0.1.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "bundleIdentifier": "com.suqpage.app",
-      "scheme": "suqpage",
+      "bundleIdentifier": "com.africmade.app",
+      "scheme": "africmade",
       "supportsTablet": true
     },
     "android": {

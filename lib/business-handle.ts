@@ -5,7 +5,7 @@ export function parseBusinessHandle(value: unknown): string {
   if (!/^[a-z0-9](?:[a-z0-9]|-(?=[a-z0-9])){1,58}[a-z0-9]$/.test(handle)) {
     throw new Error('Use 3–60 English letters, numbers or hyphens.');
   }
-  if (['suqpage', 'admin', 'support'].includes(handle)) throw new Error('This handle is not available.');
+  if (['africmade', 'suqpage', 'mirtpage', 'admin', 'support'].includes(handle)) throw new Error('This handle is not available.');
   return handle;
 }
 

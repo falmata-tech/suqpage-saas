@@ -2,7 +2,7 @@ import {OWNER_ACTIVITY_METRICS} from "../../../lib/i18n/owner-activity-copy";
 import React, {useState} from 'react';
 import {View, Text, Pressable} from 'react-native';
 import {router} from 'expo-router';
-import type {OwnerHome, Profile} from '@suqpage/contracts';
+import type {OwnerHome, Profile} from '@africmade/contracts';
 import {useApp} from './runtime';
 import {Button, Card, Copy, Photo, Icon, colors} from './ui';
 import {ActionStatus, addAsset, pickImages, useAction} from './owner-forms';

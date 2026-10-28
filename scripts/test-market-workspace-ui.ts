@@ -288,7 +288,7 @@ test('FE-065 actual web workspace restores before its first write and keeps map/
  await expect(page.getByRole('button',{name:'Made to order',exact:true})).toHaveAttribute('aria-pressed','true');
  const writes=await savedWrites(page);assert.ok(writes.length);assert.ok(writes.every(params=>new URLSearchParams(params).get('view')==='search'),'No default-map write precedes restoration');
  await page.getByRole('button',{name:'Business locations',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');
- await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.requests.some(url=>new URL(url,location.href).searchParams.get('q')==='Workshop'))).toBe(true);await expect(page.locator('.suqpage-loading')).toHaveCount(0);
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.requests.some(url=>new URL(url,location.href).searchParams.get('q')==='Workshop'))).toBe(true);await expect(page.locator('.africmade-loading')).toHaveCount(0);
  await page.getByRole('button',{name:'Move fixture map',exact:true}).click();
  await page.getByRole('button',{name:'Product listings',exact:true}).click();await page.getByRole('button',{name:'Open Featured',exact:true}).click();
  await page.getByRole('button',{name:'Open Featured showroom',exact:true}).click();
@@ -367,11 +367,11 @@ test('FE-065 S128 cached Addis return fences the initial SDK view until the clea
  await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','0');
  await page.getByRole('button',{name:'Commit current fixture map',exact:true}).click();
  assert.deepEqual(await page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)!),DISCOVERY_KEY),JSON.parse(discoveryMemory),'A pending projection cannot invalidate or overwrite still-unvalidated saved group/selection/camera');
- await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.failBusiness=true);await releaseBusinessReads(page);await expect(page.getByRole('alert')).toContainText('Search is unavailable. Try again.');await expect(page.locator('.suqpage-loading')).toHaveCount(0);
+ await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.failBusiness=true);await releaseBusinessReads(page);await expect(page.getByRole('alert')).toContainText('Search is unavailable. Try again.');await expect(page.locator('.africmade-loading')).toHaveCount(0);
  assert.deepEqual(await page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)!),DISCOVERY_KEY),JSON.parse(discoveryMemory),'A failed current read preserves the unvalidated return context for Retry');
  await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.failBusiness=false;f.holdBusiness=true;});await page.getByRole('button',{name:'Try again',exact:true}).click();await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingReads.length)).toBe(1);await releaseBusinessReads(page);
  const back=page.getByRole('button',{name:'Back to businesses',exact:true});await expect(back).toBeVisible();
- await expect(page.locator('.suqpage-loading')).toHaveCount(0);await expect(page.getByRole('heading',{name:'Fixture Business 1',exact:true})).toBeVisible();
+ await expect(page.locator('.africmade-loading')).toHaveCount(0);await expect(page.getByRole('heading',{name:'Fixture Business 1',exact:true})).toBeVisible();
  await page.getByRole('link',{name:'Open page',exact:true}).click();await expect(page).toHaveURL(/\/@fixture-1/);
  await page.getByRole('button',{name:'Browser Back',exact:true}).click();await expect(back).toBeVisible();await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','2');
  const restored=await page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)!),DISCOVERY_KEY);assert.equal(restored.activeNearbyGroupKey,'cluster:1-2');assert.equal(restored.selectedShowroomId,1);assert.deepEqual(restored.mapView,{center:[9.03,38.75],zoom:18});assert.deepEqual(errors,[]);
@@ -382,7 +382,7 @@ test('FE-065 S128 aborting a pending search back to its resolved key clears the 
  const search=page.getByRole('searchbox',{name:'Search businesses',exact:true});await search.fill('Other');
  await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.pendingReads.length)).toBe(1);
  await expect(page.getByRole('status').filter({hasText:'Updating Market results'})).toHaveCount(1);await search.fill('Addis');await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.abortedReads)).toBe(1);
- await expect(page.locator('.suqpage-loading')).toHaveCount(0);const saved=await page.evaluate(key=>sessionStorage.getItem(key),DISCOVERY_KEY);await releaseBusinessReads(page);await page.waitForTimeout(50);await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','0');assert.equal(await page.evaluate(key=>sessionStorage.getItem(key),DISCOVERY_KEY),saved,'A late aborted response cannot replace the cached projection or write return memory');assert.deepEqual(errors,[]);
+ await expect(page.locator('.africmade-loading')).toHaveCount(0);const saved=await page.evaluate(key=>sessionStorage.getItem(key),DISCOVERY_KEY);await releaseBusinessReads(page);await page.waitForTimeout(50);await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','0');assert.equal(await page.evaluate(key=>sessionStorage.getItem(key),DISCOVERY_KEY),saved,'A late aborted response cannot replace the cached projection or write return memory');assert.deepEqual(errors,[]);
 });
 
 test('FE-074 web product updates retain canonical cards and scroll until a matching snapshot settles',async t=>{
@@ -400,7 +400,7 @@ test('FE-074 web product updates retain canonical cards and scroll until a match
  await expect(page.locator('.discovery-product-link')).toHaveAttribute('href',/@fixture-shop\?product=101/);
  await expect(page.locator('.discovery-search-workspace')).toHaveAttribute('data-snapshot-current','false');
  await expect(page.getByRole('status').filter({hasText:'Updating Market results'})).toHaveCount(1);
- await expect(page.locator('.suqpage-loading')).toHaveCount(0);
+ await expect(page.locator('.africmade-loading')).toHaveCount(0);
  await expect(page.getByText("You've seen all the results.",{exact:true})).toHaveCount(0);
  assert.equal(await page.evaluate(()=>(window as unknown as{fixture:{scrolls:number}}).fixture.scrolls),0,'Typing does not reset the displayed result list');
  await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.holdProducts=false;f.pendingProductReads.splice(0).forEach(release=>release());});

@@ -1,13 +1,23 @@
 ---
 id: ADR-0029
-title: MirtPage presentation migration with preserved system identities
-status: proposed
+title: AfricMade presentation migration with preserved system identities
+status: accepted
 date: 2026-10-18
 deciders: [product, architecture, security]
 related: [FE-070, BE-059, DEP-049]
 ---
 
-# ADR-0029 — Rebrand without replacing the business system
+# ADR-0029 — AfricMade presentation with preserved system identities
+
+## Current decision
+
+AfricMade is the current public identity and `africmade.com` serves the website.
+The owner requests all active code, assets, metadata and release artifacts to
+reflect that name before the new Play submission. Retained protocol values,
+session keys, provider IDs and historical evidence below remain factual and
+require versioned compatibility migrations before removal. The old signed
+Android version3 contains former-name strings and is not the Play artifact.
+FE-070/BE-059/DEP-049 S188 govern the current completion work.
 
 ## Context
 

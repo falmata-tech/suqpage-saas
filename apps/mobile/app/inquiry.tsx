@@ -7,7 +7,7 @@ import * as Crypto from "expo-crypto";
 import {buildSocialInquiryMessage,inquiryHandoffs,selectionKey} from "../../../lib/product-inquiry";
 import {canOpenPublicContact} from "../../../lib/demo-inquiry-policy";
 import {publicContactIsPhone,publicContactDisplay} from "../../../lib/public-contact-device";
-import type {Shop,InquiryReceipt} from "@suqpage/contracts";
+import type {Shop,InquiryReceipt} from "@africmade/contracts";
 import {inquiryOptions} from "../src/inquiry-options";
 import {useApp,useLoad,request,API,type BasketItem} from "../src/runtime";
 import {useBlockedBusinesses} from "../src/blocked-businesses";

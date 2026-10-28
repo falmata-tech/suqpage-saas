@@ -10,6 +10,9 @@ assert.equal(showroomStatusLookupUrl("http://192.168.1.9:3102/@sample", { NODE_E
 assert.equal(showroomStatusLookupUrl("https://untrusted.example/@sample?token=private", {
   NODE_ENV: "production", NETLIFY: "true", NEXT_PUBLIC_APP_URL: "https://mirtpage.com",
 }).href, "https://mirtpage.com/api/public/showroom-status");
+assert.equal(showroomStatusLookupUrl("https://untrusted.example/@sample?token=private", {
+  NODE_ENV: "production", NETLIFY: "true", NEXT_PUBLIC_APP_URL: "https://africmade.com",
+}).href, "https://africmade.com/api/public/showroom-status");
 assert.throws(() => showroomStatusLookupUrl("https://untrusted.example/@sample", {
   NODE_ENV: "production", NETLIFY: "true", NEXT_PUBLIC_APP_URL: "https://untrusted.example",
 }));

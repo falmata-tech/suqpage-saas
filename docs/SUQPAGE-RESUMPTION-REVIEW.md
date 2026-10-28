@@ -8,7 +8,7 @@ not authorize retired commands or establish readiness of this candidate.
 
 Classification: continuation of FE-040 visual feature work, plus documentation
 and workflow review. The active sequence remains
-[the transition checklist](SUQPAGE-TRANSITION-CHECKLIST.md); this report does not
+[the transition checklist](AFRICMADE-TRANSITION-CHECKLIST.md); this report does not
 replace it or authorize production changes.
 
 ## Recovered state

@@ -205,9 +205,9 @@ assert.match(nextConfig, /geolocation=\(self\)/);
 assert.doesNotMatch(nextConfig, /geolocation=\(\)/);
 
 const images = [
-  ["public/landing/suqpage-public-app-canvas-v1.webp", 160_000],
-  ["public/landing/suqpage-about-production-v1.webp", 180_000],
-  ["public/landing/suqpage-workspace-context-v1.webp", 140_000],
+  ["public/landing/africmade-public-app-canvas-v1.webp", 160_000],
+  ["public/landing/africmade-about-production-v1.webp", 180_000],
+  ["public/landing/africmade-workspace-context-v1.webp", 140_000],
 ];
 for (const [file, maximum] of images) {
   const target = path.join(root, file);

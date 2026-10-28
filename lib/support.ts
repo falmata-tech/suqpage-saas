@@ -25,7 +25,7 @@ import {supportIdleEndEvidence,type SupportIdleEndEvidence} from './support-idle
 import {SUPPORT_ACTIVE_ASSIGNMENT_JOIN,SUPPORT_RESPONSE_DEADLINE_SQL,SUPPORT_RESPONSE_EPOCH_SQL,SUPPORT_RESPONSE_START_SQL} from './support-response-sql';
 import {participantTransportPlan} from './transport-plan';
 import {transportLiveWait} from './transport-live-wait';
-import type {TransportPlan} from '@suqpage/contracts';
+import type {TransportPlan} from '@africmade/contracts';
 
 export const PUBLIC_SUPPORT_SESSION_MS = 7 * 24 * 60 * 60 * 1000;
 export const PUBLIC_SUPPORT_COOKIE = platformCookies.support.current;

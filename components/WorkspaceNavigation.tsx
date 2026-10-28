@@ -38,7 +38,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { logoutAction } from "@/app/actions";
-import SuqpageBrand from "@/components/SuqpageBrand";
+import AfricMadeBrand from "@/components/AfricMadeBrand";
 import NavigationPendingIndicator from "@/components/NavigationPendingIndicator";
 import { workspaceActiveHref, type SupportQueue } from "@/lib/support-navigation";
 
@@ -256,13 +256,13 @@ export default function WorkspaceNavigation({
   return (
     <>
       <aside className="sidebar">
-        <SuqpageBrand href={dashboardHref} className="workspace-brand" />
+        <AfricMadeBrand href={dashboardHref} className="workspace-brand" />
       <LanguageSelector />
         <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
         <NavigationGroups groups={groups} clientNavigation={clientNavigation} supportQueue={supportQueue}/>
       </aside>
       <header className="workspace-mobile-header">
-        <SuqpageBrand href={dashboardHref} className="workspace-brand" />
+        <AfricMadeBrand href={dashboardHref} className="workspace-brand" />
         <LanguageSelector />
       </header>
       {!clientNavigation && <nav className="workspace-mobile-tabs" style={{gridTemplateColumns:`repeat(${primaryItems.length+1}, minmax(0, 1fr))`}} aria-label={t("Workspace application navigation")}>

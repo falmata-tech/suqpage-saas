@@ -10,6 +10,7 @@ import {
 } from "../lib/public-seo";
 import { runtimeAll, runtimeGet } from "../lib/runtime-sql";
 import type { Business, Product } from "../lib/types";
+import { publicSiteOrigin } from "../lib/public-site-origin";
 
 const business = {
   id: 19, handle: "real-showroom", name: "Sample Weaving Studio",
@@ -24,6 +25,8 @@ const product = {
 } as unknown as Product;
 
 async function main() {
+  assert.equal(publicSiteOrigin({ NODE_ENV: "production", NEXT_PUBLIC_APP_URL: "https://mirtpage.com" }), "https://africmade.com");
+  assert.equal(publicSiteOrigin({ NODE_ENV: "development", NEXT_PUBLIC_APP_URL: "http://127.0.0.1:3102/" }), "http://127.0.0.1:3102");
   const previousOrigin = process.env.NEXT_PUBLIC_APP_URL;
   process.env.NEXT_PUBLIC_APP_URL = "https://active.example";
   try {

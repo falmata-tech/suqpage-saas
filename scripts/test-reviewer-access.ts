@@ -6,7 +6,7 @@ import {reviewerBinding, reviewerEmail, reviewerSignInMode, authenticateReviewer
 import {reviewerAccounts, reviewerProvider} from '../lib/reviewer-access-runtime';
 import {createPublicClientWorkspace} from '../lib/signup';
 import {findPlaceSuggestions} from '../lib/place-catalog';
-import {createSuqpageSupabaseAdminClient, linkedSuqpageUserId} from '../lib/supabase-auth';
+import {createAfricMadeSupabaseAdminClient, linkedAfricMadeUserId} from '../lib/supabase-auth';
 import {supabaseAuthConfig} from '../lib/config';
 import {runtimeUserById} from '../lib/catalog-runtime';
 import {nativeIdentityPort} from '../lib/mobile/http';
@@ -49,14 +49,14 @@ async function main() {
   const previous={driver:process.env.SUQPAGE_AUTH_DRIVER,email:process.env.SUQPAGE_REVIEW_EMAIL,id:process.env.SUQPAGE_REVIEW_PROVIDER_ID};
   process.env.SUQPAGE_AUTH_DRIVER='supabase';
   assert.equal(new URL(supabaseAuthConfig().url).origin,'http://127.0.0.1:54321','Real provider tests must be local only');
-  const admin=createSuqpageSupabaseAdminClient();
+  const admin=createAfricMadeSupabaseAdminClient();
   try {
     const email=`qa-review-${crypto.randomUUID()}@example.test`,password=crypto.randomBytes(32).toString('base64url');
     const created=await admin.auth.admin.createUser({email,password,email_confirm:true});
     assert.equal(created.error,null,'Local reviewer provider fixture creation');assert.ok(created.data.user);const id=created.data.user.id;providerIds.push(id);
     const a=await createPublicClientWorkspace({name:'LOCAL QA reviewer',businessName:'LOCAL QA Reviewer Studio',businessCategory:'home-living',placeId:findPlaceSuggestions('Addis Ababa')[0].id,phone:'+447700900123',consent:true,idempotencyKey:crypto.randomUUID()}, {providerUserId:id,email});
     const b=await createPublicClientWorkspace({name:'LOCAL QA other owner',businessName:'LOCAL QA Other Studio',businessCategory:'home-living',placeId:findPlaceSuggestions('Addis Ababa')[0].id,phone:'+447700900124',consent:true,idempotencyKey:crypto.randomUUID()}, {providerUserId:crypto.randomUUID(),email:'qa-other@example.test'});
-    assert.equal(await linkedSuqpageUserId(id),a.userId);
+    assert.equal(await linkedAfricMadeUserId(id),a.userId);
     process.env.SUQPAGE_REVIEW_EMAIL=email;process.env.SUQPAGE_REVIEW_PROVIDER_ID=id;
     const localBinding=reviewerBinding(email,id)!;
     await assert.rejects(()=>authenticateReviewer(localBinding,reviewerAccounts,reviewerProvider(),{email,password}),ReviewerAccessError,'Non-demo account denied despite correct password');

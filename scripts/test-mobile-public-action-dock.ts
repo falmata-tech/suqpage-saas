@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import vm from 'node:vm';
 import {build} from 'esbuild';
-import type {Offering,Shop} from '@suqpage/contracts';
+import type {Offering,Shop} from '@africmade/contracts';
 import {createUiText} from '../lib/i18n/core';
 import am from '../lib/i18n/messages/am.json';
 import om from '../lib/i18n/messages/om.json';

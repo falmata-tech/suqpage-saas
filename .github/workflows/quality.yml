@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: 24.18.1
           cache: npm
-      - run: SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@suqpage/contracts --include-workspace-root
+      - run: SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@africmade/contracts --include-workspace-root
       - run: npm run test:workflow
       - run: npm run release:web
         env:
@@ -92,9 +92,9 @@ jobs:
         with:
           node-version: 24.18.1
           cache: npm
-      - run: SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@suqpage/contracts --include-workspace-root
+      - run: SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@africmade/contracts --include-workspace-root
       - run: node scripts/check-web-install.cjs
-      - run: npm audit --workspace=@suqpage/contracts --include-workspace-root --audit-level=moderate
+      - run: npm audit --workspace=@africmade/contracts --include-workspace-root --audit-level=moderate
 
   postgres:
     runs-on: ubuntu-latest

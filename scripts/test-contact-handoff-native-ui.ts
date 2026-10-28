@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import {build} from 'esbuild';
 import {createUiText} from '../lib/i18n/core';
 import {approvedDemoContactMethods,DEMO_PROFILE_CONTACT_EXAMPLES} from '../lib/demo-inquiry-policy';
-import type {Shop} from '@suqpage/contracts';
+import type {Shop} from '@africmade/contracts';
 
 type Element={type:string;props:Record<string,unknown>&{children?:unknown}};
 const bundle=build({entryPoints:['apps/mobile/app/inquiry.tsx','apps/mobile/src/ShowroomContent.tsx'],outdir:'/tmp/suqpage-inbox-ui',bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'inbox-ports',setup(b){

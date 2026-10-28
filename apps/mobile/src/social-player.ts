@@ -1,5 +1,5 @@
 import {productVideoEmbedUrl,productVideo} from '../../../lib/video/product-video';
-import {apiOrigin} from '@suqpage/contracts';
+import {apiOrigin} from '@africmade/contracts';
 import type {PlayerEvent} from './youtube-player';
 
 export function socialPlayerNavigation(input:string,origin:string):boolean {

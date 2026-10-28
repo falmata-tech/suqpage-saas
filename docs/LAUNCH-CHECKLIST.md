@@ -1,8 +1,8 @@
 # Controlled MVP launch checklist
 
 Current MirtPage work and qualification live in the
-[active delivery checklist](SUQPAGE-TRANSITION-CHECKLIST.md) and
-[DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md).
+[active delivery checklist](AFRICMADE-TRANSITION-CHECKLIST.md) and
+[DEP-049](../specs/deployment/DEP-049-africmade-domain-and-app-cutover.md).
 Netlify is the host; existing Supabase remains the managed data/Auth/media target.
 BE-035/DEP-031 retire all executable file-database tooling. The inherited pilot
 checks below are historical reference, not current commands or proof of readiness.

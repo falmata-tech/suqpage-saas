@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import vm from 'node:vm';
 import {build} from 'esbuild';
-import type {Offering,Shop} from '@suqpage/contracts';
+import type {Offering,Shop} from '@africmade/contracts';
 import {createInquiryBaskets,INQUIRY_STORAGE_ERROR,type BusinessInquiryItem} from '../apps/mobile/src/inquiry-baskets';
 
 type Element={type:string;props:Record<string,unknown>&{children?:unknown}};

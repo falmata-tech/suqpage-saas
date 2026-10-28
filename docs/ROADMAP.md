@@ -22,7 +22,7 @@ privacy, and data integrity may interrupt this sequence when evidence requires i
 ## Now - Suqpage self-service transition
 
 The product owner promoted the Suqpage transition on 2026-09-13. Its active
-sequence is `docs/SUQPAGE-TRANSITION-CHECKLIST.md`, controlled by FE-040, BE-032,
+sequence is `docs/AFRICMADE-TRANSITION-CHECKLIST.md`, controlled by FE-040, BE-032,
 DEP-030, and ADR-0018. This takes priority over older expansion entries below.
 Existing operations and security safeguards remain in force. No hosted rename,
 credential change, reset, or production migration is authorized by starting the

@@ -25,7 +25,7 @@ try {
  const anonymous=await browser.newContext();const brandPage=await anonymous.newPage();let brandStyle;
  for(const locale of ['en','am','om','so','ti']){
   await anonymous.addCookies([{name:'suqpage-language',value:locale,url:base}]);await brandPage.goto(base+'/login');await brandPage.setViewportSize({width:1440,height:1000});await brandPage.evaluate(()=>document.fonts.ready);
-  const brand=brandPage.locator('.suqpage-wordmark').first();await expect(brand).toBeVisible();
+  const brand=brandPage.locator('.africmade-wordmark').first();await expect(brand).toBeVisible();
   const style=await brand.evaluate(el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return {font:s.fontFamily,weight:s.fontWeight,spacing:s.letterSpacing,width:r.width,height:r.height,text:el.textContent}});
   if(!brandStyle)brandStyle=style;else assert.deepEqual(style,brandStyle,`Stable ${locale} wordmark`);
   await brand.screenshot({path:`${out}/logo-${locale}.png`});assert.ok(fs.readFileSync(`${out}/logo-${locale}.png`).equals(fs.readFileSync(`${out}/logo-en.png`)),`Identical ${locale} logo pixels`);

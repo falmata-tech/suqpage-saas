@@ -4,7 +4,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { assertWebInstall } = require('./check-web-install.cjs');
-const root = fs.mkdtempSync(path.join(os.tmpdir(), 'suqpage-web-boundary-'));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), 'africmade-web-boundary-'));
 function write(name, value) {
   const file = path.join(root, name);
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -13,10 +13,10 @@ function write(name, value) {
 try {
   write('package.json', '{"private":true}');
   for (const name of ['next', 'react', 'pg', 'typescript']) write(`node_modules/${name}/package.json`, JSON.stringify({ name, version: '0.0.0-test' }));
-  write('packages/contracts/package.json', '{"name":"@suqpage/contracts","main":"index.js"}');
+  write('packages/contracts/package.json', '{"name":"@africmade/contracts","main":"index.js"}');
   write('packages/contracts/index.js', 'module.exports = {};');
-  fs.mkdirSync(path.join(root, 'node_modules/@suqpage'), { recursive: true });
-  fs.symlinkSync('../../packages/contracts', path.join(root, 'node_modules/@suqpage/contracts'));
+  fs.mkdirSync(path.join(root, 'node_modules/@africmade'), { recursive: true });
+  fs.symlinkSync('../../packages/contracts', path.join(root, 'node_modules/@africmade/contracts'));
   assert.doesNotThrow(() => assertWebInstall(root));
   for (const name of ['expo', '@expo/cli', 'react-native', 'braces', 'node-forge']) {
     write(`node_modules/${name}/package.json`, JSON.stringify({ name, version: '0.0.0-test' }));

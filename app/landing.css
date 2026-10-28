@@ -216,7 +216,7 @@
   .platform-interest-form .field { grid-column: 1; }
 }
 
-/* FE-029 Suqpage public identity */
+/* FE-029 AfricMade public identity */
 .landing-header { border-color: rgb(216 223 227 / 90%); background: rgb(255 255 255 / 96%); }
 .landing-desktop-nav a { color: #42545c; }
 .landing-desktop-nav a:hover { color: var(--mp-teal); }
@@ -232,9 +232,9 @@
 .landing-closing .landing-eyebrow { color: #c8eeeb; }
 .landing-closing-action { color: var(--mp-navy); }
 .landing-footer { background: var(--mp-navy); }
-.landing-footer .suqpage-brand img { border: 1px solid rgb(255 255 255 / 34%); border-radius: 9px; }
-.landing-footer .suqpage-wordmark > span:first-child { color: #fff; }
-.landing-footer .suqpage-wordmark > span:last-child { color: var(--af-orange); }
+.landing-footer .africmade-brand img { border: 1px solid rgb(255 255 255 / 34%); border-radius: 9px; }
+.landing-footer .africmade-wordmark > span:first-child { color: #fff; }
+.landing-footer .africmade-wordmark > span:last-child { color: var(--af-orange); }
 .about-hero { background: var(--mp-navy); }
 .about-hero::after { background: rgb(11 29 58 / 64%); }
 .about-hero .landing-eyebrow { color: #ffd2bd; }
@@ -276,9 +276,9 @@
 .landing-footer-light { padding-block: 48px 28px; border-top: 1px solid var(--mp-line); background: #fff; color: var(--mp-navy); }
 .landing-footer-light .landing-footer-grid { grid-template-columns: 1.25fr repeat(3, .75fr); gap: 42px; }
 .landing-footer-light .landing-brand { color: var(--mp-navy); }
-.landing-footer-light .suqpage-brand img { border: 0; }
-.landing-footer-light .suqpage-wordmark > span:first-child { color: var(--mp-navy); }
-.landing-footer-light .suqpage-wordmark > span:last-child { color: var(--mp-teal); }
+.landing-footer-light .africmade-brand img { border: 0; }
+.landing-footer-light .africmade-wordmark > span:first-child { color: var(--mp-navy); }
+.landing-footer-light .africmade-wordmark > span:last-child { color: var(--mp-teal); }
 .landing-footer-light p { color: #66777d; }
 .landing-footer-light nav,.landing-footer-light .landing-legal { gap: 9px; }
 .landing-footer-light nav strong,.landing-footer-light .landing-legal strong { margin-bottom: 4px; color: var(--mp-navy); font-size: .72rem; text-transform: uppercase; }
@@ -321,7 +321,7 @@
   .landing-footer { display: none; }
   .landing-header { padding-top: env(safe-area-inset-top); }
   .landing-nav { gap: 6px; }
-  .landing-nav .suqpage-brand { --suqpage-mark-width: 36px; --suqpage-wordmark-size: 22px; }
+  .landing-nav .africmade-brand { --africmade-mark-width: 36px; --africmade-wordmark-size: 22px; }
   .landing-nav .language-selector select { max-width: 110px; font-size: 12px; }
   .landing-nav .language-selector > svg { display: none; }
   .public-mobile-page { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
@@ -508,7 +508,7 @@
   .public-app-shell-showroom { padding-bottom: 0; }
   .public-app-rail,.public-app-shell-showroom > .public-app-header { display: none; }
   .public-app-header { height: calc(54px + env(safe-area-inset-top)); gap: 12px; padding: env(safe-area-inset-top) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left)); }
-  .public-app-header .suqpage-brand { --suqpage-mark-width: 34px; --suqpage-wordmark-size: 22px; }
+  .public-app-header .africmade-brand { --africmade-mark-width: 34px; --africmade-wordmark-size: 22px; }
   .public-app-main { min-height: calc(100dvh - 118px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
   .public-app-showroom-main { height: auto; min-height: 100dvh; overflow: visible; background: #fff; }
   .public-app-shell-showroom .public-app-showroom-main { padding-bottom: 76px; }
@@ -573,12 +573,12 @@
 }
 
 /* Give the full signature breathing room in the header without shrinking the touch target. */
-.public-app-header .suqpage-brand { --suqpage-mark-width: 48px; }
+.public-app-header .africmade-brand { --africmade-mark-width: 48px; }
 @media(max-width:680px) {
-  .public-app-header .suqpage-brand { --suqpage-mark-width: 36px; }
+  .public-app-header .africmade-brand { --africmade-mark-width: 36px; }
 }
 @media(max-width:380px) {
   .public-app-header { gap:6px; }
-  .public-app-header .suqpage-brand { --suqpage-mark-width:32px; }
+  .public-app-header .africmade-brand { --africmade-mark-width:32px; }
   .public-app-header .language-selector > svg { display:none; }
 }

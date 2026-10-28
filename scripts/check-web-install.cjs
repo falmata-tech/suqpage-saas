@@ -14,7 +14,7 @@ function assertWebInstall(directory = process.cwd()) {
     }
     assert.equal(installed, false, `Web installation includes ${name}; use a clean, isolated root/contracts installation.`);
   }
-  const contracts = fs.realpathSync(resolve('@suqpage/contracts'));
+  const contracts = fs.realpathSync(resolve('@africmade/contracts'));
   assert.ok(contracts.startsWith(path.join(root, 'packages', 'contracts') + path.sep), 'Shared contracts must resolve inside this release tree.');
   for (const name of ['next', 'react', 'pg', 'typescript']) {
     const resolved = fs.realpathSync(resolve(`${name}/package.json`));

@@ -465,7 +465,7 @@ Provider URI references: [WhatsApp](https://faq.whatsapp.com/5913398998672934),
 
 Implementation and focused verification pass; status remains in progress pending
 explicit visual approval and the required full gates. S2h in
-`docs/SUQPAGE-TRANSITION-CHECKLIST.md` records the criterion-mapped browser flows,
+`docs/AFRICMADE-TRANSITION-CHECKLIST.md` records the criterion-mapped browser flows,
 1440/390/320 screenshots, typecheck/domain/security/architecture checks, real local
 inbox retry/duplicate evidence with cleanup, preview regression and known stubs.
 The legacy full acceptance runner needs FE-040/FE-041 selector/flow reconciliation

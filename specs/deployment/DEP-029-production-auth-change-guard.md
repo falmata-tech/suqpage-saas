@@ -10,6 +10,30 @@ change_level: L3
 
 # DEP-029 - Guarded production Auth configuration changes
 
+## S188 — AfricMade callback and mail presentation cutover (ready for local guard work)
+
+The current website is served at `africmade.com`, but the managed Auth primary
+and existing source guard still target the former domain. This leaves invitation
+and OAuth links on the former host. Extend the guard with a finite two-stage
+transition from the currently verified dual-callback policy: first add the exact
+`https://africmade.com/auth/callback` while retaining the old primary and both
+old callbacks, then select `https://africmade.com` as primary with all three
+exact callbacks retained. Permit a separately reviewed reverse primary edge.
+Do not remove any old callback in this task. Project ID, provider credentials,
+SMTP, OTP, security notices and unrelated fields remain unchanged. New Auth
+email sender/subjects/content need their own exact manifest and plan; source
+support alone does not apply them.
+
+GIVEN any old installed client or in-progress sign-in WHEN the two reviewed
+stages execute THEN its exact old callback remains accepted. GIVEN a request
+for an unreviewed host, wildcard, port, credential or callback removal WHEN the
+guard validates a plan THEN it rejects before provider access. GIVEN a plan
+with exact target, beforeimage, backup and digest WHEN the remote state drifts
+THEN no write occurs. Offline injected-port tests must prove each transition,
+reverse edge, refusal and unchanged-field readback. Production plan/apply
+requires independent target verification and owner review of the exact plan as
+already required below; no provider action is authorized by this source edit.
+
 ## Ready: exact MirtPage email presentation
 
 The independent BE-059/DEP-049 source tranche is Ready. Its only new admitted

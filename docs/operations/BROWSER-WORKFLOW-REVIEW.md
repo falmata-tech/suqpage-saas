@@ -1,6 +1,6 @@
 # Actual Chrome workflow review
 
-S120 makes this a recurring requirement for Suqpage UI, UX, layout and navigation
+S120 makes this a recurring requirement for AfricMade UI, UX, layout and navigation
 work. Follow [AGENTS.md](../../AGENTS.md), the active task checklist and the
 controlling specs. Review the affected tasks, roles and platforms and record an
 agent-owned visual pass/fail decision before full checks; then follow the
@@ -12,7 +12,7 @@ exception. A screenshot is supporting evidence, not a completed workflow test.
 
 1. Record the spec/task IDs, changed source, local URLs, affected roles, expected
    outcomes and planned writes. Verify the running process, repository and local
-   API/database target independently. Never infer Suqpage identity from the IDE
+   API/database target independently. Never infer AfricMade identity from the IDE
    tab or an open browser. Do not touch Loadgistic or hosted systems.
 2. Use actual **Google Chrome**, preferably a visible Chrome session controlled
    through its existing authorized browser/CDP connection. Use isolated browser
@@ -41,7 +41,7 @@ exception. A screenshot is supporting evidence, not a completed workflow test.
 
 ## Exercise the task as its user
 
-For interface changes, also follow the [MirtPage interface-design skill](../../.agents/skills/mirtpage-interface-design/SKILL.md). At affected phone widths, inspect real active-language labels and content—not just English—with equal attention to meaning, fit and whether the main task stays visible. Catalog/key parity is not evidence of natural wording; record when qualified language review remains outstanding.
+For interface changes, also follow the [AfricMade interface-design skill](../../.agents/skills/africmade-interface-design/SKILL.md). At affected phone widths, inspect real active-language labels and content—not just English—with equal attention to meaning, fit and whether the main task stays visible. Catalog/key parity is not evidence of natural wording; record when qualified language review remains outstanding.
 
 Cover every affected role below; an unaffected role need not repeat an unrelated
 workflow. Shared navigation changes require the affected role entry/exit paths.
@@ -125,7 +125,7 @@ Use Fast Refresh for JavaScript changes; separately verify the final standalone
 release, OS integration and production configuration before distribution.
 
 Before every phone interaction/capture, confirm the phone is awake, unlocked and
-MirtPage is the actual foreground window. Stop if another app, notification shade
+AfricMade is the actual foreground window. Stop if another app, notification shade
 or lockscreen appears. Keep credentials out of captures/output and private demo
 records protected; never capture unrelated phone content. Recheck after capture,
 wait for settled transitions and retain rejected/loading captures as such. Use

@@ -207,7 +207,7 @@ Plan before implementation:
    static validation and reasoned cases do not prove automatic activation.
 
 These L0 instructions do not change product behavior, UI or runtime artifacts.
-`SUQPAGE-MASTER-PROMPT.md` remains the product authority. Structural validation
+`AFRICMADE-MASTER-PROMPT.md` remains the product authority. Structural validation
 may use the installed YAML parser if the bundled Python validator cannot import
 its dependency; retain that limitation instead of claiming the bundled tool
 passed. Token/cost savings require observation, not a size-based promise.

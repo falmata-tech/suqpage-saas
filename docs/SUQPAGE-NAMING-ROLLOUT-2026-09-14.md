@@ -6,7 +6,7 @@ Source commit: `51109d8` (`Canonicalize Suqpage names while preserving existing 
 The main change covers 318 files, including 22 renamed tracked paths. Static
 CDN compatibility is completed by follow-up commit `ce2015b`. Canonical source,
 configuration, browser state, assets and documentation use Suqpage. The master
-brief is `SUQPAGE-MASTER-PROMPT.md`.
+brief is `AFRICMADE-MASTER-PROMPT.md`.
 
 ## Database evidence
 

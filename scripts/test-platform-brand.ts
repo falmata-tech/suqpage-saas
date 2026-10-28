@@ -126,22 +126,16 @@ test('FE-070 saved icon and wordmark URLs cannot serve a former platform mark',a
   ['public/pwa/apple-touch-icon.png','public/pwa/africmade-apple-touch-v4-180.png'],
   ['public/uploads/seed/suqpage/icon.png','public/pwa/africmade-icon-v4-512.png'],
   ['public/uploads/seed/suqpage/logo.png','public/brand/africmade-wordmark-email-white-v3.png'],
-  ['apps/mobile/assets/mirtpage-mark.png','apps/mobile/assets/africmade-mark.png'],
-  ['apps/mobile/assets/mirtpage-wordmark.png','apps/mobile/assets/africmade-wordmark.png'],
-  ['apps/mobile/assets/mirtpage-notification.png','apps/mobile/assets/africmade-notification.png'],
  ];
- for(const prefix of ['suqpage','mirtpage-panels']){
-  for(const [suffix,current] of [
-   ['favicon-32.png','africmade-favicon-v3-32.png'],
-   ['apple-touch-icon.png','africmade-apple-touch-v4-180.png'],
-   ['icon-192.png','africmade-icon-v4-192.png'],
-   ['icon-512.png','africmade-icon-v4-512.png'],
-   ['icon-maskable-512.png','africmade-maskable-v4-512.png'],
-  ])pairs.push([`public/pwa/${prefix}-${suffix}`,`public/pwa/${current}`]);
- }
- pairs.push(['public/pwa/mirtpage-panels-badge-96.png','public/pwa/africmade-badge-96.png']);
- for(const suffix of ['wordmark-email.png','wordmark-email-white-v2.png'])pairs.push([`public/brand/mirtpage-panels-${suffix}`,'public/brand/africmade-wordmark-email-white-v2.png']);
  for(const [legacy,current] of pairs)assert.ok(fs.readFileSync(legacy).equals(fs.readFileSync(current)),`${legacy} shows old artwork`);
+ for(const name of ['mark','wordmark','notification'])assert.ok(!fs.existsSync(`apps/mobile/assets/mirtpage-${name}.png`),'Retired duplicate native asset must not be shipped');
+ const retiredAssetRoutes=platformAssetRewrites.filter(route=>/^\/(?:brand|pwa)\/(?:suqpage|mirtpage)/.test(route.source));
+ assert.equal(retiredAssetRoutes.length,22,'All saved former-brand asset URLs have exact rewrites');
+ for(const route of retiredAssetRoutes){
+  assert.ok(!fs.existsSync(`public${route.source}`),`Duplicate former-name asset should not be shipped: ${route.source}`);
+  assert.ok(fs.existsSync(`public${route.destination}`),`Former-name asset rewrite lacks current art: ${route.source}`);
+  assert.ok(fs.readFileSync('public/_redirects','utf8').includes(`${route.source} ${route.destination} 200`),`Netlify former-name rewrite is missing: ${route.source}`);
+ }
  const oldEmail=await pixels('public/brand/africmade-wordmark-email-white-v2.png');
  const newEmail=await pixels('public/brand/africmade-wordmark-email-white-v3.png');
  assert.equal(oldEmail.info.width,1094);assert.equal(oldEmail.info.height,300);
@@ -156,12 +150,6 @@ test('FE-070 saved icon and wordmark URLs cannot serve a former platform mark',a
   assert.deepEqual([...ico.subarray(offset,offset+8)],[137,80,78,71,13,10,26,10]);
   if(size===32)assert.ok(ico.subarray(offset,offset+length).equals(fs.readFileSync('public/pwa/africmade-favicon-v3-32.png')));
  }
- const mark=fs.readFileSync('public/brand/africmade-showroom-mark-v3.png').toString('base64');
- const wordmark=fs.readFileSync('public/brand/africmade-wordmark-v3.png').toString('base64');
- const reverse=fs.readFileSync('public/brand/africmade-wordmark-reverse-v3.png').toString('base64');
- for(const file of ['suqpage-legacy-mark.svg','suqpage-mark.svg','suqpage-original-mark.svg','suqpage-original-mark-v2.svg','mirtpage-panels-mark.svg'])assert.ok(fs.readFileSync(`public/brand/${file}`,'utf8').includes(mark),file);
- assert.ok(fs.readFileSync('public/brand/mirtpage-panels-wordmark.svg','utf8').includes(wordmark));
- assert.ok(fs.readFileSync('public/brand/mirtpage-panels-wordmark-reverse.svg','utf8').includes(reverse));
 });
 
 test('FE-070 small, maskable and Android icons use the minimal showroom silhouette',async()=>{
@@ -201,7 +189,8 @@ test('FE-070 web, email, PWA and native configuration point to current artwork',
  const layout=fs.readFileSync('app/layout.tsx','utf8');for(const asset of [PLATFORM_BRAND.assets.mark,PLATFORM_BRAND.assets.favicon,PLATFORM_BRAND.assets.apple])assert.ok(layout.includes(asset),asset);
  const worker=fs.readFileSync('public/sw.js','utf8');assert.match(worker,/const CACHE_PREFIX = "africmade-pwa-"/);for(const asset of [PLATFORM_BRAND.assets.mark,PLATFORM_BRAND.assets.icon192])assert.ok(worker.includes(asset));
  const webBrand=fs.readFileSync('components/AfricMadeBrand.tsx','utf8');assert.match(webBrand,/AfricMade home/);assert.match(webBrand,/wordmarkReverse/);
- assert.match(fs.readFileSync('components/SuqpageBrand.tsx','utf8'),/AfricMadeBrand/,'Compatibility import uses the new renderer');
+ assert.equal(fs.existsSync('components/SuqpageBrand.tsx'),false,'Retired component shim is removed');
+ assert.match(fs.readFileSync('components/PublicAppFrame.tsx','utf8'),/components\/AfricMadeBrand/);
  const mobile=JSON.parse(fs.readFileSync('apps/mobile/app.json','utf8')).expo;
  assert.equal(mobile.name,'AfricMade');assert.equal(mobile.icon,'./assets/icon.png');
  assert.equal(mobile.android.adaptiveIcon.foregroundImage,'./assets/africmade-adaptive-foreground.png');
@@ -211,5 +200,5 @@ test('FE-070 web, email, PWA and native configuration point to current artwork',
  assert.equal(mobile.android.adaptiveIcon.backgroundColor,'#ffffff');
  assert.match(fs.readFileSync('apps/mobile/src/ui.tsx','utf8'),/africmade-wordmark\.png/);
  for(const asset of ['africmade-mark.png','africmade-wordmark.png','africmade-splash-wordmark.png','africmade-notification.png'])assert.ok(fs.existsSync(`apps/mobile/assets/${asset}`));
- assert.ok(fs.existsSync('public/brand/suqpage-mark.svg'),'Old bookmarked asset URLs remain available');
+ assert.ok(platformAssetRewrites.some(route=>route.source==='/brand/suqpage-mark.svg'&&route.destination===PLATFORM_BRAND.assets.mark),'Old bookmarked asset URL resolves to the current mark');
 });

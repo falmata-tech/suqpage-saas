@@ -3,7 +3,7 @@ import {TRANSPORT_COPY,OWNER_TRANSPORT_COPY} from "../../../lib/i18n/transport-c
 import { router,useFocusEffect } from "expo-router";
 import { AppState, View, Text, Pressable, StyleSheet, ScrollView, useWindowDimensions } from "react-native";
 import * as Crypto from "expo-crypto";
-import type { Buying } from "@suqpage/contracts";
+import type { Buying } from "@africmade/contracts";
 import { useApp, request, secure, transportStorageKey, ApiFailure } from "../src/runtime";
 import { Screen, Copy, Field, Button, Status, Icon, colors, useOpenLink } from "../src/ui";
 import ChatReadSentinel,{ChatReadTranscript} from '../src/ChatReadSentinel';

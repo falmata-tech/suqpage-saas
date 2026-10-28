@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { suqpageEmailBrandingPatch } from "./auth-email-templates";
+import { africMadeEmailBrandingPatch } from "./auth-email-templates";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -67,7 +67,7 @@ for (const [index, patch] of forbidden.entries()) {
   });
 }
 test("all AfricMade email branding is exact and cannot alter providers or sender addresses", () => {
-  const patch = suqpageEmailBrandingPatch();
+  const patch = africMadeEmailBrandingPatch();
   assert.equal(Object.keys(patch).length, 27);
   validatePatch(project, patch, template);
   for (const [key, value] of Object.entries(patch)) {
@@ -80,7 +80,7 @@ test("all AfricMade email branding is exact and cannot alter providers or sender
 });
 
 test("email contrast repair admits only the thirteen exact HTML fields", () => {
-  const patch=Object.fromEntries(Object.entries(suqpageEmailBrandingPatch()).filter(([key])=>key.startsWith("mailer_templates_")&&key.endsWith("_content")));
+  const patch=Object.fromEntries(Object.entries(africMadeEmailBrandingPatch()).filter(([key])=>key.startsWith("mailer_templates_")&&key.endsWith("_content")));
   assert.equal(Object.keys(patch).length,13);
   assert.ok(Object.keys(patch).every(key=>key.startsWith("mailer_templates_")));
   for(const html of Object.values(patch))assert.match(html,/africmade-wordmark-email-white-v3\.png/);
@@ -316,7 +316,7 @@ test("readback predicts only approved customization flags and preserves every ot
       config.mailer_subjects_custom_contents = { MAILER_SUBJECTS_INVITE: false, MAILER_SUBJECTS_RECOVERY: false };
       config.mailer_templates_custom_contents = { MAILER_TEMPLATES_INVITE_CONTENT: false };
       const patch = { mailer_subjects_invite: "You are invited to AfricMade",
-        mailer_templates_invite_content: suqpageEmailBrandingPatch().mailer_templates_invite_content };
+        mailer_templates_invite_content: africMadeEmailBrandingPatch().mailer_templates_invite_content };
       const plan = await f.plan(patch);
       const originalPatch = f.port.patch;
       f.port.patch = async request => {
@@ -362,6 +362,9 @@ test("customization metadata is immutable and malformed metadata cannot admit a 
 
 const transitions: readonly [AuthOriginPhase, AuthOriginPhase][] = [
   ["legacy", "dual-old-primary"], ["dual-old-primary", "dual-new-primary"], ["dual-new-primary", "dual-old-primary"],
+  ["dual-new-primary", "africmade-callback-old-primary"],
+  ["africmade-callback-old-primary", "africmade-primary"],
+  ["africmade-primary", "africmade-callback-old-primary"],
 ];
 function originFixture(sourcePhase: AuthOriginPhase = "legacy") {
   const f = fixture();
@@ -406,6 +409,8 @@ test("origin policy tuples are exact and no phase can retire the legacy callback
     legacy: { site_url: "https://suqpage.com", uri_allow_list: "https://suqpage.com/auth/callback" },
     "dual-old-primary": { site_url: "https://suqpage.com", uri_allow_list: "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback" },
     "dual-new-primary": { site_url: "https://mirtpage.com", uri_allow_list: "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback" },
+    "africmade-callback-old-primary": { site_url: "https://mirtpage.com", uri_allow_list: "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback,https://africmade.com/auth/callback" },
+    "africmade-primary": { site_url: "https://africmade.com", uri_allow_list: "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback,https://africmade.com/auth/callback" },
   });
   assert.ok(Object.isFrozen(AUTH_ORIGIN_POLICIES));
   for (const policy of Object.values(AUTH_ORIGIN_POLICIES)) {
@@ -415,6 +420,10 @@ test("origin policy tuples are exact and no phase can retire the legacy callback
       { ...policy, mailer_otp_length: 6 }]) {
       assert.throws(() => validatePatch(project, patch, template), /forbidden/);
     }
+  }
+  for (const phase of ["africmade-callback-old-primary", "africmade-primary"] as const) {
+    const allowed = AUTH_ORIGIN_POLICIES[phase].uri_allow_list.split(",");
+    assert.deepEqual(allowed, ["https://suqpage.com/auth/callback", "https://mirtpage.com/auth/callback", "https://africmade.com/auth/callback"]);
   }
 });
 
@@ -431,7 +440,9 @@ test("unsupported origin phases, skipped steps, no-ops and callback retirement r
       }
     }
     for (const phase of [undefined, null, [], {}, "__proto__", "toString", "new-only", "https://mirtpage.com",
-      "https://www.mirtpage.com", "https://mirtpage.com:443", "http://mirtpage.com", "https://mirtpage.com/?q=1"]) {
+      "https://www.mirtpage.com", "https://mirtpage.com:443", "http://mirtpage.com", "https://mirtpage.com/?q=1",
+      "https://africmade.com", "https://www.africmade.com", "https://africmade.com:443", "http://africmade.com",
+      "africmade-primary?uri_allow_list=*"]) {
       await assert.rejects(prepareAuthOriginPlan({ ...f, sourcePhase: "legacy", targetPhase: phase }), /phase/);
       await assert.rejects(prepareAuthOriginPlan({ ...f, sourcePhase: phase, targetPhase: "dual-old-primary" }), /phase/);
     }
@@ -456,6 +467,54 @@ test("source phase must exactly match the complete current origin tuple before a
       await assert.rejects(f.originPlan(), /exact source phase/);
       assert.equal(f.writes.length, 0);
       assert.deepEqual(fs.readdirSync(f.directory), []);
+    } finally { f.dispose(); }
+  }
+});
+
+test("AfricMade stages reject a wrong current host or changed callback list before a plan exists", async () => {
+  for (const [sourcePhase, targetPhase, mismatch] of [
+    ["dual-new-primary", "africmade-callback-old-primary", { uri_allow_list: AUTH_ORIGIN_POLICIES["africmade-callback-old-primary"].uri_allow_list }],
+    ["africmade-callback-old-primary", "africmade-primary", { uri_allow_list: AUTH_ORIGIN_POLICIES["dual-new-primary"].uri_allow_list }],
+    ["africmade-callback-old-primary", "africmade-primary", { uri_allow_list: `${AUTH_ORIGIN_POLICIES["africmade-callback-old-primary"].uri_allow_list},https://unreviewed.test/auth/callback` }],
+    ["africmade-primary", "africmade-callback-old-primary", { site_url: "https://www.africmade.com" }],
+  ] as const) {
+    const f = originFixture(sourcePhase);
+    try {
+      Object.assign(f.config(), mismatch);
+      await assert.rejects(f.originPlan(targetPhase), /exact source phase/);
+      assert.equal(f.writes.length, 0);
+      assert.deepEqual(fs.readdirSync(f.directory), []);
+    } finally { f.dispose(); }
+  }
+});
+
+test("AfricMade plans reject removed callbacks, extra hosts, wrong primary and mixed settings before provider access", async () => {
+  for (const [sourcePhase, targetPhase] of [
+    ["dual-new-primary", "africmade-callback-old-primary"],
+    ["africmade-callback-old-primary", "africmade-primary"],
+  ] as const) {
+    const f = originFixture(sourcePhase);
+    try {
+      const plan = await f.originPlan(targetPhase);
+      const file = path.join(f.directory, `${plan.id}.json`);
+      const original = JSON.parse(fs.readFileSync(file, "utf8"));
+      const target = AUTH_ORIGIN_POLICIES[targetPhase];
+      let providerCalls = 0;
+      f.port.project = async () => { providerCalls++; throw Error("Provider must not be called"); };
+      f.port.read = async () => { providerCalls++; throw Error("Provider must not be called"); };
+      for (const patch of [
+        { ...target, uri_allow_list: AUTH_ORIGIN_POLICIES["dual-new-primary"].uri_allow_list },
+        { ...target, uri_allow_list: `${target.uri_allow_list},https://unreviewed.test/auth/callback` },
+        { ...target, site_url: "https://www.africmade.com" },
+        { ...target, external_google_enabled: false },
+      ]) {
+        const edited = { ...original, patch };
+        fs.writeFileSync(file, JSON.stringify(edited));
+        await assert.rejects(f.apply({ ...plan, approval: digest(edited) }), /exact target phase policy/);
+      }
+      assert.equal(providerCalls, 0);
+      assert.equal(f.writes.length, 0);
+      assert.equal(fs.existsSync(`${file}.attempt`), false);
     } finally { f.dispose(); }
   }
 });

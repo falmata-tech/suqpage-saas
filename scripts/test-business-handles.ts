@@ -9,6 +9,9 @@ import {HANDLE_CHANGE_INTERVAL_MS,nextHandleChangeAt,parseBusinessHandle} from '
 import {findPlaceSuggestions} from '../lib/place-catalog';
 
 async function main(){
+ for (const platformHandle of ['africmade','suqpage','mirtpage']) {
+  assert.throws(()=>parseBusinessHandle(platformHandle),/not available/,`${platformHandle} must remain reserved as a platform or legacy address`);
+ }
  const db=await getDb();
  try{
   const identity={providerUserId:crypto.randomUUID(),email:'handle-lifecycle@example.test'};

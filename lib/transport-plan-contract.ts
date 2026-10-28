@@ -1,5 +1,5 @@
-import type {TransportMethod,TransportPlan,TransportPlanLeg} from '@suqpage/contracts';
-export type {TransportMethod,TransportPlan,TransportPlanLeg} from '@suqpage/contracts';
+import type {TransportMethod,TransportPlan,TransportPlanLeg} from '@africmade/contracts';
+export type {TransportMethod,TransportPlan,TransportPlanLeg} from '@africmade/contracts';
 
 export const TRANSPORT_METHODS:readonly TransportMethod[]=['air','truck','van','car','motorcycle'];
 export const TRANSPORT_PLAN_MAX_LEGS=12;

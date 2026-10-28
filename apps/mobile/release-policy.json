@@ -1,6 +1,7 @@
 {
   "appName": "AfricMade",
   "packageName": "com.africmade.app",
+  "publicOrigin": "https://africmade.com",
   "expoProjectId": "bfc289fb-238e-44a3-9e0f-fec6a7c857d1",
   "firebaseProjectId": "africmade-de81a",
   "firebaseProjectNumber": "417974978793",
@@ -8,8 +9,8 @@
   "firebaseClientSha256": "94145cb4b33413f08e9e2658cd9b96474663d32df6a979b4cd3ededa55e7e117",
   "certificateSha256": "0630C56F88DF874FD27296D1AA0848A68FC8345F702FE6802EDD8255B7211183",
   "dataTargets": {
-    "mirtpage-production": {
-      "apiOrigin": "https://mirtpage.com",
+    "africmade-production": {
+      "apiOrigin": "https://africmade.com",
       "authOrigin": "https://sjeiiqxgscuqajpgddcc.supabase.co"
     }
   }

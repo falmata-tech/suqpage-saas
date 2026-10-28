@@ -2,7 +2,7 @@
 
 import {useEffect,useRef,useState} from 'react';
 import {Car,Copy,ExternalLink,Motorbike,Plane,Truck} from 'lucide-react';
-import type {TransportMethod,TransportPlan,TransportPlanLeg} from '@suqpage/contracts';
+import type {TransportMethod,TransportPlan,TransportPlanLeg} from '@africmade/contracts';
 import {useUiText} from '@/lib/i18n/ui';
 import {trackingProviderUrl} from '@/lib/tracking-contract';
 import {copyBrowserText} from '@/lib/browser-clipboard';

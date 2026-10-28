@@ -165,7 +165,7 @@ and no tint over a playing video. The release command fails only its final
 existing Expo dependency audit (20 high entries through braces/node-forge).
 No audit exception/downgrade, commit, hosted rollout or device build is claimed.
 Status remains in_progress until the separate release/commit/device gates close.
-See S52 in docs/SUQPAGE-TRANSITION-CHECKLIST.md.
+See S52 in docs/AFRICMADE-TRANSITION-CHECKLIST.md.
 
 ## Current owner correction — 2026-10-05
 

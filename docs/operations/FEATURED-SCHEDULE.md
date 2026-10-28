@@ -1,7 +1,7 @@
 # Daily Featured scheduling
 
 FE-033 / BE-029 / FE-021 · S182 source update; current release qualification is
-tracked in `../SUQPAGE-TRANSITION-CHECKLIST.md` and `../../specs/TRACEABILITY.md`.
+tracked in `../AFRICMADE-TRANSITION-CHECKLIST.md` and `../../specs/TRACEABILITY.md`.
 
 ## Automatic schedule
 

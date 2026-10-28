@@ -1,5 +1,5 @@
 {
-  "name": "suqpage-saas-mvp",
+  "name": "africmade-platform",
   "version": "1.0.0-mvp-launch",
   "private": true,
   "scripts": {
@@ -146,7 +146,7 @@
     "test:localization": "node scripts/build-ui-messages.mjs --check && node --import tsx scripts/test-localization.ts && node --import tsx scripts/test-backend-brand-presentation.ts",
     "mobile": "node scripts/start-mobile.mjs phone",
     "mobile:web": "node scripts/start-mobile.mjs web",
-    "mobile:typecheck": "npm run typecheck --workspace=@suqpage/mobile",
+    "mobile:typecheck": "npm run typecheck --workspace=@africmade/mobile",
     "test:mobile": "tsx scripts/test-mobile-contracts.ts && tsx scripts/test-mobile-api.ts",
     "mobile:android": "node scripts/start-mobile.mjs android",
     "mobile:phone": "node scripts/start-mobile.mjs phone",

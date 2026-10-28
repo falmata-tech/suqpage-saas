@@ -7,7 +7,7 @@ import { runtimeUserById } from "./catalog-runtime";
 import { postgresRuntimeServices } from "./postgres-runtime-services";
 import { currentRequestIdentity } from "./security";
 import type { SessionUser } from "./types";
-import { createSuqpageSupabaseServerClient, currentSupabaseIdentity, signOutSupabaseSession } from "./supabase-auth";
+import { createAfricMadeSupabaseServerClient, currentSupabaseIdentity, signOutSupabaseSession } from "./supabase-auth";
 import { ownerSessionAllowed, reconcileOwnerEmailIdentity } from "./owner-email-runtime";
 import { verifiedJwtIssueTime } from "./owner-email-change";
 const COOKIE = platformCookies.session.current;
@@ -30,7 +30,7 @@ export async function currentUser(): Promise<SessionUser | null> {
             try { user = await reconcileOwnerEmailIdentity(user, identity.providerUserId); }
             catch { return null; }
         }
-        const client = await createSuqpageSupabaseServerClient();
+        const client = await createAfricMadeSupabaseServerClient();
         const session = await client.auth.getSession();
         const issuedAt = session.data.session?.access_token
             ? verifiedJwtIssueTime(session.data.session.access_token, identity.providerUserId)

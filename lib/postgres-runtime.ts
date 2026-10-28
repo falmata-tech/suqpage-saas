@@ -128,7 +128,7 @@ export function postgresParameters(sql: string) {
 }
 
 export function createPostgresPool(config: PostgresRuntimeConfig) {
-  // PostgreSQL returns BIGINT/Numeric values as strings by default. Suqpage IDs
+  // PostgreSQL returns BIGINT/Numeric values as strings by default. Platform IDs
   // and timestamps are bounded safe integers, so normalize them at this adapter.
   types.setTypeParser(20, Number);
   types.setTypeParser(1700, Number);

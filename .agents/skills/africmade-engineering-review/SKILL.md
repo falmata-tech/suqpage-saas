@@ -1,9 +1,9 @@
 ---
-name: mirtpage-engineering-review
-description: Review MirtPage’s overall engineering setup, housekeeping, development workflow or readiness to build and ship reliably. Use when a project-wide setup audit or workflow redesign is requested; not every bug fix, small feature or unchanged test run.
+name: africmade-engineering-review
+description: Review AfricMade’s overall engineering setup, housekeeping, development workflow or readiness to build and ship reliably. Use when a project-wide setup audit or workflow redesign is requested; not every bug fix, small feature or unchanged test run.
 ---
 
-Resolve paths from this MirtPage repository root. Use `AGENTS.md`, the active
+Resolve paths from this AfricMade repository root. Use `AGENTS.md`, the active
 checklist and `specs/deployment/DEP-002-reproducible-delivery-hygiene.md`; read
 other controlling specs only for the areas actually under review. Preserve the
 current shipping task and existing working capabilities.

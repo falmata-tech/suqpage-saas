@@ -13,7 +13,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { router } from "expo-router";
-import type { Shop, Offering } from "@suqpage/contracts";
+import type { Shop, Offering } from "@africmade/contracts";
 import { useApp, API } from "./runtime";
 import {
   Photo,

@@ -9,7 +9,7 @@ export function showroomStatusLookupUrl(requestUrl: string, environment: LookupE
   if (localPreview) return new URL("/api/public/showroom-status", request.origin);
 
   const configured = new URL(environment.NEXT_PUBLIC_APP_URL || "");
-  if (configured.origin !== "https://mirtpage.com" || configured.pathname !== "/" || configured.search || configured.hash
+  if (!["https://africmade.com", "https://mirtpage.com"].includes(configured.origin) || configured.pathname !== "/" || configured.search || configured.hash
     || configured.username || configured.password) {
     throw new Error("The hosted showroom status origin is not the reviewed AfricMade site.");
   }

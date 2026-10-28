@@ -44,7 +44,7 @@ try {
   await opener.press('Enter');await expect(search.locator('input')).toHaveValue('lotion');
   await expect(page.locator('.discovery-product-results a').first()).toContainText('Aloe Body Lotion');
   for(const route of process.argv.includes('--panel-only') ? [] : ['/featured','/about','/login','/@demo-aloe-field-care']) {
-   await page.goto(base+route,{waitUntil:"domcontentloaded"});await expect(page.locator('.suqpage-wordmark').first()).toHaveText('suqpage');
+   await page.goto(base+route,{waitUntil:"domcontentloaded"});await expect(page.locator('.africmade-wordmark').first()).toHaveText('AfricMade');
    if(route==='/featured') {
     await expect(page.locator('#daily-featured-title')).toBeVisible({timeout:20000});
     await expect(page.locator('.featured-card').first()).toBeVisible();

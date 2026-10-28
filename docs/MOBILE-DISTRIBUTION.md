@@ -1,6 +1,12 @@
-# MirtPage Android distribution
+# Android distribution history
 
-## Current source and next release
+This document records earlier Android package and provider decisions; the
+historical source and release plans below. For the current
+AfricMade package `com.africmade.app`, use [DEP-044](../specs/deployment/DEP-044-google-play-testing-rollout.md)
+and the [active checklist](AFRICMADE-TRANSITION-CHECKLIST.md) before any build or
+Play submission. Do not follow the earlier package instructions as a release plan.
+
+## Historical MirtPage source and release plan
 
 All normal source profiles now use **MirtPage / com.mirtpage.app**. There is no
 Suqpage future-build fallback. The existing Expo project UUID/current slug is an

@@ -21,7 +21,7 @@ import { View, ScrollView, Platform,Pressable,Text } from "react-native";
 import { router } from "expo-router";
 import * as Crypto from "expo-crypto";
 import * as ImagePicker from "expo-image-picker";
-import type { OwnerHome, Profile, Media, Offering } from "@suqpage/contracts";
+import type { OwnerHome, Profile, Media, Offering } from "@africmade/contracts";
 import { useApp, useLoad, request, auth, API } from "./runtime";
 import {
   Copy,

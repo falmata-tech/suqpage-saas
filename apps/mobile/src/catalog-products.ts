@@ -1,4 +1,4 @@
-import type {Offering,Shop} from '@suqpage/contracts';
+import type {Offering,Shop} from '@africmade/contracts';
 import {isPublicProduct} from '../../../lib/offerings';
 
 export function visibleCatalogProduct(product:Offering):boolean {

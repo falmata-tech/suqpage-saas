@@ -4,7 +4,7 @@ import {HandleEditor} from "../../src/owner-handle";
 import React from "react";
 import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import type { OwnerHome } from "@suqpage/contracts";
+import type { OwnerHome } from "@africmade/contracts";
 import { useApp, useLoad } from "../../src/runtime";
 import { Screen, Copy, Button, Card, Photo, Status } from "../../src/ui";
 import { Setup, PageEditor, ProductEditor } from "../../src/owner-forms";

@@ -6,7 +6,7 @@ import manifest from "../supabase/templates/manifest.json";
 const directory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../supabase/templates");
 
 /** Exact repository-owned branding fields; no provider or notification enablement. */
-export function suqpageEmailBrandingPatch(): Record<string, string> {
+export function africMadeEmailBrandingPatch(): Record<string, string> {
   const patch: Record<string, string> = { smtp_sender_name: "AfricMade" };
   for (const entry of manifest) {
     patch[`mailer_subjects_${entry.key}`] = entry.subject;

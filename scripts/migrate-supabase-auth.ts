@@ -1,4 +1,4 @@
-import { createSuqpageSupabaseAdminClient, finalizeSupabaseIdentity, removePendingSupabaseIdentity } from "../lib/supabase-auth";
+import { createAfricMadeSupabaseAdminClient, finalizeSupabaseIdentity, removePendingSupabaseIdentity } from "../lib/supabase-auth";
 import { closePostgresRuntimeForTests } from "../lib/postgres-runtime-services";
 import { runtimeAll, runtimeGet, runtimeRun } from "../lib/runtime-sql";
 
@@ -14,7 +14,7 @@ async function main() {
     throw new Error("Database migration 37 is required before identity migration.");
   }
 
-  const admin = createSuqpageSupabaseAdminClient();
+  const admin = createAfricMadeSupabaseAdminClient();
   const providerUsers = new Map<string, { id: string; linkedUserId: string }>();
   for (let page = 1; ; page += 1) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });

@@ -1,4 +1,4 @@
-# MirtPage traceability matrix
+# AfricMade traceability matrix
 
 This is the current requirements → implementation → test/evidence index, not a
 release transcript. Specification IDs and their reciprocal `related` links are
@@ -6,7 +6,30 @@ immutable. A specification's declared status is preserved below; it does not
 upgrade local evidence into hosted or device qualification. The linked test plan
 contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
-run logs. [Active delivery checklist](../docs/SUQPAGE-TRANSITION-CHECKLIST.md).
+run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
+
+## S188 AfricMade source identity before Play
+
+FE-070, BE-059, DEP-029 and DEP-049 control the current name audit. A clean
+task worktree from main `d1e2c022` removes former public brand names, duplicate
+assets and obsolete active component/package names. The public canonical and
+new-build API/link target are `africmade.com`; the hosted Auth primary and old
+installed-client wire values are separate. The signed v3 AAB/APK remain held
+from Play. [The exact residual inventory](../docs/operations/AFRICMADE-LEGACY-IDENTIFIERS.md)
+names retained session, provider, migration, media and historical identifiers.
+
+Focused SMTP, origin, asset, identity, mobile link/build and Auth guard tests
+pass. Actual local Chrome web/Expo signup, city selection, exact pin, owner save
+and database readback pass in `.local/s158-map-pin-review/verified.json`; the
+corrected Expo heading run passes nine Market/Featured/Login states in en/am/om
+in `.local/mobile-primary-headings/verified.json`. The agent inspected affected
+phone and Expo screenshots. The complete `npm run check`, clean web-only
+`npm run release:web` (including 0-vulnerability web audit and provider HTTP
+smoke), and `npm run test:acceptance` (20/20) pass on this local source. Earlier
+failed invocations exposed stale renamed-asset/workspace test expectations and
+a mixed web/native install; the corrected source and clean install passed. This
+is local qualification only: PR/main CI, hosted Auth/Netlify changes, website
+publication, signed v4, physical Android and Play remain pending.
 
 ## S187 signed AfricMade Android version3
 
@@ -735,7 +758,7 @@ Existing historical/current report pointers:
 - [SUQPAGE-S98-RELEASE-2026-10-08.md](../docs/SUQPAGE-S98-RELEASE-2026-10-08.md)
 - [SUQPAGE-SELF-SERVICE-REVIEW.md](../docs/SUQPAGE-SELF-SERVICE-REVIEW.md)
 - [SUQPAGE-SERVICES-AND-PLACES-REVIEW.md](../docs/SUQPAGE-SERVICES-AND-PLACES-REVIEW.md)
-- [SUQPAGE-TRANSITION-CHECKLIST.md](../docs/SUQPAGE-TRANSITION-CHECKLIST.md)
+- [AFRICMADE-TRANSITION-CHECKLIST.md](../docs/AFRICMADE-TRANSITION-CHECKLIST.md)
 - [SUQPAGE-WORKFLOW-WIRING-AUDIT-2026-09-21.md](../docs/SUQPAGE-WORKFLOW-WIRING-AUDIT-2026-09-21.md)
 - [BROWSER-WORKFLOW-REVIEW.md](../docs/operations/BROWSER-WORKFLOW-REVIEW.md)
 - [ENGINEERING-READINESS.md](../docs/operations/ENGINEERING-READINESS.md)
@@ -887,8 +910,8 @@ chronological transcript. `npm run validate:specs` validates the complete regist
 [FE-068-tests]: frontend/FE-068-transport-plan-workspaces.md#test-plan-and-evidence
 [FE-069]: frontend/FE-069-verified-tracking-portal.md
 [FE-069-tests]: frontend/FE-069-verified-tracking-portal.md#test-plan-and-rollout-gates
-[FE-070]: frontend/FE-070-mirtpage-brand-and-showroom-narrative.md
-[FE-070-tests]: frontend/FE-070-mirtpage-brand-and-showroom-narrative.md#test-plan
+[FE-070]: frontend/FE-070-africmade-brand-and-page-narrative.md
+[FE-070-tests]: frontend/FE-070-africmade-brand-and-page-narrative.md#test-plan
 [FE-071]: frontend/FE-071-public-showroom-search-discovery.md
 [FE-071-tests]: frontend/FE-071-public-showroom-search-discovery.md#test-plan
 [FE-072]: frontend/FE-072-admin-controlled-staff-business-management.md
@@ -1014,8 +1037,8 @@ chronological transcript. `npm run validate:specs` validates the complete regist
 [BE-057-tests]: backend/BE-057-ordered-transport-plans.md#test-plan-and-observability
 [BE-058]: backend/BE-058-verified-recipient-shipments.md
 [BE-058-tests]: backend/BE-058-verified-recipient-shipments.md#test-plan-readiness-and-rollout
-[BE-059]: backend/BE-059-mirtpage-data-and-protocol-compatibility.md
-[BE-059-tests]: backend/BE-059-mirtpage-data-and-protocol-compatibility.md#test-plan
+[BE-059]: backend/BE-059-africmade-data-and-protocol-compatibility.md
+[BE-059-tests]: backend/BE-059-africmade-data-and-protocol-compatibility.md#test-plan
 [BE-060]: backend/BE-060-admin-controlled-business-management.md
 [BE-060-tests]: backend/BE-060-admin-controlled-business-management.md#test-plan
 [BE-061]: backend/BE-061-owner-verified-email-identity.md
@@ -1117,8 +1140,8 @@ chronological transcript. `npm run validate:specs` validates the complete regist
 [DEP-047-tests]: deployment/DEP-047-transport-plan-rollout.md#test-plan-and-evidence
 [DEP-048]: deployment/DEP-048-verified-tracking-rollout.md
 [DEP-048-tests]: deployment/DEP-048-verified-tracking-rollout.md#test-plan-and-rollback-checks
-[DEP-049]: deployment/DEP-049-mirtpage-domain-and-app-cutover.md
-[DEP-049-tests]: deployment/DEP-049-mirtpage-domain-and-app-cutover.md#test-plan
+[DEP-049]: deployment/DEP-049-africmade-domain-and-app-cutover.md
+[DEP-049-tests]: deployment/DEP-049-africmade-domain-and-app-cutover.md#test-plan
 [DEP-050]: deployment/DEP-050-owner-email-change-rollout.md
 [DEP-050-tests]: deployment/DEP-050-owner-email-change-rollout.md#test-plan
 [DEP_BASE]: deployment/DEP_BASE.md

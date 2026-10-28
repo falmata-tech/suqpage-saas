@@ -3,7 +3,7 @@
 import {useEffect,useId,useRef,useState,type ReactNode} from "react";
 import {unstable_rethrow} from "next/navigation";
 import {ArrowDown,ArrowUp,Plus,Save,Trash2} from "lucide-react";
-import type {TransportMethod,TransportPlan} from "@suqpage/contracts";
+import type {TransportMethod,TransportPlan} from "@africmade/contracts";
 import {TRANSPORT_METHODS,TRANSPORT_PLAN_MAX_LEGS,type TransportPlanLegInput} from "@/lib/transport-plan-contract";
 import {saveTransportPlanAction} from "@/app/dashboard/support/[id]/plan/actions";
 import {useUiText} from "@/lib/i18n/ui";

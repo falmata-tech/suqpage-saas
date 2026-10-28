@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, AppState, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
-import type { Featured } from "@suqpage/contracts";
+import type { Featured } from "@africmade/contracts";
 import { useSponsorRotation } from "../../../lib/use-sponsor-rotation";
 import { API, useApp } from "./runtime";
 import { colors, Icon, useOpenLink, Photo } from "./ui";

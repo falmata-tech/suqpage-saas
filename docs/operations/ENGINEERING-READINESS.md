@@ -56,7 +56,7 @@ do not rule out App publishing. The exact `falmata-ds-projects/mirtpage` →
 by a fresh provider reload on 2026-10-20. The project, old deployments and account
 App installation remain; Netlify, domains/secrets and other repos are unchanged.
 Current trigger-verification evidence and limits belong in
-[active checklist V01](../SUQPAGE-TRANSITION-CHECKLIST.md#v01--retire-this-repositorys-vercel-publishing-connection).
+[active checklist V01](../AFRICMADE-TRANSITION-CHECKLIST.md#v01--retire-this-repositorys-vercel-publishing-connection).
 Protected inventory and result live under the existing research directory:
 `repository-readonly-audit-20261020/vercel-retirement-inventory-plan.json` and
 `vercel-retirement/result.json`. The docs patch records the separately verified
