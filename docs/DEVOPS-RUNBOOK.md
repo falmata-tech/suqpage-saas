@@ -1,4 +1,4 @@
-# Suqpage delivery and managed-service runbook
+# AfricMade delivery and managed-service runbook
 
 This runbook is the operator path for local Supabase, repository checks,
 managed Auth and Storage, PostgreSQL, Netlify deployment, and rollback.
@@ -13,13 +13,13 @@ It does not authorize a production launch, DNS change, or destructive cutover.
   database engine, including fixtures and operations (BE-035/DEP-031).
 - Production and Deploy Previews use separate hosted Supabase projects. Each
   selects PostgreSQL through its own transaction pooler, Supabase Auth, and its
-  own private Storage bucket through Suqpage's server-side media port. Suqpage
+  own private Storage bucket through AfricMade's server-side media port. AfricMade
   remains the only role, capability, tenant, and suspension authority.
 - PostgreSQL tooling supports native installation, isolated fixtures and
   explicitly approved archive recovery. The linked Supabase target remains
-  authoritative; MirtPage is hosted on Netlify at `https://mirtpage.com`.
-  [DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md) and the
-  [active checklist](SUQPAGE-TRANSITION-CHECKLIST.md) own current release status.
+  authoritative; AfricMade is available on Netlify at `https://africmade.com`.
+  [DEP-049](../specs/deployment/DEP-049-africmade-domain-and-app-cutover.md) and the
+  [active checklist](AFRICMADE-TRANSITION-CHECKLIST.md) own current release status.
   Historical Vercel cutovers are retained in DEP-023, not a current deployment or
   rollback instruction. Its repository Git connection is now disconnected.
 

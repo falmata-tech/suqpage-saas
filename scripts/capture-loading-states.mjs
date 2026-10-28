@@ -9,8 +9,8 @@ try{
   const pending=new Promise(resolve=>release=resolve);
   await context.route('**/api/auth/email/start',async route=>{await pending;await route.fulfill({status:503,json:{error:'Please try again.'}});});
   await page.goto('http://127.0.0.1:3102/login');await page.getByLabel('Email',{exact:true}).fill('loading-review@example.test');await page.getByRole('button',{name:'Continue with email',exact:true}).click();
-  await expect(page.locator('.suqpage-loading')).toBeVisible();assert.equal(await page.locator('.suqpage-loading-track i').evaluate(e=>getComputedStyle(e).animationName),reduced?'none':'suqpage-loading-slide');
-  await page.screenshot({path:`${out}/web-pending-${reduced?'reduced':'animated'}.png`});release();await expect(page.locator('.platform-login-form').getByRole('alert')).toHaveText('Please try again.');await expect(page.locator('.suqpage-loading')).toHaveCount(0);await page.screenshot({path:`${out}/web-error-${reduced?'reduced':'animated'}.png`});await context.close();
+  await expect(page.locator('.africmade-loading')).toBeVisible();assert.equal(await page.locator('.africmade-loading-track i').evaluate(e=>getComputedStyle(e).animationName),reduced?'none':'africmade-loading-slide');
+  await page.screenshot({path:`${out}/web-pending-${reduced?'reduced':'animated'}.png`});release();await expect(page.locator('.platform-login-form').getByRole('alert')).toHaveText('Please try again.');await expect(page.locator('.africmade-loading')).toHaveCount(0);await page.screenshot({path:`${out}/web-error-${reduced?'reduced':'animated'}.png`});await context.close();
  }
  for(const reduced of [false,true]){
   const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:reduced?'reduce':'no-preference'}),page=await context.newPage();let release;let fail=true;

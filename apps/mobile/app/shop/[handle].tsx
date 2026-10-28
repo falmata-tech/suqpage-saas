@@ -2,7 +2,7 @@ import {usePublicScrollInset} from '../../src/public-scroll-inset';
 import React from "react";
 import { ScrollView } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import type { Shop } from "@suqpage/contracts";
+import type { Shop } from "@africmade/contracts";
 import { useLoad, request } from "../../src/runtime";
 import { Screen, Status } from "../../src/ui";
 import { ShowroomContent } from "../../src/ShowroomContent";

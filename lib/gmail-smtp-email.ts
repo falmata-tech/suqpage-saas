@@ -73,7 +73,7 @@ export async function sendGmailSmtpEmail(
     const sent=await transport.sendMail({
       from:{name:'AfricMade',address:config.user},to:{address:message.recipientEmail},
       subject:message.subject,text:message.text,
-      messageId:`<${message.deliveryKey}@mirtpage.com>`,disableFileAccess:true,disableUrlAccess:true,
+      messageId:`<${message.deliveryKey}@africmade.com>`,disableFileAccess:true,disableUrlAccess:true,
     });
     return sent.accepted.length===1&&sent.accepted[0]?.toLowerCase()===message.recipientEmail.toLowerCase()&&sent.rejected.length===0
       ?{state:'accepted'}:{state:'failed',category:'provider_rejected',retryable:false};

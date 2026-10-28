@@ -1,7 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {Platform,View,StyleSheet} from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import type {TransportMethod,TransportPlan,TransportPlanLeg} from '@suqpage/contracts';
+import type {TransportMethod,TransportPlan,TransportPlanLeg} from '@africmade/contracts';
 import {trackingProviderUrl} from '../../../lib/tracking-contract';
 import {copyBrowserText} from '../../../lib/browser-clipboard';
 import {useApp} from './runtime';

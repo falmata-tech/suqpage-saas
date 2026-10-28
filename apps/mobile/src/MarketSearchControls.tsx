@@ -1,6 +1,6 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {View,Text,TextInput,Pressable,StyleSheet,Platform,useWindowDimensions} from 'react-native';
-import type {Market} from '@suqpage/contracts';
+import type {Market} from '@africmade/contracts';
 import {emptyMarketSearch,hasMarketCriteria,type MarketScope,type MarketSearch} from '../../../lib/market-search';
 import {countryName} from '../../../lib/countries';
 import {useApp} from './runtime';

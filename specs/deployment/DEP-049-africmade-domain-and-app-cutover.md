@@ -1,6 +1,6 @@
 ---
 id: DEP-049
-title: MirtPage domain, managed services and app release cutover
+title: AfricMade domain, managed services and app release cutover
 status: draft
 related: [FE-021, FE-070, FE-071, BE-059, DEP-029, DEP-051, ADR-0029, FE-072, BE-060, DEP-050, DEP-044, FE-075, BE-062]
 owners: [operations, security, mobile]
@@ -8,7 +8,32 @@ last_updated: 2026-10-27
 change_level: L4
 ---
 
-# DEP-049 — MirtPage cutover
+# DEP-049 — AfricMade cutover
+
+## S188 — final identity audit before new Play upload (ready)
+
+The owner has paused Play submission to remove former platform names from all
+current public and active source surfaces. FE-070 owns the web/native/metadata
+outcome; BE-059 owns retained protocol/data compatibility. Inspect the actual
+compiled v3 AAB as well as source: it contains former-name config and bundle
+strings and must not be uploaded as the AfricMade submission. Source edits
+require a new DEP-044 source-bound, approved native compilation and inspection.
+
+GIVEN a source fix is prepared WHEN qualifying a replacement website THEN first
+verify current canonical metadata, managed environment, asset aliases and links
+against `africmade.com`, then pass the applicable local, Chrome, PR/main and
+publication gates. A local origin string change does not itself rename hosted
+Auth email, Firebase, DNS, Netlify settings, SMTP or existing customer data.
+The public status lookup accepts only the reviewed AfricMade and old MirtPage
+origins while the hosted primary changes; arbitrary request Hosts cannot select
+its target. The old landing, brand and PWA paths resolve to current AfricMade
+art, with the live compatibility inventory in
+[AFRICMADE-LEGACY-IDENTIFIERS](../../docs/operations/AFRICMADE-LEGACY-IDENTIFIERS.md).
+GIVEN any hosted identity field must change WHEN planning it THEN name the exact
+account/project, fields, beforeimage, recovery and approval digest before a
+write, following DEP-029 where applicable. Never overwrite secrets or replace a
+provider project merely to remove an internal identifier. Record remaining
+provider-managed names separately from source and shipped artifacts.
 
 ## Current web publication and separate native admission
 

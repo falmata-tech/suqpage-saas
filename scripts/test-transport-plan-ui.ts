@@ -6,7 +6,7 @@ import {build} from 'esbuild';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {createElement,type ReactElement} from 'react';
 import {chromium,type Browser,type Page} from 'playwright';
-import type {TransportPlan} from '@suqpage/contracts';
+import type {TransportPlan} from '@africmade/contracts';
 import {TransportPlanError} from '../lib/transport-plan-contract';
 import {supportTransportPlanHref,workspaceActiveHref} from '../lib/support-navigation';
 import type {OwnerEditResult} from '../lib/owner-edit-contract';

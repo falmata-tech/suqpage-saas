@@ -1,5 +1,5 @@
 // Portable DTO: no Next.js, DOM, database or provider dependency.
-import type {TransportPlan} from '@suqpage/contracts';
+import type {TransportPlan} from '@africmade/contracts';
 export type BuyingConversation = {
   publicRef: string;
   createdAt?: number;

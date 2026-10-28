@@ -1,5 +1,5 @@
 import type { FeatureCollection, Point } from 'geojson';
-import type { MapShop } from '@suqpage/contracts';
+import type { MapShop } from '@africmade/contracts';
 import { mapDisplayLocation } from '../../../lib/map/map-display-location';
 import {MAP_MAX_ZOOM} from '../../../lib/map/map-clustering';
 

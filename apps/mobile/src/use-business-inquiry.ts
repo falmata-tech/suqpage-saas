@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import type {Shop} from '@suqpage/contracts';
+import type {Shop} from '@africmade/contracts';
 import {createInquiryBaskets,type BusinessInquiryItem} from './inquiry-baskets';
 import {createInquiryBasketStorage} from './inquiry-basket-storage';
 import {API,useApp} from './runtime';

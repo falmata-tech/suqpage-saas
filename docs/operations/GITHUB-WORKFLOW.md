@@ -92,7 +92,7 @@ Check actual delivery wiring before merging; a GitHub App may publish even when
 traditional repository hooks are empty and Actions has no deploy step. The
 owner-requested Vercel Git disconnect for this project/repository is verified by
 fresh provider reload. The account App installation, project and old deployments
-remain. Use [checklist V01](../SUQPAGE-TRANSITION-CHECKLIST.md#v01--retire-this-repositorys-vercel-publishing-connection)
+remain. Use [checklist V01](../AFRICMADE-TRANSITION-CHECKLIST.md#v01--retire-this-repositorys-vercel-publishing-connection)
 for current trigger-verification evidence and limits; a point-in-time observation
 does not guarantee future integration behavior.
 Do not uninstall the App for other repositories or delete past deploys as branch

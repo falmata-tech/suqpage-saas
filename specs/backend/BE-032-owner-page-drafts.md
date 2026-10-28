@@ -368,7 +368,7 @@ protected loopback backup. Account/signup/domain and PostgreSQL privacy tests pa
 workflows/accessibility scans and the 24-state/12-profile-scan public matrix pass.
 Approved fictional contacts populated for 66 demo pages and 47 demo users, retaining
 account emails. Two non-demo account phones require owner input. Evidence and
-screenshots: docs/SUQPAGE-TRANSITION-CHECKLIST.md S2g. Visual approval, full gates,
+screenshots: docs/AFRICMADE-TRANSITION-CHECKLIST.md S2g. Visual approval, full gates,
 commit and hosted rollout remain pending.
 
 ## S33 first-publication readiness — FE-052 (local)

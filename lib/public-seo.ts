@@ -1,4 +1,4 @@
-import { appUrl } from "./app-url";
+import { publicSiteOrigin } from "./public-site-origin";
 import { businessProfileDescription } from "./business-profile";
 import type { ShopPageContent } from "./owner-page-domain";
 import type { Business, Product } from "./types";
@@ -33,10 +33,10 @@ export function publicDirectorySummary(value: string): string {
   return normalized.length > 180 ? `${normalized.slice(0, 177).trimEnd()}…` : normalized;
 }
 
-/** Public URLs use the active configured origin, including during a staged domain cutover. */
+/** Public URLs use the visitor site independently of API/Auth migration. */
 export function publicSeoUrl(path: string): string {
   if (!path.startsWith("/") || path.startsWith("//") || path.includes("\\")) throw new Error("Public SEO path must stay on the configured origin");
-  return new URL(path, `${appUrl()}/`).toString();
+  return new URL(path, `${publicSiteOrigin()}/`).toString();
 }
 
 export function showroomSeoPath(handle: string, productId?: number): string {
@@ -70,7 +70,7 @@ export function publicSeoEntryPath(entry: PublicSeoEntry): string {
 export function publicSeoImageUrl(value: string | null | undefined): string | undefined {
   if (!value || value.startsWith("//") || value.includes("\\")) return undefined;
   try {
-    const url = new URL(value, `${appUrl()}/`);
+    const url = new URL(value, `${publicSiteOrigin()}/`);
     if (!(["http:", "https:"].includes(url.protocol))) return undefined;
     return url.toString();
   } catch { return undefined; }

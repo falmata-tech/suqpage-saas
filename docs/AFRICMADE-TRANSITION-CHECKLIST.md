@@ -1,8 +1,8 @@
 # AfricMade active delivery checklist
 
-Current product authority: [master brief](../SUQPAGE-MASTER-PROMPT.md).
+Current product authority: [master brief](../AFRICMADE-MASTER-PROMPT.md).
 Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
-[DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md).
+[DEP-049](../specs/deployment/DEP-049-africmade-domain-and-app-cutover.md).
 Updated 2026-10-26. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
@@ -46,6 +46,50 @@ old **com.mirtpage.app** v6 artifact cannot be submitted to the new package.
 | AfricMade Play app | Saved AfricMade app and local English/Amharic listing drafts | Name/package/Draft, Free pricing and App type verified; category unselected, listing/declarations/native screens pending | Native phone screenshots pending | No bundle upload, release or closed-test enrollment |
 
 ## Ordered work
+
+### S188 — finish AfricMade naming before Play submission
+
+Current step: full source qualification. FE-070 S188 defines public/source identity, BE-059 S188
+defines compatibility, and DEP-049 S188 owns hosted/release order. The source is
+isolated on `release/dep-044-africmade-play` from main `d1e2c022`; the dirty root
+worktree is user-owned and untouched. The already signed Android v3 artifact is
+held from Play because old names remain in its compiled content. Master §§2,
+5.2, 11, 15, 18 and 19 will be reconciled after verified implementation.
+
+1. [x] Inventory tracked text/path and compiled v3 former-name hits;
+   distinguish visible current leaks, safe internal names, retained wire/data
+   compatibility and historical evidence. [The bounded residual inventory](operations/AFRICMADE-LEGACY-IDENTIFIERS.md)
+   records why old bytes remain and who owns each later migration.
+2. [x] Fix current web, phone web, Expo, email/notification, metadata, source
+   names and assets with focused tests for all affected languages and roles.
+   Preserve old installed client, session, tenant, media and provider contracts.
+   The source now uses AfricMade for current names, canonical SEO, Android links,
+   API target, SMTP Message-ID, and live-looking assets; `showroom-status` accepts
+   both reviewed origins during transition. Retired duplicate brand and landing
+   files are removed or aliased. Focused brand, naming, mobile link, Auth guard,
+   SMTP, status-origin, type and spec checks pass. Hosted values are step 5.
+3. [x] Exercise actual Chrome desktop/phone and current Expo tasks and inspect
+   metadata/assets; record agent visual review and authoritative outcomes.
+   The API-backed city/pin/signup and owner Save/readback journey passed in
+   desktop/390px web and Expo with synthetic map tiles (`.local/s158-map-pin-review/verified.json`).
+   The corrected Expo heading capture passed all nine Market/Featured/Login
+   states across en/am/om (`.local/mobile-primary-headings/verified.json`);
+   agent review inspected Market, Featured and Login screenshots. The first
+   heading invocation exposed stale test assumptions; those are fixed, not
+   counted as a product failure. Installed Android and hosted provider state
+   remain separate release gates.
+4. [ ] Pass source-matched `npm run check`, release and acceptance gates, update
+   master/traceability and stage only reviewed task files. Integrate via the
+   authorized GitHub workflow and confirm terminal main CI.
+   Local complete check, clean web-only release (including provider smoke and
+   zero web audit findings), and 20/20 acceptance pass; traceability records
+   these as local only. Git review, commit, PR/main CI remain.
+5. [ ] Coordinate any necessary hosted identity changes with exact protected
+   plans, then publish and verify `africmade.com` and legacy compatibility.
+6. [ ] Prepare a fresh DEP-044 native build review/advisory exception, compile
+   one successor AAB/APK, inspect it independently, and only then resume the
+   MarketVision Play listing, declarations, screenshots, upload and testing.
+
 
 ### Delivery documentation reconciliation
 
@@ -817,7 +861,7 @@ isolated from R02 and does not change application or native artifacts.
 
 ### R01 — Finish B09 source and CI qualification
 
-[DEP-049](../specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md),
+[DEP-049](../specs/deployment/DEP-049-africmade-domain-and-app-cutover.md),
 FE-021, FE-053, FE-074; depends on the frozen source above.
 
 - [x] Implement the bounded routing fix: remove only the manual physical image

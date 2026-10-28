@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import vm from 'node:vm';
 import {build} from 'esbuild';
-import type {Offering,Shop} from '@suqpage/contracts';
+import type {Offering,Shop} from '@africmade/contracts';
 import {visibleCatalogProduct,restoreCatalogSelections} from '../apps/mobile/src/catalog-products';
 
 type Element={type:string|((props:Record<string,unknown>)=>Element|null);props:Record<string,unknown>&{children?:unknown}};

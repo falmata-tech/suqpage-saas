@@ -3,7 +3,7 @@ import {test} from "node:test";
 import vm from "node:vm";
 import fs from "node:fs";
 import {build} from "esbuild";
-import type {Offering,Shop} from "@suqpage/contracts";
+import type {Offering,Shop} from "@africmade/contracts";
 import {TRANSPORT_COPY} from "../lib/i18n/transport-copy";
 import {publicTransportPlacement} from "../lib/public-transport-placement";
 
@@ -38,7 +38,7 @@ async function shell(entry: string) {
     b.onResolve({filter: /^@\/components\/PublicActionDock$/}, args => ({path: args.path, namespace: "ports"}));
     b.onResolve({filter: /^(react(?:\/jsx-runtime)?|react-native|react-native-safe-area-context|expo-router|expo-status-bar|react-native-svg|next\/navigation|next\/link|lucide-react)$/}, args => ({path: args.path, namespace: "ports"}));
     // Footer presentation/navigation is exercised with real RNWeb in test-about-audiences.
-    b.onResolve({filter: /(?:^|\/)(?:runtime|ui|main-navigation|AttentionAlerts|blocked-businesses|use-business-inquiry|use-transport-unread|overlay-visibility|LanguageSelector|SuqpageBrand|NavigationPendingIndicator|PublicMobileNavigation|PublicSupportChat|PublicSiteFooter|i18n\/ui|owner-edit-navigation)$/}, args => ({path: args.path.endsWith('/i18n/ui')?'uiText':args.path.split("/").at(-1)!, namespace: "ports"}));
+    b.onResolve({filter: /(?:^|\/)(?:runtime|ui|main-navigation|AttentionAlerts|blocked-businesses|use-business-inquiry|use-transport-unread|overlay-visibility|LanguageSelector|AfricMadeBrand|NavigationPendingIndicator|PublicMobileNavigation|PublicSupportChat|PublicSiteFooter|i18n\/ui|owner-edit-navigation)$/}, args => ({path: args.path.endsWith('/i18n/ui')?'uiText':args.path.split("/").at(-1)!, namespace: "ports"}));
     b.onLoad({filter: /.*/,namespace: "ports"}, args => ({loader: "jsx",contents:
       args.path === "react" ? "export const useState=value=>[value,()=>{}],useEffect=()=>{},createContext=initial=>({Provider:props=>({type:'ScrollInsetProvider',props}),initial}),useContext=context=>context.initial;export default {};"
       : args.path === "react/jsx-runtime" ? "export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';"

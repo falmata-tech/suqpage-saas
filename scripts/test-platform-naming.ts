@@ -59,7 +59,7 @@ function auditDirectory(directory: string) {
 }
 for (const directory of ['app', 'components', 'lib']) auditDirectory(directory);
 assert.doesNotMatch(fs.readFileSync('proxy.ts','utf8'), /process\.env\.SUQPAGE_/, 'The root proxy must use the environment compatibility boundary');
-assert.ok(fs.existsSync('SUQPAGE-MASTER-PROMPT.md'));
+assert.ok(fs.existsSync('AFRICMADE-MASTER-PROMPT.md'));
 assert.ok(!fs.existsSync('MIRTPAGE-MASTER-PROMPT.md'));
 const cdnRules = fs.readFileSync('public/_redirects', 'utf8').split(/\r?\n/).filter(line => line && !line.startsWith('#'));
 assert.deepEqual(cdnRules, platformAssetRewrites.map(route => `${route.source} ${route.destination} 200`), 'Physical Netlify redirects retain only exact legacy aliases; image routing belongs to the generated query-aware adapter');

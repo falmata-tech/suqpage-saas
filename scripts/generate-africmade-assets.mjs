@@ -41,11 +41,6 @@ async function squareIcon(mark,size,scale,background){
   .composite([{input:foreground,left:Math.floor((size-edge)/2),top:Math.floor((size-edge)/2)}]).png().toBuffer();
 }
 
-function legacySvgImage(png,width,height){
- const encoded=png.toString('base64');
- return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="AfricMade"><title>AfricMade</title><image width="${width}" height="${height}" href="data:image/png;base64,${encoded}"/></svg>\n`);
-}
-
 function icoFromPngs(entries){
  const headerBytes=6+entries.length*16;
  const ico=Buffer.alloc(headerBytes+entries.reduce((sum,{png})=>sum+png.length,0));
@@ -137,36 +132,11 @@ export async function africmadeDerivatives(root=process.cwd()){
   ['public/pwa/icon-192.png','public/pwa/africmade-icon-v3-192.png'],
   ['public/pwa/icon-512.png','public/pwa/africmade-icon-v3-512.png'],
   ['public/pwa/icon-maskable-512.png','public/pwa/africmade-maskable-v3-512.png'],
-  ['public/pwa/suqpage-favicon-32.png','public/pwa/africmade-favicon-v3-32.png'],
-  ['public/pwa/suqpage-apple-touch-icon.png','public/pwa/africmade-apple-touch-v3-180.png'],
-  ['public/pwa/suqpage-icon-192.png','public/pwa/africmade-icon-v3-192.png'],
-  ['public/pwa/suqpage-icon-512.png','public/pwa/africmade-icon-v3-512.png'],
-  ['public/pwa/suqpage-icon-maskable-512.png','public/pwa/africmade-maskable-v3-512.png'],
-  ['public/pwa/mirtpage-panels-favicon-32.png','public/pwa/africmade-favicon-v3-32.png'],
-  ['public/pwa/mirtpage-panels-apple-touch-icon.png','public/pwa/africmade-apple-touch-v3-180.png'],
-  ['public/pwa/mirtpage-panels-icon-192.png','public/pwa/africmade-icon-v3-192.png'],
-  ['public/pwa/mirtpage-panels-icon-512.png','public/pwa/africmade-icon-v3-512.png'],
-  ['public/pwa/mirtpage-panels-icon-maskable-512.png','public/pwa/africmade-maskable-v3-512.png'],
-  ['public/pwa/mirtpage-panels-badge-96.png','public/pwa/africmade-badge-96.png'],
-  ['apps/mobile/assets/mirtpage-mark.png','apps/mobile/assets/africmade-mark.png'],
-  ['apps/mobile/assets/mirtpage-wordmark.png','apps/mobile/assets/africmade-wordmark.png'],
-  ['apps/mobile/assets/mirtpage-notification.png','apps/mobile/assets/africmade-notification.png'],
   ['public/uploads/seed/suqpage/icon.png','public/pwa/africmade-icon-v3-512.png'],
   ['public/uploads/seed/suqpage/logo.png','public/brand/africmade-wordmark-email-white-v3.png'],
  ];
  for(const [legacy,current] of aliases)output.set(legacy,output.get(current));
- for(const legacy of ['public/brand/africmade-wordmark-email-white-v2.png','public/brand/mirtpage-panels-wordmark-email.png','public/brand/mirtpage-panels-wordmark-email-white-v2.png'])output.set(legacy,legacyEmailWordmark);
- const canonicalMark=output.get('public/brand/africmade-showroom-mark-v3.png');
- const svgAliases=[
-  ['public/brand/suqpage-legacy-mark.svg',canonicalMark,512,512],
-  ['public/brand/suqpage-mark.svg',canonicalMark,512,512],
-  ['public/brand/suqpage-original-mark.svg',canonicalMark,512,512],
-  ['public/brand/suqpage-original-mark-v2.svg',canonicalMark,512,512],
-  ['public/brand/mirtpage-panels-mark.svg',canonicalMark,512,512],
-  ['public/brand/mirtpage-panels-wordmark.svg',wordmark,WORDMARK_OUTPUT.width,WORDMARK_OUTPUT.height],
-  ['public/brand/mirtpage-panels-wordmark-reverse.svg',reverse,WORDMARK_OUTPUT.width,WORDMARK_OUTPUT.height],
- ];
- for(const [file,png,width,height] of svgAliases)output.set(file,legacySvgImage(png,width,height));
+ output.set('public/brand/africmade-wordmark-email-white-v2.png',legacyEmailWordmark);
  return output;
 }
 

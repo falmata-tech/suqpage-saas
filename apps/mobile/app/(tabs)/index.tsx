@@ -10,7 +10,7 @@ import {View,Text,Pressable,FlatList,Animated,Platform,Keyboard,BackHandler,Acce
 import {router,useFocusEffect,useIsFocused,useLocalSearchParams} from 'expo-router';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {readMarketSession,rememberMarketSession} from '../../src/market-session';
-import type {Market,MapShop,SearchItem} from '@suqpage/contracts';
+import type {Market,MapShop,SearchItem} from '@africmade/contracts';
 import {API,request,useApp} from '../../src/runtime';
 import {Screen,Copy,Photo,Status,Icon,colors,Button,useOpenLink} from '../../src/ui';
 import {IconButton,Sheet} from '../../src/chrome';

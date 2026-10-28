@@ -1,8 +1,13 @@
 # MirtPage rebrand and migration plan
 
+Historical release plan for the former identity. AfricMade is the current
+platform; use FE-070/BE-059/DEP-049 S188 and the active AfricMade checklist for
+current branding and release decisions. The dated target below is retained as
+evidence of the prior transition, not a current instruction.
+
 Owner direction confirmed 2026-10-18. Controlling contracts: FE-070, BE-059,
 DEP-049 and proposed ADR-0029. Ordered work lives in
-[the active checklist](../SUQPAGE-TRANSITION-CHECKLIST.md). This plan records the
+[the active checklist](../AFRICMADE-TRANSITION-CHECKLIST.md). This plan records the
 target and verification order; it is not evidence of a completed migration.
 
 ## Confirmed target

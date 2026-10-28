@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-// Old package names are protocol identities. Rendered labels must use AfricMade.
+// Persisted protocol identities are separate from repository and display names.
 const activeFiles = ["app", "components"].flatMap((root) => fs.readdirSync(root, { recursive: true })
   .filter((file) => /\.(tsx?|css)$/.test(file)).map((file) => `${root}/${file}`));
 const visibleOldBrand=[];
@@ -9,13 +9,20 @@ for(const file of activeFiles){
  if(/(?:aria-label|alt|title|description)=[{]?[^\n]*\b(?:MirtPage|Suq[Pp]age)\b/.test(source))visibleOldBrand.push(file);
 }
 assert.deepEqual(visibleOldBrand,[],`Old customer-facing brand remains in: ${visibleOldBrand.join(", ")}`);
-assert.equal(JSON.parse(fs.readFileSync("package.json", "utf8")).name, "suqpage-saas-mvp");
-assert.ok(fs.existsSync("SUQPAGE-MASTER-PROMPT.md"));
+assert.equal(JSON.parse(fs.readFileSync("package.json", "utf8")).name, "africmade-platform");
+assert.ok(fs.existsSync("AFRICMADE-MASTER-PROMPT.md"));
 assert.ok(fs.existsSync("public/brand/africmade-showroom-mark-v3.png"));
 const brand=fs.readFileSync("components/AfricMadeBrand.tsx","utf8");
 assert.match(brand,/aria-label=\{t\("AfricMade home"\)\}/);
 assert.match(brand,/PLATFORM_BRAND\.assets\.wordmark/);
-assert.match(fs.readFileSync("components/SuqpageBrand.tsx","utf8"),/export \{ default \} from "\.\/AfricMadeBrand"/);
+assert.equal(fs.existsSync("components/SuqpageBrand.tsx"),false);
+assert.match(fs.readFileSync("components/PublicAppFrame.tsx","utf8"),/components\/AfricMadeBrand/);
+for (const file of ["components/HandleField.tsx", "components/HandleSettingsForm.tsx"]) {
+  const source = fs.readFileSync(file, "utf8");
+  assert.match(source, /africmade\.com\/@/, `${file} shows the current public page address`);
+  assert.doesNotMatch(source, /mirtpage\.com\/@/);
+}
+assert.match(fs.readFileSync("app/layout.tsx", "utf8"), /metadataBase:new URL\(publicSiteOrigin\(\)\)/);
 const platformStyles = ["app/globals.css", "app/landing.css", "app/discovery.css"]
   .map((file) => fs.readFileSync(file, "utf8").toLowerCase())
   .join("\n");
@@ -50,4 +57,4 @@ for (const file of ["app/(public)/[handle]/page.tsx", "app/preview/[handle]/page
   assert.match(source, /runtimePublishedPage\([^\n]+\|\| initialBusinessProfile\(catalog\)/);
   assert.match(source, /businessProfile=\{profile\}/);
 }
-console.log("AfricMade identity and shared public/preview renderer contracts passed; technical package identity retained.");
+console.log("AfricMade identity and shared public/preview renderer contracts passed.");

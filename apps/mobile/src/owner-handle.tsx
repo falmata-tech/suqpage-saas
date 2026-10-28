@@ -36,7 +36,7 @@ export function HandleInput({ value, onChange, onReady, currentHandle = "", refr
   }, [handle, currentHandle, retry, refreshKey]);
   return <>
     <Field label={t("Page handle")} value={value} onChangeText={v => {onReady(false); onChange(v);}} autoCapitalize="none" autoCorrect={false} maxLength={61} />
-    <Copy muted>{"mirtpage.com/@" + (handle || value.trim().replace(/^@/, "").toLowerCase())}</Copy>
+    <Copy muted>{"africmade.com/@" + (handle || value.trim().replace(/^@/, "").toLowerCase())}</Copy>
     {invalid ? <Status error={t(invalid)} /> : current ? <Copy>{t(current.kind === "available" ? "Available" : current.kind === "taken" ? "This handle is already taken. Choose another." : current.kind === "error" ? "Could not check this handle. Try again." : "Checking…")}</Copy> : null}
     {current?.kind === "error" ? <Button secondary label={t("Retry")} onPress={() => setRetry(v => v + 1)} /> : null}
   </>;
@@ -53,7 +53,7 @@ export function HandleEditor({ initialHandle, onSaved,onCancel }: { initialHandl
     <Copy big heading>{t("Page address")}</Copy>
     <Status {...settings} retry={settings.reload} />
     {locked ? <>
-      <Copy>{"mirtpage.com/@" + (settings.data?.handle || initialHandle)}</Copy>
+      <Copy>{"africmade.com/@" + (settings.data?.handle || initialHandle)}</Copy>
       <Copy muted>{t("You can change your handle once every 30 days. Contact support for help.")}</Copy>
       <Button secondary label={t("Contact support")} onPress={() => router.push({pathname: "/owner/[section]", params: {section: "support"}})} />
     </> : <>

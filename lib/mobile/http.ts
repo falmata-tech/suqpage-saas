@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAuthConfig } from "../config";
-import { linkedSuqpageUserId } from "../supabase-auth";
+import { linkedAfricMadeUserId } from "../supabase-auth";
 import { runtimeUserById } from "../catalog-runtime";
 import type { SessionUser } from "../types";
 import { verifiedJwtIssueTime } from "../owner-email-change";
@@ -39,7 +39,7 @@ export const nativeIdentityPort: NativeIdentityPort = {
       ? { id: data.user.id, email: data.user.email }
       : null;
   },
-  linked: linkedSuqpageUserId,
+  linked: linkedAfricMadeUserId,
   user: runtimeUserById,
 };
 export async function nativeIdentity(

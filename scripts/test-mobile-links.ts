@@ -65,26 +65,25 @@ test('FE-053 actual Expo adapter uses an in-app native browser and isolated web 
 
 test('FE-070 native legal links follow the validated AfricMade, local or staging origin',async()=>{
  const {build}=await import('esbuild'),vm=await import('node:vm');
- for(const [raw,expected] of [[undefined,'https://mirtpage.com'],['http://127.0.0.1:3102','http://127.0.0.1:3102'],['https://preview.mirtpage.com','https://preview.mirtpage.com']] as const){
+ for(const [raw,expected] of [[undefined,'https://africmade.com'],['https://mirtpage.com','https://mirtpage.com'],['http://127.0.0.1:3102','http://127.0.0.1:3102'],['https://preview.mirtpage.com','https://preview.mirtpage.com']] as const){
   const calls:string[]=[];
-  const result=await build({entryPoints:['apps/mobile/app/(tabs)/about.tsx'],bundle:true,platform:'node',format:'cjs',write:false,define:{'process.env.EXPO_PUBLIC_API_ORIGIN':raw===undefined?'undefined':JSON.stringify(raw)},plugins:[{name:'about-native-ports',setup(b){
-   b.onResolve({filter:/^(react(?:\/jsx-runtime)?|react-native|expo-router)$|(?:^|\/)(?:ui|runtime|incoming-link)$/},args=>({path:args.path,namespace:'ports'}));
-   b.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'js',contents:args.path==='react'?`export const useRef=initial=>({current:initial}),useState=initial=>[initial,()=>{}];export default {};`
+  const result=await build({entryPoints:['apps/mobile/src/PublicSiteFooter.tsx'],bundle:true,platform:'node',format:'cjs',write:false,define:{'process.env.EXPO_PUBLIC_API_ORIGIN':raw===undefined?'undefined':JSON.stringify(raw)},plugins:[{name:'footer-native-ports',setup(b){
+   b.onResolve({filter:/^(react(?:\/jsx-runtime)?|react-native|expo-router)$|(?:^|\/)(?:ui|runtime)$/},args=>({path:args.path,namespace:'ports'}));
+   b.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'js',contents:args.path==='react'?`export default {};`
     :args.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
-    :args.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',ScrollView='ScrollView',StyleSheet={create:value=>value},Platform={OS:'android'};`
+    :args.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',StyleSheet={create:value=>value};`
     :args.path==='expo-router'?`export const router={navigate:()=>{}};`
     :args.path.endsWith('/runtime')?`export const useApp=()=>({t:value=>value});`
-    :args.path.endsWith('/incoming-link')?`export const createMarketNavigationIntent=()=>1;`
-    :`export const Screen='Screen',Button='Button',Icon='Icon',colors={brand:'#c43a00',ink:'#202428',muted:'#63737a',line:'#dbe2e3',soft:'#fff1e9'},useOpenLink=()=>async url=>calls.push(url);`}));
+    :`export const colors={brand:'#c43a00',ink:'#202428',muted:'#63737a',line:'#dbe2e3',soft:'#fff1e9'},useOpenLink=()=>async url=>calls.push(url);`}));
   }}]});
   const module={exports:{} as {default:()=>{type:string;props:{children?:unknown}}}};
   vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,calls,URL,URLSearchParams});
   const nodes:(node:unknown)=>Array<{type:string;props:Record<string,unknown>}>=node=>node&&typeof node==='object'&&'props'in node?
    [node as {type:string;props:Record<string,unknown>},...[((node as {props:{children?:unknown}}).props.children)].flat(Infinity).flatMap(nodes)]:[];
-  const buttons=nodes(module.exports.default()).filter(node=>node.type==='Button');
+  const links=nodes(module.exports.default()).filter(node=>node.type==='Pressable');
   for(const [label,path] of [['Privacy','privacy'],['Terms','terms']] as const){
-   const button=buttons.find(node=>node.props.label===label);assert.ok(button,`${label} button exists`);
-   (button.props.onPress as ()=>void)();assert.equal(calls.at(-1),`${expected}/${path}`);
+   const link=links.find(node=>node.props.accessibilityLabel===label);assert.ok(link,`${label} link exists`);
+   (link.props.onPress as ()=>void)();assert.equal(calls.at(-1),`${expected}/${path}`);
   }
  }
  for(const raw of ['javascript:alert(1)','https://user:pass@mirtpage.com','https://mirtpage.com/private','http://evil.test']){
@@ -96,7 +95,7 @@ test('FE-070 native legal links follow the validated AfricMade, local or staging
 test('FE-070 native social-video WebView uses the same qualified referrer without opening arbitrary destinations',async()=>{
  const {build}=await import('esbuild'),vm=await import('node:vm');
  const id='6718335390845095173';
- for(const [raw,expected] of [[undefined,'https://mirtpage.com'],['http://127.0.0.1:3102','http://127.0.0.1:3102'],['https://preview.mirtpage.com','https://preview.mirtpage.com']] as const){
+ for(const [raw,expected] of [[undefined,'https://africmade.com'],['https://mirtpage.com','https://mirtpage.com'],['http://127.0.0.1:3102','http://127.0.0.1:3102'],['https://preview.mirtpage.com','https://preview.mirtpage.com']] as const){
   const result=await build({entryPoints:['apps/mobile/src/SocialVideoFrame.tsx'],bundle:true,platform:'node',format:'cjs',write:false,define:{'process.env.EXPO_PUBLIC_API_ORIGIN':raw===undefined?'undefined':JSON.stringify(raw)},plugins:[{name:'video-native-ports',setup(b){
    b.onResolve({filter:/^(react(?:\/jsx-runtime)?|react-native|react-native-webview)$/},args=>({path:args.path,namespace:'ports'}));
    b.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'js',contents:args.path==='react'?`export const useMemo=fn=>fn();export default {};`

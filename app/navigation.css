@@ -1,4 +1,4 @@
-/* Shared public and workspace navigation: Suqpage identity, consistent hierarchy. */
+/* Shared public and workspace navigation: AfricMade identity, consistent hierarchy. */
 .public-app-shell{grid-template-columns:244px minmax(0,1fr);background:#f4f7f6}
 .public-app-rail{top:82px;height:fit-content;max-height:calc(100dvh - 98px);margin:16px 12px;padding:18px 12px;gap:18px;overflow-y:auto;border:1px solid #d6e1de;border-radius:18px;background:#fff;box-shadow:0 12px 32px #263f3810;backdrop-filter:none}
 .public-app-rail-group>span{font-size:10px;letter-spacing:.12em;padding:0 12px 5px;font-weight:800}

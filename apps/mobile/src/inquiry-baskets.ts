@@ -1,4 +1,4 @@
-import type {Shop,Offering} from '@suqpage/contracts';
+import type {Shop,Offering} from '@africmade/contracts';
 import {MAX_INQUIRY_SELECTIONS,selectionKey} from '../../../lib/product-inquiry';
 import {inquiryCatalogProduct} from './catalog-products';
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {createTransportPlanLive,createTransportPlanReader,type TransportPlanClock,type TransportPlanReadResult,type TransportPlanLiveState} from '../lib/transport-plan-live';
-import type {TransportPlan} from '@suqpage/contracts';
+import type {TransportPlan} from '@africmade/contracts';
 
 const a='a'.repeat(64),b='b'.repeat(64);
 const plan=(version=1,name='Literal carrier'):TransportPlan=>({version,legs:[{id:'00000000-0000-4000-8000-000000000001',providerName:name,origin:'Addis Ababa',destination:'Adama',method:'truck'}]});

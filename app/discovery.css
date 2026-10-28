@@ -597,7 +597,7 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
   .discovery-map, .shared-location-stage { scroll-behavior: auto; }
 }
 
-/* FE-029 Suqpage discovery and venue identity */
+/* FE-029 AfricMade discovery and venue identity */
 .discovery-switcher { border-color: var(--mp-line); }
 .discovery-kicker { color: var(--mp-teal); }
 .discovery-industries a { border-color: var(--mp-line); background: #f8fafb; color: #41545d; }
@@ -1239,7 +1239,7 @@ body:has(.nearby-showroom-viewer) .public-support-launcher { visibility: hidden;
 .discovery-results-toggle > svg { flex:none; }
 
 .discovery-loading-feedback {position:absolute;z-index:840;top:57px;left:10px;width:min(590px,calc(100% - 90px));pointer-events:none;}
-.discovery-loading-feedback .suqpage-loading {padding:4px 8px;background:#fff;border-radius:7px;box-shadow:0 2px 8px #0001;}
+.discovery-loading-feedback .africmade-loading {padding:4px 8px;background:#fff;border-radius:7px;box-shadow:0 2px 8px #0001;}
 
 /* Give the Daily Featured broadcast state enough room to read on phones. */
 @media (max-width: 640px) {

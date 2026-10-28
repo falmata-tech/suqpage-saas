@@ -1,7 +1,7 @@
 # AfricMade on Google Play
 
 Current authority: [DEP-044 S180](../specs/deployment/DEP-044-google-play-testing-rollout.md#s180--standalone-africmade-firebase-project-in-progress)
-and the [active delivery checklist](SUQPAGE-TRANSITION-CHECKLIST.md).
+and the [active delivery checklist](AFRICMADE-TRANSITION-CHECKLIST.md).
 
 ## Required account selection
 

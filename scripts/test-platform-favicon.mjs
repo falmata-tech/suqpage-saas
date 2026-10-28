@@ -26,7 +26,7 @@ try{
  for(const width of [1440,390,320]){
   await page.setViewportSize({width,height:820});
   await page.goto(base+'/',{waitUntil:'domcontentloaded'});await check();
-  const logo=await page.locator('.public-app-header .suqpage-brand').boundingBox();
+  const logo=await page.locator('.public-app-header .africmade-brand').boundingBox();
   const language=await page.locator('.public-app-header .language-selector').boundingBox();
   assert.ok(logo&&language,`Header controls visible at ${width}px`);
   assert.ok(logo.width>= (width<500?145:205),`AfricMade wordmark readable at ${width}px`);

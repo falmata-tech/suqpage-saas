@@ -1,6 +1,6 @@
 ---
 id: BE-059
-title: Data-preserving MirtPage branding and compatibility
+title: Data-preserving AfricMade branding and compatibility
 status: in_progress
 related: [FE-070, DEP-029, DEP-049, DEP-051, ADR-0029]
 owners: [backend, security, operations]
@@ -8,7 +8,34 @@ last_updated: 2026-10-20
 change_level: L3
 ---
 
-# BE-059 — MirtPage data and protocol compatibility
+# BE-059 — AfricMade data and protocol compatibility
+
+## S188 — eliminate old presentation without breaking stored identities (ready)
+
+The owner requests AfricMade throughout active code and files. Inventory every
+former-name token and classify it as current presentation, internal source name,
+persisted key, wire value, provider-bound setting, legacy asset alias or
+historical evidence. Replace current presentation and safe source names under
+FE-070. For stored sessions, cookies, idempotency keys, push channels, database
+roles/defaults, storage buckets and client headers, preserve reads of existing
+values until a separately tested dual-read/write migration proves continuity.
+Do not globally replace a token in an old migration or dispatched message.
+
+GIVEN a current web/native client and retained session WHEN the source rename is
+deployed THEN auth, tenant isolation, inquiries, transport conversations and
+notifications still reach the same authorized records. GIVEN an older client or
+bookmark WHEN it sends an admitted legacy value THEN the server continues to
+accept only that exact compatible value, without widening authorization.
+GIVEN an operator reviews remaining former-name strings THEN each has a recorded
+compatibility or historical reason and an owner for a later migration; none may
+be mistaken for finished public branding. Focused tests cover both old and new
+names at every changed storage/wire boundary. No hosted data rewrite is included.
+The current residual inventory is
+[AFRICMADE-LEGACY-IDENTIFIERS](../../docs/operations/AFRICMADE-LEGACY-IDENTIFIERS.md).
+New application SMTP Message-ID domains use `africmade.com` while existing
+delivery-key prefixes remain stable for idempotency. Old schema migrations and
+stored labels remain historical; a forward database migration is a separate
+reviewed operation.
 
 ## S172 — AfricMade display with stable system identifiers (ready)
 

@@ -18,7 +18,7 @@ readiness boxes below are historical; they are not current launch instructions.
 Netlify hosting supersedes this path under
 [DEP-026](DEP-026-netlify-and-supabase-capabilities-rollout.md); current MirtPage
 release/recovery admission is
-[DEP-049](DEP-049-mirtpage-domain-and-app-cutover.md). This deprecation does not
+[DEP-049](DEP-049-africmade-domain-and-app-cutover.md). This deprecation does not
 mark the old rollout complete or remove its immutable ID, database/media evidence,
 related contracts or tracing/privacy requirements.
 

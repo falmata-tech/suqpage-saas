@@ -1,4 +1,4 @@
-import type { MapShop, NearbyGroup } from "@suqpage/contracts";
+import type { MapShop, NearbyGroup } from "@africmade/contracts";
 export type MapViewpoint={center:[number,number];zoom:number};
 export type MapControls = {
   zoom: (direction: 1 | -1) => void;

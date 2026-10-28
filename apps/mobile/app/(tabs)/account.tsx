@@ -4,7 +4,7 @@ import ResourceLoading from '../../src/ResourceLoading';
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import type { OwnerHome } from "@suqpage/contracts";
+import type { OwnerHome } from "@africmade/contracts";
 import { auth, useApp, useLoad, request, API } from "../../src/runtime";
 import {
   Screen,

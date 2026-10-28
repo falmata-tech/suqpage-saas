@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';import crypto from 'node:crypto';import 
 import {getDb,closeDbForTests} from './testing/postgres-fixture';
 import {planOwnerErasure,replanOwnerErasureAfterIdentityRemoval,eraseOwnerRows} from './operations/account-erasure';
 import {createPublicClientWorkspace} from '../lib/signup';import {findPlaceSuggestions} from '../lib/place-catalog';
-import {createSuqpageSupabaseAdminClient} from '../lib/supabase-auth';import {supabaseAuthConfig,supabaseMediaStorageConfig} from '../lib/config';
+import {createAfricMadeSupabaseAdminClient} from '../lib/supabase-auth';import {supabaseAuthConfig,supabaseMediaStorageConfig} from '../lib/config';
 import {runtimeUserById} from '../lib/catalog-runtime';import {getMediaObjectStore,type MediaNamespace} from '../lib/media-storage';
 import {buildRuntimeMediaReferenceManifest} from '../lib/media-manifest';import {handleMobileRequest} from '../lib/mobile/router';
 import {createSupportConversation} from '../lib/support';
@@ -10,7 +10,7 @@ import {createSupportConversation} from '../lib/support';
 async function main(){
  const db=await getDb();process.env.SUQPAGE_AUTH_DRIVER='supabase';process.env.SUQPAGE_MEDIA_DRIVER='supabase';
  assert.equal(new URL(supabaseAuthConfig().url).origin,'http://127.0.0.1:54321');assert.equal(new URL(supabaseMediaStorageConfig().url).origin,'http://127.0.0.1:54321');
- const admin=createSuqpageSupabaseAdminClient(),store=getMediaObjectStore(),providerIds:string[]=[],media:Array<{namespace:MediaNamespace;key:string}>=[];
+ const admin=createAfricMadeSupabaseAdminClient(),store=getMediaObjectStore(),providerIds:string[]=[],media:Array<{namespace:MediaNamespace;key:string}>=[];
  try{
   const email='qa-erasure-'+crypto.randomUUID()+'@example.test',password=crypto.randomBytes(32).toString('base64url');
   const p=await admin.auth.admin.createUser({email,password,email_confirm:true});assert.equal(p.error,null);assert.ok(p.data.user);providerIds.push(p.data.user.id);

@@ -48,7 +48,7 @@ Google UI stays disabled until its provider credentials are separately restored
 and verified. This does not authorize Google/SMTP secret replacement or bypass
 DEP-029's exact-plan requirement for hosted Auth configuration changes.
 
-`docs/SUQPAGE-TRANSITION-CHECKLIST.md` is the active sequence. FE-042/BE-033 enable the standard
+`docs/AFRICMADE-TRANSITION-CHECKLIST.md` is the active sequence. FE-042/BE-033 enable the standard
 editor by default, with an explicit emergency-disable environment switch. Its additive
 schema is rehearsed locally before any remote application. Public and ordinary
 preview rendering uses the shared profile for all businesses; retained design
@@ -115,7 +115,7 @@ protected loopback backup. Account/signup/domain and PostgreSQL privacy tests pa
 workflows/accessibility scans and the 24-state/12-profile-scan public matrix pass.
 Approved fictional contacts populated for 66 demo pages and 47 demo users, retaining
 account emails. Two non-demo account phones require owner input. Evidence and
-screenshots: docs/SUQPAGE-TRANSITION-CHECKLIST.md S2g. Visual approval, full gates,
+screenshots: docs/AFRICMADE-TRANSITION-CHECKLIST.md S2g. Visual approval, full gates,
 commit and hosted rollout remain pending.
 
 ## S2h public experience revision
@@ -125,7 +125,7 @@ public features/unit presentation, single/group inquiry choice, progressive phon
 form and search panel beside the persistent map. It supersedes earlier public
 modal, production-fact, persistent empty-cart and map-replacement statements here.
 Retained data, canonical server security and legacy recovery contracts remain.
-Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+Implementation/evidence tracked in docs/AFRICMADE-TRANSITION-CHECKLIST.md S2h.
 
 
 ## S2i/S2j local standard-page lifecycle

@@ -1,7 +1,7 @@
 "use client";
 import {copyBrowserText as copyText, openCopiedBrowserLink} from "@/lib/browser-clipboard";
 import LanguageSelector from "@/components/LanguageSelector";
-import SuqpageBrand from "@/components/SuqpageBrand";
+import AfricMadeBrand from "@/components/AfricMadeBrand";
 import { useUiText } from "@/lib/i18n/ui";
 import {orderScopeLabels} from "@/lib/order-scope";
 
@@ -393,7 +393,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
           <ArrowLeft aria-hidden="true" size={18} strokeWidth={2.4} />
           <span>{t("Back to Market")}</span>
         </button>
-        {withinPublicApp ? <SuqpageBrand className="showroom-host-brand" /> : null}
+        {withinPublicApp ? <AfricMadeBrand className="showroom-host-brand" /> : null}
         <span className="showroom-language"><LanguageSelector /></span>
       </nav> : null}
       <ShowroomRoot
@@ -723,11 +723,11 @@ function InquiryDrawer({
                     ? <a key={link.kind} className={`${inquiryStyles.channelCard} ${channelClass}`} href={link.href} target="_blank" rel="noopener noreferrer" onClick={event=>void openSocial(event,link)}>{content}<span className={inquiryStyles.channelAction}>{label}<span aria-hidden="true"> ↗</span></span></a>
                     : <div key={link.kind} className={`${inquiryStyles.channelCard} ${channelClass}`}>{content}<button type="button" className={`${inquiryStyles.copyContact} ${contactCopyState===link.kind?inquiryStyles.copied:""}`} aria-label={`${t(contactCopyState===link.kind?"Copied":"Copy contact")} ${link.label}`} onClick={()=>void copyText(value).then(copied=>{setContactCopyState(copied?link.kind:null);setContactCopyNotice(copied?"":t("Select and copy the contact details."));})}><Copy size={16} aria-hidden="true"/>{t(contactCopyState===link.kind?"Copied":"Copy contact")}</button></div>;
                 })}
-                <button type="button" className={`${inquiryStyles.channelCard} ${inquiryStyles.inboxChoice}`} aria-expanded={showPlatform} aria-controls="mirtpage-inquiry-details" onClick={()=>{if(!showPlatform)setInboxMessage(message);setShowPlatform(value=>!value);}}><span className={inquiryStyles.channelIcon}><MessageSquare size={22} aria-hidden="true"/></span><span className={inquiryStyles.channelIdentity}><strong>{t("Send to AfricMade Inbox")}</strong></span><span className={inquiryStyles.inboxArrow} aria-hidden="true">→</span></button>
+                <button type="button" className={`${inquiryStyles.channelCard} ${inquiryStyles.inboxChoice}`} aria-expanded={showPlatform} aria-controls="africmade-inquiry-details" onClick={()=>{if(!showPlatform)setInboxMessage(message);setShowPlatform(value=>!value);}}><span className={inquiryStyles.channelIcon}><MessageSquare size={22} aria-hidden="true"/></span><span className={inquiryStyles.channelIdentity}><strong>{t("Send to AfricMade Inbox")}</strong></span><span className={inquiryStyles.inboxArrow} aria-hidden="true">→</span></button>
               </div>
               {contactCopyNotice&&<p role="status" className={inquiryStyles.note}>{contactCopyNotice}</p>}
             </section>
-            {showPlatform&&<form id="mirtpage-inquiry-details" className={inquiryStyles.platform} onSubmit={sendInquiry}>
+            {showPlatform&&<form id="africmade-inquiry-details" className={inquiryStyles.platform} onSubmit={sendInquiry}>
               <p>{t("Ask about products, quantities or a general question. The business will receive your message and phone number.")}</p>
               <label>{t("Your name")}<input autoComplete="name" value={name} onChange={e=>setName(e.target.value)} maxLength={80} required disabled={busy}/></label>
               <label>{t("Phone number")}<input type="tel" autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)} maxLength={60} required disabled={busy}/></label>

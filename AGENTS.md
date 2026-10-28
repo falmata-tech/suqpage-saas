@@ -1,14 +1,14 @@
-# Suqpage agent operating contract
+# AfricMade agent operating contract
 
 This file is mandatory for every human or AI change in this repository. Read it
-with `SUQPAGE-MASTER-PROMPT.md`, `specs/README.md`, and the relevant base and
+with `AFRICMADE-MASTER-PROMPT.md`, `specs/README.md`, and the relevant base and
 feature specs before editing code.
 
 ## Order of authority
 
 1. The user's newest explicit instruction.
 2. Security, tenant isolation, privacy, and data-integrity requirements.
-3. `SUQPAGE-MASTER-PROMPT.md` product rules.
+3. `AFRICMADE-MASTER-PROMPT.md` product rules.
 4. Accepted specs and architecture decision records (ADRs).
 5. Existing implementation details.
 
@@ -21,12 +21,12 @@ silently change product behavior to match convenient code.
    architecture.
 2. Find the controlling specs with `npm run specs:list` or the traceability map.
 3. For a behavior change, create or update specs before production code and
-   identify every section of `SUQPAGE-MASTER-PROMPT.md` whose statement of
+   identify every section of `AFRICMADE-MASTER-PROMPT.md` whose statement of
    current product behavior will be affected.
 4. Confirm Definition of Ready in `specs/README.md`.
 5. Write a short implementation plan linked to spec IDs and acceptance criteria.
    Before feature work, record ordered, checkable steps in the active task
-   checklist (currently `docs/SUQPAGE-TRANSITION-CHECKLIST.md`). Mark the current
+   checklist (currently `docs/AFRICMADE-TRANSITION-CHECKLIST.md`). Mark the current
    step, dependencies, verification, and approval gates. Add new user requests
    where they belong before acting; do not silently replace earlier work.
    Check items only when their stated evidence exists. Distinguish implemented,
@@ -80,11 +80,11 @@ current specs retain authority; a skill grants no additional provider permission
 
 | Task | Skill |
 | --- | --- |
-| User-facing interface, interaction, copy or localization design | `.agents/skills/mirtpage-interface-design/SKILL.md` |
-| Changed UI/UX/navigation or usability audit | `.agents/skills/mirtpage-browser-review/SKILL.md` |
-| Requested build, deployment, hosted change or release recovery | `.agents/skills/mirtpage-release/SKILL.md` |
-| Requested overall engineering/setup audit, housekeeping or workflow redesign | `.agents/skills/mirtpage-engineering-review/SKILL.md` |
-| Branch/PR/CI feedback work or an authorized merge/integration | `.agents/skills/mirtpage-github-workflow/SKILL.md` |
+| User-facing interface, interaction, copy or localization design | `.agents/skills/africmade-interface-design/SKILL.md` |
+| Changed UI/UX/navigation or usability audit | `.agents/skills/africmade-browser-review/SKILL.md` |
+| Requested build, deployment, hosted change or release recovery | `.agents/skills/africmade-release/SKILL.md` |
+| Requested overall engineering/setup audit, housekeeping or workflow redesign | `.agents/skills/africmade-engineering-review/SKILL.md` |
+| Branch/PR/CI feedback work or an authorized merge/integration | `.agents/skills/africmade-github-workflow/SKILL.md` |
 
 Normal implicit selection is enabled by default; explicit `$skill-name` is also
 available. Actual discovery and selection require qualification in the host.
@@ -104,7 +104,7 @@ or treat generated illustrative media as a factual product photograph.
 
 - Before changing transport intake, queue routing, staff assignment or its
   customer-facing copy, read FE-076/BE-063 and master prompt §4. They own the
-  current MirtPage-queue/selected-provider boundary and the deferred provider-
+  current platform-queue/selected-provider boundary and the deferred provider-
   tenant routing work; do not imply provider employees handle today's chats.
 - Use pragmatic hexagonal architecture: domain rules must not depend on Next.js,
   HTTP, cookies, database drivers, email vendors, or filesystem details.

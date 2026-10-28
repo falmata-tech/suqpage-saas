@@ -1,7 +1,7 @@
 import React from 'react';
 import {Pressable,StyleSheet,Text,View,useWindowDimensions} from 'react-native';
 import {router,useGlobalSearchParams,usePathname} from 'expo-router';
-import type {Shop} from '@suqpage/contracts';
+import type {Shop} from '@africmade/contracts';
 import {publicTransportPlacement} from '../../../lib/public-transport-placement';
 import {storefrontAccent} from '../../../lib/storefront-accent';
 import {BuyingLauncher} from './chrome';

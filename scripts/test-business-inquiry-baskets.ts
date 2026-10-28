@@ -6,7 +6,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import {createRequire} from 'node:module';
 import {build} from 'esbuild';
-import type {Offering,Shop} from '@suqpage/contracts';
+import type {Offering,Shop} from '@africmade/contracts';
 import {createInquiryBaskets,INQUIRY_STORAGE_ERROR,restoreBusinessInquiry,type InquiryBasketStorage} from '../apps/mobile/src/inquiry-baskets';
 const product=(id:number,extra:Partial<Offering>={}):Offering=>({id,name:'Product '+id,description:'Public product',kind:'standard_product',availability:'available',priceMinor:null,media:[],published:true,quantityMode:'optional',options:[],...extra});
 const shop=(id:number,products=[product(id)]):Shop=>({id,handle:'business-'+id,name:'Business '+id,about:'',cover:'',videoUrl:'',contacts:{},products,version:1,status:'active',isDemo:false});

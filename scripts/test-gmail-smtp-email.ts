@@ -61,7 +61,7 @@ test('ADR-0031 Gmail adapter pins TLS, sender and stable Message-ID without prov
   assert.equal(settings[0].connectionTimeout,4000);assert.equal(settings[0].socketTimeout,4000);
   assert.deepEqual(messages[0].from,{name:'AfricMade',address:'owner@gmail.com'});
   assert.deepEqual(messages[0].to,{address:message.recipientEmail});
-  assert.equal(messages[0].messageId,'<suqpage-tracking-7@mirtpage.com>');
+  assert.equal(messages[0].messageId,'<suqpage-tracking-7@africmade.com>');
   assert.deepEqual(messages[0],messages[1]);
   assert.ok(!JSON.stringify(messages).includes('abcdefghijklmnop'));
   assert.ok(!JSON.stringify(messages).includes('fixture-resend-key'));
@@ -117,8 +117,8 @@ test('BE-058/BE-050 Gmail route preserves scoped Tracking and manager mail witho
   assert.deepEqual(await sendSupportEscalationEmail(alert,{env:hosted,send:noFetch,smtpCreateTransport:createTransport}),{state:'accepted'});
   assert.deepEqual(await sendTrackingEmail(code,{env:{...hosted,NOTIFICATION_FROM_EMAIL:'',RESEND_API_KEY:''},send:noFetch,smtpCreateTransport:createTransport}),{state:'accepted'},'Gmail uses its verified SMTP user, not Resend sender configuration');
   assert.deepEqual(sent.map(row=>row.to),[code.recipientEmail,alert.recipientEmail,code.recipientEmail]);
-  assert.equal(sent[0].messageId,'<suqpage-tracking-7@mirtpage.com>');
-  assert.equal(sent[1].messageId,'<suqpage-support-overdue-81@mirtpage.com>');
+  assert.equal(sent[0].messageId,'<suqpage-tracking-7@africmade.com>');
+  assert.equal(sent[1].messageId,'<suqpage-support-overdue-81@africmade.com>');
   assert.ok(sent[0].text.includes('123456'));assert.ok(sent[1].text.includes('SUP-QA126'));
   assert.ok(!sent[1].text.includes('customer'));assert.ok(!sent[1].text.includes('route'));
   assert.ok(!sent[0].text.includes('fixture-resend-key'));

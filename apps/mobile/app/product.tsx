@@ -5,7 +5,7 @@ import {
 import React, { useRef, useState } from "react";
 import { View, Text } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import type { Shop } from "@suqpage/contracts";
+import type { Shop } from "@africmade/contracts";
 import { useApp, useLoad, request } from "../src/runtime";
 import { Screen, Copy, LinkedText, Card, Button, Chip, Status, s } from "../src/ui";
 import Gallery from "../src/Gallery";

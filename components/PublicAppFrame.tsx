@@ -7,7 +7,7 @@ import Link from "next/link";
 import { FileText, Info, LayoutDashboard, LogIn, Store, Menu, Shield, Star } from "lucide-react";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import SuqpageBrand from "@/components/SuqpageBrand";
+import AfricMadeBrand from "@/components/AfricMadeBrand";
 import NavigationPendingIndicator, { NavigationPendingMain, NavigationPendingProvider } from "@/components/NavigationPendingIndicator";
 import PublicMobileNavigation from "@/components/PublicMobileNavigation";
 import PublicSupportChat from "@/components/PublicSupportChat";
@@ -32,7 +32,7 @@ function PublicAppFrameContent({ children, signedIn, dashboardHref="/dashboard" 
 
   return <PublicActionDockProvider enabled={publicTransportPlacement(pathname,"web")==="shell"} transport={<PublicSupportChat />}><div className={`public-app-shell${showroomOpen ? " public-app-shell-showroom" : ""}`}>
     <header className="public-app-header">
-      <SuqpageBrand className="public-app-brand" />
+      <AfricMadeBrand className="public-app-brand" />
       <LanguageSelector />
     </header>
     <aside className="public-app-rail">

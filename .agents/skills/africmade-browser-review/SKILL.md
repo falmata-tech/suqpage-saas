@@ -1,9 +1,9 @@
 ---
-name: mirtpage-browser-review
+name: africmade-browser-review
 description: Exercise changed AfricMade UI, UX, layout or navigation as affected visitors, owners, staff and admins in actual Chrome on web and Expo preview. Use for interface changes or usability audits; not backend-only logic or static code review.
 ---
 
-For interface work, also load `.agents/skills/mirtpage-interface-design/SKILL.md`;
+For interface work, also load `.agents/skills/africmade-interface-design/SKILL.md`;
 it supplies the content, localization and responsive-layout criteria.
 
 Resolve paths from this repository root. Follow `AGENTS.md` and read

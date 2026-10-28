@@ -69,7 +69,7 @@ test('FE-021 S153 iOS counted SDK host remains targetable for its own annotation
 
 test('FE-053 native map registers only the canonical public User-Agent on the exact OSM tile host',async()=>{
  const app=await component('MarketMap');
- assert.deepEqual(JSON.parse(JSON.stringify(app.fixture.headers)),[{id:'suqpage-osm-client',match:'^https://tile\\.openstreetmap\\.org/',name:'User-Agent',value:'AfricMade/0.1 (+https://mirtpage.com)'}]);
+ assert.deepEqual(JSON.parse(JSON.stringify(app.fixture.headers)),[{id:'africmade-osm-client',match:'^https://tile\\.openstreetmap\\.org/',name:'User-Agent',value:'AfricMade/0.1 (+https://africmade.com)'}]);
  const header=app.fixture.headers[0] as{match:string;value:string};const match=new RegExp(header.match);
  assert.ok(match.test('https://tile.openstreetmap.org/9/314/208.png'));
  for(const target of['http://tile.openstreetmap.org/9/314/208.png','https://other.tile.openstreetmap.org/9/314/208.png','https://tile.openstreetmap.org.evil.test/9/314/208.png','https://tile.openstreetmap.org@evil.test/9/314/208.png','https://mirtpage.com/api/mobile/v1/market','https://sjeiiqxgscuqajpgddcc.supabase.co/auth/v1/user'])assert.equal(match.test(target),false);

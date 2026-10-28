@@ -42,7 +42,7 @@ Maintain an ordered task checklist before implementation, linked to the controll
 specs. Track implementation, verification, visual approval and deployment separately.
 Insert new requests at their dependency-appropriate step, and resume from the first
 unfinished dependency. Record mistakes as a brief cause and prevention rule, not raw
-logs or chat history. See `docs/SUQPAGE-TRANSITION-CHECKLIST.md` for the active example.
+logs or chat history. See `docs/AFRICMADE-TRANSITION-CHECKLIST.md` for the active example.
 
 1. Draft affected FE/BE/DEP specs from the template.
 2. Write success, denial/failure, retry/idempotency, and boundary scenarios.

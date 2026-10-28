@@ -6,13 +6,14 @@ const publicPaths = [
 ];
 function androidAppLinks(packageName) {
   if(packageName!=='com.africmade.app'||packageName!==policy.packageName)return [];
-  const target=Object.hasOwn(policy.dataTargets,'mirtpage-production')?policy.dataTargets['mirtpage-production']:null;
-  if(!target||target.apiOrigin!=='https://mirtpage.com')return [];
+  const target=Object.hasOwn(policy.dataTargets,'africmade-production')?policy.dataTargets['africmade-production']:null;
+  if(!target||target.apiOrigin!=='https://africmade.com')return [];
+  if(policy.publicOrigin!=='https://africmade.com')return [];
   const identity = associations.find(a => a.target?.namespace === 'android_app' && a.target.package_name === packageName);
   if (!identity || !identity.target.sha256_cert_fingerprints?.length) return [];
   for(const fingerprint of identity.target.sha256_cert_fingerprints)
     if(!/^(?:[A-F0-9]{2}:){31}[A-F0-9]{2}$/.test(fingerprint))throw Error('Invalid public signing fingerprint.');
   if(identity.target.sha256_cert_fingerprints.length!==1||identity.target.sha256_cert_fingerprints[0].replaceAll(':','')!==policy.certificateSha256)throw Error('Public signing association does not match the reviewed AfricMade signer.');
-  return [{action:'VIEW',autoVerify:true,category:['BROWSABLE','DEFAULT'],data:publicPaths.map(path=>({scheme:'https',host:'mirtpage.com',...path}))}];
+  return [{action:'VIEW',autoVerify:true,category:['BROWSABLE','DEFAULT'],data:publicPaths.map(path=>({scheme:'https',host:'africmade.com',...path}))}];
 }
 module.exports = { androidAppLinks };

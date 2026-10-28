@@ -154,7 +154,7 @@ public features/unit presentation, single/group inquiry choice, progressive phon
 form and search panel beside the persistent map. It supersedes earlier public
 modal, production-fact, persistent empty-cart and map-replacement statements here.
 Retained data, canonical server security and legacy recovery contracts remain.
-Implementation/evidence tracked in docs/SUQPAGE-TRANSITION-CHECKLIST.md S2h.
+Implementation/evidence tracked in docs/AFRICMADE-TRANSITION-CHECKLIST.md S2h.
 
 
 ## S105 social-contact revision

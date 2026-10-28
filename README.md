@@ -1,15 +1,17 @@
-# MirtPage
+# AfricMade
 
-A professional digital showroom for every business. Customers explore what a
-business sells, makes or grows, browse products and collections, and contact it
-through its listed channels. Transport arrangement and business-owner support
-remain separate live-chat workflows. Product inquiries go to the business's
-SMS, WhatsApp or Telegram; there is no platform checkout or business inbox.
+AfricMade helps people discover African farmers, manufacturers, artisans and
+other suppliers in one place. Visitors explore each business's Page, story,
+products and order options, then inquire through AfricMade Inbox or the
+business's listed WhatsApp and Telegram channels. There is no platform checkout.
+Transport requests use a separate logistics-provider chat and follow-up flow.
 
 The web application and API use Next.js, Supabase PostgreSQL, managed Auth and
 private Storage. The Expo Android app consumes shared application contracts and
-the API. The public domain is [mirtpage.com](https://mirtpage.com); stable internal
-`suqpage` identifiers remain where changing them would break compatibility.
+the API. The website is available at [africmade.com](https://africmade.com).
+Some stored identifiers and legacy links remain for existing clients; their
+versioned migration is governed by [BE-059](specs/backend/BE-059-africmade-data-and-protocol-compatibility.md)
+and [DEP-049](specs/deployment/DEP-049-africmade-domain-and-app-cutover.md).
 
 ## Start locally
 
@@ -47,10 +49,10 @@ the ordinary web command; do not launch two web servers on the same port.
 
 ## Develop and verify
 
-Read [AGENTS.md](AGENTS.md), [the product brief](SUQPAGE-MASTER-PROMPT.md) and
+Read [AGENTS.md](AGENTS.md), [the product brief](AFRICMADE-MASTER-PROMPT.md) and
 [specification workflow](specs/README.md). Resume the first incomplete dependency
-in [the active checklist](docs/SUQPAGE-TRANSITION-CHECKLIST.md). Current release
-boundaries live in [DEP-049](specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md);
+in [the active checklist](docs/AFRICMADE-TRANSITION-CHECKLIST.md). Current release
+boundaries live in [DEP-049](specs/deployment/DEP-049-africmade-domain-and-app-cutover.md);
 older release documents are historical evidence.
 
 Use focused tests while editing. Useful entry points:
@@ -80,19 +82,18 @@ synthetic map tiles. Screenshots alone do not establish workflow correctness.
 ## Agent skills and engineering upkeep
 
 Project skills in `.agents/skills/` route browser review, delivery, engineering
-review and GitHub integration. Codex supports normal implicit selection and
-explicit `$mirtpage-browser-review`, `$mirtpage-release`,
-`$mirtpage-engineering-review` and `$mirtpage-github-workflow`. Verify discovery
-and selection in the actual host; the files do not grant provider permissions.
+review and GitHub integration. Their current path names are retained until the
+skill registry can be migrated without breaking discovery. Verify discovery and
+selection in the actual host; the files do not grant provider permissions.
 
 [Engineering readiness](docs/operations/ENGINEERING-READINESS.md) records the
 current setup, known gaps and prioritized improvements. Prefer measured fixes
 to existing commands over more frameworks, mandatory ceremonies or paid tools.
 
 [GitHub workflow](docs/operations/GITHUB-WORKFLOW.md) covers task branches,
-commit names, PR review and authorized merge/release boundaries. Use
-`$mirtpage-github-workflow` for that work; installed project skills are instructions,
-not additional app dependencies or merge/deployment permissions.
+commit names, PR review and authorized merge/release boundaries. Use the
+repository's GitHub workflow skill for that work; installed project skills are
+instructions, not additional app dependencies or merge/deployment permissions.
 
 ## Operate and release
 

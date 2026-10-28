@@ -7,7 +7,7 @@ import {countryName} from "../../../lib/countries";
 import {BUSINESS_CATEGORY_OPTIONS} from "../../../lib/business-categories";
 import React, { useRef, useState } from "react";
 import { View } from "react-native";
-import type { OwnerHome } from "@suqpage/contracts";
+import type { OwnerHome } from "@africmade/contracts";
 import { useApp, useLoad, request } from "./runtime";
 import { Copy, Field, Chip, Button, Card, Status, Photo, s } from "./ui";
 import {OwnerAlerts} from './AttentionAlerts';

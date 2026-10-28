@@ -1,7 +1,7 @@
 import { authDriver } from './config';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { runtimeGet, runtimeRun, runtimeTransaction } from './runtime-sql';
-import { createSuqpageSupabaseAdminClient, createSuqpageSupabaseServerClient } from './supabase-auth';
+import { createAfricMadeSupabaseAdminClient, createAfricMadeSupabaseServerClient } from './supabase-auth';
 import {
   assertMatchingEmailChange, assertOwnerEmailActor, decideEmailReconciliation,
   normalizedSignInEmail, sixDigitEmailCode, sessionIssuedAfterEmailChange,
@@ -27,7 +27,7 @@ async function readChange(userId: number) {
 }
 
 async function readProvider(providerUserId: string): Promise<AuthoritativeEmail> {
-  const { data, error } = await createSuqpageSupabaseAdminClient().auth.admin.getUserById(providerUserId);
+  const { data, error } = await createAfricMadeSupabaseAdminClient().auth.admin.getUserById(providerUserId);
   const user = data.user;
   if (error || !user || user.id !== providerUserId || !user.email) throw new OwnerEmailChangeError('try_again');
   return {
@@ -126,7 +126,7 @@ export async function requestOwnerEmailChange(actor: SessionUser, identity: Veri
     throw new OwnerEmailChangeError('identity_mismatch');
   }
   if (currentProvider.newEmail !== prepared) {
-    const client = await createSuqpageSupabaseServerClient();
+    const client = await createAfricMadeSupabaseServerClient();
     const { error, data } = await client.auth.updateUser({ email: prepared });
     if (error || data.user?.id !== identity.providerUserId) {
       const after = await readProvider(identity.providerUserId);
@@ -146,7 +146,7 @@ export async function verifyOwnerEmailChangeCode(actor: SessionUser, identity: V
   assertMatchingEmailChange(change, actor, identity, Date.now());
   if (mailbox === 'current' ? change.old_verified_at : change.new_verified_at) throw new OwnerEmailChangeError('invalid_code');
   const email = mailbox === 'current' ? change.old_email : change.new_email;
-  const client = native?.client || await createSuqpageSupabaseServerClient();
+  const client = native?.client || await createAfricMadeSupabaseServerClient();
   const presentedToken = native?.accessToken || (await client.auth.getSession()).data.session?.access_token;
   if (!presentedToken || verifiedJwtIssueTime(presentedToken, identity.providerUserId) === null) throw new OwnerEmailChangeError('owner_only');
   const { data, error } = await client.auth.verifyOtp({ email, token: code, type: 'email_change' });
@@ -159,7 +159,7 @@ export async function verifyOwnerEmailChangeCode(actor: SessionUser, identity: V
   if (provider.email === change.new_email) {
     // Revoke every refresh session before recording the final proof. Otherwise
     // an old session could refresh into a post-fence JWT after reconciliation.
-    const revoked = await createSuqpageSupabaseAdminClient().auth.admin.signOut(presentedToken, 'global');
+    const revoked = await createAfricMadeSupabaseAdminClient().auth.admin.signOut(presentedToken, 'global');
     if (revoked.error) throw new OwnerEmailChangeError('try_again');
   }
   await runtimeRun(`UPDATE owner_email_change_requests SET ${column}=COALESCE(${column},?) WHERE user_id=? AND provider_user_id=? AND state='pending'`, [stamp, actor.id, identity.providerUserId]);

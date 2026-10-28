@@ -5,9 +5,10 @@ Read this current product brief with [AGENTS.md](AGENTS.md) and
 transcript. Existing numbered headings retain their identities for spec references;
 older “Suqpage” heading names are compatibility anchors, not the public brand.
 
-AfricMade is the public brand. **https://africmade.com** serves the current website;
-canonical metadata and the existing application API still use
-**https://mirtpage.com** during the transition. The current Android release target
+AfricMade is the public brand. **https://africmade.com** serves the website and
+the current source uses it for public canonical/SEO links. The existing
+application API and managed Auth primary still use **https://mirtpage.com**
+until DEP-029/DEP-049's reviewed callback and runtime cutover. The Android target
 is **com.africmade.app**, using the verified standalone Firebase project
 **africmade-de81a** and pinned public client under
 [DEP-044](specs/deployment/DEP-044-google-play-testing-rollout.md).
@@ -20,17 +21,18 @@ historical provider/protocol identifiers remain where compatibility requires
 them. Their spelling does not authorize recreating services or imply that hosted
 names, email settings or existing store listings have already changed.
 
-The current source resolves Android versionCode 3 for the map-first discovery,
-simpler Featured/footer, mask-safe white-field branding and S185 transport-chat
-presentation. The locally signed v3 candidate includes S185 and passed
-source-bound static inspection. Installed-phone, notification-delivery and Play
-qualification remain separate from that binary admission.
+The previously signed Android version3 candidate includes the map-first
+discovery, simpler Featured/footer, mask-safe white-field branding and S185
+transport-chat presentation. It passed static inspection but contains former
+identity strings and is held from Play. S188 source corrections require a new
+DEP-044 build and independent admission. Installed-phone, notification-delivery
+and Play qualification remain separate from any static binary inspection.
 
 This brief describes the current source contracts. Implementation, focused tests,
 visual approval, publication and physical/Play qualification are separate states.
 For the actual deployed source, active recovery, unfinished work and exact evidence,
-start with [DEP-049](specs/deployment/DEP-049-mirtpage-domain-and-app-cutover.md)
-and the current section of [the transition checklist](docs/SUQPAGE-TRANSITION-CHECKLIST.md).
+start with [DEP-049](specs/deployment/DEP-049-africmade-domain-and-app-cutover.md)
+and the current section of [the transition checklist](docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 Do not infer that every source capability is deployed or every binary is qualified.
 Historical rollouts belong in Git, their existing release documents and controlling
 specs; raw logs, customer data and credentials never belong in this brief.

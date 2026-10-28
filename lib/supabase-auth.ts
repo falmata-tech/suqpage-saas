@@ -38,7 +38,7 @@ function publicConfig() {
   return config;
 }
 
-export async function createSuqpageSupabaseServerClient() {
+export async function createAfricMadeSupabaseServerClient() {
   const config = publicConfig();
   const jar = await cookies();
   return createServerClient(config.url, config.publishableKey, {
@@ -53,7 +53,7 @@ export async function createSuqpageSupabaseServerClient() {
   });
 }
 
-export function createSuqpageSupabaseAdminClient(): SupabaseClient {
+export function createAfricMadeSupabaseAdminClient(): SupabaseClient {
   const config = assertSupabaseAuthConfiguration();
   return createClient(config.url, config.serviceRoleKey, {
     global: { fetch: boundedFetch(config.requestTimeoutMs) },
@@ -70,7 +70,7 @@ export function provisionSupabaseEmailIdentity(input: { email: string; name: str
 }
 
 async function provisionSupabaseIdentity(input: { email: string; name: string; password?: string; passwordHash?: string }) {
-  const client = createSuqpageSupabaseAdminClient();
+  const client = createAfricMadeSupabaseAdminClient();
   const { data, error } = await client.auth.admin.createUser({
     email: input.email,
     ...(input.passwordHash ? { password_hash: input.passwordHash } : input.password ? { password: input.password } : {}),
@@ -86,7 +86,7 @@ async function provisionSupabaseIdentity(input: { email: string; name: string; p
 }
 
 export async function finalizeSupabaseIdentity(providerUserId: string, userId: number) {
-  const client = createSuqpageSupabaseAdminClient();
+  const client = createAfricMadeSupabaseAdminClient();
   const { error } = await client.auth.admin.updateUserById(providerUserId, {
     app_metadata: { suqpage_user_id: String(userId), suqpage_link_state: "linked" },
   });
@@ -94,12 +94,12 @@ export async function finalizeSupabaseIdentity(providerUserId: string, userId: n
 }
 
 export async function removePendingSupabaseIdentity(providerUserId: string) {
-  const client = createSuqpageSupabaseAdminClient();
+  const client = createAfricMadeSupabaseAdminClient();
   const { error } = await client.auth.admin.deleteUser(providerUserId);
   return !error;
 }
 
-export async function linkedSuqpageUserId(providerUserId: string) {
+export async function linkedAfricMadeUserId(providerUserId: string) {
   const link = await runtimeGet<LinkedIdentity>(
     "SELECT user_id FROM auth_identity_links WHERE provider='supabase' AND provider_user_id=?",
     [providerUserId],
@@ -118,11 +118,11 @@ export function providerDisplayName(metadata: unknown) {
 }
 
 async function resolveCurrentSupabaseProviderIdentity(): Promise<SupabaseProviderIdentity | null> {
-  const client = await createSuqpageSupabaseServerClient();
+  const client = await createAfricMadeSupabaseServerClient();
   const { data, error } = await client.auth.getUser();
   const email = data.user?.email?.trim().toLowerCase() || "";
   if (error || !data.user || !email) return null;
-  const userId = await linkedSuqpageUserId(data.user.id);
+  const userId = await linkedAfricMadeUserId(data.user.id);
   return { providerUserId: data.user.id, userId, email, displayName: providerDisplayName(data.user.user_metadata) };
 }
 
@@ -134,7 +134,7 @@ export const currentSupabaseIdentity = cache(async () => {
 });
 
 export async function requestSupabaseEmailOtp(email: string) {
-  const client = await createSuqpageSupabaseServerClient();
+  const client = await createAfricMadeSupabaseServerClient();
   const { error } = await client.auth.signInWithOtp({
     email,
     options: { shouldCreateUser: true },
@@ -143,7 +143,7 @@ export async function requestSupabaseEmailOtp(email: string) {
 }
 
 export async function verifySupabaseEmailOtp(email: string, token: string) {
-  const client = await createSuqpageSupabaseServerClient();
+  const client = await createAfricMadeSupabaseServerClient();
   const { data, error } = await client.auth.verifyOtp({ email, token, type: "email" });
   if (error || !data.user) return null;
   const verifiedEmail = data.user.email?.trim().toLowerCase() || "";
@@ -155,15 +155,15 @@ export async function verifySupabaseEmailOtp(email: string, token: string) {
     providerUserId: data.user.id,
     email: verifiedEmail,
     displayName: providerDisplayName(data.user.user_metadata),
-    userId: await linkedSuqpageUserId(data.user.id),
+    userId: await linkedAfricMadeUserId(data.user.id),
   } satisfies SupabaseProviderIdentity;
 }
 
 export async function signInWithSupabasePassword(email: string, password: string) {
-  const client = await createSuqpageSupabaseServerClient();
+  const client = await createAfricMadeSupabaseServerClient();
   const { data, error } = await client.auth.signInWithPassword({ email, password });
   if (error || !data.user) return null;
-  const userId = await linkedSuqpageUserId(data.user.id);
+  const userId = await linkedAfricMadeUserId(data.user.id);
   if (!userId) {
     await client.auth.signOut({ scope: "local" });
     return null;
@@ -172,14 +172,14 @@ export async function signInWithSupabasePassword(email: string, password: string
 }
 
 export async function signOutSupabaseSession() {
-  const client = await createSuqpageSupabaseServerClient();
+  const client = await createAfricMadeSupabaseServerClient();
   await client.auth.signOut({ scope: "local" });
 }
 
 export async function beginGoogleSignIn() {
   const config = assertSupabaseAuthConfiguration();
   if (!config.googleEnabled) return null;
-  const client = await createSuqpageSupabaseServerClient();
+  const client = await createAfricMadeSupabaseServerClient();
   const requestHeaders = await headers();
   const callbackOrigin = googleAuthCallbackOrigin(requestHeaders.get("host"));
   const { data, error } = await client.auth.signInWithOAuth({
@@ -190,7 +190,7 @@ export async function beginGoogleSignIn() {
 }
 
 export async function completeSupabaseCodeExchange(code: string) {
-  const client = await createSuqpageSupabaseServerClient();
+  const client = await createAfricMadeSupabaseServerClient();
   const { data, error } = await client.auth.exchangeCodeForSession(code);
   if (error || !data.user) return null;
   const email = data.user.email?.trim().toLowerCase() || "";
@@ -202,14 +202,14 @@ export async function completeSupabaseCodeExchange(code: string) {
     providerUserId: data.user.id,
     email,
     displayName: providerDisplayName(data.user.user_metadata),
-    userId: await linkedSuqpageUserId(data.user.id),
+    userId: await linkedAfricMadeUserId(data.user.id),
   } satisfies SupabaseProviderIdentity;
 }
 
 export async function updateCurrentSupabasePassword(email: string, currentPassword: string, nextPassword: string) {
   const identity = await signInWithSupabasePassword(email, currentPassword);
   if (!identity) return false;
-  const client = await createSuqpageSupabaseServerClient();
+  const client = await createAfricMadeSupabaseServerClient();
   const { error } = await client.auth.updateUser({ password: nextPassword });
   return !error;
 }
@@ -220,7 +220,7 @@ export async function updateLinkedSupabasePassword(userId: number, nextPassword:
     [userId],
   );
   if (!link) return false;
-  const client = createSuqpageSupabaseAdminClient();
+  const client = createAfricMadeSupabaseAdminClient();
   const { error } = await client.auth.admin.updateUserById(link.provider_user_id, { password: nextPassword });
   return !error;
 }

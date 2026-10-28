@@ -40,7 +40,7 @@ test('FE-065 S181 short enlarged discovery preserves a usable map and contained 
   await page.locator('.language-selector select:not(:disabled)').waitFor();
   const geometry=await page.evaluate(()=>{
    const box=(e:Element)=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};};
-   const header=document.querySelector('.public-app-header')!,brand=header.querySelector('.suqpage-brand')!,language=header.querySelector('.language-selector')!,select=language.querySelector('select')!;
+   const header=document.querySelector('.public-app-header')!,brand=header.querySelector('.africmade-brand')!,language=header.querySelector('.language-selector')!,select=language.querySelector('select')!;
    const introduction=document.querySelector('.market-landing-introduction')!,market=document.querySelector('.public-market-experience')!,map=document.querySelector('.discovery-map')!;
    const selectedText=select.selectedOptions[0].text,style=getComputedStyle(select),context=document.createElement('canvas').getContext('2d')!;
    context.font=style.font;const selectedTextWidth=context.measureText(selectedText).width;

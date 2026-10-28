@@ -1,7 +1,7 @@
 import React,{useEffect,useRef} from 'react';
 import {Modal,Pressable,ScrollView,Text,View,StyleSheet,useWindowDimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import type {MapShop} from '@suqpage/contracts';
+import type {MapShop} from '@africmade/contracts';
 import {mapGroupPickerLayout,MAP_GROUP_ROW_HEIGHT,MAP_GROUP_ROW_GAP} from '../../../lib/map/map-clustering';
 import {useApp} from './runtime';
 import {Photo,Icon,colors} from './ui';

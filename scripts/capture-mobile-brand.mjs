@@ -48,17 +48,17 @@ try {
         const dashboard = route.startsWith("/dashboard");
         const selector = dashboard ? (width <= 900 ? ".workspace-mobile-header" : ".sidebar") : (shopPage && width <= 680 ? ".showroom-host-bar-shell" : ".public-app-header");
         const header = page.locator(selector);
-        const brand = header.locator(".suqpage-brand");
+        const brand = header.locator(".africmade-brand");
         await expect(brand).toBeVisible();
-        await expect(brand.locator(".suqpage-wordmark")).toHaveText(PLATFORM_BRAND.name);
+        await expect(brand.locator(".africmade-wordmark")).toHaveText(PLATFORM_BRAND.name);
         const artwork=brand.locator('img').filter({visible:true});
         await expect(artwork).toHaveCount(1);
         await expect(artwork).toHaveAttribute('src',PLATFORM_BRAND.assets.wordmark);
         await expect(header.locator("select")).toBeVisible();
         await expect.poll(()=>artwork.evaluate(image=>image.complete&&image.naturalWidth>0)).toBe(true);
         const geometry=await header.evaluate(element=>{
-          const brand=element.querySelector('.suqpage-brand').getBoundingClientRect();
-          const image=[...element.querySelectorAll('.suqpage-brand img')].find(node=>node.getBoundingClientRect().width>0&&getComputedStyle(node).display!=='none');
+          const brand=element.querySelector('.africmade-brand').getBoundingClientRect();
+          const image=[...element.querySelectorAll('.africmade-brand img')].find(node=>node.getBoundingClientRect().width>0&&getComputedStyle(node).display!=='none');
           const art=image.getBoundingClientRect(),language=element.querySelector('select').getBoundingClientRect();
           return{brandTop:brand.top,brandRight:brand.right,languageLeft:language.left,brandHeight:brand.height,artRatio:art.width/art.height,artHeight:art.height,artCenter:art.top+art.height/2,brandCenter:brand.top+brand.height/2,sameRow:Math.abs(brand.top-language.top)<14,overflow:document.documentElement.scrollWidth>innerWidth+1};
         });

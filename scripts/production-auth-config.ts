@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { suqpageEmailBrandingPatch } from "./auth-email-templates";
+import { africMadeEmailBrandingPatch } from "./auth-email-templates";
 import { AuthCredentialError, resolveAuthCredential, type CredentialSource } from "./auth-credentials";
 
 export const PRODUCTION_AUTH = Object.freeze({
@@ -11,10 +11,13 @@ export const PRODUCTION_AUTH = Object.freeze({
   origin: "https://suqpage.com",
 });
 const callbacks = "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback";
+const africMadeCallbacks = `${callbacks},https://africmade.com/auth/callback`;
 export const AUTH_ORIGIN_POLICIES = Object.freeze({
   legacy: Object.freeze({ site_url: PRODUCTION_AUTH.origin, uri_allow_list: `${PRODUCTION_AUTH.origin}/auth/callback` }),
   "dual-old-primary": Object.freeze({ site_url: PRODUCTION_AUTH.origin, uri_allow_list: callbacks }),
   "dual-new-primary": Object.freeze({ site_url: "https://mirtpage.com", uri_allow_list: callbacks }),
+  "africmade-callback-old-primary": Object.freeze({ site_url: "https://mirtpage.com", uri_allow_list: africMadeCallbacks }),
+  "africmade-primary": Object.freeze({ site_url: "https://africmade.com", uri_allow_list: africMadeCallbacks }),
 });
 export type AuthOriginPhase = keyof typeof AUTH_ORIGIN_POLICIES;
 const MAX_BYTES = 512 * 1024;
@@ -58,7 +61,7 @@ export function validatePatch(project: string, patch: unknown, template: string)
   requireGuard(project === PRODUCTION_AUTH.project, "Wrong production project.");
   requireGuard(record(patch) && Object.keys(patch).length > 0, "A nonempty JSON patch is required.");
   const permitted: AuthConfig = {
-    ...suqpageEmailBrandingPatch(),
+    ...africMadeEmailBrandingPatch(),
     mailer_otp_length: 6,
     mailer_otp_exp: 600,
     smtp_max_frequency: 60,
@@ -86,7 +89,10 @@ function originTransition(project: string, source: unknown, target: unknown): Au
   originPhase(target);
   requireGuard((source === "legacy" && target === "dual-old-primary")
     || (source === "dual-old-primary" && target === "dual-new-primary")
-    || (source === "dual-new-primary" && target === "dual-old-primary"), "Origin phase transition is not permitted.");
+    || (source === "dual-new-primary" && target === "dual-old-primary")
+    || (source === "dual-new-primary" && target === "africmade-callback-old-primary")
+    || (source === "africmade-callback-old-primary" && target === "africmade-primary")
+    || (source === "africmade-primary" && target === "africmade-callback-old-primary"), "Origin phase transition is not permitted.");
   return { ...AUTH_ORIGIN_POLICIES[target] };
 }
 function matchesOrigin(config: AuthConfig, phase: AuthOriginPhase): boolean {

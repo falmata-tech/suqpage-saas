@@ -1,18 +1,26 @@
 const hostedProfiles=new Set(['preview','production']);
 const policy=require('./release-policy.json');
 const crypto=require('node:crypto');
+function brandedSetting(env,current,legacy){
+ const next=env[current],previous=env[legacy];
+ if(next!==undefined&&previous!==undefined&&next!==previous)throw Error('AfricMade and legacy mobile build settings must agree.');
+ return next!==undefined?next:previous;
+}
 function mobileBuildSettings(env, { validateHosted = true } = {}){
- const profile=env.SUQPAGE_MOBILE_BUILD_PROFILE||env.EAS_BUILD_PROFILE||'development';
+ const requestedProfile=brandedSetting(env,'AFRICMADE_MOBILE_BUILD_PROFILE','SUQPAGE_MOBILE_BUILD_PROFILE');
+ const profile=requestedProfile||env.EAS_BUILD_PROFILE||'development';
  if(!['development','preview','production'].includes(profile))throw Error('Unknown mobile build profile.');
  const hosted=hostedProfiles.has(profile);
- if(env.SUQPAGE_MOBILE_BUILD_PROFILE&&env.EAS_BUILD_PROFILE&&env.SUQPAGE_MOBILE_BUILD_PROFILE!==env.EAS_BUILD_PROFILE)throw Error('Requested and EAS build profiles must match.');
+ if(requestedProfile&&env.EAS_BUILD_PROFILE&&requestedProfile!==env.EAS_BUILD_PROFILE)throw Error('Requested and EAS build profiles must match.');
  if(env.EAS_BUILD_PLATFORM==='ios')throw Error('The AfricMade iOS application is not qualified for builds.');
  if(env.EXPO_PUBLIC_EAS_PROJECT_ID&&env.EXPO_PUBLIC_EAS_PROJECT_ID!==policy.expoProjectId)throw Error('Mobile configuration must use the reviewed AfricMade Expo project.');
  const api=env.EXPO_PUBLIC_API_ORIGIN||'';
  const auth=env.EXPO_PUBLIC_SUPABASE_URL||'';
- const dataTarget=env.SUQPAGE_MOBILE_DATA_TARGET||'';
+ const dataTarget=brandedSetting(env,'AFRICMADE_MOBILE_DATA_TARGET','SUQPAGE_MOBILE_DATA_TARGET')||'';
+ const target=Object.hasOwn(policy.dataTargets,dataTarget)?policy.dataTargets[dataTarget]:null;
+ if(hosted&&dataTarget&&!target)throw Error('Choose an explicitly approved mobile data target.');
+ if(hosted&&api&&target&&api!==target.apiOrigin)throw Error('Mobile API and Auth origins must match the reviewed data target.');
  if(hosted && validateHosted){
-  const target=Object.hasOwn(policy.dataTargets,dataTarget)?policy.dataTargets[dataTarget]:null;
   if(!target)throw Error('Choose an explicitly approved mobile data target.');
   for(const [name,value] of [['API origin',api],['Supabase URL',auth]]){let u;try{u=new URL(value);}catch{throw Error(`${name} is required for an installable hosted build.`);}if(u.protocol!=='https:'||u.username||u.password||u.pathname!=='/'||u.search||u.hash||['localhost','127.0.0.1','0.0.0.0'].includes(u.hostname)||/^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(u.hostname))throw Error(`${name} must be an explicit hosted HTTPS origin.`);}
   if(api!==target.apiOrigin||auth!==target.authOrigin)throw Error('Mobile API and Auth origins must match the reviewed data target.');
@@ -36,7 +44,7 @@ function validateFirebaseClient(input,env){
  if(!/^1:\d+:android:[a-f0-9]+$/.test(policy.firebaseAndroidAppId||''))throw Error('Register and verify the AfricMade Firebase Android app before building.');
  if(!input||typeof input!=='object'||Array.isArray(input))throw Error('Select a Firebase Android client configuration object.');
  if(privateMaterial(input))throw Error('Private credentials must never be used as Firebase Android client configuration.');
- if(env.SUQPAGE_FIREBASE_PROJECT_ID!==policy.firebaseProjectId||input.project_info?.project_id!==policy.firebaseProjectId||String(input.project_info?.project_number)!==policy.firebaseProjectNumber)throw Error('Firebase client must match the reviewed AfricMade project and number.');
+ if(brandedSetting(env,'AFRICMADE_FIREBASE_PROJECT_ID','SUQPAGE_FIREBASE_PROJECT_ID')!==policy.firebaseProjectId||input.project_info?.project_id!==policy.firebaseProjectId||String(input.project_info?.project_number)!==policy.firebaseProjectNumber)throw Error('Firebase client must match the reviewed AfricMade project and number.');
  if(!Array.isArray(input.client))throw Error('Firebase Android configuration does not match the registered AfricMade app.');
  const matchingClients=input.client.filter(c=>c?.client_info?.android_client_info?.package_name===policy.packageName);
  if(matchingClients.length!==1||matchingClients[0].client_info.mobilesdk_app_id!==policy.firebaseAndroidAppId)throw Error('Firebase Android configuration does not match the registered AfricMade app.');

@@ -3,7 +3,7 @@ import {Platform,View} from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
 import {File,Paths} from 'expo-file-system';
-import type {SupportAttachment} from '@suqpage/contracts';
+import type {SupportAttachment} from '@africmade/contracts';
 import {auth,API,useApp} from './runtime';
 import {Button,Copy,Status} from './ui';
 export type PickedSupportFile=DocumentPicker.DocumentPickerAsset;

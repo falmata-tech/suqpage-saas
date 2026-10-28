@@ -527,7 +527,7 @@ async function runPostgresFixture() {
     public_ref,participant_kind,business_id,opened_by_user_id,
     assistance_category,requester_label,subject,status,assigned_user_id,
     created_at,updated_at,last_message_at,closed_at
-  ) VALUES(?,'client',?,?,'general','Suqpage client',?,?,?,?,?,?,?)
+  ) VALUES(?,'client',?,?,'general','AfricMade client',?,?,?,?,?,?,?)
 `);
     const addSupportMessage = db.prepare(`
   INSERT INTO support_messages(

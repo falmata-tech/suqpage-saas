@@ -29,7 +29,7 @@ export async function ensureLocalServices(port = {
   if (!await port.command('docker', ['--version'])) throw Error('Install Docker Desktop, then run npm run dev again.');
   if (!await port.command('docker', ['info', '--format', '{{.ServerVersion}}'])) {
     if (port.platform !== 'darwin') throw Error('Start your Docker engine, then run npm run dev again.');
-    port.log('Starting Docker Desktop for local Suqpage…');
+    port.log('Starting Docker Desktop for local AfricMade…');
     if (!await port.command('open', ['-a', 'Docker'])) throw Error('Could not open Docker Desktop. Open it manually, then retry npm run dev.');
     const deadline = port.now() + 120_000;
     let running = false;

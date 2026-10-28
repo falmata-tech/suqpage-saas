@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { View, ScrollView, Pressable, Platform, Text, useWindowDimensions } from "react-native";
-import type { Media } from "@suqpage/contracts";
+import type { Media } from "@africmade/contracts";
 import YouTubeVideo from "./YouTubeVideo";
 import { Photo, Button, Copy, Icon, colors, s } from "./ui";
 import { useApp } from "./runtime";
