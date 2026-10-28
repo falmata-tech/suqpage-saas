@@ -3,14 +3,14 @@
 The files in this directory that name SuqPage are historical material for the
 older app. They are not AfricMade upload inputs. The current AfricMade text
 candidate is [the local listing draft](africmade/listing-draft.json) under DEP-044
-S178. Its package/app record, native screenshots, new feature graphic, supported
-listing translations and current Console declarations are not yet qualified;
-the owner selected a new `com.africmade.app` package, so the existing v6
-`com.mirtpage.app` bundle cannot be its submission artifact;
-no AfricMade Play listing or bundle upload is claimed.
+S188. The `com.africmade.app` package has its own standalone Firebase project
+and a verified Free/App draft in the MarketVision Play account. The signed v3
+bundle is held because it predates the current identity fixes. A fresh bundle,
+native screenshots, feature graphic, supported listing translations and Console
+declarations still need qualification; no AfricMade bundle upload is claimed.
 
-This DEP-044 worksheet separates last verified provider outcomes from the newer
-local source candidate. Last verified October 12, 2026: SuqPage package
+The remainder of this worksheet is historical SuqPage evidence, not the current
+AfricMade submission plan. Last verified October 12, 2026: SuqPage package
 `com.suqpage.app`, version 5, is **Available to selected testers** on Alpha and
 Available on internal testing. Twelve exact owner-confirmed Google accounts are
 eligible; all 178 selected countries/regions and feedback settings are preserved.
@@ -28,7 +28,7 @@ temporary API-read operation is historical and was not replayed to establish the
 later Console outcomes. See [the current release record](../GOOGLE-PLAY-RELEASE.md)
 for exact version-5 artifact and publication evidence.
 
-## Current local candidate — not released
+## Historical SuqPage local candidate — not released
 
 S100–S115 include independent business-map/product searches, required canonical
 country/city, product-only catalogs with Made to order, focused account/workspace
