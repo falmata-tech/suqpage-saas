@@ -45,6 +45,27 @@ S185 web/Expo transport workflow evidence, `npm run check`, `npm run release:web
 `npm run test:acceptance`, locked native audit/export and independent v3 binary
 inspection. Traceability records results and limits after each gate.
 
+### Verified S187 local admission
+
+PR #52 merged as `16f2d9f5daa91538f532d2ed7d3b6e5c57103041`; its tree
+`e6a43edf20b04c72cf6ef3bff39238978b7a41ab` equals the checked source.
+All five required PR and main CI jobs passed. The disposable local full check,
+clean web release and provider-backed acceptance passed with their separate
+receipts. The exact one-build plan digest was
+`91e90833f41b2d1e2de974ea478803089fe53b4af98bfc09d125de6cfc791710`;
+the owner approved its four-high build-tool exception for this compilation only.
+
+One local compilation produced the signed AAB and derived universal APK for
+`com.africmade.app` versionCode 3. The AAB SHA-256 is
+`eb263b277cc802bf14ef629049cb75a78b889dc707c19f33ccb980e83a1d89a7`;
+the APK SHA-256 is
+`96dfb15f55fd50c3f0fc69a179687ac4006f07b78759cb70e74865bfe17f2d5c`.
+Independent static admission compares the previous signed version2, package,
+signer, target SDK, non-debuggable manifest, compiled AfricMade label, all 35
+brand resources, AAB/APK Hermes and 100 native libraries, 16-KB alignment, and
+bounded private-material patterns. Its receipt is in traceability. No physical
+phone, FCM delivery or Play upload was qualified, and the exception is consumed.
+
 ## S181–S183 — local Android version2 candidate
 
 GIVEN the new discovery/Featured/footer and FE-070 S183 icon/splash corrections

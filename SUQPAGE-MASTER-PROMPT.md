@@ -22,8 +22,9 @@ names, email settings or existing store listings have already changed.
 
 The current source resolves Android versionCode 3 for the map-first discovery,
 simpler Featured/footer, mask-safe white-field branding and S185 transport-chat
-presentation. The retained signed v2 predates S185 and cannot substitute for
-the new candidate; source configuration alone is not a signed v3 artifact.
+presentation. The locally signed v3 candidate includes S185 and passed
+source-bound static inspection. Installed-phone, notification-delivery and Play
+qualification remain separate from that binary admission.
 
 This brief describes the current source contracts. Implementation, focused tests,
 visual approval, publication and physical/Play qualification are separate states.

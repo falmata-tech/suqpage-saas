@@ -663,8 +663,9 @@ Traceability E14 owns exact receipts and remaining hosted/device limits.
 
 ### S187 — signed Android successor for the current chat
 
-Dependency: FE-019 S185, DEP-044 S187, merged main `7787a98` and canonical
-same-package v2 APK. Current step: 2. No hosted or Play write is in scope.
+Dependency: FE-019 S185, DEP-044 S187, merged main `16f2d9f5` and canonical
+same-package v2 APK. Static build admission is complete; physical phone and
+Play qualification remain under R05 and DEP-044. No hosted or Play write occurred.
 
 1. [x] Advance and test resolved Android `versionCode` to 3 for every admitted
    profile while preserving package, signer, Firebase client, API/Auth targets,
@@ -673,10 +674,10 @@ same-package v2 APK. Current step: 2. No hosted or Play write is in scope.
    five timer tests and the full source `npm run check` pass. A clean install
    exposed an undeclared Xcode UUID import and mobile CSS type declaration;
    these are fixed without changing app behavior.
-2. [ ] Freeze the exact source/lock/assets and run focused, release, acceptance,
+2. [x] Freeze the exact source/lock/assets and run focused, release, acceptance,
    config, audit and Hermes/runtime inventory checks. Bind five green integrated
    main CI jobs before compilation; retain any failed gate honestly.
-   - [ ] PR #52 browser CI failed twice before tests at disposable Supabase
+   - [x] PR #52 browser CI failed twice before tests at disposable Supabase
      startup. Classify the image-pull/registry subtype with a private-safe,
      fixed-indicator DEP-027 correction and rerun the changed exact head. Keep
      the other four passing jobs and local 20/20 acceptance evidence distinct.
@@ -698,18 +699,25 @@ same-package v2 APK. Current step: 2. No hosted or Play write is in scope.
      permission and bypass; public-script binding, workflow, YAML and spec
      checks pass locally. No native build or provider configuration change
      belongs to this step.
-   - [ ] After the current source-matched local check finishes, integrate the
-     reviewed CI correction into PR #52 and bind all five required jobs to the
-     changed exact head. A local workflow test cannot replace browser acceptance.
-3. [ ] Prepare a one-artifact review with previous v2 comparison, expiry, output
+   - [x] The final PR head `106468e6` and merged main `16f2d9f5` have the same
+     tree. All five required jobs passed on PR run `40572119857` and main run
+     `40574306092`. The disposable full local check and clean web release passed;
+     the failed local web-install and missing-DB-URL attempts remain retained.
+3. [x] Prepare a one-artifact review with previous v2 comparison, expiry, output
    names, bounded compilation and exact locked-audit findings. Obtain the fresh
    DEP-044 owner exception if the native audit fails. An earlier exception is
-   consumed and does not cover this v3 artifact.
-4. [ ] Compile one local signed AAB, derive its universal APK, and independently
+   consumed and does not cover this v3 artifact. The owner approved exact digest
+   `91e90833…791710` and its four-high advisory exception for this one build.
+4. [x] Compile one local signed AAB, derive its universal APK, and independently
    inspect identity, signing, SDK, private data, resource masks, native alignment,
-   runtime and version lineage. No automatic compilation retry.
-5. [ ] Report the installable path and SHA-256 after static admission; keep real
-   Android, push, managed CargoChatter and Play outcomes separate.
+   runtime and version lineage. One compilation succeeded without retry. Static
+   inspection verifies 35 unchanged compiled brand resources against the reviewed
+   v2 and equality of 31 AAB/APK brand rasters; no physical artwork claim.
+   Protected receipts are under `.local/africmade-s187-native-v3/evidence/`.
+5. [x] Report the installable
+   `.local/africmade-s187-native-v3/AfricMade-v3-universal.apk`, SHA-256
+   `96dfb15f55fd50c3f0fc69a179687ac4006f07b78759cb70e74865bfe17f2d5c`.
+   Real Android, push, managed CargoChatter and Play outcomes remain separate.
 
 ### S174 — Transport live-agent countdown and provider follow-up
 
