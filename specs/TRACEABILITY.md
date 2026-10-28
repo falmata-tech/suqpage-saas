@@ -28,8 +28,17 @@ phone and Expo screenshots. The complete `npm run check`, clean web-only
 smoke), and `npm run test:acceptance` (20/20) pass on this local source. Earlier
 failed invocations exposed stale renamed-asset/workspace test expectations and
 a mixed web/native install; the corrected source and clean install passed. This
-is local qualification only: PR/main CI, hosted Auth/Netlify changes, website
-publication, signed v4, physical Android and Play remain pending.
+is local qualification. PR #54 merged as main
+`d6aea16f518bf45f6ddfbb0868fc41530f8058c9`; its tree equals the checked
+branch. All five required PR jobs and all five post-merge main jobs passed
+(`40667403674`, `40668561713`). Hosted Auth/Netlify changes, website
+publication, signed v4, physical Android and Play remain pending. DEP-044 S188
+prepares version4 and a white-background Play icon; its resolved-config and
+artwork checks, full `npm run check`, clean `npm run release:web` with zero web
+audit findings, and 20/20 acceptance pass. The first full-check attempt was
+stopped by sandbox loopback `EPERM` before product tests; the identical
+source rerun with local service access passed. Remote v4 CI and signed-binary
+admission remain open.
 
 ## S187 signed AfricMade Android version3
 

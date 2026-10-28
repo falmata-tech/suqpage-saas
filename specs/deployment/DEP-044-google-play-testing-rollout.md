@@ -4,11 +4,41 @@ title: Google Play testing and store rollout
 status: draft
 related: [DEP-042, DEP-043, FE-055, FE-063, BE-051, FE-064, BE-052, BE-053, FE-052, FE-049, DEP-046, DEP-049, DEP-051, FE-070, FE-075]
 owners: [product, operations, security]
-last_updated: 2026-10-27
+last_updated: 2026-10-28
 change_level: L4
 ---
 
 # DEP-044 — Google Play testing and store rollout
+
+## S188 — post-identity Android successor and current Play artwork
+
+The signed version3 bundle predates FE-070/BE-059 S188 identity corrections and
+must not be uploaded as AfricMade's next Play artifact. This step prepares the
+same `com.africmade.app` package for a new local version4 build with the existing
+signer and standalone Firebase project. It does not change app capabilities,
+permissions, checkout, tenant data or provider configuration.
+
+GIVEN the canonical signed version3 APK and current source WHEN development,
+preview or production Expo configuration resolves THEN Android `versionCode` is
+4 even if the input Expo config supplies an older code. The package, scheme,
+display name, API target, app links and signing lineage remain AfricMade's.
+
+GIVEN the current white-background native icon WHEN preparing the AfricMade
+Play listing THEN the 512-pixel store icon is derived from that exact artwork,
+its digest is recorded, and it is checked against the app's resolved icon.
+Neither the retired dark icon nor old-package drafts are upload inputs.
+
+GIVEN the frozen source, lockfile, tools and previous APK WHEN a local version4
+compilation is proposed THEN re-run source, export, security and release gates,
+compare the same-package predecessor, and inspect the resulting AAB and derived
+APK independently. Any locked-tool advisory exception needs a new exact owner
+approval for one artifact; the version3 exception is consumed. Play upload,
+installed-device behavior and real push delivery remain separate gates.
+
+Tests: `scripts/test-mobile-build-config.cjs`, current brand/artifact checks,
+`npm run check`, `npm run release:web`, `npm run test:acceptance`, locked native
+audit/export, main CI and independent signed-binary inspection. Traceability
+records actual results and remaining limits.
 
 ## S187 — local Android version3 with S185 chat
 

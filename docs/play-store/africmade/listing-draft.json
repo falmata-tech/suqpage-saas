@@ -3,6 +3,7 @@
   "source": "DEP-044 S188; listing copy derives from current AfricMade UI, fresh post-identity artifact pending",
   "packageDecision": "com.africmade.app_standalone_firebase_registered_play_draft_created",
   "currentLocalBuildPackage": "com.africmade.app",
+  "expectedNextVersionCode": 4,
   "targetPackage": "com.africmade.app",
   "mainListing": {
     "locale": "en-US",
@@ -23,7 +24,7 @@
     "om": "Afaan Oromo is an active app language; verify Play Console listing-locale support before preparing an upload."
   },
   "media": {
-    "icon": "icon.png: 512x512 PNG, 99,308 bytes, scaled from the approved 1024px native icon; SHA-256 e348ba8833d14fffea124b855c3010ce74eed8783ed23c9498ea53e83b8491e9",
+    "icon": "icon.png: 512x512 PNG, 62,001 bytes, generated from the same approved white-background mark as the native 1024px icon; SHA-256 496ee620cd15c28b7dfca2711384df9c1fdf614f5f5d40764111f3d2572ae3f8",
     "featureGraphic": "not yet created for this logo",
     "phoneScreenshots": "capture from admitted native artifact; no old Suqpage or MirtPage screenshots"
   },
