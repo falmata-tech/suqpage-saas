@@ -20,10 +20,11 @@ are unchanged. FE-021 S181 owns earlier, safe group activation; FE-053 and FE-04
 retain native accessibility and meaning-led localization requirements. Affected
 master sections are §§5, 10, 18 and 19.
 
-1. GIVEN phone web or the native Market WHEN the page opens THEN show the short
-   heading **Find African suppliers.**, with natural Amharic/Afaan Oromo wording,
-   rather than the full marketing paragraph. Keep the programmatic heading and
-   the full product explanation on desktop web/About. Do not translate merchant
+1. GIVEN phone web or the native Market WHEN the page opens THEN show the owner's
+   approved heading **Discover African farmers, manufacturers, and artisans in one place.**
+   in English, with the existing natural Amharic/Afaan Oromo wording, without
+   the full supporting paragraph. Keep that paragraph directly below the same
+   heading on desktop web and on About. Do not translate merchant
    data or change the platform's African-made, bulk-and-small-order audience.
 2. GIVEN a compact viewport WHEN no filter dialog is open THEN search and a
    labelled **Filters** action share one row, with at least 44px targets and a
