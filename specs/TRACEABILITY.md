@@ -8,6 +8,25 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S188-H approved Market headline restoration
+
+FE-065 and FE-070 retain the owner's exact headline across desktop, phone web
+and Expo, with the supporting paragraph shown on desktop/About. The Oct 26
+compact substitute is removed from authored catalogs; the existing Amharic and
+Afaan Oromo translations of the approved headline are reused. The map-first
+controls and discovery behavior are unchanged. Focused web geometry (3/3),
+native layout (31/31), localization (26/26), narrative and spec validation pass.
+Installed Google Chrome 156 exercises desktop web, 390/320px phone web and 390px
+Expo in English, Amharic and Afaan Oromo: seven Market→Product listings→Business
+locations returns retain the heading, no page errors or escaped OSM tile requests.
+At 390px the phone-web map retains 67.1% of the viewport; at 320px in Amharic it
+retains 53.5%; Expo retains 68.6% at 390px. The source-bound agent visual decision
+is PASS; snapshots and the synthetic-tile receipt are in the protected
+`.local/homecopy-review/` folder. These previews do not qualify installed Android.
+The source-matched full `npm run check`, clean root/contracts `npm run release:web`
+with zero web audit findings, and 20/20 production-mode browser acceptance
+journeys pass. Source integration and publication remain separate.
+
 ## S188 AfricMade source identity before Play
 
 DEP-044 binds the Android source and release policy to the independently

@@ -77,8 +77,9 @@ about their story, product lineup and production capacity for bulk purchase or
 small orders without getting lost in social media posts. Individual and business
 buyers use the same
 product and inquiry flows, with order options explained on the product page.
-Phone web and native Market use “Find African suppliers.” to prioritize the map;
-About and desktop retain the fuller narrative.
+Phone web and native Market show the same approved headline without the
+supporting paragraph to prioritize the map; About and desktop retain the fuller
+narrative.
 Logos and merchant pictures are not recolored by a showroom accent or locale.
 Launcher and installed-web icons use the approved orange symbol on white with
 mask-safe padding. Android's system splash uses a dedicated padded symbol,
@@ -120,7 +121,8 @@ for conversation and the final sale. Do not imply verified stock, a completed
 purchase, automated fulfillment or an exact home address.
 
 Web Market retains a compact visible introduction on a plain background. Phone
-web and native use the shorter supplier heading and compact search/filter row;
+web and native use the approved headline without its paragraph and a compact
+search/filter row;
 About explains benefits to both visitors and
 business owners. Write inviting, professional copy rather than hype or literal
 translations of internal brainstorming. FE-070 and FE-049 control authored copy.

@@ -130,7 +130,7 @@ const nativeMarket=read('apps/mobile/app/(tabs)/index.tsx');
 assert.match(nativeMarket, /testID="market-introduction"/);
 assert.match(nativeMarket, /t\(MARKET_COMPACT_COPY.title\)/);
 assert.doesNotMatch(nativeMarket, /t\(MARKET_STOREFRONT_COPY.description\)/, 'Phone discovery gives its map the space previously occupied by marketing copy');
-assert.equal(MARKET_COMPACT_COPY.title, 'Find African suppliers.');
+assert.equal(MARKET_COMPACT_COPY.title, MARKET_STOREFRONT_COPY.title);
 assert.match(home, /t\(MARKET_COMPACT_COPY.title\)/, 'Phone web and native share the same compact meaning');
 assert.doesNotMatch(nativeMarket, /setIntro|name="info"/, 'Native Market copy stays inline without a redundant sheet');
 assert.match(read('apps/mobile/app/(tabs)/about.tsx'), /ABOUT_STOREFRONT_SECTIONS/);

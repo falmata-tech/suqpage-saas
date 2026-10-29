@@ -169,7 +169,7 @@ product lineup, and their production capacity for bulk purchase or small orders,
 without getting lost searching through their social media posts.”
 Amharic and Afaan Oromo express the same meaning naturally. Desktop web places
 the supporting text directly beneath the headline. Phone web and native instead
-use FE-065 S181's short supplier-discovery heading to preserve map space; About
+use the same approved heading without the paragraph to preserve map space; About
 retains the full narrative. About explains the buyer and
 supplier journeys in more detail using the actual page, catalog and inquiry
 steps, and makes clear that capacity is shown only when a supplier lists it.

@@ -232,7 +232,7 @@ test('FE-052: both storefront audiences and Market use complete client-safe cata
 test('FE-065 S181: compact discovery and filter navigation have authored active-language client messages', async () => {
   const {MARKET_COMPACT_COPY} = await import('../lib/storefront-copy');
   const {clientMessages} = await import('../lib/i18n/client-messages');
-  assert.equal(MARKET_COMPACT_COPY.title, 'Find African suppliers.');
+  assert.equal(MARKET_COMPACT_COPY.title, 'Discover African farmers, manufacturers, and artisans in one place.');
   for (const locale of enabledLocales) {
     const t = createUiText(catalogs[locale]);
     const title = t(MARKET_COMPACT_COPY.title);
@@ -245,7 +245,7 @@ test('FE-065 S181: compact discovery and filter navigation have authored active-
         assert.ok(client[messageKey(message)], `${locale}: ${message} reaches the interactive client`);
         assert.notEqual(t(message), message, `${locale}: authored active-language discovery copy`);
       }
-      assert.match(title, locale === 'am' ? /አፍሪካ.*አቅራቢ/ : /Dhiyeessitoota.*Afrikaa/);
+      assert.match(title, locale === 'am' ? /አፍሪካ.*አርሶ አደሮችን.*አምራቾችን.*የእጅ ጥበበኞችን/ : /Qonnaan bultoota.*oomishtoota.*ogeeyyii hojii harkaa Afrikaa/);
     }
   }
 });

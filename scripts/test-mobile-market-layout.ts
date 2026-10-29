@@ -86,7 +86,7 @@ test('FE-065 S181 native Market replaces the marketing paragraph with one compac
  assert.ok(intro,'Native Market has a visible introduction');
  const copy=nodes(intro).filter(node=>node.type==='Text').map(node=>node.props.children);
  assert.deepEqual(copy,[MARKET_COMPACT_COPY.title]);
- assert.ok(!tree.some(node=>node.props.children===MARKET_STOREFRONT_COPY.title||node.props.children===MARKET_STOREFRONT_COPY.description),'The complete narrative stays off the native map screen');
+ assert.ok(!tree.some(node=>node.props.children===MARKET_STOREFRONT_COPY.description),'The supporting paragraph stays off the native map screen');
  assert.ok(tree.indexOf(intro)<tree.findIndex(node=>node.props.testID==='market-mode-row'));
  assert.ok(tree.indexOf(intro)<tree.findIndex(node=>node.props.testID==='market-stage'));
  assert.equal(style(intro).position,undefined,'Introduction takes layout space instead of blocking the map');

@@ -16,7 +16,7 @@ test('FE-065 S181 short enlarged discovery preserves a usable map and contained 
   function App(){const[value,setValue]=useState(emptyMarketSearch());return <div className="public-app-shell">
    <header className="public-app-header"><Brand className="public-app-brand"/><Language/></header>
    <main className="public-app-main"><div className="public-experience public-market-experience">
-    <header className="market-landing-introduction"><h1><span className="market-landing-compact-title">{window.fixtureT('Find African suppliers.')}</span></h1></header>
+    <header className="market-landing-introduction"><h1><span className="market-landing-compact-title">{window.fixtureT('Discover African farmers, manufacturers, and artisans in one place.')}</span></h1></header>
     <section className="discovery discovery-marketplace"><div className={'discovery-workbench discovery-drawer-workbench '+styles.stage}>
      <div className={styles.modeBar}><nav className={styles.switch}><button><span>{window.fixtureT('Business locations')}</span></button><button><span>{window.fixtureT('Product listings')}</span></button></nav></div>
      <div className={styles.activeControls}><Controls ready={true} scope="businesses" value={value} onChange={setValue} metadata={{places:[],countries:[],industries:[]}}/></div>

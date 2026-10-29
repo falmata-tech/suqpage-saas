@@ -47,6 +47,30 @@ old **com.mirtpage.app** v6 artifact cannot be submitted to the new package.
 
 ## Ordered work
 
+### S188-H — restore the owner's Market headline on phones
+
+Current step: correct FE-065/FE-070's compact-copy drift before the next web
+publication and Android source freeze. The Oct 26 map-first commit introduced
+“Find African suppliers.” without a corresponding owner instruction. This is a
+presentation-only correction; search, map, API, accounts and inquiry behavior
+remain unchanged. Master §§2–3 and FE-065/FE-070 own the visible wording.
+
+1. [x] Trace the introduced wording to its source, spec, translations and tests;
+   keep the approved full desktop narrative and existing map-first structure.
+2. [x] Restore the approved headline on phone web and Expo; remove the obsolete
+   compact wording from authored catalogs and update contract tests.
+3. [x] Run focused locale/layout checks, then actual Chrome desktop/phone web and
+   Expo Market journeys in English, Amharic and Afaan Oromo, recording the
+   source-bound visual decision and map visibility. The corrected layout passes
+   3 web, 31 native and 26 locale focused cases; seven installed-Chrome web/Expo
+   journeys pass with synthetic tiles, no page errors and no external tile
+   requests. The agent visual decision is PASS. At 320px the Amharic phone-web
+   map retains 53.5% visible height; installed Android remains separate.
+4. [ ] Integrate a scoped PR after its required checks pass. The source-matched
+   full `npm run check`, clean root/contracts `npm run release:web` with zero web
+   audit findings, and 20/20 production-mode browser acceptance journeys pass.
+   Web publication and the next signed Android build remain separate release steps.
+
 ### S188 — finish AfricMade naming before Play submission
 
 Current step: full source qualification. FE-070 S188 defines public/source identity, BE-059 S188
