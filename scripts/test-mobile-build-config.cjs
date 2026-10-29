@@ -6,11 +6,16 @@ const policy=require('../apps/mobile/release-policy.json');
 assert.deepEqual(policy.dataTargets,{'africmade-production':{apiOrigin:'https://africmade.com',authOrigin:'https://sjeiiqxgscuqajpgddcc.supabase.co'}},'Only the verified AfricMade production runtime is admitted');
 assert.equal(policy.appName,'AfricMade');assert.equal(policy.packageName,'com.africmade.app');
 assert.equal(policy.publicOrigin,'https://africmade.com');
+assert.equal(policy.expoProjectId,'1908b4c4-bdf6-4744-b373-8dc6979e54b0','Only the independently verified standalone AfricMade Expo project is admitted');
+const expoConfig=require('../apps/mobile/app.json').expo;
+assert.equal(expoConfig.owner,'falmatad');assert.equal(expoConfig.slug,'africmade');
+assert.equal(expoConfig.extra.eas.projectId,policy.expoProjectId,'The app config and reviewed build policy must identify the same Expo project');
 assert.match(policy.firebaseProjectNumber,/^\d+$/,'Reviewed Firebase project number must be numeric');
 assert.ok(policy.firebaseAndroidAppId===null||new RegExp(`^1:${policy.firebaseProjectNumber}:android:[a-f0-9]+$`).test(policy.firebaseAndroidAppId),'Firebase app ID must be absent or bound to the reviewed project');
 assert.ok(policy.firebaseClientSha256===null||/^[a-f0-9]{64}$/.test(policy.firebaseClientSha256),'Firebase client digest must be absent or a reviewed SHA-256');
 const{mobileBuildSettings}=actualBuild;
 const env={SUQPAGE_MOBILE_BUILD_PROFILE:'preview',SUQPAGE_MOBILE_DATA_TARGET:'africmade-production',EXPO_PUBLIC_API_ORIGIN:policy.dataTargets['africmade-production'].apiOrigin,EXPO_PUBLIC_SUPABASE_URL:policy.dataTargets['africmade-production'].authOrigin,EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_fixture',EXPO_PUBLIC_EAS_PROJECT_ID:policy.expoProjectId};
+assert.throws(()=>mobileBuildSettings({...env,EXPO_PUBLIC_EAS_PROJECT_ID:'bfc289fb-238e-44a3-9e0f-fec6a7c857d1'}),/reviewed AfricMade Expo project/,'The former EAS project must be rejected before a build');
 for(const profile of ['development','preview','production']){assert.equal(mobileBuildSettings({...env,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).packageName,'com.africmade.app');assert.equal(mobileBuildSettings({...env,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).appName,'AfricMade');}
 for(const profile of ['preview','production'])assert.equal(mobileBuildSettings({...env,SUQPAGE_MOBILE_BUILD_PROFILE:profile}).dataTarget,'africmade-production');
 for(const profile of ['preview','production']){

@@ -95,7 +95,13 @@ held from Play because old names remain in its compiled content. Master §§2,
    the successor AAB/APK, and only then resume the MarketVision Play listing,
    declarations, screenshots, upload and testing. Version4 config, exact
    white-field icon parity, full check, clean web release and 20/20 acceptance
-   pass locally; signed build and Play actions remain open.
+   pass locally. The first approved v4 attempt stopped before native compilation
+   because its old EAS project slug mismatched `africmade`; that exception is
+   consumed. The owner-approved standalone `@falmatad/africmade` project is
+   independently verified as `1908b4c4-bdf6-4744-b373-8dc6979e54b0`.
+   Current step: bind this ID in tracked Expo/policy config, prove old-ID refusal,
+   pass source-matched local/CI gates, then prepare a fresh exact build review.
+   Native compilation, binary inspection and Play upload remain open.
 
 
 ### Delivery documentation reconciliation
