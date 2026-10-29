@@ -697,8 +697,10 @@ actual artifact/configuration admission under DEP-044/DEP-049 and BE-044/BE-059.
 The next `com.africmade.app` build selects the verified standalone AfricMade
 Firebase client from the release policy. Preview and production profiles pin its
 public project ID; old-project clients and mismatched identities fail admission.
-This public client binding does not qualify a new-project FCM sending credential,
-package-specific EAS binding or actual push delivery; DEP-043/DEP-044 own those gates.
+The Android source and release policy bind to the standalone `@falmatad/africmade`
+Expo project; the former Expo project remains separate. These public client and
+project bindings do not qualify a new-project FCM sending credential, a signed
+Android artifact or actual push delivery; DEP-043/DEP-044 own those gates.
 Local development uses separate owner and guest credential keys bound to the
 canonical API/Auth origins; it never restores or deletes production keys as a
 fallback. Production keys remain compatible with existing installations. This

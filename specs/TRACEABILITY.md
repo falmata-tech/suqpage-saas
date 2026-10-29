@@ -10,6 +10,15 @@ run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md)
 
 ## S188 AfricMade source identity before Play
 
+DEP-044 binds the Android source and release policy to the independently
+verified standalone Expo project `@falmatad/africmade`
+(`1908b4c4-bdf6-4744-b373-8dc6979e54b0`). The old Expo project remains
+separate. The first v4 build approval was consumed by a precompile slug mismatch;
+it produced no new artifact. Focused build-config tests, resolved Expo config,
+old-ID refusal, local `npm run check`, clean `npm run release:web`, and acceptance
+qualify the corrected source only. A fresh one-artifact DEP-044 review is needed
+before the next local Android build.
+
 FE-070, BE-059, DEP-029 and DEP-049 control the current name audit. A clean
 task worktree from main `d1e2c022` removes former public brand names, duplicate
 assets and obsolete active component/package names. The public canonical and

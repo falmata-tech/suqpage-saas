@@ -40,6 +40,32 @@ Tests: `scripts/test-mobile-build-config.cjs`, current brand/artifact checks,
 audit/export, main CI and independent signed-binary inspection. Traceability
 records actual results and remaining limits.
 
+### Standalone Expo project binding
+
+The first v4 local attempt stopped before native compilation because its pinned
+Expo project still belonged to the former `suqpage` slug. The owner approved a
+separate `@falmatad/africmade` EAS project; its verified ID is
+`1908b4c4-bdf6-4744-b373-8dc6979e54b0`. The prior Expo project remains intact.
+Creating and linking this project does not create a Firebase sender credential,
+qualify push delivery, admit another local build, or authorize Play upload.
+
+GIVEN the independently verified AfricMade EAS project WHEN development, preview
+or production Expo config resolves THEN the app slug and owner remain
+`africmade` and `falmatad`, and the resolved public project ID equals that
+verified standalone ID. A supplied old or unknown project ID fails before a
+hosted build. The package, signer, Firebase client and API/Auth target do not
+change with this binding.
+
+GIVEN the prior project or an unverified project ID WHEN preparing the next
+Android artifact THEN the release guard refuses compilation. Re-plan the
+one-artifact DEP-044 advisory exception against the new source revision; the
+stopped first attempt's approval cannot be reused.
+
+Evidence: the reviewed EAS create-or-link plan, independent `eas project:info`
+readback, resolved Expo-config and negative-ID tests, then source-matched local
+and main CI gates. Qualify package-specific FCM/EAS credential binding and actual
+push delivery separately under DEP-043.
+
 ## S187 — local Android version3 with S185 chat
 
 The next installable AfricMade candidate includes the S185 transport chat
