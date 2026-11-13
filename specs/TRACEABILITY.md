@@ -42,6 +42,16 @@ correctly fails before installing the now-missing APK. Cache layout v2 keeps onl
 the validated client and identity outside generated native output; prebuild can
 recreate that output without deleting the client. Native qualification and an
 actual cache-hit run are still pending, not inferred from a successful build.
+
+Run43526056334 (source `d445a48`, tree `1f52e87`) passes all five quality
+jobs, v2 APK admission, backend preflight and Android launch. The inspected native
+screens show Market/map, product results and a real Android search keyboard;
+no fatal exception is reported. The journey stops before product navigation:
+the typed product name also matches the search EditText, so the driver retaps
+that input instead of the product Button. The driver now selects the observed
+button class for product actions, with an actual-function regression for the
+ambiguous label. Inquiry persistence and the v2 cache-hit run remain pending.
+Artifact14086097451 SHA256 `703e06a46ac973fda14e703e757b544a218c7f430680571aadb121abafbad124`.
 DEP-044 signed-release inputs and
 Auth/push/physical-device qualification remain separate; S194 demo simulation and
 deferred S192 Google verification are preserved in the checklist.

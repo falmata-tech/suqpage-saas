@@ -54,7 +54,7 @@ def bounds(node):
     return values if len(values) == 4 else [0, 0, 0, 0]
 
 
-def find(label, timeout=40, scroll=False):
+def find(label, timeout=40, scroll=False, widget=None):
     deadline = time.monotonic() + timeout
     swipes = 0
     while time.monotonic() < deadline:
@@ -64,7 +64,8 @@ def find(label, timeout=40, scroll=False):
             time.sleep(1)
             continue
         matches = [n for n in nodes.iter('node') if label in (n.get('text'), n.get('content-desc'))
-                   and n.get('enabled') == 'true' and bounds(n)[2] > bounds(n)[0]]
+                   and n.get('enabled') == 'true' and bounds(n)[2] > bounds(n)[0]
+                   and (widget is None or n.get('class') == widget)]
         if matches:
             matches.sort(key=lambda n: n.get('clickable') != 'true')
             return matches[0]
@@ -144,14 +145,14 @@ try:
     type_into('Search products', fixture['productName'])
     capture('03-search-keyboard')
     adb('shell', 'input', 'keyevent', '4')
-    tap(fixture['productName'], timeout=60)
+    tap(fixture['productName'], timeout=60, widget='android.widget.Button')
     find(fixture['businessName'], timeout=60)
     capture('04-product')
     adb('shell', 'input', 'keyevent', '4')
     find('Search products')
     find(fixture['productName'])
     capture('05-native-back-retains-search')
-    tap(fixture['productName'])
+    tap(fixture['productName'], widget='android.widget.Button')
     tap('Add to inquiry list', scroll=True)
     find('Added to inquiry list')
     capture('06-product-added')

@@ -57,3 +57,11 @@ with tempfile.TemporaryDirectory() as root:
     except ConnectionError:
         pass
 print('PASS native driver busy-start retry, fresh hierarchy, finite deadline and device-error propagation.')
+
+# The live keyboard/search screen exposes both an EditText containing the typed
+# product name and a product Button with that same accessible label.
+with tempfile.TemporaryDirectory() as root:
+    xml = '<hierarchy><node text="Product" class="android.widget.EditText" enabled="true" clickable="true" bounds="[0,0][100,40]"/><node content-desc="Product" class="android.widget.Button" enabled="true" clickable="true" bounds="[0,50][100,100]"/></hierarchy>'
+    _, find = fixture(root, busy=0)
+    assert find('Product', widget='android.widget.Button').get('content-desc') == 'Product'
+print('PASS native product action is distinct from identically named search input.')
