@@ -2,7 +2,7 @@
 id: FE-066
 title: External business contact with localized product messages
 status: in_progress
-related: [BE-062, FE-075, FE-040, BE-055, DEP-045, FE-001, FE-041, FE-049, FE-052, FE-053, FE-056, FE-062, FE-067]
+related: [FE-079, BE-062, FE-075, FE-040, BE-055, DEP-045, FE-001, FE-041, FE-049, FE-052, FE-053, FE-056, FE-062, FE-067]
 owners: [product, frontend, security]
 last_updated: 2026-10-17
 change_level: L2

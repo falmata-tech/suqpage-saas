@@ -8,10 +8,11 @@ import { Screen, Status } from "../../src/ui";
 import { ShowroomContent } from "../../src/ShowroomContent";
 import {CatalogSafety} from '../../src/CatalogSafety';
 import ResourceLoading from '../../src/ResourceLoading';
+import {usePublicShop} from '../../src/use-public-shop';
 export default function Showroom() {
   const bottomInset=usePublicScrollInset();
   const { handle } = useLocalSearchParams<{ handle: string }>();
-  const load = useLoad(() => request<Shop>("shops/" + encodeURIComponent(handle)), [handle]);
+  const load = usePublicShop(handle);
   return <Screen scroll={false}>
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{paddingBottom:bottomInset}}>
       <ResourceLoading load={load} variant="showroom"/>

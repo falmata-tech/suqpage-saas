@@ -185,7 +185,7 @@ async function loadProductBatch(params:string,signal:AbortSignal) {
  return productBatch(await response.json() as MarketplaceDiscoveryView);
 }
 
-function useIndependentSearch(scope:MarketScope,search:MarketSearch,initial:MarketplaceDiscoveryView,initialSearch:MarketSearch,exclusionKey:string,initialExclusionKey:string|null) {
+function useIndependentSearch(scope:MarketScope,search:MarketSearch,initial:MarketplaceDiscoveryView,initialSearch:MarketSearch,exclusionKey:string,initialExclusionKey:string|null,active:boolean) {
  const key=marketSearchParams(scope,search).toString();
  const batch=(data:MarketplaceDiscoveryView)=>({data,items:data.showrooms,page:1,pages:1,total:data.total});
  // Retention is limited to this same-origin public collection. Cached server
@@ -194,7 +194,7 @@ function useIndependentSearch(scope:MarketScope,search:MarketSearch,initial:Mark
   const response=await fetch('/api/discovery?'+params,{signal});
   if(!response.ok)throw new Error('Search is unavailable. Try again.');
   return batch(await response.json() as MarketplaceDiscoveryView);
- },initialExclusionKey===exclusionKey?batch(initial):undefined,{scopeKey:'/api/discovery:public:'+scope+':excluded:'+exclusionKey,initialSnapshotKey:marketSearchParams(scope,initialSearch).toString()});
+ },initialExclusionKey===exclusionKey?batch(initial):undefined,{scopeKey:'/api/discovery:public:'+scope+':excluded:'+exclusionKey,initialSnapshotKey:marketSearchParams(scope,initialSearch).toString(),refreshMs:15000,active});
  const visible=feed.batch?.data||{...initial,showrooms:[],nearbyGroups:[],searchProducts:[],searchOrder:[],searchBusinesses:[],total:0,resultCounts:{products:0,businesses:0},resultPage:{...initial.resultPage,totalItems:0,totalPages:1,firstItem:0,lastItem:0}};
  return {data:visible,pending:feed.loading,settled:feed.snapshotCurrent&&!feed.loading&&!feed.error,snapshotCurrent:feed.snapshotCurrent,error:feed.error,retry:feed.retry};
 }
@@ -210,9 +210,9 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
  const readyRef=useRef(false),writtenParams=useRef<string|null>(null),pendingRestore=useRef<string|null>(null);
  const currentWorkspace=useRef<MarketWorkspaceState>({mode:panelOpen?'products':'businesses',business:businessSearch,product:productSearch});
  currentWorkspace.current={mode:panelOpen?'products':'businesses',business:businessSearch,product:productSearch};
- const businesses=useIndependentSearch('businesses',businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey);
+ const businesses=useIndependentSearch('businesses',businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey,!panelOpen);
  const productKey=marketSearchParams('products',productSearch).toString();
- const products=useMarketFeed(productKey,loadProductBatch,initialExclusionKey===exclusionKey?productBatch(productDiscovery||discovery):undefined,{scopeKey:'/api/discovery:public:products:excluded:'+exclusionKey,initialSnapshotKey:marketSearchParams('products',initialProduct).toString()});
+ const products=useMarketFeed(productKey,loadProductBatch,initialExclusionKey===exclusionKey?productBatch(productDiscovery||discovery):undefined,{scopeKey:'/api/discovery:public:products:excluded:'+exclusionKey,initialSnapshotKey:marketSearchParams('products',initialProduct).toString(),refreshMs:15000,active:panelOpen});
  const productData=products.batch?.data||{...(productDiscovery||discovery),searchProducts:[],resultPage:{...(productDiscovery||discovery).resultPage,totalItems:0}};
  const [mapFailed,setMapFailed]=useState(false),[selectedShowroomId,setSelectedShowroomId]=useState<number|null>(null),[activeNearbyGroupKey,setActiveNearbyGroupKey]=useState<string|null>(null),[requestedView,setRequestedView]=useState<MapView|null>(null),[nearMeStatus,setNearMeStatus]=useState('');
  const [mapZoom,setMapZoom]=useState(5);
@@ -329,6 +329,7 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
    <div ref={viewport} className={independentStyles.viewport} data-dragging={moving}>
    <aside id="discovery-search-panel" className={independentStyles.panel} data-open={panelOpen} style={moving?{transform:`translateX(${(1-progress)*paneTravel}px)`,transition:'none'}:undefined} aria-label={t('Products')} aria-hidden={!panelOpen} inert={!panelOpen} onKeyDown={event=>{if(event.key==='Escape'&&!event.defaultPrevented){setPanelOpen(false);requestAnimationFrame(()=>businessButton.current?.focus());}}}>
     {products.error&&<div className={independentStyles.error} role="alert">{t(products.error)} <button type="button" onClick={products.retry}>{t('Try again')}</button></div>}
+    {products.updatesAvailable&&<button type="button" onClick={products.retry}>{t('Refresh')}</button>}
     <div className={independentStyles.panelBody}><MarketplaceSearchResults discovery={productData} items={products.batch?.items||[]} loading={products.loading} failed={Boolean(products.error)} hasMore={products.hasMore} loadingMore={products.loadingMore} moreError={products.moreError} onMore={products.loadMore} enabled={panelOpen} resetKey={products.displayedSnapshotKey} snapshotCurrent={products.snapshotCurrent}/></div>
    </aside>
    <button type="button" className={independentStyles.peek} data-side={panelOpen?'map':'products'} style={moving?{left:Math.max(16,(viewport.current?.clientWidth||320)-64)-progress*Math.max(0,(viewport.current?.clientWidth||320)-80),right:'auto'}:undefined} aria-label={t(panelOpen?'Map only':'View products')} title={t(panelOpen?'Map only':'View products')} onClick={event=>{if(event.detail===0||!dragged.current)setPanelOpen(!panelOpen);dragged.current=false;}} onPointerDown={panelDragStart} onPointerMove={panelDragMove} onPointerUp={panelDragEnd} onPointerCancel={cancelPanelDrag} onLostPointerCapture={()=>{if(dragStart.current)cancelPanelDrag();}}><i aria-hidden="true"/>{panelOpen?<ChevronRight size={18}/>:<ChevronLeft size={18}/>}</button>

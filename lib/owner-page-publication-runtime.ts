@@ -66,9 +66,12 @@ export const pagePublicationPort: PagePublicationPort = {
 };
 
 export async function runtimePublishedPage(businessId: number): Promise<ShopPageContent | undefined> {
-  if (!ownerPageEditorEnabled() || !(await active(businessId))) return undefined;
-  const current = await latest(businessId);
-  return current?.content ? publicPageContent(businessId, current.content) : undefined;
+  return (await runtimePublishedPageState(businessId)).content;
+}
+export async function runtimePublishedPageState(businessId:number):Promise<{revision:number;content:ShopPageContent|undefined}>{
+  if (!ownerPageEditorEnabled() || !(await active(businessId))) return {revision:0,content:undefined};
+  const current=await latest(businessId);
+  return {revision:current?.revision??0,content:current?.content?publicPageContent(businessId,current.content):undefined};
 }
 
 export async function runtimeCurrentPageCovers(businessIds: number[]): Promise<Map<number, string>> {

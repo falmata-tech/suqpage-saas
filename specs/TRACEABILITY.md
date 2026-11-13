@@ -8,6 +8,21 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S194 scenario-driven demo activity (qualification in progress)
+
+BE-067 / FE-079 / DEP-054 / ADR-0034 define coherent versioned timelines,
+minute-level activity through ordinary application writes, strict enrolled-demo
+identity/version checks and bounded foreground public refresh. The operating
+inventory maps supported business/product fields, existing write/read paths and
+actual storage measurements. The three scenario catalogs, disabled migration82,
+private explicit enrollment, transactional ordinary-command worker and foreground
+public revision/feed adapters are implemented. Eight domain/timer/inert-worker
+tests, 13 existing controlled native inquiry/product cases and root/mobile types
+pass. These controlled ports are not PostgreSQL, Chrome or Android refresh proof.
+PostgreSQL integration, actual refresh journeys and hosted execution remain
+pending; no recurring service or enrollment is deployed yet. Local Chromium is
+blocked by its singleton socket; the cloud browser cannot reach that loopback.
+
 ## S193 phone messaging handoff and demo destinations
 
 FE-066 uses the existing phone-device policy in the browser clipboard adapter.

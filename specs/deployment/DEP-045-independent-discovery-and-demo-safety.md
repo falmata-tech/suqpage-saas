@@ -2,7 +2,7 @@
 id: DEP-045
 title: Independent discovery rollout and safe demo contacts
 status: in_progress
-related: [FE-065, FE-066, BE-055, BE-054, DEP-042, DEP-030, DEP-041, BE-022, ADR-0027, DEP-046]
+related: [DEP-054, FE-065, FE-066, BE-055, BE-054, DEP-042, DEP-030, DEP-041, BE-022, ADR-0027, DEP-046]
 owners: [operations, security]
 last_updated: 2026-10-20
 change_level: L4

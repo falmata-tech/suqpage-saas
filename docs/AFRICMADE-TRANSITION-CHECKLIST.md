@@ -61,14 +61,14 @@ store screenshots and Play qualification remain separate unfinished work.
 
 ## Ordered work
 
-### S194 — recurring demo marketplace simulator
+### S194 — scenario-driven demo marketplace simulator (BE-067 / FE-079 / DEP-054)
 
 Owner instruction 2026-11-13: operate a dedicated recurring demo service and
 verify storage, public refresh and rendered changes after production deployment.
 Use explicitly enrolled, marked demo tenants; real signups/accounts must never
 be eligible. Google verification/mailbox S192 stays deferred by owner instruction.
 
-1. [ ] Inventory supported business/product fields, current write/publication/
+1. [x] Inventory supported business/product fields, current write/publication/
    refresh contracts and existing worker hosting; specify the simulated data
    matrix and cadence before implementation.
 2. [ ] Implement a bounded, idempotent scheduler with demo-only registration,
@@ -80,8 +80,20 @@ be eligible. Google verification/mailbox S192 stays deferred by owner instructio
    plan and production deployment; enable only the reviewed enrolled demos and
    independently verify scheduled runs and real-account preservation.
 
-Current step: 1. Prefer the existing scheduled-function infrastructure if its
-bounded execution contract fits; no new paid VM or background mutation exists yet.
+Current step: 2. The field/scenario and refresh inventory is in
+`docs/operations/DEMO-SIMULATOR.md`. Use predefined coherent accelerated timelines,
+private explicit enrollment, a dedicated one-minute scheduled function and at most
+two due stages per tick in a small active cohort. Open screens refresh at15s while
+active. Real/new/private accounts remain excluded; record versions and guard
+concurrent human edits, writes and retained-data growth. No hosted mutation yet.
+
+Implementation checkpoint: the three versioned scenario catalogs, additive
+disabled private schema, enrollment/transactional worker and public foreground
+refresh adapters are written. Eight pure/timer/worker-load tests and root/mobile
+typechecking pass. PostgreSQL integration and actual browser/native refresh
+journeys remain unqualified. This host refuses Chromium's singleton socket and
+the separate cloud browser cannot reach its loopback preview; no UI pass is
+inferred from that environment failure. Native QA continues separately in S195.
 
 ### S195 — native Android emulator development testing
 

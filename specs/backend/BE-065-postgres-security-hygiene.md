@@ -2,7 +2,7 @@
 id: BE-065
 title: Fixed trigger search paths and server-only database grants
 status: in_progress
-related: [BE-001, BE-002, BE-035, DEP-052]
+related: [DEP-054, BE-001, BE-002, BE-035, DEP-052]
 owners: [backend, security, operations]
 last_updated: 2026-11-12
 change_level: L3

@@ -2,7 +2,7 @@
 id: DEP-052
 title: Git-connected Netlify delivery and verified environment readiness
 status: in_progress
-related: [DEP-002, DEP-026, DEP-049, DEP-029, BE-065, ADR-0032]
+related: [DEP-054, DEP-002, DEP-026, DEP-049, DEP-029, BE-065, ADR-0032]
 owners: [operations, security]
 last_updated: 2026-11-12
 change_level: L3
