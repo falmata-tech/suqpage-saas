@@ -67,6 +67,13 @@ Owner instruction 2026-11-13: operate a dedicated recurring demo service and
 verify storage, public refresh and rendered changes after production deployment.
 Use explicitly enrolled, marked demo tenants; real signups/accounts must never
 be eligible. Google verification/mailbox S192 stays deferred by owner instruction.
+The owner's clarification requires a scenario catalog with realistic timelines:
+predefined stages coordinate related business/product changes and enforce their
+consistency. Persist progress over time; never select independent arbitrary field
+changes. Test complete scenarios, recovery and concurrent-human-edit protection.
+The owner additionally requires frequent visible activity for early users: advance
+short coordinated demo stages about every minute and refresh already-open public
+screens, with measured storage/write budgets and a bounded active demo cohort.
 
 1. [ ] Inventory supported business/product fields, current write/publication/
    refresh contracts and existing worker hosting; specify the simulated data
@@ -129,22 +136,25 @@ web and route only demo-business messaging contacts to `+19528552202`.
 1. [x] Inspect the handoff and exact demo records; retain protected before-images
    and define acceptance before code/data changes. Never select records solely
    by a plausible business name or overwrite real merchant contacts.
-2. [ ] Fix mobile navigation without a blank popup, preserve copy/prefilled draft
+2. [x] Fix mobile navigation without a blank popup, preserve copy/prefilled draft
    and visible failure recovery, and add desktop/phone regressions.
 3. [x] Verify the reviewed demo-only messaging fields and their approved-number
    configuration. All 65 canonical/draft and 64 current published/public-API
    contacts already match and approve the owned number; no data or setting
    update is needed. Six non-demo businesses remain untouched. No messages sent.
-4. [ ] Exercise the affected public contact journey, pass required source gates,
+4. [x] Exercise the affected public contact journey, pass required source gates,
    integrate/deploy, and independently verify all demo targets and real-business
    preservation. Expo/physical-app behavior remains separately identified.
 
-Current step: 2. Source now uses current-tab navigation on phone web; five
-clipboard edge tests and the existing pure contact/demo tests pass. Local browser
-qualification first stopped on an unavailable browser download, then the
-installed browser hit the host socket restriction. The real browser regression
-is wired into required CI, pending source-bound review before merge. Existing
-Android artifact prerequisites in S191 remain pending and are not replaced.
+Completed through PR #61 / main `c2075ec`: all five PR and post-merge checks pass,
+including 134 browser/component cases and 20 acceptance journeys. The first
+post-merge Chrome launch timeout was classified before a bounded successful job
+retry. Netlify automatically published `6af78ed9cb2cd269ccc734db` in 37s;
+dashboard readback binds that deploy to main and confirms auto publishing, and
+the live health endpoint returns OK. Source-bound controlled destinations prove
+copy-before-navigation and one-tab phone behavior; no external message was sent.
+Local socket/download failures remain historical infrastructure limits. Physical
+app handoff and S191 Android release prerequisites remain separate.
 
 ### S191 — finish the business-only Android update (DEP-044 / FE-078)
 

@@ -37,6 +37,12 @@ The public repository uses standard runners; no new paid service is provisioned.
   credentials, notifications, external messages or public map-tile requests.
 - Android loads the actual app from a local Metro server. This is a native
   development build, not Expo Go, a WebView or an Expo web preview.
+- Verify the ordinary local API before compilation. Cache only the separate
+  debuggable QA APK and its digest/source/native-input identity using an exact
+  native configuration/dependency/asset/workflow key. Always inspect package,
+  debuggability and digest before reuse. Current JavaScript loads from fresh
+  Metro; report native compiled source and JavaScript source separately. No
+  restore-prefix fallback, production credentials or cache-limit expansion.
 - The initial bounded English smoke covers Market map/list switching, a real
   product, native Back, inquiry selection/form/keyboard, local Inbox submission,
   authoritative saved inquiry, About and Login entry. Use actual native nodes

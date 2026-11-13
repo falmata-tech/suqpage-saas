@@ -20,8 +20,16 @@ the two exact public files. A missing JSON-module diagnostic was corrected by
 reading the actual public JSON fixture explicitly, then static checks pass.
 These are configuration/harness results, not emulator or release evidence.
 
-The first accelerated Android build/UI run, screenshot review, persistence check
-and required current-head CI remain pending. DEP-044 signed-release inputs and
+First run 43519737758 compiled the actual QA APK in 12m17s and booted an accelerated
+API35 emulator in 41s. Its public API preflight failed before app installation:
+the harness selected an output directory refused by the existing Next guard.
+The exact bad configuration reproduces that refusal; the existing default passes.
+The corrected harness uses that default and verifies its real API before costly
+compilation. Exact native-input/debug-package/digest caching is being qualified to
+avoid recompilation for JavaScript/UI-harness-only iterations. Source/JS identities
+remain separate. The five quality jobs for the initial source passed; emulator
+UI/screenshot/persistence and corrected-head gates remain pending.
+DEP-044 signed-release inputs and
 Auth/push/physical-device qualification remain separate; S194 demo simulation and
 deferred S192 Google verification are preserved in the checklist.
 
@@ -38,12 +46,19 @@ controlled and no WhatsApp/Telegram message is sent.
 
 Local browser execution is unqualified: the pinned browser download was
 truncated, and one installed-Chromium retry stopped on the host's prohibited
-socket creation. Current-head CI browser review remains required before merge;
-these infrastructure stops are not passing browser or physical-phone evidence.
+socket creation. These infrastructure stops are not passing browser or
+physical-phone evidence.
 Initial PR #61 CI passed the other browser/component cases but the new handoff
 fixture did not install its clipboard port: a serialized TypeScript function
 depended on an unavailable helper. The fixture now installs a plain browser
-script, preserving the copy-order and one-tab assertions; fresh CI is required.
+script, preserving the copy-order and one-tab assertions. Corrected head
+`69687f8` passes all five jobs in run 43518310026: 134 browser/component cases
+including the real phone handoff and 20 acceptance journeys. PR #61 is protected-
+squash merged as `c2075ec` with the same qualified tree. Its five post-merge jobs
+pass in run 43519441799 after one Chrome-start timeout and a classified bounded
+retry. Netlify dashboard verifies automatic published deploy
+`6af78ed9cb2cd269ccc734db` from that commit in37s; live health is OK. No contact
+data/configuration or actual message changed during delivery.
 
 DEP-045 readback verifies the exact healthy AfricMade project, 65 marked demos,
 six non-demo businesses, zero canonical/draft/current-publication messaging

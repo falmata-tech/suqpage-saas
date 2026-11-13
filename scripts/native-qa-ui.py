@@ -103,7 +103,11 @@ try:
         raise AssertionError('Android aapt is unavailable')
     badging = run([str(tools[-1]), 'dump', 'badging', str(apk)])
     assert "package: name='com.africmade.qa'" in badging and 'application-debuggable' in badging
-    (OUT / 'artifact.json').write_text(json.dumps({'source': fixture['source'],
+    native = json.loads((ROOT / 'native-build.json').read_text())
+    assert native['key'] == os.environ['NATIVE_QA_CACHE_KEY']
+    assert native['sha256'] == hashlib.sha256(apk.read_bytes()).hexdigest()
+    (OUT / 'artifact.json').write_text(json.dumps({'javascriptSource': fixture['source'],
+        'nativeSource': native['source'], 'nativeInputsKey': native['key'],
         'apkSha256': hashlib.sha256(apk.read_bytes()).hexdigest(), 'package': APP,
         'debuggable': True, 'api': adb('shell', 'getprop', 'ro.build.version.sdk').strip(),
         'abi': adb('shell', 'getprop', 'ro.product.cpu.abi').strip(),

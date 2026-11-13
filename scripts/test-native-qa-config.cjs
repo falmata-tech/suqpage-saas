@@ -26,7 +26,7 @@ scope.exports=scope.module.exports; vm.runInNewContext(compiled,scope);
 const actual=scope.module.exports.default({config:base});
 assert.equal(actual.android.package,'com.africmade.qa'); assert.equal(actual.name,'AfricMade QA');
 assert.equal(actual.extra.eas,undefined); assert.equal(actual.slug,'africmade-qa');
-const {nativeQaDatabaseUrl,nativeQaSchema}=require('./native-qa-target.ts');
+const {nativeQaDatabaseUrl,nativeQaSchema,verifyNativeQaArtifact}=require('./native-qa-target.ts');
 const local={CI:'true',SUQPAGE_TEST_POSTGRES_URL:'postgresql://qa:fixture@127.0.0.1:5432/suqpage_native_qa'};
 assert.equal(nativeQaDatabaseUrl(local).pathname,'/suqpage_native_qa');
 for(const value of ['postgresql://qa@db.example.test/suqpage_native_qa','postgresql://qa@127.0.0.1/production',
@@ -35,4 +35,8 @@ for(const value of ['postgresql://qa@db.example.test/suqpage_native_qa','postgre
 assert.throws(()=>nativeQaDatabaseUrl({...local,CI:'false'}));
 assert.equal(nativeQaSchema('suqpage_test_'+'a'.repeat(32)),'suqpage_test_'+'a'.repeat(32));
 for(const value of ['public','suqpage_test_bad','public;DROP SCHEMA public',null])assert.throws(()=>nativeQaSchema(value));
+const key='native-qa-apk-v1-Linux-X64-'+'a'.repeat(64),digest='b'.repeat(64),artifact={source:'c'.repeat(40),key,sha256:digest};
+assert.equal(verifyNativeQaArtifact(artifact,key,digest).source,artifact.source);
+for(const changed of [{...artifact,key:'foreign'},{...artifact,sha256:'0'.repeat(64)},{...artifact,source:'unknown'},null])
+ assert.throws(()=>verifyNativeQaArtifact(changed,key,digest));
 console.log('PASS native QA configuration: distinct identity, local-only target, no hosted/Auth/Firebase inputs.');
