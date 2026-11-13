@@ -36,8 +36,8 @@ const webAudit = "npm audit --workspace=@africmade/contracts --include-workspace
 assert.ok(core.includes(`- run: ${webInstall}`), "Core CI must install only web and shared contracts from the lockfile");
 assert.equal((core.match(/- run: npm run test:workflow\n/g) ?? []).length, 1,
   "Core CI must run the shared offline workflow gate exactly once");
-assert.ok(core.includes(`- run: ${webInstall}\n      - run: npm run test:workflow\n      - run: npm run release:web\n`),
-  "Core CI must check workflow scripts immediately after its clean web install and before the expensive release gate");
+assert.ok(core.includes(`- run: ${webInstall}\n      - run: npm run test:workflow\n      - run: npm run test:business-transport\n      - run: npm run release:web\n`),
+  "Core CI must check workflow scripts immediately after its clean web install, then business transport authorization before the expensive release gate");
 assert.match(core, /- run: npm run release:web\n/, "Core CI must invoke the complete selected web release contract");
 assert.match(core, /- run: npm run test:operations/, "Core CI must retain independent recovery evidence");
 assert.match(core, /- run: npm run test:mobile:release-safety/, "Core CI must retain pure Android artifact safety checks");

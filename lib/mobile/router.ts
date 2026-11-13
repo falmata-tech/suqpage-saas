@@ -217,6 +217,9 @@ async function dispatch(
       mobileParse(() => parseBusinessHandle(q.get("handle"))),
     );
   if(method==='POST'&&key==='reports')return submitListingReport(listingReportPort,await jsonBody(request),ip);
+  if (['transport','buying'].includes(path[0]) && (path.length === 1 || (path.length === 2 && path[1] === 'attention'))) {
+    throw new MobileError('Transport chat is available from your business dashboard.', 410, 'public_chat_retired');
+  }
   if ((path[0]==='transport'||path[0]==='buying') && path.length===2 && path[1]==='attention') {
     const token=request.headers.get('X-Suqpage-Buying-Session')||'';
     await assertVisitorAttentionChannel(token,path[0]==='transport'?'transport':'buying');
@@ -666,7 +669,9 @@ export async function handleMobileRequest(
     const status = known
       ? e.status
       : e instanceof AttentionError ? e.code==='not_found'?404:e.code==='forbidden'?403:400 : e instanceof SupportError
-        ? e.code === "forbidden"
+        ? e.code === "public_chat_retired"
+          ? 410
+          : e.code === "forbidden"
           ? 403
           : e.code === "not_found"
             ? 404

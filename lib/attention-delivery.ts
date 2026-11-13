@@ -24,7 +24,7 @@ function permitted(r:PayloadRow,now:number){
       !(r.access_role==='team_member'&&r.assigned_user_id===r.user_id&&
         ['all',r.assistance_category==='shipment_observation'||r.assistance_category==='buying_assistance'?'transport':'support'].includes(r.queue_scope||'')))return false;
   }
-  if(r.visitor_conversation_id!==null)return r.recipient_key==='visitor:'+r.visitor_conversation_id && r.visitor_conversation_id===r.conversation_id && Boolean(r.visitor_session_expires_at&&r.visitor_session_expires_at>=now);
+  if(r.visitor_conversation_id!==null)return !['shipment_observation','buying_assistance'].includes(r.assistance_category||'') && r.recipient_key==='visitor:'+r.visitor_conversation_id && r.visitor_conversation_id===r.conversation_id && Boolean(r.visitor_session_expires_at&&r.visitor_session_expires_at>=now);
   if(!r.access_role||r.recipient_key!=='user:'+r.user_id)return false;
   if(r.subscription_kind==='expo'&&r.access_role!=='client')return false;
   if(r.access_role==='client')return Boolean(r.business_id)&&(r.inquiry_id!==null?r.inquiry_business_id===r.business_id:r.case_business_id===r.business_id);

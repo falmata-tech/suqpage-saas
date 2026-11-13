@@ -16,7 +16,7 @@ async function main(){
   await postSupportMessage(owner,held.id,{message:'Participant follow-up does not clear a manager hold',idempotencyKey:crypto.randomUUID()});
   await updateSupportAgentSetting(admin,{userId:agent.id,enabled:false,queueScope:'support'});
   const createdAt=Date.now();const waiting=[];for(const offset of [30,10,20])waiting.push(await createSupportConversation(owner,{subject:'Waiting '+offset,message:'Recover this unassigned case',idempotencyKey:crypto.randomUUID()},createdAt+offset));
-  const transport=await createPublicSupportConversation({category:'shipment_observation',name:'Recovery visitor',phone:'+447700900119',origin:'Local pickup',destination:'Local destination',idempotencyKey:crypto.randomUUID()},'recovery-fixture');
+  const transport=await createPublicSupportConversation({category:'buying_assistance',email:'fixture-buyer@example.test',message:'Fixture buying question',name:'Recovery visitor',phone:'+447700900119',origin:'Local pickup',destination:'Local destination',idempotencyKey:crypto.randomUUID()},'recovery-fixture');
   assert.equal((await getSupportConversation(admin,transport.id)).conversation.assignedUserId,null);
   await db.prepare('UPDATE support_agent_settings SET enabled=1 WHERE user_id IN (?,?)').run(agent.id,dispatcher.id);
   const decision={queue:'support' as const};

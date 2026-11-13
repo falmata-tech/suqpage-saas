@@ -3,7 +3,6 @@ import React, { useRef,useState,type KeyboardEvent } from "react";
 import { View, Text, Pressable,ScrollView, StyleSheet,Platform } from "react-native";
 import { router } from "expo-router";
 import { ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } from "../../../../lib/storefront-copy";
-import {TRANSPORT_COPY} from '../../../../lib/i18n/transport-copy';
 import { Screen, Button, Icon, colors } from "../../src/ui";
 import { useApp } from "../../src/runtime";
 import { createMarketNavigationIntent } from "../../src/incoming-link";
@@ -28,7 +27,7 @@ export default function About() {
         <View style={s.icon}><Icon name={benefit.icon} size={21} color={colors.brand}/></View>
         <View style={{flex:1,gap:6}}><Text accessibilityRole="header" style={s.benefitTitle}>{t(benefit.title)}</Text><Text style={s.body}>{t(benefit.description)}</Text></View>
       </View>)}</View>
-      {section.id === "customers" && <View style={s.mapNote}><Text style={s.benefitTitle}>{t(CUSTOMER_MAP_COPY.title)}</Text><Text style={s.body}>{t(CUSTOMER_MAP_COPY.description)}</Text><Button secondary icon="map" label={t("Explore the map")} onPress={() => router.navigate(`/?view=map&_intent=${createMarketNavigationIntent()}`)} /><Pressable accessibilityRole="link" accessibilityLabel={t(TRANSPORT_COPY.launcherTitle)} onPress={()=>router.navigate('/buying')} style={s.transportLink}><Text style={s.transportText}>{t(TRANSPORT_COPY.launcherTitle)} →</Text></Pressable></View>}
+      {section.id === "customers" && <View style={s.mapNote}><Text style={s.benefitTitle}>{t(CUSTOMER_MAP_COPY.title)}</Text><Text style={s.body}>{t(CUSTOMER_MAP_COPY.description)}</Text><Button secondary icon="map" label={t("Explore the map")} onPress={() => router.navigate(`/?view=map&_intent=${createMarketNavigationIntent()}`)} /></View>}
     </View>
     <PublicSiteFooter/>
   </ScrollView></Screen>;

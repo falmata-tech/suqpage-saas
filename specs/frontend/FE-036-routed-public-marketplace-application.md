@@ -2,7 +2,7 @@
 id: FE-036
 title: Routed public marketplace application
 status: in_progress
-related: [FE-074, FE-041, FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, FE-038, FE-039, BE-023, DEP-025, FE-033, FE-052, FE-053, FE-056, DEP-043, BE-018]
+related: [FE-078, FE-074, FE-041, FE-019, FE-021, FE-024, FE-025, FE-027, FE-030, FE-034, FE-035, FE-037, FE-038, FE-039, BE-023, DEP-025, FE-033, FE-052, FE-053, FE-056, DEP-043, BE-018]
 owners: [product, frontend, design]
 last_updated: 2026-10-20
 change_level: L2
@@ -65,6 +65,9 @@ direct business-inquiry inbox stay closed/retired respectively.
 
 
 Mapped focused regression: `scripts/test-public-transport-launcher.ts` tests route exclusions and actual web/native shell components. Actual local layout/modal/action evidence is `.local/workflow-audit-s111/native-agent/final-evidence.json`, with preserved classified failed attempts and separate completed segments. Full visual/release gates remain pending.
+
+Public transport entry is superseded by FE-078; historical contracts below do
+not permit visitor transport access.
 
 ## Problem and outcome
 

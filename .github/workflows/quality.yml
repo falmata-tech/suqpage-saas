@@ -39,6 +39,7 @@ jobs:
           cache: npm
       - run: SUQPAGE_INSTALL_TARGET=web npm ci --workspace=@africmade/contracts --include-workspace-root
       - run: npm run test:workflow
+      - run: npm run test:business-transport
       - run: npm run release:web
         env:
           SUQPAGE_DELEGATE_PROVIDER_SMOKE: "1"
@@ -59,9 +60,36 @@ jobs:
           version: 2.111.0
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Business transport UI regression
+        run: >-
+          node --import tsx --test --test-concurrency=1
+          scripts/test-public-transport-launcher.ts
+          scripts/test-mobile-public-action-dock.ts
+          scripts/test-mobile-market-layout.ts
+          scripts/test-floating-inquiry-web.ts
+          scripts/test-about-audiences.ts
+          scripts/test-mobile-account-hub.ts
+          scripts/test-mobile-owner-transport.ts
+          scripts/test-chat-assignment-state.ts
+          scripts/test-chat-inactivity-ui.ts
+          scripts/test-client-chat-state-ui.ts
+          scripts/test-native-transport-plan.ts
+          scripts/test-participant-transport-plan.ts
+          scripts/test-transport-storage-ui.ts
+          scripts/test-transport-chat-layout.ts
+          scripts/test-transport-coordinator-ui.ts
+          scripts/test-owner-transport-workspace.ts
+          scripts/test-tracking-portal-ui.ts
       - run: npm run test:acceptance
         env:
           SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: business-transport-browser-review
+          path: test-results/**/workflow/*.png
+          if-no-files-found: ignore
+          retention-days: 7
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with:

@@ -57,7 +57,7 @@ test('malformed, excessive, injected and authority-bearing fields fail closed', 
 test('guest and owner application services reject a foreign coordinator before any persistence',async()=>{
  const {createPublicSupportConversation,createOwnerTransportConversation,SupportError}=await import('../lib/support');
  const invalid=(error:unknown)=>error instanceof SupportError&&error.code==='invalid_request';
- await assert.rejects(()=>createPublicSupportConversation({category:'shipment_observation',coordinatorId:'other-company',name:'Test',phone:'+12025550188',origin:'A',destination:'B',idempotencyKey:'030f2173-f4b1-4abe-8c59-0cb3d8e115f7'},'fixture-ip'),invalid);
+ await assert.rejects(()=>createPublicSupportConversation({category:'shipment_observation',coordinatorId:'other-company',name:'Test',phone:'+12025550188',origin:'A',destination:'B',idempotencyKey:'030f2173-f4b1-4abe-8c59-0cb3d8e115f7'},'fixture-ip'),error=>error instanceof SupportError&&error.code==='public_chat_retired');
  const actor={access_role:'client',business_id:1} as import('../lib/types').SessionUser;
  await assert.rejects(()=>createOwnerTransportConversation(actor,{coordinatorId:'other-company',name:'Test',phone:'+12025550188',origin:'A',destination:'B',idempotencyKey:'030f2173-f4b1-4abe-8c59-0cb3d8e115f7'}),invalid);
 });

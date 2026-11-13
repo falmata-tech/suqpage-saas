@@ -1,6 +1,6 @@
 /** A return hint is presentation only and never grants account/chat authority. */
 export function trackingReturnHref(value:unknown){
- return typeof value==='string'&&/^\/dashboard\/transport(?:\?(?:conversation=[1-9]\d{0,15}|new=1))?$/.test(value)?value:'/?chat=transport';
+ return typeof value==='string'&&/^\/dashboard\/transport(?:\?(?:conversation=[1-9]\d{0,15}|new=1))?$/.test(value)?value:'/';
 }
 const drafts=new Map<string,{value:unknown;until:number}>();
 /** Browser-memory-only, bounded, short-lived draft handoff. Never URL or storage. */

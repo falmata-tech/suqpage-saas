@@ -79,7 +79,7 @@ async function main() {
     assert.notEqual((await getSupportConversation(owner,c.id)).conversation.readEpoch,previousEpoch,'Assignment identity changes independently of message IDs');
     assert.equal((await db.prepare("SELECT COUNT(*) total FROM support_events WHERE conversation_id=? AND event_type='joined'").get(c.id)).total,2);
     // Guest receipts use the same explicit contract and cannot see private notes.
-    const guest = await createPublicSupportConversation({category:'shipment_observation',origin:'Addis Ababa',destination:'Adama',name:'LOCAL QA receipt',phone:'+251911112233',idempotencyKey:crypto.randomUUID()},'receipt-fixture');
+    const guest = await createPublicSupportConversation({category:'buying_assistance',email:'fixture-buyer@example.test',message:'Fixture buying question',origin:'Addis Ababa',destination:'Adama',name:'LOCAL QA receipt',phone:'+251911112233',idempotencyKey:crypto.randomUUID()},'receipt-fixture');
     const thread = await getSupportConversation(manager,guest.id), guestAgent = thread.conversation.assignedUserId===agent.id?agent:alternate;
     const guestInitial = thread.messages[0].id;
     await getPublicSupportConversation(guest.token); await getSupportConversation(guestAgent,guest.id);
@@ -118,7 +118,7 @@ async function main() {
     assert.equal((await db.prepare('SELECT COUNT(*) total FROM support_messages WHERE sender_side IS NOT NULL').get()).total,0,'Migration leaves historical sides unknown');
     assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);
     assert.deepEqual(await db.prepare('SELECT * FROM support_conversations WHERE id=?').get(guest.id),stable);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,80);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,81);
     console.log('PASS real PostgreSQL confirmed reads/joins, read-only GET, owner/guest privacy, stale/foreign/self/private/expired denial, reassignment/reopen, monotonic and migration preservation.');
   } finally { await closeDbForTests(); }
 }

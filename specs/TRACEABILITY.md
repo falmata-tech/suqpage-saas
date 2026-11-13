@@ -8,6 +8,39 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S190 business dashboard transport only
+
+| Spec | Implementation | Current evidence |
+| --- | --- | --- |
+| FE-078 | Public web/native shells and About; saved inquiry docks; retired native route; dashboard renderer | Public-shell/deep-link/inquiry component tests pass. The isolated CI browser component regressions pass after retiring launcher expectations and correcting moved-renderer selectors. Current-head provider-backed journeys, captures, merge and production readback are tracked in [PR #59](https://github.com/falmata-tech/suqpage-saas/pull/59). |
+| BE-066 | Public support/attention adapters; domain guest guards; native router; notification enqueue/delivery | `npm run test:business-transport` passes against isolated PostgreSQL17.10: web/native410, old-token/alias denial, unchanged history, suppressed notifications, current-business workspace and foreign/stale-role denial, business callback. |
+
+Source-bound browser review: run `43361817050` on `85f2f3f` passed all128
+component cases and the actual business/staff transport journey (19/20 overall
+acceptance). The remaining category-capture failure clicked an SSR filter before
+its handlers hydrated; its bounded action/visible-category assertion is repaired
+without dropping the category/map checks. Artifact `14008443825` was inspected
+for business intake/chat at1440/390: pass for preserved dashboard entry, provider
+choice, private conversation and phone layout within this access-removal scope.
+Subsequent changes close the buying API alias and its notifications; those UI
+components remain byte-identical. Full Expo8082 and broad phone-composer usability
+are not established by those captures. Current-head gates still apply in PR59.
+
+Historical guest queue/response/read/idle fixtures use the retained buying
+domain utilities; all public web/native buying and transport adapters are retired.
+Queued deliveries for both guest categories are suppressed. Product inquiries
+use their separate API and remain available. Web production build, root/mobile typecheck, localization, workflow scripts and
+50 focused pure component tests pass. Full local check passes its
+first three groups then stops at unavailable provider-backed account-erasure
+fixtures. Required current-head gates and delivery are tracked in PR #59; do not infer
+qualification from an older run. The optional native render-boundary
+audit reports five pre-existing findings in TransportPlanView, owner-forms and
+OwnerEmailChange; none is introduced by the renderer move. No hosted data/configuration
+change or Android binary qualification is claimed. Connected Chrome cannot reach
+workspace localhost and later lost its connection. Expo8082/physical Android
+visual qualification remains separate; the moved owner renderer is otherwise
+byte-equivalent and root/mobile typechecks pass.
+
 ## S189 development and deployment readiness
 
 DEP-052 / ADR-0032 now govern ordinary web delivery through the existing

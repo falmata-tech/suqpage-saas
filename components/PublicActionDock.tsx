@@ -13,11 +13,10 @@ type DockHost = {
 };
 const DockContext = createContext<DockHost | undefined>(undefined);
 
-/** The shell keeps chat mounted while the showroom owns its saved selections. */
-export function PublicActionDockProvider({ children, enabled, transport }: {
+/** The shell hosts the showroom’s saved inquiry action. */
+export function PublicActionDockProvider({ children, enabled }: {
   children: ReactNode;
   enabled: boolean;
-  transport: ReactNode;
 }) {
   const [target, setTarget] = useState<HTMLDivElement | null>(null);
   const [inquiryOpen, setInquiryOpen] = useState(false);
@@ -36,7 +35,6 @@ export function PublicActionDockProvider({ children, enabled, transport }: {
     {children}
     {enabled && <div ref={setDock} className={styles.dock} data-public-action-dock inert={inquiryOpen} aria-hidden={inquiryOpen || undefined}>
       <div className={styles.inquirySlot} ref={setTarget} />
-      {transport}
     </div>}
     </div>
   </DockContext.Provider>;

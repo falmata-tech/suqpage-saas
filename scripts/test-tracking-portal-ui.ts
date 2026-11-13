@@ -70,7 +70,7 @@ test('FE-069 cold304 cannot pretend a shipment body exists and retries without a
 });
 
 test('FE-069 transport return hints and draft memory are bounded, ephemeral and purpose-separated',()=>{
- assert.equal(trackingReturnHref('/dashboard/transport?conversation=12'),'/dashboard/transport?conversation=12');for(const invalid of['https://foreign.test','//foreign.test','/dashboard','/dashboard/transport?conversation=0','/dashboard/transport?new=1&email=x'])assert.equal(trackingReturnHref(invalid),'/?chat=transport');
+ assert.equal(trackingReturnHref('/dashboard/transport?conversation=12'),'/dashboard/transport?conversation=12');for(const invalid of['https://foreign.test','//foreign.test','/dashboard','/dashboard/transport?conversation=0','/dashboard/transport?new=1&email=x'])assert.equal(trackingReturnHref(invalid),'/');
  clearTransportDraft('fixture');rememberTransportDraft('fixture',{origin:'A'},1000);assert.deepEqual(takeTransportDraft('fixture',1001),{origin:'A'});assert.equal(takeTransportDraft('fixture',601000),undefined);for(let i=0;i<17;i++)rememberTransportDraft('fixture-'+i,{i},2000);assert.equal(takeTransportDraft('fixture-0',2001),undefined);assert.deepEqual(takeTransportDraft('fixture-16',2001),{i:16});for(let i=0;i<17;i++)clearTransportDraft('fixture-'+i);
 });
 

@@ -16,7 +16,7 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 const bundle = build({
-  entryPoints: ["apps/mobile/app/buying.tsx", "apps/mobile/src/use-transport-unread.ts"], outdir: "/tmp/suqpage-transport-storage-ui", bundle: true, write: false,
+  entryPoints: ["apps/mobile/src/BusinessTransportWorkspace.tsx", "apps/mobile/src/use-transport-unread.ts"], outdir: "/tmp/suqpage-transport-storage-ui", bundle: true, write: false,
   format: "cjs", platform: "node",
   plugins: [{ name: "transport-device-ports", setup(builder) {
     builder.onResolve({ filter: /^\.\/runtime$/ }, args => args.importer.endsWith("use-transport-unread.ts") ? { path: "../src/runtime", namespace: "ports" } : undefined);
@@ -45,7 +45,7 @@ const bundle = build({
   }}],
 });
 
-async function screen(reads: Promise<string | null>[], t: UiText = value => value, options: { storageKey?: string; memory?: Map<string,string>; failRestore?: boolean; entry?: "buying" | "use-transport-unread" } = {}) {
+async function screen(reads: Promise<string | null>[], t: UiText = value => value, options: { storageKey?: string; memory?: Map<string,string>; failRestore?: boolean; entry?: "BusinessTransportWorkspace" | "use-transport-unread" } = {}) {
   const fixture = {
     storageKey: options.storageKey || "suqpage-transport", memory: options.memory, writes: [] as string[], closed: false, failRestore: options.failRestore || false,
     reads, readKeys: [] as string[], removals: [] as string[], requests: [] as { path: string; options: { buyingToken?: string; body?: unknown } }[],
@@ -53,7 +53,7 @@ async function screen(reads: Promise<string | null>[], t: UiText = value => valu
     effects: [] as Effect[], pendingEffects: [] as (() => void)[], focus: undefined as (() => (() => void) | undefined) | undefined, t,
   };
   const module = { exports: {} as { default: () => Element; useTransportUnread: () => number } };
-  vm.runInNewContext((await bundle).outputFiles.find(file=>file.path.endsWith(`/${options.entry || "buying"}.js`))!.text, { module, exports: module.exports, fixture, performance, setTimeout, clearTimeout, setInterval:()=>1, clearInterval:()=>{}, AbortController });
+  vm.runInNewContext((await bundle).outputFiles.find(file=>file.path.endsWith(`/${options.entry || "BusinessTransportWorkspace"}.js`))!.text, { module, exports: module.exports, fixture, performance, setTimeout, clearTimeout, setInterval:()=>1, clearInterval:()=>{}, AbortController });
   function nodes(value: unknown): Element[] {
     if (!value || typeof value !== "object") return [];
     const element = value as Element;

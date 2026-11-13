@@ -91,9 +91,7 @@ test('FE-065 S181 native Market replaces the marketing paragraph with one compac
  assert.ok(tree.indexOf(intro)<tree.findIndex(node=>node.props.testID==='market-stage'));
  assert.equal(style(intro).position,undefined,'Introduction takes layout space instead of blocking the map');
 });
-test('FE-065 S181 attribution belongs to the full-width map and clears its measured transport action',async()=>{
- type Box={x:number;y:number;width:number;height:number};
- const overlaps=(a:Box,b:Box)=>a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
+test('FE-065 S181 attribution belongs to the full-width map and has no public transport dock',async()=>{
  for(const viewport of [{width:390,height:844,stage:500,legalHeight:17},{width:320,height:480,stage:164,legalHeight:32},{width:844,height:390,stage:74,legalHeight:17}]){
   const state=fixture();state.dimensions={width:viewport.width,height:viewport.height,fontScale:1};
   const render=await component('index',state);let tree=render();
@@ -103,15 +101,8 @@ test('FE-065 S181 attribution belongs to the full-width map and clears its measu
   assert.equal(style(attribution).position,'absolute');assert.equal(style(attribution).bottom,0);assert.equal(attribution.props.accessibilityRole,'link');
   assert.ok(nodes(attribution).some(node=>node.type==='Text'&&node.props.children==='© OpenStreetMap contributors'));
   (attribution.props.onLayout as(event:{nativeEvent:{layout:{height:number}}})=>void)({nativeEvent:{layout:{height:viewport.legalHeight}}});tree=render();attribution=tree.find(node=>node.props.testID==='market-map-attribution')!;
-  const a=style(attribution),placement=style(tree.find(node=>node.props.testID==='market-public-actions')!),compact=tree.find(node=>node.type==='PublicActionDock')!.props.compact;
-  const legalWidth=Number(a.maxWidth),legal:Box={x:a.left==='auto'?viewport.width-Number(a.right)-legalWidth:Number(a.left),y:viewport.stage-Number(a.bottom)-viewport.legalHeight,width:legalWidth,height:viewport.legalHeight};
-  const dockWidth=compact?168:200,dock:Box={x:placement.left===undefined?viewport.width-Number(placement.right)-dockWidth:Number(placement.left),y:viewport.stage-Number(placement.bottom)-48,width:dockWidth,height:48};
-  assert.ok(!overlaps(legal,dock),JSON.stringify({viewport,legal,dock}));
-  assert.ok(legal.x>=0&&legal.x+legal.width<=viewport.width&&legal.y>=0&&legal.y+legal.height<=viewport.stage,'Attribution stays inside the available canvas');
-  if(viewport.stage>=180){
-   (attribution.props.onLayout as(event:{nativeEvent:{layout:{height:number}}})=>void)({nativeEvent:{layout:{height:37}}});tree=render();
-   assert.ok(Number(style(tree.find(node=>node.props.testID==='market-public-actions')!).bottom)>=44,'A wrapping attribution increases CTA clearance instead of intercepting it');
-  }
+  const a=style(attribution);assert.ok(Number(a.maxWidth)<=viewport.width);
+  assert.equal(tree.filter(node=>node.props.testID==='market-public-actions').length,0,'Market has no public transport dock');
   await(attribution.props.onPress as()=>Promise<void>)();assert.deepEqual(state.openedLinks,['https://www.openstreetmap.org/copyright']);
   assert.equal(style(tree.find(node=>node.props.testID==='market-map-panel')!).width,viewport.width,'No counterpart strip is reserved beside the canvas');
  }
@@ -221,16 +212,9 @@ test("FE-053 actual Market component preserves the mounted panes and follows onl
   (stage.props.onLayout as (event:{nativeEvent:{layout:{height:number}}})=>void)({nativeEvent:{layout:{height:340}}});
   tree=render();
   assert.equal(style(tree.find(node=>node.props.testID==='map-tools')!).flexDirection,'row','Intermediate heights also keep Reset map clear of the right-side handle');
-  assert.equal(tree.find(node=>node.type==='PublicActionDock')!.props.compact,false,'Intermediate heights preserve the readable public action dock');
-  assert.equal(tree.find(node=>node.type==='PublicActionDock')!.props.horizontal,false,'Ordinary public placement retains the labelled stack');
   (stage.props.onLayout as (event:{nativeEvent:{layout:{height:number}}})=>void)({nativeEvent:{layout:{height:204}}});
   tree=render();
-  assert.equal(tree.find(node=>node.type==='PublicActionDock')!.props.compact,true,"A short map keeps the public action dock compact so it cannot cover the handle");
-  assert.equal(tree.find(node=>node.type==='PublicActionDock')!.props.horizontal,true,'Only a short Market stage uses the compact single-row dock');
-  const launcherFrame=tree.find(node=>node.type==='View'&&(node.props.children as Element)?.type==='PublicActionDock')!;
-  assert.equal(style(launcherFrame).left,73,"A short-stage244px dock remains horizontally centered");
-  (launcherFrame.props.onLayout as (event:{nativeEvent:{layout:{height:number}}})=>void)({nativeEvent:{layout:{height:56}}});tree=render();
-  assert.equal((tree.find(node=>node.type==='FlatList')!.props.contentContainerStyle as {paddingBottom:number}).paddingBottom,92,'The last product action can scroll clear of the measured single-row dock');
+  assert.equal((tree.find(node=>node.type==='FlatList')!.props.contentContainerStyle as {paddingBottom:number}).paddingBottom,36,'Product actions retain ordinary scroll clearance without the retired dock');
   assert.equal(style(tree.find(node=>node.props.testID==='map-tools')!).flexDirection,'row','Short maps keep zoom controls above the right-side handle');
   assert.ok(!tree.some(node=>node.props.accessibilityLabel==='About AfricMade'||node.type==='Sheet'&&node.props.title==='About AfricMade'),'Market leaves its narrative on the dedicated About page');
 });
@@ -563,7 +547,7 @@ test('FE-053 S140 group picker and retained detail require a current terminal re
   (tree.find(n=>n.type==='MarketMap')!.props.onSelect as(value:typeof shops[number])=>void)(shops[2]);tree=render();assert.ok(tree.some(n=>n.type==='Sheet'&&n.props.title==='Business'&&n.props.visible===true),'An isolated shop keeps its existing preview behavior at every zoom');
 });
 
-test('FE-053 S127 short portrait and landscape keep48px map controls clear of the peek and transport dock',async()=>{
+test('FE-053 S127 short portrait and landscape keep48px map controls clear of the peek without public transport',async()=>{
   type Box={x:number;y:number;width:number;height:number};
   const overlaps=(a:Box,b:Box)=>a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
   // Existing Chrome's320x480 stage was116px; its duplicated48px Market strip
@@ -583,12 +567,9 @@ test('FE-053 S127 short portrait and landscape keep48px map controls clear of th
       const toolBoxes=buttons.map((_,i)=>({x:toolsX+i*(48+Number(tools.gap)),y:Number(tools.top),width:48,height:48}));
       const peek=style(tree.find(n=>n.type==='AnimatedView'&&style(n).width===48&&style(n).height===48)!),travel=(peek.transform as Array<{translateX:{outputRange:number[]}}>)[0].translateX.outputRange;
       const peekBox={x:Number(peek.left)+travel[products?1:0],y:stageHeight/2+Number(peek.marginTop),width:Number(peek.width),height:Number(peek.height)};
-      const dock=tree.find(n=>n.props.testID==='market-public-actions')!,placement=style(dock),action=tree.find(n=>n.type==='PublicActionDock')!;
-      assert.equal(action.props.horizontal,false);assert.equal(action.props.compact,true);
-      const dockBox={x:placement.left===undefined?viewport.width-Number(placement.right)-168:Number(placement.left),y:stageHeight-Number(placement.bottom)-48,width:168,height:48};
-      for(const box of [...(products?[]:toolBoxes),peekBox,dockBox]){assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=viewport.width&&box.y+box.height<=stageHeight,JSON.stringify({viewport,products,box}));assert.ok(box.width>=48&&box.height>=48);}
-      assert.ok(!overlaps(peekBox,dockBox),'Dock cannot intercept the Products/Map handle');
-      if(!products)for(const box of toolBoxes){assert.ok(!overlaps(box,peekBox),'Visible zoom/reset cannot be blocked by the peek');assert.ok(!overlaps(box,dockBox),'Transport cannot cover a visible map control');}
+      assert.equal(tree.filter(n=>n.props.testID==='market-public-actions').length,0);
+      for(const box of [...(products?[]:toolBoxes),peekBox]){assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=viewport.width&&box.y+box.height<=stageHeight,JSON.stringify({viewport,products,box}));assert.ok(box.width>=48&&box.height>=48);}
+      if(!products)for(const box of toolBoxes)assert.ok(!overlaps(box,peekBox),'Visible zoom/reset cannot be blocked by the peek');
     }
   }
 });

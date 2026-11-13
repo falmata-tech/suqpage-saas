@@ -8,6 +8,8 @@ import {createClient} from '@supabase/supabase-js';
 import {createServerClient, type CookieOptions} from '@supabase/ssr';
 import {createPostgresPool,postgresRuntimeConfig} from '../lib/postgres-runtime';
 import * as support from '../lib/support';
+import {readOwnerTransport} from '../lib/owner-transport';
+import type {OwnerTransportState} from '../lib/owner-transport-contract';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 import type {SessionUser} from '../lib/types';
 
@@ -24,7 +26,7 @@ async function main(){
  process.env.SUQPAGE_TELEGRAM_BOT_TOKEN='';process.env.SUQPAGE_TELEGRAM_SUPPORT_CHAT_ID='';
  const pool=createPostgresPool(postgresRuntimeConfig({SUQPAGE_POSTGRES_URL:target.href})!);
  const auth=createClient(provider.origin,process.env.SUQPAGE_SUPABASE_SERVICE_ROLE_KEY!,{auth:{persistSession:false,autoRefreshToken:false}});
- const browser=await chromium.launch();const tileFixtures:MapTileFixture[]=[];let providerId:string|undefined,userId:number|undefined,caseId:number|undefined;
+ const browser=await chromium.launch();const tileFixtures:MapTileFixture[]=[];let providerId:string|undefined,userId:number|undefined,caseId:number|undefined,ownerProviderId:string|undefined,ownerUserId:number|undefined,businessId:number|undefined;
  const dir=process.env.SUQPAGE_TEST_SCREENSHOT_DIR||'.local/live-buying-review';fs.mkdirSync(dir,{recursive:true});
  try{
   const email=`buying-staff-${crypto.randomUUID()}@example.test`;
@@ -37,7 +39,24 @@ async function main(){
   const visitorContext=await browser.newContext({viewport:{width:390,height:900},serviceWorkers:'block'});
   tileFixtures.push(await installMapTileFixture(visitorContext));
   const visitor=await visitorContext.newPage();
-  await visitor.goto(base);await visitor.locator('button[data-channel=buying]').click();
+  await visitor.goto(base+'/?chat=transport');
+  await expect(visitor.locator('button[data-channel=buying]')).toHaveCount(0);
+  for(const endpoint of ['/api/public-support?channel=transport','/api/public-support?channel=buying','/api/attention?channel=transport','/api/attention?channel=buying','/api/mobile/v1/transport','/api/mobile/v1/transport/attention','/api/mobile/v1/buying','/api/mobile/v1/buying/attention']){
+    const denied=await visitor.request.get(base+endpoint);assert.equal(denied.status(),410);assert.equal((await denied.json()).code,'public_chat_retired');
+  }
+  const ownerEmail=`business-transport-${crypto.randomUUID()}@example.test`;
+  const ownerAuth=await auth.auth.admin.createUser({email:ownerEmail,email_confirm:true});assert.ok(!ownerAuth.error&&ownerAuth.data.user);ownerProviderId=ownerAuth.data.user.id;
+  businessId=Number((await pool.query("INSERT INTO businesses(handle,name,design_key,status,public_phone) VALUES($1,'Business transport review','composition','active','+447700900999') RETURNING id",['business-transport-'+crypto.randomUUID()])).rows[0].id);
+  ownerUserId=Number((await pool.query("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES($1,'unused','Business review owner','owner',$2,0) RETURNING id",[ownerEmail,businessId])).rows[0].id);
+  await pool.query("INSERT INTO user_access_profiles(user_id,access_role) VALUES($1,'client')",[ownerUserId]);
+  await pool.query("INSERT INTO auth_identity_links(user_id,provider,provider_user_id,email_at_link,created_at) VALUES($1,'supabase',$2,$3,$4)",[ownerUserId,ownerProviderId,ownerEmail,Date.now()]);
+  const owner:SessionUser={id:ownerUserId,email:ownerEmail,name:'Business review owner',role:'owner',access_role:'client',business_id:businessId,must_change_password:0};
+  const ownerLink=await auth.auth.admin.generateLink({type:'magiclink',email:ownerEmail});assert.ok(!ownerLink.error&&ownerLink.data.properties.email_otp);
+  const ownerCookies:Array<{name:string;value:string;options:CookieOptions}>=[];
+  const ownerClient=createServerClient(provider.origin,process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,{cookies:{getAll:()=>[],setAll:values=>{ownerCookies.push(...values);}}});
+  const ownerVerified=await ownerClient.auth.verifyOtp({email:ownerEmail,token:ownerLink.data.properties.email_otp,type:'email'});assert.ok(!ownerVerified.error);
+  await visitorContext.addCookies(ownerCookies.map(({name,value})=>({name,value,url:base,sameSite:'Lax' as const})));
+  await visitor.goto(base+'/dashboard/transport?new=1');
   await visitor.getByTestId('transport-provider-toggle').click();
   await visitor.getByTestId('transport-provider-option').click();
   await expect(visitor.locator('[data-transport-coordinator]')).toHaveAttribute('data-transport-coordinator','shared-trucks-logistics');
@@ -45,15 +64,18 @@ async function main(){
   await visitor.locator('#transport-destination').fill('Adama');
   await visitor.locator('#public-buying-message').fill('Two cartons to deliver.');
   await visitor.locator('#public-buying-name').fill('Review visitor');await visitor.locator('#public-buying-phone').fill('+447700900999');
-  const started=visitor.waitForResponse(response=>response.request().method()==='POST'&&new URL(response.url()).pathname==='/api/public-support');
+  for(const width of [1440,390]){
+   await visitor.setViewportSize({width,height:900});
+   assert.ok(await visitor.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+   await visitor.screenshot({style:"nextjs-portal {visibility:hidden}",path:`${dir}/business-intake-${width}.png`});
+  }
+  const started=visitor.waitForResponse(response=>response.request().method()==='POST'&&new URL(response.url()).pathname==='/api/owner-transport');
   await visitor.getByRole('button',{name:'Start chat',exact:true}).click();assert.ok((await started).ok());
-  const token=(await visitor.context().cookies()).find(cookie=>cookie.name==='suqpage_public_transport')?.value;assert.ok(token);
-  const publicCase=await support.getPublicSupportConversation(token);
-  assert.equal(publicCase.agentJoined,false,'Assignment does not claim the agent joined');
-  assert.equal(publicCase.assignedUserName,null,'Unjoined assignment identity stays private');
+  const ownerState=await readOwnerTransport(owner) as OwnerTransportState;const publicCase=ownerState.conversation!;
+  assert.ok(publicCase);assert.equal(publicCase.agentJoined,false);assert.equal(publicCase.assignedUserName,null);
   await expect(visitor.getByText('Waiting for a live agent at SharedTrucks Logistics',{exact:true})).toBeVisible();
-  caseId=Number((await pool.query('SELECT id FROM support_conversations WHERE public_ref=$1',[publicCase.publicRef])).rows[0].id);
-  const request={id:caseId,token};
+  caseId=publicCase.id;const request={id:caseId};
+  const ownerView=async()=>(await readOwnerTransport(owner,{conversation:caseId!}) as OwnerTransportState).conversation!;
   await support.reassignSupportConversation(staff,caseId,userId);
   const link=await auth.auth.admin.generateLink({type:'magiclink',email});assert.ok(!link.error&&link.data.properties.email_otp);
   const cookies:Array<{name:string;value:string;options:CookieOptions}>=[];
@@ -84,15 +106,21 @@ async function main(){
    console.error('Staff note browser failure:',JSON.stringify({path:new URL(page.url()).pathname,search:new URL(page.url()).search,savedCount:Number(rows.rows[0].n),alertCount:await page.getByRole('alert').count()}));
    throw error;
   }
-  assert.ok(!(await support.getPublicSupportConversation(request.token)).messages.some(row=>row.body.includes('staff-only')));
+  assert.ok(!(await ownerView()).messages.some(row=>row.body.includes('staff-only')));
   await joinChat();
   await page.locator('select[name=audience]').selectOption('reply');await page.locator('#support-reply').fill('We can help. Please send the pickup details.');await page.locator('.support-reply button').click();
   await expect(page.getByText('Reply sent.',{exact:true})).toBeVisible();
   assert.equal((await support.getSupportConversation(staff,request.id)).messages.find(row=>row.body==='We can help. Please send the pickup details.')?.visitorVisible,true,'The saved reply has public audience');
-  assert.ok((await support.getPublicSupportConversation(request.token)).messages.some(row=>row.body.includes('pickup details')));
+  assert.ok((await ownerView()).messages.some(row=>row.body.includes('pickup details')));
   await visitor.bringToFront();
   await expect(visitor.getByRole('log')).toContainText('We can help. Please send the pickup details.',{timeout:15000});
   await expect(visitor.getByRole('log')).not.toContainText('Private staff-only review note');
+  for(const width of [1440,390]){
+   await visitor.setViewportSize({width,height:900});
+   await expect(visitor.getByRole('log')).toContainText('We can help. Please send the pickup details.');
+   assert.ok(await visitor.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+   await visitor.screenshot({style:"nextjs-portal {visibility:hidden}",path:`${dir}/business-chat-${width}.png`});
+  }
   const measureComposer=()=>page.evaluate(()=>{
    const button=document.querySelector<HTMLButtonElement>('.support-reply button');
    const navigation=document.querySelector<HTMLElement>('.workspace-mobile-tabs');
@@ -151,7 +179,7 @@ async function main(){
   await page.locator('.support-reply button').click();
   await expect(page.getByText('Note saved',{exact:true})).toBeVisible();
   assert.equal((await support.getSupportConversation(staff,caseId)).conversation.status,'closed');
-  assert.ok(!(await support.getPublicSupportConversation(request.token)).messages.some(row=>row.body.includes('No longer interested')));
+  assert.ok(!(await ownerView()).messages.some(row=>row.body.includes('No longer interested')));
   const reference=(await support.getSupportConversation(staff,caseId)).conversation.publicRef;
   for(const width of [1440,390]) {
     await page.setViewportSize({width,height:900});
@@ -180,9 +208,12 @@ async function main(){
   assert.equal((await support.getSupportConversation(staff,request.id)).conversation.agentJoined,false,'Reopening does not bypass explicit acceptance');
   await support.reassignSupportConversation(staff,caseId,userId);
   await page.goto(`${base}/dashboard/support/${caseId}`);await joinChat();
-  console.log('PASS public browser intake/live reply/privacy/End chat, authenticated staff reply/private follow-up notes, retained contact/intake, history/resolved filters, resolution/reopen actions and desktop/phone controls. Local fixtures removed.');
+  console.log('PASS business dashboard intake/live reply/privacy/End chat and public transport410, authenticated staff reply/private follow-up notes, retained contact/intake, history/resolved filters, resolution/reopen actions and desktop/phone controls. Local fixtures removed.');
  }finally{
   if(caseId)await pool.query('DELETE FROM support_conversations WHERE id=$1',[caseId]);
+  if(ownerUserId){await pool.query('DELETE FROM audit_logs WHERE user_id=$1',[ownerUserId]);await pool.query('DELETE FROM users WHERE id=$1',[ownerUserId]);}
+  if(businessId)await pool.query('DELETE FROM businesses WHERE id=$1',[businessId]);
+  if(ownerProviderId){const result=await auth.auth.admin.deleteUser(ownerProviderId);assert.ok(!result.error);}
   if(userId){await pool.query('DELETE FROM audit_logs WHERE user_id=$1',[userId]);await pool.query('DELETE FROM users WHERE id=$1',[userId]);}
   if(providerId){const result=await auth.auth.admin.deleteUser(providerId);assert.ok(!result.error);}
   await browser.close();await pool.end();await closePostgresRuntimeForTests();

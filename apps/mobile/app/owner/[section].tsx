@@ -10,7 +10,7 @@ import { Screen, Copy, Button, Card, Photo, Status } from "../../src/ui";
 import { Setup, PageEditor, ProductEditor } from "../../src/owner-forms";
 import { BusinessForm, BusinessSummary, Settings } from "../../src/owner-business";
 import { Inquiries, SupportList, OwnerChat } from "../../src/owner-inbox";
-import BuyingScreen from '../buying';
+import BuyingScreen from '../../src/BusinessTransportWorkspace';
 import OwnerTransportHistory from '../../src/OwnerTransportHistory';
 import {ownerPageTask} from '../../../../lib/owner-page-tasks';
 import {useOwnerNavigation} from '../../src/owner-edit-navigation';

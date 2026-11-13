@@ -2,13 +2,16 @@
 id: BE-063
 title: Single transport coordinator and private partner interest intake
 status: ready
-related: [FE-076, BE-018, BE-058, DEP-043, DEP-048, FE-077, BE-064]
+related: [BE-066, FE-076, BE-018, BE-058, DEP-043, DEP-048, FE-077, BE-064]
 owners: [backend, security, operations]
 last_updated: 2026-10-21
 change_level: L2
 ---
 
 # BE-063 — One coordinator without premature multi-company authority
+
+Current transport entry/visitor authority is superseded by BE-066; retained
+provider and business/staff contracts still apply.
 
 ## Problem, outcome and contract
 

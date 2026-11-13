@@ -2,7 +2,7 @@
 id: BE-058
 title: Email-verified recipients and independent shipment plans
 status: in_progress
-related: [BE-057, BE-044, FE-049, FE-053, FE-069, FE-077, DEP-048, ADR-0031, BE-063, BE-064]
+related: [BE-066, BE-057, BE-044, FE-049, FE-053, FE-069, FE-077, DEP-048, ADR-0031, BE-063, BE-064]
 owners: [backend, security, operations]
 last_updated: 2026-10-21
 change_level: L3

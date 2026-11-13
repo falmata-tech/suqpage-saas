@@ -38,7 +38,7 @@ async function main(){
   await reassignSupportConversation(admin,wait.id,null);
   assert.equal((await getSupportConversation(admin,wait.id)).conversation.status,'waiting');
   assert.equal((await userAttentionFeed(support)).items[0].kind,'waiting_chat');assert.equal((await userAttentionFeed(transport)).unread,0);
-  const visitorInput={category:'shipment_observation',origin:'Addis Ababa',destination:'Adama',name:'LOCAL QA visitor',phone:'+251911334455',idempotencyKey:crypto.randomUUID()};
+  const visitorInput={category:'buying_assistance',email:'fixture-buyer@example.test',message:'Fixture buying question',origin:'Addis Ababa',destination:'Adama',name:'LOCAL QA visitor',phone:'+251911334455',idempotencyKey:crypto.randomUUID()};
   const v=await createPublicSupportConversation(visitorInput,'alert-fixture');
   assert.equal((await userAttentionFeed(transport)).items[0].kind,'assigned');assert.equal((await visitorAttentionFeed(v.token)).items.length,0,'Assignment remains internal');
   const privateCount=await count();await postSupportMessage(transport,v.id,{audience:'note',message:'Private carrier and commission details',idempotencyKey:crypto.randomUUID()});assert.equal(await count(),privateCount,'Internal note has no public alert');
@@ -77,8 +77,9 @@ async function main(){
   const visitorDevice={kind:'web',subscription:{endpoint:'https://fcm.googleapis.com/fcm/send/local-fixture',keys:{p256dh:browserPair.getPublicKey().toString('base64url'),auth:crypto.randomBytes(16).toString('base64url')}}};
   process.env.SUQPAGE_WEB_PUSH_PUBLIC_KEY=pair.getPublicKey().toString('base64url');process.env.SUQPAGE_WEB_PUSH_PRIVATE_KEY=pair.getPrivateKey().toString('base64url');process.env.SUQPAGE_WEB_PUSH_SUBJECT='mailto:qa@example.test';
   await subscribeVisitorAttention(v.token,visitorDevice);
+  await subscribeUserAttention(owner,{...visitorDevice,subscription:{...visitorDevice.subscription,endpoint:"https://fcm.googleapis.com/fcm/send/owner-local-fixture"}});
   delete process.env.SUQPAGE_WEB_PUSH_PUBLIC_KEY;delete process.env.SUQPAGE_WEB_PUSH_PRIVATE_KEY;delete process.env.SUQPAGE_WEB_PUSH_SUBJECT;
-  assert.equal((await db.prepare('SELECT COUNT(*) total FROM attention_subscriptions').get()).total,3,'The additional visitor browser subscription retains both shared-token Expo bindings');
+  assert.equal((await db.prepare('SELECT COUNT(*) total FROM attention_subscriptions').get()).total,4,'Private owner web push and retained visitor subscriptions remain separately bound');
   await assert.rejects(()=>subscribeUserAttention(foreign,device),AttentionError);
   await assert.rejects(()=>subscribeUserAttention(support,{...device,token:'ExponentPushToken[LOCAL_FIXTURE_STAFF_TOKEN]'}),AttentionError);
   for(const endpoint of ['http://127.0.0.1/x','https://evil.example/x','https://fcm.googleapis.com.evil.example/x','https://fcm.googleapis.com:444/x'])assert.throws(()=>validatedPushSubscription({kind:'web',subscription:{endpoint,keys:{p256dh:'x',auth:'y'}}}));
@@ -87,8 +88,9 @@ async function main(){
   await postAssignedSupportReply(admin,v.id,{audience:'reply',message:'Unread visitor reply for dispatch',idempotencyKey:crypto.randomUUID()});
   const payloads:unknown[]=[],kinds=new Set<string>();
   const dispatched=await dispatchAttention({send:async(subscription,payload)=>{payloads.push(payload);kinds.add(subscription.kind);assert.equal(payload.title,'AfricMade','Both web and native notifications use the current presentation brand');assert.doesNotMatch(JSON.stringify(payload),/Private carrier|commission details|251911|Addis Ababa|Adama|alert-owner@example/);return {state:'accepted'};}});
-  assert.ok(dispatched.accepted>=2);assert.ok(payloads.length>=2);assert.deepEqual([...kinds].sort(),['expo','web']);
+  assert.ok(dispatched.accepted>=2);assert.ok(payloads.length>=2);assert.deepEqual([...kinds].sort(),['expo','web']);assert.ok(dispatched.ignored>=1,'Retained guest transport/buying deliveries are suppressed');assert.ok(payloads.every(payload=>(payload as {scope:string}).scope==='user'));
   const duplicateDispatch=await dispatchAttention({send:async()=>{throw new Error('Already accepted deliveries must not resend');}});assert.equal(duplicateDispatch.processed,0);
+  await db.prepare("UPDATE attention_subscriptions SET revoked_at=? WHERE recipient_key=? AND kind='web'").run(Date.now(),'user:'+owner.id);
   const failedMessage=await postSupportMessage(support,c.id,{message:'Retry-safe owner reply',idempotencyKey:crypto.randomUUID()});
   const failed=await dispatchAttention({send:async()=>({state:'failed',category:'provider_unavailable',retryable:true})});assert.equal(failed.pending,1);
   const receiptRow=await db.prepare("SELECT id FROM attention_deliveries WHERE state='pending'").get();

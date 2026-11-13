@@ -897,6 +897,7 @@ export async function createPublicSupportConversation(
 ) {
   const category = assistanceCategory(input.category);
   const transport = category === "shipment_observation";
+  if (transport) throw new SupportError("Transport chat is available from your business dashboard.", "public_chat_retired");
   if(input.coordinatorId!==undefined&&!transport||transport&&!selectTransportCoordinator(input.coordinatorId).ok)throw new SupportError("Choose a logistics service provider.","invalid_request");
   const callback = isCallbackRequest(category);
   const service = category === "buying_assistance" ? buyingService(input.service) : null;
@@ -990,6 +991,7 @@ async function requirePublicConversation(token: unknown, now = Date.now()) {
       AND c.visitor_session_expires_at>=?
   `, [tokenHash, now]);
   if (!row) throw new SupportError("Support conversation was not found.", "not_found");
+  if (row.assistance_category === "shipment_observation") throw new SupportError("Transport chat is available from your business dashboard.", "public_chat_retired");
   return { row, tokenHash };
 }
 

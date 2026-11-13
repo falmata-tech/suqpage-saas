@@ -19,7 +19,7 @@ async function main(){
    return (await runtimeUserById(id))!;
   }
   const admin=await user('assignment-admin','platform_admin'),manager=await user('assignment-manager','operations_manager'),a=await user('assignment-a','team_member','transport'),b=await user('assignment-b','team_member','transport');
-  let ordinal=0;const guest=(at=t)=>support.createPublicSupportConversation({category:'shipment_observation',name:'Private customer name',phone:'+447700900999',origin:'Private pickup',destination:'Private destination',message:'Private goods description',idempotencyKey:key()},`assignment-response-${++ordinal}`,at);
+  let ordinal=0;const guest=(at=t)=>support.createPublicSupportConversation({category:'buying_assistance',email:'fixture-buyer@example.test',name:'Private customer name',phone:'+447700900999',origin:'Private pickup',destination:'Private destination',message:'Private goods description',idempotencyKey:key()},`assignment-response-${++ordinal}`,at);
   const view=async(id:number)=>(await support.getSupportConversation(admin,id)).conversation;
   const state=(id:number)=>db.prepare('SELECT awaiting_staff_since,awaiting_staff_message_id,overdue_notified_message_id,overdue_notified_assignment_id,status,assigned_user_id FROM support_conversations WHERE id=?').get(id);
   const active=(id:number)=>db.prepare('SELECT id,assigned_at FROM support_assignments WHERE conversation_id=? AND released_at IS NULL ORDER BY id DESC LIMIT 1').get(id);

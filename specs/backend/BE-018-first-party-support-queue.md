@@ -2,7 +2,7 @@
 id: BE-018
 title: First-party customer support queue
 status: in_progress
-related: [BE-046, BE-044, ADR-0023, FE-019, FE-026, FE-056, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, BE-031, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039, BE-050, DEP-043, FE-036, FE-053, BE-057, ADR-0031, BE-063]
+related: [BE-066, BE-046, BE-044, ADR-0023, FE-019, FE-026, FE-056, BE-002, BE-015, BE-023, BE-024, BE-026, BE-030, BE-031, DEP-015, DEP-026, ADR-0009, ADR-0012, ADR-0014, BE-032, BE-040, BE-042, DEP-039, BE-050, DEP-043, FE-036, FE-053, BE-057, ADR-0031, BE-063]
 owners: [backend, security, customer-support]
 last_updated: 2026-10-23
 change_level: L3

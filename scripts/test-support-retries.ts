@@ -10,10 +10,10 @@ async function main(){
  try {
   const token=crypto.randomBytes(32).toString('base64url');const now=Date.now();
   const opening=await GET(new NextRequest('http://localhost:3102/api/public-support?channel=buying'));
-  assert.match(opening.headers.get('set-cookie')||'',/suqpage_public_buying=.*HttpOnly/i);
+  assert.equal(opening.status,410);assert.equal(opening.headers.get('set-cookie'),null);
   const prepared=await GET(new NextRequest('http://localhost:3102/api/public-support?channel=buying',{headers:{cookie:`suqpage_public_buying=${token}`}}));
   assert.equal(prepared.headers.get('set-cookie'),null,'GET must retain an unused prepared cookie');
-  assert.deepEqual(await prepared.json(),{conversation:null});
+  assert.equal(prepared.status,410);assert.equal((await prepared.json()).code,'public_chat_retired');
   const draft={category:'buying_assistance',name:'Example buyer',phone:'+447700900999',message:'Fictional support retry test.',idempotencyKey:crypto.randomUUID()};
   assert.equal(await publicSupportSessionIsUsable(token),true);assert.equal(await publicSupportSessionIsUsable('invalid'),false);
   const results=await Promise.all([createPublicSupportConversation(draft,'retry-ip',now,token),createPublicSupportConversation(draft,'retry-ip',now,token)]);
@@ -32,10 +32,8 @@ async function main(){
   await assert.rejects(()=>createPublicSupportConversation(draft,'retry-ip',now+PUBLIC_SUPPORT_SESSION_MS+1,token),/expired/);
   await db.prepare('UPDATE support_conversations SET visitor_session_expires_at=? WHERE id=?').run(now-1,results[0].id);
   const expired=await GET(new NextRequest('http://localhost:3102/api/public-support?channel=buying',{headers:{cookie:`suqpage_public_buying=${token}`}}));
-  assert.deepEqual(await expired.json(),{conversation:null});
-  assert.match(expired.headers.get('set-cookie')||'',/suqpage_public_buying=/);
-  assert.ok(!expired.headers.get('set-cookie')?.includes(token),'Expired token must rotate');
-  console.log('PASS prepared-session concurrent/serial replay, unchanged counts/quota, altered-payload denial, token isolation, buying message replay and expiry.');
+  assert.equal(expired.status,410);assert.equal(expired.headers.get('set-cookie'),null,'Retired entry never rotates or prepares guest credentials');
+  console.log('PASS retired HTTP never prepares/rotates guest tokens; retained fixture replay, quota/idempotency, altered-payload denial, token isolation and expiry.');
  }finally{await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

@@ -10,9 +10,8 @@ import type { ReactNode } from "react";
 import AfricMadeBrand from "@/components/AfricMadeBrand";
 import NavigationPendingIndicator, { NavigationPendingMain, NavigationPendingProvider } from "@/components/NavigationPendingIndicator";
 import PublicMobileNavigation from "@/components/PublicMobileNavigation";
-import PublicSupportChat from "@/components/PublicSupportChat";
 import { PublicActionDockProvider } from "@/components/PublicActionDock";
-import {publicTransportPlacement} from "@/lib/public-transport-placement";
+import {publicInquiryPlacement} from "@/lib/public-transport-placement";
 import PublicSiteFooter from "@/components/PublicSiteFooter";
 import {showPublicSiteFooter} from "@/lib/public-site-footer";
 
@@ -30,7 +29,7 @@ function PublicAppFrameContent({ children, signedIn, dashboardHref="/dashboard" 
   const pathname = usePathname();
   const showroomOpen = pathname.startsWith("/@");
 
-  return <PublicActionDockProvider enabled={publicTransportPlacement(pathname,"web")==="shell"} transport={<PublicSupportChat />}><div className={`public-app-shell${showroomOpen ? " public-app-shell-showroom" : ""}`}>
+  return <PublicActionDockProvider enabled={publicInquiryPlacement(pathname,"web")==="shell"}><div className={`public-app-shell${showroomOpen ? " public-app-shell-showroom" : ""}`}>
     <header className="public-app-header">
       <AfricMadeBrand className="public-app-brand" />
       <LanguageSelector />

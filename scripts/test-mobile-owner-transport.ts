@@ -13,7 +13,7 @@ const response=(conversation:OwnerTransportConversation|null=null):OwnerTranspor
 const chat=(patch:Partial<OwnerTransportConversation>={}):OwnerTransportConversation=>({id:71,publicRef:'SUP-OWNER-71',subject:'Town A → Town B',category:'shipment_observation',status:'open',assignedUserName:'Transport agent',agentJoined:true,resolvedAt:null,messages:[],...patch});
 // Real shared native screen/controller with controlled native, lifecycle, router
 // and authenticated I/O ports. No HTTP/database/device operation is performed.
-const bundle=build({entryPoints:['apps/mobile/app/buying.tsx','apps/mobile/src/OwnerTransportHistory.tsx','apps/mobile/src/owner-inbox.tsx'],outdir:'/tmp/suqpage-owner-transport-ui',bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'owner-transport-ports',setup(b){
+const bundle=build({entryPoints:['apps/mobile/src/BusinessTransportWorkspace.tsx','apps/mobile/src/OwnerTransportHistory.tsx','apps/mobile/src/owner-inbox.tsx'],outdir:'/tmp/suqpage-owner-transport-ui',bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'owner-transport-ports',setup(b){
  b.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|react-native|expo-router|expo-crypto|(?:\.\/|\.\.\/src\/)(?:runtime|ui|ChatReadSentinel|AttentionAlerts|TransportPlanView|TransportCoordinator|owner-forms|support-files))$/},a=>({path:a.path.startsWith('../src/')?'./'+a.path.split('/').at(-1):a.path,namespace:'ports'}));
  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'js',contents:
   a.path==='react'?`export const useState=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return[fixture.states[i],value=>{fixture.updates++;fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value;}];},useRef=initial=>{const i=fixture.cursor++;return fixture.states[i]||(fixture.states[i]={current:initial});},useCallback=fn=>fn,useEffect=(create,deps)=>{const i=fixture.effectCursor++,old=fixture.effects[i];if(!old||deps.some((value,j)=>value!==old.deps[j]))fixture.pending.push(()=>{old?.cleanup?.();fixture.effects[i]={deps,cleanup:create()};});};export default {};`
@@ -39,7 +39,7 @@ const press=(node:Element)=>(node.props.onPress as()=>void)();
 const change=(node:Element,value:string)=>(node.props.onChangeText as(value:string)=>void)(value);
 function commandBody(value:unknown):Record<string,unknown>{assert.ok(value&&typeof value==='object'&&!Array.isArray(value),'A command must be an object');return value as Record<string,unknown>;}
 async function settle(){await new Promise<void>(resolve=>setImmediate(resolve));}
-async function screen(entry='buying'){
+async function screen(entry='BusinessTransportWorkspace'){
  const fixture={states:[] as unknown[],cursor:0,effectCursor:0,effects:[] as Effect[],pending:[] as Array<()=>void>,updates:0,keys:0,session:{user:{id:'owner-A'}} as {user:{id:string}}|null,focus:undefined as (()=>(()=>void)|undefined)|undefined,routes:[] as unknown[],calls:[] as Array<{path:string;body?:unknown}>,responses:[] as Array<Promise<unknown>>,ownerRequest:undefined as unknown as(path:string,body?:unknown)=>Promise<unknown>,loaders:[] as Array<()=>Promise<unknown>>,history:{data:null as unknown,error:'',loading:false,reload(){}}};
  fixture.ownerRequest=(path,body)=>{fixture.calls.push({path,body});const result=fixture.responses.shift();if(!result)throw Error('Unexpected owner request '+path);return result;};
  const output=(await bundle).outputFiles.find(file=>file.path.endsWith('/'+entry+'.js'))!,module={exports:{} as Record<string,(props:Record<string,unknown>)=>Element>};
@@ -155,7 +155,7 @@ test('FE-053 technical owner chat preserves reference, hides routing and disting
 
 test('FE-053 actual React native controller retains exact retry keys, renews edited attempts and fences unmounted handlers',{timeout:60000},async()=>{
  const require=createRequire(import.meta.url);
- const output=await build({stdin:{loader:'tsx',resolveDir:process.cwd(),contents:`import React from 'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';import Native from './apps/mobile/app/buying';const root=createRoot(document.getElementById('root'));window.fixture.mount=visible=>flushSync(()=>root.render(visible?<Native owner/>:null));`},bundle:true,write:false,format:'iife',platform:'browser',plugins:[{name:'native-owner-react-ports',setup(b){
+ const output=await build({stdin:{loader:'tsx',resolveDir:process.cwd(),contents:`import React from 'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';import Native from './apps/mobile/src/BusinessTransportWorkspace';const root=createRoot(document.getElementById('root'));window.fixture.mount=visible=>flushSync(()=>root.render(visible?<Native owner/>:null));`},bundle:true,write:false,format:'iife',platform:'browser',plugins:[{name:'native-owner-react-ports',setup(b){
   b.onResolve({filter:/^react(?:\/jsx(?:-dev)?-runtime)?$/},a=>({path:require.resolve(a.path)}));
   b.onResolve({filter:/^(?:react-native|expo-router|expo-crypto|\.\.\/src\/(?:runtime|ui|ChatReadSentinel|AttentionAlerts|TransportPlanView|TransportCoordinator))$/},a=>({path:a.path,namespace:'ports'}));
   b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:
