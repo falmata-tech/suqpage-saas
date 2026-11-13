@@ -217,7 +217,7 @@ async function dispatch(
       mobileParse(() => parseBusinessHandle(q.get("handle"))),
     );
   if(method==='POST'&&key==='reports')return submitListingReport(listingReportPort,await jsonBody(request),ip);
-  if (path[0] === 'transport' && (path.length === 1 || (path.length === 2 && path[1] === 'attention'))) {
+  if (['transport','buying'].includes(path[0]) && (path.length === 1 || (path.length === 2 && path[1] === 'attention'))) {
     throw new MobileError('Transport chat is available from your business dashboard.', 410, 'public_chat_retired');
   }
   if ((path[0]==='transport'||path[0]==='buying') && path.length===2 && path[1]==='attention') {

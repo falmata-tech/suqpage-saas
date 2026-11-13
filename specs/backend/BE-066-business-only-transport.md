@@ -12,12 +12,13 @@ change_level: L2
 
 ## Problem and contracts
 
-The visitor transport capability is retired. Web public-support transport and
-transport-attention endpoints and native public transport/attention return410
+The visitor transport capability is retired. All web public-support channels and guest-attention endpoints, including the
+legacy buying alias, and native public transport/buying/attention return410
 `public_chat_retired` without reading tokens, parsing chat bodies or writing data.
-The public domain start rejects shipment_observation; all public domain access
-rejects retained visitor transport tokens, including attempts through another
-channel. Guest attention excludes transport both at enqueue and delivery time.
+The public domain start rejects shipment_observation; legacy buying-domain
+utilities remain internal history/test compatibility, with no live public adapter. Retained shipment-category guest tokens also fail
+the shared domain access guard, including attempts through another channel. Guest transport delivery is suppressed, including retained buying-route
+deliveries. Shipment guest attention is denied at enqueue/feed boundaries too.
 Authenticated owner-transport APIs keep existing auth, fresh-role and tenant
 checks, and do not adopt guest cases. This supersedes visitor transport criteria
 in BE-018/BE-063 while retaining their business/staff and provider contracts.

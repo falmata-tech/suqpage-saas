@@ -15,8 +15,10 @@ run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md)
 | FE-078 | Public web/native shells and About; saved inquiry docks; retired native route; dashboard renderer | Public-shell/deep-link/inquiry component tests pass. The isolated CI browser component regressions pass after retiring launcher expectations and correcting moved-renderer selectors. Current-head provider-backed journeys, captures, merge and production readback are tracked in [PR #59](https://github.com/falmata-tech/suqpage-saas/pull/59). |
 | BE-066 | Public support/attention adapters; domain guest guards; native router; notification enqueue/delivery | `npm run test:business-transport` passes against isolated PostgreSQL17.10: web/native410, old-token/alias denial, unchanged history, suppressed notifications, current-business workspace and foreign/stale-role denial, business callback. |
 
-Generic visitor queue/response/read/idle regressions now use the separate buying
-category; they do not restore visitor transport. Web production build, root/mobile typecheck, localization, workflow scripts and
+Historical guest queue/response/read/idle fixtures use the retained buying
+domain utilities; all public web/native buying and transport adapters are retired.
+Queued deliveries for both guest categories are suppressed. Product inquiries
+use their separate API and remain available. Web production build, root/mobile typecheck, localization, workflow scripts and
 50 focused pure component tests pass. Full local check passes its
 first three groups then stops at unavailable provider-backed account-erasure
 fixtures. Required current-head gates and delivery are tracked in PR #59; do not infer

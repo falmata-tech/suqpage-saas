@@ -34,20 +34,20 @@ async function main(){
    ()=>support.getPublicSupportAttachment(old.token,1),
    ()=>support.submitPublicTransportCallback(old.token,{phone:'+251911223344',email:'bypass@example.test',idempotencyKey:key()},'denied'),
   ])await assert.rejects(action,retired);
-  for(const method of ['GET','POST','DELETE'])for(const token of ['',old.token]){
-   const request=new NextRequest(base+'/api/public-support?channel=transport',{method,headers:{cookie:'suqpage_public_transport='+token},...(method==='POST'?{body:'invalid JSON'}:{})});
+  for(const channel of ['transport','buying'])for(const method of ['GET','POST','DELETE'])for(const token of ['',old.token]){
+   const request=new NextRequest(base+'/api/public-support?channel='+channel,{method,headers:{cookie:'suqpage_public_transport='+token},...(method==='POST'?{body:'invalid JSON'}:{})});
    const response=await(method==='GET'?GET(request):method==='POST'?POST(request):DELETE(request));
    assert.equal(response.status,410);assert.equal((await response.json()).code,'public_chat_retired');assert.equal(response.headers.get('set-cookie'),null);assert.match(response.headers.get('cache-control')||'',/no-store/);
   }
-  for(const handler of [attentionGET,attentionPOST]){
-   const response=await handler(new NextRequest(base+'/api/attention?channel=transport',{method:handler===attentionGET?'GET':'POST'}));
+  for(const channel of ['transport','buying'])for(const handler of [attentionGET,attentionPOST]){
+   const response=await handler(new NextRequest(base+'/api/attention?channel='+channel,{method:handler===attentionGET?'GET':'POST'}));
    assert.equal(response.status,410);assert.equal((await response.json()).code,'public_chat_retired');
   }
   // A buying alias cannot recover a retained transport token either.
   const alias=await GET(new NextRequest(base+'/api/public-support?channel=buying',{headers:{cookie:'suqpage_public_buying='+old.token}}));assert.equal(alias.status,410);
   const noIdentity={verify:async()=>{throw Error('Public retirement must precede identity lookup');},linked:async()=>null,user:async()=>null};
-  for(const path of ['transport','transport/attention'])for(const method of ['GET','POST','DELETE']){
-   const response=await handleMobileRequest(new Request(base+'/api/mobile/'+path,{method,headers:{'X-Suqpage-Buying-Session':old.token},...(method==='POST'?{body:'invalid JSON'}:{})}),path.split('/'),{identity:noIdentity});
+  for(const path of ['transport','transport/attention','buying','buying/attention'])for(const method of ['GET','POST','DELETE']){
+   const response=await handleMobileRequest(new Request(base+'/api/mobile/v1/'+path,{method,headers:{'X-Suqpage-Buying-Session':old.token},...(method==='POST'?{body:'invalid JSON'}:{})}),path.split('/'),{identity:noIdentity});
    assert.equal(response.status,410,path+' '+method);assert.equal((await response.json()).code,'public_chat_retired');
   }
   await assert.rejects(()=>visitorAttentionFeed(old.token));
@@ -60,6 +60,9 @@ async function main(){
   const notification=(await db.prepare("INSERT INTO attention_notifications(source_key,recipient_key,visitor_conversation_id,conversation_id,kind,created_at) VALUES('historical-message',?,?,?,'message',?)").run('visitor:'+old.id,old.id,old.id,Date.now())).insertedId;
   await db.prepare('INSERT INTO attention_deliveries(notification_id,subscription_id,next_attempt_at) VALUES(?,?,0)').run(notification,subscription);
   let sent=0;const delivery=await dispatchAttention({send:async()=>{sent++;return {state:'accepted'};}});assert.equal(delivery.ignored,1);assert.equal(sent,0,'Queued visitor transport push is suppressed');
+  await db.prepare("UPDATE support_conversations SET assistance_category='buying_assistance',transport_origin=NULL,transport_destination=NULL WHERE id=?").run(old.id);
+  await db.prepare("UPDATE attention_deliveries SET state='pending',next_attempt_at=0,attempts=0 WHERE notification_id=?").run(notification);
+  const aliasDelivery=await dispatchAttention({send:async()=>{sent++;return {state:'accepted'};}});assert.equal(aliasDelivery.ignored,1);assert.equal(sent,0,'Legacy buying-route pushes cannot revive transport chat');
   console.log('PASS BE-066 public web/native410, malformed-body early denial, old-token domain/alias/attention denial, unchanged history and suppressed queued delivery. Business and tenant flows: test-owner-transport.ts.');
  }finally{await closeDbForTests();}
 }

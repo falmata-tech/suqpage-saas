@@ -648,7 +648,8 @@ feedback; an inquiry alert remains informational and never grants a new permissi
 Visitors need no business account to browse or prepare/send product inquiries.
 Transport chat is available only to current business clients through their
 dashboard on web or native. Public launchers, About transport links and the old
-native chat route are retired; old guest tokens and transport notifications do
+native chat route and legacy buying-chat API aliases are retired; old guest
+tokens and transport notifications do
 not grant access. Staff retain authorized historical records (FE-078/BE-066).
 Tracking verification creates a separate recipient session, not a
 business account. Public reports accept canonical targets and bounded reasons;
