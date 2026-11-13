@@ -8,8 +8,9 @@ not authorize a provider write or rerun an already completed migration/build.
 
 ## Current position
 
-Housekeeping is integrated through main `5557d5e` (PR #58), with all five
-required checks passed. The preceding main `120f480` (PR #57) included: AfricMade naming,
+Business-only transport is integrated through main `2872313` (PR #59), with all
+five required PR/main checks passed. Housekeeping is integrated in PR #58.
+The preceding main `120f480` (PR #57) included: AfricMade naming,
 Android version4 preparation, standalone Expo binding (#56) and the approved
 phone headline are merged. All five required jobs passed on that exact main
 commit in run `40819547526`. S190 now owns business-only transport; earlier unchecked integration statements
@@ -52,13 +53,54 @@ store screenshots and Play qualification remain separate unfinished work.
 
 | Surface | Source / evidence | Remaining qualification |
 | --- | --- | --- |
-| AfricMade web source | Main `120f480`, all five jobs passed; later naming/headline corrections integrated | Published Git build `120f480`; local housekeeping patch still requires remote integration |
-| Published website | Current main `120f480` Git build published; bounded desktop journeys above pass | Complete phone, authenticated and provider outcomes; managed Auth/domain cutover remains separately guarded |
+| AfricMade web source | PR #59 / main `2872313`; five required PR/main jobs passed | S191 native release preparation remains separate |
+| Published website | PR #59 business-only transport is deployed; public guest aliases return410 and unauthenticated private owner APIs return401 | Complete Expo/physical-device qualification; managed Auth/domain cutover remains separately guarded |
 | Android new package | Signed v3 recorded; version4 config and standalone Expo binding merged | Fresh build admission, signed v4, binary/device/push/Play checks |
 | Android former packages | Retained signed artifacts and compatibility records | Historical inputs; do not submit them as the new package |
 | AfricMade Play app | Previously verified Free/App draft and local listing material | Current Console readback, declarations/screenshots, admitted bundle and actual testing |
 
 ## Ordered work
+
+### S191 — finish the business-only Android update (DEP-044 / FE-078)
+
+Owner instruction: finish the mobile update after S190. Baseline main
+`28723134e555d9f8c4fa3b7203e2d557d46d2fb5`; preserve `com.africmade.app`,
+versionCode 4, the admitted signer, standalone Firebase client and API/Auth
+targets. This is build/delivery work; no new product behavior or Play submission.
+
+1. [x] Verify the merged source, native identity and missing local build inputs.
+   S190 is integrated in PR #59 and its five required PR/main checks passed.
+2. [ ] Recover the existing signer and authentic pinned Firebase client through
+   the exact provider projects; recover the canonical v3 APK for comparison.
+   Keep private material in ignored protected paths. Never substitute a new key.
+3. [ ] Patch the newly reported URL-decoder denial of service with the reviewed
+   0.5.1 patch under DEP-042 and enforce its bounded distinct-run regression in
+   the existing full-install browser CI job. Freeze
+   source/lock/tools, run native configuration and export checks,
+   inspect the current locked dependency audit, and record exact build inputs.
+   Resolve current findings against the owner's current build instruction;
+   consumed historical exceptions do not admit new findings.
+4. [ ] Compile one local AAB, derive the universal APK, and independently inspect
+   both against DEP-044 and the v3 predecessor. A failed compilation requires
+   diagnosis before a bounded retry; do not weaken release checks.
+5. [ ] Make the verified APK available, record source/artifact evidence and
+   remaining physical-device/push/Play limits. Commit scoped documentation and
+   complete its normal protected integration if documentation changes remain.
+
+Current step: 2, blocked on the pinned Firebase client and canonical v3 APK.
+The original keystore/password were recovered from `@falmatad/suqpage` and
+independently verified against the admitted certificate. `@falmatad/africmade`
+has no uploaded Android credentials. Firebase confirms the exact admitted app
+and certificate, but its configuration download timed out twice. No matching
+previous APK is available in the checkout, Library or GitHub Releases. No
+provider configuration, replacement signer or native compilation was attempted.
+
+The decoder patch passes the mobile build/configuration/release-safety/media
+checks, mobile typecheck and public-script static gate. The fresh full locked
+native audit improves from six high findings to three, with six moderate, one
+low and zero critical remaining in native build tooling. This is a failed
+native audit, not an admitted release. Source integration checks are tracked
+by the S191 PR; recover missing inputs before freezing a build plan.
 
 ### S190 — business dashboard transport only (FE-078 / BE-066)
 

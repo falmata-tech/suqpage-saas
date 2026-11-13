@@ -45,6 +45,8 @@ assert(!core.includes("- run: npm run build"), "Core CI must not drift into a pa
 assert(!core.includes("- run: npm run check"), "Core CI must not drift into a partial duplicate of the release script");
 
 assert.match(browser, /node-version: 24\.18\.1/, "Browser CI must use the supported Node baseline");
+assert.ok(browser.includes("      - run: npm ci\n      - name: Native dependency compatibility\n        run: node scripts/test-mobile-dependencies.cjs\n"),
+  "Full-install browser CI must exercise native dependency compatibility before browser setup");
 function assertBrowserRegistryOverride(source) {
   const acceptance = "      - run: npm run test:acceptance\n        env:\n          SUPABASE_INTERNAL_IMAGE_REGISTRY: docker.io\n";
   const acceptanceAt = source.indexOf("      - run: npm run test:acceptance\n");
