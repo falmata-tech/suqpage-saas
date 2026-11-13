@@ -69,8 +69,9 @@ Use focused tests while editing. Useful entry points:
 | Browser acceptance | `npm run test:acceptance` |
 | Recovery / container qualification | `npm run test:operations` / `npm run test:container` |
 
-Complete gates follow the applicable change level and existing visual-approval
-gate. Reuse passing evidence only when its relevant inputs remain unchanged.
+Complete gates follow the applicable change level and the agent-owned visual
+review checkpoint. Reuse passing evidence only when its relevant inputs remain
+unchanged.
 Browser acceptance uses disposable local Auth/Storage and synthetic accounts;
 persistence suites use isolated PostgreSQL schemas. Never point tests at
 Production or reset a shared local database to fix a fixture.
@@ -96,6 +97,15 @@ repository's GitHub workflow skill for that work; installed project skills are
 instructions, not additional app dependencies or merge/deployment permissions.
 
 ## Operate and release
+
+The existing Netlify project builds and publishes protected GitHub `main`
+automatically. Its web app is at the repository root; `netlify.toml` declares
+that base, the pinned Node version, web/contracts install and Next adapter.
+Use the normal PR/check/merge flow. Deploy Previews and branch deploys are
+currently disabled until an isolated backend is configured. See
+[DEP-052](specs/deployment/DEP-052-automatic-netlify-delivery.md) for qualification
+and recovery; do not add a parallel Actions publisher or production build hook.
+Database migrations, managed Auth/SMTP and Android releases are separate steps.
 
 Follow the PostgreSQL runbook for backup, migration and restore. An application
 database archive does not back up managed Auth or private Storage. Hosted changes

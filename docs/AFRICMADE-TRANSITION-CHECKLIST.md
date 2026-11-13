@@ -3,49 +3,116 @@
 Current product authority: [master brief](../AFRICMADE-MASTER-PROMPT.md).
 Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 [DEP-049](../specs/deployment/DEP-049-africmade-domain-and-app-cutover.md).
-Updated 2026-10-26. This working board replaces dated `CURRENT` labels; it does
+Updated 2026-11-12. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
 ## Current position
 
-AfricMade's map-first UI, simpler Featured/footer and white-field installation
-icons are published from main `75092ef` (PR #48), Netlify deploy
-`6adfa7a046c301c50af9b164`. All five required PR/main CI jobs and 29 independent
-public readbacks pass. **africmade.com** serves the artifact in place; the admitted
-canonical address remains **mirtpage.com**. The previous deploy remains ready for
-recovery. [Current delivery evidence](../specs/TRACEABILITY.md#current-s181s184-delivery)
-owns the exact source, gate, provider and browser receipts.
+Source is integrated through main `120f480` (PR #57): AfricMade naming,
+Android version4 preparation, standalone Expo binding (#56) and the approved
+phone headline are merged. All five required jobs passed on that exact main
+commit in run `40819547526`. S189 now owns the hands-on comparison and readiness
+work; earlier unchecked integration statements are not new source tasks.
 
-Live Chrome completes 22 scoped functional checks, with a retained overall
-deadline failure and unproven GET-cancellation causes. A separate settled 390px
-review qualifies inquiry choice-action reachability, quantity and unsent Inbox
-Open/Close. This is qualified read-only web evidence, not a passing complete
-browser invocation or a live inquiry/chat submission.
+The existing Netlify project `africmade`, ID
+`26c795eb-5560-4a88-b38d-3cc922c2a5e6`, is independently verified on
+2026-11-12. GitHub main is linked and automatic publication is enabled. The
+native Git build of main `120f480` is published as `6af5f7049dd20b84e5ea38ea`;
+`africmade.com` serves it directly. Netlify's primary domain remains
+`mirtpage.com`; domains and credentials were preserved. Branch deploys and PR
+previews are disabled until their backend is isolated. The previous deploy
+`6ae0a7fb4ccd545c7dd13f55` remains available for recovery. DEP-052 owns the new
+ordinary delivery contract; traceability owns the exact build/runtime evidence.
 
-One exact owner-approved local version2 build for **com.africmade.app** succeeded;
-the signed AAB and derived APK pass independent composed static admission against
-the verified standalone Firebase project and canonical version1 predecessor.
-Actual compiled launcher/splash artwork passes source-bound visual review. The
-one-build advisory exception is consumed; it authorizes no retry or new build.
-[Current delivery evidence](../specs/TRACEABILITY.md#current-s181s184-delivery)
-retains the failed inspector invocations and composition limits.
+Live desktop review verifies buyer/supplier About tabs, current Featured timing
+and four examples, supplier preview/page/product search and details, separate
+single-product/saved inquiry selection, and the unsent Inbox form. No business
+inquiry, chat, email or external message was sent. Phone, full map, authenticated
+roles, Expo and installed Android are not established by this review.
 
-**Next delivery dependencies:** physical Android workflows, 16-KB device runtime,
-FCM/EAS binding, actual push delivery and Play qualification remain open. The
-MarketVision Play app is a verified Free/App draft; category, listing, declarations,
-screenshots, upload and genuine closed-test enrollment remain unfinished. The
-old **com.mirtpage.app** v6 artifact cannot be submitted to the new package.
+Supabase project `sjeiiqxgscuqajpgddcc` is independently active/healthy, with
+application schema 80 and one private/no public Storage buckets. No development
+branch is listed. BE-065's guarded metadata-only correction fixed all nine
+trigger search paths and removed 408 unnecessary API-role grants, including
+MAINTAIN. Fresh readback preserves function bodies/owners, server ACLs, RLS and
+ledger 80; effective public API-role table/sequence privileges are empty. The only
+remaining security advisory is the separate disabled leaked-password protection
+setting; Auth settings and credentials were not changed.
+
+The last recorded signed `com.africmade.app` artifact is version3. It passed
+static inspection but is held from Play because it predates the final identity
+corrections. The first version4 attempt stopped before native compilation;
+the corrected standalone Expo binding is merged, but a fresh signed successor
+and its independent admission remain open. Previous one-build exceptions are
+consumed. Physical Android, 16-KB runtime, FCM/EAS sending credentials, actual push,
+store screenshots and Play qualification remain separate unfinished work.
 
 ## Surface status
 
-| Surface | Implemented | Tested | Visually approved | Deployed / delivered |
-| --- | --- | --- | --- | --- |
-| AfricMade web | S181–S184 source integrated through PR #48 | All five required PR/main jobs, composed local gates and 29 public readbacks pass | Local desktop/phone/Expo tasks and focused live inquiry choices pass source-bound review; live 22-task run retains deadline/network limits | Current deploy above serves mirtpage.com and the AfricMade alias |
-| AfricMade Android, old package | Signed v6 AAB and APK | Static release checks pass; physical device pending | Web/Expo source preview reviewed; installed native pending | Local only, `com.mirtpage.app`; not a new-package Play artifact |
-| AfricMade Android, new package | One signed v2 AAB and derived APK; standalone Firebase/source binding and v1→v2 upgrade policy verified | Source/export gates and composed independent static binary admission pass; failed inspector invocations retained | Actual 31 compiled artwork variants pass agent/root review; installed launcher/splash and phone workflows pending | Local signed v2 ready for owner testing; no Play upload or physical-device qualification |
-| AfricMade Play app | Saved AfricMade app and local English/Amharic listing drafts | Name/package/Draft, Free pricing and App type verified; category unselected, listing/declarations/native screens pending | Native phone screenshots pending | No bundle upload, release or closed-test enrollment |
+| Surface | Source / evidence | Remaining qualification |
+| --- | --- | --- |
+| AfricMade web source | Main `120f480`, all five jobs passed; later naming/headline corrections integrated | Published Git build `120f480`; local housekeeping patch still requires remote integration |
+| Published website | Current main `120f480` Git build published; bounded desktop journeys above pass | Complete phone, authenticated and provider outcomes; managed Auth/domain cutover remains separately guarded |
+| Android new package | Signed v3 recorded; version4 config and standalone Expo binding merged | Fresh build admission, signed v4, binary/device/push/Play checks |
+| Android former packages | Retained signed artifacts and compatibility records | Historical inputs; do not submit them as the new package |
+| AfricMade Play app | Previously verified Free/App draft and local listing material | Current Console readback, declarations/screenshots, admitted bundle and actual testing |
 
 ## Ordered work
+
+### S189 — hands-on comparison and development/deployment housekeeping
+
+Owner instruction, 2026-11-12: use the application, compare implementation with
+the specs/checklist, implement housekeeping, verify GitHub/Netlify/Supabase and
+prepare automatic Netlify delivery after a GitHub merge. DEP-002 owns readiness
+and documentation; DEP-026/DEP-049 own hosting, DEP-029 owns Auth settings, and
+BE-065 owns the verified database security correction. Existing Android/Play
+work stays visible and is not silently included in a new build approval.
+
+Current step: 7, finish routine publication, CI, merge and automatic deployment.
+The owner's standing instruction removes repeated approval prompts for this work;
+AGENTS.md and DEP-002 retain checks and consequential-operation boundaries.
+Baseline is main `120f480`;
+work is isolated on `chore/dep-002-development-readiness`. Preserve existing
+provider resources, customer data, legacy compatibility and prior release evidence.
+
+1. [x] Exercise bounded live public journeys and compare actual behavior with
+   current specs. Cover desktop/phone where supported; label untested owner,
+   staff, admin, Expo, map-provider and physical-device behavior explicitly.
+   Use only synthetic map tiles during automated map review and do not submit
+   real inquiries/chats/messages or alter customer records as audit fixtures.
+2. [x] Independently inspect exact GitHub, Netlify and Supabase targets. Record
+   deployment source, environment isolation, schema ledger, private-media and
+   security/health findings without copying secrets or customer content.
+3. [x] Specify the automatic delivery contract before implementation. Reconcile
+   the earlier complete-artifact/manual release boundary, required GitHub checks,
+   preview isolation, native runtime/adapter compatibility, recovery and hosted
+   activation. A Git connection alone cannot prove a working deployed build.
+4. [x] Reconcile stale current-state documentation and completed checklist steps
+   from verified commits/evidence. Keep historical contracts and unresolved
+   release/device/provider qualifications separate from present source behavior.
+5. [x] Establish available local dependencies and isolated test services, then
+   run applicable baseline/focused checks. Record concrete host limitations;
+   never substitute production data or fake successful application responses.
+6. [x] Implement the accepted delivery/readiness changes and focused security
+   corrections, with tests at their owning boundary. Review dependency updates
+   individually; retain branches until unique work/artifact lineage is resolved.
+7. [ ] Review explicit task files and applicable gates; commit only the qualified
+   scope. Prepare remote integration and hosted activation with exact target,
+   before-state, recovery and existing approval boundaries. Verify actual build,
+   publication, routes/assets/runtime and provider state before claiming delivery.
+   Local review, focused gates and build are complete; hosting is verified. The
+   source commit `93f8384` is prepared locally. First update the standing routine
+   authorization, then push/open the exact PR, resolve CI/review findings, squash
+   merge after all required checks/reviews pass, and verify post-merge CI plus
+   the actual automatic Netlify deployment. No further routine confirmation is
+   needed; record terminal source/deployment evidence before closing this step.
+   CI review also found that the new security regression was wired only into
+   the local npm suite. Add it to the existing required PostgreSQL rehearsal
+   before qualifying the PR head; retain every other required check.
+8. [x] Update master/specs/traceability/runbooks with verified outcomes, remaining
+   access/device limits and the next concrete step. No automatic migration,
+   Auth/credential replacement, account cleanup or other-product change belongs
+   to routine Git-triggered application deployment.
 
 ### S188-H — restore the owner's Market headline on phones
 
@@ -66,19 +133,18 @@ remain unchanged. Master §§2–3 and FE-065/FE-070 own the visible wording.
    journeys pass with synthetic tiles, no page errors and no external tile
    requests. The agent visual decision is PASS. At 320px the Amharic phone-web
    map retains 53.5% visible height; installed Android remains separate.
-4. [ ] Integrate a scoped PR after its required checks pass. The source-matched
-   full `npm run check`, clean root/contracts `npm run release:web` with zero web
-   audit findings, and 20/20 production-mode browser acceptance journeys pass.
-   Web publication and the next signed Android build remain separate release steps.
+4. [x] Integrate the scoped change: PR #57 merged as main `120f480`; all five
+   required main jobs pass in run `40819547526`. The recorded local full check,
+   clean web release and 20/20 acceptance remain source-bound historical evidence.
+   Web publication and the next signed Android build are separate release steps.
 
 ### S188 — finish AfricMade naming before Play submission
 
-Current step: full source qualification. FE-070 S188 defines public/source identity, BE-059 S188
-defines compatibility, and DEP-049 S188 owns hosted/release order. The source is
-isolated on `release/dep-044-africmade-play` from main `d1e2c022`; the dirty root
-worktree is user-owned and untouched. The already signed Android v3 artifact is
-held from Play because old names remain in its compiled content. Master §§2,
-5.2, 11, 15, 18 and 19 will be reconciled after verified implementation.
+Current step: web publication is verified in S189; separate native admission remains. FE-070/BE-059
+S188 source identity is integrated through PR #54; PR #56 binds the verified
+standalone Expo project and PR #57 restores the approved headline. DEP-049 owns
+hosted release order. Signed Android v3 remains held from Play; a new signed
+successor, independent inspection and actual device/Play evidence remain open.
 
 1. [x] Inventory tracked text/path and compiled v3 former-name hits;
    distinguish visible current leaks, safe internal names, retained wire/data
@@ -123,9 +189,10 @@ held from Play because old names remain in its compiled content. Master §§2,
    because its old EAS project slug mismatched `africmade`; that exception is
    consumed. The owner-approved standalone `@falmatad/africmade` project is
    independently verified as `1908b4c4-bdf6-4744-b373-8dc6979e54b0`.
-   Current step: bind this ID in tracked Expo/policy config, prove old-ID refusal,
-   pass source-matched local/CI gates, then prepare a fresh exact build review.
-   Native compilation, binary inspection and Play upload remain open.
+   PR #56 merged the verified project binding as main `6e8d084`; the latest
+   main `120f480` has five passing required jobs. Binding/old-ID refusal source
+   work is complete. Prepare a fresh exact build review only when resumed;
+   native compilation, binary inspection and Play upload remain open.
 
 
 ### Delivery documentation reconciliation

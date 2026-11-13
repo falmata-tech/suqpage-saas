@@ -1,6 +1,6 @@
 # PostgreSQL-only operations
 
-Controlling contracts: BE-035, DEP-031, ADR-0020. Updated 2026-09-14.
+Controlling contracts: BE-035, BE-065, DEP-031, ADR-0020. Updated 2026-11-12.
 This supersedes earlier file-database fixture, copy and restore instructions.
 
 ## Development and fresh installation
@@ -15,8 +15,8 @@ npm run local:supabase:bootstrap
 npm run dev -- --hostname 127.0.0.1 --port 3102
 ```
 
-Bootstrap writes the protected local runtime configuration, installs native
-PostgreSQL schema 45, seeds an empty local database, reconciles local Auth accounts,
+Bootstrap writes the protected local runtime configuration, applies the current
+PostgreSQL migrations, seeds an empty local database, reconciles local Auth accounts,
 and copies local media into private local Storage. It preserves an existing
 populated database. Demo setup is local-only; it never prints generated passwords.
 The protected `.local/seed-credentials.txt` is a fixture artifact, not a hosted
@@ -56,7 +56,7 @@ a separate Supabase project on ports 56321/56322; development uses 54321/54322.
 The browser bootstrap installs directly in PostgreSQL. Local synthetic accounts,
 private media and test-issued Auth sessions are explicitly test fixtures.
 
-After explicit visual approval, run `npm run check`, `npm run release`,
+After the applicable agent-owned visual review, run `npm run check`, `npm run release`,
 `npm run test:acceptance`, `npm run test:operations`, and the applicable container
 and hosted rollout checks. Passing a focused local test is not deployment evidence.
 
@@ -86,6 +86,20 @@ and restores in one transaction. Use an empty recovery database and verify it
 before any traffic switch. Existing application data is never automatically dropped.
 The native operations test verifies backup, tamper rejection, missing approval,
 populated-target denial and restore into an isolated empty database.
+
+## Security housekeeping and rollout
+
+BE-065 adds migration 81: fixed empty paths on the nine existing invoker trigger
+functions and no table/sequence grants to PUBLIC/anon/authenticated. Runtime
+server grants, function bodies, tenant constraints, RLS and customer rows remain
+unchanged. Source readiness admits only complete ordered 80 or 81 histories, with
+the existing all-or-none retired 27–30 group; unknown or incomplete histories fail.
+
+The hosted metadata-only precursor is verified on schema 80. It intentionally
+leaves that ledger intact until the compatible source is integrated. Do not append
+81 manually or run an obsolete provisioning helper to rotate runtime credentials.
+Use the reviewed migration path and protected before-images for subsequent
+operations; a Git build never applies migrations. Exact evidence is in S189.
 
 ## Hosted changes and launch
 

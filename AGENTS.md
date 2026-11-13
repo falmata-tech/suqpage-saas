@@ -15,6 +15,24 @@ feature specs before editing code.
 If these disagree, stop and resolve the conflict in the spec or ADR. Never
 silently change product behavior to match convenient code.
 
+## Standing authorization and judgment
+
+The owner authorizes routine work within the requested task through completion
+without repeated approval prompts. This standing instruction persists across
+sessions. It includes investigation, reversible implementation, local setup and
+tests, task branches/commits, normal pushes, PR creation/update, related CI/review
+fixes, protected merges after all required checks/reviews pass, and ordinary
+Netlify delivery through DEP-052. State the intended action, do the work, and
+verify its result; do not ask whether to continue an already authorized step.
+
+Ask only when information or a consequential choice is genuinely missing, scope
+would materially expand, or a separately guarded destructive, credential, Auth,
+signing or recovery operation needs its exact admission. Prepare the concrete
+reviewable result first. Existing authorization counts; a skill or old checklist
+must not invent an additional approval requirement. This flexibility never
+permits bypassing protection/reviews/tests, exposing secrets, weakening security,
+destroying retained data, or rewriting shared history without specific authority.
+
 ## Required workflow
 
 1. Classify the request: explanation, defect, feature, security, operations, or
@@ -270,8 +288,12 @@ These conventions do not retroactively rename or rewrite existing work.
 - After committing, verify `git show --stat --oneline HEAD` and
   `git status --short`. A dirty tree is acceptable only for preserved changes
   outside the completed task, and those remaining paths must be reported.
-- Do not amend, rebase, force-push, push, or open a pull request unless the user
-  explicitly requests that Git history or remote action.
+- Normal pushes, PRs, scoped fixes and protected merges are covered by the
+  standing authorization above; no extra user confirmation is needed. Preserve
+  explicit task staging, current-head checks and required reviews. Amending or
+  rebasing published/shared commits, force-pushing or other history rewrites
+  still require specific authorization; do not treat ordinary housekeeping as
+  permission to discard unique work.
 
 ## Change levels and required evidence
 

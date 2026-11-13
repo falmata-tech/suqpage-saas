@@ -8,6 +8,70 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S189 development and deployment readiness
+
+DEP-052 / ADR-0032 now govern ordinary web delivery through the existing
+Netlify GitHub connection. The exact `falmatad/africmade` project
+`26c795eb-5560-4a88-b38d-3cc922c2a5e6` is linked to
+`falmata-tech/suqpage-saas`, production branch `main`. Branch deploys and PR
+previews are disabled until an isolated backend exists; production variables,
+domains and previous deploys were retained. Automatic publication is on.
+
+The initial Git build of main `120f48064e207dfe53dac4df32bb4a53719f4156`
+completed in 53s and is published as
+[`6af5f7049dd20b84e5ea38ea`](https://app.netlify.com/projects/africmade/deploys/6af5f7049dd20b84e5ea38ea).
+It uses the root Next.js 16.4.2 app, exact Node 24.18.1 web/contracts installation
+and maintained adapter 5.16.6, with two server functions and one edge function.
+The attention worker is listed as Scheduled in production. Source CI already
+passed all five jobs in `40819547526`; current main was reread before publication.
+Actual next-merge triggering has not yet occurred. Previous deploy
+`6ae0a7fb4ccd545c7dd13f55` remains available for recovery.
+
+Candidate and production `/api/health` return 200/ok. Their About pages reference
+the same 25 Next assets. Candidate Featured→showroom→product→unsent direct inquiry
+works; product media loads, and the official query-aware image route returns 200
+image/webp. Bounded desktop Chrome comparison also covered buyer/supplier About,
+Featured schedule/sponsors, product filtering, saved-list isolation, unsent Inbox,
+transport intake and recipient shipment-access entry. Temporary selections were
+removed; no inquiry/chat/code/message was sent. Agent visual decision: PASS for
+these desktop public tasks on main `120f480`. Phone, map, authenticated writes,
+Expo and physical-device outcomes remain untested in this review.
+
+BE-065's separately guarded metadata-only precursor was applied to Supabase
+`sjeiiqxgscuqajpgddcc` using the protected exact function/ACL/ledger before-image.
+All nine trigger search paths are now empty; their OIDs, bodies, owners and
+invoker mode are unchanged. The 408 unnecessary anon/authenticated grants on 51
+legacy tables, including PostgreSQL 17 MAINTAIN, are removed. All 118 table/sequence
+identities, RLS settings and non-target/server ACLs are preserved. Effective
+API-role table/sequence privilege readback is empty. No customer-row write or
+application-ledger marker was part of the operation; hosted ledger remains 80.
+The security advisor now reports only the separate disabled leaked-password
+protection warning. OTP-only Auth, its review-login exception and credentials
+were not changed. Existing private Storage remains unchanged.
+
+Local source adds migration 81 and exact 80/81 readiness compatibility, with the
+existing all-or-none retired 27–30 group. Real PostgreSQL 17.10 regressions pass:
+native install/66 demo businesses; fixed paths/API denial, identity/body/settings/
+server-ACL/data preservation and idempotence; unexpected-security rollback;
+exact hosted-plan drift rejection; full/retained rollout ledgers; migration73
+preservation; runtime transactions; catalog safety; staff/tenant boundaries; and
+restored product inquiry persistence. Typecheck, 229 spec/ADR validation,
+database boundaries, workflow/runtime contracts, explicit changed-JS static check,
+production build, 104 private-path trace checks and source-map security pass.
+Clean web-only audit reports 0 vulnerabilities. The exact locally generated Netlify
+server archive initializes and Sharp transforms an image on Linux x64/glibc.
+The local offline edge type-import warning is retained; the actual hosted build
+successfully bundled and served the middleware without a copied-artifact patch.
+
+The full `npm run check` stopped at provider-backed account erasure because this
+host lacks Docker/local Supabase Auth/Storage. Full release, provider browser,
+container/restore and device gates were not passed here. The local task branch
+has not been pushed or integrated; its source is separate from the published
+main above. The owner's subsequent standing instruction now authorizes routine
+push/PR, related CI fixes and protected merge without another approval prompt;
+DEP-002 and AGENTS.md own that scope and its consequential-operation exceptions.
+DEP-002 owns the reconciled readiness document and ordered next work.
+
 ## S188-H approved Market headline restoration
 
 FE-065 and FE-070 retain the owner's exact headline across desktop, phone web
@@ -25,7 +89,8 @@ is PASS; snapshots and the synthetic-tile receipt are in the protected
 `.local/homecopy-review/` folder. These previews do not qualify installed Android.
 The source-matched full `npm run check`, clean root/contracts `npm run release:web`
 with zero web audit findings, and 20/20 production-mode browser acceptance
-journeys pass. Source integration and publication remain separate.
+journeys pass. PR #57 integrated this change as main `120f480`; all five
+required jobs pass in main run `40819547526`. Publication is verified in S189 above.
 
 ## S188 AfricMade source identity before Play
 
@@ -59,8 +124,8 @@ a mixed web/native install; the corrected source and clean install passed. This
 is local qualification. PR #54 merged as main
 `d6aea16f518bf45f6ddfbb0868fc41530f8058c9`; its tree equals the checked
 branch. All five required PR jobs and all five post-merge main jobs passed
-(`40667403674`, `40668561713`). Hosted Auth/Netlify changes, website
-publication, signed v4, physical Android and Play remain pending. DEP-044 S188
+(`40667403674`, `40668561713`). Hosted Auth, signed v4, physical Android and
+Play remain pending; S189 above records the later Netlify connection and website publication. DEP-044 S188
 prepares version4 and a white-background Play icon; its resolved-config and
 artwork checks, full `npm run check`, clean `npm run release:web` with zero web
 audit findings, and 20/20 acceptance pass. The first full-check attempt was
@@ -231,7 +296,7 @@ the original full run remains failed, not relabelled as one successful invocatio
 Protected gate evidence is `.local/s182-gates/check-qualification.json`.
 
 Web release passes in the independent root/contracts-only install in 428.7s,
-including the production build,104 trace-privacy checks, real disposable-provider
+including the production build, 104 trace-privacy checks, real disposable-provider
 HTTP smoke and zero-vulnerability web audits. Full acceptance passes19 cases;
 the remaining stale direct Category assertion is corrected to open the actual
 Filters overview, and its entire human-search case passes in a fresh disposable
@@ -461,18 +526,21 @@ belong in engineering readiness; no source merge or production change is claimed
   deployments, portable dependencies and privacy exclusions remain intact.
 - Products are the current catalog, including ready/custom-order labels:
   [FE-067]/[BE-056] supersede older service-offering behavior.
-- Business contact is configured external SMS/Telegram/WhatsApp with localized
-  product copy and business-local saved lists: [FE-066]/[BE-055]. Direct platform
-  business inquiry submission/inbox is retired; historical isolation remains.
+- Business contact supports localized external drafts and restored asynchronous
+  AfricMade Inbox submission under [FE-075]/[BE-062], with business-local saved
+  lists. [FE-066]/[BE-055] retirement is historical. The S189 live unsent composer
+  review does not establish successful hosted submission or owner handling.
 - Staff business authority is administrator-controlled [FE-072]/[BE-060]; owner
   consent/assignment does not restore revoked authority. Owner account-security
   changes use [FE-073]/[BE-061]/[DEP-050] and remain independently gated.
 - Shipment tracking is independent of conversation IDs, with recipient email
   verification and multiple editable shipments: [FE-069]/[BE-058]/[DEP-048].
   Provider links/codes are organized per leg; no scan integration/date promise.
-- Current identity is MirtPage with en/am/om enabled. [FE-070]/[BE-059]/[DEP-049]
-  override obsolete brand/domain/package/copy readings without renaming stable
-  keys or tenant identity. Former `CURRENT` dates are historical.
+- Current source identity is AfricMade with en/am/om enabled.
+  [FE-070]/[BE-059]/[DEP-049] override obsolete brand/domain/package/copy readings
+  while preserving versioned compatibility. Current main `120f480` is published
+  through the Git pipeline; the local S189 source patch still needs integration.
+  Former `CURRENT` dates are historical.
 
 ## Cross-layer requirements and implementation
 

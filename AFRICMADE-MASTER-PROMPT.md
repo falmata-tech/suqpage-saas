@@ -827,6 +827,13 @@ incident/recovery contract is satisfied. No automatic restore, retry or guessed
 credential replacement follows a timeout. Repository guards do not sandbox an
 administrator shell or provider permissions.
 
+Ordinary web delivery uses the existing Netlify GitHub connection to protected
+main under DEP-052. Successful main builds publish automatically; branch and PR
+previews remain disabled until their backend is isolated. Database/Auth/SMTP and
+Android operations retain separate guarded qualification. BE-065's metadata-only
+security correction preserves customer rows and runtime server access; migration 81
+source readiness accepts exact compatible 80/81 histories during rollout.
+
 Web and native release inputs, archives, runtime targets and artifact identity must
 match their admitted evidence. DEP-044/DEP-049 control build-tool exceptions,
 signing, privacy, binary inspection, physical/device and Play stages. Web audit or
@@ -1024,6 +1031,9 @@ Project skills route browser, release, engineering and
 [GitHub integration work](docs/operations/GITHUB-WORKFLOW.md) without replacing
 the contract or adding provider authority. For a product change, read the nearby
 specs through [the traceability map](specs/TRACEABILITY.md) rather than every spec.
+AGENTS.md carries the owner's standing authorization to finish routine scoped
+development, qualified GitHub integration and normal web delivery without repeated
+approval prompts; separately guarded consequential operations retain their controls.
 
 ### 24.1 Keep this product contract synchronized
 

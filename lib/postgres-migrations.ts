@@ -1253,6 +1253,33 @@ export async function migratePostgresDatabase(
       if(Number(checked.rows[0]?.total)!==0)throw new Error('Migration 80 inferred an order size for existing products.');
       await runner.query('INSERT INTO schema_migrations(version) VALUES(80)');applied.push(80);
     }
+    const migration81=await runner.query('SELECT version FROM schema_migrations WHERE version=81');
+    if(!migration81.rows.length){
+      if(!(await runner.query('SELECT version FROM schema_migrations WHERE version=80')).rows.length)throw new Error('Migration 81 requires schema 80.');
+      const triggers=[
+        'deny_public_request_attachment','deny_attached_request_becoming_public',
+        'enforce_category_collection_business','enforce_product_collection_business',
+        'enforce_product_category_business','enforce_inquiry_item_business',
+        'enforce_delivery_inquiry_business','enforce_submitted_revision_immutable',
+        'enforce_support_visitor_contact',
+      ];
+      const routines=await runner.query<{proname:string;prosecdef:boolean;is_trigger:boolean}>(
+        `SELECT proname,prosecdef,prorettype='pg_catalog.trigger'::regtype is_trigger FROM pg_proc
+          WHERE pronamespace=current_schema()::regnamespace AND pronargs=0 AND proname=ANY(?::text[])`,[triggers],
+      );
+      if(routines.rows.length!==triggers.length||routines.rows.some(row=>row.prosecdef||!row.is_trigger)){
+        throw new Error('Migration 81 requires the reviewed nine invoker trigger functions.');
+      }
+      for(const name of triggers)await runner.query(`ALTER FUNCTION ${quotedSchema(schema)}.${quotedRole(name)}() SET search_path = ''`);
+      await runner.query(`REVOKE ALL ON ALL TABLES IN SCHEMA ${quotedSchema(schema)} FROM PUBLIC`);
+      await runner.query(`REVOKE ALL ON ALL SEQUENCES IN SCHEMA ${quotedSchema(schema)} FROM PUBLIC`);
+      for(const role of ['anon','authenticated']){
+        if(!(await runner.query('SELECT 1 FROM pg_roles WHERE rolname=?',[role])).rows.length)continue;
+        await runner.query(`REVOKE ALL ON ALL TABLES IN SCHEMA ${quotedSchema(schema)} FROM ${quotedRole(role)}`);
+        await runner.query(`REVOKE ALL ON ALL SEQUENCES IN SCHEMA ${quotedSchema(schema)} FROM ${quotedRole(role)}`);
+      }
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(81)');applied.push(81);
+    }
     return { applied };
   });
 }
