@@ -12,17 +12,21 @@ run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md)
 
 | Spec | Implementation | Current evidence |
 | --- | --- | --- |
-| FE-078 | Public web/native shells and About; saved inquiry docks; retired native route; dashboard renderer | Public-shell/deep-link/inquiry component tests pass. Connected Chrome cannot reach workspace localhost; host blocks local Chromium sockets. Isolated CI browser review and production readback remain pending. |
+| FE-078 | Public web/native shells and About; saved inquiry docks; retired native route; dashboard renderer | Public-shell/deep-link/inquiry component tests pass. The isolated CI browser component regressions pass after retiring launcher expectations and correcting moved-renderer selectors. Current-head provider-backed journeys, captures, merge and production readback are tracked in [PR #59](https://github.com/falmata-tech/suqpage-saas/pull/59). |
 | BE-066 | Public support/attention adapters; domain guest guards; native router; notification enqueue/delivery | `npm run test:business-transport` passes against isolated PostgreSQL17.10: web/native410, old-token/alias denial, unchanged history, suppressed notifications, current-business workspace and foreign/stale-role denial, business callback. |
 
 Generic visitor queue/response/read/idle regressions now use the separate buying
 category; they do not restore visitor transport. Web production build, root/mobile typecheck, localization, workflow scripts and
 50 focused pure component tests pass. Full local check passes its
 first three groups then stops at unavailable provider-backed account-erasure
-fixtures. Required remote/browser gates remain pending. The optional native render-boundary
+fixtures. Required current-head gates and delivery are tracked in PR #59; do not infer
+qualification from an older run. The optional native render-boundary
 audit reports five pre-existing findings in TransportPlanView, owner-forms and
 OwnerEmailChange; none is introduced by the renderer move. No hosted data/configuration
-change or Android binary qualification is claimed.
+change or Android binary qualification is claimed. Connected Chrome cannot reach
+workspace localhost and later lost its connection. Expo8082/physical Android
+visual qualification remains separate; the moved owner renderer is otherwise
+byte-equivalent and root/mobile typechecks pass.
 
 ## S189 development and deployment readiness
 

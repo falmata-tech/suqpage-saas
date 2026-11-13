@@ -41,7 +41,7 @@ async function main(){
   const visitor=await visitorContext.newPage();
   await visitor.goto(base+'/?chat=transport');
   await expect(visitor.locator('button[data-channel=buying]')).toHaveCount(0);
-  for(const endpoint of ['/api/public-support?channel=transport','/api/attention?channel=transport','/api/mobile/transport','/api/mobile/transport/attention']){
+  for(const endpoint of ['/api/public-support?channel=transport','/api/attention?channel=transport','/api/mobile/v1/transport','/api/mobile/v1/transport/attention']){
     const denied=await visitor.request.get(base+endpoint);assert.equal(denied.status(),410);assert.equal((await denied.json()).code,'public_chat_retired');
   }
   const ownerEmail=`business-transport-${crypto.randomUUID()}@example.test`;

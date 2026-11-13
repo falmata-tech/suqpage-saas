@@ -67,8 +67,11 @@ Owner instruction 2026-11-13; clean baseline main `5557d5e` (PR #58).
 - [x] 1. Inspect web/native/domain/attention paths; define specs and affected master sections.
 - [x] 2. remove public entry/composer paths; deny guest transport and old tokens;
   preserve authenticated business workspace, staff history, inquiry lists and tracking.
-- [ ] 3. CURRENT: Focused UI/API/PostgreSQL regression; actual Chrome1440/390 and Expo8082
-  journeys and source-bound visual decision before full gates.
+- [x] 3. Focused UI/API/PostgreSQL regression, production build, localization and
+  root/mobile typechecks. CI browser component regressions pass; exact source
+  results and captured provider-backed journeys are reviewed in PR #59.
+- [ ] Separate visual qualification: full Expo8082/physical Android remains
+  unavailable in this workspace; do not claim it from component/browser fixtures.
 Connected Chrome cannot reach workspace localhost (connection refused); local
 Chromium is blocked by the host socket policy. Pure component and isolated SQL
 checks run locally; real browser/UI qualification runs in isolated CI before
@@ -76,8 +79,12 @@ merge, with the public production browser review after delivery. This is an
 access-removal security change; no preview routing or provider credentials are
 widened to bypass the environment boundary. Visual status remains pending.
 
-- [ ] 4. Full applicable gates, traceability/master reconciliation and task-scoped commit.
-- [ ] 5. PR, required reviews/checks, protected merge and automatic Netlify readback.
+4. Full gates and current-head reviews: [PR #59](https://github.com/falmata-tech/suqpage-saas/pull/59)
+   owns the live check state and source-bound browser decision. Initial failures
+   were test-harness expectations/selectors; no check was skipped or weakened.
+5. The same PR owns protected integration and automatic Netlify delivery
+   readback. Consult its current result before resuming delivery; this board
+   does not duplicate an inevitably stale queued/running/merged deployment flag.
 
 Standing authorization applies. No migration, Auth, credential or destructive
 change is needed. S189 is integrated in PR #58; earlier pending source labels
