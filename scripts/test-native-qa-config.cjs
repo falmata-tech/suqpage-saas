@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const ts = require('typescript');
+const {spawnSync}=require('node:child_process');
 const {nativeQaConfig} = require('../apps/mobile/native-qa-config.cjs');
 const good = {AFRICMADE_NATIVE_QA:'1', AFRICMADE_MOBILE_BUILD_PROFILE:'development',
   EXPO_PUBLIC_API_ORIGIN:'http://10.0.2.2:3000', EXPO_PUBLIC_NATIVE_MAP_FIXTURE:'1'};
@@ -40,3 +41,4 @@ assert.equal(verifyNativeQaArtifact(artifact,key,digest).source,artifact.source)
 for(const changed of [{...artifact,key:'foreign'},{...artifact,sha256:'0'.repeat(64)},{...artifact,source:'unknown'},null])
  assert.throws(()=>verifyNativeQaArtifact(changed,key,digest));
 console.log('PASS native QA configuration: distinct identity, local-only target, no hosted/Auth/Firebase inputs.');
+assert.equal(spawnSync('python3',['scripts/test-native-qa-ui.py'],{stdio:'inherit'}).status,0);

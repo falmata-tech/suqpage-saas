@@ -28,7 +28,14 @@ The corrected harness uses that default and verifies its real API before costly
 compilation. Exact native-input/debug-package/digest caching is being qualified to
 avoid recompilation for JavaScript/UI-harness-only iterations. Source/JS identities
 remain separate. The five quality jobs for the initial source passed; emulator
-UI/screenshot/persistence and corrected-head gates remain pending.
+UI/screenshot/persistence and corrected-head gates remain pending. Corrected run
+43522909389 passes API preflight in34s, all five quality jobs, debug APK admission
+and cache save/recheck; its app is installed/launched. The next driver observation
+fails while the real development app is still bundling (16% in its screenshot),
+not on an app assertion or fatal crash. The driver now treats a missing hierarchy
+during a busy launch as bounded non-readiness, clears old dumps and preserves its
+existing deadline. Actual-function controlled-port tests cover retry, permanent
+failure and disconnected-device propagation; the next native run remains required.
 DEP-044 signed-release inputs and
 Auth/push/physical-device qualification remain separate; S194 demo simulation and
 deferred S192 Google verification are preserved in the checklist.

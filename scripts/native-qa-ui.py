@@ -29,9 +29,22 @@ def adb(*args, **kwargs):
     return run(['adb', '-s', os.environ.get('ANDROID_SERIAL', 'emulator-5554'), *args], **kwargs)
 
 
+class UiHierarchyNotReady(RuntimeError):
+    pass
+
+
 def tree():
-    adb('shell', 'uiautomator', 'dump', '/sdcard/africmade-qa.xml', timeout=20)
-    source = adb('shell', 'cat', '/sdcard/africmade-qa.xml')
+    try:
+        # A busy launch/bundle can return success without writing a hierarchy.
+        # Clear our previous dump so it can never masquerade as current state.
+        adb('shell', 'rm', '-f', '/sdcard/africmade-qa.xml')
+        adb('shell', 'uiautomator', 'dump', '/sdcard/africmade-qa.xml', timeout=20)
+        source = adb('shell', 'cat', '/sdcard/africmade-qa.xml')
+    except subprocess.CalledProcessError as error:
+        detail = (error.stdout or '') + (error.stderr or '')
+        if 'No such file' in detail or 'idle state' in detail:
+            raise UiHierarchyNotReady('Android is still preparing its current UI hierarchy') from error
+        raise
     (ROOT / 'current.xml').write_text(source)
     return ET.fromstring(source)
 
@@ -45,7 +58,11 @@ def find(label, timeout=40, scroll=False):
     deadline = time.monotonic() + timeout
     swipes = 0
     while time.monotonic() < deadline:
-        nodes = tree()
+        try:
+            nodes = tree()
+        except UiHierarchyNotReady:
+            time.sleep(1)
+            continue
         matches = [n for n in nodes.iter('node') if label in (n.get('text'), n.get('content-desc'))
                    and n.get('enabled') == 'true' and bounds(n)[2] > bounds(n)[0]]
         if matches:
