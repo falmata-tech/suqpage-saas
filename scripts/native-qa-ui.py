@@ -64,7 +64,7 @@ def find(label, timeout=40, scroll=False, widget=None):
             time.sleep(1)
             continue
         matches = [n for n in nodes.iter('node') if label in (n.get('text'), n.get('content-desc'))
-                   and n.get('enabled') == 'true' and bounds(n)[2] > bounds(n)[0]
+                   and n.get('enabled') == 'true' and bounds(n)[2] > bounds(n)[0] and bounds(n)[3] - bounds(n)[1] > 1
                    and (widget is None or n.get('class') == widget)]
         if matches:
             matches.sort(key=lambda n: n.get('clickable') != 'true')
@@ -84,8 +84,17 @@ def tap(label, **kwargs):
     adb('shell', 'input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2))
 
 
+def dismiss_keyboard():
+    # A swipe through the IME types suggestions instead of scrolling the form.
+    # Send Back only when Android reports a visible keyboard, not unconditionally.
+    state = adb('shell', 'dumpsys', 'input_method')
+    if re.search(r'\bmInputShown=true\b', state):
+        adb('shell', 'input', 'keyevent', '4')
+
+
 def type_into(label, text):
-    tap(label, scroll=True)
+    dismiss_keyboard()
+    tap(label, scroll=True, widget='android.widget.EditText')
     # Synthetic ASCII fixture values only; quote for the Android shell as well.
     if not re.fullmatch(r'[A-Za-z0-9 +.-]+', text):
         raise AssertionError('Unsupported fixture input')

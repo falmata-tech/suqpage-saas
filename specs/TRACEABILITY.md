@@ -52,6 +52,16 @@ that input instead of the product Button. The driver now selects the observed
 button class for product actions, with an actual-function regression for the
 ambiguous label. Inquiry persistence and the v2 cache-hit run remain pending.
 Artifact14086097451 SHA256 `703e06a46ac973fda14e703e757b544a218c7f430680571aadb121abafbad124`.
+Run43528344909 (`65fde1e`, tree `e199230`) proves an exact v2 cache hit
+survives generation and APK admission, avoiding the ten-minute compile. The real
+native journey passes product navigation, native Back/search retention and adding
+an item. Inspected product/added screenshots have readable identity, price,
+availability and actions. It stops before submission: a one-pixel clipped name
+label is mistaken for an input, leaving the quantity focused; subsequent swipes
+cross the keyboard. The driver now targets EditText, rejects clipped nodes and
+hides only an Android-observed IME before scrolling to another input. Actual-function
+tests cover these selectors and conditional Back. Submission remains pending.
+Artifact14085944291 SHA256 `5ca949afd4036f981a3753f97c264115f2ed706fc64251cd483b404e20f50e3a`.
 DEP-044 signed-release inputs and
 Auth/push/physical-device qualification remain separate; S194 demo simulation and
 deferred S192 Google verification are preserved in the checklist.

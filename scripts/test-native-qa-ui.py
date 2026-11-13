@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 
 source = ast.parse(Path('scripts/native-qa-ui.py').read_text())
 selected = [n for n in source.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))
-            and n.name in {'UiHierarchyNotReady', 'tree', 'bounds', 'find'}]
+            and n.name in {'UiHierarchyNotReady', 'tree', 'bounds', 'find', 'dismiss_keyboard'}]
 code = compile(ast.Module(body=selected, type_ignores=[]), 'actual-native-driver', 'exec')
 xml = '<hierarchy><node text="Business locations" enabled="true" clickable="true" bounds="[0,0][100,40]"/></hierarchy>'
 
@@ -65,3 +65,20 @@ with tempfile.TemporaryDirectory() as root:
     _, find = fixture(root, busy=0)
     assert find('Product', widget='android.widget.Button').get('content-desc') == 'Product'
 print('PASS native product action is distinct from identically named search input.')
+
+with tempfile.TemporaryDirectory() as root:
+    xml = '<hierarchy><node text="Your name" class="android.widget.TextView" enabled="true" bounds="[0,99][100,100]"/><node content-desc="Your name" class="android.widget.EditText" enabled="true" bounds="[0,50][100,98]"/></hierarchy>'
+    _, find = fixture(root, busy=0)
+    assert find('Your name', widget='android.widget.EditText').get('class') == 'android.widget.EditText'
+for shown in [False, True]:
+    calls = []
+
+    def ime_adb(*args):
+        calls.append(args)
+        return 'mInputShown=' + str(shown).lower()
+
+    scope = {'adb': ime_adb, 're': re}
+    exec(code, scope)
+    scope['dismiss_keyboard']()
+    assert len(calls) == (2 if shown else 1)
+print('PASS native inputs exclude clipped labels and hide only an observed keyboard before form scrolling.')
