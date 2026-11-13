@@ -1,3 +1,5 @@
+import {publicContactIsPhone} from './public-contact-device';
+
 /** Browser clipboard adapter: a denied or false legacy copy is never success. */
 function legacyCopy(value: string) {
   let area: HTMLTextAreaElement | null = null;
@@ -29,11 +31,12 @@ export async function copyBrowserText(value: string) {
 
 /** Copy during a contact tap, then open its destination; never send a message. */
 export async function openCopiedBrowserLink(message: string, href: string, external = true): Promise<{copied:boolean;opened:boolean}> {
+  const newTab = external && !publicContactIsPhone('web', navigator.userAgent);
   let tab: Window | null = null;
-  if (external) try { tab = window.open("about:blank", "_blank"); if (tab) tab.opener = null; } catch { /* Return the visible fallback. */ }
+  if (newTab) try { tab = window.open("about:blank", "_blank"); if (tab) tab.opener = null; } catch { /* Return the visible fallback. */ }
   const copied = await copyBrowserText(message);
   try {
-    if (external) {
+    if (newTab) {
       if (!tab || tab.closed) throw Error("popup");
       tab.location.href = href;
     } else window.location.assign(href);

@@ -10,6 +10,17 @@ change_level: L4
 
 # DEP-045 — Discovery and demo safety
 
+## S193 — current demo destination verification
+
+The owner reconfirms `+19528552202` for demo WhatsApp/Telegram contacts. A fresh
+read-only check of production project `sjeiiqxgscuqajpgddcc` finds 65 marked demos,
+six non-demo businesses and 64 published demos. Every marked demo's canonical,
+draft and latest publication messaging fields already match the owned number.
+No data correction is required by that check; do not replay old correction plans
+or touch real-business contacts. Verify effective public web/native projection
+and per-method approval before declaring the live contact paths ready. FE-066
+owns the separately tested mobile blank-popup correction.
+
 ## S151 — live demo contact rollout gap (inventory; apply not approved)
 
 The batch audit independently verified the MirtPage site/project and schema 77.
