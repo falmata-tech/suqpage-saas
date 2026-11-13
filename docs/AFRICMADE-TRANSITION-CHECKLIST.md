@@ -61,6 +61,46 @@ store screenshots and Play qualification remain separate unfinished work.
 
 ## Ordered work
 
+### S194 — recurring demo marketplace simulator
+
+Owner instruction 2026-11-13: operate a dedicated recurring demo service and
+verify storage, public refresh and rendered changes after production deployment.
+Use explicitly enrolled, marked demo tenants; real signups/accounts must never
+be eligible. Google verification/mailbox S192 stays deferred by owner instruction.
+
+1. [ ] Inventory supported business/product fields, current write/publication/
+   refresh contracts and existing worker hosting; specify the simulated data
+   matrix and cadence before implementation.
+2. [ ] Implement a bounded, idempotent scheduler with demo-only registration,
+   current-flag/identity checks, concurrency control, pause/kill switch and safe
+   run evidence; preserve contacts, identity/Auth, customers and notifications.
+3. [ ] Prove non-demo/new-signup exclusion, ownership/flag drift refusal, mixed
+   data preservation, failures/replay and normal database-to-public-read paths.
+4. [ ] Qualify browser update journeys, required CI, exact hosted migration/data
+   plan and production deployment; enable only the reviewed enrolled demos and
+   independently verify scheduled runs and real-account preservation.
+
+Current step: 1. Prefer the existing scheduled-function infrastructure if its
+bounded execution contract fits; no new paid VM or background mutation exists yet.
+
+### S195 — native Android emulator development testing
+
+Owner instruction 2026-11-13: test the actual mobile application on an Android
+instance while developing, inspect its UI and compare web/native capabilities.
+
+1. [ ] Verify local acceleration/tooling, existing native build prerequisites
+   and managed-runner capabilities/costs. Keep public web preview distinct from
+   a native emulator, real-device and notification-delivery evidence.
+2. [ ] Specify an isolated QA build/data target and reproducible emulator/UI
+   workflow with screenshots, errors, interactions and web/native parity cases.
+   Preserve production signing, Auth, customers and release-artifact admission.
+3. [ ] Boot an emulator, run actual app workflows, inspect evidence and fix
+   demonstrated native gaps; wire repeatable checks into development/CI.
+
+Current step: 1. This execution VM exposes no `/dev/kvm` and has no Android SDK/
+ADB installed. Managed Android runner and interactive-device options are under
+review. Willingness to pay is not a spending limit or a paid subscription.
+
 ### S192 — AfricMade support mailbox (ADR-0031 / DEP-029)
 
 Owner instruction 2026-11-13: use `africmade.support@gmail.com` for all platform

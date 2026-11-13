@@ -278,11 +278,9 @@ test('FE-066 actual phone browser copies and navigates to messaging without crea
     try{
      const events:string[]=[];
      await context.exposeBinding('recordFixtureCopy',()=>{events.push('copy');});
-     await context.addInitScript(()=>{
-      Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{
-       await (window as unknown as {recordFixtureCopy:()=>Promise<void>}).recordFixtureCopy();
-      }}});
-     });
+     // A plain browser script avoids TS/esbuild function-name helpers leaking
+     // into Playwright's serialized function and preventing fixture setup.
+     await context.addInitScript("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async function(){await window.recordFixtureCopy();}}});");
      const bundle=await build({stdin:{loader:'js',resolveDir:process.cwd(),contents:`
       import {openCopiedBrowserLink} from './lib/browser-clipboard';
       document.querySelector('button').addEventListener('click',async()=>{await openCopiedBrowserLink('Hello & thanks',${JSON.stringify(destination)});});

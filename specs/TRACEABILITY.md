@@ -23,6 +23,10 @@ Local browser execution is unqualified: the pinned browser download was
 truncated, and one installed-Chromium retry stopped on the host's prohibited
 socket creation. Current-head CI browser review remains required before merge;
 these infrastructure stops are not passing browser or physical-phone evidence.
+Initial PR #61 CI passed the other browser/component cases but the new handoff
+fixture did not install its clipboard port: a serialized TypeScript function
+depended on an unavailable helper. The fixture now installs a plain browser
+script, preserving the copy-order and one-tab assertions; fresh CI is required.
 
 DEP-045 readback verifies the exact healthy AfricMade project, 65 marked demos,
 six non-demo businesses, zero canonical/draft/current-publication messaging
