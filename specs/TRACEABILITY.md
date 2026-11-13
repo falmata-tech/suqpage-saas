@@ -17,6 +17,9 @@ the existing Unicode/repeated-malformed-input/UUID checks still pass. A clean
 locked install, `test:mobile:build`, mobile typecheck and the public-script
 static gate pass. Dependency changes are limited to the decoder pin; no SDK
 upgrade or product UI change is introduced.
+The same adversarial payload times out against isolated decoder 0.5.0 and passes
+with 0.5.1. The existing full-install browser CI job now enforces the compatibility
+check before browser setup; the offline workflow contract requires that order.
 
 The full local `npm run check` passes its prechecks and stops at the first
 PostgreSQL fixture because this session has no fixture database URL. This is an

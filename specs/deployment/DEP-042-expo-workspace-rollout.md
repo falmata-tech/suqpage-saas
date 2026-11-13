@@ -145,6 +145,8 @@ S191 closes the subsequent GHSA-qr28-fpjm-wq7f decoder issue without changing
 Expo SDK or query-string versions. GIVEN many distinct malformed percent-encoded
 runs WHEN query-string decodes the input THEN the isolated compatibility test
 finishes within its three-second bound, alongside Unicode round-trip checks.
+The existing browser CI job runs this dependency compatibility check after its
+clean full-workspace install; the offline workflow contract requires the step.
 This decoder patch does not waive the remaining native build-tool advisories or
 admit an Android binary with missing release inputs.
 

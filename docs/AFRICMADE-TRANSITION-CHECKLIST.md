@@ -74,7 +74,8 @@ targets. This is build/delivery work; no new product behavior or Play submission
    the exact provider projects; recover the canonical v3 APK for comparison.
    Keep private material in ignored protected paths. Never substitute a new key.
 3. [ ] Patch the newly reported URL-decoder denial of service with the reviewed
-   0.5.1 patch under DEP-042 and add a bounded distinct-run regression. Freeze
+   0.5.1 patch under DEP-042 and enforce its bounded distinct-run regression in
+   the existing full-install browser CI job. Freeze
    source/lock/tools, run native configuration and export checks,
    inspect the current locked dependency audit, and record exact build inputs.
    Resolve current findings against the owner's current build instruction;
