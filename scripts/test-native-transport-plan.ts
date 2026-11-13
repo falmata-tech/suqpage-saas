@@ -60,7 +60,7 @@ test('FE-069 native legacy plan route drops all capability input without making 
 });
 
 test('FE-069 native participant exposes independent Tracking and ignores legacy plan authority',async()=>{
- const h=await harness('buying');h.render({owner:true});await settle();let tree=h.render({owner:true});h.fixture.focus!();await settle();tree=h.render({owner:true});
+ const h=await harness('BusinessTransportWorkspace');h.render({owner:true});await settle();let tree=h.render({owner:true});h.fixture.focus!();await settle();tree=h.render({owner:true});
  assert.ok(getButton(tree,'Back to account'));assert.ok(getButton(tree,'Chat history'));assert.ok(getButton(tree,'Shipment records'));assert.equal(tree.filter(node=>node.type==='ChatReadTranscript').length,1);
  assert.equal(tree.filter(node=>String(node.props.testID||'').startsWith('transport-plan-leg-')).length,0);assert.ok(!tree.some(node=>node.type==='Button'&&node.props.label==='View shipment record'),'Legacy DTO data never opens a publication bypass');
  press(getButton(tree,'Shipment records'));assert.deepEqual(h.fixture.navigation,['/tracking']);assert.equal(h.fixture.ownerCalls.filter(call=>call.body).length,0);assert.equal(h.fixture.requests.length,0);

@@ -39,7 +39,7 @@ const press=(node:Element)=>(node.props.onPress as()=>void)();
 const change=(node:Element,value:string)=>(node.props.onChangeText as(value:string)=>void)(value);
 function commandBody(value:unknown):Record<string,unknown>{assert.ok(value&&typeof value==='object'&&!Array.isArray(value),'A command must be an object');return value as Record<string,unknown>;}
 async function settle(){await new Promise<void>(resolve=>setImmediate(resolve));}
-async function screen(entry='buying'){
+async function screen(entry='BusinessTransportWorkspace'){
  const fixture={states:[] as unknown[],cursor:0,effectCursor:0,effects:[] as Effect[],pending:[] as Array<()=>void>,updates:0,keys:0,session:{user:{id:'owner-A'}} as {user:{id:string}}|null,focus:undefined as (()=>(()=>void)|undefined)|undefined,routes:[] as unknown[],calls:[] as Array<{path:string;body?:unknown}>,responses:[] as Array<Promise<unknown>>,ownerRequest:undefined as unknown as(path:string,body?:unknown)=>Promise<unknown>,loaders:[] as Array<()=>Promise<unknown>>,history:{data:null as unknown,error:'',loading:false,reload(){}}};
  fixture.ownerRequest=(path,body)=>{fixture.calls.push({path,body});const result=fixture.responses.shift();if(!result)throw Error('Unexpected owner request '+path);return result;};
  const output=(await bundle).outputFiles.find(file=>file.path.endsWith('/'+entry+'.js'))!,module={exports:{} as Record<string,(props:Record<string,unknown>)=>Element>};
