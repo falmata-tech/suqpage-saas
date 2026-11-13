@@ -83,23 +83,24 @@ be eligible. Google verification/mailbox S192 stays deferred by owner instructio
 Current step: 1. Prefer the existing scheduled-function infrastructure if its
 bounded execution contract fits; no new paid VM or background mutation exists yet.
 
-### S195 — native Android emulator development testing
+### S195 — native Android emulator development testing (DEP-053 / ADR-0033)
 
 Owner instruction 2026-11-13: test the actual mobile application on an Android
 instance while developing, inspect its UI and compare web/native capabilities.
 
-1. [ ] Verify local acceleration/tooling, existing native build prerequisites
+1. [x] Verify local acceleration/tooling, existing native build prerequisites
    and managed-runner capabilities/costs. Keep public web preview distinct from
    a native emulator, real-device and notification-delivery evidence.
-2. [ ] Specify an isolated QA build/data target and reproducible emulator/UI
+2. [x] Specify an isolated QA build/data target and reproducible emulator/UI
    workflow with screenshots, errors, interactions and web/native parity cases.
    Preserve production signing, Auth, customers and release-artifact admission.
 3. [ ] Boot an emulator, run actual app workflows, inspect evidence and fix
    demonstrated native gaps; wire repeatable checks into development/CI.
 
-Current step: 1. This execution VM exposes no `/dev/kvm` and has no Android SDK/
-ADB installed. Managed Android runner and interactive-device options are under
-review. Willingness to pay is not a spending limit or a paid subscription.
+Current step: 3. The workspace has no `/dev/kvm`/SDK. Use an accelerated standard
+GitHub Linux runner (public repo; no new subscription), separately packaged debug
+app, disposable local PostgreSQL/API, synthetic map and native ADB UI evidence.
+DEP-044 production signing/Firebase/prior-artifact admission remains unchanged.
 
 ### S192 — AfricMade support mailbox (ADR-0031 / DEP-029)
 

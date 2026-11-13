@@ -1007,6 +1007,12 @@ provider fixtures, Expo browser tests and OS focus emulation retain their limits
 Real Android keyboard/accessibility/push and Play delivery/enrollment need actual
 independent evidence and current device availability/authorization.
 
+DEP-053 defines an isolated native Android QA workflow; its first emulator
+qualification is in progress. It uses a separately packaged development app,
+disposable local API/PostgreSQL data, synthetic map and actual Android controls/
+screenshots. This test path never admits production signing, Auth/push or Play
+release and does not substitute for physical-device evidence.
+
 Status updates distinguish implemented, tested, visually approved, committed,
 pushed, merged and deployed. Store sanitized outcome summaries in specs/traceability;
 protected logs/data/screenshots belong only in authorized ignored task evidence.

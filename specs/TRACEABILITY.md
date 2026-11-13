@@ -8,6 +8,23 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S195 native Android QA (qualification in progress)
+
+DEP-053 / ADR-0033 map the actual Android workflow to
+`.github/workflows/native-android.yml`, the isolated `native-qa-config.cjs`,
+`scripts/test-native-qa-config.cjs` and the `scripts/native-qa-*` backend/UI/
+persistence adapters. Initial QA identity/negative checks, exact static binding
+checks and root/mobile types pass. The generic script selector excludes app
+companions; its first refusal was followed by the existing in-memory checker on
+the two exact public files. A missing JSON-module diagnostic was corrected by
+reading the actual public JSON fixture explicitly, then static checks pass.
+These are configuration/harness results, not emulator or release evidence.
+
+The first accelerated Android build/UI run, screenshot review, persistence check
+and required current-head CI remain pending. DEP-044 signed-release inputs and
+Auth/push/physical-device qualification remain separate; S194 demo simulation and
+deferred S192 Google verification are preserved in the checklist.
+
 ## S193 phone messaging handoff and demo destinations
 
 FE-066 uses the existing phone-device policy in the browser clipboard adapter.
