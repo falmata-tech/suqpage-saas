@@ -10,6 +10,21 @@ change_level: L2
 
 # FE-066 — External business contact; no Suqpage inbox
 
+## S193 — phone web messaging without blank popups
+
+GIVEN an Android-phone or iPhone web contact action WHEN the inquiry draft is
+copied or copying is denied THEN navigate the current tab to the validated
+prefilled HTTPS WhatsApp/Telegram destination without opening `about:blank`.
+Copying still precedes navigation; denial keeps the prepared draft available.
+GIVEN a navigation exception THEN report an unopened destination and retain the
+existing visible fallback. Desktop popup handling and SMS navigation remain
+compatible. No message is submitted to a destination service.
+
+The owner's demo-only destination remains `+19528552202` under DEP-045. This
+handoff correction never replaces a real business's configured destination.
+Tests: `scripts/test-browser-clipboard.ts`, existing inquiry-component and
+demo-policy regressions, then the affected actual browser journey and CI gates.
+
 ## S154 planned replacement — FE-075 / BE-062
 
 The owner now restores on-platform inquiries as the primary asynchronous business

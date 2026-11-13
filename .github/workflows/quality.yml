@@ -65,6 +65,7 @@ jobs:
       - name: Business transport UI regression
         run: >-
           node --import tsx --test --test-concurrency=1
+          scripts/test-browser-clipboard.ts
           scripts/test-public-transport-launcher.ts
           scripts/test-mobile-public-action-dock.ts
           scripts/test-mobile-market-layout.ts

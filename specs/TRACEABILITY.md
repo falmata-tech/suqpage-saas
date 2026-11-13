@@ -8,6 +8,33 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S193 phone messaging handoff and demo destinations
+
+FE-066 uses the existing phone-device policy in the browser clipboard adapter.
+Phone web copies before same-tab HTTPS navigation; desktop popup reservation,
+SMS, copy denial and navigation-failure feedback remain covered. Five clipboard
+cases, six controlled native inquiry cases and four demo-policy cases pass.
+Root typecheck, specification validation and workflow/script gates pass. The
+required browser job now includes the clipboard cases and a real phone-context
+navigation regression using the actual helper; destination responses are
+controlled and no WhatsApp/Telegram message is sent.
+
+Local browser execution is unqualified: the pinned browser download was
+truncated, and one installed-Chromium retry stopped on the host's prohibited
+socket creation. Current-head CI browser review remains required before merge;
+these infrastructure stops are not passing browser or physical-phone evidence.
+Initial PR #61 CI passed the other browser/component cases but the new handoff
+fixture did not install its clipboard port: a serialized TypeScript function
+depended on an unavailable helper. The fixture now installs a plain browser
+script, preserving the copy-order and one-tab assertions; fresh CI is required.
+
+DEP-045 readback verifies the exact healthy AfricMade project, 65 marked demos,
+six non-demo businesses, zero canonical/draft/current-publication messaging
+mismatches and 64 published demos. All 64 public mobile API responses independently
+return the owned WhatsApp/Telegram number and approve both methods. There were
+no database/configuration writes and no external messages. Current Auth/SMTP
+credentials and S192's support-mailbox setup remain pending owner Google sign-in.
+
 ## S191 Android release preparation
 
 DEP-042 pins `decode-uri-component` 0.5.1 for GHSA-qr28-fpjm-wq7f. The existing

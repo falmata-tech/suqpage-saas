@@ -61,6 +61,90 @@ store screenshots and Play qualification remain separate unfinished work.
 
 ## Ordered work
 
+### S194 — recurring demo marketplace simulator
+
+Owner instruction 2026-11-13: operate a dedicated recurring demo service and
+verify storage, public refresh and rendered changes after production deployment.
+Use explicitly enrolled, marked demo tenants; real signups/accounts must never
+be eligible. Google verification/mailbox S192 stays deferred by owner instruction.
+
+1. [ ] Inventory supported business/product fields, current write/publication/
+   refresh contracts and existing worker hosting; specify the simulated data
+   matrix and cadence before implementation.
+2. [ ] Implement a bounded, idempotent scheduler with demo-only registration,
+   current-flag/identity checks, concurrency control, pause/kill switch and safe
+   run evidence; preserve contacts, identity/Auth, customers and notifications.
+3. [ ] Prove non-demo/new-signup exclusion, ownership/flag drift refusal, mixed
+   data preservation, failures/replay and normal database-to-public-read paths.
+4. [ ] Qualify browser update journeys, required CI, exact hosted migration/data
+   plan and production deployment; enable only the reviewed enrolled demos and
+   independently verify scheduled runs and real-account preservation.
+
+Current step: 1. Prefer the existing scheduled-function infrastructure if its
+bounded execution contract fits; no new paid VM or background mutation exists yet.
+
+### S195 — native Android emulator development testing
+
+Owner instruction 2026-11-13: test the actual mobile application on an Android
+instance while developing, inspect its UI and compare web/native capabilities.
+
+1. [ ] Verify local acceleration/tooling, existing native build prerequisites
+   and managed-runner capabilities/costs. Keep public web preview distinct from
+   a native emulator, real-device and notification-delivery evidence.
+2. [ ] Specify an isolated QA build/data target and reproducible emulator/UI
+   workflow with screenshots, errors, interactions and web/native parity cases.
+   Preserve production signing, Auth, customers and release-artifact admission.
+3. [ ] Boot an emulator, run actual app workflows, inspect evidence and fix
+   demonstrated native gaps; wire repeatable checks into development/CI.
+
+Current step: 1. This execution VM exposes no `/dev/kvm` and has no Android SDK/
+ADB installed. Managed Android runner and interactive-device options are under
+review. Willingness to pay is not a spending limit or a paid subscription.
+
+### S192 — AfricMade support mailbox (ADR-0031 / DEP-029)
+
+Owner instruction 2026-11-13: use `africmade.support@gmail.com` for all platform
+outgoing email instead of the personal mailbox. Preserve provider administrator
+login identities and customer/merchant contact addresses.
+
+- [x] Inspect the existing transactional SMTP adapter and managed Auth boundary.
+- [ ] Owner signs into the support Google account and creates app passwords in
+  the opened browser. Keep values out of chat, source, logs and mobile builds.
+- [ ] Verify exact Netlify/Supabase targets and recoverable before-states; set
+  the transactional SMTP user/secret/provider and Auth SMTP sender/user/secret.
+  Prefer separate credentials for independent revocation. No broad Auth sync.
+- [ ] Update current public support/privacy/deletion contacts and translations;
+  run focused checks, protected integration and normal Netlify delivery.
+- [ ] Verify bounded sender/authentication and a labelled support-mailbox test;
+  report provider acceptance separately from actual inbox receipt.
+
+Current dependency: Google sign-in. No credential or provider setting changed.
+
+### S193 — mobile messaging handoff and demo destinations (FE-066 / DEP-045)
+
+Owner instruction 2026-11-13: fix blank WhatsApp/Telegram navigation on mobile
+web and route only demo-business messaging contacts to `+19528552202`.
+
+1. [x] Inspect the handoff and exact demo records; retain protected before-images
+   and define acceptance before code/data changes. Never select records solely
+   by a plausible business name or overwrite real merchant contacts.
+2. [ ] Fix mobile navigation without a blank popup, preserve copy/prefilled draft
+   and visible failure recovery, and add desktop/phone regressions.
+3. [x] Verify the reviewed demo-only messaging fields and their approved-number
+   configuration. All 65 canonical/draft and 64 current published/public-API
+   contacts already match and approve the owned number; no data or setting
+   update is needed. Six non-demo businesses remain untouched. No messages sent.
+4. [ ] Exercise the affected public contact journey, pass required source gates,
+   integrate/deploy, and independently verify all demo targets and real-business
+   preservation. Expo/physical-app behavior remains separately identified.
+
+Current step: 2. Source now uses current-tab navigation on phone web; five
+clipboard edge tests and the existing pure contact/demo tests pass. Local browser
+qualification first stopped on an unavailable browser download, then the
+installed browser hit the host socket restriction. The real browser regression
+is wired into required CI, pending source-bound review before merge. Existing
+Android artifact prerequisites in S191 remain pending and are not replaced.
+
 ### S191 — finish the business-only Android update (DEP-044 / FE-078)
 
 Owner instruction: finish the mobile update after S190. Baseline main

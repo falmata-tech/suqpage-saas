@@ -328,6 +328,8 @@ validated, policy-approved WhatsApp and Telegram actions alongside AfricMade Inb
 Show the approved public contact identity on desktop with a separate Copy contact
 action; desktop uses Copy message or AfricMade Inbox and does not launch messaging
 apps. Phone/native actions may open the supported channel with the prepared draft.
+Phone web copies the draft before navigating its current tab to the validated
+HTTPS destination; it does not open a blank placeholder tab.
 SMS remains secondary. No external message is sent automatically.
 
 An AfricMade Inbox submission is an asynchronous inquiry to the selected business,

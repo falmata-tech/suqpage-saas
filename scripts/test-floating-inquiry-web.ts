@@ -268,3 +268,37 @@ test('FE-078 saved inquiry host does not render a transport launcher',{timeout:3
   assert.equal(await page.locator('button[data-channel=buying]').count(),0);
  }finally{await browser.close();}
 });
+
+test('FE-066 actual phone browser copies and navigates to messaging without creating a blank tab',{timeout:30000},async()=>{
+ const browser=await chromium.launch({headless:true});
+ try{
+  for(const userAgent of ['Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)','Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 Mobile Safari/537.36']){
+   for(const destination of ['https://wa.me/19528552202?text=Hello%20%26%20thanks','https://t.me/+19528552202?text=Hello%20%26%20thanks']){
+    const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent});
+    try{
+     const events:string[]=[];
+     await context.exposeBinding('recordFixtureCopy',()=>{events.push('copy');});
+     // A plain browser script avoids TS/esbuild function-name helpers leaking
+     // into Playwright's serialized function and preventing fixture setup.
+     await context.addInitScript("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async function(){await window.recordFixtureCopy();}}});");
+     const bundle=await build({stdin:{loader:'js',resolveDir:process.cwd(),contents:`
+      import {openCopiedBrowserLink} from './lib/browser-clipboard';
+      document.querySelector('button').addEventListener('click',async()=>{await openCopiedBrowserLink('Hello & thanks',${JSON.stringify(destination)});});
+     `},bundle:true,write:false,platform:'browser',format:'iife'});
+     await context.route('**/*',async route=>{
+      const url=route.request().url();
+      if(url==='https://contact-fixture.test/')return route.fulfill({contentType:'text/html',body:`<h1>Prepared product inquiry</h1><button>Open messaging draft</button><script>${bundle.outputFiles[0].text}</script>`});
+      if(url===destination){events.push('navigate:'+url);return route.fulfill({contentType:'text/html',body:'<h1>Destination opened (test substitute)</h1>'});}
+      return route.abort();
+     });
+     const page=await context.newPage();
+     await page.goto('https://contact-fixture.test/');
+     await Promise.all([page.waitForURL(destination),page.getByRole('button',{name:'Open messaging draft'}).click()]);
+     await page.getByRole('heading',{name:'Destination opened (test substitute)'}).waitFor();
+     assert.deepEqual(events,['copy','navigate:'+destination]);
+     assert.equal(context.pages().length,1,'Phone handoff must reuse its current tab');
+    }finally{await context.close();}
+   }
+  }
+ }finally{await browser.close();}
+});
