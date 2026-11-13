@@ -25,7 +25,7 @@ async function main() {
     const admin=await user('response-admin','platform_admin'),manager=await user('response-manager','operations_manager'),owner=await user('response-owner','client',business),foreign=await user('response-foreign','client',foreignBusiness);
     const agent=await user('response-transport','team_member',null,'transport'),helper=await user('response-support','team_member',null,'support'),other=await user('response-other','team_member',null,'transport');
     const key=()=>crypto.randomUUID();let ordinal=0;
-    const guest=(at=t)=>support.createPublicSupportConversation({category:'shipment_observation',name:'Response fixture',phone:'+447700900999',origin:'Town A',destination:'Town B',message:'Fixture goods',idempotencyKey:key()},`response-${++ordinal}`,at);
+    const guest=(at=t)=>support.createPublicSupportConversation({category:'buying_assistance',email:'fixture-buyer@example.test',name:'Response fixture',phone:'+447700900999',origin:'Town A',destination:'Town B',message:'Fixture goods',idempotencyKey:key()},`response-${++ordinal}`,at);
     const state=(id:number)=>db.prepare('SELECT status,resolved_at,assigned_user_id,awaiting_staff_since,awaiting_staff_message_id,overdue_notified_message_id,overdue_notified_assignment_id,awaiting_participant_since,staff_joined_assignment_id FROM support_conversations WHERE id=?').get(id);
     const inspect=(id:number)=>support.getSupportConversation(admin,id);
     async function assignee(id:number) { return (await runtimeUserById((await inspect(id)).conversation.assignedUserId!))!; }
@@ -92,7 +92,7 @@ async function main() {
     await join(c.id,t+2*target+4);await db.prepare('UPDATE support_agent_settings SET enabled=0 WHERE user_id=?').run(replacement.id);
     await reply(c.id,t+2*target+5); // Pausing new work never blocks the existing assignee.
     const afterLateReply=await support.getPublicSupportConversation(c.token,t+2*target+6);
-    assert.equal(afterLateReply.firstStaffReplyAt,t+target+1,'The first timely public reply remains authoritative after reassignment and a later reply');
+    assert.equal(afterLateReply.firstStaffReplyAt,null,'Buying help has no transport wait/callback clock');
     assert.ok(afterLateReply.messages.length>0,'The active transcript remains visible after a later reply');
     const pausedMsg=await support.postPublicSupportMessage(c.token,{message:'Current paused agent still owns this request',idempotencyKey:key()},'response-paused',t+2*target+6);
     assert.equal((await support.sweepSupportReplyOverdue(t+3*target+6)).notified,1);

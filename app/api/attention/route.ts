@@ -8,6 +8,7 @@ import { SupportError } from '@/lib/support';
 function json(value: unknown, status = 200) { return NextResponse.json(value,{status,headers:{'Cache-Control':'private, no-store'}}); }
 async function scope(request:NextRequest) {
   const channel=request.nextUrl.searchParams.get('channel');
+  if(channel==='transport')throw new SupportError('Transport chat is available from your business dashboard.','public_chat_retired');
   if(channel!==null){
     if(!['transport','buying'].includes(channel))throw new AttentionError('This chat is unavailable.');
     const session=await publicSupportSession(request.cookies,channel);
@@ -16,12 +17,13 @@ async function scope(request:NextRequest) {
   const user=await apiUser();if(!user)throw new AttentionError('Sign in to continue.','unauthorized');return {user,token:''};
 }
 function error(error:unknown) {
-  if(error instanceof AttentionError || error instanceof SupportError)return json({error:error.message,code:error.code},error.code==='unauthorized'?401:error.code==='not_found'?404:error.code==='forbidden'?403:400);
+  if(error instanceof AttentionError || error instanceof SupportError)return json({error:error.message,code:error.code},error.code==='public_chat_retired'?410:error.code==='unauthorized'?401:error.code==='not_found'?404:error.code==='forbidden'?403:400);
   return json({error:'Alerts are temporarily unavailable.'},500);
 }
 export async function GET(request:NextRequest){try{const s=await scope(request);return json({...(s.user?await userAttentionFeed(s.user):await visitorAttentionFeed(s.token)),push:pushCapabilities()});}catch(e){return error(e);}}
 export async function POST(request:NextRequest){
   try{
+    if(request.nextUrl.searchParams.get('channel')==='transport')throw new SupportError('Transport chat is available from your business dashboard.','public_chat_retired');
     try{assertSameOrigin(request);}catch{return json({error:'Request could not be accepted.'},403);}
     if(request.headers.get('content-type')?.split(';')[0]!=='application/json')return json({error:'Send a JSON request.'},415);
     const reader=request.body?.getReader(),parts:Uint8Array[]=[];let length=0;

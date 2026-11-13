@@ -23,7 +23,7 @@ async function caseRow(runner: PostgresTransactionRunner, id: number): Promise<C
 }
 async function recipients(runner: PostgresTransactionRunner, c: Case, direction: 'participant'|'staff', now: number): Promise<Recipient[]> {
   if (direction === 'participant') {
-    if (c.participant_kind === 'visitor') return c.visitor_session_expires_at && c.visitor_session_expires_at >= now ? [{ key: 'visitor:'+c.id, visitorId:c.id }] : [];
+    if (c.participant_kind === 'visitor') return c.assistance_category !== 'shipment_observation' && c.visitor_session_expires_at && c.visitor_session_expires_at >= now ? [{ key: 'visitor:'+c.id, visitorId:c.id }] : [];
     const rows = await runner.query<{id:number}>("SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.business_id=? AND p.access_role='client'",[c.business_id]);
     return rows.rows.map(row=>({key:'user:'+row.id,userId:row.id}));
   }
@@ -90,7 +90,7 @@ async function actor(user: SessionUser): Promise<Actor> {
 async function visitor(token: unknown, now=Date.now()): Promise<Case> {
   if(typeof token!=='string'||!/^[A-Za-z0-9_-]{40,120}$/.test(token)) throw new AttentionError('This chat is unavailable.');
   const row=(await executor().query<Case>(`SELECT id,participant_kind,business_id,opened_by_user_id,assigned_user_id,assistance_category,status,visitor_session_expires_at FROM support_conversations
-    WHERE visitor_token_hash=? AND participant_kind='visitor' AND visitor_session_expires_at>=? AND assistance_category IN ('buying_assistance','shipment_observation')`,[hashPrivateValue('public-support:'+token),now])).rows[0];
+    WHERE visitor_token_hash=? AND participant_kind='visitor' AND visitor_session_expires_at>=? AND assistance_category='buying_assistance'`,[hashPrivateValue('public-support:'+token),now])).rows[0];
   if(!row) throw new AttentionError('This chat is unavailable.');return row;
 }
 async function preferences(key: string): Promise<AttentionPreferences> {

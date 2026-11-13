@@ -8,6 +8,22 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S190 business dashboard transport only
+
+| Spec | Implementation | Current evidence |
+| --- | --- | --- |
+| FE-078 | Public web/native shells and About; saved inquiry docks; retired native route; dashboard renderer | Public-shell/deep-link/inquiry component tests pass. Connected Chrome cannot reach workspace localhost; host blocks local Chromium sockets. Isolated CI browser review and production readback remain pending. |
+| BE-066 | Public support/attention adapters; domain guest guards; native router; notification enqueue/delivery | `npm run test:business-transport` passes against isolated PostgreSQL17.10: web/native410, old-token/alias denial, unchanged history, suppressed notifications, current-business workspace and foreign/stale-role denial, business callback. |
+
+Generic visitor queue/response/read/idle regressions now use the separate buying
+category; they do not restore visitor transport. Web production build, root/mobile typecheck, localization, workflow scripts and
+50 focused pure component tests pass. Full local check passes its
+first three groups then stops at unavailable provider-backed account-erasure
+fixtures. Required remote/browser gates remain pending. The optional native render-boundary
+audit reports five pre-existing findings in TransportPlanView, owner-forms and
+OwnerEmailChange; none is introduced by the renderer move. No hosted data/configuration
+change or Android binary qualification is claimed.
+
 ## S189 development and deployment readiness
 
 DEP-052 / ADR-0032 now govern ordinary web delivery through the existing

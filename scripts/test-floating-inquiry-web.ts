@@ -30,7 +30,7 @@ const bundled=build({stdin:{loader:'tsx',resolveDir:process.cwd(),contents:`
    f.commits.push({handle:catalog?.business.handle||null,actions:[...document.querySelectorAll('[data-inquiry-floating]')].map(el=>({tag:el.tagName,href:el.getAttribute('href'),label:el.getAttribute('aria-label'),count:el.querySelector('b')?.textContent})),dialogs:[...document.querySelectorAll('[role=dialog]')].map(el=>el.textContent)});
    if(catalog&&f.contactDuringLayout===catalog.business.handle){f.contactDuringLayout=null;document.querySelector('[data-profile-contact]')?.click();}
   },[catalog]);
-  return <PublicActionDockProvider enabled={!preview} transport={<PublicSupportChat/>}>{catalog?<ShowroomApp catalog={catalog} withinPublicApp businessProfile={{template:'profile-v1',coverStyle:'blended',about:'A real showroom description.',introduction:'',heroImage:'',videoUrl:'',contacts,accentColor}} previewMode={preview}/>:<section><h1>Public browse</h1></section>}</PublicActionDockProvider>;
+  return <PublicActionDockProvider enabled={!preview}>{catalog?<ShowroomApp catalog={catalog} withinPublicApp businessProfile={{template:'profile-v1',coverStyle:'blended',about:'A real showroom description.',introduction:'',heroImage:'',videoUrl:'',contacts,accentColor}} previewMode={preview}/>:<section><h1>Public browse</h1></section>}</PublicActionDockProvider>;
  }
  f.mountRead=(hidden,readAt)=>flushSync(()=>root.render(<div style={{display:hidden?'none':'block'}}><InquiryReadMarker inquiryId={77} businessId={1} readAt={readAt}/></div>));
  f.mount=(catalog,preview=false,contacts,accentColor)=>flushSync(()=>root.render(<Stage catalog={catalog} preview={preview} contacts={contacts} accentColor={accentColor}/>));
@@ -202,22 +202,6 @@ test('FE-041 S113 saved variants persist, prune against authority and never leak
  }finally{await browser.close();}assert.deepEqual(errors,[]);
 });
 
-test('FE-036 S113 transport opens in one action without sending and keeps the same unsent intake across showrooms',{timeout:60000},async()=>{
- const browser=await chromium.launch({timeout:20000}),errors:string[]=[];
- try{const page=await browser.newPage({userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)'});page.on('pageerror',error=>errors.push(error.message));await boot(page,a,[{productId:101,quantity:'',options:{}}]);await count(page,1);
-  const order=await page.locator('[data-public-action-dock] button').evaluateAll(buttons=>buttons.map(button=>button.textContent));assert.match(order[0]||'',/Inquiry list/);assert.ok((order[1]||'').includes(TRANSPORT_COPY.launcherTitle));assert.ok((order[1]||'').includes(TRANSPORT_COPY.launcherSubtitle));
-  await page.getByRole('button',{name:`${TRANSPORT_COPY.launcherTitle} · ${TRANSPORT_COPY.launcherSubtitle}`,exact:true}).click();const transport=page.locator('dialog[open]');await transport.getByLabel('From',{exact:true}).waitFor();await transport.getByLabel('Name',{exact:true}).fill('Unsent fixture name');await transport.getByLabel('From',{exact:true}).fill('Town A');await transport.getByLabel('To',{exact:true}).fill('Town B');
-  let ports=await noAutomaticSend(page);assert.deepEqual(ports.handoffs,[]);assert.deepEqual(ports.copied,[]);await transport.getByRole('button',{name:'Close',exact:true}).click();
-  await page.evaluate(()=>history.pushState(null,'','/tracking?reference=SHP-FIXTURE'));await transport.waitFor({state:'hidden'});
-  await page.evaluate(()=>history.pushState(null,'','/?chat=other'));await transport.waitFor({state:'hidden'});
-  await page.evaluate(()=>history.pushState(null,'','/?chat=transport'));await transport.waitFor();await transport.getByLabel('From',{exact:true}).waitFor();
-  assert.equal(await transport.getByLabel('From',{exact:true}).inputValue(),'Town A','The Tracking return opens the same unsent draft from the current route');
-  await transport.getByRole('button',{name:'Close',exact:true}).click();
-  await page.evaluate(()=>history.pushState(null,'','/@fixture-shop-a?chat=other'));await transport.waitFor({state:'hidden'});
-  await page.evaluate(catalog=>{history.pushState(null,'','/@'+catalog.business.handle);(window as unknown as{fixture:Fixture}).fixture.mount(catalog);},b);await count(page,0);assert.equal(await currentAction(page).count(),0,'Empty B does not pretend to own A selections');assert.equal(await fallback(page).count(),0);await page.getByRole('button',{name:`${TRANSPORT_COPY.launcherTitle} · ${TRANSPORT_COPY.launcherSubtitle}`,exact:true}).click();await transport.getByLabel('Name',{exact:true}).waitFor();assert.equal(await transport.getByLabel('Name',{exact:true}).inputValue(),'Unsent fixture name');assert.equal(await transport.getByLabel('From',{exact:true}).inputValue(),'Town A');assert.equal(await transport.getByLabel('To',{exact:true}).inputValue(),'Town B');ports=await noAutomaticSend(page);assert.deepEqual(ports.handoffs,[]);assert.deepEqual(ports.copied,[]);
-  await transport.getByRole('button',{name:'Close',exact:true}).click();await page.evaluate(()=>{(window as unknown as{fixture:Fixture}).fixture.receipt={publicRef:'SUP-FIXTURE-RECOVERED',status:'open',messages:[]};});await page.getByRole('button',{name:`${TRANSPORT_COPY.launcherTitle} · ${TRANSPORT_COPY.launcherSubtitle}`,exact:true}).click();await page.getByText('Recovered SUP-FIXTURE-RECOVERED',{exact:true}).waitFor();assert.equal(await transport.getByLabel('From',{exact:true}).count(),0,'Existing session recovery is opened, not silently replaced');await noAutomaticSend(page);
- }finally{await browser.close();}assert.deepEqual(errors,[]);
-});
 
 test('FE-041 S118 public navigation hides carts while each business retains its independent saved group',{timeout:60000},async()=>{
  const browser=await chromium.launch({timeout:20000}),errors:string[]=[];
@@ -232,28 +216,6 @@ test('FE-041 S118 public navigation hides carts while each business retains its 
   await composer(page).getByRole('button',{name:'Copy message',exact:true}).click();ports=await noAutomaticSend(page);assert.match(ports.copied.at(-1)||'',/Canonical current cup/);assert.ok(!ports.copied.at(-1)?.includes('Saved cup'));assert.equal(ports.handoffs.length,0);
   await page.keyboard.press('Escape');await composer(page).waitFor({state:'hidden'});await count(page,1);await floatingFocus(page);assert.equal(await currentAction(page).count(),1);assert.equal(await fallback(page).count(),0,'The current shop has one floating action and no fallback');assert.equal((await saved(page,b))[0].productId,201);
   await page.evaluate(catalog=>(window as unknown as{fixture:Fixture}).fixture.mount(catalog),{...canonical});assert.equal(await composer(page).count(),0);await noAutomaticSend(page);
- }finally{await browser.close();}assert.deepEqual(errors,[]);
-});
-
-test('FE-036 S113 transport session refresh shows loading until settlement and retry preserves the unsent draft',{timeout:60000},async()=>{
- const browser=await chromium.launch({timeout:20000}),errors:string[]=[];
- try{const page=await browser.newPage({userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)'});page.on('pageerror',error=>errors.push(error.message));await boot(page);
-  // The closed dialog already contains its intake only after prefetch succeeded.
-  await page.locator('dialog').getByLabel('From',{exact:true}).waitFor({state:'attached'});
-  await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.deferReceipt=true);
-  await page.getByRole('button',{name:`${TRANSPORT_COPY.launcherTitle} · ${TRANSPORT_COPY.launcherSubtitle}`,exact:true}).click();const transport=page.locator('dialog[open]');
-  async function pendingLoading(){
-   await page.waitForFunction(()=>(window as unknown as{fixture:Fixture}).fixture.pendingReceipts.length===1);
-   await transport.getByRole('status').waitFor();assert.equal(await transport.locator('.africmade-loading-track i').count(),1,'The real themed horizontal loading component is rendered');
-   assert.equal(await transport.getByRole('button',{name:'Retry',exact:true}).count(),0,'An outstanding authoritative GET is not a connection failure');assert.equal(await transport.getByRole('alert').count(),0);assert.equal(await transport.getByLabel('From',{exact:true}).count(),0,'Intake waits for fresh session authority');
-  }
-  await pendingLoading();await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.releaseReceipt());await transport.getByLabel('From',{exact:true}).waitFor();assert.equal(await transport.getByRole('status').count(),0);
-  await transport.getByLabel('From',{exact:true}).fill('Unsent origin');await transport.getByLabel('To',{exact:true}).fill('Unsent destination');await transport.getByLabel('Name',{exact:true}).fill('Unsent person');await transport.getByLabel('Phone',{exact:true}).fill('+447700900123');await transport.getByLabel('Goods or transport details (optional)',{exact:true}).fill('Unsent goods');
-  await transport.getByRole('button',{name:'Close',exact:true}).click();await page.getByRole('button',{name:`${TRANSPORT_COPY.launcherTitle} · ${TRANSPORT_COPY.launcherSubtitle}`,exact:true}).click();await pendingLoading();await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.releaseReceipt(false));
-  await transport.getByRole('button',{name:'Retry',exact:true}).waitFor();assert.match(await transport.getByRole('alert').textContent()||'',/temporarily unavailable/);assert.equal(await transport.getByRole('status').count(),0);assert.equal(await transport.getByLabel('Name',{exact:true}).inputValue(),'Unsent person');assert.equal(await transport.getByRole('button',{name:'Start chat',exact:true}).isDisabled(),true,'A failed session refresh cannot submit stale intake');
-  await transport.getByRole('button',{name:'Retry',exact:true}).click();await pendingLoading();await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.releaseReceipt());await transport.getByLabel('From',{exact:true}).waitFor();
-  assert.equal(await transport.getByLabel('From',{exact:true}).inputValue(),'Unsent origin');assert.equal(await transport.getByLabel('To',{exact:true}).inputValue(),'Unsent destination');assert.equal(await transport.getByLabel('Name',{exact:true}).inputValue(),'Unsent person');assert.equal(await transport.getByLabel('Phone',{exact:true}).inputValue(),'+447700900123');assert.equal(await transport.getByLabel('Goods or transport details (optional)',{exact:true}).inputValue(),'Unsent goods');assert.equal(await transport.getByRole('alert').count(),0);assert.equal(await transport.getByRole('button',{name:'Retry',exact:true}).count(),0);await transport.getByTestId('transport-provider-toggle').click();await transport.getByTestId('transport-provider-option').click();assert.equal(await transport.getByRole('button',{name:'Start chat',exact:true}).isEnabled(),true);
-  const ports=await noAutomaticSend(page);assert.equal(ports.network.filter(call=>call.url.includes('/api/public-support')).length,4,'One prefetch, two opens and one explicit retry each perform a single GET');assert.deepEqual(ports.copied,[]);assert.deepEqual(ports.handoffs,[]);
  }finally{await browser.close();}assert.deepEqual(errors,[]);
 });
 
@@ -297,5 +259,12 @@ test('FE-075 phone detail hides list tools while desktop retains the list/detail
   await page.setContent(markup(css,true));assert.equal(await page.getByRole('searchbox').isVisible(),false);assert.equal(await page.locator('.inquiry-back').isVisible(),true);assert.equal(await page.locator('.inquiry-inbox-list').isVisible(),false);
   await page.setViewportSize({width:1440,height:900});assert.equal(await page.getByRole('searchbox').isVisible(),true);assert.equal(await page.locator('.inquiry-inbox-list').isVisible(),true);
   await page.setViewportSize({width:390,height:844});await page.setContent(markup(base,true));assert.equal(await page.getByRole('searchbox').isVisible(),true,'Negative control: original CSS leaves the clutter visible');
+ }finally{await browser.close();}
+});
+
+test('FE-078 saved inquiry host does not render a transport launcher',{timeout:30000},async()=>{
+ const browser=await chromium.launch({headless:true});try{
+  const page=await browser.newPage();await boot(page);
+  assert.equal(await page.locator('button[data-channel=buying]').count(),0);
  }finally{await browser.close();}
 });

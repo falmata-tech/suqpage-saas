@@ -26,7 +26,7 @@ function privateJson(body: unknown, init: ResponseInit = {}) {
   return response;
 }
 function retiredEntry(request: NextRequest) {
-  return ["buying", "transport"].includes(request.nextUrl.searchParams.get("channel") || "") ? null : privateJson(
+  return request.nextUrl.searchParams.get("channel") === "buying" ? null : privateJson(
     {error:"Live support is available from your business dashboard.",code:"public_chat_retired"},
     {status:410,headers:{"Cache-Control":"private, no-store"}},
   );
@@ -36,7 +36,7 @@ function errorResponse(error: unknown) {
   const known = error instanceof SupportError
     ? error
     : new SupportError("Support is temporarily unavailable.", "internal");
-  const status = known.code === "rate_limited" ? 429
+  const status = known.code === "public_chat_retired" ? 410 : known.code === "rate_limited" ? 429
     : known.code === "not_found" ? 404
       : known.code === "internal" ? 500
         : 400;

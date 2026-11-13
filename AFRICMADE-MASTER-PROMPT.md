@@ -135,14 +135,14 @@ destination, and the inquiry does not become a purchase or a transport booking.
 Desktop visitors can copy the public messaging contact and prepared text; phone
 and native actions may open the configured app. SMS remains secondary.
 
-Transport is a separate conversation with a selected independent logistics
-service provider. SharedTrucks Logistics is the current freight-brokerage choice;
+Transport is a private business-dashboard conversation with a selected
+independent logistics service provider. SharedTrucks Logistics is the current freight-brokerage choice;
 its navy/blue identity appears in the provider choice and shipment records,
 while general site copy remains provider-neutral. Its stable internal ID remains
 `shared-trucks-logistics`. AfricMade staff currently operate that provider's
 queue on its behalf; provider-owned accounts and direct routing are future work.
-After a visitor starts or resumes a transport conversation, the provider profile
-links to the independent provider's website without closing the chat.
+After a business owner starts or resumes dashboard transport, the provider
+profile links to the independent provider's website without closing the chat.
 The visible live-wait countdown and callback handoff are defined in §12.
 
 Market groups map markers at city scale without changing saved locations. An
@@ -207,7 +207,7 @@ Public information pages share a grouped footer: Businesses and logistics-compan
 listing links, separate legal/account-deletion links, then Jigjiga, Somali Region,
 Ethiopia and the MarketVision Technology copyright on separate lines. Market,
 Featured, chat, business Pages and private workspaces retain their task-specific
-layouts without that footer. About keeps a small transport entry in its buyer
+layouts without that footer. About has no visitor transport entry in its buyer
 content. AfricMade remains the customer-facing product name. Market navigation
 uses a storefront symbol; the map symbol identifies Business locations.
 
@@ -501,16 +501,16 @@ Details: BE-030/BE-031/BE-038/BE-039/BE-043/BE-045/BE-047/BE-052/BE-053/BE-061.
 
 ## 12. Fulfillment boundary
 
-Customers and businesses agree purchases/payment directly. Visitors and authenticated
-business owners can share an origin and destination to arrange transport with
-SharedTrucks Logistics. A live transport agent helps with the request; AfricMade
+Customers and businesses agree purchases/payment directly. Only current authenticated
+business clients can share an origin and destination through their dashboard
+to arrange transport with SharedTrucks Logistics. A live transport agent helps with the request; AfricMade
 staff currently operate the internal queue on the provider's behalf, and
 provider-owned routing is future work. If no agent joins or replies, a visible
 countdown runs during the live wait. Staff are alerted after two minutes; after
 three minutes thirty seconds the provider-named busy state offers a short callback
 form or a way to try again later. Submitting the form leaves one
 follow-up on the existing staff case and shows a static receipt; it does not
-keep a public chat or message portal open. The visitor or owner can cancel a
+keep a public chat or message portal open. The business owner can cancel a
 timed-out request and start a separate one. Owner transport is bound to the current business;
 it does not adopt a guest browser token or merge with private owner Support.
 The first public staff reply before that cutoff keeps the case live even after
@@ -625,8 +625,10 @@ Only visible incoming-message acknowledgement establishes Read; fetching, openin
 or inspecting another assignee's case does not. Retain original author side and
 assignment epoch so later role changes cannot recast history.
 
-Customer-idle warning/end clocks start after a public staff reply: guest transport
-warns/ends at 25/30 minutes, owner Support/Transport at 23/24 hours. An unanswered
+Customer-idle warning/end clocks start after a public staff reply: owner
+Support/Transport warns/ends at 23/24 hours. Retained guest history keeps its
+original lifecycle evidence, but visitor transport cannot be started or resumed.
+An unanswered
 customer request does not start this clock. Automatic or participant End leaves
 an unresolved case with factual reason/timestamps/read-at-ending evidence; only
 an authorized staff resolution resolves it. History remains available with explicit
@@ -643,8 +645,12 @@ feedback; an inquiry alert remains informational and never grants a new permissi
 
 ### Public customer
 
-Visitors need no business account to browse, prepare external inquiries or start
-guest transport. Tracking verification creates a separate recipient session, not a
+Visitors need no business account to browse or prepare/send product inquiries.
+Transport chat is available only to current business clients through their
+dashboard on web or native. Public launchers, About transport links and the old
+native chat route are retired; old guest tokens and transport notifications do
+not grant access. Staff retain authorized historical records (FE-078/BE-066).
+Tracking verification creates a separate recipient session, not a
 business account. Public reports accept canonical targets and bounded reasons;
 listing exclusions, where offered, are browser/installation browsing preferences,
 not confidentiality or identity authority. Staff report handling requires scoped
@@ -703,7 +709,7 @@ The Android source and release policy bind to the standalone `@falmatad/africmad
 Expo project; the former Expo project remains separate. These public client and
 project bindings do not qualify a new-project FCM sending credential, a signed
 Android artifact or actual push delivery; DEP-043/DEP-044 own those gates.
-Local development uses separate owner and guest credential keys bound to the
+Local development uses separate owner and retained legacy guest credential keys bound to the
 canonical API/Auth origins; it never restores or deletes production keys as a
 fallback. Production keys remain compatible with existing installations. This
 boundary has focused regression evidence; the current physical development-client
@@ -924,8 +930,8 @@ Staff chat puts transcript/reply first with adjacent desktop management and an
 explicit phone Details/Back view that retains the reply draft. Separate reply
 priority from assignment/join/end/resolution state. Read receipts require actual
 visible/focused incoming content, not a fetch or a synthetic successful response.
-Public transport help is reachable in its supported shell; Account owners reach
-Support and Transport through their own workspace, without duplicate launchers or
+Business clients reach Support and Transport only through their own workspace,
+without duplicate launchers or
 conflicting floating cart actions. Tracking has one purposeful entry, not duplicated
 conversation-bound plan controls.
 

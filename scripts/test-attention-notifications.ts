@@ -38,7 +38,7 @@ async function main(){
   await reassignSupportConversation(admin,wait.id,null);
   assert.equal((await getSupportConversation(admin,wait.id)).conversation.status,'waiting');
   assert.equal((await userAttentionFeed(support)).items[0].kind,'waiting_chat');assert.equal((await userAttentionFeed(transport)).unread,0);
-  const visitorInput={category:'shipment_observation',origin:'Addis Ababa',destination:'Adama',name:'LOCAL QA visitor',phone:'+251911334455',idempotencyKey:crypto.randomUUID()};
+  const visitorInput={category:'buying_assistance',email:'fixture-buyer@example.test',message:'Fixture buying question',origin:'Addis Ababa',destination:'Adama',name:'LOCAL QA visitor',phone:'+251911334455',idempotencyKey:crypto.randomUUID()};
   const v=await createPublicSupportConversation(visitorInput,'alert-fixture');
   assert.equal((await userAttentionFeed(transport)).items[0].kind,'assigned');assert.equal((await visitorAttentionFeed(v.token)).items.length,0,'Assignment remains internal');
   const privateCount=await count();await postSupportMessage(transport,v.id,{audience:'note',message:'Private carrier and commission details',idempotencyKey:crypto.randomUUID()});assert.equal(await count(),privateCount,'Internal note has no public alert');

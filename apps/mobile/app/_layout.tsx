@@ -1,5 +1,5 @@
 import {TRANSPORT_COPY} from "../../../lib/i18n/transport-copy";
-import {publicTransportPlacement} from "../../../lib/public-transport-placement";
+import {publicInquiryPlacement} from "../../../lib/public-transport-placement";
 import {View,useWindowDimensions} from "react-native";
 import MainNavigation from "../src/main-navigation";
 import React,{useEffect,useState} from "react";
@@ -24,13 +24,13 @@ function Routes() {
   },[session?.user.id,accountEntryReady,rootNavigation?.key,consumeAccountEntry]);
   const path=usePathname(),{bottom}=useSafeAreaInsets(),{width,height}=useWindowDimensions();
   const params=useGlobalSearchParams();
-  const transportVisible=publicTransportPlacement(path,"native")==="shell";
-  // Public scroll actions can clear the floating entry; Market keeps its own placement.
+  const inquiryVisible=publicInquiryPlacement(path,"native")==="shell";
+  // Showroom selections clear the floating inquiry-list action.
   const [launcherHeight,setLauncherHeight]=useState(72);
   return (
     <View style={{flex:1}}>
       <StatusBar style="dark" />
-      <PublicScrollInsetProvider value={transportVisible?launcherHeight+24:0}>
+      <PublicScrollInsetProvider value={inquiryVisible?launcherHeight+24:0}>
       <Stack
         key={session?.user.id || "visitor"}
         screenOptions={{
@@ -59,7 +59,7 @@ function Routes() {
         />
       </Stack>
       </PublicScrollInsetProvider>
-      {transportVisible&&<View testID="public-transport-overlay" onLayout={event=>setLauncherHeight(Math.max(48,Math.ceil(event.nativeEvent.layout.height)))} style={{pointerEvents:'box-none',position:'absolute',right:12,bottom:60+bottom+12,maxWidth:width-24,zIndex:20}}>
+      {inquiryVisible&&<View testID="public-inquiry-overlay" onLayout={event=>setLauncherHeight(Math.max(48,Math.ceil(event.nativeEvent.layout.height)))} style={{pointerEvents:'box-none',position:'absolute',right:12,bottom:60+bottom+12,maxWidth:width-24,zIndex:20}}>
         <PublicActionDock placement="shell" compact={height<700||width<360||path==='/product'} hideInquiry={path==='/inquiry'&&!params.id}/>
       </View>}
       <MainNavigation/>

@@ -13,7 +13,7 @@ type Fixture={pending:Pending[];hidden:boolean;appState:string;mount:(kind:strin
 
 const bundle=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
  import React from 'react';import {createRoot} from 'react-dom/client';import {flushSync} from 'react-dom';
- import Web from './components/BuyingConversation';import Native from './apps/mobile/app/buying';import {OwnerChat} from './apps/mobile/src/owner-inbox';
+ import Web from './components/BuyingConversation';import Native from './apps/mobile/src/BusinessTransportWorkspace';import {OwnerChat} from './apps/mobile/src/owner-inbox';
  const root=createRoot(document.getElementById('root'));
  window.fixture.mount=(kind,id='1')=>flushSync(()=>root.render(kind==='web'?<Web key={kind} initial={window.fixture.seed} active onAnother={()=>{}}/>:kind==='native'?<Native key={kind}/>:kind==='owner'?<OwnerChat key={kind+id} id={id}/>:null));
 `},bundle:true,write:false,format:'iife',platform:'browser',plugins:[{name:'idle-ui-ports',setup(builder){

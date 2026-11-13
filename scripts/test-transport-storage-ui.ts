@@ -16,7 +16,7 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 const bundle = build({
-  entryPoints: ["apps/mobile/app/buying.tsx", "apps/mobile/src/use-transport-unread.ts"], outdir: "/tmp/suqpage-transport-storage-ui", bundle: true, write: false,
+  entryPoints: ["apps/mobile/src/BusinessTransportWorkspace.tsx", "apps/mobile/src/use-transport-unread.ts"], outdir: "/tmp/suqpage-transport-storage-ui", bundle: true, write: false,
   format: "cjs", platform: "node",
   plugins: [{ name: "transport-device-ports", setup(builder) {
     builder.onResolve({ filter: /^\.\/runtime$/ }, args => args.importer.endsWith("use-transport-unread.ts") ? { path: "../src/runtime", namespace: "ports" } : undefined);

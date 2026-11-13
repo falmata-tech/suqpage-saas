@@ -29,7 +29,7 @@ const require=createRequire(import.meta.url);
 // database, provider, device or real-time deadline claim is made by this suite.
 const entry=String.raw`
 import React from'react';import{createRoot}from'react-dom/client';
-import Web from'./components/BuyingConversation';import Native from'./apps/mobile/app/buying';
+import Web from'./components/BuyingConversation';import Native from'./apps/mobile/src/BusinessTransportWorkspace';
 import{OwnerChat,SupportList}from'./apps/mobile/src/owner-inbox';
 import History from'./apps/mobile/src/OwnerTransportHistory';
 const actualTimeout=window.setTimeout.bind(window);window.setTimeout=(fn,ms,...args)=>actualTimeout(fn,ms===5000||ms===30000?40:ms,...args);
@@ -128,7 +128,7 @@ test('FE-019/FE-053 actual customer React views preserve drafts through explicit
 test('FE-019 N12 installed RNWeb transport keeps compact utilities and one reachable End above messages',{timeout:60000},async()=>{
  const nativeRequire=createRequire(process.cwd()+'/apps/mobile/package.json');
  const compiled=await build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
-  import React from'react';import{createRoot}from'react-dom/client';import Buying from'./apps/mobile/app/buying';
+  import React from'react';import{createRoot}from'react-dom/client';import Buying from'./apps/mobile/src/BusinessTransportWorkspace';
   import{createUiText}from'./lib/i18n/core';import am from'./lib/i18n/messages/am.json';import om from'./lib/i18n/messages/om.json';
   const root=createRoot(document.getElementById('root'));let key=0;
   const fixture=window.fixture={snapshot:null,session:null,locale:'en',t:s=>s,routes:[],calls:[]};

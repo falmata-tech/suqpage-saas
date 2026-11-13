@@ -3,21 +3,22 @@
 Current product authority: [master brief](../AFRICMADE-MASTER-PROMPT.md).
 Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 [DEP-049](../specs/deployment/DEP-049-africmade-domain-and-app-cutover.md).
-Updated 2026-11-12. This working board replaces dated `CURRENT` labels; it does
+Updated 2026-11-13. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
 ## Current position
 
-Source is integrated through main `120f480` (PR #57): AfricMade naming,
+Housekeeping is integrated through main `5557d5e` (PR #58), with all five
+required checks passed. The preceding main `120f480` (PR #57) included: AfricMade naming,
 Android version4 preparation, standalone Expo binding (#56) and the approved
 phone headline are merged. All five required jobs passed on that exact main
-commit in run `40819547526`. S189 now owns the hands-on comparison and readiness
-work; earlier unchecked integration statements are not new source tasks.
+commit in run `40819547526`. S190 now owns business-only transport; earlier unchecked integration statements
+are not new source tasks.
 
 The existing Netlify project `africmade`, ID
 `26c795eb-5560-4a88-b38d-3cc922c2a5e6`, is independently verified on
 2026-11-12. GitHub main is linked and automatic publication is enabled. The
-native Git build of main `120f480` is published as `6af5f7049dd20b84e5ea38ea`;
+native Git build of main `5557d5e` is published as `6af656dfc37bdf4701b82d65`;
 `africmade.com` serves it directly. Netlify's primary domain remains
 `mirtpage.com`; domains and credentials were preserved. Branch deploys and PR
 previews are disabled until their backend is isolated. The previous deploy
@@ -58,6 +59,30 @@ store screenshots and Play qualification remain separate unfinished work.
 | AfricMade Play app | Previously verified Free/App draft and local listing material | Current Console readback, declarations/screenshots, admitted bundle and actual testing |
 
 ## Ordered work
+
+### S190 — business dashboard transport only (FE-078 / BE-066)
+
+Owner instruction 2026-11-13; clean baseline main `5557d5e` (PR #58).
+
+- [x] 1. Inspect web/native/domain/attention paths; define specs and affected master sections.
+- [x] 2. remove public entry/composer paths; deny guest transport and old tokens;
+  preserve authenticated business workspace, staff history, inquiry lists and tracking.
+- [ ] 3. CURRENT: Focused UI/API/PostgreSQL regression; actual Chrome1440/390 and Expo8082
+  journeys and source-bound visual decision before full gates.
+Connected Chrome cannot reach workspace localhost (connection refused); local
+Chromium is blocked by the host socket policy. Pure component and isolated SQL
+checks run locally; real browser/UI qualification runs in isolated CI before
+merge, with the public production browser review after delivery. This is an
+access-removal security change; no preview routing or provider credentials are
+widened to bypass the environment boundary. Visual status remains pending.
+
+- [ ] 4. Full applicable gates, traceability/master reconciliation and task-scoped commit.
+- [ ] 5. PR, required reviews/checks, protected merge and automatic Netlify readback.
+
+Standing authorization applies. No migration, Auth, credential or destructive
+change is needed. S189 is integrated in PR #58; earlier pending source labels
+are historical and must not restart that work.
+
 
 ### S189 — hands-on comparison and development/deployment housekeeping
 

@@ -1,18 +1,8 @@
-export type TransportLauncherPlatform = "web" | "native";
-export type TransportLauncherPlacement = "shell" | "market" | null;
+export type InquiryDockPlatform = "web" | "native";
+export type InquiryDockPlacement = "shell" | null;
 
-/** Presentation policy only; this never grants account or conversation access. */
-export function publicTransportPlacement(
-  pathname: string,
-  platform: TransportLauncherPlatform,
-): TransportLauncherPlacement {
+/** Saved product selections only; transport is a private business task. */
+export function publicInquiryPlacement(pathname: string, platform: InquiryDockPlatform): InquiryDockPlacement {
   const path = pathname.replace(/\/+$/, "") || "/";
-  if (path === "/") return platform === "native" ? "market" : "shell";
-  if (path === "/featured") return "shell";
-  if (platform === "web") {
-    return path === "/tracking" || /^\/tracking\/[^/]+$/.test(path) || ["/discover", "/privacy", "/terms", "/contact-success"].includes(path)
-      || /^\/@[^/]+$/.test(path) ? "shell" : null;
-  }
-  return ["/product", "/inquiry"].includes(path)
-    || /^\/shop\/[^/]+$/.test(path) ? "shell" : null;
+  return (platform === "web" ? /^\/@[^/]+$/.test(path) : path === "/product" || /^\/shop\/[^/]+$/.test(path)) ? "shell" : null;
 }

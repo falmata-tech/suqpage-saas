@@ -62,58 +62,32 @@ test('FE-074 actual native Product scopes choices/notices to handle+ID and reval
  f.fixture.shop={...f.fixture.shop,id:8,handle:'another-showroom'};f.fixture.params={handle:'another-showroom',id:'2'};tree=f.render();assert.equal(byLabel(tree,'Inquire about this item only').props.disabled,true,'A different business cannot inherit same-ID options');
 });
 
-test('FE-041 native dock counts only distinct eligible saved selections and follows removal without a write',async()=>{
-  const{fixture,render}=await component('PublicActionDock');let tree=render();assert.ok(!find(tree,'public-inquiry-list'));assert.equal(find(tree,'public-transport-launcher').props.accessibilityLabel,`${TRANSPORT_COPY.launcherTitle} · ${TRANSPORT_COPY.launcherSubtitle}`);
-  const ready=product(1),custom=product(2,{kind:'made_to_order',availability:'limited',options:[{name:'Color',values:['Blue','Red']}]}),retired=product(3,{kind:'service'}),unavailable=product(4,{availability:'unavailable'}),draft=product(5,{published:false});
-  fixture.basket={shop:shop([ready,custom,retired,unavailable,draft]),items:[item(ready),item(ready),item(custom,{Color:'Blue'}),item(custom,{Color:'Purple'}),item(retired),item(unavailable),item(draft)]};
-  fixture.shop=fixture.basket.shop;fixture.path='/shop/'+fixture.shop.handle;
-  tree=render();assert.equal(text(find(tree,'inquiry-list-count')), '2');assert.equal(find(tree,'public-inquiry-list').props.accessibilityLabel,'View inquiry list (2)');
-  assert.ok(tree.indexOf(find(tree,'public-inquiry-list'))<tree.indexOf(find(tree,'public-transport-launcher')),'Saved-list access precedes transport');assert.equal(tree.filter(node=>node.props.testID==='public-inquiry-list').length,1);
-  fixture.basket.items=[item(ready)];tree=render();assert.equal(text(find(tree,'inquiry-list-count')),'1');fixture.basket.items=[];tree=render();assert.ok(!find(tree,'public-inquiry-list'));assert.equal(fixture.basketWrites,0,'Navigation never mutates or persists the basket');
-  fixture.basket.items=[item(ready)];fixture.blocked=[{id:fixture.shop.id}];tree=render();assert.ok(!find(tree,'public-inquiry-list'),'Blocking a business removes its action without exposing any other business list');
-});
-
-test('FE-036 native floating inquiry appears only for its current business while transport remains public',async()=>{
-  const{fixture,render}=await component('PublicActionDock'),ready=product(1);fixture.basket={shop:shop([ready]),items:[item(ready)]};
-  fixture.path='/shop/another-business';fixture.shop={...shop([ready]),id:99,handle:'another-business'};let tree=render();assert.ok(!find(tree,'public-inquiry-list'),'Another business never displays the old business list');
-  fixture.shop=fixture.basket.shop;fixture.path='/shop/'+fixture.shop.handle;tree=render();press(find(tree,'public-inquiry-list'));assert.deepEqual(JSON.parse(JSON.stringify(fixture.routes.at(-1))),{pathname:'/inquiry',params:{handle:fixture.shop.handle}});
-  fixture.path='/inquiry';fixture.params={id:'99',handle:'another-business'};tree=render();assert.ok(!find(tree,'public-inquiry-list'));assert.ok(find(tree,'public-transport-launcher'));
-  for(const path of ['/','/featured']){fixture.path=path;tree=render();assert.ok(!find(tree,'public-inquiry-list'),path);assert.ok(find(tree,'public-transport-launcher'),path);}
-  fixture.path='/about';tree=render();assert.ok(!find(tree,'public-inquiry-list'));assert.ok(!find(tree,'public-transport-launcher'),'About uses its inline transport link so long translated reading panels stay clear');
-  fixture.path='/shop/'+fixture.shop.handle;tree=render();fixture.modal=true;const before=fixture.routes.length;press(find(tree,'public-inquiry-list'));press(find(tree,'public-transport-launcher'));assert.equal(fixture.routes.length,before,'Retained background handlers cannot navigate during composition');fixture.modal=false;
-  assert.deepEqual(render({placement:'market'}),[],'A retained hidden Market cannot duplicate the public root dock');fixture.path='/';assert.deepEqual(render({placement:'shell'}),[],'The public root leaves Market placement to its mounted stage');
-  for(const path of ['/account','/owner/page','/owner/setup','/owner/support','/login','/request','/buying','/dashboard/admin/staff','/blocked-businesses']){fixture.path=path;assert.deepEqual(render(),[],path);}
-});
-
-test('FE-054 native floating inquiry uses only the current Shop accent with readable defaults and unchanged transport',async()=>{
- const{fixture,render}=await component('PublicActionDock'),ready=product(1),first=shop([ready]);fixture.basket={shop:first,items:[item(ready)]};fixture.shop=first;fixture.path='/shop/'+first.handle;
- const transportBefore=style(find(render(),'public-transport-launcher'));
- for(const accentColor of [undefined,'#087F75','#B6FF00','#FFFFFF','#000000','invalid','']){
-  fixture.shop={...first,accentColor};const tree=render(),list=find(tree,'public-inquiry-list'),palette=storefrontAccent(accentColor),badge=find(tree,'inquiry-list-count'),label=nodes(list).find(node=>node.type==='Text'&&text(node)==='Inquiry list')!,icon=nodes(list).find(node=>node.type==='Icon')!;
-  assert.equal(style(list).backgroundColor,palette?.accent||'white');assert.equal(style(list).borderColor,palette?.edge||'#c43a00');assert.equal(style(label).color,palette?.on||'#c43a00');assert.equal(icon.props.color,palette?.on||'#c43a00');assert.equal(style(badge).backgroundColor,palette?.on||'#c43a00');assert.equal(style(badge).color,palette?.accent||'white');
-  assert.ok(Number(style(list).minHeight)>=48);assert.equal(text(badge),'1');assert.deepEqual(style(find(tree,'public-transport-launcher')),transportBefore,'Only the business action changes color');if(palette)assert.ok(accentContrast(String(style(label).color),String(style(list).backgroundColor))>=4.5&&accentContrast(String(style(badge).color),String(style(badge).backgroundColor))>=4.5);
+test('FE-078 public native dock retains current business selections without transport',async()=>{
+ const{fixture,render}=await component('PublicActionDock'),ready=product(1),first=shop([ready]);
+ fixture.shop=first;fixture.path='/shop/'+first.handle;
+ assert.deepEqual(render(),[],'An empty list has no floating control');
+ fixture.basket={shop:first,items:[item(ready)]};
+ for(const messages of [{},am,om,so,ti])for(const width of [320,390]){
+  fixture.t=createUiText(messages);fixture.width=width;const tree=render({compact:true}),list=find(tree,'public-inquiry-list');
+  assert.ok(list);assert.equal(style(list).minWidth,48);assert.equal(style(list).minHeight,48);assert.equal(text(find(tree,'inquiry-list-count')),'1');
+  assert.ok(text(list).includes(fixture.t('Inquiry list')));assert.ok(!find(tree,'public-transport-launcher'));
+  press(list);assert.deepEqual(JSON.parse(JSON.stringify(fixture.routes.at(-1))),{pathname:'/inquiry',params:{handle:first.handle}});
  }
- fixture.shop={...first,accentColor:'#087F75'};fixture.path='/shop/second-shop';assert.equal(find(render(),'public-inquiry-list'),undefined,'A previous Shop color/action is absent before the new current Shop arrives');
- const second={...first,id:99,handle:'second-shop',accentColor:'#7900FF',products:[product(9)]};fixture.shop=second;fixture.baskets.set(second.id,[item(second.products[0])]);let tree=render();assert.equal(style(find(tree,'public-inquiry-list')).backgroundColor,'#7900FF');press(find(tree,'public-inquiry-list'));assert.deepEqual(JSON.parse(JSON.stringify(fixture.routes.at(-1))),{pathname:'/inquiry',params:{handle:second.handle}});
- fixture.shop={...second,accentColor:''};tree=render();assert.equal(style(find(tree,'public-inquiry-list')).backgroundColor,'white','Reset removes the prior saved color');assert.equal(fixture.basketWrites,0,'Changing action presentation never changes saved items');
+ for(const path of ['/','/featured','/about','/inquiry','/buying','/account','/owner/transport']){fixture.path=path;assert.deepEqual(render(),[],path);}
+ fixture.path='/product';fixture.params={handle:first.handle,id:'1'};assert.ok(find(render(),'public-inquiry-list'));
+ fixture.params={handle:'another-business',id:'1'};assert.ok(!find(render(),'public-inquiry-list'));
+ fixture.path='/shop/'+first.handle;fixture.params={};fixture.modal=true;const before=fixture.routes.length;press(find(render(),'public-inquiry-list'));assert.equal(fixture.routes.length,before,'An open inquiry dialog prevents duplicate navigation');
+ assert.equal(fixture.basketWrites,0,'Dock rendering never changes selections');
 });
 
-test('FE-053 compact dock keeps both translated labels and actual48px controls; transport opens intake directly',async()=>{
-  const{fixture,render}=await component('PublicActionDock'),ready=product(1);fixture.basket={shop:shop([ready]),items:[item(ready)]};fixture.shop=fixture.basket.shop;fixture.path='/shop/'+fixture.shop.handle;fixture.unread=3;
-  for(const messages of [{},am,om,so,ti])for(const width of [320,390]){fixture.t=createUiText(messages);fixture.width=width;const tree=render({compact:true}),list=find(tree,'public-inquiry-list'),transport=find(tree,'public-transport-launcher'),dock=find(tree,'public-action-dock');
-    assert.equal(style(dock).width,168);for(const control of [list,transport]){assert.equal(style(control).minWidth,48);assert.equal(style(control).minHeight,48);assert.ok(nodes(control).filter(node=>node.type==='Text').every(node=>!node.props.numberOfLines),'Labels wrap instead of truncating');}
-    assert.ok(text(list).includes(fixture.t('Inquiry list')));assert.ok(text(transport).includes(fixture.t(TRANSPORT_COPY.launcherTitle)));assert.ok(!text(transport).includes(fixture.t(TRANSPORT_COPY.launcherSubtitle)),'Compact transport entry keeps the short visible title');assert.ok(String(transport.props.accessibilityLabel).includes(fixture.t(TRANSPORT_COPY.launcherSubtitle)),'Screen readers retain the full context');assert.equal(style(transport).paddingRight,26,'Unread badge has its own room');assert.ok(text(transport).includes('3'));
-    const before=fixture.routes.length;press(transport);assert.equal(fixture.routes.length,before+1);assert.equal(fixture.routes.at(-1),'/buying','A single tap navigates to existing intake, without a confirmation or send');
-  }
-});
-
-test('FE-053 short Market dock shows transport only in every locale despite saved business lists',async()=>{
-  const{fixture,render}=await component('PublicActionDock'),ready=product(1);fixture.basket={shop:shop([ready]),items:[item(ready)]};
-  for(const messages of [{},am,om,so,ti])for(const width of [320,390]){fixture.t=createUiText(messages);fixture.width=width;const tree=render({compact:true,horizontal:true,placement:'market'}),dock=find(tree,'public-action-dock'),list=find(tree,'public-inquiry-list'),transport=find(tree,'public-transport-launcher');
-    assert.equal(style(dock).width,244);assert.equal(style(dock).flexDirection,'row');assert.equal(list,undefined);assert.equal(style(transport).minHeight,48);
-    assert.equal(text(transport),fixture.t(TRANSPORT_COPY.launcherTitle));assert.ok(String(transport.props.accessibilityLabel).includes(fixture.t(TRANSPORT_COPY.launcherSubtitle)));assert.ok(nodes(transport).every(node=>!node.props.numberOfLines),'Transport still wraps without truncation');assert.equal(tree.filter(node=>node.type==='Pressable').length,1,'Global Market never advertises a business list');
-  }
-  fixture.basket=null;const tree=render({compact:true,horizontal:true,placement:'market'});assert.equal(tree.filter(node=>node.type==='Pressable').length,1);assert.ok(!find(tree,'public-inquiry-list'));assert.ok(find(tree,'public-transport-launcher'));
+test('FE-078 saved inquiry action retains business accent and readable localized controls',async()=>{
+ const{fixture,render}=await component('PublicActionDock'),ready=product(1),first=shop([ready]);fixture.basket={shop:first,items:[item(ready)]};fixture.shop=first;fixture.path='/shop/'+first.handle;
+ for(const accentColor of [undefined,'#087F75','#B6FF00','#FFFFFF','#000000','invalid','']){
+  fixture.shop={...first,accentColor};const tree=render(),list=find(tree,'public-inquiry-list'),palette=storefrontAccent(accentColor),badge=find(tree,'inquiry-list-count'),label=nodes(list).find(node=>node.type==='Text'&&text(node)==='Inquiry list')!;
+  assert.equal(style(list).backgroundColor,palette?.accent||'white');assert.equal(style(label).color,palette?.on||'#c43a00');assert.equal(style(badge).color,palette?.accent||'white');
+  if(palette)assert.ok(accentContrast(String(style(label).color),String(style(list).backgroundColor))>=4.5);
+  assert.ok(!find(tree,'public-transport-launcher'));
+ }
 });
 
 test('FE-041 direct product inquiry does not alter saved items; A and B Add retain independent lists',async()=>{

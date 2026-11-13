@@ -29,7 +29,7 @@ const require = createRequire(import.meta.url);
 const bundle = build({
   stdin: { resolveDir: process.cwd(), loader: "tsx", contents: `
     import React from 'react';import {createRoot} from 'react-dom/client';import {flushSync} from 'react-dom';
-    import Parent from './components/PublicSupportChat';import Web from './components/BuyingConversation';import Native from './apps/mobile/app/buying';
+    import Parent from './components/PublicSupportChat';import Web from './components/BuyingConversation';import Native from './apps/mobile/src/BusinessTransportWorkspace';
     const root=createRoot(document.getElementById('root'));let screen;
     window.harness.mount=(kind,props={})=>flushSync(()=>root.render(kind==='parent'?<Parent key={kind}/>:kind==='web'?<Web key={kind} onAnother={()=>{}} {...props}/>:kind==='native'?<Native key={kind}/>:null));
   ` },

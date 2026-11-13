@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {registerOverlay,overlayIsOpen} from './overlay-visibility';
-import {useTransportUnread} from './use-transport-unread';
 import {
   View,
   Text,
@@ -16,7 +15,6 @@ import { useApp, languageNames, enabledLocales, API } from "./runtime";
 import { Brand, Icon, colors, useOpenLink } from "./ui";
 import { categoryArt } from "./category-art";
 import {useOwnerNavigation} from './owner-edit-navigation';
-import {TRANSPORT_COPY} from '../../../lib/i18n/transport-copy';
 export function CategoryArt({
   name,
   size = 32,
@@ -215,26 +213,6 @@ export function MoreSheet({
         </Pressable>
       ))}
     </Sheet>
-  );
-}
-export function BuyingLauncher({ compact = false }: { compact?: boolean }) {
-  const { t } = useApp();
-  const unread=useTransportUnread();
-  return (
-    <Pressable
-      testID="public-transport-launcher"
-      accessibilityRole="button"
-      accessibilityLabel={`${t(TRANSPORT_COPY.launcherTitle)} · ${t(TRANSPORT_COPY.launcherSubtitle)}`}
-      onPress={() => {if(!overlayIsOpen())router.push("/buying");}}
-      style={[c.buying, compact && { padding: 8 },unread>0&&{paddingRight:26}]}
-    >
-      <Icon name="truck" color="white" size={compact?20:22} />
-      {unread>0&&<Text accessibilityElementsHidden style={{position:'absolute',right:4,top:3,backgroundColor:'white',color:colors.brand,borderRadius:12,minWidth:20,paddingHorizontal:5,fontSize:12,fontWeight:'700',textAlign:'center'}}>{unread>99?'99+':unread}</Text>}
-      <View style={{flex:1,minWidth:0,gap:3}}>
-        <Text style={[c.buyingText,{lineHeight:17},compact&&{fontSize:12}]}>{t(TRANSPORT_COPY.launcherTitle)}</Text>
-        {!compact&&<Text style={[c.buyingSmall,{lineHeight:16}]}>{t(TRANSPORT_COPY.launcherSubtitle)}</Text>}
-      </View>
-    </Pressable>
   );
 }
 export const c = StyleSheet.create({

@@ -57,7 +57,7 @@ async function main() {
     await db.exec(`INSERT INTO support_conversations(public_ref,participant_kind,business_id,opened_by_user_id,assistance_category,requester_label,subject,status,assigned_user_id,created_at,updated_at,last_message_at)
       SELECT 'TRANSPORT-BULK-'||n,'client',${businessId},${owner.id},'shipment_observation','Fixture','Existing transport','open',${transport.id},${sameTime},${sameTime},${sameTime}
       FROM generate_series(1,101) n`);
-    const visitor=await createPublicSupportConversation({category:'shipment_observation',origin:'Addis Ababa',destination:'Hawassa',name:'Disposable routing visitor',phone:'+447700900999',idempotencyKey:crypto.randomUUID()},'routing-visitor');
+    const visitor=await createPublicSupportConversation({category:'buying_assistance',email:'fixture-buyer@example.test',message:'Fixture buying question',origin:'Addis Ababa',destination:'Hawassa',name:'Disposable routing visitor',phone:'+447700900999',idempotencyKey:crypto.randomUUID()},'routing-visitor');
     const visitorView=await getPublicSupportConversation(visitor.token);
     const staffView=(await getSupportConversation(admin,visitor.id)).conversation;
     assert.equal(visitorView.status,'open');assert.equal(staffView.assignedUserId,transport.id);

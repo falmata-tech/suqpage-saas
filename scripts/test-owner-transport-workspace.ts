@@ -87,7 +87,7 @@ test('FE-069 transport return cache is memory-only, bounded, expires and admits 
  const key='tracking-owner-cache-fixture';rememberTransportDraft(key,{message:'Unsent'},1000);assert.deepEqual(takeTransportDraft(key,1001),{message:'Unsent'});assert.equal(takeTransportDraft(key,601000),undefined);
  for(let index=0;index<17;index++)rememberTransportDraft(key+index,{index},2000);assert.equal(takeTransportDraft(key+'0',2001),undefined);assert.deepEqual(takeTransportDraft(key+'16',2001),{index:16});clearTransportDraft(key+'16');assert.equal(takeTransportDraft(key+'16',2001),undefined);
  for(const path of ['/dashboard/transport','/dashboard/transport?new=1','/dashboard/transport?conversation=71'])assert.equal(trackingReturnHref(path),path);
- for(const path of ['https://evil.test/dashboard/transport','//evil.test','/dashboard/admin','/dashboard/transport?conversation=71&email=secret','/dashboard/transport?conversation=0','/dashboard/transport#secret','/dashboard/transport?new=1%0A'])assert.equal(trackingReturnHref(path),'/?chat=transport');
+ for(const path of ['https://evil.test/dashboard/transport','//evil.test','/dashboard/admin','/dashboard/transport?conversation=71&email=secret','/dashboard/transport?conversation=0','/dashboard/transport#secret','/dashboard/transport?new=1%0A'])assert.equal(trackingReturnHref(path),'/');
 });
 
 async function serverPage(entry:string){

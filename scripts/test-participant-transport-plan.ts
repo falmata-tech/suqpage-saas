@@ -9,7 +9,7 @@ const require=createRequire(import.meta.url);
 // Actual React participant controllers and plan renderers. HTTP, read observation,
 // native host primitives and poll time are the only controlled ports.
 const entry=String.raw`
-import React from'react';import{createRoot}from'react-dom/client';import Web from'./components/BuyingConversation';import Native from'./apps/mobile/app/buying';
+import React from'react';import{createRoot}from'react-dom/client';import Web from'./components/BuyingConversation';import Native from'./apps/mobile/src/BusinessTransportWorkspace';
 const nativeTimeout=window.setTimeout.bind(window);window.setTimeout=(fn,ms,...args)=>nativeTimeout(fn,ms===5000?50:ms===30000?90:ms,...args);
 const plan={version:1,legs:[{id:'00000000-0000-4000-8000-000000000001',providerName:'Literal Air Provider',origin:'Place A',destination:'Place B',method:'air'},{id:'00000000-0000-4000-8000-000000000002',providerName:'Literal Truck Provider',origin:'Place B',destination:'Place C',method:'truck'}]};
 window.fixture={kind:'',owner:'owner-A',visitorToken:'controlled-visitor-token',navigation:[],reads:[],calls:[],snapshot:{id:71,publicRef:'SUP-PLAN-71',category:'shipment_observation',subject:'Fixture route',status:'open',assignedUserName:null,agentJoined:false,resolvedAt:null,messages:[{id:2,sender:'staff',senderName:'Agent',body:'A public reply',createdAt:1}],transportPlan:plan},t:(key,values={})=>key.replace(/\{(\w+)\}/g,(_,key)=>String(values[key]??''))};

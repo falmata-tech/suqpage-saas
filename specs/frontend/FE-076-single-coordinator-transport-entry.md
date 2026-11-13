@@ -2,13 +2,16 @@
 id: FE-076
 title: Transport help and provider listing interest
 status: in_progress
-related: [BE-063, FE-068, FE-069, FE-049, FE-053, FE-077, BE-064, FE-070]
+related: [FE-078, BE-063, FE-068, FE-069, FE-049, FE-053, FE-077, BE-064, FE-070]
 owners: [product, frontend, mobile]
 last_updated: 2026-10-21
 change_level: L2
 ---
 
 # FE-076 — Clear transport help with a live agent
+
+Current transport entry/visitor authority is superseded by FE-078; retained
+provider and business/staff contracts still apply.
 
 ## Problem, outcome and boundary
 

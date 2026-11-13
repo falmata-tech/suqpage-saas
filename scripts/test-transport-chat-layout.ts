@@ -33,15 +33,16 @@ test('FE-076/S162: transport copy is professional and distinguishes general help
 test('FE-076: provider-listing promotion stays outside the transport chat and is linked from About',async()=>{
   const [webIntake,mobileChat,webAbout,mobileAbout,login]=await Promise.all([
     readFile('components/TransportIntake.tsx','utf8'),
-    readFile('apps/mobile/app/buying.tsx','utf8'),
+    readFile('apps/mobile/src/BusinessTransportWorkspace.tsx','utf8'),
     readFile('components/AboutAudience.tsx','utf8'),
     readFile('apps/mobile/app/(tabs)/about.tsx','utf8'),
     readFile('app/(public)/login/page.tsx','utf8'),
   ]);
   assert.doesNotMatch(webIntake,/transport-partners|Ask to be listed/i);
   assert.doesNotMatch(mobileChat,/transport-partners|Ask to be listed/i);
-  assert.match(webAbout,/href="\/transport-partners"/);
-  assert.match(mobileAbout,/router\.navigate\('\/transport-partners'\)/);
+  assert.doesNotMatch(webAbout,/chat=transport/);
+  const footer=await readFile('lib/public-site-footer.ts','utf8');assert.match(footer,/href: '\/transport-partners'/);
+  assert.doesNotMatch(mobileAbout,/navigate\('\/buying'\)/);
   assert.match(login,/href="\/transport-partners"/);
 });
 
@@ -50,7 +51,7 @@ test('FE-076: phone layouts reserve the viewport for the chat and keep scrolling
     readFile('app/landing.css','utf8'),
     readFile('components/TransportSupport.module.css','utf8'),
     readFile('components/BuyingConversation.module.css','utf8'),
-    readFile('apps/mobile/app/buying.tsx','utf8'),
+    readFile('apps/mobile/src/BusinessTransportWorkspace.tsx','utf8'),
     readFile('apps/mobile/src/main-navigation.tsx','utf8'),
   ]);
   assert.match(globalCss,/visualViewport|support-visible-height/);
