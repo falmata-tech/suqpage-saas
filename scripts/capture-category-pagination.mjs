@@ -14,9 +14,14 @@ const evidence = [], tileFixtures = [];
 
 async function expectCategoryCount(page, count) {
   const compact = page.getByRole('button', {name: /^Filters, \d+ selected$/});
-  if (await compact.isVisible()) await compact.click();
-  await expect(page.getByRole('button', {name: count ? `Category ${count}` : 'Category', exact: true})).toBeVisible();
+  const category = page.getByRole('button', {name: count ? `Category ${count}` : 'Category', exact: true});
   const dialog = page.getByRole('dialog');
+  // Reloaded SSR cards can appear before the filter event handlers hydrate.
+  // Require the actual open action and its category receipt within one bound.
+  await expect(async () => {
+    if (await compact.isVisible() && !await dialog.isVisible()) await compact.click();
+    await expect(category).toBeVisible({timeout: 750});
+  }).toPass({timeout: 5000, intervals: [100, 250, 500]});
   if (await dialog.isVisible()) await dialog.getByRole('button', {name: 'Done', exact: true}).click();
 }
 
