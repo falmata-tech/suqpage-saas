@@ -36,7 +36,7 @@ for(const value of ['postgresql://qa@db.example.test/suqpage_native_qa','postgre
 assert.throws(()=>nativeQaDatabaseUrl({...local,CI:'false'}));
 assert.equal(nativeQaSchema('suqpage_test_'+'a'.repeat(32)),'suqpage_test_'+'a'.repeat(32));
 for(const value of ['public','suqpage_test_bad','public;DROP SCHEMA public',null])assert.throws(()=>nativeQaSchema(value));
-const key='native-qa-apk-v1-Linux-X64-'+'a'.repeat(64),digest='b'.repeat(64),artifact={source:'c'.repeat(40),key,sha256:digest};
+const key='native-qa-apk-v2-Linux-X64-'+'a'.repeat(64),digest='b'.repeat(64),artifact={source:'c'.repeat(40),key,sha256:digest};
 assert.equal(verifyNativeQaArtifact(artifact,key,digest).source,artifact.source);
 for(const changed of [{...artifact,key:'foreign'},{...artifact,sha256:'0'.repeat(64)},{...artifact,source:'unknown'},null])
  assert.throws(()=>verifyNativeQaArtifact(changed,key,digest));

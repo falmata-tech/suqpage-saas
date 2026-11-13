@@ -5,7 +5,9 @@ import {execFileSync} from 'node:child_process';
 import {nativeQaDatabaseUrl,verifyNativeQaArtifact} from './native-qa-target';
 nativeQaDatabaseUrl();
 const file='.local/native-qa/native-build.json';
-const apk='apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk';
+// Expo may regenerate the entire native directory; cache outside that output.
+const apk='.local/native-qa/client.apk';
+if(process.argv.includes('--record'))fs.copyFileSync('apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk',apk);
 const toolsRoot=path.join(process.env.ANDROID_HOME||'', 'build-tools');
 const tools=fs.readdirSync(toolsRoot).sort().map(version=>path.join(toolsRoot,version,'aapt')).filter(file=>fs.existsSync(file));
 if(!tools.length)throw Error('Android aapt is required before admitting a QA cache artifact.');

@@ -36,6 +36,12 @@ not on an app assertion or fatal crash. The driver now treats a missing hierarch
 during a busy launch as bounded non-readiness, clears old dumps and preserves its
 existing deadline. Actual-function controlled-port tests cover retry, permanent
 failure and disconnected-device propagation; the next native run remains required.
+Run43525289532 restores the exact cached APK, but Expo identifies its otherwise
+partial native directory as disposable and clears it during generation. Admission
+correctly fails before installing the now-missing APK. Cache layout v2 keeps only
+the validated client and identity outside generated native output; prebuild can
+recreate that output without deleting the client. Native qualification and an
+actual cache-hit run are still pending, not inferred from a successful build.
 DEP-044 signed-release inputs and
 Auth/push/physical-device qualification remain separate; S194 demo simulation and
 deferred S192 Google verification are preserved in the checklist.

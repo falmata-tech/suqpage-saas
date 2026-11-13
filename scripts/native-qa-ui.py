@@ -114,7 +114,7 @@ def wait_backend():
 result = 'failed'
 failure = None
 try:
-    apk = Path('apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk')
+    apk = ROOT / 'client.apk'
     tools = sorted((Path(os.environ['ANDROID_HOME']) / 'build-tools').glob('*/aapt'))
     if not tools:
         raise AssertionError('Android aapt is unavailable')
