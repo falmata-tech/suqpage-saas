@@ -2,9 +2,9 @@
 id: DEP-049
 title: AfricMade domain, managed services and app release cutover
 status: draft
-related: [FE-021, FE-070, FE-071, BE-059, DEP-029, DEP-051, ADR-0029, FE-072, BE-060, DEP-050, DEP-044, FE-075, BE-062]
+related: [FE-021, FE-070, FE-071, BE-059, DEP-029, DEP-051, ADR-0029, FE-072, BE-060, DEP-050, DEP-044, FE-075, BE-062, DEP-052, ADR-0032]
 owners: [operations, security, mobile]
-last_updated: 2026-10-27
+last_updated: 2026-11-12
 change_level: L4
 ---
 
@@ -37,24 +37,22 @@ provider-managed names separately from source and shipped artifacts.
 
 ## Current web publication and separate native admission
 
-PR #50 is merged as main `08999f3`; its tree matches the qualified task source.
-All five required PR and main CI jobs pass. The exact reviewed map-first website,
-simpler Featured/footer, white-field installation icons and S185 transport chat
-presentation are published as Netlify deploy `6ae0a7fb4ccd545c7dd13f55`.
-`africmade.com` serves this artifact directly; its canonical metadata still uses
-the admitted `mirtpage.com` address. Independent route, asset, image, manifest,
-worker-file and App Links readback passes. The transport form loads in settled
-390px and desktop Chrome views. Provider target and all 41 environment records
-remain unchanged; deploy `6adfa7a046c301c50af9b164` remains ready for recovery.
-[Traceability](../TRACEABILITY.md#current-s186-chat-web-publication) owns exact
-source, CI, artifact, Linux import, publication and browser evidence.
+DEP-052 / ADR-0032 now govern the qualified ordinary Git-connected website
+pipeline. Main `120f480` includes PRs #54/#56/#57 and its five required checks passed.
+The native Netlify build is published as `6af5f7049dd20b84e5ea38ea`, serving
+`africmade.com`; branch/PR previews are disabled, automatic main publication is
+on, and the prior `6ae0a7fb4ccd545c7dd13f55` deploy remains available for recovery.
+Source, build, assets, runtime, image and worker evidence belong in
+[traceability S189](../TRACEABILITY.md#s189-development-and-deployment-readiness).
+This supersedes the earlier manual-artifact publication path for ordinary web
+merges; historical workaround/admission records below remain historical.
 
-Website publication does not qualify an installed Android app, service-worker
-execution, scheduled-worker delivery, sender credential, device push or Play
-testing. DEP-044 owns the separately approved, built and statically admitted
-local version2 successor, its canonical version1 predecessor and the saved
-MarketVision Play draft. Physical Android, FCM and Play qualification remain
-separate gates.
+Domains, managed Auth and credentials were not changed by this connection.
+Website publication does not qualify installed Android, actual worker/email/push
+delivery or Play testing. The recorded signed AfricMade v3 remains held; a fresh
+signed v4, physical-device qualification, sender credentials and Play admission
+remain separately governed by DEP-044. BE-065 owns the separate metadata-only
+Supabase security correction; application migrations are never a Git build step.
 
 ## S179 — selected successor Android package
 
@@ -173,7 +171,7 @@ push, native screenshots, Play delivery or the twelve-person testing clock.
 ## S151 B09 — published image routing recovery; browser cancellations open
 
 The owner reports missing example pictures. Read-only production diagnosis
-confirms five original product/showroom assets return200 and exist in Git. The
+confirms five original product/showroom assets return 200 and exist in Git. The
 Featured hero's exact `/_next/image` variants return400 at640 and3840px; its
 original bytes match the repository, and the existing `/.netlify/images`
 endpoint returns a valid resized WebP. This is image delivery, not missing data
@@ -347,7 +345,7 @@ isolated tests. No hosted process, provider, schema or mail credential changes.
 
 This source boundary is now verified, including two stable stopped-state zero
 counts, all five old processes gone, unchanged Expo and exactly one ordinary
-supervisor restart. Web health and localhost8082 return200. Preserve the initial
+supervisor restart. Web health and localhost8082 return 200. Preserve the initial
 health verifier's wrong127.0.0.1:8082 failure as a harness-address error; no second
 restart or product outage is inferred. Focused renderer/durable-delivery/privacy
 tests pass; the owner approves the actual Chrome static42 email states and full

@@ -1,146 +1,82 @@
-# MirtPage engineering readiness
+# AfricMade engineering readiness
 
-This review covers the overall ability to build and ship MirtPage, not only a
-particular release failure. It is a sampled repository assessment as of
-2026-10-20, controlled by DEP-002. Provider settings not independently inspected
-are unverified. Release status belongs in DEP-049 and the active checklist.
+Current assessment: 2026-11-12, controlled by DEP-002, DEP-052 and BE-065.
+The repository is `falmata-tech/suqpage-saas`; AfricMade is the current product
+name. Historical Suqpage/MirtPage provider and protocol identifiers remain
+intentional compatibility boundaries. Resume the active checklist, not an old
+release transcript.
 
-The existing stack is suitable for the current product. Improve reproducibility,
-developer guidance and feedback speed within it before replacing services or
-adding frameworks. This assessment does not certify every module or endpoint.
+## Verified baseline
 
-## Verified foundations and gaps
-
-| Area | Existing evidence | Gap or next qualification |
+| Area | Verified state | Remaining qualification |
 | --- | --- | --- |
-| Architecture | Next.js web/API, Expo mobile, shared `packages/contracts`; explicit server/database boundary checks | Sample large workspace and domain modules during related work; architecture rules alone do not prove every dependency follows them |
-| Runtime/install | Node 24.18.1 baseline, locked npm graph, clean web install, separate mobile type/dependency checks | Native cold builds are expensive; retain input-matched outputs and measure stages before tuning |
-| Local development | Guarded `start-local-dev.mjs`, loopback admission and bounded PostgreSQL/Auth/Storage readiness | Keep one documented start path and current setup guidance |
-| Tests | Domain/security/SQL fixtures, actual Chrome workflows, disposable browser Supabase and separate mobile contracts | Older helpers duplicate port assumptions; operations readiness should probe the connection path actually used |
-| CI/CD | Five isolated jobs, pinned actions/runtime, npm caching, superseded-run cancellation and bounded failure artifacts; main protection independently read back on 2026-10-20 | Main enforces administrators, PRs, strict five-job checks, resolved conversations and linear history; zero approving reviews are required and force pushes are disabled. Actual current-head results remain necessary |
-| Workflow code | TypeScript checks plus explicit JS script admission; actual inert main preflight remains required | Static checks cannot establish provider/SQL/runtime behavior; qualify linked dependency layouts as well as ordinary installs |
-| Environments/security | Separate local/disposable targets; tenant, role, origin, private-media and source-map tests; guarded hosted operations | Provider IAM, MFA, quota and credential-review cadence require an account-level assessment; no secrets are discovered here |
-| Dependencies | Weekly grouped npm and monthly action updates in `.github/dependabot.yml`; production audits and separate Android tooling admission | Keep build-tool advisories distinct from runtime exposure and preserve explicit exception scope |
-| Recovery | PostgreSQL archive/restore tests and target-bound operations; runbook distinguishes Auth/Storage backups | Verify provider backup retention and recovery exercise ownership; SQL restore alone is not full managed-service recovery |
-| Observability | `/api/health`, sanitized scheduled-worker counters and bounded failure evidence | External uptime alert delivery, response ownership and retention/cost settings are not established by repository inspection |
-| Documentation | Compact master, active work board and complete spec/evidence index validated, root-reviewed, committed and pushed on the isolated docs branch; browser guide/runbooks retained | Integration is pending. Numbered anchors, all IDs/relations and unfinished requests remain mapped; keep chronology in Git/existing records |
-| Agent tooling | Scoped tasks, explicit staging, source-bound evidence and three focused repo skills | Verify host discovery/routing in a fresh session; measure retries and time instead of promising token savings |
+| Source | Main `120f480` includes the rebrand, owner email workflow, restored business Inbox and latest headline; five GitHub jobs passed in `40819547526` | Current housekeeping changes are on their own local task branch; they have not been published to GitHub |
+| Stack | Root Next.js 16.4.2; Expo 57/RN 0.86.3 under apps/mobile; shared contracts; exact Node 24.18.1 | Use the pinned runtime, not the host's newer 24.x binary |
+| Netlify | Existing africmade project now linked to this repo/main; root build, .next, native Next adapter 5.16.6; first Git build completed in 53s | Published current main; automatic publication on; actual next-merge trigger remains a separate observation |
+| Environments | Production variables retained; branch deploys and PR previews disabled; fork builds retain approval policy | No isolated hosted preview Supabase exists; never copy production secrets into preview contexts |
+| Supabase | Exact africmade project sjeiiqxgscuqajpgddcc, eu-west-1, ACTIVE_HEALTHY; application ledger 80; one private storage bucket | Database correction and final advisor readback are recorded with BE-065; Auth remains separately guarded |
+| PostgreSQL | Real 17.10 fixture service built from verified official sources; native installation/seeding and migration 81 regression passed | A standalone SQL service does not supply managed Auth/Storage |
+| Build | Clean 124-package root/contracts install; production audit 0 vulnerabilities; actual maintained Netlify build; exact packaged handler/Sharp initialize on Linux | Local offline edge bundler reported an unreachable remote type import; hosted build successfully bundled the edge function without that failure |
+| GitHub | Main protected; existing five-job workflow green; four open Dependabot PRs | Connector cannot read detailed main protection (403); historic strict-check settings must not be represented as a fresh full readback |
+| Recovery | Previous production deployment retained; protected Netlify before-state and exact database metadata/ACL before-images retained | Provider backup retention, complete Auth/Storage recovery exercise and alert delivery remain unverified |
 
-GitHub follow-up: the default is `main` (no `master`), 68 commits behind the
-current release head in the 2026-10-20 read-only comparison. The stale draft PR
-is integration debt, not absent CI. The local release upstream has been corrected
-to its matching remote without changing source or remote branches. Actual main
-protection requires linear history, resolved
-conversations and strict five-job checks, with zero required approving reviews.
-[GitHub workflow](GITHUB-WORKFLOW.md) now documents task branches, typed commits,
-dependent PRs, current-head qualification and source-versus-deployment lineage.
-The three existing skills are now visible in the host catalog; implicit-routing
-accuracy remains unmeasured. No provider integration or merge has been enabled
-by adding those instructions.
+## Application compared with the specification
 
-The audit's protected receipt is
-`.local/mirtpage-final-release-20261019/s151-batch-audit/workflow-improvement-research/repository-readonly-audit-20261020/audit-result.json`.
-Draft PR #36 targets `main` from the old `release/mirtpage-launch` head; its green
-checks cover that old head only. The separate docs branch is 70 commits ahead
-of main, including its two docs-only commits after the current release source.
-Local main also has two commits absent from current remote main; preserve them
-before any local-main reconciliation. Do not reset or delete branches blindly.
+The desktop Chrome review exercised actual public pages and controls without
+sending customer inquiries, chats, codes or messages. Temporary inquiry-list
+selections were removed after review.
 
-Fresh Netlify site reads report Git provider, repository path and branch as null.
-GitHub’s workflow has no Netlify publishing step; current publication is the
-separate guarded artifact operation. The pre-disconnect audit found empty
-conventional GitHub hooks but active Vercel App previews, including integration
-head `580b99d`, and a historical main Production-labelled deployment. Empty hooks
-do not rule out App publishing. The exact `falmata-ds-projects/mirtpage` →
-`falmata-tech/suqpage-saas` Git connection was subsequently removed and verified
-by a fresh provider reload on 2026-10-20. The project, old deployments and account
-App installation remain; Netlify, domains/secrets and other repos are unchanged.
-Current trigger-verification evidence and limits belong in
-[active checklist V01](../AFRICMADE-TRANSITION-CHECKLIST.md#v01--retire-this-repositorys-vercel-publishing-connection).
-Protected inventory and result live under the existing research directory:
-`repository-readonly-audit-20261020/vercel-retirement-inventory-plan.json` and
-`vercel-retirement/result.json`. The docs patch records the separately verified
-provider action; it does not itself disable a service.
-The local default VS Code extension inventory includes Codex, GitHub Actions, GitLens and Git Graph;
-the GitHub Pull Requests extension was not listed. It is optional while `gh`
-already supplies the working GitHub interface. Other editor profiles are unverified.
-
-The package files currently specify Next.js 16.3.8, Expo 57 and React Native
-0.86.3. This is an observation, not a recommendation to freeze future security
-updates. Stable internal names do not justify recreating provider accounts.
-
-## Prioritized improvements
-
-Release blockers stay in the release checklist. These engineering follow-ups
-do not independently block an otherwise qualified release.
-
-| Priority | Smallest useful outcome | Verification / decision boundary |
+| Workflow | Observed behavior | Contract / limit |
 | --- | --- | --- |
-| Implemented | Refresh README and add three focused project skills | Command/path review and spec/skill structure checks pass; actual host selection remains separate |
-| Now | Check changed public JS workflow scripts before costly release work; exercise the real operation entry offline | Missing binding/import, inert execution and path-boundary regressions; existing CI core job uses the same gate |
-| Implemented; integration pending | Keep the current brief, acceptance, next work and evidence in their owning documents | All numbered master anchors, spec/ADR links and inherited open requests remain mapped; focused L0 checks and root review pass, no new application gate |
-| Next scoped patch | Have disposable PostgreSQL operations wait on the mapped TCP connection they actually use | Bounded read-only `SELECT 1` before fixture DDL; no DDL retry or shared-data changes. The current CI core recurs at operations-fixture startup after web release; exact cause is not proven, and no harness fix belongs to this L0 patch |
-| Next scoped patch | Reuse the existing disposable browser port contract in older helpers | Default/alternate loopback families pass; mismatched and nonlocal targets still reject before writes |
-| Later reproducibility decision | Review `ubuntu-latest` runner drift alongside the pinned action/runtime versions | The failed core used Ubuntu 24.04.5; the announced Ubuntu 26 transition is not established as its cause. Inspect actual runner evidence before choosing an explicit OS label; no CI change or new gate here |
-| Next delivery improvement | Consolidate the qualified Netlify assembly path into a reproducible recurring command | Same complete static/server/edge/worker/blob contract, clean-install qualification and no hidden provider writes |
-| Next account review | Establish external health alerts, backup freshness and a response owner using available provider capabilities | Prove alert receipt and a recovery exercise; inspect free-tier capabilities before adding services or cost |
-| As code is touched | Split modules where responsibilities or test seams justify it; reduce repeated setup and stale docs | Preserve behavior/security coverage; avoid an unrelated architecture rewrite |
-| After successful rollout | Review protected failure receipts/source snapshots for necessary retention and safe cleanup | Preserve unresolved incident/recovery evidence and reproducible source lineage; no archive deletion, new retention utility or provider action is part of this patch |
-| After measurement | Consider VS Code task shortcuts and native development-build tuning | Wrap existing npm commands; compare elapsed time/failures; no implicit release-ABI or launcher change |
+| About | Buyer and supplier narratives, ownership and current brand | Current public positioning; no checkout |
+| Daily Featured | Four scheduled Thursday businesses, EAT timing, five sponsor placements and business preview | Real schedule read from the hosted database; scheduled presentation is not proof of a TikTok broadcast |
+| Showroom | Fictional business label, four products, product filtering and product details | Real database-backed catalog and loaded product media |
+| Inquiry list | Add/remove item, contact options and unsent Inbox form | FE-075/BE-062 restored Inbox supersedes the older retirement prose |
+| Direct inquiry | Only the opened product appears; saved list retains its separate original selection | No message was submitted |
+| Transport | SharedTrucks Logistics provider intake and CargoChatter presentation credit | FE-076/BE-063: AfricMade team routes today's queue; provider-tenant dispatch is deferred |
+| Shipment access | Separate recipient email/code entry with disabled empty submit | No OTP sent or recipient records accessed |
 
-No provider migration, paid plan, monitoring vendor, credential rotation, global
-editor setting, new lint framework or history rewrite is authorized by this
-review alone. Existing authorization still applies to concrete improvements.
+This is a bounded desktop review. Phone layouts, authenticated owner/staff/admin
+writes, Expo, physical Android, actual email/push delivery and map behavior were
+not newly qualified. Automated map reviews require synthetic tiles; no live OSM
+tiles were fetched for this review.
 
-## Everyday feedback loop
+## Local setup and verification limits
 
-Record relevant gate durations, failure category and avoidable retries in the
-existing protected task receipt. Distinguish product, fixture/data, harness and
-environment failures. Fix a demonstrated recurring cause at its owning boundary;
-keep one-time corrections small. Batch related findings, freeze changed inputs
-once and reuse evidence only when its actual inputs are unchanged.
+The standard development path remains the README's Docker/Supabase bootstrap,
+followed by the guarded development launcher. This host lacks Docker and Supabase
+CLI. The full source check reached the provider-backed account-erasure regression
+and stopped because local Auth/Storage was absent; it did not pass end to end.
+Browser acceptance, container/restore gates and full release qualification remain
+unrun here. Focused SQL, security, types and workflow results belong in traceability.
 
-Use skills to load the relevant procedure, not duplicate AGENTS and every
-operational document in context. Descriptions guide selection; full instructions
-load when applicable. Repo skills do not create an unattended agent or guarantee
-host selection. Fresh-session checks must distinguish explicit use, implicit
-use and prompts that should not select a skill.
+For this workspace, the verified Node binary is under the ignored local tools
+directory. Run project commands with that binary on PATH and `NODE_PATH` unset
+for the command: the host's ambient shared dependency path otherwise makes the
+web-install boundary detect unrelated host packages. Do not weaken the guard or
+change global environment settings. The native test database is loopback-only,
+uses generated protected credentials and disposable random schemas. This host
+isolates command network namespaces, so start the test service and its consumers
+inside one command/session; this limitation does not apply to ordinary local
+Docker development. Stop the test service after its suite.
 
-Measure elapsed gate time, install/build frequency, retries and observed failure
-rate where practical. Token counts, quota headroom, per-release cost and automatic
-routing accuracy are unmeasured. Claim improvements only after observation;
-never collect credentials or customer content as workflow telemetry.
+## Next work
 
-The initial routing review uses these reasoned cases. They are expectations to
-exercise in the actual host, not measured model outcomes:
+1. Publish the reviewed local housekeeping branch and open its pull request.
+   The owner's standing authorization covers routine publication, related fixes
+   and protected merge; complete them without another approval prompt and
+   without bypassing the five checks or required reviews.
+2. Qualify this source through normal CI on a Docker-capable runner; complete
+   owner/staff/admin and phone/Expo workflows when the local provider stack exists.
+3. Keep the signed AfricMade Android/Play/device work in S188 visible. A web deploy
+   or Expo preview does not qualify the next signed binary.
+4. Review the four Dependabot PRs separately, retaining old branches until unique
+   work and artifact lineage are established. Do not bulk-update or delete them.
+5. Establish backup freshness/restore ownership and external health-alert receipt
+   using existing provider capabilities before adding services or paid plans.
 
-| Should select | Representative request |
-| --- | --- |
-| Browser review | “Review the changed owner navigation on desktop and phone” |
-| Browser review | “Click through the Expo product-preview flow and verify Back” |
-| Release | “Qualify the approved Android bundle for submission” |
-| Release | “Prepare recovery of this failed web deployment” |
-| Engineering review | “Audit whether our setup is ready to build and ship” |
-| Engineering review | “Improve project tooling, cost and development workflow” |
-
-Backend-only sorting and a static code review should not select browser review.
-A copy-only edit and an ordinary unit-test run should not select release.
-A small product bug and an unchanged test rerun should not select engineering
-review. Selection does not authorize a provider write.
-
-## Research informing the choices
-
-- [Codex skills](https://learn.chatgpt.com/docs/build-skills): repository-scoped
-  instructions with detail loaded when needed.
-- [Skill evaluation](https://developers.openai.com/blog/eval-skills): realistic
-  activation and behavior matter; valid files alone are insufficient.
-- [GitHub caching](https://docs.github.com/en/actions/concepts/workflows-and-actions/dependency-caching):
-  reuse installed inputs appropriately; caches and artifacts serve different
-  purposes and must not carry secrets.
-- [TypeScript checkJs](https://www.typescriptlang.org/tsconfig/checkJs.html): use
-  installed compiler diagnostics for JavaScript without migrating the app.
-- [VS Code tasks](https://code.visualstudio.com/docs/debugtest/tasks): integrate
-  existing commands when useful rather than add another development system.
-
-External examples inform choices; they do not override user scope or repository
-security, data and hosted-operation requirements.
+No credential rotation, broad RLS/index changes, extra publisher, provider account
+replacement or other-product change is part of this housekeeping patch. The nine
+mutable trigger paths and unnecessary API-role grants have a finite, tested
+correction under BE-065. The password-protection advisor is kept distinct from
+the product's OTP-only Auth policy and review-login exception.

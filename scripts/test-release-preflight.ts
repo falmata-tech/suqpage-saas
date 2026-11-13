@@ -12,12 +12,14 @@ const missing = new RegExp(`complete reviewed ledger through ${LATEST_POSTGRES_M
 function policy() {
   assert.equal(isSupportedPostgresMigrationLedger(full), true);
   assert.equal(isSupportedPostgresMigrationLedger(legacy), true);
+  assert.equal(isSupportedPostgresMigrationLedger(full.slice(0,-1)), true, 'Schema80 remains compatible during the metadata-only rollout.');
+  assert.equal(isSupportedPostgresMigrationLedger(legacy.slice(0,-1)), true);
   for (const invalid of [
-    [], full.slice(0, -1), [...full, LATEST_POSTGRES_MIGRATION_VERSION + 1], [0, ...legacy], [...legacy, -1],
+    [], full.slice(0, -2), [...full, LATEST_POSTGRES_MIGRATION_VERSION + 1], [0, ...legacy], [...legacy, -1],
     full.filter(version => version !== 64), [...full.slice(0, -1), 72],
     ...[1.1, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1, '1', null, undefined].map(value => [value, ...full.slice(1)]),
     [...full].reverse(),
-  ]) assert.equal(isSupportedPostgresMigrationLedger(invalid), false, 'Only exact ordered integer histories are admitted.');
+  ]) assert.equal(isSupportedPostgresMigrationLedger(invalid), false, 'Only exact reviewed ordered integer rollout histories are admitted.');
   for (let mask = 1; mask < 15; mask++) {
     const partial = full.filter(version => version < 27 || version > 30 || Boolean(mask & (1 << (version - 27))));
     assert.equal(isSupportedPostgresMigrationLedger(partial), false, 'Every partial27–30 representation is denied.');
@@ -73,6 +75,13 @@ async function main() {
     const admin = (await db.prepare("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES('preflight@example.test','unused','Readiness fixture','admin',0)").run()).insertedId;
     await preflight();
     await assert.rejects(() => db.runner.transaction(async () => {
+      await db.exec('DELETE FROM schema_migrations WHERE version=81');
+      const before=await ledger();
+      await preflight();
+      assert.deepEqual(await ledger(),before,'Schema80 admission never writes a migration marker.');
+      throw sentinel;
+    }), error => error === sentinel);
+    await assert.rejects(() => db.runner.transaction(async () => {
       await db.exec('DELETE FROM schema_migrations WHERE version BETWEEN 27 AND 30');
       const before = await ledger();
       await preflight();
@@ -102,7 +111,7 @@ async function main() {
 
   // Construct the physical63 prefix in an empty owned fixture. Only fixture
   // setup substitutes forward existence probes; it writes no future markers.
-  // The actual63→77 migration and readiness assertion use the unmodified reader.
+  // The actual63→81 migration and readiness assertion use the unmodified reader.
   const retained = await getEmptyDb();
   try {
     const schema = String((await retained.prepare('SELECT current_schema() name').get()).name);
@@ -126,13 +135,13 @@ async function main() {
     const beforeUser = await retained.prepare('SELECT * FROM users WHERE id=?').get(admin);
     await assert.rejects(() => preflight(), missing);
     assert.deepEqual((await migratePostgresDatabase(retained.runner, schema)).applied, full.filter(version => version >= 64));
-    assert.deepEqual(await versions(), legacy, 'Only64–77 are appended; no27–30 backfill or old data-patch replay.');
+    assert.deepEqual(await versions(), legacy, 'Only64–81 are appended; no27–30 backfill or old data-patch replay.');
     assert.deepEqual(await retained.prepare('SELECT * FROM users WHERE id=?').get(admin), beforeUser);
     assert.ok((await retained.prepare("SELECT to_regclass('tracking_shipments') value").get()).value);
     await preflight();
     assert.deepEqual((await migratePostgresDatabase(retained.runner, schema)).applied, []);
     assert.deepEqual(await versions(), legacy);
   } finally { await closeDbForTests(); }
-  console.log('PASS DEP-049 exact two-ledger readiness: full/retained histories, actual59-entry six-key63→77 upgrade without fake markers, all14partial groups, stale/hole64/future/noninteger rejection, read order and Auth/admin/configuration guards.');
+  console.log('PASS DEP-049/BE-065 exact ledger readiness: full/retained80/81 histories, actual59-entry six-key63→81 upgrade without fake markers, all14partial groups, stale/hole64/future/noninteger rejection, read order and Auth/admin/configuration guards.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

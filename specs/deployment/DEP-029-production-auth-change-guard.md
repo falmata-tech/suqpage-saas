@@ -2,7 +2,7 @@
 id: DEP-029
 title: Guarded production Auth configuration changes
 status: in_progress
-related: [FE-070, BE-059, DEP-049, DEP-048, DEP-032, DEP-028, ADR-0014, DEP-050]
+related: [FE-070, BE-059, DEP-049, DEP-048, DEP-032, DEP-028, ADR-0014, DEP-050, DEP-052]
 owners: [operations, security]
 last_updated: 2026-10-18
 change_level: L3

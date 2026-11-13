@@ -84,6 +84,7 @@ rejects("broader handler exclusion", value => { value.serverFunction.excluded_ro
 rejects("additional handler exclusion", value => { value.serverFunction.excluded_routes.push({ literal: "/api/private" }); });
 
 assert.match(config, /command = "node scripts\/check-web-install.cjs && npm run build"/);
+assert.match(config, /\[build\]\s+base = "\."/, "The web app builds from the repository root, not an auto-detected workspace");
 assert.match(config, /NPM_FLAGS = "--workspace=@africmade\/contracts --include-workspace-root"/);
 assert.match(config, /SUQPAGE_INSTALL_TARGET = "web"/);
 assert.match(config, /publish = "\.next"/, "Only Next output may be selected for adapter packaging");

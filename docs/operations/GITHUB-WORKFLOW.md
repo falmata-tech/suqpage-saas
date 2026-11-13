@@ -4,6 +4,14 @@ DEP-002 owns this contributor workflow. AGENTS.md retains staging, security and
 authorization rules; DEP-049 owns release admission. These instructions do not
 enable an integration or change provider settings.
 
+The owner's standing instruction in AGENTS.md covers routine task branches,
+commits, normal pushes, PRs, related CI/review fixes, protected merges and normal
+Netlify delivery within the requested scope. Continue those steps without asking
+for approval again. Required checks/reviews and separately guarded destructive,
+credential/Auth, signing, recovery and shared-history actions retain their exact
+controls. An actual access or review block is a concrete blocker, not a reason
+to ask again for authority the owner already supplied.
+
 ## Branches and commits
 
 Use GitHub flow: the verified default branch is the integration branch, and a
@@ -47,7 +55,7 @@ skill's bulk-stage or history-rewrite shortcut.
 
 ## Pull request and review
 
-When PR publication is authorized, find the existing PR for the exact head first.
+Under that standing authorization, find the existing PR for the exact head first.
 Create a draft only if none exists; preserve an existing PR's review state.
 Confirm repository, base, head and complete net diff. Use the existing template,
 state the concrete outcome, controlling specs, applicable test results and real
@@ -68,7 +76,7 @@ review feedback within the authorized task and recheck affected evidence.
 
 ## Merge and release
 
-Before an authorized merge, reread the current head/base, mergeability, unresolved
+Before a merge within the authorized task, reread the current head/base, mergeability, unresolved
 reviews and required-check results. Our existing required jobs are `core`,
 `browser`, `container`, `dependency` and `postgres`; actual provider protection
 is the enforcement authority. A changed base may require fresh checks. Never
@@ -98,11 +106,15 @@ does not guarantee future integration behavior.
 Do not uninstall the App for other repositories or delete past deploys as branch
 cleanup.
 
-Current guarded Netlify artifact publication is separate from a Git merge.
-Source-integration approval does not admit an unreviewed production rollout. A
-future Git-connected production branch could auto-deploy; never add another
-publishing path without reconciling release admission, environment isolation and
-provider settings. A preview URL alone does not prove isolation or release safety.
+DEP-052 now governs ordinary web publication through the existing Netlify Git
+connection to protected `main`. The initial current-main build is qualified and
+published; successful future main builds publish automatically. Existing GitHub
+checks protect source integration; Netlify build/runtime results remain separate
+evidence. PR/branch previews stay disabled until an isolated backend exists.
+Do not add a parallel Actions/CLI publisher, production migration or Auth write.
+The previous manual artifacts and deployment remain recovery records. A changed
+adapter/runtime or failed build needs fresh qualification; a preview URL alone
+never proves release safety or backend isolation.
 
 After merge, verify the merge result/default head and required post-merge checks;
 record what source is integrated and what artifact is actually deployed. Remove

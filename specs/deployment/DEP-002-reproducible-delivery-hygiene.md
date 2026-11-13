@@ -2,13 +2,59 @@
 id: DEP-002
 title: Reproducible delivery and repository hygiene
 status: in_progress
-related: [FE-035, BE-003, BE-025, DEP_BASE, ADR-0002, ADR-0003, DEP-010, DEP-022, DEP-025]
+related: [FE-035, BE-003, BE-025, DEP_BASE, ADR-0002, ADR-0003, DEP-010, DEP-022, DEP-025, DEP-052, ADR-0032]
 owners: [operations, security]
-last_updated: 2026-10-26
+last_updated: 2026-11-12
 change_level: L3
 ---
 
 # DEP-002 — Reproducible delivery and repository hygiene
+
+## S189 — verified takeover and deployment readiness (in progress)
+
+The owner requests an actual application comparison followed by housekeeping,
+provider verification and automatic Netlify delivery after a GitHub merge.
+The ordered plan is in the active checklist. Reconcile documentation against
+current source and independently observed provider state; an old unchecked box
+does not establish missing implementation. Preserve prior failures and distinguish
+source, test, live publication, local native binaries and installed-device evidence.
+
+GIVEN the repository is being resumed WHEN housekeeping starts THEN inspect
+the clean baseline, exact main head/checks, retained branches, local runtime
+prerequisites and provider identities before editing or mutating a hosted target.
+GIVEN a delivery path is changed WHEN implementation starts THEN specify required
+checks, exact source, isolated contexts, artifact/runtime admission, recovery and
+separate schema/Auth operations under DEP-026/DEP-029/DEP-049 before enabling it.
+No credential rotation, production fixture writes, branch deletion or provider
+recreation follows from an audit finding alone.
+
+Test plan: spec/traceability and documentation validation; existing workflow and
+Netlify/readiness tests; focused security/database tests for any changed invariant;
+source-bound browser and provider checks for the surfaces actually exercised.
+Rollout follows the accepted delivery contract; blocked access remains visible
+while independent preparation continues.
+
+### Standing authorization for routine follow-through
+
+The owner's 2026-11-12 instruction authorizes agents to finish routine work in
+the requested scope without separate approval for each GitHub step. This includes
+task branches, scoped commits, normal pushes, PR creation/update, related CI and
+review fixes, protected merges after required checks/reviews pass, and ordinary
+Netlify publication through DEP-052. The instruction persists across sessions;
+do not recreate a per-action approval gate in a skill or handoff document.
+
+GIVEN work remains within the owner's requested scope WHEN the next step is a
+routine reversible implementation or qualified GitHub/delivery action THEN
+perform and verify it without another confirmation. GIVEN scope or a consequential
+choice is unresolved, or the operation changes credentials, rewrites shared
+history, destroys retained data, or needs separately guarded Auth/signing/recovery
+admission THEN prepare the exact reviewable result and resolve that boundary.
+Required checks, reviews, tenant/data controls, backups and actual provider
+permissions remain mandatory; never weaken them to avoid a prompt.
+
+Verification: review AGENTS.md and the GitHub workflow for consistent scope and
+exceptions; validate spec links and existing workflow guards. Actual PR/check,
+merge and delivery results are recorded in S189, not inferred from this policy.
 
 ## S184 — operations fixture waits for permanent PostgreSQL (ready)
 
