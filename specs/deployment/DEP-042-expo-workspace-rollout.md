@@ -135,11 +135,18 @@ cannot run this native module: use a rebuilt development client or standalone AP
 Compatibility research and source links: docs/MOBILE-MAP-RESEARCH.md.
 
 S50 dependency remediation keeps Expo's SDK versions while using the patched
-decode-uri-component 0.5.0 and xcode's compatible UUID v4 export from 11.1.1.
+decode-uri-component 0.5.1 and xcode's compatible UUID v4 export from 11.1.1.
 The former changes from CommonJS to ESM: a version-checked install adapter updates
 query-string 7.1.3's single import to its default export, failing closed on source
 drift. Test query round trips (including Ethiopic and malformed input), native
 bundling and Xcode UUID generation; retain the moderate-severity audit gate.
+
+S191 closes the subsequent GHSA-qr28-fpjm-wq7f decoder issue without changing
+Expo SDK or query-string versions. GIVEN many distinct malformed percent-encoded
+runs WHEN query-string decodes the input THEN the isolated compatibility test
+finishes within its three-second bound, alongside Unicode round-trip checks.
+This decoder patch does not waive the remaining native build-tool advisories or
+admit an Android binary with missing release inputs.
 
 ## S59 — approved coordinated release, 2026-10-05
 

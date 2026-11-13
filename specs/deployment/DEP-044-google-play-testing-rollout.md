@@ -10,6 +10,27 @@ change_level: L4
 
 # DEP-044 — Google Play testing and store rollout
 
+## S191 — current Android successor preparation
+
+The owner requested completion after S190's business-only transport change,
+merged in PR #59. Version4 remains the next candidate; no new artifact has
+been compiled. The existing canonical keystore was recovered from the retained
+Suqpage EAS project and independently verified against `release-policy.json`.
+The standalone AfricMade EAS project has no uploaded Android credentials; no
+provider credential or setting was changed during recovery.
+
+The authentic pinned Firebase client and signed v3 predecessor are still missing
+from this checkout. Firebase readback confirms the exact admitted project/app
+and signing fingerprints, but both configuration-download attempts timed out.
+Library and GitHub Releases have no matching previous APK. Resume artifact
+preparation only after recovering those inputs; do not fabricate a client, use
+first-release admission for an existing app, or generate a replacement signer.
+
+DEP-042 owns the 0.5.1 URL-decoder patch and distinct-run regression. Fresh locked
+native audit still fails on remaining build-tool findings; no exception has
+been admitted and no compilation, physical-device or Play result is claimed.
+The active checklist and traceability own the remaining steps and evidence.
+
 ## S188 — post-identity Android successor and current Play artwork
 
 The signed version3 bundle predates FE-070/BE-059 S188 identity corrections and

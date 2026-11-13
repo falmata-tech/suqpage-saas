@@ -8,6 +8,35 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S191 Android release preparation
+
+DEP-042 pins `decode-uri-component` 0.5.1 for GHSA-qr28-fpjm-wq7f. The existing
+query-string import adapter is unchanged. `test-mobile-dependencies.cjs` adds
+32,000 distinct malformed percent runs in a three-second child-process bound;
+the existing Unicode/repeated-malformed-input/UUID checks still pass. A clean
+locked install, `test:mobile:build`, mobile typecheck and the public-script
+static gate pass. Dependency changes are limited to the decoder pin; no SDK
+upgrade or product UI change is introduced.
+
+The full local `npm run check` passes its prechecks and stops at the first
+PostgreSQL fixture because this session has no fixture database URL. This is an
+environment failure; required provider-backed remote checks remain necessary.
+
+The current native audit has three high, six moderate, one low and zero critical
+findings after the decoder patch (previously six high). Remaining roots are
+node-forge, Zod, glob/minimatch and deepmerge in Expo build tooling. The audit
+remains failed; its SHA-256 is
+`fd6971ef9069c443f2bee3f28b9594f183df51788bc1b11337085e96e7fcbd2e`.
+No finding or historical artifact exception is waived.
+
+The recovered existing keystore/password pass an independent `keytool`
+certificate comparison with the pinned release policy. Firebase's exact
+project/app/certificates are independently visible, but configuration downloads
+time out. The pinned client and canonical v3 APK are absent; no Android build
+or signed-artifact/device/Play qualification is claimed. DEP-044 S191 and the
+active checklist retain the missing-input dependencies. Current-head protected
+checks and source integration remain required for this patch.
+
 ## S190 business dashboard transport only
 
 | Spec | Implementation | Current evidence |
