@@ -11,8 +11,9 @@ Play/physical-device qualification. Current work and release blockers belong in
 builds the actual React Native development client on a standard Ubuntu runner
 and starts an accelerated API 35 x86_64 emulator. It runs on relevant pull requests
 and main changes, with manual dispatch available after integration. The first
-native qualification is in progress; configuration or browser passes alone do
-not establish an emulator pass.
+native English smoke is qualified in run43529393814: native navigation, keyboard,
+Back, inquiry submission and independent PostgreSQL verification pass. See
+traceability for the exact source/artifact and inspected visual decision.
 
 The disposable app is **AfricMade QA**, package `com.africmade.qa`. It uses the
 runner-local API at `http://10.0.2.2:3000`, a fresh local PostgreSQL fixture schema

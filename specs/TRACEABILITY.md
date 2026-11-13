@@ -8,63 +8,46 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
-## S195 native Android QA (qualification in progress)
+## S195 native Android QA — initial smoke qualified
 
-DEP-053 / ADR-0033 map the actual Android workflow to
-`.github/workflows/native-android.yml`, the isolated `native-qa-config.cjs`,
-`scripts/test-native-qa-config.cjs` and the `scripts/native-qa-*` backend/UI/
-persistence adapters. Initial QA identity/negative checks, exact static binding
-checks and root/mobile types pass. The generic script selector excludes app
-companions; its first refusal was followed by the existing in-memory checker on
-the two exact public files. A missing JSON-module diagnostic was corrected by
-reading the actual public JSON fixture explicitly, then static checks pass.
-These are configuration/harness results, not emulator or release evidence.
+DEP-053 / ADR-0033 map the isolated configuration, actual Android driver, disposable
+backend and saved-inquiry verifier to `.github/workflows/native-android.yml` and
+`scripts/native-qa-*`. Configuration/negative cases, actual driver helpers,
+root/mobile types and existing release safety pass. Generic script checking
+refused app companions; exact in-memory checks passed without changing its guard.
 
-First run 43519737758 compiled the actual QA APK in 12m17s and booted an accelerated
-API35 emulator in 41s. Its public API preflight failed before app installation:
-the harness selected an output directory refused by the existing Next guard.
-The exact bad configuration reproduces that refusal; the existing default passes.
-The corrected harness uses that default and verifies its real API before costly
-compilation. Exact native-input/debug-package/digest caching is being qualified to
-avoid recompilation for JavaScript/UI-harness-only iterations. Source/JS identities
-remain separate. The five quality jobs for the initial source passed; emulator
-UI/screenshot/persistence and corrected-head gates remain pending. Corrected run
-43522909389 passes API preflight in34s, all five quality jobs, debug APK admission
-and cache save/recheck; its app is installed/launched. The next driver observation
-fails while the real development app is still bundling (16% in its screenshot),
-not on an app assertion or fatal crash. The driver now treats a missing hierarchy
-during a busy launch as bounded non-readiness, clears old dumps and preserves its
-existing deadline. Actual-function controlled-port tests cover retry, permanent
-failure and disconnected-device propagation; the next native run remains required.
-Run43525289532 restores the exact cached APK, but Expo identifies its otherwise
-partial native directory as disposable and clears it during generation. Admission
-correctly fails before installing the now-missing APK. Cache layout v2 keeps only
-the validated client and identity outside generated native output; prebuild can
-recreate that output without deleting the client. Native qualification and an
-actual cache-hit run are still pending, not inferred from a successful build.
+Source `345f64bf9f1fdb3258fd22ca8ed0aa214edfd06f`, tree
+`a955366544b10ee029df90fcf3164a63f295ec9f`: native run43529393814 and all five
+quality jobs in43529393782 pass. The actual API35/x86_64 app completes ten states
+in151s: map/list/search/keyboard, product, native Back retaining search, selection,
+Inbox form/submission, About and Login entry. Independent PostgreSQL readback
+proves exactly one inquiry for the selected tenant/product and unchanged other
+businesses. No fatal exception is reported. Source-bound visual decision: PASS
+for this English smoke's inspected screens, readable actions and form/keyboard
+states; the map background is synthetic and proves no external tile availability.
 
-Run43526056334 (source `d445a48`, tree `1f52e87`) passes all five quality
-jobs, v2 APK admission, backend preflight and Android launch. The inspected native
-screens show Market/map, product results and a real Android search keyboard;
-no fatal exception is reported. The journey stops before product navigation:
-the typed product name also matches the search EditText, so the driver retaps
-that input instead of the product Button. The driver now selects the observed
-button class for product actions, with an actual-function regression for the
-ambiguous label. Inquiry persistence and the v2 cache-hit run remain pending.
-Artifact14086097451 SHA256 `703e06a46ac973fda14e703e757b544a218c7f430680571aadb121abafbad124`.
-Run43528344909 (`65fde1e`, tree `e199230`) proves an exact v2 cache hit
-survives generation and APK admission, avoiding the ten-minute compile. The real
-native journey passes product navigation, native Back/search retention and adding
-an item. Inspected product/added screenshots have readable identity, price,
-availability and actions. It stops before submission: a one-pixel clipped name
-label is mistaken for an input, leaving the quantity focused; subsequent swipes
-cross the keyboard. The driver now targets EditText, rejects clipped nodes and
-hides only an Android-observed IME before scrolling to another input. Actual-function
-tests cover these selectors and conditional Back. Submission remains pending.
-Artifact14085944291 SHA256 `5ca949afd4036f981a3753f97c264115f2ed706fc64251cd483b404e20f50e3a`.
-DEP-044 signed-release inputs and
-Auth/push/physical-device qualification remain separate; S194 demo simulation and
-deferred S192 Google verification are preserved in the checklist.
+The inspected cache records native source `d445a48` separately from current Metro
+JavaScript. Debug QA package `com.africmade.qa`, APK SHA256
+`568f3a90c8d98b4dc3347c45db767656b01a71ca9fdf1b3918df31a17c8b4484`.
+Exact v2 cache reuse survives prebuild and avoids the ten-minute native compile.
+Artifact14086218967 SHA256
+`636e2acc160fefa8b68b4cf387ed3b7b063fff8b5f13635e070c3ab0b59d80b7`
+retains synthetic screenshots, hierarchies and reports for seven days.
+
+Retained failed attempts and corrected causes:
+
+| Run | Classification and correction |
+|---|---|
+| 43519737758 | Harness: unsupported Next output directory prevented API startup; use/verify the existing default before compile. Native compilation and emulator boot already passed. |
+| 43522909389 | Harness: missing UI hierarchy during actual bundling; bounded fresh-dump retry retains the deadline and propagates real device errors. |
+| 43525289532 | Cache layout: prebuild deleted a partial native directory; keep the inspected client outside generated output, with exact input/package/digest admission. |
+| 43526056334 | Native selector: typed search text matched the product action; target the observed Button class. |
+| 43528344909 | Native selector/IME: clipped label and keyboard swipes targeted the wrong input; require EditText/visible bounds and dismiss only an observed keyboard. Product/Back/selection and v2 cache reuse passed. |
+
+`docs/MOBILE-TESTING.md` maps web/native parity and further coverage. This initial
+smoke does not qualify owner Auth/edit/publish, locale/large-text/offline cases,
+FCM/push, physical devices or Play. Production signing and DEP-044 admission are
+unchanged. S194 simulation and deferred S192 Google verification remain open.
 
 ## S193 phone messaging handoff and demo destinations
 

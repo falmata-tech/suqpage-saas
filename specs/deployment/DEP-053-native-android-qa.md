@@ -1,7 +1,7 @@
 ---
 id: DEP-053
 title: Isolated native Android development testing
-status: in_progress
+status: done
 related: [DEP-042, DEP-044, FE-053, ADR-0033]
 owners: [operations, frontend, security]
 last_updated: 2026-11-13
@@ -80,7 +80,16 @@ and explicit failed step. A passed browser test cannot substitute for that resul
 | Ordinary API persistence and tenant boundary | integration | `scripts/native-qa-backend.ts`, `scripts/native-qa-verify.ts` |
 | Repeatable bounded runner and safe artifacts | operations | workflow/script checks, first native workflow run |
 
-## Quality and limits
+## Evidence:
+
+Native run43529393814 and source-matched quality run43529393782 pass. The actual
+Android smoke completes ten screen states and independently verifies one saved
+tenant/product inquiry with other businesses unchanged. Screenshots were inspected
+for the scoped English visual pass. Exact source, APK/cache identities, prior
+failures and remaining coverage are recorded in
+[S195 traceability](../TRACEABILITY.md#s195-native-android-qa--initial-smoke-qualified).
+
+## Remaining coverage
 
 The QA app uses the existing English UI and accessibility labels, changes no
 merchant content and publishes no production behavior. Add locale/font-scale,
@@ -100,5 +109,5 @@ Production release, hosting, credentials and databases require no mutation.
 ## Readiness
 
 Scope, exact QA target/identity, negative contracts, tests and rollout are explicit.
-Master §22 will describe the implemented native QA boundary after qualification.
+Master §22 describes the implemented native QA boundary and its remaining limits.
 Ordered execution is checklist S195; the recurring demo simulator remains S194.

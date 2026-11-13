@@ -101,13 +101,15 @@ instance while developing, inspect its UI and compare web/native capabilities.
 2. [x] Specify an isolated QA build/data target and reproducible emulator/UI
    workflow with screenshots, errors, interactions and web/native parity cases.
    Preserve production signing, Auth, customers and release-artifact admission.
-3. [ ] Boot an emulator, run actual app workflows, inspect evidence and fix
+3. [x] Boot an emulator, run actual app workflows, inspect evidence and fix
    demonstrated native gaps; wire repeatable checks into development/CI.
 
-Current step: 3. The workspace has no `/dev/kvm`/SDK. Use an accelerated standard
-GitHub Linux runner (public repo; no new subscription), separately packaged debug
-app, disposable local PostgreSQL/API, synthetic map and native ADB UI evidence.
-DEP-044 production signing/Firebase/prior-artifact admission remains unchanged.
+Initial smoke complete: run43529393814 passes ten actual Android states and the
+saved tenant/product inquiry check in151s; all five source-matched quality jobs
+pass. Screenshots were inspected. Exact native caching avoids the ten-minute
+compile for UI-only iterations. Broader locale/filter/offline/owner workflows
+remain follow-ups in `docs/MOBILE-TESTING.md`; DEP-044 signing/Firebase/physical/
+Play admission remains separate. Protected integration/delivery follows DEP-052.
 
 ### S192 — AfricMade support mailbox (ADR-0031 / DEP-029)
 
