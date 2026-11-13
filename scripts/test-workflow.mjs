@@ -9,6 +9,7 @@ const releaseScript = fs.readFileSync("scripts/release.sh", "utf8");
 const acceptanceRunner = fs.readFileSync("scripts/acceptance-runner.mjs", "utf8");
 const typecheckScript = fs.readFileSync("scripts/typecheck.mjs", "utf8");
 const agentContract = fs.readFileSync("AGENTS.md", "utf8");
+const postgresReadiness = fs.readFileSync("scripts/test-postgres-readiness.mjs", "utf8");
 const masterPrompt = fs.readFileSync("AFRICMADE-MASTER-PROMPT.md", "utf8");
 const showroomWorkflow = fs.readFileSync("showroom-projects/WORKFLOW.md", "utf8");
 const showroomBrief = fs.readFileSync("showroom-projects/_template/BRIEF.md", "utf8");
@@ -88,6 +89,8 @@ assert.ok(dependency.includes(`- run: ${webAudit}`), "Dependency CI must audit a
 assert.doesNotMatch(core + dependency, /npm audit --omit=dev/, "Web PR jobs must not substitute the native toolchain audit for web admission");
 assert.match(postgres, /node-version: 24\.18\.1/, "PostgreSQL CI must use the supported Node baseline");
 assert.match(postgres, /- run: npm run test:postgres-readiness/, "PostgreSQL CI must run the disposable migration rehearsal");
+assert.ok(postgresReadiness.includes("'test-postgres-security-hygiene.ts'"),
+  "Required PostgreSQL CI must exercise the security housekeeping regression");
 
 for (const [action, tag] of [
   ["actions/checkout", "v7.0.1"],

@@ -78,6 +78,9 @@ ledger admission and rejection, and `scripts/test-native-postgres.ts` covers
 fresh installation. Existing cross-tenant trigger/security,
 native installation and migration tests remain applicable. Typecheck/build and
 spec/workflow validation supplement these database outcomes.
+The required PostgreSQL CI job must run the security regression through
+`scripts/test-postgres-readiness.mjs`; wiring only the local npm suite is
+insufficient. The existing workflow contract checks this connection.
 
 ## Rollout and rollback
 

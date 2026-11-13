@@ -106,6 +106,9 @@ provider resources, customer data, legacy compatibility and prior release eviden
    merge after all required checks/reviews pass, and verify post-merge CI plus
    the actual automatic Netlify deployment. No further routine confirmation is
    needed; record terminal source/deployment evidence before closing this step.
+   CI review also found that the new security regression was wired only into
+   the local npm suite. Add it to the existing required PostgreSQL rehearsal
+   before qualifying the PR head; retain every other required check.
 8. [x] Update master/specs/traceability/runbooks with verified outcomes, remaining
    access/device limits and the next concrete step. No automatic migration,
    Auth/credential replacement, account cleanup or other-product change belongs
