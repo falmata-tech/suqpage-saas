@@ -27,6 +27,13 @@ PostgreSQL late-failure, private-boundary, replay and next-stage tests require
 managed CI because this workspace has no local Docker/PostgreSQL service. No
 production pause, media change, credential write or new signed APK is claimed.
 
+Candidate`995b11f` in43563904767 passes legacy simulator PostgreSQL and reaches
+the new successful correction, but its preservation assertion incorrectly expects
+the catalog's derived`media` projection to retain the old video. Compare that
+projection to the exact reviewed after-gallery, while continuing to compare every
+other product field (including image identity) unchanged. Retain the failed run;
+the updated rollback/replay/continuation case still requires a complete rerun.
+
 ## S196 full public-demo catalog — qualified and deployed
 
 The owner requires all public demo businesses and all current products. The

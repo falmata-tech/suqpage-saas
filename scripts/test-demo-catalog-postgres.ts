@@ -148,7 +148,7 @@ async function main(){
   const corrected=(await runtimeCatalogByHandle(mediaTarget.handle))!;
   for(const p of corrected.products){const before=mediaCatalog.products.find(x=>x.id===p.id)!;
    assert.deepEqual(productMedia(p),correction.products.find(x=>x.productId===p.id)!.afterMedia);
-   for(const [key,value] of Object.entries(before))if(!['video_ref','media_json'].includes(key))assert.deepEqual(p[key as keyof typeof p],value,key);
+   for(const [key,value] of Object.entries(before))if(!['video_ref','media_json','media'].includes(key))assert.deepEqual(p[key as keyof typeof p],value,key);
   }
   assert.deepEqual(await correctDemoMedia(correction),{duplicate:true});assert.equal(await snapshot(mediaTarget.businessId),mediaAfter);
   await assert.rejects(()=>correctDemoMedia({...correction,coverVideoRef:'youtube:NJMPGgcDylY'}),/different reviewed/);
