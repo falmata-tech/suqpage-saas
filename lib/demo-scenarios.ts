@@ -10,7 +10,7 @@ export type DemoScenarioDefinition={key:DemoScenarioKey;version:number;productKi
  facts:Record<FactsKey,FactsProfile>;stages:readonly DemoScenarioStage[]};
 
 const definitions:Record<DemoScenarioKey,DemoScenarioDefinition>={
- 'seasonal-harvest':{key:'seasonal-harvest',version:1,productKind:'standard_product',categories:['agriculture-growers'],facts:{
+ 'seasonal-harvest':{key:'seasonal-harvest',version:1,productKind:'standard_product',categories:['agriculture-growers','food-farming'],facts:{
   planned:{availability:'coming_soon',capacity:'planned',leadTime:'Next example harvest in 5–7 days',pricePercent:100},
   available:{availability:'available',capacity:'normal',leadTime:'Dispatch in 1–2 working days',pricePercent:100},
   limited:{availability:'limited',capacity:'limited',leadTime:'Dispatch in 1–2 working days',pricePercent:105},

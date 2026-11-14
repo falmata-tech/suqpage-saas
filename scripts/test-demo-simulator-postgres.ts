@@ -164,6 +164,39 @@ async function main(){
   assert.notEqual(await readPublicShopRevision(unregistered.handle),revision,'Page-only publication changes the public revision independently.');
   assert.equal((await runtimeCatalogByHandle(unregistered.handle))!.business.content_version,businessVersion);
   assert.equal(await readPublicShopRevision(privateDemo.handle),null);assert.equal(await readPublicShopRevision('missing-example'),null);
+  // A private operator request calls the same enrollment path while paused.
+  // Only the explicitly empty unit can be initialized, through ordinary upkeep.
+  const queued=await make('queued-example'),stale=await make('stale-queued-example');
+  await db.prepare("UPDATE products SET quantity_unit='' WHERE id=?").run(queued.productId);
+  await db.prepare("UPDATE products SET quantity_unit='' WHERE id=?").run(stale.productId);
+  const queue=async(input:DemoEnrollmentInput,changes:Record<string,unknown>={})=>{
+   const catalog=await runtimeCatalogByHandle(input.handle),draft=await ownerPagePort.read(input.businessId);
+   const publication=await db.prepare('SELECT MAX(revision) revision FROM owner_page_publications WHERE business_id=?').get(input.businessId);
+   await db.prepare('INSERT INTO demo_simulator_requests(business_id,input_json,requested_at) VALUES(?,?,?)').run(input.businessId,JSON.stringify({...input,initializeUnit:true,
+    expectedContentVersion:catalog!.business.content_version,expectedDraftVersion:draft!.version,expectedPageRevision:publication.revision,...changes}),now);
+  };
+  await db.exec('UPDATE demo_simulator_control SET enabled=0,database_limit_bytes=268435456 WHERE id=1');
+  const queuedBefore=await snapshot(queued.businessId),realQueueBefore=await snapshot(real.businessId);
+  await queue(queued);await queue(real);
+  const admission=await runDemoSimulatorTick(now);assert.equal(admission.status,'disabled');assert.equal(admission.enrolled,1);assert.equal(admission.enrollmentRejected,1);
+  assert.equal((await db.prepare('SELECT enabled FROM demo_simulator_control').get()).enabled,0);
+  assert.equal((await db.prepare('SELECT quantity_unit FROM products WHERE id=?').get(queued.productId)).quantity_unit,'kg');
+  assert.notEqual(await snapshot(queued.businessId),queuedBefore);assert.equal(await snapshot(real.businessId),realQueueBefore);
+  assert.equal((await get(queued.businessId)).stage,-1,'Admission never advances a stage.');
+  await queue(stale,{expectedContentVersion:999});const staleBefore=await snapshot(stale.businessId);
+  assert.equal((await runDemoSimulatorTick(now)).enrollmentRejected,1);assert.equal(await snapshot(stale.businessId),staleBefore);
+  assert.equal((await db.prepare('SELECT quantity_unit FROM products WHERE id=?').get(stale.productId)).quantity_unit,'');
+  // A late duplicate refusal occurs after normal unit upkeep. Its savepoint
+  // must undo that catalog/version/history write before recording rejection.
+  const duplicate=await make('duplicate-request');await db.prepare("UPDATE products SET quantity_unit='' WHERE id=?").run(duplicate.productId);
+  await db.prepare(`INSERT INTO demo_simulator_enrollments(business_id,handle,owner_user_id,provider_user_id,product_id,scenario_key,scenario_version,
+   parameters_json,baseline_page_json,baseline_description,expected_hash,due_at,enrolled_at,status)
+   SELECT ?,?,?,?,?,scenario_key,scenario_version,parameters_json,baseline_page_json,baseline_description,expected_hash,due_at,enrolled_at,'paused'
+   FROM demo_simulator_enrollments WHERE business_id=?`).run(duplicate.businessId,duplicate.handle,duplicate.ownerUserId,duplicate.providerUserId,duplicate.productId,a.businessId);
+  await queue(duplicate);const duplicateBefore=await snapshot(duplicate.businessId);
+  assert.equal((await runDemoSimulatorTick(now)).enrollmentRejected,1);assert.equal(await snapshot(duplicate.businessId),duplicateBefore);
+  const malformed=await make('malformed-request');await db.prepare('INSERT INTO demo_simulator_requests(business_id,input_json,requested_at) VALUES(?,?,?)').run(malformed.businessId,'{"businessId":0,"unknown":true}',now);
+  assert.equal((await runDemoSimulatorTick(now)).enrollmentRejected,1);assert.equal(await get(malformed.businessId),undefined);
   console.log('PASS BE-067 PostgreSQL: coherent normal writes/public reads, real/new/private exclusion, drift, overlap/retry/restart, atomic failure isolation, budgets and private state.');
  }finally{await closeDbForTests();}
 }

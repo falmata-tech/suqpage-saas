@@ -163,3 +163,16 @@ source-bound local QA fixture advances through ordinary scenario commands while
 the actual product screen stays open. The driver waits for Limited availability
 and retains before/after screenshots plus independent public-read receipts.
 This local synthetic identity is never a hosted Auth account or session.
+
+Hosted registration uses private `demo_simulator_requests` rows for exact reviewed
+inputs and content/draft/publication versions. A disabled scheduled worker admits
+at most two per tick through ordinary enrollment, then stays disabled. An explicit
+`initializeUnit` may fill only an empty selling unit using normal product upkeep;
+all related preparation rolls back on refusal. Existing units are preserved.
+Accepted/rejected outcomes are private and contain no raw exception. Active
+simulation does not process requests. This avoids a public administration route or
+copying management credentials into the application.
+
+The public no-store health endpoint includes validated build commit/deployment IDs
+when Netlify supplies them at build time. Only these public identifiers are
+embedded; no credential or private simulator state enters health or client code.

@@ -74,7 +74,16 @@ Netlify's 30-second limit. A server-only control starts disabled, supports pause
 and enforces explicit per-day mutation and database-size budgets. Budget pressure
 pauses demo work; it never deletes immutable history or blocks real users.
 
-The control, enrollment and seven-day bounded operational run records are private
+Operator enrollment requests are private database records, never an HTTP/admin
+endpoint. The disabled worker admits at most two explicit requests per tick using
+the ordinary enrollment checks, reviewed content/draft/publication versions and
+exact demo owner/product bindings. It records accepted/rejected outcomes and never
+enables itself. When explicitly requested, an empty product unit may be initialized
+through ordinary product upkeep before enrollment; an existing unit is preserved.
+A refused request rolls back all preparation. Active simulation does not consume
+requests. Migration creates no request or enrollment.
+
+The control, requests, enrollment and seven-day bounded operational run records are private
 PostgreSQL tables with RLS and no anon/authenticated/service-role access. Only the
 existing server runtime roles receive the required privileges. Do not expose
 owner UUIDs, baseline/private state or service controls in public DTOs/logs.
@@ -102,6 +111,10 @@ occurs and excluded real/private data remains byte-for-byte unchanged.
 GIVEN an intermediate command/database failure WHEN a stage ends THEN all its
 related writes and notifications roll back, progress does not advance and a
 bounded generic failure is observable. GIVEN a pause/budget limit THEN writes stop.
+
+GIVEN an explicit private enrollment request WHEN the disabled worker processes
+it THEN current versions/identity and the ordinary enrollment contract govern it,
+partial preparation rolls back on refusal, and simulation stays disabled.
 
 ## Test plan
 

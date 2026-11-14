@@ -1,6 +1,6 @@
 // BE-067. Private operational state; immutable merchant histories stay in their
 // existing tables. No enrollment is inferred or created by the migration.
-export const DEMO_SIMULATOR_TABLES = ['demo_simulator_control','demo_simulator_enrollments','demo_simulator_runs'] as const;
+export const DEMO_SIMULATOR_TABLES = ['demo_simulator_control','demo_simulator_enrollments','demo_simulator_runs','demo_simulator_requests'] as const;
 export const DEMO_SIMULATOR_SCHEMA_SQL = `
 CREATE TABLE demo_simulator_control (
  id INTEGER PRIMARY KEY CHECK(id=1), enabled INTEGER NOT NULL DEFAULT 0 CHECK(enabled IN (0,1)),
@@ -11,6 +11,14 @@ CREATE TABLE demo_simulator_control (
  pause_reason TEXT NOT NULL DEFAULT '' CHECK(pause_reason IN ('','operator','daily_budget','database_budget'))
 );
 INSERT INTO demo_simulator_control(id) VALUES(1);
+CREATE TABLE demo_simulator_requests (
+ business_id INTEGER PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
+ input_json TEXT NOT NULL CHECK(length(input_json)<=6000),
+ status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','accepted','rejected')),
+ reason TEXT NOT NULL DEFAULT '' CHECK(reason IN ('','enrollment_failed')),
+ requested_at BIGINT NOT NULL, processed_at BIGINT NOT NULL DEFAULT 0
+);
+CREATE INDEX demo_simulator_requests_pending_idx ON demo_simulator_requests(requested_at,business_id) WHERE status='pending';
 CREATE TABLE demo_simulator_enrollments (
  business_id INTEGER PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
  handle TEXT NOT NULL, owner_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -38,6 +46,7 @@ CREATE TABLE demo_simulator_runs (
 );
 CREATE INDEX demo_simulator_runs_created_idx ON demo_simulator_runs(created_at);
 ALTER TABLE demo_simulator_control ENABLE ROW LEVEL SECURITY;
+ALTER TABLE demo_simulator_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE demo_simulator_enrollments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE demo_simulator_runs ENABLE ROW LEVEL SECURITY;
 `;

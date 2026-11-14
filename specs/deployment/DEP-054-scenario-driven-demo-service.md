@@ -40,6 +40,10 @@ function duration; measure actual retained snapshot growth rather than assuming
 unlimited free capacity. Do not expand provider storage/billing or delete public
 history as automatic cleanup. A budget/authority/schema failure pauses demo work.
 
+The ordinary no-store health response may include only validated public build
+commit, deployment and site IDs, captured at build time, so automatic delivery can be
+verified independently of dashboard access. It exposes no secrets or private state.
+
 Record source/deployment identity where available, scenario/stage/run slot,
 generic result/category, counts, versions and durations. Keep owner identities,
 contacts, baselines, customer data and credentials out of general logs/public
@@ -63,7 +67,10 @@ publications and all real-account history are outside that retention.
    the control disabled. Verify82, private privileges and healthy public reads.
    This code-before-schema order preserves readiness because the earlier app
    deliberately refuses a future82 ledger. Verify the published function schedule.
-5. Enroll only exact reviewed marked demos/owner identities/products with baseline
+5. Submit private enrollment requests only for exact reviewed marked demos/owner
+   identities/products, bound to reviewed content/draft/publication versions. The
+   disabled scheduled worker calls ordinary enrollment and records admission;
+   there is no public endpoint or management credential in the runtime. Enroll with baseline
    and version fences. Exclude private reviewer, inactive and all real accounts.
    Stage and inspect a coherent canary, then enable bounded recurring execution
    under the owner's standing task authorization. No repeated routine approval.
@@ -78,7 +85,10 @@ publications and run evidence; code rollback never restores past data. A failed
 or ambiguous hosted mutation stops further writes for exact diagnosis; never
 bulk restore or repeat a seed. Any later baseline restoration uses reviewed
 ordinary commands and fresh version/identity checks, never historical-row edits.
-Normal customer signup/use remains available while demo work is paused.
+After82 is recorded, do not redeploy an81-only source that refuses a future
+ledger. Keep an82-compatible qualified build or roll forward; the first rollback
+is the private pause control. Normal customer signup/use remains available while
+demo work is paused.
 
 ## Scenarios
 

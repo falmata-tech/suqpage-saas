@@ -8,7 +8,7 @@ assert.match(postgresCatalogSource, /option_groups WHERE product_id IN/);
 assert.match(postgresCatalogSource, /option_values WHERE option_group_id IN/);
 assert.doesNotMatch(postgresCatalogSource, /products\.rows\.map\(async/);
 assert.match(postgresCatalogSource, /getCatalogByBusinessId\(business\.id, false, business\)/);
-assert.match(showroomPageSource, /const catalog\s*=\s*await runtimeCatalogByHandle\(handle\);\s*if\s*\(!catalog\)\s*\{\s*const existing\s*=\s*await runtimeBusinessByHandleAny\(handle\)/);
+assert.match(showroomPageSource, /const snapshot\s*=\s*await runtimePublicShowroom\(handle\);\s*if\s*\(!snapshot\)\s*\{\s*const existing\s*=\s*await runtimeBusinessByHandleAny\(handle\)/);
 async function main() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "suqpage-scale-queries-"));
     process.env.SUQPAGE_MEDIA_ROOT = path.join(root, "media");

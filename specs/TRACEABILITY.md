@@ -25,7 +25,17 @@ the browser gate catches an introduced raw-space native View child and an
 undeclared navigation import in an existing fixture. The fixes retain those
 assertions, use the installed Expo Router API and keep the new refresh lifecycle
 tests. Current description/read-snapshot and end-to-end additions require fresh
-qualification. Actual refresh journeys and hosted execution remain
+qualification. Run43534062393 stops core on a stale scalable-query source assertion after the
+public read adapter changed; native43534062384 reaches ordinary scenario writes
+but its test-only pause reason violates the real control constraint. These are
+corrected without weakening the contract. The143 browser/component cases and
+20 existing journeys pass; the new scenario stops during preparation. Selam is shared with an
+earlier controlled-video test that writes publications independently of its
+draft; move this journey to an untouched Afia fixture and retain phase-only
+failure diagnosis, preserving the enrollment drift checks.
+Private enrollment-request admission
+and empty-unit preparation now require fresh PostgreSQL/native qualification.
+Actual refresh journeys and hosted execution remain
 pending; no recurring service or enrollment is deployed yet. Local Chromium is
 blocked by its singleton socket; the cloud browser cannot reach that loopback.
 

@@ -15,7 +15,8 @@ import type {SessionUser} from './types';
 import {isSupportedPostgresMigrationLedger,LATEST_POSTGRES_MIGRATION_VERSION} from './postgres-schema-version';
 
 export type DemoEnrollmentInput={businessId:number;handle:string;ownerUserId:number;providerUserId:string;productId:number;
- scenarioKey:DemoScenarioKey;parameters:DemoScenarioParameters};
+ scenarioKey:DemoScenarioKey;parameters:DemoScenarioParameters;initializeUnit?:boolean;
+ expectedContentVersion?:number;expectedDraftVersion?:number;expectedPageRevision?:number};
 type Enrollment={business_id:number;handle:string;owner_user_id:number;provider_user_id:string;product_id:number;
  scenario_key:DemoScenarioKey;scenario_version:number;parameters_json:string;baseline_page_json:string;baseline_description:string;expected_hash:string;
  stage:number;cycle:number;due_at:number;status:'active'|'paused'};
@@ -69,11 +70,25 @@ export async function enrollDemoScenario(input:DemoEnrollmentInput,now=Date.now(
   const count=await runtimeGet<{total:number}>("SELECT COUNT(*) total FROM demo_simulator_enrollments WHERE status='active'");
   if(Number(count?.total)>=6)throw new Error('The initial demo cohort is limited to six businesses.');
   const e={business_id:input.businessId,handle:input.handle,owner_user_id:input.ownerUserId,provider_user_id:input.providerUserId,product_id:input.productId};
-  const state=await currentState(e);
+  let state=await currentState(e);
   if(parameters.productName!==state.product.name||parameters.productKind!==state.product.offering_kind||
-     parameters.basePriceMinor!==state.product.price_minor||parameters.unit!==state.product.quantity_unit||
+     parameters.basePriceMinor!==state.product.price_minor||!(parameters.unit===state.product.quantity_unit||input.initializeUnit===true&&!state.product.quantity_unit)||
+     input.expectedContentVersion!==undefined&&input.expectedContentVersion!==state.catalog.business.content_version||
+     input.expectedDraftVersion!==undefined&&input.expectedDraftVersion!==state.draft.version||
+     input.expectedPageRevision!==undefined&&input.expectedPageRevision!==state.publication.revision||
      digest([...parameters.businessCategories].sort())!==digest(state.categories)||
      state.draft.version!==state.publication.draftVersion||digest(state.draft.content)!==digest(state.publication.content)||state.publication.content.about.length>2500||state.product.description.length>2500)throw new DemoDrift('content_changed');
+  if(input.initializeUnit===true&&!state.product.quantity_unit){
+   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
+   if(Number(size?.bytes)>=Number(control.database_limit_bytes))throw Error('Demo enrollment storage budget reached.');
+   const p=state.product;
+   await executeBasicProductUpkeep(postgresProductUpkeepPort,state.actor,{kind:'update',businessId:input.businessId,productId:p.id,
+    expectedContentVersion:state.catalog.business.content_version,idempotencyKey:`demo_enrollment_unit_${input.businessId}_${state.catalog.business.content_version}`,
+    name:p.name,description:p.description,availability:p.availability,offeringKind:p.offering_kind,quantityMode:p.quantity_mode,orderScope:p.order_scope??'unspecified',
+    priceMinor:p.price_minor,quantityUnit:parameters.unit,highlights:parseOfferingHighlightsJson(p.highlights_json),capacitySummary:p.capacity_summary,
+    minimumOrderSummary:p.minimum_order_summary,leadTimeSummary:p.lead_time_summary,videoRef:p.video_ref,categoryId:p.category_id,imageAction:'keep',preserveMetadata:true,updateSellingFacts:true},null);
+   state=await currentState(e);
+  }
   await runtimeRun(`INSERT INTO demo_simulator_enrollments(business_id,handle,owner_user_id,provider_user_id,product_id,scenario_key,scenario_version,
    parameters_json,baseline_page_json,baseline_description,expected_hash,due_at,enrolled_at) VALUES(?,?,?,?,?,?,1,?,?,?,?,?,?)`,
    [input.businessId,input.handle,input.ownerUserId,input.providerUserId,input.productId,input.scenarioKey,JSON.stringify(parameters),JSON.stringify(state.publication.content),state.product.description,state.hash,now,now]);
@@ -112,7 +127,30 @@ async function advance(e:Enrollment,slot:number,now:number){
  return next;
 }
 
-export type DemoTickResult={status:'advanced'|'disabled'|'busy'|'duplicate'|'budget'|'schema';advanced:number;paused:number;failed:number};
+function parseEnrollmentRequest(raw:string,businessId:number):DemoEnrollmentInput{
+ const value:unknown=JSON.parse(raw),keys=['businessId','handle','ownerUserId','providerUserId','productId','scenarioKey','parameters','initializeUnit','expectedContentVersion','expectedDraftVersion','expectedPageRevision'];
+ if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(k=>!keys.includes(k)))throw Error('Invalid private enrollment request.');
+ const v=value as Record<string,unknown>;
+ if(v.businessId!==businessId||!['expectedContentVersion','expectedDraftVersion','expectedPageRevision'].every(k=>Number.isSafeInteger(v[k])&&Number(v[k])>=0)||
+  v.initializeUnit!==undefined&&typeof v.initializeUnit!=='boolean')throw Error('Invalid private enrollment request.');
+ return {...v,parameters:parseDemoScenarioParameters(v.parameters)} as DemoEnrollmentInput;
+}
+async function processEnrollmentRequests(now:number){
+ const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 2 FOR UPDATE");
+ let enrolled=0,enrollmentRejected=0;
+ for(const request of requests){
+  await runtimeRun('SAVEPOINT demo_enrollment');
+  let accepted=false;
+  try{await enrollDemoScenario(parseEnrollmentRequest(request.input_json,request.business_id),now);accepted=true;enrolled++;}
+  catch{await runtimeRun('ROLLBACK TO SAVEPOINT demo_enrollment');enrollmentRejected++;}
+  await runtimeRun('RELEASE SAVEPOINT demo_enrollment');
+  await runtimeRun('UPDATE demo_simulator_requests SET status=?,reason=?,processed_at=? WHERE business_id=?',
+   [accepted?'accepted':'rejected',accepted?'':'enrollment_failed',now,request.business_id]);
+ }
+ return {enrolled,enrollmentRejected};
+}
+
+export type DemoTickResult={enrolled?:number;enrollmentRejected?:number;status:'advanced'|'disabled'|'busy'|'duplicate'|'budget'|'schema';advanced:number;paused:number;failed:number};
 /** The scheduled adapter supplies no client input. The clock argument also lets
  * disposable PostgreSQL tests exercise complete timelines without sleeping. */
 export async function runDemoSimulatorTick(now=Date.now()):Promise<DemoTickResult>{
@@ -128,7 +166,8 @@ export async function runDemoSimulatorTick(now=Date.now()):Promise<DemoTickResul
   if(!lock?.locked)return result('busy');
   if(!await schemaReady())return result('schema');
   const control=await runtimeGet<Control>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
-  if(!control||!control.enabled)return result('disabled');
+  if(!control)return result('disabled');
+  if(!control.enabled){const admission=await processEnrollmentRequests(now);return admission.enrolled||admission.enrollmentRejected?{...result('disabled'),...admission}:result('disabled');}
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;
