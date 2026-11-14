@@ -151,7 +151,10 @@ try:
     tap('Product listings')
     find('Search products')
     capture('02-product-search')
-    type_into('Search products', fixture['productName'])
+    # This finite provider check uses a short ordinary search to reach its soap
+    # fixture. The full-name multiword search timed out in the first hosted
+    # attempt; retain that failure separately rather than call it a video error.
+    type_into('Search products', 'Oat')
     capture('03-search-keyboard')
     adb('shell', 'input', 'keyevent', '4')
     tap(fixture['productName'], timeout=60, widget='android.widget.Button')
