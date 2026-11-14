@@ -37,13 +37,17 @@ test('BE-057 mobile shared plan rejects guest/JWT/query fallback, revoked links 
   f.setAllowed(false);response=await f.request();assert.equal(response.status,429);assert.equal(response.headers.get('retry-after'),'60');assert.equal(f.identityCalls,0);
  }finally{if(previous===undefined)delete env.NODE_ENV;else env.NODE_ENV=previous;}
 });
-test('BE-044 mobile conditional CORS is limited to the exact plan route and existing development origins',async()=>{
- const previous=env.NODE_ENV;env.NODE_ENV='development';
+test('BE-044 mobile conditional CORS admits only the selected exact development origin',async()=>{
+ const previous=env.NODE_ENV,previousPort=env.SUQPAGE_LOCAL_EXPO_PORT;env.NODE_ENV='development';delete env.SUQPAGE_LOCAL_EXPO_PORT;
  try{
   const f=fixture();let response=await f.request('OPTIONS');assert.equal(response.status,204);assert.equal(response.headers.get('access-control-expose-headers'),'ETag');assert.equal(response.headers.get('cache-control'),'private, no-store');assert.equal(response.headers.get('referrer-policy'),'no-referrer');
   response=await f.request('OPTIONS',{},'','http://localhost:8082',['health']);assert.equal(response.status,204);assert.equal(response.headers.has('access-control-expose-headers'),false);assert.ok(!(response.headers.get('access-control-allow-headers')||'').includes('If-None-Match'));assert.equal(response.headers.get('access-control-allow-methods'),'GET, POST, OPTIONS');
   for(const origin of['https://foreign.example','http://localhost:8083']){response=await f.request('GET',{},'',origin);assert.equal(response.status,403);assert.equal(response.headers.has('access-control-allow-origin'),false);assert.equal(response.headers.get('cache-control'),'private, no-store');assert.equal(response.headers.get('referrer-policy'),'no-referrer');}
   response=await f.request('HEAD',{},'','https://foreign.example');assert.equal(response.status,403);assert.equal(await response.text(),'');assert.equal(response.headers.get('cache-control'),'private, no-store');
-  env.NODE_ENV='production';response=await f.request('GET');assert.equal(response.status,403);assert.equal(response.headers.has('access-control-allow-origin'),false);assert.equal(f.calls.length,0);assert.equal(f.identityCalls,0);
- }finally{if(previous===undefined)delete env.NODE_ENV;else env.NODE_ENV=previous;}
+  env.SUQPAGE_LOCAL_EXPO_PORT='8083';response=await f.request('GET',{},'','http://localhost:8083');assert.equal(response.status,200);assert.equal(response.headers.get('access-control-allow-origin'),'http://localhost:8083');
+  response=await f.request('OPTIONS',{},'','http://127.0.0.1:8083');assert.equal(response.status,204);assert.equal(response.headers.get('access-control-allow-origin'),'http://127.0.0.1:8083');
+  for(const origin of['http://localhost:8082','http://foreign.example:8083','https://localhost:8083','http://localhost:80830','http://localhost:8083.evil.test']){response=await f.request('GET',{},'',origin);assert.equal(response.status,403,origin);assert.equal(response.headers.has('access-control-allow-origin'),false,origin);}
+  for(const invalidPort of['','8083/evil']){env.SUQPAGE_LOCAL_EXPO_PORT=invalidPort;for(const origin of['http://localhost:8082','http://localhost:8083']){response=await f.request('GET',{},'',origin);assert.equal(response.status,403);assert.equal(response.headers.has('access-control-allow-origin'),false);}}
+  env.SUQPAGE_LOCAL_EXPO_PORT='8083';env.NODE_ENV='production';for(const origin of['http://localhost:8082','http://localhost:8083']){response=await f.request('GET',{},'',origin);assert.equal(response.status,403);assert.equal(response.headers.has('access-control-allow-origin'),false);}assert.equal(f.identityCalls,0);
+ }finally{if(previous===undefined)delete env.NODE_ENV;else env.NODE_ENV=previous;if(previousPort===undefined)delete env.SUQPAGE_LOCAL_EXPO_PORT;else env.SUQPAGE_LOCAL_EXPO_PORT=previousPort;}
 });

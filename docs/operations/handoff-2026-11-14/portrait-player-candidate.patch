@@ -1,0 +1,100 @@
+diff --git a/.github/workflows/quality.yml b/.github/workflows/quality.yml
+index 7c69741..6295b65 100644
+--- a/.github/workflows/quality.yml
++++ b/.github/workflows/quality.yml
+@@ -68,0 +69 @@ jobs:
++          scripts/test-social-video-layout.ts
+diff --git a/AFRICMADE-MASTER-PROMPT.md b/AFRICMADE-MASTER-PROMPT.md
+index cd7f625..d32c618 100644
+--- a/AFRICMADE-MASTER-PROMPT.md
++++ b/AFRICMADE-MASTER-PROMPT.md
+@@ -306,0 +307,4 @@ in BE-042/BE-048. Example starter footage is not evidence of a merchant's work.
++Inline portrait social videos retain their full vertical frame in modern galleries
++and retained showroom dialogs, with static image fill beside the player. Shared
++dialog styling must not stretch or crop the provider frame; FE-057 owns playback
++readiness, recovery and stopping when the visitor leaves the video.
+diff --git a/components/SocialVideoFrame.tsx b/components/SocialVideoFrame.tsx
+index b094798..3a0bdb6 100644
+--- a/components/SocialVideoFrame.tsx
++++ b/components/SocialVideoFrame.tsx
+@@ -24 +24 @@ export default function SocialVideoFrame({video,title,poster}:{video:string;titl
+-    <div style={(provider==='tiktok'||provider==='instagram')?{height:'100%',aspectRatio:'9/16',maxWidth:'100%',zIndex:1}:{height:'100%',width:'100%',zIndex:1}}>
++    <div style={{position:'relative',...((provider==='tiktok'||provider==='instagram')?{height:'100%',aspectRatio:'9/16',maxWidth:'100%',zIndex:1}:{height:'100%',width:'100%',zIndex:1})}}>
+diff --git a/docs/AFRICMADE-TRANSITION-CHECKLIST.md b/docs/AFRICMADE-TRANSITION-CHECKLIST.md
+index 0a0a71c..ade1080 100644
+--- a/docs/AFRICMADE-TRANSITION-CHECKLIST.md
++++ b/docs/AFRICMADE-TRANSITION-CHECKLIST.md
+@@ -84,0 +85,5 @@ and scenario progress remain protected. National origin is not a quality test.
++   CURRENT shared-player defect: the real phone-web capture crops portrait
++   TikTok content because retained dialog iframe positioning escapes its narrow
++   wrapper. Specify and fix the shared containing block, regress its real CSS
++   geometry, then recheck actual desktop/phone playback before full gates and
++   publication. Native/Expo already preserve the portrait shape.
+diff --git a/specs/frontend/FE-057-tiktok-product-video.md b/specs/frontend/FE-057-tiktok-product-video.md
+index 09187ac..e769d11 100644
+--- a/specs/frontend/FE-057-tiktok-product-video.md
++++ b/specs/frontend/FE-057-tiktok-product-video.md
+@@ -17,0 +18,13 @@ deterministic provider frames do not establish external video availability.
++S197's actual phone-web review exposes a containing-block defect in retained
++product dialogs: their absolute-positioned iframe rule escapes the portrait
++wrapper and crops the TikTok frame to the wide stage. The provider frame must
++retain its own 9:16 bounds in both modern galleries and retained dialogs, with
++static image fill beside it. Facebook/YouTube geometry, playback/security
++attributes, error/retry and gallery unmount behavior remain unchanged.
++
++GIVEN a retained dialog or gallery at desktop/phone widths WHEN an admitted
++portrait social video plays THEN the iframe bounds remain 9:16, centered within
++the stage, so the full vertical content is visible. Verify the actual component
++under the real dialog CSS, plus actual desktop/phone and Expo playback evidence;
++a fixture proves geometry only, not provider availability.
++
+diff --git a/scripts/test-social-video-layout.ts b/scripts/test-social-video-layout.ts
+new file mode 100644
+index 0000000..d9aeb09
+--- /dev/null
++++ b/scripts/test-social-video-layout.ts
+@@ -0,0 +1,44 @@
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import fs from 'node:fs';
++import {createRequire} from 'node:module';
++import {build} from 'esbuild';
++import {chromium} from 'playwright';
++
++const require=createRequire(import.meta.url);
++const bundle=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
++ import React from 'react';import {createRoot} from 'react-dom/client';import {flushSync} from 'react-dom';
++ import SocialVideoFrame from './components/SocialVideoFrame';
++ const root=createRoot(document.getElementById('root'));
++ window.mount=video=>flushSync(()=>root.render(<div className="product-dialog-video"><SocialVideoFrame video={video} title="Process video"/></div>));
++`},bundle:true,write:false,format:'iife',platform:'browser',plugins:[{name:'social-layout-ports',setup(b){
++ b.onResolve({filter:/^react(?:\/jsx(?:-dev)?-runtime)?$/},a=>({path:require.resolve(a.path)}));
++ b.onResolve({filter:/^@\/lib\/i18n\/ui$/},a=>({path:a.path,namespace:'translation'}));
++ b.onLoad({filter:/.*/,namespace:'translation'},()=>({loader:'js',contents:'export const useUiText=()=>s=>s;'}));
++}}]});
++
++test('FE-057 retained dialog CSS cannot stretch a portrait provider frame',{timeout:60000},async()=>{
++ const browser=await chromium.launch({timeout:20000});
++ try{
++  const page=await browser.newPage();
++  // Deterministic geometry only; real creator playback is qualified separately.
++  await page.route('https://www.tiktok.com/**',r=>r.fulfill({contentType:'text/html',body:'<p>Provider layout fixture</p>'}));
++  await page.route('https://www.instagram.com/**',r=>r.fulfill({contentType:'text/html',body:'<p>Provider layout fixture</p>'}));
++  await page.route('https://www.facebook.com/**',r=>r.fulfill({contentType:'text/html',body:'<p>Provider layout fixture</p>'}));
++  await page.setContent('<main id="root"></main>');
++  await page.addStyleTag({content:fs.readFileSync('components/showroom/showrooms.css','utf8')});
++  await page.addScriptTag({content:(await bundle).outputFiles[0].text});
++  for(const width of [1440,390,320]){
++   await page.setViewportSize({width,height:900});
++   for(const ref of ['tiktok:7703762862484851981','instagram:DFs9ue4OJig','facebook:123456789012345']){
++    await page.evaluate(ref=>(window as unknown as{mount:(ref:string)=>void}).mount(ref),ref);
++    const frame=page.getByTitle('Process video',{exact:true});await frame.waitFor();
++    const box=await frame.boundingBox(),stage=await page.locator('.product-dialog-video').boundingBox();assert.ok(box&&stage);
++    const portrait=!ref.startsWith('facebook:');
++    assert.ok(Math.abs(box.width/box.height-(portrait?9/16:stage.width/stage.height))<.02,`${ref} at${width}: full intended frame ratio`);
++    assert.ok(Math.abs((box.x+box.width/2)-(stage.x+stage.width/2))<1,'The provider stays centered.');
++    assert.ok(box.x>=stage.x-.5&&box.x+box.width<=stage.x+stage.width+.5,'The player remains inside the stage.');
++   }
++  }
++ }finally{await browser.close();}
++});

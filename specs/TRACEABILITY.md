@@ -28,6 +28,16 @@ stages. All five main quality jobs in43567277821 and Android43567277813 pass.
 Automatic Netlify deploy`6af801bd1efb5643dfad1c6b` reports that source and the
 expected site with a healthy API. No production media correction has been applied.
 
+BE-044's local Expo preview fallback accepts only the selected development port
+(8082 by default, or 8083 when explicitly configured) with exact loopback hosts;
+production and foreign origins remain denied. The focused mobile transport tests
+pass three adapter cases including CORS denials; typecheck, 237-spec validation,
+and the changed launcher static check pass. The actual local API on 3102 returns
+the four-product Liya shop to the 8083 preview with scoped CORS, while 8082 is
+denied. Chromium at 390px loads that shop in Expo web with zero application API
+failures and no uncontrolled map tiles. This qualifies local preview access,
+not external video playback or installed Android.
+
 The finite actual-provider branch`fc020396ddea5c9005605d36041a14fe5af9589d`
 qualifies TikTok`7703762862484851981` inside the real Android app. The reviewed
 captures show actual soap-making footage and seek progression from0:00 to0:16;
@@ -362,19 +372,26 @@ previews are disabled until an isolated backend exists; production variables,
 domains and previous deploys were retained. Automatic publication is on.
 
 The initial Git build of main `120f48064e207dfe53dac4df32bb4a53719f4156`
-completed in 53s and is published as
+completed in 53s and was published as
 [`6af5f7049dd20b84e5ea38ea`](https://app.netlify.com/projects/africmade/deploys/6af5f7049dd20b84e5ea38ea).
 It uses the root Next.js 16.4.2 app, exact Node 24.18.1 web/contracts installation
 and maintained adapter 5.16.6, with two server functions and one edge function.
 The attention worker is listed as Scheduled in production. Source CI already
-passed all five jobs in `40819547526`; current main was reread before publication.
-Actual next-merge triggering has not yet occurred. Previous deploy
-`6ae0a7fb4ccd545c7dd13f55` remains available for recovery.
+passed all five jobs in `40819547526`; that main was reread before publication.
+PR #58 then integrated the housekeeping/security source as main
+`5557d5ef94d44533c3ee46c81602c0790cb0472d`, tree
+`583e56f146bc34f1cdf9f3ac837bdf9e1a399479`, matching its qualified PR
+tree. All five required PR jobs passed in `43334640799` and all five post-merge
+main jobs passed in `43335751841`. The merge automatically published Netlify
+deploy `6af656dfc37bdf4701b82d65` in 44s. Its live health returned 200/ok,
+and the official image route returned a real 256×256 WebP transform. The
+previous deploy and protected recovery records remain available.
 
-Candidate and production `/api/health` return 200/ok. Their About pages reference
-the same 25 Next assets. Candidate Featured→showroom→product→unsent direct inquiry
-works; product media loads, and the official query-aware image route returns 200
-image/webp. Bounded desktop Chrome comparison also covered buyer/supplier About,
+At initial qualification, candidate and production `/api/health` returned 200/ok.
+Their About pages referenced the same 25 Next assets. Candidate
+Featured→showroom→product→unsent direct inquiry worked; product media loaded,
+and the official query-aware image route returned 200 image/webp. Bounded
+desktop Chrome comparison also covered buyer/supplier About,
 Featured schedule/sponsors, product filtering, saved-list isolation, unsent Inbox,
 transport intake and recipient shipment-access entry. Temporary selections were
 removed; no inquiry/chat/code/message was sent. Agent visual decision: PASS for
@@ -388,12 +405,13 @@ invoker mode are unchanged. The 408 unnecessary anon/authenticated grants on 51
 legacy tables, including PostgreSQL 17 MAINTAIN, are removed. All 118 table/sequence
 identities, RLS settings and non-target/server ACLs are preserved. Effective
 API-role table/sequence privilege readback is empty. No customer-row write or
-application-ledger marker was part of the operation; hosted ledger remains 80.
-The security advisor now reports only the separate disabled leaked-password
-protection warning. OTP-only Auth, its review-login exception and credentials
+application-ledger marker was part of the operation; hosted ledger remained 80
+at that precursor check before later additive migrations. The advisor then
+reported only the separate disabled leaked-password protection warning. OTP-only
+Auth, its review-login exception and credentials
 were not changed. Existing private Storage remains unchanged.
 
-Local source adds migration 81 and exact 80/81 readiness compatibility, with the
+S189 source added migration 81 and exact 80/81 readiness compatibility, with the
 existing all-or-none retired 27–30 group. Real PostgreSQL 17.10 regressions pass:
 native install/66 demo businesses; fixed paths/API denial, identity/body/settings/
 server-ACL/data preservation and idempotence; unexpected-security rollback;
@@ -407,14 +425,13 @@ server archive initializes and Sharp transforms an image on Linux x64/glibc.
 The local offline edge type-import warning is retained; the actual hosted build
 successfully bundled and served the middleware without a copied-artifact patch.
 
-The full `npm run check` stopped at provider-backed account erasure because this
-host lacks Docker/local Supabase Auth/Storage. Full release, provider browser,
-container/restore and device gates were not passed here. The local task branch
-has not been pushed or integrated; its source is separate from the published
-main above. The owner's subsequent standing instruction now authorizes routine
-push/PR, related CI fixes and protected merge without another approval prompt;
-DEP-002 and AGENTS.md own that scope and its consequential-operation exceptions.
-DEP-002 owns the reconciled readiness document and ordered next work.
+The original local `npm run check` stopped at provider-backed account erasure
+because that host lacked Docker/local Supabase Auth/Storage; it was not a full
+local pass. PR #58's required managed CI supplied independent provider/browser,
+container and PostgreSQL results before the protected merge. Its source is now
+integrated and published. Auth/credential changes, physical Android and full
+recovery exercises remain separately qualified. DEP-002 and AGENTS.md retain
+routine follow-through and consequential-operation boundaries.
 
 ## S188-H approved Market headline restoration
 
@@ -882,9 +899,9 @@ belong in engineering readiness; no source merge or production change is claimed
   Provider links/codes are organized per leg; no scan integration/date promise.
 - Current source identity is AfricMade with en/am/om enabled.
   [FE-070]/[BE-059]/[DEP-049] override obsolete brand/domain/package/copy readings
-  while preserving versioned compatibility. Current main `120f480` is published
-  through the Git pipeline; the local S189 source patch still needs integration.
-  Former `CURRENT` dates are historical.
+  while preserving versioned compatibility. Main is published through the Git
+  pipeline; S189's source patch merged in PR #58 as recorded above. Former
+  `CURRENT` dates are historical.
 
 ## Cross-layer requirements and implementation
 

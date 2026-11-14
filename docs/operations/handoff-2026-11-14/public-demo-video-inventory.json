@@ -1,0 +1,4511 @@
+[
+  {
+    "name": "Selam Weave Studio",
+    "handle": "selam-weave",
+    "products": [
+      {
+        "id": 1,
+        "name": "Indigo Kuta Shawl",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/selam-weave/product-1.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 2,
+        "name": "Natural Cotton Wrap",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/selam-weave/product-2.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 3,
+        "name": "Indigo Table Linen",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/selam-weave/product-3.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 4,
+        "name": "Workshop Tote",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/selam-weave/product-4.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 1,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Afia Botanics",
+    "handle": "afia-botanics",
+    "products": [
+      {
+        "id": 5,
+        "name": "Garden Cleansing Bars",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/afia-botanics/product-1.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 6,
+        "name": "Leaf & Seed Body Oil",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/afia-botanics/product-2.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 7,
+        "name": "Mineral Clay Mask",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/afia-botanics/product-3.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 8,
+        "name": "Nourishing Hair Butter",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/afia-botanics/product-4.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 2,
+    "categories": [
+      "beauty-wellness"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Warka Furniture Works",
+    "handle": "warka-furniture",
+    "products": [
+      {
+        "id": 9,
+        "name": "Low Woven Lounge Chair",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/warka-furniture/product-1.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 10,
+        "name": "Round Cross-Leg Table",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/warka-furniture/product-2.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 11,
+        "name": "Entry Bench",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/warka-furniture/product-3.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 12,
+        "name": "Open Wall Shelf",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/warka-furniture/product-4.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      }
+    ],
+    "businessId": 3,
+    "categories": [
+      "home-living"
+    ],
+    "legacyVideo": "youtube:pLL4PW4LZT8",
+    "businessVideo": "https://www.youtube.com/watch?v=pLL4PW4LZT8"
+  },
+  {
+    "name": "Addis Metalworks",
+    "handle": "addis-metalworks",
+    "products": [
+      {
+        "id": 13,
+        "name": "Powder-Coated Equipment Frame",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/addis-metalworks/product-1.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 14,
+        "name": "Stainless Prep Table",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/addis-metalworks/product-2.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 15,
+        "name": "Modular Storage Rack",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/addis-metalworks/product-3.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 16,
+        "name": "Precision Bracket Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/addis-metalworks/product-4.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      }
+    ],
+    "businessId": 4,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:G034cOM2th8",
+    "businessVideo": "https://www.youtube.com/watch?v=G034cOM2th8"
+  },
+  {
+    "name": "Green Terrace Farm",
+    "handle": "green-terrace-farm",
+    "products": [
+      {
+        "id": 17,
+        "name": "Highland Greens Mix",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/green-terrace-farm/product-1.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 18,
+        "name": "Kitchen Herb Bunch",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/green-terrace-farm/product-2.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 19,
+        "name": "Heirloom Tomato Mix",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/green-terrace-farm/product-3.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 20,
+        "name": "Weekly Produce Crate",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/green-terrace-farm/product-4.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      }
+    ],
+    "businessId": 5,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:a2c1vNB-Bpg",
+    "businessVideo": "https://www.youtube.com/watch?v=a2c1vNB-Bpg"
+  },
+  {
+    "name": "Blue Nile Apiary",
+    "handle": "blue-nile-apiary",
+    "products": [
+      {
+        "id": 21,
+        "name": "Seasonal Raw Honey",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/blue-nile-apiary/product-1.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:gkqKw1n6VQg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:gkqKw1n6VQg"
+      },
+      {
+        "id": 22,
+        "name": "Cut Comb Honey",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/blue-nile-apiary/product-2.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:gkqKw1n6VQg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:gkqKw1n6VQg"
+      },
+      {
+        "id": 23,
+        "name": "Pure Beeswax Candles",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/blue-nile-apiary/product-3.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:gkqKw1n6VQg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:gkqKw1n6VQg"
+      },
+      {
+        "id": 24,
+        "name": "Honey & Comb Gift Box",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/blue-nile-apiary/product-4.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:gkqKw1n6VQg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:gkqKw1n6VQg"
+      }
+    ],
+    "businessId": 6,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:gkqKw1n6VQg",
+    "businessVideo": "https://www.youtube.com/watch?v=gkqKw1n6VQg"
+  },
+  {
+    "name": "Rift Valley Mill",
+    "handle": "rift-valley-mill",
+    "products": [
+      {
+        "id": 25,
+        "name": "Ivory Teff Flour",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/rift-valley-mill/product-1.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 26,
+        "name": "Brown Teff Flour",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/rift-valley-mill/product-2.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 27,
+        "name": "Roasted Barley Blend",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/rift-valley-mill/product-3.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 28,
+        "name": "Mixed Grain Baking Pack",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/rift-valley-mill/product-4.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      }
+    ],
+    "businessId": 7,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:ftMC5TSJSBg",
+    "businessVideo": "https://www.youtube.com/watch?v=ftMC5TSJSBg"
+  },
+  {
+    "name": "Entoto Ceramics",
+    "handle": "entoto-ceramics",
+    "products": [
+      {
+        "id": 29,
+        "name": "Studio Coffee Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/entoto-ceramics/product-1.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 30,
+        "name": "Everyday Serving Bowl",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/entoto-ceramics/product-2.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 31,
+        "name": "Textured Stem Vase",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/entoto-ceramics/product-3.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 32,
+        "name": "Dinner Plate Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/entoto-ceramics/product-4.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 8,
+    "categories": [
+      "home-living"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Koba Leather Workshop",
+    "handle": "koba-leather",
+    "products": [
+      {
+        "id": 33,
+        "name": "Structured Work Tote",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/koba-leather/product-1.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 34,
+        "name": "Slim Card Wallet",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/koba-leather/product-2.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 35,
+        "name": "Leather Tool Roll",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/koba-leather/product-3.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 36,
+        "name": "Everyday Crossbody",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/koba-leather/product-4.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 9,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Nova Assembly Lab",
+    "handle": "nova-assembly",
+    "products": [
+      {
+        "id": 37,
+        "name": "Rugged Solar Charge Controller",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/nova-assembly/product-1.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 38,
+        "name": "Compact Backup Power Box",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/nova-assembly/product-2.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 39,
+        "name": "Compact Audio Amplifier Module",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/nova-assembly/product-3.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 40,
+        "name": "Custom Cable Harness Kit",
+        "media": [
+          {
+            "ref": "/uploads/seed/benchmarks/nova-assembly/product-4.jpg",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      }
+    ],
+    "businessId": 10,
+    "categories": [
+      "electronics"
+    ],
+    "legacyVideo": "youtube:rRbIS71ZVpU",
+    "businessVideo": "https://www.youtube.com/watch?v=rRbIS71ZVpU"
+  },
+  {
+    "name": "Aster Device Workshop",
+    "handle": "demo-aster-device-workshop",
+    "products": [
+      {
+        "id": 41,
+        "name": "Motor Timer Control",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aster-device-workshop/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 42,
+        "name": "Rechargeable Inspection Light",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aster-device-workshop/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 43,
+        "name": "Appliance Control Board",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aster-device-workshop/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 44,
+        "name": "Labeled Control Harness",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aster-device-workshop/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      }
+    ],
+    "businessId": 11,
+    "categories": [
+      "electronics"
+    ],
+    "legacyVideo": "youtube:rRbIS71ZVpU",
+    "businessVideo": "https://www.youtube.com/watch?v=rRbIS71ZVpU"
+  },
+  {
+    "name": "Lume Solar Light Workshop",
+    "handle": "demo-lume-solar-repair",
+    "products": [
+      {
+        "id": 45,
+        "name": "Courtyard Solar Lamp",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 46,
+        "name": "Market Stall Light Kit",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 47,
+        "name": "Two-Room Solar Kit",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-lume-solar-repair/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 48,
+        "name": "Weatherproof DC Cable Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-lume-solar-repair/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      }
+    ],
+    "businessId": 12,
+    "categories": [
+      "electronics"
+    ],
+    "legacyVideo": "youtube:rRbIS71ZVpU",
+    "businessVideo": "https://www.youtube.com/watch?v=rRbIS71ZVpU"
+  },
+  {
+    "name": "Tana Speaker Workshop",
+    "handle": "demo-tana-radio-works",
+    "products": [
+      {
+        "id": 49,
+        "name": "Compact PA Speaker",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 50,
+        "name": "Floor Monitor Cabinet",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 51,
+        "name": "Outdoor FM Antenna Kit",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tana-radio-works/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 52,
+        "name": "Custom Audio Cable Loom",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tana-radio-works/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      }
+    ],
+    "businessId": 13,
+    "categories": [
+      "electronics"
+    ],
+    "legacyVideo": "youtube:rRbIS71ZVpU",
+    "businessVideo": "https://www.youtube.com/watch?v=rRbIS71ZVpU"
+  },
+  {
+    "name": "Shewa Cable Studio",
+    "handle": "demo-shewa-cable-studio",
+    "products": [
+      {
+        "id": 53,
+        "name": "Solar Drop Cable",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-shewa-cable-studio/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 54,
+        "name": "Pump Control Harness",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-shewa-cable-studio/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 55,
+        "name": "Appliance Lead Assembly",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-shewa-cable-studio/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 56,
+        "name": "Numbered Cable Label Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-shewa-cable-studio/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      }
+    ],
+    "businessId": 14,
+    "categories": [
+      "electronics"
+    ],
+    "legacyVideo": "youtube:rRbIS71ZVpU",
+    "businessVideo": "https://www.youtube.com/watch?v=rRbIS71ZVpU"
+  },
+  {
+    "name": "Desta Injera Stove Works",
+    "handle": "demo-desta-appliance-repair",
+    "products": [
+      {
+        "id": 57,
+        "name": "Household Injera Stove",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 58,
+        "name": "Cafe Injera Stove",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 59,
+        "name": "Countertop Hotplate",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 60,
+        "name": "Replacement Wiring Loom",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-desta-appliance-repair/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      }
+    ],
+    "businessId": 15,
+    "categories": [
+      "electronics"
+    ],
+    "legacyVideo": "youtube:rRbIS71ZVpU",
+    "businessVideo": "https://www.youtube.com/watch?v=rRbIS71ZVpU"
+  },
+  {
+    "name": "Orbit Meter Assembly",
+    "handle": "demo-orbit-meter-workshop",
+    "products": [
+      {
+        "id": 61,
+        "name": "Analog Panel Ammeter",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-orbit-meter-workshop/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 62,
+        "name": "Water Level Display",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 63,
+        "name": "Pump Hour Counter",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-orbit-meter-workshop/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 64,
+        "name": "Sensor Display Assembly",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-orbit-meter-workshop/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      }
+    ],
+    "businessId": 16,
+    "categories": [
+      "electronics"
+    ],
+    "legacyVideo": "youtube:rRbIS71ZVpU",
+    "businessVideo": "https://www.youtube.com/watch?v=rRbIS71ZVpU"
+  },
+  {
+    "name": "Kora Solar Lights",
+    "handle": "demo-kora-solar-lights",
+    "products": [
+      {
+        "id": 65,
+        "name": "Courtyard Solar Lamp",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-solar-lights/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 66,
+        "name": "Market Stall Light Kit",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-solar-lights/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 67,
+        "name": "Portable Study Light",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-solar-lights/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 68,
+        "name": "Replacement Battery Pack",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-solar-lights/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      }
+    ],
+    "businessId": 17,
+    "categories": [
+      "electronics"
+    ],
+    "legacyVideo": "youtube:rRbIS71ZVpU",
+    "businessVideo": "https://www.youtube.com/watch?v=rRbIS71ZVpU"
+  },
+  {
+    "name": "Nile Sensor Studio",
+    "handle": "demo-nile-sensor-studio",
+    "products": [
+      {
+        "id": 69,
+        "name": "Water Tank Level Monitor",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-nile-sensor-studio/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 70,
+        "name": "Greenhouse Temperature Node",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-nile-sensor-studio/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 71,
+        "name": "Pump Pressure Alert",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-nile-sensor-studio/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 72,
+        "name": "Custom Sensor Interface",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-nile-sensor-studio/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      }
+    ],
+    "businessId": 18,
+    "categories": [
+      "electronics"
+    ],
+    "legacyVideo": "youtube:rRbIS71ZVpU",
+    "businessVideo": "https://www.youtube.com/watch?v=rRbIS71ZVpU"
+  },
+  {
+    "name": "Aloe Field Care",
+    "handle": "demo-aloe-field-care",
+    "products": [
+      {
+        "id": 73,
+        "name": "Cooling Aloe Gel",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aloe-field-care/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 74,
+        "name": "Aloe Body Lotion",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aloe-field-care/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 75,
+        "name": "Aloe Scalp Mist",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aloe-field-care/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 76,
+        "name": "Hospitality Aloe Minis",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aloe-field-care/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 19,
+    "categories": [
+      "beauty-wellness"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Muna Botanical Studio",
+    "handle": "demo-muna-botanical-studio",
+    "products": [
+      {
+        "id": 77,
+        "name": "Evening Face Oil",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-muna-botanical-studio/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 78,
+        "name": "Botanical Body Serum",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-muna-botanical-studio/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 79,
+        "name": "Nourishing Hair Drops",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-muna-botanical-studio/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 80,
+        "name": "Ritual Gift Quartet",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-muna-botanical-studio/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      }
+    ],
+    "businessId": 20,
+    "categories": [
+      "beauty-wellness"
+    ],
+    "legacyVideo": "youtube:WHyh9auBmA0",
+    "businessVideo": "https://www.youtube.com/watch?v=WHyh9auBmA0"
+  },
+  {
+    "name": "Liya Soap Kitchen",
+    "handle": "demo-liya-soap-kitchen",
+    "products": [
+      {
+        "id": 81,
+        "name": "Oat Everyday Bar",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-liya-soap-kitchen/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 82,
+        "name": "Citrus Kitchen Bar",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-liya-soap-kitchen/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 83,
+        "name": "Coffee Scrub Bar",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-liya-soap-kitchen/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 84,
+        "name": "Wrapped Guest Soap Run",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-liya-soap-kitchen/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      }
+    ],
+    "businessId": 21,
+    "categories": [
+      "beauty-wellness"
+    ],
+    "legacyVideo": "youtube:WHyh9auBmA0",
+    "businessVideo": "https://www.youtube.com/watch?v=WHyh9auBmA0"
+  },
+  {
+    "name": "Biftu Natural Oils",
+    "handle": "demo-biftu-natural-oils",
+    "products": [
+      {
+        "id": 85,
+        "name": "Black Seed Oil",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-biftu-natural-oils/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 86,
+        "name": "Sesame Body Oil",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-biftu-natural-oils/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 87,
+        "name": "Hair and Scalp Oil",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-biftu-natural-oils/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 88,
+        "name": "Retail Refill Batch",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-biftu-natural-oils/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      }
+    ],
+    "businessId": 22,
+    "categories": [
+      "beauty-wellness"
+    ],
+    "legacyVideo": "youtube:WHyh9auBmA0",
+    "businessVideo": "https://www.youtube.com/watch?v=WHyh9auBmA0"
+  },
+  {
+    "name": "Hana Herbal Works",
+    "handle": "demo-hana-herbal-works",
+    "products": [
+      {
+        "id": 89,
+        "name": "Highland Herb Infusion",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-hana-herbal-works/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 90,
+        "name": "Warming Massage Oil",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-hana-herbal-works/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 91,
+        "name": "Steam Bowl Blend",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-hana-herbal-works/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 92,
+        "name": "Guest Wellness Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-hana-herbal-works/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      }
+    ],
+    "businessId": 23,
+    "categories": [
+      "beauty-wellness"
+    ],
+    "legacyVideo": "youtube:WHyh9auBmA0",
+    "businessVideo": "https://www.youtube.com/watch?v=WHyh9auBmA0"
+  },
+  {
+    "name": "Sena Body Care",
+    "handle": "demo-sena-body-care",
+    "products": [
+      {
+        "id": 93,
+        "name": "Daily Body Wash",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sena-body-care/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 94,
+        "name": "Whipped Body Butter",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sena-body-care/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 95,
+        "name": "Sugar Polish",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sena-body-care/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 96,
+        "name": "Bright Body Pair",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sena-body-care/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      }
+    ],
+    "businessId": 24,
+    "categories": [
+      "beauty-wellness"
+    ],
+    "legacyVideo": "youtube:WHyh9auBmA0",
+    "businessVideo": "https://www.youtube.com/watch?v=WHyh9auBmA0"
+  },
+  {
+    "name": "Meriem Hair Care",
+    "handle": "demo-meriem-hair-care",
+    "products": [
+      {
+        "id": 97,
+        "name": "Gentle Scalp Cleanser",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meriem-hair-care/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 98,
+        "name": "Leave-In Moisture Milk",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meriem-hair-care/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 99,
+        "name": "Braid and Scalp Drops",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meriem-hair-care/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 100,
+        "name": "Protective Style Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meriem-hair-care/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      }
+    ],
+    "businessId": 25,
+    "categories": [
+      "beauty-wellness"
+    ],
+    "legacyVideo": "youtube:WHyh9auBmA0",
+    "businessVideo": "https://www.youtube.com/watch?v=WHyh9auBmA0"
+  },
+  {
+    "name": "Zema Plant Balms",
+    "handle": "demo-zema-plant-balms",
+    "products": [
+      {
+        "id": 101,
+        "name": "Working Hand Balm",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-zema-plant-balms/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 102,
+        "name": "Soft Lip Balm",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-zema-plant-balms/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 103,
+        "name": "Heel and Elbow Balm",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-zema-plant-balms/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 104,
+        "name": "Pocket Balm Trio",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-zema-plant-balms/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      }
+    ],
+    "businessId": 26,
+    "categories": [
+      "beauty-wellness"
+    ],
+    "legacyVideo": "youtube:WHyh9auBmA0",
+    "businessVideo": "https://www.youtube.com/watch?v=WHyh9auBmA0"
+  },
+  {
+    "name": "Bora Highland Farm",
+    "handle": "demo-bora-highland-farm",
+    "products": [
+      {
+        "id": 105,
+        "name": "Highland Greens Crate",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-bora-highland-farm/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 106,
+        "name": "Root Vegetable Mix",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-bora-highland-farm/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 107,
+        "name": "Kitchen Herb Bundle",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-bora-highland-farm/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 108,
+        "name": "Weekly Family Harvest",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-bora-highland-farm/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      }
+    ],
+    "businessId": 27,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:a2c1vNB-Bpg",
+    "businessVideo": "https://www.youtube.com/watch?v=a2c1vNB-Bpg"
+  },
+  {
+    "name": "Laga Grain Mill",
+    "handle": "demo-laga-grain-mill",
+    "products": [
+      {
+        "id": 109,
+        "name": "Ivory Teff Flour",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-laga-grain-mill/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 110,
+        "name": "Brown Teff Flour",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-laga-grain-mill/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 111,
+        "name": "Roasted Barley Flour",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-laga-grain-mill/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 112,
+        "name": "Bakery Grain Blend",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-laga-grain-mill/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      }
+    ],
+    "businessId": 28,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:ftMC5TSJSBg",
+    "businessVideo": "https://www.youtube.com/watch?v=ftMC5TSJSBg"
+  },
+  {
+    "name": "Mulu Family Farm",
+    "handle": "demo-mulu-family-farm",
+    "products": [
+      {
+        "id": 113,
+        "name": "Seasonal Vegetable Basket",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-mulu-family-farm/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 114,
+        "name": "Farm Egg Tray",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-mulu-family-farm/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 115,
+        "name": "Fresh Herb Bunches",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-mulu-family-farm/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 116,
+        "name": "Cafe Breakfast Supply",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-mulu-family-farm/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      }
+    ],
+    "businessId": 29,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:a2c1vNB-Bpg",
+    "businessVideo": "https://www.youtube.com/watch?v=a2c1vNB-Bpg"
+  },
+  {
+    "name": "Kaffa Spice Kitchen",
+    "handle": "demo-kaffa-spice-kitchen",
+    "products": [
+      {
+        "id": 117,
+        "name": "House Berbere Blend",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kaffa-spice-kitchen/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 118,
+        "name": "Mild Shiro Seasoning",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kaffa-spice-kitchen/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 119,
+        "name": "Roasted Korerima",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kaffa-spice-kitchen/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 120,
+        "name": "Restaurant Spice Pack",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kaffa-spice-kitchen/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      }
+    ],
+    "businessId": 30,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:ftMC5TSJSBg",
+    "businessVideo": "https://www.youtube.com/watch?v=ftMC5TSJSBg"
+  },
+  {
+    "name": "Sofi Orchard",
+    "handle": "demo-sofi-orchard",
+    "products": [
+      {
+        "id": 121,
+        "name": "Seasonal Citrus Bag",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sofi-orchard/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 122,
+        "name": "Juicing Fruit Crate",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sofi-orchard/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 123,
+        "name": "Orchard Tasting Box",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sofi-orchard/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 124,
+        "name": "Preserving Fruit Batch",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sofi-orchard/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      }
+    ],
+    "businessId": 31,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:a2c1vNB-Bpg",
+    "businessVideo": "https://www.youtube.com/watch?v=a2c1vNB-Bpg"
+  },
+  {
+    "name": "Wabi Flour Mill",
+    "handle": "demo-wabi-flour-mill",
+    "products": [
+      {
+        "id": 125,
+        "name": "White Wheat Flour",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-wabi-flour-mill/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 126,
+        "name": "Whole Wheat Flour",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-wabi-flour-mill/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 127,
+        "name": "Teff-Wheat Baking Blend",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-wabi-flour-mill/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 128,
+        "name": "Bakery Repeat Supply",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-wabi-flour-mill/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      }
+    ],
+    "businessId": 32,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:ftMC5TSJSBg",
+    "businessVideo": "https://www.youtube.com/watch?v=ftMC5TSJSBg"
+  },
+  {
+    "name": "Rift Seed Growers",
+    "handle": "demo-rift-seed-growers",
+    "products": [
+      {
+        "id": 129,
+        "name": "Tomato Grower Seed",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-rift-seed-growers/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 130,
+        "name": "Leafy Green Seed Mix",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-rift-seed-growers/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 131,
+        "name": "Kitchen Herb Seed Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-rift-seed-growers/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      },
+      {
+        "id": 132,
+        "name": "Nursery Seasonal Lot",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-rift-seed-growers/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      }
+    ],
+    "businessId": 33,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:a2c1vNB-Bpg",
+    "businessVideo": "https://www.youtube.com/watch?v=a2c1vNB-Bpg"
+  },
+  {
+    "name": "Tena Food Kitchen",
+    "handle": "demo-tena-food-kitchen",
+    "products": [
+      {
+        "id": 133,
+        "name": "Vegetable Lunch Tray",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tena-food-kitchen/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 134,
+        "name": "Spiced Lentil Jar",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tena-food-kitchen/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 135,
+        "name": "Family Injera Pack",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tena-food-kitchen/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 136,
+        "name": "Small Office Lunch Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tena-food-kitchen/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 34,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Shewa Tool Workshop",
+    "handle": "demo-shewa-tool-workshop",
+    "products": [
+      {
+        "id": 137,
+        "name": "Forged Digging Hoe",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-shewa-tool-workshop/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 138,
+        "name": "Workshop Pry Bar",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-shewa-tool-workshop/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 139,
+        "name": "Hoe Head & Handle Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-shewa-tool-workshop/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 140,
+        "name": "Short-Run Tool Pattern",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-shewa-tool-workshop/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      }
+    ],
+    "businessId": 35,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:G034cOM2th8",
+    "businessVideo": "https://www.youtube.com/watch?v=G034cOM2th8"
+  },
+  {
+    "name": "Rift Metal Studio",
+    "handle": "demo-rift-metal-studio",
+    "products": [
+      {
+        "id": 141,
+        "name": "Slim Display Shelf",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-rift-metal-studio/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 142,
+        "name": "Cafe Table Base",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-rift-metal-studio/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 143,
+        "name": "Plant Stand Pair",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-rift-metal-studio/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 144,
+        "name": "Made-to-Fit Counter Frame",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-rift-metal-studio/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      }
+    ],
+    "businessId": 36,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:G034cOM2th8",
+    "businessVideo": "https://www.youtube.com/watch?v=G034cOM2th8"
+  },
+  {
+    "name": "Abay Machine Works",
+    "handle": "demo-abay-machine-works",
+    "products": [
+      {
+        "id": 145,
+        "name": "Compact Grain Cleaner",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-abay-machine-works/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 146,
+        "name": "Belt Conveyor Module",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-abay-machine-works/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 147,
+        "name": "Bench Mixing Unit",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-abay-machine-works/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 148,
+        "name": "Machine Guard Retrofit",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-abay-machine-works/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      }
+    ],
+    "businessId": 37,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:G034cOM2th8",
+    "businessVideo": "https://www.youtube.com/watch?v=G034cOM2th8"
+  },
+  {
+    "name": "Tana Welding Shop",
+    "handle": "demo-tana-welding-shop",
+    "products": [
+      {
+        "id": 149,
+        "name": "Shopfront Security Frame",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tana-welding-shop/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 150,
+        "name": "Water Tank Stand",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tana-welding-shop/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 151,
+        "name": "Mobile Work Stand",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tana-welding-shop/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 152,
+        "name": "Hinged Steel Window Guard",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tana-welding-shop/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      }
+    ],
+    "businessId": 38,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:G034cOM2th8",
+    "businessVideo": "https://www.youtube.com/watch?v=G034cOM2th8"
+  },
+  {
+    "name": "Bale Farm Tool Works",
+    "handle": "demo-bale-equipment-repair",
+    "products": [
+      {
+        "id": 153,
+        "name": "Field Hoe Head",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 154,
+        "name": "Compact Grain Hopper",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 155,
+        "name": "Pulley Guard Set",
+        "media": [],
+        "videoRef": ""
+      },
+      {
+        "id": 156,
+        "name": "Replacement Guard Fabrication",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-bale-equipment-repair/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:a2c1vNB-Bpg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:a2c1vNB-Bpg"
+      }
+    ],
+    "businessId": 39,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:a2c1vNB-Bpg",
+    "businessVideo": "https://www.youtube.com/watch?v=a2c1vNB-Bpg"
+  },
+  {
+    "name": "Dawa Hand Tools",
+    "handle": "demo-dawa-hand-tools",
+    "products": [
+      {
+        "id": 157,
+        "name": "Mason Point Chisel",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-dawa-hand-tools/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 158,
+        "name": "Carpenter Claw Hammer",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-dawa-hand-tools/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 159,
+        "name": "Brick Jointing Tool",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-dawa-hand-tools/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 160,
+        "name": "Crew Tool Marking Run",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-dawa-hand-tools/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 40,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Kaffa Mill Workshop",
+    "handle": "demo-kaffa-mill-workshop",
+    "products": [
+      {
+        "id": 161,
+        "name": "Replacement Mill Shaft",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kaffa-mill-workshop/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 162,
+        "name": "Grain Hopper Fabrication",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kaffa-mill-workshop/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 163,
+        "name": "Pulley and Guard Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kaffa-mill-workshop/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      },
+      {
+        "id": 164,
+        "name": "Compact Feed Chute",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kaffa-mill-workshop/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:ftMC5TSJSBg",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:ftMC5TSJSBg"
+      }
+    ],
+    "businessId": 41,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:ftMC5TSJSBg",
+    "businessVideo": "https://www.youtube.com/watch?v=ftMC5TSJSBg"
+  },
+  {
+    "name": "Sidama Fabrication",
+    "handle": "demo-sidama-fabrication",
+    "products": [
+      {
+        "id": 165,
+        "name": "Retail Display Frame",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sidama-fabrication/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 166,
+        "name": "Stainless Service Trolley",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sidama-fabrication/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 167,
+        "name": "Producer Packing Table",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sidama-fabrication/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 168,
+        "name": "Short-Run Bracket Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sidama-fabrication/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      }
+    ],
+    "businessId": 42,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:G034cOM2th8",
+    "businessVideo": "https://www.youtube.com/watch?v=G034cOM2th8"
+  },
+  {
+    "name": "Meda Furniture Studio",
+    "handle": "demo-meda-furniture-studio",
+    "products": [
+      {
+        "id": 169,
+        "name": "Compact Lounge Chair",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meda-furniture-studio/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 170,
+        "name": "Round Side Table",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meda-furniture-studio/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 171,
+        "name": "Entry Storage Bench",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meda-furniture-studio/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 172,
+        "name": "Made-to-Fit Dining Table",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meda-furniture-studio/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      }
+    ],
+    "businessId": 43,
+    "categories": [
+      "home-living"
+    ],
+    "legacyVideo": "youtube:pLL4PW4LZT8",
+    "businessVideo": "https://www.youtube.com/watch?v=pLL4PW4LZT8"
+  },
+  {
+    "name": "Tullu Timber Works",
+    "handle": "demo-tullu-timber-works",
+    "products": [
+      {
+        "id": 173,
+        "name": "Graded Hardwood Boards",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tullu-timber-works/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 174,
+        "name": "Edge-Glued Worktop",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tullu-timber-works/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 175,
+        "name": "Turned Furniture Leg Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tullu-timber-works/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 176,
+        "name": "Cut-to-Size Timber Pack",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tullu-timber-works/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      }
+    ],
+    "businessId": 44,
+    "categories": [
+      "home-living"
+    ],
+    "legacyVideo": "youtube:pLL4PW4LZT8",
+    "businessVideo": "https://www.youtube.com/watch?v=pLL4PW4LZT8"
+  },
+  {
+    "name": "Buna Basket House",
+    "handle": "demo-buna-basket-house",
+    "products": [
+      {
+        "id": 177,
+        "name": "Lidded Floor Basket",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-buna-basket-house/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 178,
+        "name": "Low Serving Tray",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-buna-basket-house/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 179,
+        "name": "Woven Planter Cover",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-buna-basket-house/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 180,
+        "name": "Retail Basket Quartet",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-buna-basket-house/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      }
+    ],
+    "businessId": 45,
+    "categories": [
+      "home-living"
+    ],
+    "legacyVideo": "youtube:pLL4PW4LZT8",
+    "businessVideo": "https://www.youtube.com/watch?v=pLL4PW4LZT8"
+  },
+  {
+    "name": "Kora Ceramic House",
+    "handle": "demo-kora-ceramic-house",
+    "products": [
+      {
+        "id": 181,
+        "name": "Everyday Cup Pair",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-ceramic-house/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:NJMPGgcDylY",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:NJMPGgcDylY"
+      },
+      {
+        "id": 182,
+        "name": "Wide Serving Bowl",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-ceramic-house/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:NJMPGgcDylY",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:NJMPGgcDylY"
+      },
+      {
+        "id": 183,
+        "name": "Carved Stem Vase",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-ceramic-house/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:NJMPGgcDylY",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:NJMPGgcDylY"
+      },
+      {
+        "id": 184,
+        "name": "Cafe Cup Production Run",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-ceramic-house/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:NJMPGgcDylY",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:NJMPGgcDylY"
+      }
+    ],
+    "businessId": 46,
+    "categories": [
+      "home-living"
+    ],
+    "legacyVideo": "youtube:NJMPGgcDylY",
+    "businessVideo": "https://www.youtube.com/watch?v=NJMPGgcDylY"
+  },
+  {
+    "name": "Aster Lighting Works",
+    "handle": "demo-aster-lighting-works",
+    "products": [
+      {
+        "id": 185,
+        "name": "Woven Pendant Light",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aster-lighting-works/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 186,
+        "name": "Directional Wall Light",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aster-lighting-works/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 187,
+        "name": "Workshop Task Lamp",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aster-lighting-works/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      },
+      {
+        "id": 188,
+        "name": "Cafe Lighting Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-aster-lighting-works/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:rRbIS71ZVpU",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:rRbIS71ZVpU"
+      }
+    ],
+    "businessId": 47,
+    "categories": [
+      "home-living"
+    ],
+    "legacyVideo": "youtube:rRbIS71ZVpU",
+    "businessVideo": "https://www.youtube.com/watch?v=rRbIS71ZVpU"
+  },
+  {
+    "name": "Wabi Joinery Studio",
+    "handle": "demo-wabi-joinery-studio",
+    "products": [
+      {
+        "id": 189,
+        "name": "Fitted Wall Shelving",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-wabi-joinery-studio/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 190,
+        "name": "Compact Entry Cabinet",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-wabi-joinery-studio/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 191,
+        "name": "Window Work Desk",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-wabi-joinery-studio/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      },
+      {
+        "id": 192,
+        "name": "Small Office Joinery Pack",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-wabi-joinery-studio/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:pLL4PW4LZT8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:pLL4PW4LZT8"
+      }
+    ],
+    "businessId": 48,
+    "categories": [
+      "home-living"
+    ],
+    "legacyVideo": "youtube:pLL4PW4LZT8",
+    "businessVideo": "https://www.youtube.com/watch?v=pLL4PW4LZT8"
+  },
+  {
+    "name": "Sena Home Textiles",
+    "handle": "demo-sena-home-textiles",
+    "products": [
+      {
+        "id": 193,
+        "name": "Structured Woven Throw",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sena-home-textiles/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 194,
+        "name": "Textured Cushion Pair",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sena-home-textiles/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 195,
+        "name": "Everyday Table Runner",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sena-home-textiles/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 196,
+        "name": "Guest Room Textile Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sena-home-textiles/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 49,
+    "categories": [
+      "home-living"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Sora Workwear Studio",
+    "handle": "demo-sora-workwear-studio",
+    "products": [
+      {
+        "id": 201,
+        "name": "Production Work Shirt",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sora-workwear-studio/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 202,
+        "name": "Cross-Back Workshop Apron",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sora-workwear-studio/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 203,
+        "name": "Service Team Trouser",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sora-workwear-studio/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 204,
+        "name": "Branded Team Uniform Run",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sora-workwear-studio/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 51,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Liya Textile House",
+    "handle": "demo-liya-textile-house",
+    "products": [
+      {
+        "id": 205,
+        "name": "Midweight Cotton Cloth",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-liya-textile-house/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 206,
+        "name": "Textured Interior Weave",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-liya-textile-house/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 207,
+        "name": "Light Garment Stripe",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-liya-textile-house/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 208,
+        "name": "Custom Color Weave Run",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-liya-textile-house/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 52,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Biftu Leather Goods",
+    "handle": "demo-biftu-leather-goods",
+    "products": [
+      {
+        "id": 209,
+        "name": "Structured Work Tote",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-biftu-leather-goods/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 210,
+        "name": "Everyday Crossbody",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-biftu-leather-goods/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 211,
+        "name": "Slim Card Wallet",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-biftu-leather-goods/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 212,
+        "name": "Branded Staff Carry Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-biftu-leather-goods/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 53,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Meda Uniform Works",
+    "handle": "demo-meda-uniform-works",
+    "products": [
+      {
+        "id": 213,
+        "name": "Service Polo Shirt",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meda-uniform-works/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 214,
+        "name": "Clinic Tunic",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meda-uniform-works/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 215,
+        "name": "School Sweater",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meda-uniform-works/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 216,
+        "name": "Uniform Reorder Program",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-meda-uniform-works/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 54,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Kora Weaving Studio",
+    "handle": "demo-kora-weaving-studio",
+    "products": [
+      {
+        "id": 217,
+        "name": "Graphic Cotton Wrap",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-weaving-studio/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 218,
+        "name": "Long Table Runner",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-weaving-studio/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 219,
+        "name": "Woven Cushion Face",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-weaving-studio/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 220,
+        "name": "Custom Palette Weave",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-kora-weaving-studio/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 55,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Ayni Garment Room",
+    "handle": "demo-ayni-garment-room",
+    "products": [
+      {
+        "id": 221,
+        "name": "Relaxed Day Dress",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-ayni-garment-room/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 222,
+        "name": "Draped Occasion Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-ayni-garment-room/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 223,
+        "name": "Tailored Long Jacket",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-ayni-garment-room/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 224,
+        "name": "Small Group Garment Run",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-ayni-garment-room/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 56,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Tana Cloth House",
+    "handle": "demo-tana-cloth-house",
+    "products": [
+      {
+        "id": 225,
+        "name": "Everyday Garment Cotton",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tana-cloth-house/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 226,
+        "name": "Durable Sheet Fabric",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tana-cloth-house/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 227,
+        "name": "Textured Curtain Cloth",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tana-cloth-house/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 228,
+        "name": "Coordinated Home Cloth Pack",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tana-cloth-house/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 57,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Zema Bag Studio",
+    "handle": "demo-zema-bag-studio",
+    "products": [
+      {
+        "id": 229,
+        "name": "Daily Zip Tote",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-zema-bag-studio/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 230,
+        "name": "Compact Commuter Backpack",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-zema-bag-studio/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 231,
+        "name": "Crossbody Utility Pouch",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-zema-bag-studio/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 232,
+        "name": "Team Field Bag Run",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-zema-bag-studio/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 58,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Abay Electrical Assembly",
+    "handle": "demo-abay-electrical-assembly",
+    "products": [
+      {
+        "id": 233,
+        "name": "Distribution Board Runs",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-abay-electrical-assembly/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 234,
+        "name": "Motor Control Panels",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-abay-electrical-assembly/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 235,
+        "name": "Labeled Cable Harnesses",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-abay-electrical-assembly/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 236,
+        "name": "Sheet-Metal Enclosure Runs",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-abay-electrical-assembly/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 59,
+    "categories": [
+      "electronics"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Netsa Hygiene Products",
+    "handle": "demo-netsa-hygiene-products",
+    "products": [
+      {
+        "id": 237,
+        "name": "Washable Baby Cloth Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-netsa-hygiene-products/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 238,
+        "name": "Reusable Menstrual Pad Set",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-netsa-hygiene-products/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 239,
+        "name": "Protective Underpads",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-netsa-hygiene-products/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      },
+      {
+        "id": 240,
+        "name": "Private-Label Hygiene Packs",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-netsa-hygiene-products/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:WHyh9auBmA0",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:WHyh9auBmA0"
+      }
+    ],
+    "businessId": 60,
+    "categories": [
+      "beauty-wellness"
+    ],
+    "legacyVideo": "youtube:WHyh9auBmA0",
+    "businessVideo": "https://www.youtube.com/watch?v=WHyh9auBmA0"
+  },
+  {
+    "name": "Tena Pasta Works",
+    "handle": "demo-tena-pasta-works",
+    "products": [
+      {
+        "id": 241,
+        "name": "Spaghetti Production",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tena-pasta-works/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:2H4PO4yVIsI",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:2H4PO4yVIsI"
+      },
+      {
+        "id": 242,
+        "name": "Macaroni Production",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tena-pasta-works/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:2H4PO4yVIsI",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:2H4PO4yVIsI"
+      },
+      {
+        "id": 243,
+        "name": "Fortified School Pasta",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tena-pasta-works/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:2H4PO4yVIsI",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:2H4PO4yVIsI"
+      },
+      {
+        "id": 244,
+        "name": "Private-Label Pasta Run",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-tena-pasta-works/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:2H4PO4yVIsI",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:2H4PO4yVIsI"
+      }
+    ],
+    "businessId": 61,
+    "categories": [
+      "food-farming"
+    ],
+    "legacyVideo": "youtube:2H4PO4yVIsI",
+    "businessVideo": "https://www.youtube.com/watch?v=2H4PO4yVIsI"
+  },
+  {
+    "name": "Sheger Rebar Works",
+    "handle": "demo-sheger-rebar-works",
+    "products": [
+      {
+        "id": 249,
+        "name": "Cut-and-Bent Rebar",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sheger-rebar-works/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 250,
+        "name": "Welded Mesh Panels",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sheger-rebar-works/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 251,
+        "name": "Stirrup Production Runs",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sheger-rebar-works/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      },
+      {
+        "id": 252,
+        "name": "Tagged Project Bundles",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-sheger-rebar-works/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:G034cOM2th8",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:G034cOM2th8"
+      }
+    ],
+    "businessId": 63,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:G034cOM2th8",
+    "businessVideo": "https://www.youtube.com/watch?v=G034cOM2th8"
+  },
+  {
+    "name": "Omo Packaging Factory",
+    "handle": "demo-omo-packaging-factory",
+    "products": [
+      {
+        "id": 253,
+        "name": "Corrugated Shipping Boxes",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-omo-packaging-factory/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:IaFy4gizZXk",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:IaFy4gizZXk"
+      },
+      {
+        "id": 254,
+        "name": "Food Product Cartons",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-omo-packaging-factory/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:IaFy4gizZXk",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:IaFy4gizZXk"
+      },
+      {
+        "id": 255,
+        "name": "Protective Box Dividers",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-omo-packaging-factory/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:IaFy4gizZXk",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:IaFy4gizZXk"
+      },
+      {
+        "id": 256,
+        "name": "Produce Carry Cartons",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-omo-packaging-factory/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:IaFy4gizZXk",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:IaFy4gizZXk"
+      }
+    ],
+    "businessId": 64,
+    "categories": [
+      "machinery-tools"
+    ],
+    "legacyVideo": "youtube:IaFy4gizZXk",
+    "businessVideo": "https://www.youtube.com/watch?v=IaFy4gizZXk"
+  },
+  {
+    "name": "Lemi Building Products",
+    "handle": "demo-lemi-building-products",
+    "products": [
+      {
+        "id": 257,
+        "name": "Interlocking Paver Runs",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-lemi-building-products/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 258,
+        "name": "Hollow Concrete Blocks",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-lemi-building-products/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 259,
+        "name": "Road and Garden Kerbs",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-lemi-building-products/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 260,
+        "name": "Custom Project Concrete Run",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-lemi-building-products/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 65,
+    "categories": [
+      "home-living"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  },
+  {
+    "name": "Awash Garment Factory",
+    "handle": "demo-awash-garment-factory",
+    "products": [
+      {
+        "id": 261,
+        "name": "School Uniform Programs",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-awash-garment-factory/product-1.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 262,
+        "name": "Hospitality and Clinic Wear",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-awash-garment-factory/product-2.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 263,
+        "name": "Branded Workwear Runs",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-awash-garment-factory/product-3.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      },
+      {
+        "id": 264,
+        "name": "Private-Label Contract Sewing",
+        "media": [
+          {
+            "ref": "/uploads/seed/portfolio/demo-awash-garment-factory/product-4.webp",
+            "kind": "image"
+          },
+          {
+            "ref": "youtube:wJV9EDe_sFc",
+            "kind": "video"
+          }
+        ],
+        "videoRef": "youtube:wJV9EDe_sFc"
+      }
+    ],
+    "businessId": 66,
+    "categories": [
+      "fashion-textiles"
+    ],
+    "legacyVideo": "youtube:wJV9EDe_sFc",
+    "businessVideo": "https://www.youtube.com/watch?v=wJV9EDe_sFc"
+  }
+]

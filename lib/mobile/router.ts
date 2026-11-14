@@ -104,10 +104,13 @@ function json(value: unknown, status = 200) {
   });
 }
 export function nativeCors(origin: string | null) {
+  const configuredPort = process.env.SUQPAGE_LOCAL_EXPO_PORT ?? "8082";
   return (
     process.env.NODE_ENV !== "production" &&
     !!origin &&
-    /^http:\/\/(localhost|127\.0\.0\.1):8082$/.test(origin)
+    (configuredPort === "8082" || configuredPort === "8083") &&
+    (origin === `http://localhost:${configuredPort}` ||
+      origin === `http://127.0.0.1:${configuredPort}`)
   );
 }
 async function dispatch(

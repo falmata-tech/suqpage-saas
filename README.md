@@ -44,6 +44,11 @@ npm run mobile:web
 
 Web/API: **http://127.0.0.1:3102**. Expo preview: **http://localhost:8082**.
 The Expo preview is not evidence of physical Android or OS push behavior.
+If a managed host reserves port 8082, add `SUQPAGE_LOCAL_EXPO_PORT=8083` to the
+ignored `.local/supabase-runtime.env`, restart the local web/API process, and
+run `npm run mobile:web` again. The preview then uses `http://localhost:8083`;
+the API admits only the two exact loopback host forms on that development
+port. Remove the setting when port 8082 is available again.
 For local scheduled chat processing, use `npm run dev:with-worker` in place of
 the ordinary web command; do not launch two web servers on the same port.
 
