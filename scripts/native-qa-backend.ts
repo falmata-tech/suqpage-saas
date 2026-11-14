@@ -41,6 +41,7 @@ const schema=nativeQaSchema((await db.prepare('SELECT current_schema() name').ge
 const product=await db.prepare(`SELECT p.id,p.name,b.id business_id,b.handle,b.name business_name FROM products p
  JOIN businesses b ON b.id=p.business_id WHERE b.status='active' AND b.is_demo=1 AND p.is_published=1
  AND p.availability IN ('available','limited') AND p.offering_kind<>'service'
+ AND b.handle='demo-liya-soap-kitchen' AND p.name='Oat Everyday Bar'
  AND NOT EXISTS(SELECT 1 FROM option_groups o WHERE o.product_id=p.id) ORDER BY b.id,p.id LIMIT 1`).get();
 if(!product)throw Error('Native QA needs a published demo product without required options.');
 const manifest={schema,source:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),businessId:Number(product.business_id),handle:product.handle,

@@ -161,6 +161,24 @@ try:
     run(['node', '--import', 'tsx', 'scripts/native-qa-demo.ts', '--limited'], timeout=30)
     find('Limited availability', timeout=45)
     capture('04-demo-live-update')
+    # This branch is a finite real-provider check, separate from deterministic
+    # fixtures. Screenshots must be visually reviewed for actual moving footage;
+    # a loaded WebView or a changed screenshot hash alone is not a pass.
+    assert fixture.get('externalVideo', {}).get('ref') == 'tiktok:7703762862484851981'
+    tap('Video 2', scroll=True)
+    tap('Watch video', scroll=True)
+    tap('Play video', timeout=35)
+    capture('04-tiktok-start')
+    time.sleep(8)
+    capture('04-tiktok-progress')
+    (OUT / 'external-video-review.json').write_text(json.dumps({
+        'source': fixture['source'], 'provider': fixture['externalVideo'],
+        'dataTarget': 'disposable-local-postgres',
+        'result': 'awaiting-agent-visual-verdict',
+        'captures': ['04-tiktok-start.png', '04-tiktok-progress.png']}, indent=2))
+    tap('Photo 1', scroll=True)
+    capture('04-tiktok-stopped')
+    assert not any(n.get('class') == 'android.webkit.WebView' for n in tree().iter('node'))
     adb('shell', 'input', 'keyevent', '4')
     find('Search products')
     find(fixture['productName'])
