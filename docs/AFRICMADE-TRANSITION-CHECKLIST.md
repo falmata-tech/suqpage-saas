@@ -76,9 +76,11 @@ and scenario progress remain protected. National origin is not a quality test.
    actual playback/quality evidence; do not admit a thumbnail or title alone.
    A finite read-only runner probe for two official-source candidates is in
    progress under FE-061. Its first watch-page run hit a Google traffic challenge
-   for both clips; one ordinary no-cookie embed attempt is pending. Decoded-player
-   receipts and frames still require agent visual inspection and exact product
-   matching; failures stay unqualified.
+   for both clips. The official no-cookie player displayed both exact creator
+   titles and Play controls, but the first embed probe's watch-page-only identity
+   assertion stopped before playback; a corrected ID check is pending. Decoded
+   receipts and frames still require visual inspection and exact product matching;
+   failures stay unqualified.
 2. [x] Qualify a finite, version/identity-fenced media correction through ordinary
    product and page commands. Reuse existing private requests while paused;
    reject drift before writes, retain history/photos/order/scenario facts, and

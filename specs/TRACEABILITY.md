@@ -14,8 +14,11 @@ FE-061's finite primary-source runner probes two named official-page
 candidates in an unprivileged PR job, retaining exact player identity, decoded
 playback timing and frames or bounded failures. First current-head run
 `43641658262` retained a Google traffic challenge on both watch pages; no clip
-was played or admitted. The follow-up checks the ordinary official no-cookie
-embed path once per exact ID while retaining both outcomes. Its script preflight
+was played or admitted. The first embed probe`43643861103` loaded both exact
+creator titles and Play controls, but stopped before playback because embed pages
+do not expose the watch page's initial video-details object. The corrected
+check uses the official player's video-data/video-URL ID while retaining the
+iframe ID boundary, then requires decoded timed playback. Its script preflight
 and static workflow check are source checks; only a current-head artifact and
 agent visual inspection can qualify particular footage. Neither candidate is
 admitted or applied to a public demo by introducing the review harness.

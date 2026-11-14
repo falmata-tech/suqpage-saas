@@ -48,11 +48,17 @@ const save = () => fs.writeFileSync(`${out}/review.json`, JSON.stringify(review,
 save();
 
 async function playExactVideo(page, player, candidate, prefix) {
+  const playerUrl = new URL(player.url());
+  if (prefix === 'embed') {
+    assert.ok(['www.youtube-nocookie.com', 'www.youtube.com'].includes(playerUrl.hostname));
+    assert.equal(playerUrl.pathname, `/embed/${candidate.id}`);
+  } else {
+    assert.equal(playerUrl.hostname, 'www.youtube.com');
+    assert.equal(playerUrl.searchParams.get('v'), candidate.id);
+  }
   const video = player.locator('video.html5-main-video').first();
   await video.waitFor({state: 'attached', timeout: 25000});
-  const details = await player.evaluate(() => window.ytInitialPlayerResponse?.videoDetails);
-  assert.equal(details?.videoId, candidate.id, 'The player must identify the exact creator video.');
-  const result = {player: {videoId: details.videoId, title: details.title, author: details.author}};
+  const result = {};
   if (await video.evaluate(element => element.paused)) {
     for (const selector of ['.ytp-large-play-button', '.ytp-play-button']) {
       const button = player.locator(selector).first();
@@ -71,13 +77,32 @@ async function playExactVideo(page, player, candidate, prefix) {
   const deadline = Date.now() + 45000;
   while (Date.now() < deadline) {
     const current = await state();
-    if (!current.adShowing && current.ready >= 2 && current.width > 0 && current.height > 0 && current.time >= 1.5 && !current.paused) {
+    const identity = await player.evaluate(() => {
+      const movie = document.querySelector('#movie_player');
+      const data = typeof movie?.getVideoData === 'function' ? movie.getVideoData() : null;
+      const url = typeof movie?.getVideoUrl === 'function' ? movie.getVideoUrl() : null;
+      const initial = window.ytInitialPlayerResponse?.videoDetails;
+      return {dataId: data?.video_id, url, initialId: initial?.videoId,
+        title: data?.title ?? initial?.title, author: data?.author ?? initial?.author};
+    });
+    let urlId;
+    if (identity.url) {
+      try { urlId = new URL(identity.url).searchParams.get('v'); } catch { /* An unavailable player URL is not identity evidence. */ }
+    }
+    const ids = [identity.dataId, identity.initialId, urlId].filter(Boolean);
+    assert.ok(ids.every(id => id === candidate.id), 'The official player reports another video ID.');
+    if (ids.length && !current.adShowing && current.ready >= 2 && current.width > 0 && current.height > 0 && current.time >= 1.5 && !current.paused) {
+      result.player = {videoId: candidate.id, identitySources: {
+        playerData: identity.dataId === candidate.id,
+        playerUrl: urlId === candidate.id,
+        initialResponse: identity.initialId === candidate.id,
+      }, title: identity.title, author: identity.author};
       result.start = current;
       break;
     }
     await page.waitForTimeout(500);
   }
-  assert.ok(result.start, 'The exact video did not decode and advance beyond 1.5 seconds.');
+  assert.ok(result.start, 'The exact player ID did not decode and advance beyond 1.5 seconds.');
   await page.screenshot({path: `${out}/${candidate.id}-${prefix}-start.png`, animations: 'disabled'});
   while (Date.now() < deadline) {
     const current = await state();
