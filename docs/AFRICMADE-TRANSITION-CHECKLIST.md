@@ -306,12 +306,11 @@ and documentation; DEP-026/DEP-049 own hosting, DEP-029 owns Auth settings, and
 BE-065 owns the verified database security correction. Existing Android/Play
 work stays visible and is not silently included in a new build approval.
 
-Current step: 7, finish routine publication, CI, merge and automatic deployment.
-The owner's standing instruction removes repeated approval prompts for this work;
+S189 is complete through PR #58 and main `5557d5e`. The owner's standing
+instruction removes repeated approval prompts for routine follow-through;
 AGENTS.md and DEP-002 retain checks and consequential-operation boundaries.
-Baseline is main `120f480`;
-work is isolated on `chore/dep-002-development-readiness`. Preserve existing
-provider resources, customer data, legacy compatibility and prior release evidence.
+The original baseline was main `120f480`. Preserve existing provider resources,
+customer data, legacy compatibility and prior release evidence.
 
 1. [x] Exercise bounded live public journeys and compare actual behavior with
    current specs. Cover desktop/phone where supported; label untested owner,
@@ -334,19 +333,14 @@ provider resources, customer data, legacy compatibility and prior release eviden
 6. [x] Implement the accepted delivery/readiness changes and focused security
    corrections, with tests at their owning boundary. Review dependency updates
    individually; retain branches until unique work/artifact lineage is resolved.
-7. [ ] Review explicit task files and applicable gates; commit only the qualified
+7. [x] Review explicit task files and applicable gates; commit only the qualified
    scope. Prepare remote integration and hosted activation with exact target,
    before-state, recovery and existing approval boundaries. Verify actual build,
    publication, routes/assets/runtime and provider state before claiming delivery.
-   Local review, focused gates and build are complete; hosting is verified. The
-   source commit `93f8384` is prepared locally. First update the standing routine
-   authorization, then push/open the exact PR, resolve CI/review findings, squash
-   merge after all required checks/reviews pass, and verify post-merge CI plus
-   the actual automatic Netlify deployment. No further routine confirmation is
-   needed; record terminal source/deployment evidence before closing this step.
-   CI review also found that the new security regression was wired only into
-   the local npm suite. Add it to the existing required PostgreSQL rehearsal
-   before qualifying the PR head; retain every other required check.
+   PR #58 integrated the scoped correction, including the required PostgreSQL
+   security regression. All five required PR and post-merge jobs passed, and the
+   merge automatically published the verified Netlify build. Exact source,
+   workflow, deploy and runtime receipts are in [traceability S189](../specs/TRACEABILITY.md#s189-development-and-deployment-readiness).
 8. [x] Update master/specs/traceability/runbooks with verified outcomes, remaining
    access/device limits and the next concrete step. No automatic migration,
    Auth/credential replacement, account cleanup or other-product change belongs
