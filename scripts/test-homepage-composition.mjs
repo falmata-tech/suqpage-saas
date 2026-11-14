@@ -105,9 +105,11 @@ assert.match(businessLoader, /useMarketFeed\(key,async\(params,signal\)=>/);
 assert.match(businessLoader, /return batch\(await response\.json\(\) as MarketplaceDiscoveryView\)/);
 assert.match(businessLoader, /initialExclusionKey===exclusionKey\?batch\(initial\):undefined,\{scopeKey:['"]\/api\/discovery:public:['"]\+scope\+['"]:excluded:['"]\+exclusionKey,initialSnapshotKey:marketSearchParams\(scope,initialSearch\)\.toString\(\)/, 'Business retention and initial data require the same public collection, criteria and exclusions');
 assert.match(discoveryMapUi, /exclusionKey=excludedBusinessIds\(blocked\.list\.map\(item=>item\.id\)\)\.join\(','\)/, 'Preference identity uses canonical current exclusions');
-assert.match(discoveryMapUi, /const businesses=useIndependentSearch\(['"]businesses['"],businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey\)/);
+// FE-079: only the visible scope polls; the inactive pane keeps its own criteria.
+assert.match(discoveryMapUi, /const businesses=useIndependentSearch\(['"]businesses['"],businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey,!panelOpen\)/);
+assert.match(businessLoader, /refreshMs:15000,active\}/, 'Business feed polling follows the visible pane');
 assert.match(discoveryMapUi, /const productKey=marketSearchParams\(['"]products['"],productSearch\)\.toString\(\)/);
-assert.match(discoveryMapUi, /const products=useMarketFeed\(productKey,loadProductBatch,initialExclusionKey===exclusionKey\?productBatch\(productDiscovery\|\|discovery\):undefined,\{scopeKey:['"]\/api\/discovery:public:products:excluded:['"]\+exclusionKey,initialSnapshotKey:marketSearchParams\(['"]products['"],initialProduct\)\.toString\(\)\}\)/);
+assert.match(discoveryMapUi, /const products=useMarketFeed\(productKey,loadProductBatch,initialExclusionKey===exclusionKey\?productBatch\(productDiscovery\|\|discovery\):undefined,\{scopeKey:['"]\/api\/discovery:public:products:excluded:['"]\+exclusionKey,initialSnapshotKey:marketSearchParams\(['"]products['"],initialProduct\)\.toString\(\),refreshMs:15000,active:panelOpen\}\)/);
 assert.match(marketFeed, /\},\s*250\);/, 'Criteria changes retain the bounded debounce');
 assert.match(marketFeed, /return \(\) => \{clearTimeout\(timer\); controller\.abort\(\); more\.current\?\.abort\(\);\}/);
 assert.match(marketFeed, /!controller\.signal\.aborted && generation\.current === version && activeKey\.current === key && activeScope\.current === scopeKey/, 'Only the latest correct-scope request may replace results');
