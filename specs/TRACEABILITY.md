@@ -51,8 +51,15 @@ without short-scroll settling, then passes Replay focus, partial/full horizontal
 return, thumbnail and arrow actions with both changes. Chrome for Testing 151
 on the isolated product94 source at 390/1440 confirms the selected video,
 partial-scroll settle, full photo return and arrow hit target. The external
-TikTok frame did not attach in two bounded follow-up attempts, so end-to-end
-Replay on this exact source remains unqualified pending a source-bound rerun.
+TikTok frame did not attach in two bounded local follow-up attempts. PR82's
+fixed-head disposable product94 run `43651574483` (head `7b7135c`, artifacts
+`14135903598` and `14135779600`) then passed exact 9.843s
+end-to-Replay-to-renewed-progress on desktop web and Expo web twice. Desktop
+gallery scrollLeft remained equal to clientWidth before and after Replay with
+snap disabled; Photo 1 and reload removed the player. Phone web showed the
+provider's Video unavailable state before Replay in both runs, so its exact
+source-bound Replay remains unqualified. The clip's mango/papaya color,
+packaging and overlaid copy do not qualify it as Sena's demo footage.
 Touch drags over the iframe did not move the gallery in local Chrome; photo
 thumbnail and arrow remain the verified explicit exits. Current Expo web on
 main `1c9a8dc` opens product94 Video 2 and returns to Photo 1 without page/API
