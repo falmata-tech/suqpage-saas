@@ -168,8 +168,16 @@ try:
     # fixtures. Screenshots must be visually reviewed for actual moving footage;
     # a loaded WebView or a changed screenshot hash alone is not a pass.
     assert fixture.get('externalVideo', {}).get('ref') == 'tiktok:7703762862484851981'
-    tap('Video 2', scroll=True)
-    tap('Watch video', scroll=True)
+    # Availability is below the gallery. Return upwards before selecting media;
+    # the ordinary form helper intentionally searches only downwards.
+    size = re.findall(r'(\d+)x(\d+)', adb('shell', 'wm', 'size'))[-1]
+    width, height = map(int, size)
+    for _ in range(3):
+        adb('shell', 'input', 'swipe', str(width // 2), str(int(height * .35)),
+            str(width // 2), str(int(height * .80)), '350')
+    tap('Video 2')
+    capture('04-video-selected')
+    tap('Watch video')
     tap('Play video', timeout=35)
     capture('04-tiktok-start')
     time.sleep(8)
