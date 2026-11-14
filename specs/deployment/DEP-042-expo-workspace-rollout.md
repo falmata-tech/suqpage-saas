@@ -147,17 +147,18 @@ runs WHEN query-string decodes the input THEN the isolated compatibility test
 finishes within its three-second bound, alongside Unicode round-trip checks.
 The existing browser CI job runs this dependency compatibility check after its
 clean full-workspace install; the offline workflow contract requires the step.
-This decoder patch does not waive the remaining native build-tool advisories or
-admit an Android binary with missing release inputs.
+The decoder patch alone did not waive native build-tool advisories or admit an
+Android binary with missing release inputs. The compatible tooling refresh below
+resolves the locked audit findings; signed-release admission remains separate.
 
-### S191 compatible Expo 57 security refresh (in progress)
+### S191 compatible Expo 57 security refresh (source qualified)
 
-The 2026-11-14 baseline full locked audit reports three high and six moderate
-findings in native tooling. The registry publishes newer Expo 57 patch
-releases whose upstream tool dependencies remove the old Zod dependency and
-adopt patched glob/config packages. Evaluate that supported patch line before
-considering any advisory exception; preserve React Native, application identity,
-the decoder adapter, API/Auth targets and the moderate-severity audit threshold.
+The pre-refresh 2026-11-14 locked audit reported three high and six moderate
+findings in native tooling. Newer supported Expo 57 patch releases remove the
+old Zod dependency and adopt patched glob/config packages. The supported patch
+line was evaluated before any advisory exception while preserving React Native,
+application identity, the decoder adapter, API/Auth targets and the
+moderate-severity audit threshold.
 
 GIVEN the reviewed Expo 57 dependency ranges WHEN refreshing the native lockfile
 THEN use compatible upstream releases, inspect the exact dependency diff and
@@ -178,16 +179,20 @@ Keep this compatibility check in the existing full-install browser CI step.
 An upstream API/version drift needs a new review; a general forced-major update
 or an audit suppression is not the correction.
 
-Current tooling evidence in traceability supersedes DEP-044 S191's earlier
-failed-audit snapshot. Its original artifact, signing, predecessor and provider
-admission rules remain unchanged. The historical release document is preserved;
-no old account or release-operation material is republished as part of this fix.
+The compatible patch refresh and exact fingerprint override are integrated in
+PR #69. Current-head PR/main quality and separate Android QA pass; the full
+locked audit reports zero findings. Traceability owns the exact source, runs and
+historical failure. This supersedes DEP-044 S191's earlier failed-audit snapshot
+without changing its artifact, signing, predecessor or provider admission rules.
+The historical release document is preserved; no old account or release-operation
+material is republished as part of this fix.
 
 This is build dependency work with no new product flow, schema, permissions,
 provider configuration or production data change. Master section 18 already
 delegates exact versions to the lockfile; its runtime/identity boundaries remain
-the acceptance criteria. Record actual findings and export/CI results in
-traceability before source integration.
+the acceptance criteria. The source/tooling integration is complete; the
+canonical signed successor still needs authentic inputs and independent
+artifact, physical-device, push and Play qualification in DEP-044.
 
 ## S59 — approved coordinated release, 2026-10-05
 

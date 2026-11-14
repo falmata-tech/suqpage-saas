@@ -284,16 +284,11 @@ query-string import adapter is unchanged. `test-mobile-dependencies.cjs` adds
 32,000 distinct malformed percent runs in a three-second child-process bound;
 the existing Unicode/repeated-malformed-input/UUID checks still pass. A clean
 locked install, `test:mobile:build`, mobile typecheck and the public-script
-static gate pass. The initial decoder-only patch is retained; current preparation
-also refreshes compatible Expo57 patches as described below, with no product UI
-change or major SDK/React Native upgrade.
+static gate pass. The decoder patch and compatible Expo57 refresh are integrated
+as described below, with no product UI change or major SDK/React Native upgrade.
 The same adversarial payload times out against isolated decoder 0.5.0 and passes
 with 0.5.1. The existing full-install browser CI job now enforces the compatibility
 check before browser setup; the offline workflow contract requires that order.
-
-The initial decoder patch's local `npm run check` passes its prechecks and stops at the first
-PostgreSQL fixture because this session has no fixture database URL. This is an
-environment failure; required provider-backed remote checks remain necessary.
 
 The compatible Expo57.0.33 refresh adopts upstream patched CLI/config/glob/forge
 packages while preserving React Native0.86.3, package/signer/Firebase/targets and
@@ -310,15 +305,25 @@ adversarial glob aborts at its96-MB heap ceiling under10.2.6 and completes with
 Native typecheck, resolved config/release-safety,237-spec validation and actual
 Android Hermes export pass. The export uses the explicitly separate QA profile
 and synthetic loopback backend target; it does not admit a production artifact.
-The local operations check stops because Docker is unavailable. Required remote
-source/operations/browser/PostgreSQL checks still apply to this new lockfile.
+PR #69 head `189449df62ae5030c40575901f63a9aac54b4e97` passes all five quality
+jobs in `43641495939` and actual Android QA in `43641495941`. Its reviewed
+tree `fda2a7eb582a4a16bfd5dd5743bd7ff032f3fd42` is identical to protected
+squash-merged main `4fda4aa3598999b2cefe85068f0b4928cbee8abd`. Main quality
+`43642749440` and Android `43642749393` also pass. The main Android artifact
+`14132598828` records 11 actual UI states through product search, live update,
+Back, inquiry, About and Login; one inquiry persists in disposable PostgreSQL
+with other businesses unchanged. Its bounded crash receipt reports no fatal
+exception. Published health at review reported source `32f3b84`, which includes
+the merged change.
 
-PR #69 native QA run `43609385834` reached map, product search and the typed
-keyboard, then `uiautomator dump` exited 255 at the product action. Retained
-artifact `14120525466` reports a fatal exception without a process or stack,
-so the cause remains unclassified. DEP-053 now prepares a bounded public
-exception/process identifier receipt; its synthetic privacy/bound tests pass
-locally. Current-head Android evidence is still required before integration.
+The earlier PR #69 Android run `43609385834` stopped when `uiautomator dump`
+exited 255 after the search keyboard; artifact `14120525466` reported a fatal
+exception without its process or stack. The cause remains unclassified; no UI
+workaround was inferred. DEP-053 now retains bounded public process/exception/
+method identifiers when a future error is present and keeps raw logs private.
+Its synthetic privacy/bound tests and the current-head native run pass. These
+results qualify compatible source tooling and the separate QA app, not the
+canonical signed v4 APK, physical device, push or Play testing.
 
 The original keystore/password were independently matched to the release policy
 in the prior provider session. The protected key file, pinned Firebase client and

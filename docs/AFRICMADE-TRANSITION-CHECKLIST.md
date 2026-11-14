@@ -250,17 +250,18 @@ targets. This is build/delivery work; no new product behavior or Play submission
 2. [ ] Recover the existing signer and authentic pinned Firebase client through
    the exact provider projects; recover the canonical v3 APK for comparison.
    Keep private material in ignored protected paths. Never substitute a new key.
-3. [ ] Patch the newly reported URL-decoder denial of service with the reviewed
-   0.5.1 patch under DEP-042 and enforce its bounded distinct-run regression in
-   the existing full-install browser CI job. Freeze
-   source/lock/tools, run native configuration and export checks,
-   inspect the current locked dependency audit, and record exact build inputs.
-   Resolve current findings against the owner's current build instruction;
-   consumed historical exceptions do not admit new findings.
-   - [ ] Diagnose PR #69's Android QA failure after product search. Retain
-     bounded public fatal-error classification, inspect the source-bound run,
-     and fix only the observed cause before repeating the native gate. Browser
+3. [ ] Freeze exact source/lock/tools and build inputs for the signed successor
+   after step 2. The source security portion is qualified under DEP-042:
+   - [x] Pin the reviewed URL decoder 0.5.1, enforce its bounded distinct-run
+     regression in full-install browser CI, refresh compatible Expo 57 tooling,
+     and prove native configuration, export and a zero-finding locked audit.
+     PR #69 merged as main `4fda4aa`; all five PR/main quality jobs pass.
+   - [x] Investigate PR #69's earlier Android QA stop after product search.
+     That fatal exception's cause remains unclassified. Bounded public crash
+     classification was added without raw log disclosure; the current PR and
+     main Android QA runs pass all screen and persistence checks. Browser
      preview and a QA debug APK do not qualify the signed successor.
+   Consumed historical exceptions do not admit new findings.
 4. [ ] Compile one local AAB, derive the universal APK, and independently inspect
    both against DEP-044 and the v3 predecessor. A failed compilation requires
    diagnosis before a bounded retry; do not weaken release checks.
@@ -269,10 +270,9 @@ targets. This is build/delivery work; no new product behavior or Play submission
    complete its normal protected integration if documentation changes remain.
 
 Current step: 2, blocked on the pinned Firebase client and canonical v3 APK.
-Independent work within step 3 continues: evaluate the newly published compatible
-Expo 57 patches, inspect the exact lockfile diff, run a clean full native audit,
-dependency/configuration/types and Android export checks, then qualify normal
-source integration. Do not override incompatible majors or relax release gates.
+The independent source-security work within step 3 is integrated and audited;
+its remaining freeze depends on the authentic inputs in step 2. Do not override
+incompatible majors or relax release gates.
 The recovered signer is recorded provider evidence; its protected local file is
 not present in this resumed checkout and must be recovered again before signing.
 The original keystore/password were recovered from `@falmatad/suqpage` and
@@ -288,8 +288,11 @@ the full native audit with zero findings, native types, build/configuration and
 release-safety tests, and a real Android Hermes export under the separate QA
 profile. Fingerprint path/negation/hash compatibility and bounded adversarial
 glob tests pass; no advisory exception or audit suppression is used. This is
-tooling qualification, not signed-release admission. Required source CI remains
-pending for the refreshed inputs; local operations cannot run without Docker.
+tooling qualification, not signed-release admission. PR #69 source run
+`43641495939` and Android run `43641495941` pass; merged main quality
+`43642749440` and Android `43642749393` pass. The latter saves one inquiry in
+disposable PostgreSQL with other businesses unchanged and no fatal exception.
+The current published health source includes the merged change.
 Recover the authentic client, original key file and v3 predecessor before
 freezing a canonical signed build plan.
 
