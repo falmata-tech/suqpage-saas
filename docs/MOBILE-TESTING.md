@@ -1,161 +1,109 @@
-# Test the Suqpage mobile app
+# Test the AfricMade mobile app
 
-Local development uses PostgreSQL/Supabase and real API workflows. The latest
-released standalone [Android APK, version 2](https://expo.dev/accounts/falmatad/projects/suqpage/builds/565b9614-428d-47b4-8780-2b0f9c96d68b)
-uses the live Suqpage API and production accounts. See
-[the S98 release record](SUQPAGE-S98-RELEASE-2026-10-08.md) for its evidence.
+FE-053 owns native visitor/business-owner behavior. DEP-053 / ADR-0033 own the
+isolated Android development tests; DEP-044 owns signed release admission and
+Play/physical-device qualification. Current work and release blockers belong in
+[the active checklist](AFRICMADE-TRANSITION-CHECKLIST.md), not old APK links.
 
-[Version 3](https://expo.dev/accounts/falmatad/projects/suqpage/builds/641cb96a-3296-409b-b7ae-eabb28bc11fa)
-is now built, inspected and independently verified on Google Play **active internal testing**.
-Its protected Google APK requires Play Store; it is not a promised sideload preview
-for devices/emulators without it. Google's official signed test splits pass an
-isolated update, retained language preference, 12 public states/five languages and
-HTTPS links, with production protection unchanged. The temporary test emulator is
-closed. Actual protected Play-installed phone/authenticated/notification checks
-and closed/public distribution remain. All required setup forms and the completed
-Teen/12+ rating are saved and verified; Google review submission still awaits
-remaining track setup. The five-language catalog policy is live, accessible from
-Android's existing Terms link without another APK. On a real Android phone, use one of the ten
-supplied tester Google accounts and open
-[Join SuqPage testing](https://play.google.com/apps/internaltest/4701297357173307496),
-join, then install from Google Play. Google temporarily shows
-**com.suqpage.app (unreviewed)** until setup/review completes. Availability can take
-several hours. App sign-in is separate from the Play tester Google account;
-normal business users use email codes and staff/admin cannot sign into native.
-Follow [the Play release steps](GOOGLE-PLAY-RELEASE.md#next-owner-actions).
-No real enrollment, phone result, invitation or closed-test clock is claimed.
-Internal testers must leave internal testing before joining the later closed test.
-Earlier preview notes below are historical.
+## Managed Android tests
 
-## Browser
+[Native Android QA](https://github.com/falmata-tech/suqpage-saas/actions/workflows/native-android.yml)
+builds the actual React Native development client on a standard Ubuntu runner
+and starts an accelerated API 35 x86_64 emulator. It runs on relevant pull requests
+and main changes, with manual dispatch available after integration. The first
+native English smoke is qualified in run43529393814: native navigation, keyboard,
+Back, inquiry submission and independent PostgreSQL verification pass. See
+traceability for the exact source/artifact and inspected visual decision.
 
-From `/Users/falmata/Desktop/Dev/suqpage-saas`, open two terminals:
+The disposable app is **AfricMade QA**, package `com.africmade.qa`. It uses the
+runner-local API at `http://10.0.2.2:3000`, a fresh local PostgreSQL fixture schema
+and a synthetic MapLibre background. Metro serves the actual app code locally.
+It never restores production accounts or uses hosted Auth, Firebase, release
+signing or production data. Production `com.africmade.app` admission is unchanged.
+No EAS/Play upload or new paid device subscription is part of this workflow.
+
+The `native-android-review` artifact retains synthetic screenshots, native
+accessibility hierarchies, APK/source/device identity, scenario results and saved
+inquiry verification for seven days. Inspect the screenshots yourself and record
+a source-bound visual decision. A green automated assertion does not establish
+readability or layout quality. Raw server/Metro/device logs and disposable
+credentials are excluded from public artifacts. Do not attach customer data.
+
+| Workflow | Initial native automation | Additional qualification |
+|---|---|---|
+| Market | Map/list switch, actual product search, keyboard | Filter combinations, map groups, pagination, locales and large text |
+| Product | Real API-backed detail and native Back preserving search | Gallery/video, options, unavailable states, external app handoff |
+| Inquiry | Add/list/form/keyboard, local Inbox submit, exact saved tenant/product | Cross-business basket return, validation/retry and offline recovery |
+| Navigation | About and Login entry | Wider screen/rotation/accessibility audit |
+| Owner | Not exercised without isolated managed Auth | Sign-in/out, edits, publish, inbox/support and transport |
+| Delivery | Debug install and crash signal | Firebase push, physical devices and signed Play installation |
+
+The smoke's POST goes through the ordinary application/domain/database path.
+It sends no WhatsApp/Telegram, email or push message. `scripts/native-qa-ui.py`
+drives observed native nodes through ADB; `scripts/native-qa-verify.ts` independently
+checks the saved inquiry and unchanged other-business inquiry count.
+
+Use focused component/API/type checks during iteration, then review native
+artifacts on a coherent source. Preserve initial failures and classify setup,
+harness and product failures before retrying. Fix actual defects without removing
+assertions or treating a web preview as native evidence. Keep the five required
+quality jobs separate from this new native check until qualification is complete.
+
+## Local web and native development
+
+From the repository root, start the isolated local web/API and Expo browser
+preview using the current development commands/environment:
 
 ```sh
 npm run dev -- --hostname 127.0.0.1 --port 3102
-```
-
-```sh
 npm run mobile:web
 ```
 
-Open <http://localhost:8082>. This is the mobile app's browser preview; the existing
-web app is at <http://127.0.0.1:3102>. Use browser responsive mode for phone/tablet
-sizes. Only one Expo server can use port 8082 at a time; stop it with Ctrl+C before
-switching between browser, Android and phone commands.
+These commands run in separate terminals. The web app is at
+<http://127.0.0.1:3102>; Expo browser preview is at <http://localhost:8082>.
+Use phone/tablet sizes for focused web work; this does not run Android native
+layout, OS Back or the native map. See the browser review guide for actual
+visitor/owner/staff/admin journeys and authoritative API outcomes.
 
-## Native Android / iPhone
-
-The native map now uses MapLibre. **Expo Go is no longer supported.** Browser
-preview still works with Leaflet. Install a rebuilt Suqpage development client or
-standalone APK; the earlier Expo Go QR code does not run the new native map.
-
-For a local Android development build (JDK/SDK installed):
+MapLibre needs a custom development build; **Expo Go is unsupported**. On a
+host with a qualified JDK, Android SDK and a connected test device/emulator:
 
 ```sh
 cd apps/mobile
 npx expo run:android
 ```
 
-This generates/compiles native dependencies and installs on a connected Android
-phone or emulator. After the development client is installed, use root commands
-`npm run dev:mobile` and `npm run mobile:phone` on the same trusted Wi-Fi. Open
-the QR/development URL with the Suqpage development client. For an emulator,
-`npm run mobile:android` forwards local API/Auth/Metro ports. Do not expose these
-ports on a public router. A standalone preview APK will not need Metro.
+The normal local development client is distinct from DEP-053's CI-only QA data
+workflow. Its origin-scoped storage must never fall back to production keys.
+`npm run mobile:emulator` starts the previously configured local Intel API 35 AVD;
+it does not install an SDK, create a cloud VM or work on a host without that AVD.
+`npm run mobile:android` forwards the local API/Auth/Metro ports. After installing
+a compatible development client, `npm run dev:mobile` and `npm run mobile:phone`
+support a trusted local network. Do not expose development ports publicly.
+Full Xcode/signing and iOS-device qualification remain separate.
 
-`npm run mobile:emulator` starts the existing Intel API 35 device. Android System
-UI/launcher ANRs have interrupted initial checks; scoped process recovery and
-subsequent signed-app screen checks pass. Physical phones remain unverified.
-Installed tools:
-Android Studio, SDK/platform-tools, API 35/36 build tools, Temurin Java 17,
-Gradle 9.3.1 and NDK 27.1.12297006. First native build downloads remaining dependencies. Full Xcode is unavailable on
-this Mac; an iPhone needs a separately signed development/internal build, not Expo Go.
+Use a local demo owner or a new isolated test email. Local codes belong in the
+[local inbox](http://127.0.0.1:54324); never paste OTPs or tokens into source/logs.
+Staff/admin management stays on web. Visitors can inquire about products;
+transport chat is available only to authenticated businesses from their dashboard.
+Public transport launchers and guest transport creation are retired (FE-078).
 
-Google Maps keys or Google Cloud billing are not required. MapLibre's internal
-tile cache is permitted; Suqpage application records remain in PostgreSQL.
-See MOBILE-DISTRIBUTION.md and MOBILE-MAP-RESEARCH.md for signing and constraints.
+## Release and external links
 
-## Sign-in and test paths
+The canonical app is AfricMade / `com.africmade.app`; current API/public links use
+`https://africmade.com`. Existing legacy installations and release records remain
+separate compatibility history. Use DEP-044's current exact signer, Firebase,
+predecessor and audit admission before compiling or publishing a release.
+A QA APK, JavaScript export, historical Suqpage APK or Expo preview does not admit
+that artifact or establish a new Play testing clock.
 
-Use an existing **local demo owner** or a new test email. Local login codes are in
-[the local inbox](http://127.0.0.1:54324), not your real mailbox. Never paste an OTP
-or Auth token into source files. Staff accounts are denied native owner access;
-use the web dashboard for administration.
+For a qualified rebuilt app, separately verify cold/warm canonical HTTPS links,
+return from native browser sheets, and WhatsApp/Telegram installed/absent handling.
+Inspect the correct owned demo recipient and draft without sending a message.
+Denied handlers must show recovery and preserve the inquiry. No app token may
+reach third-party URLs. Physical keyboard, TalkBack, push and Play enrollment
+require actual evidence beyond the emulator smoke.
 
-Try Market search/filter/map markers, Featured, a showroom's image/video gallery,
-a direct inquiry and a grouped inquiry. Then sign in, edit a draft page/location,
-create an offering, submit a video request, view inquiries, open owner support,
-and sign out. Transport assistance has its own guest chat session and End chat;
-it does not grant owner access. Local messages require a staff member in the local
-web dashboard to answer them.
-
-## Evidence and release limits
-
-Focused tests cover bearer verification, staff/cross-tenant denial, body limits,
-public-data projection, signup, version conflicts, offerings/idempotency, inquiries,
-support/video requests, buying-session isolation and retained closed history.
-Browser checks exercise local OTP verification and visitor/owner navigation.
-Replacement layout screenshots are in `.local/mobile-alignment/`; owner workflow captures are in `.local/mobile-review/`. Both directories stay outside Git. See `docs/MOBILE-WEB-ALIGNMENT.md`.
-Android and iOS JavaScript exports are not signed installable store applications.
-MapLibre Android compilation and emulator installation/first render/search-drawer
-composition pass. Native captures and development APK checksum are recorded in
-MOBILE-MAP-RESEARCH.md. Physical-phone gestures, preview interaction, YouTube
-playback/fullscreen and offline recovery remain explicit checks. Support attachments now have scoped API regression evidence; browser/device
-interaction verification remains part of the release audit.
-
-Current release status: web/API source 6c27025 is deployed with a clean isolated
-web audit; replacement internal APK 9bcabbdb is finished, signed and installed.
-The full native-toolchain audit retains two upstream advisory roots under the
-owner-approved single replacement-artifact exception, now consumed. Native
-map/logo/gallery/locale/link checks and local owner/API tests have separate
-evidence; physical-phone inbox/social-app checks remain. No store submission is
-claimed. Local browser codes are in the local inbox; the standalone APK sends
-codes through production email delivery.
-
-Setup references: [Expo device testing](https://docs.expo.dev/get-started/start-developing/),
-[Android acceleration](https://developer.android.com/studio/run/emulator-acceleration),
-[Xcode requirements](https://developer.apple.com/xcode/system-requirements/).
-
-### S51 local UI review (2026-10-05)
-
-Expo browser preview: http://localhost:8082; web/API: http://127.0.0.1:3102.
-The emulator is closed at the owner's request to save CPU/memory. Use browser
-preview for the shared storefront copy, customer/business About sections and
-six-second sponsor rotation. Scripts/capture-storefront-copy.mjs records 69
-web/browser-mobile locale/layout states; capture-sponsor-rotation.mjs covers
-cycles and controls. This is browser evidence, not Android/iOS AppState or
-screen-reader/gesture proof. Existing S50 native and release gates remain open.
-
-## External links — S65
-
-Run `npm run test:mobile:links` and `node scripts/capture-mobile-links.mjs` with
-local web/API 3102 and Expo web 8082 running. Browser fixtures do not update shops.
-Android JS export proves bundling only. Before releasing a rebuilt app, verify:
-- Website opens in the native browser sheet; Close/Back returns to the same
-  product/inquiry without losing its selections or message.
-- WhatsApp/Telegram installed: correct recipient and draft, no automatic send.
-- App absent: original HTTPS fallback; unavailable browser/handler: visible error.
-- SMS/email/phone remain system actions; no app tokens reach third-party pages.
-- Description links preserve text; invalid schemes remain inert.
-
-S66 adds the Android App Links candidate alongside `suqpage://`. Domain
-publication, a rebuilt APK and OS verification are required before claiming
-outside `suqpage.com` links work. iOS Universal Links await Apple identity.
-
-## Verified public links — S66
-
-`npm run test:mobile:app-links` checks route/security and registered signing scope;
-`node scripts/capture-mobile-app-links.mjs` checks local association JSON and
-Market cold/warm/repeated link inputs using real catalog reads. These do not prove
-Android OS verification. The current build configuration uses Suqpage / com.suqpage.app for both internal
-APK and store builds. After independently verifying its signing certificate,
-publishing the canonical association and installing that rebuilt APK, use
-`adb shell pm verify-app-links --re-verify com.suqpage.app` and
-`adb shell pm get-app-links com.suqpage.app`; suqpage.com must verify. The retained
-legacy com.suqpage.app.preview association belongs only to older released APKs;
-it is not proof of canonical App Links.
-Launch public HTTPS showroom/product/Market/Featured links without forcing a
-package, then check cold and warm navigation. Unsupported admin/Auth links remain
-web-only. Existing APK build 2018cc70 lacks the new link manifest; do not reuse it
-as evidence of App Links. Production Play and iOS identities are not registered.
+References: [Expo development workflows](https://docs.expo.dev/develop/development-builds/development-workflows/),
+[GitHub runner capabilities](https://docs.github.com/en/actions/reference/runners/github-hosted-runners),
+[Android ADB](https://developer.android.com/tools/adb).

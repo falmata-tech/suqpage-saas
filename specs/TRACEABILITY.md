@@ -8,6 +8,47 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S195 native Android QA — initial smoke qualified
+
+DEP-053 / ADR-0033 map the isolated configuration, actual Android driver, disposable
+backend and saved-inquiry verifier to `.github/workflows/native-android.yml` and
+`scripts/native-qa-*`. Configuration/negative cases, actual driver helpers,
+root/mobile types and existing release safety pass. Generic script checking
+refused app companions; exact in-memory checks passed without changing its guard.
+
+Source `345f64bf9f1fdb3258fd22ca8ed0aa214edfd06f`, tree
+`a955366544b10ee029df90fcf3164a63f295ec9f`: native run43529393814 and all five
+quality jobs in43529393782 pass. The actual API35/x86_64 app completes ten states
+in151s: map/list/search/keyboard, product, native Back retaining search, selection,
+Inbox form/submission, About and Login entry. Independent PostgreSQL readback
+proves exactly one inquiry for the selected tenant/product and unchanged other
+businesses. No fatal exception is reported. Source-bound visual decision: PASS
+for this English smoke's inspected screens, readable actions and form/keyboard
+states; the map background is synthetic and proves no external tile availability.
+
+The inspected cache records native source `d445a48` separately from current Metro
+JavaScript. Debug QA package `com.africmade.qa`, APK SHA256
+`568f3a90c8d98b4dc3347c45db767656b01a71ca9fdf1b3918df31a17c8b4484`.
+Exact v2 cache reuse survives prebuild and avoids the ten-minute native compile.
+Artifact14086218967 SHA256
+`636e2acc160fefa8b68b4cf387ed3b7b063fff8b5f13635e070c3ab0b59d80b7`
+retains synthetic screenshots, hierarchies and reports for seven days.
+
+Retained failed attempts and corrected causes:
+
+| Run | Classification and correction |
+|---|---|
+| 43519737758 | Harness: unsupported Next output directory prevented API startup; use/verify the existing default before compile. Native compilation and emulator boot already passed. |
+| 43522909389 | Harness: missing UI hierarchy during actual bundling; bounded fresh-dump retry retains the deadline and propagates real device errors. |
+| 43525289532 | Cache layout: prebuild deleted a partial native directory; keep the inspected client outside generated output, with exact input/package/digest admission. |
+| 43526056334 | Native selector: typed search text matched the product action; target the observed Button class. |
+| 43528344909 | Native selector/IME: clipped label and keyboard swipes targeted the wrong input; require EditText/visible bounds and dismiss only an observed keyboard. Product/Back/selection and v2 cache reuse passed. |
+
+`docs/MOBILE-TESTING.md` maps web/native parity and further coverage. This initial
+smoke does not qualify owner Auth/edit/publish, locale/large-text/offline cases,
+FCM/push, physical devices or Play. Production signing and DEP-044 admission are
+unchanged. S194 simulation and deferred S192 Google verification remain open.
+
 ## S193 phone messaging handoff and demo destinations
 
 FE-066 uses the existing phone-device policy in the browser clipboard adapter.
@@ -21,12 +62,19 @@ controlled and no WhatsApp/Telegram message is sent.
 
 Local browser execution is unqualified: the pinned browser download was
 truncated, and one installed-Chromium retry stopped on the host's prohibited
-socket creation. Current-head CI browser review remains required before merge;
-these infrastructure stops are not passing browser or physical-phone evidence.
+socket creation. These infrastructure stops are not passing browser or
+physical-phone evidence.
 Initial PR #61 CI passed the other browser/component cases but the new handoff
 fixture did not install its clipboard port: a serialized TypeScript function
 depended on an unavailable helper. The fixture now installs a plain browser
-script, preserving the copy-order and one-tab assertions; fresh CI is required.
+script, preserving the copy-order and one-tab assertions. Corrected head
+`69687f8` passes all five jobs in run 43518310026: 134 browser/component cases
+including the real phone handoff and 20 acceptance journeys. PR #61 is protected-
+squash merged as `c2075ec` with the same qualified tree. Its five post-merge jobs
+pass in run 43519441799 after one Chrome-start timeout and a classified bounded
+retry. Netlify dashboard verifies automatic published deploy
+`6af78ed9cb2cd269ccc734db` from that commit in37s; live health is OK. No contact
+data/configuration or actual message changed during delivery.
 
 DEP-045 readback verifies the exact healthy AfricMade project, 65 marked demos,
 six non-demo businesses, zero canonical/draft/current-publication messaging
