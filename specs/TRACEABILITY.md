@@ -18,10 +18,18 @@ its own 9:16 wrapper; photo selection restores the prior stage and unmounts the
 player. `scripts/test-social-video-layout.ts` mounts the real gallery/frame with
 the retained dialog CSS, and its controlled-frame geometry passes at
 1440/390/320 for TikTok/Instagram, photo return, story and Facebook. The
-inspected 390px fixture capture shows both vertical edges. This is geometry
-evidence, not an actual external playback or hosted delivery verdict. PR68's
-separate source-bound Expo playback uses unchanged Expo code; a new real-provider
-web review and current-head release gates are still required before completion.
+inspected 390px fixture capture shows both vertical edges. On a disposable
+PostgreSQL publication, the actual local web gallery at 390px contains a
+350×622.2 TikTok iframe within its 350×630 stage and returns to a 262.5px photo
+stage with no iframe. At 1440px, the 354.4×630 iframe fits the 559.4×630 stage
+and photo return restores its 559.4px square. Expo web on 8083 receives two
+HTTP 200 shop responses with no page errors; at 390px its 151.9×270 player
+fits the 354×270 stage and Photo 1 removes the iframe. Local screenshots were
+inspected. The provider frame remained blank in this environment, so these are
+layout, unmount and API findings, not decoded TikTok playback or hosted delivery.
+The finite source-bound CI review checks actual Chrome playback and retains
+screenshots and a run receipt. Its verdict and current-head release gates remain
+required before completion.
 
 FE-061/BE-049 own the exact64/256 public-demo media review; FE-057/FE-060 own
 inline social playback and BE-067 protects scenario continuity. Read-only browser
@@ -41,30 +49,16 @@ denied. Chromium at 390px loads that shop in Expo web with zero application API
 failures and no uncontrolled map tiles. This qualifies local preview access,
 not external video playback or installed Android.
 
-The candidate finite maintenance path reuses private disabled-only requests,
-normal product/page commands and exact identity/version/hash/gallery fences.
-It preserves images, facts and scenario progress, with an operation receipt and
-atomic acknowledgement only after success. Focused parser, existing11 domain/
-timer/worker checks, typecheck and237-spec validation pass locally. Disposable
-PostgreSQL late-failure, private-boundary, replay and next-stage tests require
-managed CI because this workspace has no local Docker/PostgreSQL service. No
-production pause, media change, credential write or new signed APK is claimed.
-
-Candidate`995b11f` in43563904767 passes legacy simulator PostgreSQL and reaches
-the new successful correction, but its preservation assertion incorrectly expects
-the catalog's derived`media` projection to retain the old video. Compare that
-projection to the exact reviewed after-gallery, while continuing to compare every
-other product field (including image identity) unchanged. Retain the failed run;
-the updated rollback/replay/continuation case still requires a complete rerun.
-
-Source`fc4e3fa` passes all five required jobs in43564289980, including the complete
-PostgreSQL correction/rollback/replay/continuation case and388 scenario stages.
-Its Android job43564289953 must rebuild the test client because adding a root
-package script changes the deliberately conservative native-input cache key.
-Register the media-plan test through the existing scenario test entry instead;
-restore the unchanged package metadata and keep the cache/security checks intact.
-This avoids an unnecessary native-input change; verify the resulting managed
-cache/Android run rather than assuming reuse.
+The finite maintenance path is deployed through PR66, main
+`b5486408ec4200e0e53af3b46ba28f9a95c5075e`, tree
+`49aa8f9d0bb471b6c007021353784f7e8bdaa67c`. It reuses private disabled-only
+requests, ordinary product/page commands and exact identity/version/hash/gallery
+fences. Parser, rollback, replay, next-stage media continuity and protected
+real/private boundaries pass, including388 successful whole-catalog scenario
+stages. All five main quality jobs in43567277821 and Android43567277813 pass.
+Automatic Netlify deploy`6af801bd1efb5643dfad1c6b` reports that source and
+the expected site with a healthy API. No production media correction has been
+applied.
 
 ## S196 full public-demo catalog — qualified and deployed
 

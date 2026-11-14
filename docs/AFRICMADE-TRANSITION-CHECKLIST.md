@@ -90,7 +90,12 @@ and scenario progress remain protected. National origin is not a quality test.
    geometry and actual desktop/phone web plus Expo playback and unmount, then
    record the visual verdict before broader gates. Component geometry passes
    with controlled frames at 1440/390/320, including both vertical edges,
-   photo return and retained dialog; local external playback remains blocked.
+   photo return and retained dialog. The real local web gallery at 390/1440
+   contains the full portrait iframe in its 630px stage and restores the photo
+   stage on return. Expo 8083 loads the disposable four-product API (HTTP 200),
+   contains its 270px portrait frame, and unmounts it on Photo 1. Local TikTok
+   content remains blocked, so decoded playback and the CI artifact verdict are
+   still pending.
    The PR68 fixture branch is evidence only; the focused fix starts from main
    and retains no native claim.
 4. [ ] Retain protected before-images and the exact admitted media manifest;
