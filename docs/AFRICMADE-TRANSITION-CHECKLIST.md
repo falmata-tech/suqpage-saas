@@ -11,13 +11,13 @@ not authorize a provider write or rerun an already completed migration/build.
 The qualified application source includes business-only transport (PR59), phone
 messaging/demo destinations (PR61), actual native Android QA (PR62) and the
 scenario-driven simulator (PR63), expanded to complete public-demo catalogs in
-PR65. PR65's protected functional merge is`564cfc5`;
+PR65. PR66's finite media-maintenance safeguard is integrated as`b548640`;
 all five required source/main quality jobs pass, and the source-bound Android
 scenario/inquiry smoke passes. Exact receipts and remaining limits live in
 traceability rather than earlier unmerged-branch notes.
 
 Netlify project`africmade`, ID`26c795eb-5560-4a88-b38d-3cc922c2a5e6`, automatically
-publishes GitHub main. Deploy`6af7d7219840bd93a5b8074a` independently reports the
+publishes GitHub main. Deploy`6af801bd1efb5643dfad1c6b` independently reports the
 qualified merge, expected site and healthy API at`africmade.com`. The primary
 legacy domain remains`mirtpage.com`; domains, credentials and previous deployments
 are preserved. Non-production deploys remain disabled until their backend is
@@ -45,7 +45,7 @@ store screenshots and Play qualification remain separate unfinished work.
 
 | Surface | Source / evidence | Remaining qualification |
 | --- | --- | --- |
-| AfricMade web source | PR65 / functional main`564cfc5`; required PR/main quality and source-bound native QA pass | S191 signed release preparation and S197 media correction remain separate |
+| AfricMade web source | PR66 / functional main`b548640`; required PR/main quality and source-bound native QA pass | S191 signed release preparation and S197 media correction remain separate |
 | Published website | Automatic Netlify delivery and the complete64/256 simulator are verified; public guest transport remains retired | S197 video review/correction and native owner/physical-device work remain open |
 | Android development QA | Actual navigation, keyboard, Back, live product update and saved inquiry pass in an isolated emulator | Native owner/locales/offline, physical devices, push and Play remain separate |
 | Android new package | Signed v3 recorded; version4 config and standalone Expo binding merged | Fresh build admission, signed v4, binary/device/push/Play checks |
@@ -74,7 +74,7 @@ and scenario progress remain protected. National origin is not a quality test.
 1. [ ] CURRENT: inventory exact effective refs, watch current footage and proposed
    creator-sourced replacements, and record per-business/product relevance and
    actual playback/quality evidence; do not admit a thumbnail or title alone.
-2. [ ] Qualify a finite, version/identity-fenced media correction through ordinary
+2. [x] Qualify a finite, version/identity-fenced media correction through ordinary
    product and page commands. Reuse existing private requests while paused;
    reject drift before writes, retain history/photos/order/scenario facts, and
    acknowledge only that exact media change in the enrollment's baseline/hash.
@@ -83,6 +83,12 @@ and scenario progress remain protected. National origin is not a quality test.
    effective gallery/publication coherence on disposable PostgreSQL. Exercise
    actual desktop/phone web and Android inline playback, including TikTok;
    record provider/device limits honestly before full required gates.
+   PostgreSQL rollback/replay/continuation and full388-stage coverage pass.
+   Actual Android TikTok progress, player unmount, live update and inquiry
+   persistence pass in43607030339 attempt2 on the finite qualification branch.
+   Attempt1's later adb connection failure is retained. Actual web/Expo provider
+   qualification is running separately in the finite evidence draft; no
+   production video replacement has been applied.
 4. [ ] Retain protected before-images and the exact admitted media manifest;
    deliver qualified source normally, apply bounded corrections while paused,
    verify all64/256 public effective media and preserved data, then resume only
@@ -251,6 +257,10 @@ targets. This is build/delivery work; no new product behavior or Play submission
    inspect the current locked dependency audit, and record exact build inputs.
    Resolve current findings against the owner's current build instruction;
    consumed historical exceptions do not admit new findings.
+   - [ ] Diagnose PR #69's Android QA failure after product search. Retain
+     bounded public fatal-error classification, inspect the source-bound run,
+     and fix only the observed cause before repeating the native gate. Browser
+     preview and a QA debug APK do not qualify the signed successor.
 4. [ ] Compile one local AAB, derive the universal APK, and independently inspect
    both against DEP-044 and the v3 predecessor. A failed compilation requires
    diagnosis before a bounded retry; do not weaken release checks.
@@ -259,6 +269,12 @@ targets. This is build/delivery work; no new product behavior or Play submission
    complete its normal protected integration if documentation changes remain.
 
 Current step: 2, blocked on the pinned Firebase client and canonical v3 APK.
+Independent work within step 3 continues: evaluate the newly published compatible
+Expo 57 patches, inspect the exact lockfile diff, run a clean full native audit,
+dependency/configuration/types and Android export checks, then qualify normal
+source integration. Do not override incompatible majors or relax release gates.
+The recovered signer is recorded provider evidence; its protected local file is
+not present in this resumed checkout and must be recovered again before signing.
 The original keystore/password were recovered from `@falmatad/suqpage` and
 independently verified against the admitted certificate. `@falmatad/africmade`
 has no uploaded Android credentials. Firebase confirms the exact admitted app
@@ -266,12 +282,16 @@ and certificate, but its configuration download timed out twice. No matching
 previous APK is available in the checkout, Library or GitHub Releases. No
 provider configuration, replacement signer or native compilation was attempted.
 
-The decoder patch passes the mobile build/configuration/release-safety/media
-checks, mobile typecheck and public-script static gate. The fresh full locked
-native audit improves from six high findings to three, with six moderate, one
-low and zero critical remaining in native build tooling. This is a failed
-native audit, not an admitted release. Source integration checks are tracked
-by the S191 PR; recover missing inputs before freezing a build plan.
+The decoder patch remains intact. The compatible Expo57.0.33 refresh and exact
+fingerprint0.20.16/minimatch11.0.8 correction pass a clean locked installation,
+the full native audit with zero findings, native types, build/configuration and
+release-safety tests, and a real Android Hermes export under the separate QA
+profile. Fingerprint path/negation/hash compatibility and bounded adversarial
+glob tests pass; no advisory exception or audit suppression is used. This is
+tooling qualification, not signed-release admission. Required source CI remains
+pending for the refreshed inputs; local operations cannot run without Docker.
+Recover the authentic client, original key file and v3 predecessor before
+freezing a canonical signed build plan.
 
 ### S190 — business dashboard transport only (FE-078 / BE-066)
 

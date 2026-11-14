@@ -4,7 +4,7 @@ title: Expo workspace rollout
 status: in_progress
 related: [DEP-053, FE-061, BE-049, ADR-0025, FE-060, BE-048, FE-059, BE-047, FE-058, FE-056, DEP-026, FE-055, DEP-027, FE-053, BE-044, DEP_BASE, ADR-0023, FE-057, BE-046, ADR-0024, DEP-043, DEP-044, DEP-045, DEP-046, DEP-047]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-09
+last_updated: 2026-11-14
 change_level: L3
 ---
 
@@ -149,6 +149,45 @@ The existing browser CI job runs this dependency compatibility check after its
 clean full-workspace install; the offline workflow contract requires the step.
 This decoder patch does not waive the remaining native build-tool advisories or
 admit an Android binary with missing release inputs.
+
+### S191 compatible Expo 57 security refresh (in progress)
+
+The 2026-11-14 baseline full locked audit reports three high and six moderate
+findings in native tooling. The registry publishes newer Expo 57 patch
+releases whose upstream tool dependencies remove the old Zod dependency and
+adopt patched glob/config packages. Evaluate that supported patch line before
+considering any advisory exception; preserve React Native, application identity,
+the decoder adapter, API/Auth targets and the moderate-severity audit threshold.
+
+GIVEN the reviewed Expo 57 dependency ranges WHEN refreshing the native lockfile
+THEN use compatible upstream releases, inspect the exact dependency diff and
+retain the isolated web install boundary. Do not force incompatible transitive
+major versions or suppress an unresolved advisory. GIVEN the resulting locked
+installation WHEN qualifying it THEN run dependency compatibility, native types,
+resolved configuration/release-safety, Android JavaScript export and applicable
+source/CI checks. A tooling pass does not replace authentic Firebase/signing and
+same-package predecessor inputs or independently admit a signed binary.
+
+The supported patch refresh leaves fingerprint 0.20.16 on minimatch 10.2.6.
+Review its actual consumer before a scoped replacement: it uses `Minimatch`,
+`match`, `pattern` and `negate`, with no removed v11 methods or internal matcher
+representation. Scope minimatch 11.0.8 only to that exact fingerprint version,
+then prove ignored build/cache paths, negated inclusions, dot/Unicode/monorepo
+paths, stable native-directory fingerprints and a bounded adversarial pattern.
+Keep this compatibility check in the existing full-install browser CI step.
+An upstream API/version drift needs a new review; a general forced-major update
+or an audit suppression is not the correction.
+
+Current tooling evidence in traceability supersedes DEP-044 S191's earlier
+failed-audit snapshot. Its original artifact, signing, predecessor and provider
+admission rules remain unchanged. The historical release document is preserved;
+no old account or release-operation material is republished as part of this fix.
+
+This is build dependency work with no new product flow, schema, permissions,
+provider configuration or production data change. Master section 18 already
+delegates exact versions to the lockfile; its runtime/identity boundaries remain
+the acceptance criteria. Record actual findings and export/CI results in
+traceability before source integration.
 
 ## S59 — approved coordinated release, 2026-10-05
 

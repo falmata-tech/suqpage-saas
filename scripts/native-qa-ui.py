@@ -33,6 +33,38 @@ class UiHierarchyNotReady(RuntimeError):
     pass
 
 
+def public_crash_summary(logs):
+    # Public artifacts contain identifiers only. Messages and raw log lines may
+    # include runtime URLs, fixture data or credentials and stay runner-local.
+    lines = logs.splitlines()
+    fatal_at = next((i for i in range(len(lines) - 1, -1, -1)
+                     if 'FATAL EXCEPTION' in lines[i]), None)
+    window = (lines[max(0, fatal_at - 60):fatal_at + 80] if fatal_at is not None
+              else lines[-120:])
+    processes = []
+    exception_types = []
+    stack_methods = []
+
+    def keep_unique(values, value, limit):
+        if value not in values and len(value) <= 120 and len(values) < limit:
+            values.append(value)
+
+    known_processes = {APP: 'qa-app', 'com.android.commands.uiautomator': 'uiautomator',
+                       'com.android.systemui': 'system-ui'}
+    for line in window:
+        process = re.search(r'\bProcess:\s*([A-Za-z_][A-Za-z0-9_.]*),\s*PID:\s*\d+', line)
+        if process:
+            keep_unique(processes, known_processes.get(process.group(1), 'other'), 4)
+        for match in re.finditer(r'\b((?:[A-Za-z_$][A-Za-z0-9_$]*\.)*'
+                                 r'[A-Za-z_$][A-Za-z0-9_$]*(?:Exception|Error)):', line):
+            keep_unique(exception_types, match.group(1), 8)
+        for match in re.finditer(r'\bat\s+([A-Za-z_$][A-Za-z0-9_.$]*)\(', line):
+            keep_unique(stack_methods, match.group(1), 16)
+    return {'fatalException': fatal_at is not None, 'fatalProcesses': processes,
+            'exceptionTypes': exception_types, 'stackMethods': stack_methods,
+            'logLinesExamined': len(lines)}
+
+
 def tree():
     try:
         # A busy launch/bundle can return success without writing a hierarchy.
@@ -194,14 +226,23 @@ except Exception as error:
         pass
     raise
 finally:
-    (OUT / 'ui-report.json').write_text(json.dumps({'source': fixture['source'], 'result': result,
-        'failedReason': failure, 'steps': steps, 'authAndPush': 'not exercised'}, indent=2))
+    postcheck_failure = None
     try:
         logs = adb('logcat', '-d', '-s', 'AndroidRuntime:E', 'ReactNativeJS:E')
         (ROOT / 'device-errors.log').write_text(logs)
-        fatal = 'FATAL EXCEPTION' in logs
-        (OUT / 'crash-summary.json').write_text(json.dumps({'fatalException': fatal}))
-        if fatal and result == 'passed':
-            raise AssertionError('Android reported a fatal exception; inspect protected local logs')
+        crash = public_crash_summary(logs)
+        (OUT / 'crash-summary.json').write_text(json.dumps(crash, indent=2))
+        if crash['fatalException'] and result == 'passed':
+            postcheck_failure = 'Android reported a fatal exception; inspect protected local logs'
     except subprocess.SubprocessError:
-        pass
+        (OUT / 'crash-summary.json').write_text(json.dumps({'fatalException': None,
+            'diagnosticStatus': 'logcat-unavailable'}))
+        if result == 'passed':
+            postcheck_failure = 'Android error log was unavailable after the UI smoke'
+    if postcheck_failure:
+        result = 'failed'
+        failure = postcheck_failure
+    (OUT / 'ui-report.json').write_text(json.dumps({'source': fixture['source'], 'result': result,
+        'failedReason': failure, 'steps': steps, 'authAndPush': 'not exercised'}, indent=2))
+    if postcheck_failure:
+        raise AssertionError(postcheck_failure)
