@@ -1,6 +1,7 @@
 # AfricMade engineering readiness
 
-Current assessment: 2026-11-12, controlled by DEP-002, DEP-052 and BE-065.
+S189 assessment: 2026-11-12; delivery status reconciled 2026-11-14 under
+DEP-002, DEP-052 and BE-065.
 The repository is `falmata-tech/suqpage-saas`; AfricMade is the current product
 name. Historical Suqpage/MirtPage provider and protocol identifiers remain
 intentional compatibility boundaries. Resume the active checklist, not an old
@@ -10,14 +11,14 @@ release transcript.
 
 | Area | Verified state | Remaining qualification |
 | --- | --- | --- |
-| Source | Main `120f480` includes the rebrand, owner email workflow, restored business Inbox and latest headline; five GitHub jobs passed in `40819547526` | Current housekeeping changes are on their own local task branch; they have not been published to GitHub |
-| Stack | Root Next.js 16.4.2; Expo 57/RN 0.86.3 under apps/mobile; shared contracts; exact Node 24.18.1 | Use the pinned runtime, not the host's newer 24.x binary |
-| Netlify | Existing africmade project now linked to this repo/main; root build, .next, native Next adapter 5.16.6; first Git build completed in 53s | Published current main; automatic publication on; actual next-merge trigger remains a separate observation |
+| Source | S189 merged in PR #58 as main `5557d5e`, with all five required PR and post-merge jobs passing; the current main also retains the S197 handoff from PR #70 | S197 media review and S191 signed Android successor remain separate work |
+| Stack | Root Next.js 16.4.2; Expo 57/RN 0.86.3 under apps/mobile; shared contracts; CI pins Node 24.18.1 | Current local Node 24.22.1 meets the declared engine range; use the CI pin for source-bound release qualification |
+| Netlify | Existing africmade project builds protected main with the maintained Next adapter; PR #58 automatically published deploy `6af656dfc37bdf4701b82d65` in 44s | Read-only health on 2026-11-14 reported source `0f099021`; PR/branch previews remain disabled without an isolated backend |
 | Environments | Production variables retained; branch deploys and PR previews disabled; fork builds retain approval policy | No isolated hosted preview Supabase exists; never copy production secrets into preview contexts |
-| Supabase | Exact africmade project sjeiiqxgscuqajpgddcc, eu-west-1, ACTIVE_HEALTHY; application ledger 80; one private storage bucket | Database correction and final advisor readback are recorded with BE-065; Auth remains separately guarded |
-| PostgreSQL | Real 17.10 fixture service built from verified official sources; native installation/seeding and migration 81 regression passed | A standalone SQL service does not supply managed Auth/Storage |
-| Build | Clean 124-package root/contracts install; production audit 0 vulnerabilities; actual maintained Netlify build; exact packaged handler/Sharp initialize on Linux | Local offline edge bundler reported an unreachable remote type import; hosted build successfully bundled the edge function without that failure |
-| GitHub | Main protected; existing five-job workflow green; four open Dependabot PRs | Connector cannot read detailed main protection (403); historic strict-check settings must not be represented as a fresh full readback |
+| Supabase | Exact africmade project sjeiiqxgscuqajpgddcc, eu-west-1, ACTIVE_HEALTHY; S196 records application ledger 83 and one private storage bucket | BE-065 records the guarded security correction; Auth remains separately guarded |
+| PostgreSQL | Real 17.10 fixture service passed native installation/seeding and migration 81 regression; the current workspace has the local Docker/Supabase stack running | Earlier standalone SQL evidence did not supply managed Auth/Storage; current local services do not prove full release gates |
+| Build | S189's clean root/contracts install and web-only audit reported 0 vulnerabilities; the maintained Netlify build and packaged handler/Sharp initialized on Linux | Later dependency changes need their own audit; the local offline edge type-import warning was absent from the hosted build |
+| GitHub | Main protected; the five-job PR/main workflow passed for PR #58; four Dependabot PRs remain open | Detailed main protection readback is denied (403); do not infer later settings from historical checks |
 | Recovery | Previous production deployment retained; protected Netlify before-state and exact database metadata/ACL before-images retained | Provider backup retention, complete Auth/Storage recovery exercise and alert delivery remain unverified |
 
 ## Application compared with the specification
@@ -44,39 +45,36 @@ tiles were fetched for this review.
 ## Local setup and verification limits
 
 The standard development path remains the README's Docker/Supabase bootstrap,
-followed by the guarded development launcher. This host lacks Docker and Supabase
-CLI. The full source check reached the provider-backed account-erasure regression
-and stopped because local Auth/Storage was absent; it did not pass end to end.
-Browser acceptance, container/restore gates and full release qualification remain
-unrun here. Focused SQL, security, types and workflow results belong in traceability.
+followed by the guarded development launcher. The original S189 review host
+lacked Docker and local managed Auth/Storage: its full source check stopped at
+provider-backed account erasure and was not a pass. PR #58 later passed the
+required managed CI jobs, including provider browser, container and PostgreSQL
+checks. That evidence does not qualify a fresh full release or native device.
 
-For this workspace, the verified Node binary is under the ignored local tools
-directory. Run project commands with that binary on PATH and `NODE_PATH` unset
-for the command: the host's ambient shared dependency path otherwise makes the
-web-install boundary detect unrelated host packages. Do not weaken the guard or
-change global environment settings. The native test database is loopback-only,
-uses generated protected credentials and disposable random schemas. This host
-isolates command network namespaces, so start the test service and its consumers
-inside one command/session; this limitation does not apply to ordinary local
-Docker development. Stop the test service after its suite.
+This workspace now has Docker, the local Supabase stack, Node 24.22.1, and a
+locally installed pinned Supabase CLI 2.111.0 under the ignored `.local/tooling/`
+directory. Local API health returns 200. The local CLI needs its workspace path
+and writable config/cache settings when invoked; no credential or hosted target
+is implied by its installation. Use the repository's guarded launchers and
+disposable fixtures rather than a production target. Earlier isolated SQL and
+network-namespace diagnostics remain historical evidence from the prior host.
 
 ## Next work
 
-1. Publish the reviewed local housekeeping branch and open its pull request.
-   The owner's standing authorization covers routine publication, related fixes
-   and protected merge; complete them without another approval prompt and
-   without bypassing the five checks or required reviews.
-2. Qualify this source through normal CI on a Docker-capable runner; complete
-   owner/staff/admin and phone/Expo workflows when the local provider stack exists.
-3. Keep the signed AfricMade Android/Play/device work in S188 visible. A web deploy
-   or Expo preview does not qualify the next signed binary.
+1. Resume S197's exact public-demo video review and portrait playback fix. Keep
+   unreviewed external media out of production, and use the protected finite
+   correction only after the complete source and identity plan is qualified.
+2. Keep S191's signed AfricMade Android/Play/device work visible. Expo web
+   preview does not qualify the next signed binary or physical-device behavior.
+3. Complete S192 support-mailbox setup only after the owner completes the guarded
+   Google sign-in/app-password step; verify exact provider targets and before-states.
 4. Review the four Dependabot PRs separately, retaining old branches until unique
    work and artifact lineage are established. Do not bulk-update or delete them.
 5. Establish backup freshness/restore ownership and external health-alert receipt
    using existing provider capabilities before adding services or paid plans.
 
-No credential rotation, broad RLS/index changes, extra publisher, provider account
-replacement or other-product change is part of this housekeeping patch. The nine
-mutable trigger paths and unnecessary API-role grants have a finite, tested
-correction under BE-065. The password-protection advisor is kept distinct from
-the product's OTP-only Auth policy and review-login exception.
+S189 did not rotate credentials, add a publisher, replace provider accounts or
+change other products. BE-065 records the finite, tested correction to nine
+mutable trigger paths and unnecessary API-role grants. The password-protection
+advisor remains distinct from the product's OTP-only Auth policy and review-login
+exception.

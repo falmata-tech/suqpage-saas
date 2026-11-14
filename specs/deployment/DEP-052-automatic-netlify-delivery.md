@@ -4,7 +4,7 @@ title: Git-connected Netlify delivery and verified environment readiness
 status: in_progress
 related: [DEP-054, DEP-002, DEP-026, DEP-049, DEP-029, BE-065, ADR-0032]
 owners: [operations, security]
-last_updated: 2026-11-12
+last_updated: 2026-11-14
 change_level: L3
 ---
 
@@ -97,10 +97,12 @@ Provider settings, database and Auth rollback remain separate operations.
 
 The owner selected automatic GitHub-to-Netlify delivery on 2026-11-12.
 Targets, scope, failure/preview rules and test/rollback plan are explicit.
-The initial Git build and publication are now verified in traceability S189.
-Automatic publication is enabled and non-production deploys are disabled. Actual
-next-merge trigger observation and remote qualification of the housekeeping
-source remain pending; this is not a claim that those later events occurred.
+The initial Git build and PR #58's subsequent protected merge, five required
+post-merge checks and automatic Netlify publication are verified in
+[traceability S189](../TRACEABILITY.md#s189-development-and-deployment-readiness).
+Automatic publication is enabled and non-production deploys are disabled. The
+pipeline does not qualify managed Auth, database migrations, signed Android or
+complete recovery; those remain separate admissions.
 
 Primary references:
 - https://docs.netlify.com/deploy/create-deploys/
