@@ -47,7 +47,7 @@ const review = {
 const save = () => fs.writeFileSync(`${out}/review.json`, JSON.stringify(review, null, 2) + '\n', {mode: 0o600});
 save();
 
-async function playExactVideo(page, player, candidate, prefix) {
+async function playExactVideo(page, player, candidate, prefix, receiptPart) {
   const playerUrl = new URL(player.url());
   if (prefix === 'embed') {
     assert.ok(['www.youtube-nocookie.com', 'www.youtube.com'].includes(playerUrl.hostname));
@@ -58,16 +58,8 @@ async function playExactVideo(page, player, candidate, prefix) {
   }
   const video = player.locator('video.html5-main-video').first();
   await video.waitFor({state: 'attached', timeout: 25000});
-  const result = {};
-  if (await video.evaluate(element => element.paused)) {
-    for (const selector of ['.ytp-large-play-button', '.ytp-play-button']) {
-      const button = player.locator(selector).first();
-      if (await button.isVisible().catch(() => false)) {
-        await button.click({timeout: 5000}).catch(() => {});
-        break;
-      }
-    }
-  }
+  const result = {playAttempts: []};
+  receiptPart.playAttempts = result.playAttempts;
   const state = () => video.evaluate(element => ({
     time: element.currentTime, duration: element.duration,
     ready: element.readyState, width: element.videoWidth,
@@ -75,8 +67,29 @@ async function playExactVideo(page, player, candidate, prefix) {
     adShowing: !!document.querySelector('.ad-showing'),
   }));
   const deadline = Date.now() + 45000;
+  let nextPlayAttemptAt = 0;
   while (Date.now() < deadline) {
     const current = await state();
+    receiptPart.lastObserved = current;
+    // The video element can attach before the poster's Play control appears.
+    // Retry only while visibly paused, with a bounded gap and retained outcome.
+    if (current.paused && !current.adShowing && result.playAttempts.length < 2
+      && Date.now() >= nextPlayAttemptAt) {
+      for (const selector of ['.ytp-large-play-button', '.ytp-play-button']) {
+        const button = player.locator(selector).first();
+        if (!await button.isVisible().catch(() => false)) continue;
+        const attempt = {selector, result: 'failed'};
+        result.playAttempts.push(attempt);
+        nextPlayAttemptAt = Date.now() + 5000;
+        try {
+          await button.click({timeout: 5000});
+          attempt.result = 'clicked';
+        } catch (error) {
+          attempt.failure = String(error).split('\n')[0].slice(0, 200);
+        }
+        break;
+      }
+    }
     const identity = await player.evaluate(() => {
       const movie = document.querySelector('#movie_player');
       const data = typeof movie?.getVideoData === 'function' ? movie.getVideoData() : null;
@@ -152,7 +165,7 @@ try {
         await page.goto(receipt.watchUrl, {waitUntil: 'domcontentloaded', timeout: 45000});
         const reject = page.getByRole('button', {name: /reject all/i}).first();
         if (await reject.isVisible().catch(() => false)) await reject.click({timeout: 5000});
-        Object.assign(receipt.watch, await playExactVideo(page, page, candidate, 'watch'), {result: 'decoded_playback'});
+        Object.assign(receipt.watch, await playExactVideo(page, page, candidate, 'watch', receipt.watch), {result: 'decoded_playback'});
       } catch (error) {
         receipt.watch.failure = String(error).split('\n')[0].slice(0, 400);
         await page.screenshot({path: `${out}/${candidate.id}-watch-failure.png`, animations: 'disabled'}).catch(() => {});
@@ -175,7 +188,7 @@ try {
         }
         assert.ok(frame, 'The official no-cookie embed did not load the exact ID.');
         receipt.embed.playerUrl = frame.url();
-        Object.assign(receipt.embed, await playExactVideo(page, frame, candidate, 'embed'), {result: 'decoded_playback'});
+        Object.assign(receipt.embed, await playExactVideo(page, frame, candidate, 'embed', receipt.embed), {result: 'decoded_playback'});
         receipt.result = 'decoded_playback';
         receipt.visualVerdict = 'pending human frame review';
       } catch (error) {
