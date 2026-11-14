@@ -21,13 +21,13 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: isolated-live-media-qa
-          POSTGRES_DB: africmade_media_qa
+          POSTGRES_DB: suqpage_native_qa
         ports: [5432:5432]
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      SUQPAGE_TEST_POSTGRES_URL: postgresql://postgres:isolated-live-media-qa@127.0.0.1:5432/africmade_media_qa
+      SUQPAGE_TEST_POSTGRES_URL: postgresql://postgres:isolated-live-media-qa@127.0.0.1:5432/suqpage_native_qa
       AFRICMADE_NATIVE_QA: '1'
       AFRICMADE_MOBILE_BUILD_PROFILE: development
       EXPO_PUBLIC_API_ORIGIN: http://10.0.2.2:3000
