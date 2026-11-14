@@ -97,6 +97,15 @@ for the scoped English visual pass. Exact source, APK/cache identities, prior
 failures and remaining coverage are recorded in
 [S195 traceability](../TRACEABILITY.md#s195-native-android-qa--initial-smoke-qualified).
 
+S191's compatible native-tooling refresh passes this separate QA workflow at
+its PR head and again after protected integration to main. The inspected main
+receipt has all 11 actual UI states, one persisted inquiry, unchanged other
+businesses and no fatal exception. An earlier run stopped after product search
+with an unclassified fatal exception; the current driver now retains only bounded
+public process/exception/method identifiers for future failures. Exact sources,
+runs and the retained failure are in [S191 traceability](../TRACEABILITY.md#s191-android-release-preparation).
+This qualifies the QA app's current source, not a signed v4 artifact or device.
+
 ## Remaining coverage
 
 The QA app uses the existing English UI and accessibility labels. FE-079 changes

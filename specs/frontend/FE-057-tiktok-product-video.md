@@ -15,6 +15,24 @@ below: admitted self-service social links also support business story videos.
 S197/FE-061 separately qualifies actual curated demo playback, including Android;
 deterministic provider frames do not establish external video availability.
 
+## S197 portrait player containment
+
+Actual phone web playback review found the product TikTok frame cropped vertically.
+The modern gallery fixes its video slide to a square or 4:3 stage, while the
+retained product dialog fixes its stage to 16:9 and absolutely positions the
+iframe. When a portrait TikTok or Instagram product video is active, give the
+stage enough vertical room within the viewport and center the complete 9:16
+provider iframe. Preserve static image fill beside it. Returning to a photo
+restores the normal gallery height. Facebook and YouTube remain landscape, and
+player security attributes, error/retry and unmount behavior stay intact.
+
+GIVEN a portrait social product video in a modern gallery or retained dialog
+WHEN a visitor presses Play at desktop or phone width THEN its complete iframe
+fits vertically and horizontally inside the visible stage without distortion.
+GIVEN the visitor returns to a photo THEN the normal photo stage returns and the
+player unmounts. Verify the actual CSS geometry and real provider playback in
+web and Expo preview; a deterministic frame alone cannot prove media playback.
+
 ## Problem and scope
 
 Owners already upload product demonstrations to TikTok. Allow approved public

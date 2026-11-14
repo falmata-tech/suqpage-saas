@@ -13,6 +13,8 @@ export default function ProductMediaGallery({items,name}:{items:ProductMedia[];n
   const [ready,setReady]=useState(false);const activeRef=useRef(active);activeRef.current=active;
   useEffect(()=>{setReady(true);const element=track.current;if(!element)return;let width=element.clientWidth;const observer=new ResizeObserver(()=>{if(element.clientWidth!==width){width=element.clientWidth;element.scrollTo({left:activeRef.current*width,behavior:'instant'});}});observer.observe(element);return()=>observer.disconnect();},[]);
   const cover=items.find(item=>item.kind==='image')?.ref;
+  const activeItem=items[active];
+  const portraitPlaying=playing===active&&activeItem?.kind==='video'&&/^(tiktok|instagram):/.test(activeItem.ref);
   function select(index:number) {
     if(index<0||index>=items.length)return;
     setPlaying(null);setActive(index);
@@ -25,7 +27,7 @@ export default function ProductMediaGallery({items,name}:{items:ProductMedia[];n
   if(!items.length)return <div className={styles.stage}><div className={styles.placeholder}><ImageOff size={32} aria-hidden="true" /><span>{t('No photo yet')}</span></div></div>;
   return <section className={styles.gallery} aria-label={t('Photos and videos')}>
     <div className={styles.galleryViewer}>
-      <div className={styles.galleryTrack} ref={track} tabIndex={0} onKeyDown={event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();select(active+(event.key==='ArrowLeft'?-1:1));}}} onScroll={()=>{
+      <div className={styles.galleryTrack} data-portrait-active={portraitPlaying||undefined} ref={track} tabIndex={0} onKeyDown={event=>{if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();select(active+(event.key==='ArrowLeft'?-1:1));}}} onScroll={()=>{
         if(!track.current)return;const index=Math.min(items.length-1,Math.round(track.current.scrollLeft/track.current.clientWidth));
         if(index!==active){setActive(index);setPlaying(null);}
       }}>

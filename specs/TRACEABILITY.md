@@ -10,18 +10,50 @@ run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md)
 
 ## S197 demo video quality — review and qualification in progress
 
+FE-057 portrait containment follow-up: PR68's actual Chrome phone product
+capture crops a 9:16 TikTok frame inside the short gallery stage while its Expo
+capture retains the full frame. The focused source branch gives active portrait
+product media a taller bounded stage and positions the provider iframe inside
+its own 9:16 wrapper; photo selection restores the prior stage and unmounts the
+player. `scripts/test-social-video-layout.ts` mounts the real gallery/frame with
+the retained dialog CSS, and its controlled-frame geometry passes at
+1440/390/320 for TikTok/Instagram, photo return, story and Facebook. The
+inspected 390px fixture capture shows both vertical edges. On a disposable
+PostgreSQL publication, the actual local web gallery at 390px contains a
+350×622.2 TikTok iframe within its 350×630 stage and returns to a 262.5px photo
+stage with no iframe. At 1440px, the 354.4×630 iframe fits the 559.4×630 stage
+and photo return restores its 559.4px square. Expo web on 8083 receives two
+HTTP 200 shop responses with no page errors; at 390px its 151.9×270 player
+fits the 354×270 stage and Photo 1 removes the iframe. Local screenshots were
+inspected. The provider frame remained blank locally, so that review establishes
+layout, unmount and API access. PR75's finite GitHub run `43642623765` at source
+`082713bbeb8d742734acfc7ee4f15a482367aad6` separately passes decoded
+720×1280 TikTok playback on actual Chrome desktop/phone web and Expo web. The
+video advances beyond two seconds on each product and story surface; the phone
+product frame fits both stage axes, and Photo 1 removes the iframe. Artifact
+`14132642389` retains the report and screenshots; inspected frames show the
+complete player and soap footage. PR75's final head
+`4a9fd72f5675a21f7f7c83096ca80bd0eac2ee0f` repeats that live-media
+result in `43644041451`; all five required quality jobs pass in `43644041447`.
+The portrait correction is merged as main
+`ff94208842db93cc4e3ef71b7547a79cf13b0412`, and the live API reports
+that healthy source. This is disposable-schema source evidence, not a hosted
+media correction, installed Android or signed release. Full64/256 media review
+and bounded hosted corrections remain open.
+
 FE-061's finite primary-source runner probes two named official-page
 candidates in an unprivileged PR job, retaining exact player identity, decoded
-playback timing and frames or bounded failures. First current-head run
-`43641658262` retained a Google traffic challenge on both watch pages; no clip
-was played or admitted. The first embed probe`43643861103` loaded both exact
-creator titles and Play controls, but stopped before playback because embed pages
-do not expose the watch page's initial video-details object. The corrected
-check uses the official player's video-data/video-URL ID while retaining the
-iframe ID boundary, then requires decoded timed playback. Its script preflight
-and static workflow check are source checks; only a current-head artifact and
-agent visual inspection can qualify particular footage. Neither candidate is
-admitted or applied to a public demo by introducing the review harness.
+playback timing and frames or bounded failures. Run `43641658262` retained a
+Google traffic challenge on both watch pages. The first embed probe
+`43643861103` loaded both exact creator titles and Play controls, but stopped
+before playback because embed pages do not expose the watch page's initial
+video-details object. The corrected player-ID check in `43644216376` still
+found no decoded progress; its final embed captures show both Play controls.
+The finite runner now retries a visible Play control after video attachment and
+retains each click outcome and final media state on failure. Its script
+preflight and static check are source checks; only a current-head artifact and
+agent frame inspection can qualify footage. Neither candidate is admitted or
+applied to a public demo by introducing the review harness.
 
 FE-061/BE-049 own the exact64/256 public-demo media review; FE-057/FE-060 own
 inline social playback and BE-067 protects scenario continuity. Read-only browser
@@ -61,13 +93,14 @@ inquiry phone entry; retain that infrastructure failure. Its five required
 quality jobs in43607030261 also pass. These are disposable-schema QA results,
 not a canonical phone APK, physical-device, Auth or push qualification.
 
-Desktop/phone web and Expo real-provider qualification is running separately in
-the finite evidence draft. Source review confirms clean gloved soap-making and
-body-butter footage from the primary creator; neither player readiness nor a
-thumbnail admits an unreviewed business/product mapping. The good farm/wheat
-examples remain unchanged. The earlier removed video, incorrect face-oil soap
-story, multiword search timeout and gallery-scroll test failures remain recorded;
-the latter is corrected in the finite test, not described as a product fix.
+Desktop/phone web and Expo real-provider qualification passes on the merged
+portrait source as described above. Source review confirms clean gloved
+soap-making and body-butter footage from the primary creator; neither player
+readiness nor a thumbnail admits an unreviewed business/product mapping. The
+good farm/wheat examples remain unchanged. The earlier removed video, incorrect
+face-oil soap story, multiword search timeout and gallery-scroll test failures
+remain recorded; the latter is corrected in the finite test, not described as a
+product fix.
 
 ## S196 full public-demo catalog — qualified and deployed
 
@@ -297,16 +330,11 @@ query-string import adapter is unchanged. `test-mobile-dependencies.cjs` adds
 32,000 distinct malformed percent runs in a three-second child-process bound;
 the existing Unicode/repeated-malformed-input/UUID checks still pass. A clean
 locked install, `test:mobile:build`, mobile typecheck and the public-script
-static gate pass. The initial decoder-only patch is retained; current preparation
-also refreshes compatible Expo57 patches as described below, with no product UI
-change or major SDK/React Native upgrade.
+static gate pass. The decoder patch and compatible Expo57 refresh are integrated
+as described below, with no product UI change or major SDK/React Native upgrade.
 The same adversarial payload times out against isolated decoder 0.5.0 and passes
 with 0.5.1. The existing full-install browser CI job now enforces the compatibility
 check before browser setup; the offline workflow contract requires that order.
-
-The initial decoder patch's local `npm run check` passes its prechecks and stops at the first
-PostgreSQL fixture because this session has no fixture database URL. This is an
-environment failure; required provider-backed remote checks remain necessary.
 
 The compatible Expo57.0.33 refresh adopts upstream patched CLI/config/glob/forge
 packages while preserving React Native0.86.3, package/signer/Firebase/targets and
@@ -323,15 +351,25 @@ adversarial glob aborts at its96-MB heap ceiling under10.2.6 and completes with
 Native typecheck, resolved config/release-safety,237-spec validation and actual
 Android Hermes export pass. The export uses the explicitly separate QA profile
 and synthetic loopback backend target; it does not admit a production artifact.
-The local operations check stops because Docker is unavailable. Required remote
-source/operations/browser/PostgreSQL checks still apply to this new lockfile.
+PR #69 head `189449df62ae5030c40575901f63a9aac54b4e97` passes all five quality
+jobs in `43641495939` and actual Android QA in `43641495941`. Its reviewed
+tree `fda2a7eb582a4a16bfd5dd5743bd7ff032f3fd42` is identical to protected
+squash-merged main `4fda4aa3598999b2cefe85068f0b4928cbee8abd`. Main quality
+`43642749440` and Android `43642749393` also pass. The main Android artifact
+`14132598828` records 11 actual UI states through product search, live update,
+Back, inquiry, About and Login; one inquiry persists in disposable PostgreSQL
+with other businesses unchanged. Its bounded crash receipt reports no fatal
+exception. Published health at review reported source `32f3b84`, which includes
+the merged change.
 
-PR #69 native QA run `43609385834` reached map, product search and the typed
-keyboard, then `uiautomator dump` exited 255 at the product action. Retained
-artifact `14120525466` reports a fatal exception without a process or stack,
-so the cause remains unclassified. DEP-053 now prepares a bounded public
-exception/process identifier receipt; its synthetic privacy/bound tests pass
-locally. Current-head Android evidence is still required before integration.
+The earlier PR #69 Android run `43609385834` stopped when `uiautomator dump`
+exited 255 after the search keyboard; artifact `14120525466` reported a fatal
+exception without its process or stack. The cause remains unclassified; no UI
+workaround was inferred. DEP-053 now retains bounded public process/exception/
+method identifiers when a future error is present and keeps raw logs private.
+Its synthetic privacy/bound tests and the current-head native run pass. These
+results qualify compatible source tooling and the separate QA app, not the
+canonical signed v4 APK, physical device, push or Play testing.
 
 The original keystore/password were independently matched to the release policy
 in the prior provider session. The protected key file, pinned Firebase client and
