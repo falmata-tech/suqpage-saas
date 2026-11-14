@@ -31,9 +31,9 @@ verdict to unrelated products merely to fill every slot.
 
 | Candidate/source | Actual review | Qualification limit |
 | --- | --- | --- |
-| [Bramble Berry coffee soap](https://www.tiktok.com/@brambleberry/video/7703762862484851981) | Clear actual soap-making process; official source reaches replay; actual Android, desktop/phone web and Expo decode/progress/unmount observed | Relevant handmade-soap candidate; web product-stage vertical clipping remains, despite green numeric ratio tests |
-| [Bramble Berry mango body butter](https://www.tiktok.com/@brambleberry/video/7638698619176340749) |720x1280,9.843s, clean gloved piping into clear jars and finished jars; played/replayed | Source visually suitable; exact AfricMade web/native clip still pending |
-| [Bramble Berry lip balm](https://www.tiktok.com/@brambleberry/video/7614568317126184205) |576x1024,28.03s, clean tube pouring observed | Source candidate for Zema Plant Balms26; actual app integration pending |
+| [Bramble Berry Caffe Latte soap](https://www.tiktok.com/@brambleberry/video/7703762862484851981) | Clear actual soap-making process; official source reaches replay; actual Android, desktop/phone web and Expo decode/progress/unmount observed | Plausible third-party handmade-soap story for Liya21 with explicit example attribution. The creator describes espresso, tonka bean, milk, cream and fragrance, but no coffee grounds or exfoliating process. Do not assign to Liya's oat81, citrus82, coffee *scrub*83 or wrapped guest84 products on this evidence. PR75's disposable product81 binding checked playback mechanics, not semantic fit. |
+| [Bramble Berry mango body butter](https://www.tiktok.com/@brambleberry/video/7638698619176340749) | 720×1280, 9.843s, gloved piping into clear jars and finished whipped jars; source replay works. Disposable product94 web/Expo playback passed once, but both web replay attempts failed in a second run after the player detached. | A strong process/form **candidate** for Sena Body Care24 product94 Whipped Body Butter, still unqualified for hosted use. The creator identifies mango/papaya and mango/coconut-citrus fragrance; Sena's photo is white butter in an amber jar. The large early “doom scrolling” promotional overlay, creator/example presentation, intermittent replay and installed Android need review. No other Sena product is covered. |
+| [Bramble Berry lip-products tutorial](https://www.tiktok.com/@brambleberry/video/7614568317126184205) | 720×1280, 28.03s, actual source frames show ingredient measuring, liquid preparation and small finished pots | Its creator describes lip balm, lip scrub and overnight lip mask in one clip. Zema26 product102 Soft Lip Balm remains an unqualified whole-video match until the balm stage and finished form are identified; its illustrative photo uses a plain metal tin. Other Zema products are not covered. |
 | [Bramble Berry oil/balm comparison](https://www.tiktok.com/@brambleberry/video/7705186676745800974) |576x1024 actual playback at44.74/57.64 | Not selected as face-oil-making story; presentation/comparison is weaker process evidence |
 | [Sabahar Transforming Threads](https://www.youtube.com/watch?v=22iNfILuO4U) |1280x720 actual source to105.54/124.6s; clear artisan loom/weaving/finishing | Good woven textiles, not garment factories. Actual app runner says unavailable; not admitted, not proven globally broken |
 | [Corter Leather purse](https://www.youtube.com/watch?v=gos07cabE6w) | Clear cutting, stitching/punching and edge finishing | Good leather goods, not cloth garments. Actual app runner unavailable; not admitted |
@@ -41,6 +41,40 @@ verdict to unrelated products merely to fill every slot.
 | [Paper/cardboard report](https://www.youtube.com/watch?v=_lsC0aXyY6g) | Intro and6:02 cardboard bales inspected | Actual corrugated box-forming relevance pending |
 | [Bramble Berry body oil](https://www.youtube.com/watch?v=4eni7vRYWn8) | Intro only; later source buffered | Not visually qualified for blending/bottling |
 | `youtube:dQ8a_R2Qve4` |360x640 face-oil clip | Rejected for low quality |
+
+### Product94 disposable playback checkpoint
+
+Draft [PR77](https://github.com/falmata-tech/suqpage-saas/pull/77) used a finite
+Chrome/Expo workflow in isolated local PostgreSQL. At source
+`087fa6a62d9fd86c4c3d4cb3edae142004836657`, [run 43647343317](https://github.com/falmata-tech/suqpage-saas/actions/runs/43647343317)
+passed with artifact `14133669463`: ordinary owner upkeep bound only Sena24
+product94 to `tiktok:7638698619176340749` in the disposable schema, preserving
+its photo, the business story and product media for93/95/96. All12 screenshots
+were reviewed. Chrome157 decoded the exact 720×1280/9.843-second clip on
+desktop web1440, phone web390 and Expo web390. Those three surfaces reached
+the end, restarted with Replay, advanced again, reopened the ref after reload
+and removed the iframe on Photo1. Frames show gloved piping and finished
+whipped jars inside the portrait stage.
+
+The same unchanged playback script ran again after a documentation commit at
+source `759b0b4b4ec787745ac68c13722d661d25df0c09`: [run 43647776937](https://github.com/falmata-tech/suqpage-saas/actions/runs/43647776937),
+artifact `14134659194`. Expo web390 repeated the full pass. Web1440 and web390
+decoded the clip through its end, but their Replay clicks encountered a detached
+TikTok iframe; failure screenshots show the product had returned to Photo1.
+The provider/app cause is unclassified. The second run is **red**, so replay
+reliability is unqualified. PR77 remains draft evidence rather than permanent
+one-off CI. No hosted data changed in either run.
+
+The phone-web player shows Bramble Berry's full name and the product is marked
+as an example. The compact Expo web player truncates the creator name; the
+desktop screenshot was scrolled so the sticky header covered the player's top.
+The source's first seconds also carry a prominent “We now interrupt your doom
+scrolling…” overlay. These are attribution and editorial-fit limits, not a
+final visual admission. Any hosted use needs clear creator/example presentation
+at every size, reliable replay/fallback, installed Android playback, fresh
+hosted target/version evidence and the protected BE-049 correction plan. This
+is one candidate in the64/256 review, not a production media update or a claim
+about Sena's actual recipe or packaging.
 
 Further observed primary-source leads, **not watched/admitted**: Azizi Life
 `_5kQaug4IwI` (basket weaving), SiRUBA `kuwfg34ZMyM` (garment sewing), Acme
