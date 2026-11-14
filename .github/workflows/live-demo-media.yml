@@ -2,7 +2,7 @@ name: Finite live demo media review
 
 on:
   pull_request:
-    paths: ['.github/workflows/live-demo-media.yml', 'scripts/review-live-demo-media.mjs']
+    paths: ['.github/workflows/live-demo-media.yml', 'scripts/review-live-demo-media.mjs', 'scripts/review-source-media.ts']
 
 permissions:
   contents: read

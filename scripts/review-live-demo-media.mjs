@@ -65,7 +65,10 @@ try {
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
       await gallery.getByRole('button', {name: 'Photo 1', exact: true}).click();
       await expect(gallery.locator('iframe')).toHaveCount(0);
-      results.app.push({surface: 'web', width, result: 'playback-and-unmount-observed', ...playback});
+      await page.goto(base + '/@' + fixture.handle, {timeout: 90000});
+      await page.getByRole('button', {name: 'Play business video about ' + shop.name, exact: true}).click();
+      const cover = await actualTikTok(page, 'web-cover-' + width);
+      results.app.push({surface: 'web', width, result: 'playback-and-unmount-observed', ...playback, cover});
     } catch (error) {
       await page.screenshot({path: out + '/web-' + width + '-failure.png'}).catch(() => {});
       results.app.push({surface: 'web', width, result: 'failed', error: String(error).slice(0, 1000)});
@@ -90,7 +93,10 @@ try {
     await page.getByRole('button', {name: 'Photo 1', exact: true}).click();
     await expect(page.locator('iframe')).toHaveCount(0);
     assert.equal(context.pages().length, 1);
-    results.app.push({surface: 'Expo web', width: 390, result: 'playback-and-unmount-observed', ...playback});
+    await page.goto('http://localhost:8082/shop/' + fixture.handle, {timeout: 90000});
+    await page.getByRole('button', {name: 'Watch video', exact: true}).first().click({timeout: 60000});
+    const cover = await actualTikTok(page, 'expo-cover-390');
+    results.app.push({surface: 'Expo web', width: 390, result: 'playback-and-unmount-observed', ...playback, cover});
   } catch (error) {
     await page.screenshot({path: out + '/expo-390-failure.png'}).catch(() => {});
     results.app.push({surface: 'Expo web', width: 390, result: 'failed', error: String(error).slice(0, 1000)});
@@ -117,21 +123,31 @@ try {
     const page = await browser.newPage({viewport: {width: 1120, height: 720}});
     const record = {ref: 'youtube:' + id, creator, subject, result: 'unverified'};
     try {
-      await page.goto('https://www.youtube-nocookie.com/embed/' + id + '?autoplay=0&rel=0', {timeout: 30000});
-      const text = await page.locator('body').innerText();
+      // Use the actual application's containing page and ordinary publication
+      // path. A direct embed navigation lacks a Referer and produces Error153.
+      execFileSync(process.execPath, ['--import','tsx','scripts/review-source-media.ts',id], {timeout: 30000});
+      await page.goto(base + '/@' + fixture.handle + '?product=' + fixture.productId, {timeout: 60000});
+      const gallery = page.getByRole('region', {name: 'Photos and videos', exact: true});
+      await gallery.getByRole('button', {name: 'Video ' + (mediaIndex + 1), exact: true}).click();
+      await gallery.getByRole('button', {name: 'Play video ' + (mediaIndex + 1), exact: true}).click();
+      await gallery.scrollIntoViewIfNeeded();
+      await expect.poll(() => page.frames().filter(f => f.url().includes('youtube-nocookie.com/embed/' + id)).length, {timeout: 20000}).toBe(1);
+      const frame = page.frames().find(f => f.url().includes('youtube-nocookie.com/embed/' + id));
+      const text = await frame.locator('body').innerText();
       if (/verify you are human|not a bot|unusual traffic|automated queries/i.test(text)) {
         record.result = 'provider-verification-block';
         await page.screenshot({path: out + '/source-' + id + '-block.png'});
         results.creators.push(record); write(); break;
       }
-      await page.getByRole('button', {name: /Play/}).first().click({timeout: 10000});
-      await expect.poll(async () => (await videoState(page)).some(v => v.width > 0 && v.time > 1), {timeout: 25000}).toBe(true);
-      record.start = await videoState(page);
+      const play = frame.getByRole('button', {name: /Play/}).first();
+      if (await play.isVisible()) await play.click();
+      await expect.poll(async () => (await videoState(frame)).some(v => v.width > 0 && v.time > 1), {timeout: 25000}).toBe(true);
+      record.start = await videoState(frame);
       await page.screenshot({path: out + '/source-' + id + '-start.png'});
-      await page.getByRole('slider', {name: 'Seek slider', exact: true}).press('5');
-      await expect.poll(async () => (await videoState(page))[0]?.time ?? 0, {timeout: 15000}).toBeGreaterThan(record.start[0].duration * .4);
+      await frame.getByRole('slider', {name: 'Seek slider', exact: true}).press('5');
+      await expect.poll(async () => (await videoState(frame))[0]?.time ?? 0, {timeout: 15000}).toBeGreaterThan(record.start[0].duration * .4);
       await page.waitForTimeout(1500);
-      record.middle = await videoState(page);
+      record.middle = await videoState(frame);
       await page.screenshot({path: out + '/source-' + id + '-middle.png'});
       record.result = 'decoded-frames-awaiting-visual-review';
       consecutiveStalls = 0;
