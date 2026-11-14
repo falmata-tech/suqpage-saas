@@ -20,6 +20,7 @@ CREATE TABLE demo_simulator_enrollments (
  scenario_version INTEGER NOT NULL CHECK(scenario_version=1),
  parameters_json TEXT NOT NULL CHECK(length(parameters_json)<=4000),
  baseline_page_json TEXT NOT NULL CHECK(length(baseline_page_json)<=16000),
+ baseline_description TEXT NOT NULL CHECK(length(baseline_description)<=2500),
  expected_hash TEXT NOT NULL CHECK(length(expected_hash)=64),
  stage INTEGER NOT NULL DEFAULT -1 CHECK(stage BETWEEN -1 AND 5),
  cycle INTEGER NOT NULL DEFAULT 0 CHECK(cycle BETWEEN 0 AND 1000000000),

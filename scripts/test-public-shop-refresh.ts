@@ -17,12 +17,11 @@ test('FE-079 actual native public resource refresh preserves drafts, fences scop
  shopPort.request=(path,options={})=>new Promise((resolve,reject)=>jobs.push({path,signal:options.signal,resolve,reject}));createRoot(document.getElementById('root')).render(<Probe/>);
  `},bundle:true,write:false,format:'iife',platform:'browser',plugins:[{name:'native-refresh-ports',setup(b){
   b.onResolve({filter:/^(react(?:\/.*)?|react-dom(?:\/.*)?)$/},a=>({path:mobileRequire.resolve(a.path)}));
-  b.onResolve({filter:/^(react-native|expo-router|@react-navigation\/native)$/},a=>({path:a.path,namespace:'port'}));
+  b.onResolve({filter:/^(react-native|expo-router)$/},a=>({path:a.path,namespace:'port'}));
   b.onResolve({filter:/^\.\/runtime$/},a=>a.importer.endsWith('/use-public-shop.ts')?{path:'runtime',namespace:'port'}:undefined);
   b.onLoad({filter:/.*/,namespace:'port'},a=>({loader:'tsx',resolveDir:process.cwd(),contents:
    a.path==='react-native'?`export const AppState={get currentState(){return shopPort.appState},addEventListener:(_,fn)=>({remove:shopPort.subscribe(fn)})};`:
-   a.path==='@react-navigation/native'?`export const useIsFocused=()=>shopPort.focused;`:
-   a.path==='expo-router'?`import{useEffect}from'react';export function useFocusEffect(fn){useEffect(fn,[fn]);}`:
+   a.path==='expo-router'?`import{useEffect}from'react';export const useIsFocused=()=>shopPort.focused;export function useFocusEffect(fn){useEffect(fn,[fn]);}`:
    `import{useResourceLoad}from'./apps/mobile/src/use-resource-load';export const request=(...args)=>shopPort.request(...args);export const useLoad=(loader,identity)=>useResourceLoad(loader,identity);`}));
  }}]});
  const browser=await chromium.launch({channel:'chrome',headless:true}),page=await browser.newPage();

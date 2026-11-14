@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {AppState} from 'react-native';
-import {useIsFocused} from '@react-navigation/native';
+import {useIsFocused} from 'expo-router';
 import type {Shop} from '@africmade/contracts';
 import {request,useLoad} from './runtime';
 import {startForegroundPoll} from '../../../lib/foreground-poll';
@@ -17,7 +17,10 @@ export function usePublicShop(handle:string){
   return startForegroundPoll({
    active:()=>AppState.currentState==='active',
    subscribe:changed=>{const listener=AppState.addEventListener('change',changed);return()=>listener.remove();},
-   onError:error=>setFailure({handle,message:error instanceof Error?error.message:'Please try again.'}),
+   onError:error=>{
+    if(error&&typeof error==='object'&&'status' in error&&[401,403,404].includes(Number(error.status)))latest.current.setData(null);
+    setFailure({handle,message:error instanceof Error?error.message:'Please try again.'});
+   },
    read:async signal=>{
     const before=latest.current;
     if(before.loading||!before.data)return;

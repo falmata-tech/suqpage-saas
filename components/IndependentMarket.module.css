@@ -46,6 +46,8 @@
 .emptyMap button:focus-visible{outline:3px solid #263b42;outline-offset:2px}
 .loading{padding:4px 14px}
 .error{padding:12px;background:#fff4ec;color:#963b10;font-size:14px}
+.refresh{align-self:flex-start;min-height:48px;margin:8px 14px;padding:10px 16px;border:1px solid #c94405;border-radius:8px;background:#fff;color:#ad3806;font-size:14px;font-weight:700;cursor:pointer}
+.refresh:focus-visible{outline:3px solid #263b42;outline-offset:2px}
 .filterDialog{padding:18px;border:1px solid #d4dfdc;border-radius:16px;width:min(390px,calc(100vw - 28px));max-height:min(560px,80dvh);box-shadow:0 14px 50px #142b3633;color:#293d43}
 .filterDialog::backdrop{background:#142b3659}
 .filterDialog[open]{display:flex;flex-direction:column;overflow:hidden}

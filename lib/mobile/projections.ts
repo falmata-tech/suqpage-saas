@@ -46,7 +46,6 @@ export function shopDto(c: Catalog, p: ShopPageContent, includeRetired = false,p
     handle: b.handle,
     name: b.name,
     about: p.about || p.introduction,
-    introduction:p.introduction,
     ...(pageRevision!==undefined?{publicRevision:publicShopRevision(b.id,b.handle,b.content_version,pageRevision)}:{}),
     cover: p.heroImage,
     logo: b.logo_path,

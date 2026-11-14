@@ -113,7 +113,7 @@ async function main() {
 
   // Construct the physical63 prefix in an empty owned fixture. Only fixture
   // setup substitutes forward existence probes; it writes no future markers.
-  // The actual63→81 migration and readiness assertion use the unmodified reader.
+  // The actual63→82 migration and readiness assertion use the unmodified reader.
   const retained = await getEmptyDb();
   try {
     const schema = String((await retained.prepare('SELECT current_schema() name').get()).name);
@@ -137,13 +137,13 @@ async function main() {
     const beforeUser = await retained.prepare('SELECT * FROM users WHERE id=?').get(admin);
     await assert.rejects(() => preflight(), missing);
     assert.deepEqual((await migratePostgresDatabase(retained.runner, schema)).applied, full.filter(version => version >= 64));
-    assert.deepEqual(await versions(), legacy, 'Only64–81 are appended; no27–30 backfill or old data-patch replay.');
+    assert.deepEqual(await versions(), legacy, 'Only64–82 are appended; no27–30 backfill or old data-patch replay.');
     assert.deepEqual(await retained.prepare('SELECT * FROM users WHERE id=?').get(admin), beforeUser);
     assert.ok((await retained.prepare("SELECT to_regclass('tracking_shipments') value").get()).value);
     await preflight();
     assert.deepEqual((await migratePostgresDatabase(retained.runner, schema)).applied, []);
     assert.deepEqual(await versions(), legacy);
   } finally { await closeDbForTests(); }
-  console.log('PASS DEP-049/BE-065 exact ledger readiness: full/retained80/81 histories, actual59-entry six-key63→81 upgrade without fake markers, all14partial groups, stale/hole64/future/noninteger rejection, read order and Auth/admin/configuration guards.');
+  console.log('PASS DEP-049/BE-065 exact ledger readiness: full/retained80/81/82 histories, actual59-entry six-key63→82 upgrade without fake markers, all14partial groups, stale/hole64/future/noninteger rejection, read order and Auth/admin/configuration guards.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

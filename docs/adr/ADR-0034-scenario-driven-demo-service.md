@@ -4,7 +4,7 @@ title: Scenario timelines through ordinary marketplace write paths
 status: accepted
 related: [BE-067, FE-079, DEP-054]
 owners: [backend, frontend, operations, security]
-last_updated: 2026-11-13
+last_updated: 2026-11-14
 ---
 
 # ADR-0034 — Scenario timelines through ordinary marketplace write paths

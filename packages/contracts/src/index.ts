@@ -40,7 +40,6 @@ export type Shop = {
   handle: string;
   name: string;
   about: string;
-  introduction?: string;
   cover: string;
   logo?: string;
   videoUrl: string;

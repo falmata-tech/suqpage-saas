@@ -4,7 +4,7 @@ title: Dedicated recurring demo scenario service
 status: ready
 related: [BE-067, FE-079, ADR-0034, DEP-045, DEP-046, DEP-052, BE-065]
 owners: [operations, backend, security]
-last_updated: 2026-11-13
+last_updated: 2026-11-14
 change_level: L4
 ---
 
@@ -55,10 +55,14 @@ publications and all real-account history are outside that retention.
    visibility/race recovery. Review source-bound screenshots and authoritative
    outcomes. Pass spec/type/build/security/operations/acceptance and required CI.
 3. Prepare an exact hosted plan with protected schema/privilege/data before-images,
-   current target and preserved-real-account fingerprints. Apply additive schema
-   sequentially through the migration mechanism; leave control disabled.
-4. Integrate qualified source through protection and automatic Netlify main
-   publishing. Verify function schedule, published source and healthy public API.
+   current target and preserved-real-account fingerprints. Integrate qualified
+   compatible source through protection and automatic Netlify main publishing.
+   Verify published source and healthy public API on the existing80/81 ledger;
+   the worker returns schema/not-ready before reading or writing its private state.
+4. Apply the additive schema sequentially through the migration mechanism, with
+   the control disabled. Verify82, private privileges and healthy public reads.
+   This code-before-schema order preserves readiness because the earlier app
+   deliberately refuses a future82 ledger. Verify the published function schedule.
 5. Enroll only exact reviewed marked demos/owner identities/products with baseline
    and version fences. Exclude private reviewer, inactive and all real accounts.
    Stage and inspect a coherent canary, then enable bounded recurring execution

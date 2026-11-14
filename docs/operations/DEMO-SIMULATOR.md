@@ -134,10 +134,12 @@ privilege hardening step; verify its hosted equivalence and ledger before any
 later simulator migration. These are observations, not an admission to mutate.
 
 At one product change per minute, catalog snapshots alone add roughly 12.4 MB/day
-before PostgreSQL/index overhead and compression. Profile-only stages and unchanged
-product facts should avoid unnecessary product snapshots. Preserve immutable
-history, measure actual growth and choose an explicit pause/storage budget; do
-not add an unbounded fast loop or silently delete retained publications. Final
+before PostgreSQL/index overhead and compression. Each selected stage now changes
+its predefined listing summary, even when its selling facts remain steady. At
+the maximum two stages per minute, budget roughly 24.8 MB/day of raw snapshot JSON
+before measuring actual stored growth. Identical retries create no new snapshot.
+Preserve immutable history and pause at the explicit storage budget; never delete
+retained publications or raise provider spending limits. The selected
 cadence and limits are now fixed in the implementation candidate: one minute,
 two due stages, at most six active enrollments, 2,880 successful stages per UTC
 day and a 256 MiB database soft limit. PostgreSQL17 imposes a 23-second transaction
@@ -145,9 +147,19 @@ deadline. Storage pressure disables demo work; the daily limit defers it until
 the next day. Neither condition changes merchant history or provider billing.
 Only seven-day private operational run rows are pruned during active work.
 
-The candidate uses ordinary product upkeep and owner page save/publication in
+The candidate publishes each short stage summary before the preserved original
+product description and business story, so cards and showrooms expose activity.
+Enrollment reserves space in the ordinary text limits without truncating either.
+Public catalog/profile reads use one read-only repeatable snapshot to avoid
+mixed stages during concurrent writes. The candidate uses ordinary product upkeep and owner page save/publication in
 one transaction. It refuses pending location proposals and page-owned Storage
 images so a stage cannot approve geography or fetch Storage while holding locks.
 Current catalog, draft/publication, identity and geography fingerprints fence
 human edits. Qualification and hosted enrollment remain pending; deployment does
 not enable the disabled control or infer any enrolled business from its name.
+
+Native qualification extends DEP-053 with `scripts/native-qa-demo.ts`: the exact
+source-bound local QA fixture advances through ordinary scenario commands while
+the actual product screen stays open. The driver waits for Limited availability
+and retains before/after screenshots plus independent public-read receipts.
+This local synthetic identity is never a hosted Auth account or session.

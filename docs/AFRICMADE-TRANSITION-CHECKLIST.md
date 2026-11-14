@@ -67,6 +67,13 @@ Owner instruction 2026-11-13: operate a dedicated recurring demo service and
 verify storage, public refresh and rendered changes after production deployment.
 Use explicitly enrolled, marked demo tenants; real signups/accounts must never
 be eligible. Google verification/mailbox S192 stays deferred by owner instruction.
+The owner's clarification requires a scenario catalog with realistic timelines:
+predefined stages coordinate related business/product changes and enforce their
+consistency. Persist progress over time; never select independent arbitrary field
+changes. Test complete scenarios, recovery and concurrent-human-edit protection.
+The owner additionally requires frequent visible activity for early users: advance
+short coordinated demo stages about every minute and refresh already-open public
+screens, with measured storage/write budgets and a bounded active demo cohort.
 
 1. [x] Inventory supported business/product fields, current write/publication/
    refresh contracts and existing worker hosting; specify the simulated data
@@ -89,29 +96,32 @@ concurrent human edits, writes and retained-data growth. No hosted mutation yet.
 
 Implementation checkpoint: the three versioned scenario catalogs, additive
 disabled private schema, enrollment/transactional worker and public foreground
-refresh adapters are written. Eight pure/timer/worker-load tests and root/mobile
+refresh adapters are written. Nine pure/timer/worker-load/fixture-boundary tests and root/mobile
 typechecking pass. PostgreSQL integration and actual browser/native refresh
 journeys remain unqualified. This host refuses Chromium's singleton socket and
 the separate cloud browser cannot reach its loopback preview; no UI pass is
 inferred from that environment failure. Native QA continues separately in S195.
 
-### S195 — native Android emulator development testing
+### S195 — native Android emulator development testing (DEP-053 / ADR-0033)
 
 Owner instruction 2026-11-13: test the actual mobile application on an Android
 instance while developing, inspect its UI and compare web/native capabilities.
 
-1. [ ] Verify local acceleration/tooling, existing native build prerequisites
+1. [x] Verify local acceleration/tooling, existing native build prerequisites
    and managed-runner capabilities/costs. Keep public web preview distinct from
    a native emulator, real-device and notification-delivery evidence.
-2. [ ] Specify an isolated QA build/data target and reproducible emulator/UI
+2. [x] Specify an isolated QA build/data target and reproducible emulator/UI
    workflow with screenshots, errors, interactions and web/native parity cases.
    Preserve production signing, Auth, customers and release-artifact admission.
-3. [ ] Boot an emulator, run actual app workflows, inspect evidence and fix
+3. [x] Boot an emulator, run actual app workflows, inspect evidence and fix
    demonstrated native gaps; wire repeatable checks into development/CI.
 
-Current step: 1. This execution VM exposes no `/dev/kvm` and has no Android SDK/
-ADB installed. Managed Android runner and interactive-device options are under
-review. Willingness to pay is not a spending limit or a paid subscription.
+Initial smoke complete: run43529393814 passes ten actual Android states and the
+saved tenant/product inquiry check in151s; all five source-matched quality jobs
+pass. Screenshots were inspected. Exact native caching avoids the ten-minute
+compile for UI-only iterations. Broader locale/filter/offline/owner workflows
+remain follow-ups in `docs/MOBILE-TESTING.md`; DEP-044 signing/Firebase/physical/
+Play admission remains separate. Protected integration/delivery follows DEP-052.
 
 ### S192 — AfricMade support mailbox (ADR-0031 / DEP-029)
 
@@ -140,22 +150,25 @@ web and route only demo-business messaging contacts to `+19528552202`.
 1. [x] Inspect the handoff and exact demo records; retain protected before-images
    and define acceptance before code/data changes. Never select records solely
    by a plausible business name or overwrite real merchant contacts.
-2. [ ] Fix mobile navigation without a blank popup, preserve copy/prefilled draft
+2. [x] Fix mobile navigation without a blank popup, preserve copy/prefilled draft
    and visible failure recovery, and add desktop/phone regressions.
 3. [x] Verify the reviewed demo-only messaging fields and their approved-number
    configuration. All 65 canonical/draft and 64 current published/public-API
    contacts already match and approve the owned number; no data or setting
    update is needed. Six non-demo businesses remain untouched. No messages sent.
-4. [ ] Exercise the affected public contact journey, pass required source gates,
+4. [x] Exercise the affected public contact journey, pass required source gates,
    integrate/deploy, and independently verify all demo targets and real-business
    preservation. Expo/physical-app behavior remains separately identified.
 
-Current step: 2. Source now uses current-tab navigation on phone web; five
-clipboard edge tests and the existing pure contact/demo tests pass. Local browser
-qualification first stopped on an unavailable browser download, then the
-installed browser hit the host socket restriction. The real browser regression
-is wired into required CI, pending source-bound review before merge. Existing
-Android artifact prerequisites in S191 remain pending and are not replaced.
+Completed through PR #61 / main `c2075ec`: all five PR and post-merge checks pass,
+including 134 browser/component cases and 20 acceptance journeys. The first
+post-merge Chrome launch timeout was classified before a bounded successful job
+retry. Netlify automatically published `6af78ed9cb2cd269ccc734db` in 37s;
+dashboard readback binds that deploy to main and confirms auto publishing, and
+the live health endpoint returns OK. Source-bound controlled destinations prove
+copy-before-navigation and one-tab phone behavior; no external message was sent.
+Local socket/download failures remain historical infrastructure limits. Physical
+app handoff and S191 Android release prerequisites remain separate.
 
 ### S191 — finish the business-only Android update (DEP-044 / FE-078)
 

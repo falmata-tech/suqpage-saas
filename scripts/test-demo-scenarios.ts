@@ -8,7 +8,10 @@ test('BE-067 complete predefined harvest timeline keeps related facts and units 
  assert.deepEqual(states.map(s=>s.product.availability),['coming_soon','coming_soon','available','available','limited','available']);
  assert.deepEqual(states.map(s=>s.product.priceMinor),[10000,10000,10000,10000,10500,10000]);
  assert.match(states[0].product.capacitySummary,/Planned 1000 kg/);assert.match(states[4].product.capacitySummary,/Up to 200 kg/);
- assert.deepEqual(states[0].product,states[1].product,'Profile stages can advance without redundant product writes.');
+ assert.deepEqual(states[0].product,states[1].product,'Related progress stages retain the same selling facts until the planned supply transition.');
+ assert.equal(new Set(states.map(s=>s.productUpdate)).size,6,'Every stage has a distinct predefined listing summary.');
+ const perUnit=demoScenarioStage('seasonal-harvest',1,0,{...base,unit:'per kg'});
+ assert.equal(perUnit.product.quantityUnit,'per kg');assert.equal(perUnit.product.minimumOrderSummary,'10 kg');
  for(const state of states){assert.equal(state.product.minimumOrderSummary,'10 kg');assert.ok(state.businessUpdate.startsWith('Example harvest:'));assert.ok(state.durationMs>=60000);}
  assert.match(states[0].product.leadTimeSummary,/Next example harvest/);assert.match(states[2].product.leadTimeSummary,/Dispatch/);
 });

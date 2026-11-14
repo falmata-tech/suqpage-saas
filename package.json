@@ -176,7 +176,7 @@
     "dev:with-worker": "node --import tsx scripts/start-local-with-worker.mjs",
     "test:transport-partners": "node --import tsx --test scripts/test-transport-coordinator.ts scripts/test-transport-coordinator-ui.ts scripts/test-transport-partner-http.ts scripts/test-transport-partner-interest-ui.ts && node --import tsx scripts/test-transport-partner-interest.ts && node --import tsx scripts/test-transport-partner-email.ts",
     "test:business-transport": "node --import tsx scripts/test-transport-support.ts && node --import tsx scripts/test-owner-transport.ts && node --import tsx scripts/test-transport-callback.ts && node --import tsx scripts/test-live-transport.ts && node --import tsx scripts/test-buying-assistance.ts && node --import tsx scripts/test-support-retries.ts",
-    "test:demo-simulator": "node --import tsx --test scripts/test-demo-scenarios.ts scripts/test-foreground-poll.ts scripts/test-demo-worker-boundary.ts && node --import tsx scripts/test-demo-simulator-postgres.ts"
+    "test:demo-simulator": "node --import tsx --test scripts/test-demo-scenarios.ts scripts/test-foreground-poll.ts scripts/test-demo-worker-boundary.ts scripts/test-scenario-acceptance-guard.ts && node --import tsx scripts/test-demo-simulator-postgres.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

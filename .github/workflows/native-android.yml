@@ -1,0 +1,124 @@
+name: Native Android QA
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ['apps/mobile/**', 'packages/contracts/**', 'lib/**', 'app/api/mobile/**', 'scripts/native-qa-*', 'scripts/test-native-qa-*', 'package*.json', '.github/workflows/native-android.yml']
+  push:
+    branches: [main]
+    paths: ['apps/mobile/**', 'packages/contracts/**', 'lib/**', 'app/api/mobile/**', 'scripts/native-qa-*', 'scripts/test-native-qa-*', 'package*.json', '.github/workflows/native-android.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:17.10-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: isolated-native-qa
+          POSTGRES_DB: suqpage_native_qa
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SUQPAGE_TEST_POSTGRES_URL: postgresql://postgres:isolated-native-qa@127.0.0.1:5432/suqpage_native_qa
+      AFRICMADE_NATIVE_QA: '1'
+      AFRICMADE_MOBILE_BUILD_PROFILE: development
+      EXPO_PUBLIC_API_ORIGIN: http://10.0.2.2:3000
+      EXPO_PUBLIC_NATIVE_MAP_FIXTURE: '1'
+      EXPO_NO_DOTENV: '1'
+      EXPO_NO_TELEMETRY: '1'
+      EXPO_NO_DEV_MENU: '1'
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+      - run: npm ci
+      - name: Restore the compatible QA native client
+        id: native_apk
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          key: native-qa-apk-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/workflows/native-android.yml', 'package-lock.json', 'package.json', 'apps/mobile/package.json', 'apps/mobile/app.config.ts', 'apps/mobile/app.json', 'apps/mobile/native-qa-config.cjs', 'apps/mobile/build-config.cjs', 'apps/mobile/link-config.cjs', 'apps/mobile/release-policy.json', 'apps/mobile/assets/**', 'apps/mobile/plugins/**', 'scripts/patch-mobile-dependencies.cjs') }}
+          path: |
+            .local/native-qa/client.apk
+            .local/native-qa/native-build.json
+      - name: Bind the exact native inputs
+        run: echo "NATIVE_QA_CACHE_KEY=${{ steps.native_apk.outputs.cache-primary-key }}" >> "$GITHUB_ENV"
+      - name: Verify isolated QA and unchanged release admission
+        run: |
+          node scripts/test-native-qa-config.cjs
+          env -u AFRICMADE_NATIVE_QA -u AFRICMADE_MOBILE_BUILD_PROFILE -u EXPO_PUBLIC_API_ORIGIN -u EXPO_PUBLIC_NATIVE_MAP_FIXTURE node scripts/test-mobile-build-config.cjs
+          env -u AFRICMADE_NATIVE_QA -u AFRICMADE_MOBILE_BUILD_PROFILE -u EXPO_PUBLIC_API_ORIGIN -u EXPO_PUBLIC_NATIVE_MAP_FIXTURE npm run test:mobile:release-safety
+      - name: Prepare and verify the disposable backend
+        run: |
+          mkdir -p .local/native-qa/evidence
+          node --import tsx scripts/native-qa-backend.ts > .local/native-qa/backend.log 2>&1 &
+          node --import tsx scripts/native-qa-backend.ts --check
+          node --import tsx scripts/native-qa-demo.ts --prepare
+      - name: Generate the separate native project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --no-install
+      - name: Compile the separately packaged debug app
+        if: steps.native_apk.outputs.cache-hit != 'true'
+        working-directory: apps/mobile/android
+        run: env JAVA_HOME="$JAVA_HOME_17_X64" PATH="$JAVA_HOME_17_X64/bin:$PATH" ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon --max-workers=2
+      - name: Record the compiled native artifact
+        if: steps.native_apk.outputs.cache-hit != 'true'
+        run: node --import tsx scripts/native-qa-artifact.ts --record
+      - name: Cache the validated native inputs for UI iteration
+        if: steps.native_apk.outputs.cache-hit != 'true'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          key: ${{ steps.native_apk.outputs.cache-primary-key }}
+          path: |
+            .local/native-qa/client.apk
+            .local/native-qa/native-build.json
+      - name: Verify cached or freshly compiled APK identity
+        run: node --import tsx scripts/native-qa-artifact.ts --check
+      - name: Start local native Metro server
+        working-directory: apps/mobile
+        run: npx expo start --dev-client --host localhost --port 8081 > ../../.local/native-qa/metro.log 2>&1 &
+      - name: Enable Android hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise actual Android screens and persistence
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # reviewed v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 2048M
+          emulator-boot-timeout: 300
+          disable-linux-hw-accel: false
+          disable-spellchecker: true
+          script: |
+            python3 scripts/native-qa-ui.py
+            node --import tsx scripts/native-qa-verify.ts
+      - name: Retain only synthetic QA review evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: native-android-review
+          path: .local/native-qa/evidence/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7

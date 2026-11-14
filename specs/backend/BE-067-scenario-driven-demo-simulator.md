@@ -4,7 +4,7 @@ title: Scenario-driven demo marketplace simulation
 status: in_progress
 related: [FE-079, DEP-054, ADR-0034, BE-055, BE-054, BE-035]
 owners: [backend, security, operations]
-last_updated: 2026-11-13
+last_updated: 2026-11-14
 change_level: L3
 ---
 
@@ -22,7 +22,10 @@ Start with seasonal harvest, workshop production and wholesale replenishment
 scenarios. Each versioned definition owns ordered named stages, minimum durations,
 compatible product/business types, unit-aware selling facts, price rules, profile
 copy and completion/cooldown. Stages may retain product facts while the business
-update advances. No independent random fields, fabricated customer transactions,
+update advances. Each stage also publishes its predefined progress summary before
+the original product description, so listing cards visibly change every tick.
+Enrollment reserves space within the ordinary text limits; no original story or
+description is truncated. No independent random fields, fabricated customer transactions,
 stock counts, certifications, transport activity or external media/message calls.
 
 ## Identity and authority
@@ -79,6 +82,8 @@ owner UUIDs, baseline/private state or service controls in public DTOs/logs.
 Public catalog revision reads are independently visibility-filtered and no-store:
 an opaque/string fingerprint includes business content version and latest public
 page revision. Draft edits, private messages and Auth activity do not advance it.
+Public showroom/API snapshots read catalog and page in one read-only, repeatable
+database snapshot, so a concurrent stage cannot mix old products with new copy.
 FE-079 owns foreground refresh, including the independent page-revision case.
 
 ## Scenarios

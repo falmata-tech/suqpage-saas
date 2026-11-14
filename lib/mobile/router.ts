@@ -1,5 +1,6 @@
 import {currentBusinessAuthority} from "../staff-business-authority";
 import {readPublicShopRevision} from '../public-shop-revision';
+import {runtimePublicShowroom} from '../public-showroom-runtime';
 import {handlePartnerInterest,partnerInterestHttpPort,type PartnerInterestHttpPort} from '../transport-partner-http';
 import {trackingHttpHandler} from '../tracking-http-runtime';
 import {createTrackingHttpHandler,type TrackingHttpPorts} from '../tracking-http';
@@ -36,11 +37,7 @@ import {
 } from "../discovery";
 import { featuredProgramTimeLabel } from "../featured-program";
 import { publicLiveLink } from "../public-live-link";
-import { runtimeCatalogByHandle } from "../catalog-runtime";
-import { initialBusinessProfile } from "../business-profile";
 import {
-  runtimePublishedPage,
-  runtimePublishedPageState,
   pagePublicationPort,
 } from "../owner-page-publication-runtime";
 import { findPlaceSuggestions } from "../place-catalog";
@@ -202,14 +199,10 @@ async function dispatch(
   if (method === "GET" && path[0] === "shops" && path.length === 2) {
     if (!/^@?[a-z0-9-]{3,80}$/.test(path[1]))
       throw new MobileError("Business not found.", 404);
-    const c = await runtimeCatalogByHandle(path[1].replace(/^@/, ""));
-    if (!c || c.business.status !== "active")
+    const snapshot=await runtimePublicShowroom(path[1].replace(/^@/, ""));
+    if (!snapshot)
       throw new MobileError("Business not found.", 404);
-    const published=await runtimePublishedPageState(c.business.id);
-    return shopDto(
-      c,
-      published.content || initialBusinessProfile(c),false,published.revision,
-    );
+    return shopDto(snapshot.catalog,snapshot.profile,false,snapshot.pageRevision);
   }
   if (method === "GET" && key === "places") {
     const query = q.get("q") || "";

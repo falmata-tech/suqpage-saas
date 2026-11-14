@@ -10,6 +10,7 @@ import {runtimePublishedPage} from '../lib/owner-page-publication-runtime';
 import {readPublicShopRevision} from '../lib/public-shop-revision';
 import {ownerPagePort} from '../lib/owner-page-runtime';
 import {saveOwnerPageAndPublication} from '../lib/owner-page-save-runtime';
+import {runtimePublicShowroom} from '../lib/public-showroom-runtime';
 import {demoScenarioStage} from '../lib/demo-scenarios';
 import {DEMO_SIMULATOR_TABLES} from '../lib/demo-simulator-schema';
 
@@ -42,6 +43,19 @@ async function main(){
    catalogs:await db.prepare('SELECT * FROM published_catalog_versions WHERE business_id=? ORDER BY content_version').all(id),
   });
   const start=1800000000000,a=await make('demo-harvest'),real=await make('demo-looking-real',0),unregistered=await make('other-marked-example'),privateDemo=await make('private-example',1,'draft');
+  const privateState=async()=>{
+   const hashes:Record<string,unknown>={};
+   for(const table of ['auth_identity_links','attention_notifications','attention_preferences','attention_subscriptions','attention_deliveries','attention_email_deliveries'])hashes[table]=await db.prepare(`SELECT COUNT(*)::integer total,md5(COALESCE(string_agg(h,'' ORDER BY h),'')) digest FROM (SELECT md5(to_jsonb(t)::text) h FROM ${table} t) rows`).get();
+   return hashes;
+  };
+  const beforePrivate=await privateState();
+  const rollback=Error('Restore fixture ledger');
+  await assert.rejects(()=>db.runner.transaction(async()=>{
+   await db.exec('DELETE FROM schema_migrations WHERE version=82');
+   assert.equal((await runDemoSimulatorTick(start)).status,'schema');
+   await assert.rejects(()=>enrollDemoScenario(a,start),/schema is not ready/);
+   throw rollback;
+  }),error=>error===rollback);
   const realBefore=await snapshot(real.businessId),otherBefore=await snapshot(unregistered.businessId),privateBefore=await snapshot(privateDemo.businessId);
   assert.equal((await runDemoSimulatorTick(start)).status,'disabled');
   await assert.rejects(()=>enrollDemoScenario(real,start),/eligibility_changed/);
@@ -59,11 +73,12 @@ async function main(){
    const progress=await get(a.businessId);assert.equal(progress.stage,index);assert.equal(progress.cycle,0);
    const plan=demoScenarioStage(a.scenarioKey,1,index,a.parameters),catalog=await runtimeCatalogByHandle(a.handle),product=catalog!.products.find(p=>p.id===a.productId)!;
    assert.equal(product.availability,plan.product.availability);assert.equal(product.price_minor,plan.product.priceMinor);assert.equal(product.capacity_summary,plan.product.capacitySummary);
+   assert.equal(product.description,plan.productUpdate+'\n\nExample wholesale onions.','Listing descriptions expose each coherent stage while preserving the original product story.');
    assert.match((await runtimePublishedPage(a.businessId))!.introduction,new RegExp(plan.stage.title));
    assert.deepEqual((await runtimePublishedPage(a.businessId))!.contacts,{whatsapp:'+19528552202',telegram:'+19528552202'});
-   assert.equal((await runtimePublishedPage(a.businessId))!.about,'Original demo business story.');
+   assert.equal((await runtimePublishedPage(a.businessId))!.about,plan.businessUpdate+'\n\nOriginal demo business story.');
    assert.equal((await runDemoSimulatorTick(now)).status,'duplicate');
-   if(index===1)assert.equal(catalog!.business.content_version,2,'A profile-only transition does not append a duplicate catalog.');
+   if(index===1)assert.equal(catalog!.business.content_version,3,'Distinct progress summaries publish even when the selling facts are unchanged.');
    now=Number(progress.due_at);
   }
   // Restart/late execution uses durable progress; a day of missed work becomes
@@ -78,6 +93,7 @@ async function main(){
   await db.prepare("UPDATE products SET description='A human edit without a version bump' WHERE id=?").run(a.productId);
   const edited=await snapshot(a.businessId);now+=60000;
   assert.equal((await runDemoSimulatorTick(now)).paused,1);assert.equal((await get(a.businessId)).reason,'content_changed');assert.equal(await snapshot(a.businessId),edited);
+  assert.deepEqual(await privateState(),beforePrivate,'The service creates no Auth identity, notification, preference, subscription or delivery.');
   // New public workspaces ignore forged demo fields and receive no enrollment.
   const signup=await createPostgresPublicClientWorkspace(db.runner,{name:'Real Merchant',phone:'+251911234567',businessName:'New Real Business',businessCategory:'agriculture-growers',placeId:findPlaceSuggestions('Hawassa')[0].id,idempotencyKey:'demo-exclusion-signup-0001',consent:true,is_demo:1,isDemo:true},{providerUserId:crypto.randomUUID(),email:'new-real@example.test'});
   assert.equal((await db.prepare('SELECT is_demo FROM businesses WHERE id=?').get(signup.businessId)).is_demo,0);assert.equal(await get(signup.businessId),undefined);
@@ -102,6 +118,26 @@ async function main(){
   assert.equal(await snapshot(bad.businessId),beforeBad);assert.equal((await get(bad.businessId)).stage,-1);assert.equal((await get(bad.businessId)).reason,'stage_failed');assert.equal((await get(good.businessId)).stage,0);
   assert.equal((await db.prepare("SELECT COUNT(*) total FROM audit_logs WHERE business_id=? AND action='product.basic_upkeep_published'").get(bad.businessId)).total,0);
   await db.exec('DROP TRIGGER fail_demo_publication ON owner_page_publications; DROP FUNCTION fail_demo_publication()');
+  // Commit an actual stage between a public reader's catalog queries. The
+  // read-only repeatable snapshot must keep old products and old profile together.
+  const beforeRead=(await runtimePublicShowroom(good.handle))!;
+  let observed!:()=>void,continueRead!:()=>void,hold=true;
+  const observedQuery=new Promise<void>(resolve=>{observed=resolve;}),resume=new Promise<void>(resolve=>{continueRead=resolve;});
+  const originalQuery=db.runner.query.bind(db.runner);
+  db.runner.query=async function<T extends Record<string,unknown>>(sql:string,values:readonly unknown[]=[]){
+   const result=await originalQuery<T>(sql,values);
+   if(hold&&sql.includes('business_handles WHERE handle=lower')&&values[0]===good.handle){hold=false;observed();await resume;}
+   return result;
+  };
+  const reading=runtimePublicShowroom(good.handle);
+  let writeFailure:unknown;
+  let barrierTimer:ReturnType<typeof setTimeout>|undefined;
+  try{await Promise.race([observedQuery,new Promise<never>((_,reject)=>{barrierTimer=setTimeout(()=>reject(Error('Public snapshot barrier was not reached.')),5000);})]);now+=60000;assert.equal((await runDemoSimulatorTick(now)).advanced,1);}
+  catch(error){writeFailure=error;}
+  finally{if(barrierTimer)clearTimeout(barrierTimer);continueRead();db.runner.query=originalQuery;}
+  const retainedRead=(await reading)!;if(writeFailure)throw writeFailure;
+  assert.equal(retainedRead.revision,beforeRead.revision);assert.deepEqual(retainedRead.catalog,beforeRead.catalog);assert.deepEqual(retainedRead.profile,beforeRead.profile);
+  const afterRead=(await runtimePublicShowroom(good.handle))!;assert.notEqual(afterRead.revision,beforeRead.revision);assert.notEqual(afterRead.profile.about,beforeRead.profile.about);
   // Budgets stop demo work without deleting or editing merchant history.
   await db.exec('UPDATE demo_simulator_control SET daily_limit=1,used_today=1 WHERE id=1');now+=60000;
   const beforeBudget=await snapshot(good.businessId);assert.equal((await runDemoSimulatorTick(now)).status,'budget');assert.equal(await snapshot(good.businessId),beforeBudget);

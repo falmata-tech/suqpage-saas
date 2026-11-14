@@ -4,7 +4,7 @@ title: Visible scenario updates in public marketplace screens
 status: in_progress
 related: [BE-067, DEP-054, ADR-0034, FE-053, FE-065, FE-066, FE-075]
 owners: [frontend, product, security]
-last_updated: 2026-11-13
+last_updated: 2026-11-14
 change_level: L3
 ---
 
@@ -48,7 +48,7 @@ foreground refresh completes THEN the visible facts match the fresh public API
 within the admitted poll/request time, without navigating away or losing a draft.
 
 GIVEN an unchanged business content version and a new public page revision WHEN
-the screen refreshes THEN its introduction/About updates. A private draft does
+the screen refreshes THEN its displayed business description updates. A private draft does
 not become visible. GIVEN an old/departed or cancelled response THEN it cannot
 replace the current resource.
 
@@ -75,3 +75,7 @@ Production verification observes only enrolled demo changes and current public
 reads. Physical-device/Auth/push/Play evidence remains separately qualified.
 DEP-054 controls rollout/rollback; disabling demo writes does not disable normal
 public reading or restore old customer data. Definition of Ready is satisfied.
+
+Native evidence: DEP-053 driver plus `scripts/native-qa-demo.ts` advances the
+source-bound disposable scenario while the product screen remains open, checks
+actual Limited availability rendering and saves authoritative readback.

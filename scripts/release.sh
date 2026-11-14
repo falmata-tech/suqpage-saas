@@ -43,7 +43,7 @@ printf '\n=== Server pagination and scale fixture validation ===\n'
 node node_modules/tsx/dist/cli.mjs scripts/test-pagination.ts
 node node_modules/tsx/dist/cli.mjs scripts/test-scalable-queries.ts
 node --import tsx scripts/test-native-postgres.ts
-node --import tsx --test scripts/test-demo-scenarios.ts scripts/test-foreground-poll.ts scripts/test-demo-worker-boundary.ts
+node --import tsx --test scripts/test-demo-scenarios.ts scripts/test-foreground-poll.ts scripts/test-demo-worker-boundary.ts scripts/test-scenario-acceptance-guard.ts
 node --import tsx scripts/test-demo-simulator-postgres.ts
 node --import tsx scripts/test-scale-fixtures.ts
 

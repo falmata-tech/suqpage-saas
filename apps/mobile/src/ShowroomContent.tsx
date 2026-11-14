@@ -146,7 +146,6 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
               {shop.logo ? <View style={{ width: 60, padding: 5, borderRadius: 12, borderWidth: 2, borderColor: accent?.edge || colors.line, backgroundColor: accent?.soft || "white" }}><Photo refPath={shop.logo} height={46} privateImage={preview} /></View> : null}
               <Text style={v.handle}>@{shop.handle}</Text>
               <Text style={v.title}>{shop.name}</Text>
-              {!!shop.introduction&&shop.introduction!==shop.about&&<LinkedText style={v.body}>{shop.introduction}</LinkedText>}
               <LinkedText style={v.body}>{shop.about}</LinkedText>
             </View>
             <View style={v.section}>

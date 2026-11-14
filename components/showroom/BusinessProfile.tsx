@@ -73,7 +73,7 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
           {business.logo_path ? <img className={styles.logo} src={business.logo_path} alt="" /> : null}
           <div><span className={styles.handle}>@{business.handle}</span><BusinessHeading className={styles.businessName}>{business.name}</BusinessHeading></div>
         </div>
-        <ProfileDescription key={businessProfileDescription(profile)} text={businessProfileDescription(profile)} />
+        <ProfileDescription key={business.id} text={businessProfileDescription(profile)} />
       </div>
     </section>
     <nav className={styles.navigation} aria-label={t("Business profile sections")}>

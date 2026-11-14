@@ -88,7 +88,7 @@ export function demoScenarioStage(key:string,version:number,index:number,raw:unk
  const sellingUnit=parameters.unit.replace(/^per\s+/i,'');
  const priceMinor=parameters.basePriceMinor===null?null:normalizeOfferingPriceMinor(Math.round(parameters.basePriceMinor*profile.pricePercent/100));
  return {definition,stage,durationMs:stage.minutes*60000,
-  businessUpdate:`${parameters.productName}: ${stage.update}`,
+  businessUpdate:`${parameters.productName}: ${stage.update}`,productUpdate:stage.update,
   product:{availability:profile.availability,priceMinor,quantityUnit:parameters.unit,
    minimumOrderSummary:`${parameters.minimumOrder} ${sellingUnit}`,
    capacitySummary:`${profile.capacity==='planned'?'Planned':'Up to'} ${capacity} ${sellingUnit} per week`,leadTimeSummary:profile.leadTime}};
