@@ -10,6 +10,32 @@ run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md)
 
 ## S197 demo video quality — review and qualification in progress
 
+FE-057 portrait containment follow-up: PR68's actual Chrome phone product
+capture crops a 9:16 TikTok frame inside the short gallery stage while its Expo
+capture retains the full frame. The focused source branch gives active portrait
+product media a taller bounded stage and positions the provider iframe inside
+its own 9:16 wrapper; photo selection restores the prior stage and unmounts the
+player. `scripts/test-social-video-layout.ts` mounts the real gallery/frame with
+the retained dialog CSS, and its controlled-frame geometry passes at
+1440/390/320 for TikTok/Instagram, photo return, story and Facebook. The
+inspected 390px fixture capture shows both vertical edges. On a disposable
+PostgreSQL publication, the actual local web gallery at 390px contains a
+350×622.2 TikTok iframe within its 350×630 stage and returns to a 262.5px photo
+stage with no iframe. At 1440px, the 354.4×630 iframe fits the 559.4×630 stage
+and photo return restores its 559.4px square. Expo web on 8083 receives two
+HTTP 200 shop responses with no page errors; at 390px its 151.9×270 player
+fits the 354×270 stage and Photo 1 removes the iframe. Local screenshots were
+inspected. The provider frame remained blank locally, so that review establishes
+layout, unmount and API access. PR75's finite GitHub run `43642623765` at source
+`082713bbeb8d742734acfc7ee4f15a482367aad6` separately passes decoded
+720×1280 TikTok playback on actual Chrome desktop/phone web and Expo web. The
+video advances beyond two seconds on each product and story surface; the phone
+product frame fits both stage axes, and Photo 1 removes the iframe. Artifact
+`14132642389` retains the report and screenshots; inspected frames show the
+complete player and soap footage. This is disposable-schema source evidence,
+not a hosted media correction, installed Android or signed release. Current-head
+live-media and required quality checks must repeat before integration.
+
 FE-061/BE-049 own the exact64/256 public-demo media review; FE-057/FE-060 own
 inline social playback and BE-067 protects scenario continuity. Read-only browser
 inspection confirms the widely reused`wJV9EDe_sFc` is no longer available, and

@@ -311,6 +311,11 @@
   background: var(--bank-strong, #111827);
 }
 
+.product-dialog-video[data-portrait-active="true"] {
+  height: min(70vh, 680px);
+  aspect-ratio: auto;
+}
+
 .product-dialog-video iframe {
   position: absolute;
   inset: 0;
