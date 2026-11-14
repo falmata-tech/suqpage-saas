@@ -1,10 +1,10 @@
 ---
 id: FE-071
-title: Search discovery for public MirtPage showrooms and products
+title: Search discovery for public AfricMade showrooms and products
 status: in_progress
 related: [FE-070, BE-054, DEP-049]
 owners: [product, frontend, search]
-last_updated: 2026-10-19
+last_updated: 2026-11-14
 change_level: L2
 ---
 
@@ -12,12 +12,12 @@ change_level: L2
 
 ## Problem and outcome
 
-MirtPage behaves like an app, but its public Market, About, showroom and product
+AfricMade behaves like an app, but its public Market, About, showroom and product
 pages must still be understandable and discoverable from a normal web crawl.
-Today the app lacks a sitemap, robots file and explicit per-page canonical URLs.
-The outcome is a truthful, crawlable path from MirtPage's public introduction to
-each eligible business and its published products, without changing the approved
-visual design or promising search placement.
+Before this work the app lacked a sitemap, robots file and explicit per-page
+canonical URLs. The outcome is a truthful, crawlable path from AfricMade's
+public introduction to each eligible business and its published products,
+without changing the approved visual design or promising search placement.
 
 ## Scope
 
@@ -29,7 +29,7 @@ visual design or promising search placement.
   published product and business.
 - Publish a bounded, paged XML sitemap of eligible canonical URLs and a robots
   file that identifies those sitemap pages while avoiding private workflows.
-- Emit minimal page-representative structured data. MirtPage is a showroom and
+- Emit minimal page-representative structured data. AfricMade is a showroom and
   direct-contact platform; price, stock, reviews, checkout, delivery dates,
   physical shop addresses and merchant-listing eligibility are not inferred.
 - Preserve crawlable `<a href>` product links and server-visible product content
@@ -102,7 +102,7 @@ visual design or promising search placement.
 - A missing or draft showroom handle fails in the pre-render request boundary
   before the showroom loading shell streams. Its initial document responds
   HTTP 404 and `noindex` without
-  exposing draft content. The page shows the existing MirtPage identity and
+  exposing draft content. The page shows the existing AfricMade identity and
   active-language return action. Suspended showroom handling retains its
   existing inactive redirect. An active directly shared showroom remains
   viewable even when it is intentionally absent from directory and sitemap
@@ -110,7 +110,7 @@ visual design or promising search placement.
   for public handle status; only the Node endpoint accesses PostgreSQL. The
   hosting build must not bundle a PostgreSQL driver into Edge code. The lookup
   selects indexed public status without caching, forwards no visitor cookies,
-  uses only the configured MirtPage origin when hosted, and fails closed on
+  uses only the configured AfricMade origin when hosted, and fails closed on
   unavailable status checks. Client navigation retains the page's catalog check.
 
 ## Scenarios
@@ -259,6 +259,32 @@ new 404 screenshots are byte-identical to the approved ones; a disposable
 Netlify build now completes Edge packaging with exit 0. The broad local SEO
 test is blocked by a disposable demo-only database with no real directory
 business; its earlier complete fixture-backed proof remains source-bound.
-Shared full release gates and hosted publication remain pending. Structured
-data can help understanding but does not guarantee a Google rich result or
-ranking.
+That candidate-era gate note is superseded by the current published web source;
+structured data can help understanding but does not guarantee a Google rich
+result or ranking. Search Console submission and actual indexing remain separate
+provider evidence.
+
+On 2026-11-14, the live R07 check against published main `0aa9ede` verified
+canonical/OG URLs for Market, About, Featured, directory and legal pages; robots
+and sitemap index/page shape; tracking HTML `noindex` with private API exclusion;
+server-visible product text and links; flagged demo and invalid-product
+`noindex`; and missing-showroom HTTP 404. `/sitemaps/0` had 16 unique URLs:
+six static entries plus two fictional portfolio showrooms and eight products.
+Their direct pages requested `index, follow` and emitted JSON-LD because the two
+hosted rows incorrectly had `is_demo=0`. Committed briefs identify Dara Clay
+Works (business 50) and Wabi Bottled Water (business 62) as fictional, and both
+sit outside S196's 64-business/256-product simulator cohort. The independently
+verified `africmade` Supabase project readback found no simulator enrollments and
+four published products each. An exact owner-approved, two-row hosted correction
+set only `businesses.is_demo` to 1; protected before/after comparison found
+identity, discovery, exact product IDs and enrollment state unchanged. Fresh
+showroom and sampled product HTML now says `noindex, follow` and omits JSON-LD;
+the showroom visibly labels its fictional status and Market product search
+returns the same example products. Sitemap pages allow a 300-second public
+cache. At 22:16:02 UTC, after that interval, an ordinary GET of `/sitemaps/0`
+returned only the six static URLs and no Dara/Wabi entries, down from 16 before
+correction. Robots still identified the canonical sitemap and published health
+reported main `0aa9ede`. A live eligible real listing, draft/suspended page and
+>10,000-entry catalog were unavailable to exercise; prior local fixture-backed
+tests cover those paths. Search Console submission and actual indexing remain
+separate provider evidence.
