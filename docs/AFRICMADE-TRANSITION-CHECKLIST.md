@@ -250,6 +250,10 @@ targets. This is build/delivery work; no new product behavior or Play submission
    inspect the current locked dependency audit, and record exact build inputs.
    Resolve current findings against the owner's current build instruction;
    consumed historical exceptions do not admit new findings.
+   - [ ] Diagnose PR #69's Android QA failure after product search. Retain
+     bounded public fatal-error classification, inspect the source-bound run,
+     and fix only the observed cause before repeating the native gate. Browser
+     preview and a QA debug APK do not qualify the signed successor.
 4. [ ] Compile one local AAB, derive the universal APK, and independently inspect
    both against DEP-044 and the v3 predecessor. A failed compilation requires
    diagnosis before a bounded retry; do not weaken release checks.

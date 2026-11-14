@@ -303,6 +303,13 @@ and synthetic loopback backend target; it does not admit a production artifact.
 The local operations check stops because Docker is unavailable. Required remote
 source/operations/browser/PostgreSQL checks still apply to this new lockfile.
 
+PR #69 native QA run `43609385834` reached map, product search and the typed
+keyboard, then `uiautomator dump` exited 255 at the product action. Retained
+artifact `14120525466` reports a fatal exception without a process or stack,
+so the cause remains unclassified. DEP-053 now prepares a bounded public
+exception/process identifier receipt; its synthetic privacy/bound tests pass
+locally. Current-head Android evidence is still required before integration.
+
 The original keystore/password were independently matched to the release policy
 in the prior provider session. The protected key file, pinned Firebase client and
 canonical signed v3 APK are absent in the resumed checkout. Library title search

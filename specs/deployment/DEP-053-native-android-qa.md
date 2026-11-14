@@ -71,6 +71,12 @@ GIVEN a crash, missing native control, backend failure or test timeout WHEN the
 workflow ends THEN the job fails and retains the last safe screenshot/hierarchy
 and explicit failed step. A passed browser test cannot substitute for that result.
 
+GIVEN an Android or React Native fatal error during the smoke WHEN the QA job
+fails THEN its public evidence records a bounded set of exception class names,
+stack method identifiers and the failing process category. It excludes raw
+device logs, error messages, runtime data and credentials. The full log remains
+only in the protected runner workspace for that job.
+
 ## Test plan
 
 | Criterion | Level | Evidence |
@@ -80,6 +86,7 @@ and explicit failed step. A passed browser test cannot substitute for that resul
 | Ordinary API persistence and tenant boundary | integration | `scripts/native-qa-backend.ts`, `scripts/native-qa-verify.ts` |
 | Normal scenario writes reach an open Android screen | native/integration | `scripts/native-qa-demo.ts`, driver screenshots and public readback (FE-079) |
 | Repeatable bounded runner and safe artifacts | operations | workflow/script checks, first native workflow run |
+| Bounded fatal-error classification without log disclosure | operations | `scripts/test-native-qa-ui.py` synthetic log cases, failed-run artifact review |
 
 ## Evidence:
 
