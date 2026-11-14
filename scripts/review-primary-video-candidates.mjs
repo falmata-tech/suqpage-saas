@@ -67,17 +67,20 @@ async function playExactVideo(page, player, candidate, prefix, receiptPart) {
     adShowing: !!document.querySelector('.ad-showing'),
   }));
   const deadline = Date.now() + 45000;
+  const maxPlayAttempts = prefix === 'embed' ? 1 : 2;
   let nextPlayAttemptAt = 0;
   while (Date.now() < deadline) {
     const current = await state();
     receiptPart.lastObserved = current;
     // The video element can attach before the poster's Play control appears.
     // Retry only while visibly paused, with a bounded gap and retained outcome.
-    if (current.paused && !current.adShowing && result.playAttempts.length < 2
+    if (current.paused && !current.adShowing && result.playAttempts.length < maxPlayAttempts
       && Date.now() >= nextPlayAttemptAt) {
-      for (const selector of ['.ytp-large-play-button', '.ytp-play-button']) {
-        const button = player.locator(selector).first();
-        if (!await button.isVisible().catch(() => false)) continue;
+      for (const selector of ['.ytp-large-play-button', '.ytp-play-button', '.ytp-cued-thumbnail-overlay']) {
+        // The player can retain an earlier hidden control before showing the
+        // poster. Select the visible match, not the first DOM match.
+        const button = player.locator(`${selector}:visible`).first();
+        if (!await button.count()) continue;
         const attempt = {selector, result: 'failed'};
         result.playAttempts.push(attempt);
         nextPlayAttemptAt = Date.now() + 5000;
