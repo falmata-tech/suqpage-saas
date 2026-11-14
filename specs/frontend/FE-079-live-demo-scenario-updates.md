@@ -1,8 +1,8 @@
 ---
 id: FE-079
 title: Visible scenario updates in public marketplace screens
-status: done
-related: [DEP-053, BE-067, DEP-054, ADR-0034, FE-053, FE-065, FE-066, FE-075]
+status: in_progress
+related: [BE-009, DEP-053, BE-067, DEP-054, ADR-0034, FE-053, FE-065, FE-066, FE-075]
 owners: [frontend, product, security]
 last_updated: 2026-11-14
 change_level: L3
@@ -64,6 +64,12 @@ growth is bounded, failures recover visibly where appropriate, and no stale
 private/foreign business data appears. No outgoing message is sent by a refresh.
 
 ## Test plan and quality
+
+S196 extends the ordinary-write browser and Android fixtures to complete four-
+product catalogs. Check every member against its planned/public facts while the
+existing open-screen, draft/selection, Back/search and language checks run. The
+full-size PostgreSQL case owns all64/256 membership and fair recurring coverage;
+the public DTO and15-second foreground refresh contract remain the same.
 
 Extend actual React lifecycle/resource and marketplace retention tests for timing,
 visibility, errors, stale results and mutation races. Add actual Chrome desktop/

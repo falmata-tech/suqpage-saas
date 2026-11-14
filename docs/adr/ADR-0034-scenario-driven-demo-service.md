@@ -24,6 +24,14 @@ activity. Limit active work and retained-data growth; pause on budget or human
 edit rather than deleting immutable history or expanding paid capacity silently.
 This fits short scheduled work and needs no VM or new production credential.
 
+The requested full-catalog expansion enrolls all reviewed public demos and their
+exact current products. A bounded ordinary upkeep batch retains each command's
+validation/authority/idempotency/audit semantics but publishes one atomic catalog
+snapshot for the coordinated business stage. Predefined product phase offsets
+retain a usable showroom. Rotate oldest-due businesses under the same global
+minute/write/storage budgets; breadth never requires a per-business worker or
+unbounded publication growth. Human/product-membership drift pauses the business.
+
 Current public catalog screens do not subscribe to changes. Add bounded foreground
 revision/data refresh with independent public page revision, scope/race fencing,
 retained discovery state and edited inquiry drafts. This tests the actual path

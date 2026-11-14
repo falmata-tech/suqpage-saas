@@ -2,7 +2,7 @@ import {normalizeOfferingPriceMinor} from './offering-presentation';
 import type {ActiveProductKind} from './offerings';
 import {DISCOVERY_INDUSTRIES} from './discovery-contract';
 
-export type DemoScenarioKey='seasonal-harvest'|'workshop-production'|'wholesale-replenishment';
+export type DemoScenarioKey='seasonal-harvest'|'workshop-production'|'wholesale-replenishment'|'production-cycle'|'food-preparation'|'fresh-food-batch';
 type FactsKey='planned'|'available'|'limited';
 type FactsProfile={availability:'available'|'limited'|'coming_soon';capacity:'normal'|'limited'|'planned';leadTime:string;pricePercent:number};
 export type DemoScenarioStage={key:string;title:string;update:string;facts:FactsKey;minutes:number};
@@ -10,6 +10,42 @@ export type DemoScenarioDefinition={key:DemoScenarioKey;version:number;productKi
  facts:Record<FactsKey,FactsProfile>;stages:readonly DemoScenarioStage[]};
 
 const definitions:Record<DemoScenarioKey,DemoScenarioDefinition>={
+ 'fresh-food-batch':{key:'fresh-food-batch',version:1,productKind:'standard_product',categories:['food-farming','agriculture-growers'],facts:{
+  planned:{availability:'coming_soon',capacity:'planned',leadTime:'Next example food batch in 1–2 working days',pricePercent:100},
+  available:{availability:'available',capacity:'normal',leadTime:'Dispatch within 1 working day',pricePercent:100},
+  limited:{availability:'limited',capacity:'limited',leadTime:'Dispatch within 1 working day',pricePercent:100},
+ },stages:[
+  {key:'batch-ready',title:'Fresh food batch available',facts:'available',minutes:1,update:'The current example food batch is available for inquiries within its short dispatch window.'},
+  {key:'dispatch',title:'Fresh food dispatch window',facts:'available',minutes:1,update:'The example food batch remains available within the stated short dispatch window.'},
+  {key:'limited',title:'Current food batch is limited',facts:'limited',minutes:2,update:'The current example food batch has limited supply; the reduced capacity and short dispatch window apply.'},
+  {key:'preparing',title:'Next food batch being prepared',facts:'planned',minutes:1,update:'The next example food batch is being prepared for the next short supply window.'},
+  {key:'checking',title:'Next food batch being checked',facts:'planned',minutes:2,update:'The replacement example food batch is being checked before the next availability window opens.'},
+  {key:'replenished',title:'Fresh food supply restored',facts:'available',minutes:1,update:'The next example food batch is available; normal capacity and the short dispatch window are restored.'},
+ ]},
+ 'food-preparation':{key:'food-preparation',version:1,productKind:'made_to_order',categories:['food-farming','agriculture-growers'],facts:{
+  planned:{availability:'limited',capacity:'limited',leadTime:'New orders: 3–5 working days',pricePercent:100},
+  available:{availability:'available',capacity:'normal',leadTime:'New orders: 1–2 working days',pricePercent:100},
+  limited:{availability:'limited',capacity:'limited',leadTime:'New orders: 3–5 working days',pricePercent:100},
+ },stages:[
+  {key:'slots-open',title:'Food preparation slots available',facts:'available',minutes:1,update:'The example kitchen has preparation capacity for new food orders within the stated short lead time.'},
+  {key:'scheduled',title:'Next kitchen batch scheduled',facts:'planned',minutes:1,update:'The next example kitchen batch is scheduled; fewer new orders fit within the current preparation window.'},
+  {key:'preparation',title:'Kitchen batch in preparation',facts:'limited',minutes:2,update:'The example kitchen batch is being prepared; new orders remain subject to limited preparation capacity.'},
+  {key:'packing',title:'Kitchen batch being packed',facts:'limited',minutes:1,update:'The current example kitchen batch is being packed; the longer new-order preparation window still applies.'},
+  {key:'planning',title:'Next kitchen allocation planned',facts:'limited',minutes:2,update:'The next example kitchen allocation is being planned; preparation slots remain limited.'},
+  {key:'capacity-restored',title:'Kitchen preparation capacity restored',facts:'available',minutes:1,update:'The next example kitchen allocation is open; normal preparation capacity and the shorter lead time are restored.'},
+ ]},
+ 'production-cycle':{key:'production-cycle',version:1,productKind:'made_to_order',categories:DISCOVERY_INDUSTRIES.map(v=>v.key),facts:{
+  planned:{availability:'limited',capacity:'limited',leadTime:'New orders: 21–28 working days',pricePercent:100},
+  available:{availability:'available',capacity:'normal',leadTime:'New orders: 10–14 working days',pricePercent:100},
+  limited:{availability:'limited',capacity:'limited',leadTime:'New orders: 21–28 working days',pricePercent:100},
+ },stages:[
+  {key:'slots-open',title:'Production capacity available',facts:'available',minutes:1,update:'The example production team has open capacity for new orders.'},
+  {key:'scheduled',title:'Next production batch scheduled',facts:'planned',minutes:1,update:'The next example production batch is scheduled; reduced capacity and the longer new-order lead time apply.'},
+  {key:'production',title:'Production batch in progress',facts:'limited',minutes:2,update:'The example production batch is in progress; new orders remain subject to the stated limited capacity.'},
+  {key:'finishing',title:'Production batch being finished',facts:'limited',minutes:1,update:'The current example production batch is being finished; the longer lead time still applies to new orders.'},
+  {key:'planning',title:'Next production allocation planned',facts:'limited',minutes:2,update:'The next example production allocation is being planned; new-order capacity remains limited.'},
+  {key:'capacity-restored',title:'Production capacity restored',facts:'available',minutes:1,update:'The next example production allocation is open; normal capacity and the shorter lead time are restored.'},
+ ]},
  'seasonal-harvest':{key:'seasonal-harvest',version:1,productKind:'standard_product',categories:['agriculture-growers','food-farming'],facts:{
   planned:{availability:'coming_soon',capacity:'planned',leadTime:'Next example harvest in 5–7 days',pricePercent:100},
   available:{availability:'available',capacity:'normal',leadTime:'Dispatch in 1–2 working days',pricePercent:100},

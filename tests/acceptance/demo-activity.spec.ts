@@ -6,7 +6,7 @@ import path from 'node:path';
 import {test,expect} from './fixtures';
 
 type ScenarioResult={handle:string;businessId:number;productId:number;stage:number;update:string;revision:string;
- product:{availability:string;capacitySummary:string;priceMinor:number|null};about:string};
+ product:{availability:string;capacitySummary:string;priceMinor:number|null};about:string;catalogProductIds:number[]};
 const scenario=(action:'prepare'|'advance'|'pause')=>JSON.parse(execFileSync(process.execPath,
  ['--import','tsx',path.resolve('tests/acceptance/demo-scenario-fixture.ts'),action],{encoding:'utf8',timeout:30000,stdio:['ignore','pipe','pipe']})) as ScenarioResult;
 
@@ -34,6 +34,7 @@ test('FE-079 ordinary demo stages reach already-open desktop and phone without l
   const started=Date.now(),limited=scenario('advance');expect(limited.stage).toBe(2);expect(limited.product.availability).toBe('limited');
   const response=await request.get('/api/mobile/v1/shops/'+prepared.handle);expect(response.ok()).toBeTruthy();expect(response.headers()['cache-control']).toMatch(/no-store/);
   const fresh=await response.json(),product=fresh.products.find((p:{id:number})=>p.id===prepared.productId);
+  expect(limited.catalogProductIds).toHaveLength(4);expect(fresh.products.map((p:{id:number})=>p.id).sort((a:number,b:number)=>a-b)).toEqual(limited.catalogProductIds);
   expect(fresh.publicRevision).toBe(limited.revision);expect(product.availability).toBe('limited');expect(product.capacitySummary).toBe(limited.product.capacitySummary);expect(fresh.about).toBe(limited.about);
   for(const surface of pages){
    await expect(surface.page.getByText('Limited availability',{exact:true}).first()).toBeVisible({timeout:25000});

@@ -8,6 +8,41 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S196 full public-demo catalog — qualification in progress
+
+The owner requires all public demo businesses and all current products. The
+read-only production inventory confirms64 active demo owners with managed links,
+matching drafts/publications,256 published products, no pending geography or
+oversized descriptions. The private reviewer remains excluded. S194's three-
+business canary is not the final requested coverage.
+
+BE-009/BE-067/FE-079/DEP-054/ADR-0034 map the bounded ordinary upkeep batch, exact
+catalog bindings, deterministic compatible phase offsets, private additive83,
+whole-stage rollback and oldest-due coverage to the expanded implementation.
+Eleven focused domain/timer/inert-worker/fixture-boundary checks pass. The new
+PostgreSQL case covers64 businesses/256 products, complete timelines, legacy
+promotion, one snapshot per business stage, replay/foreign/failed-member refusal,
+media/private/real preservation and product-membership drift. Browser/Android
+fixtures now advance all four products; actual managed-run evidence is pending.
+
+Local mobile checking first resolved an older sibling checkout's workspace
+contracts; isolated links restore current-workspace resolution. It then exposed
+the existing nullable inquiry-route handle annotation; accept an absent handle
+in the public hook, whose existing runtime guard already makes no request.
+The direct tsx CLI cannot create its local IPC socket; the standard Node
+`--import tsx` entry passes without changing sandbox or test assertions.
+
+No expanded hosted migration/enrollment or production write has been performed.
+The active checklist owns remaining gates and the separate signed phone APK.
+
+Retained first qualification: source`136f153` in43551401842/43551401841 passes
+fresh schema83 installation and legacy simulator PostgreSQL cases. The new batch
+then writes its per-product receipt before the referenced final catalog version,
+and the existing immediate foreign key rejects it. Native preparation exposes
+the same ordering defect. Preserve the FK and late-foreign rollback assertion;
+publish the shared final snapshot first, then record all member receipts/audits
+inside the same transaction before requalifying the corrected source.
+
 ## S194 scenario-driven demo activity — qualified and deployed
 
 BE-067 / FE-079 / DEP-054 / ADR-0034 map the versioned scenarios, ordinary

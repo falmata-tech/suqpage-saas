@@ -8,7 +8,7 @@ import { PAGE_REVIEW_SCHEMA_SQL } from "./page-review-schema";
 import { CONTACT_SCHEMA_SQL } from "./contact-schema";
 import type { PostgresTransactionRunner } from "./postgres-runtime";
 import { OWNER_PAGE_SCHEMA_SQL, OWNER_PAGE_PUBLICATION_SCHEMA_SQL } from "./owner-page-schema";
-import { DEMO_SIMULATOR_SCHEMA_SQL, DEMO_SIMULATOR_TABLES } from './demo-simulator-schema';
+import { DEMO_SIMULATOR_SCHEMA_SQL, DEMO_SIMULATOR_CATALOG_SCHEMA_SQL, DEMO_SIMULATOR_TABLES } from './demo-simulator-schema';
 
 const SCHEMA_NAME = /^[a-z_][a-z0-9_]*$/i;
 
@@ -1298,6 +1298,12 @@ export async function migratePostgresDatabase(
         }
       }
       await runner.query('INSERT INTO schema_migrations(version) VALUES(82)');applied.push(82);
+    }
+    const migration83=await runner.query('SELECT version FROM schema_migrations WHERE version=83');
+    if(!migration83.rows.length){
+      if(!(await runner.query('SELECT version FROM schema_migrations WHERE version=82')).rows.length)throw new Error('Migration 83 requires schema 82.');
+      await runner.query(DEMO_SIMULATOR_CATALOG_SCHEMA_SQL);
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(83)');applied.push(83);
     }
     return { applied };
   });

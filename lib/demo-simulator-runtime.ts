@@ -6,31 +6,32 @@ import {ownerPagePort} from './owner-page-runtime';
 import {pagePublicationPort} from './owner-page-publication-runtime';
 import {saveOwnerPageAndPublication} from './owner-page-save-runtime';
 import {ownerPageImageKey,parseShopPageContent,type ShopPageContent} from './owner-page-domain';
-import {executeBasicProductUpkeep} from './product-upkeep';
+import {executeBasicProductUpkeep,executeProductUpkeepBatch} from './product-upkeep';
 import {postgresProductUpkeepPort} from './product-upkeep-postgres';
 import {parseOfferingHighlightsJson} from './offering-presentation';
 import {configuredReviewer} from './reviewer-access-runtime';
 import {demoScenarioCommandKey,demoScenarioStage,nextDemoScenarioStage,parseDemoScenarioParameters,type DemoScenarioParameters,type DemoScenarioKey} from './demo-scenarios';
 import type {SessionUser} from './types';
 import {isSupportedPostgresMigrationLedger,LATEST_POSTGRES_MIGRATION_VERSION} from './postgres-schema-version';
+import {parseDemoCatalogInputs,parseStoredDemoCatalog,demoCatalogPhaseOffsets,demoCatalogStage,MAX_DEMO_CATALOG_BUSINESSES,type DemoCatalogProductInput,type DemoCatalogProduct} from './demo-catalog-scenarios';
 
 export type DemoEnrollmentInput={businessId:number;handle:string;ownerUserId:number;providerUserId:string;productId:number;
  scenarioKey:DemoScenarioKey;parameters:DemoScenarioParameters;initializeUnit?:boolean;
- expectedContentVersion?:number;expectedDraftVersion?:number;expectedPageRevision?:number};
+ expectedContentVersion?:number;expectedDraftVersion?:number;expectedPageRevision?:number;catalogProducts?:DemoCatalogProductInput[]};
 type Enrollment={business_id:number;handle:string;owner_user_id:number;provider_user_id:string;product_id:number;
  scenario_key:DemoScenarioKey;scenario_version:number;parameters_json:string;baseline_page_json:string;baseline_description:string;expected_hash:string;
- stage:number;cycle:number;due_at:number;status:'active'|'paused'};
+ stage:number;cycle:number;due_at:number;status:'active'|'paused';catalog_products_json:string};
 type Control={enabled:number;last_slot:number;budget_day:number;used_today:number;daily_limit:number;database_limit_bytes:number};
 class DemoDrift extends Error{constructor(readonly reason:'eligibility_changed'|'content_changed'){super(reason);}}
 const digest=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 async function schemaReady(){
  const versions=(await runtimeAll<{version:number}>('SELECT version FROM schema_migrations ORDER BY version')).map(row=>Number(row.version));
- return versions.at(-1)===LATEST_POSTGRES_MIGRATION_VERSION&&LATEST_POSTGRES_MIGRATION_VERSION>=82&&isSupportedPostgresMigrationLedger(versions);
+ return versions.at(-1)===LATEST_POSTGRES_MIGRATION_VERSION&&LATEST_POSTGRES_MIGRATION_VERSION>=83&&isSupportedPostgresMigrationLedger(versions);
 }
 
 // Lock in the same order as ordinary page writers: current owner/profile/link,
 // draft, business, product. No Auth session or owner login is created.
-async function currentState(e:Pick<Enrollment,'business_id'|'handle'|'owner_user_id'|'provider_user_id'|'product_id'>){
+async function currentState(e:Pick<Enrollment,'business_id'|'handle'|'owner_user_id'|'provider_user_id'|'product_id'>,fullCatalog=false){
  const actor=await runtimeUserById(e.owner_user_id),reviewer=configuredReviewer();
  if(!actor||actor.access_role!=='client'||actor.business_id!==e.business_id||
     await currentBusinessAuthority(actor,e.business_id,true)!=='owner')throw new DemoDrift('eligibility_changed');
@@ -44,7 +45,7 @@ async function currentState(e:Pick<Enrollment,'business_id'|'handle'|'owner_user
  const product=catalog?.products.find(p=>p.id===e.product_id);
  const owners=await runtimeGet<{total:number}>("SELECT COUNT(*) total FROM users u JOIN user_access_profiles p ON p.user_id=u.id WHERE u.business_id=? AND p.access_role='client'",[e.business_id]);
  if(!catalog||!draft||!publication?.content||!product||!product.is_published||product.offering_kind==='service'||product.currency!=='ETB'||Number(owners?.total)!==1||
-    !catalog.products.some(p=>p.id!==e.product_id&&p.is_published&&p.offering_kind!=='service'&&['available','limited'].includes(p.availability)))throw new DemoDrift('eligibility_changed');
+    !catalog.products.some(p=>(fullCatalog||p.id!==e.product_id)&&p.is_published&&p.offering_kind!=='service'&&['available','limited'].includes(p.availability)))throw new DemoDrift('eligibility_changed');
  const categories=(await runtimeAll<{industry_key:string}>('SELECT industry_key FROM business_industries WHERE business_id=? ORDER BY industry_key',[e.business_id])).map(v=>v.industry_key);
  const location=await runtimeGet<{version:number;reviewed_version:number}>('SELECT * FROM owner_location_proposals WHERE business_id=? FOR SHARE',[e.business_id]);
  const discovery=await runtimeGet('SELECT * FROM business_discovery_profiles WHERE business_id=?',[e.business_id]);
@@ -58,6 +59,7 @@ async function currentState(e:Pick<Enrollment,'business_id'|'handle'|'owner_user
 
 /** Explicit server/operator enrollment only. Calling it cannot enable the worker. */
 export async function enrollDemoScenario(input:DemoEnrollmentInput,now=Date.now()){
+ if(input.catalogProducts!==undefined)return enrollDemoCatalog(input,now);
  const parameters=parseDemoScenarioParameters(input.parameters);
  demoScenarioStage(input.scenarioKey,1,0,parameters);
  if(![input.businessId,input.ownerUserId,input.productId].every(v=>Number.isSafeInteger(v)&&v>0)||
@@ -95,18 +97,82 @@ export async function enrollDemoScenario(input:DemoEnrollmentInput,now=Date.now(
   await audit(state.actor,input.businessId,{kind:'enrolled',scenario:input.scenarioKey});
  });
 }
+
+async function enrollDemoCatalog(input:DemoEnrollmentInput,now:number){
+ const inputs=parseDemoCatalogInputs(input.catalogProducts),primary=inputs[0];
+ if(![input.businessId,input.ownerUserId,input.productId].every(v=>Number.isSafeInteger(v)&&v>0)||
+   !/^[a-z0-9][a-z0-9-]{1,79}$/.test(input.handle)||!/^[0-9a-f-]{32,64}$/i.test(input.providerUserId)||
+   ![input.expectedContentVersion,input.expectedDraftVersion,input.expectedPageRevision].every(v=>Number.isSafeInteger(v)&&Number(v)>=0)||
+   primary.productId!==input.productId||primary.scenarioKey!==input.scenarioKey||digest(primary.parameters)!==digest(parseDemoScenarioParameters(input.parameters)))throw Error('Invalid reviewed demo catalog binding.');
+ return runtimeTransaction(async()=>{
+  await runtimeRun('SELECT pg_advisory_xact_lock(6870619271382)');
+  if(!await schemaReady())throw Error('The demo schema is not ready.');
+  const control=await runtimeGet<Control>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
+  if(!control||control.enabled)throw Error('Pause the demo service before enrollment.');
+  const existing=await runtimeGet<Enrollment>('SELECT * FROM demo_simulator_enrollments WHERE business_id=? FOR UPDATE',[input.businessId]);
+  if(existing&&parseStoredDemoCatalog(existing.catalog_products_json).length)throw Error('This demo catalog is already enrolled.');
+  const count=await runtimeGet<{total:number}>("SELECT COUNT(*) total FROM demo_simulator_enrollments WHERE status='active'");
+  if(!existing&&Number(count?.total)>=MAX_DEMO_CATALOG_BUSINESSES)throw Error('The reviewed public-demo catalog limit is reached.');
+  if(existing&&(existing.handle!==input.handle||existing.owner_user_id!==input.ownerUserId||existing.provider_user_id!==input.providerUserId||
+    existing.product_id!==input.productId||existing.status!=='active'))throw new DemoDrift('eligibility_changed');
+  const e={business_id:input.businessId,handle:input.handle,owner_user_id:input.ownerUserId,provider_user_id:input.providerUserId,product_id:input.productId};
+  const state=await currentState(e,true);
+  if(existing&&existing.expected_hash!==state.hash)throw new DemoDrift('content_changed');
+  if(input.expectedContentVersion!==state.catalog.business.content_version||input.expectedDraftVersion!==state.draft.version||
+    input.expectedPageRevision!==state.publication.revision||state.draft.version!==state.publication.draftVersion||
+    digest(state.draft.content)!==digest(state.publication.content)||state.publication.content.about.length>2500||
+    digest(inputs.map(p=>p.productId))!==digest(state.catalog.products.map(p=>p.id).sort((a,b)=>a-b)))throw new DemoDrift('content_changed');
+  const offsets=demoCatalogPhaseOffsets(inputs),products:DemoCatalogProduct[]=inputs.map((binding,index)=>{
+   const p=state.catalog.products.find(p=>p.id===binding.productId)!,parameters=binding.parameters;
+   const old=existing&&p.id===existing.product_id?parseDemoScenarioParameters(JSON.parse(existing.parameters_json)):null;
+   const description=old?existing!.baseline_description:p.description;
+   if(!p.is_published||p.offering_kind==='service'||p.currency!=='ETB'||parameters.productName!==p.name||parameters.productKind!==p.offering_kind||
+     parameters.basePriceMinor!==(old?old.basePriceMinor:p.price_minor)||
+     !(parameters.unit===p.quantity_unit||binding.initializeUnit===true&&!p.quantity_unit)||
+     digest([...parameters.businessCategories].sort())!==digest(state.categories)||description.length>2500)throw new DemoDrift('content_changed');
+   return {productId:p.id,scenarioKey:binding.scenarioKey,scenarioVersion:1,parameters,baselineDescription:description,phaseOffset:offsets[index]};
+  });
+  const stored=JSON.stringify(products);parseStoredDemoCatalog(stored);
+  if(existing){
+   if(existing.scenario_key!==primary.scenarioKey||digest(JSON.parse(existing.parameters_json))!==digest(primary.parameters))throw new DemoDrift('content_changed');
+   await runtimeRun('UPDATE demo_simulator_enrollments SET catalog_products_json=? WHERE business_id=?',[stored,input.businessId]);
+  }else{
+   await runtimeRun(`INSERT INTO demo_simulator_enrollments(business_id,handle,owner_user_id,provider_user_id,product_id,scenario_key,scenario_version,
+    parameters_json,baseline_page_json,baseline_description,expected_hash,due_at,enrolled_at,catalog_products_json) VALUES(?,?,?,?,?,?,1,?,?,?,?,?,?,?)`,
+    [input.businessId,input.handle,input.ownerUserId,input.providerUserId,primary.productId,primary.scenarioKey,JSON.stringify(primary.parameters),
+     JSON.stringify(state.publication.content),products[0].baselineDescription,state.hash,now,now,stored]);
+  }
+  await audit(state.actor,input.businessId,{kind:'catalog_enrolled',products:products.map(p=>p.productId)});
+ });
+}
 async function audit(actor:SessionUser,businessId:number,detail:Record<string,unknown>){
  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.scenario',?,'')",[actor.id,businessId,JSON.stringify({automation:'demo-simulator',...detail})]);
 }
 async function advance(e:Enrollment,slot:number,now:number){
- const state=await currentState(e);
+ const products=parseStoredDemoCatalog(e.catalog_products_json),state=await currentState(e,products.length>0);
  if(state.hash!==e.expected_hash)throw new DemoDrift('content_changed');
  const next=nextDemoScenarioStage(e.scenario_key,e.scenario_version,e.stage,e.cycle),parameters=parseDemoScenarioParameters(JSON.parse(e.parameters_json));
  if(parameters.productName!==state.product.name||parameters.productKind!==state.product.offering_kind||digest([...parameters.businessCategories].sort())!==digest(state.categories))throw new DemoDrift('eligibility_changed');
  const plan=demoScenarioStage(e.scenario_key,e.scenario_version,next.stage,parameters),p=state.product,f=plan.product;
  const currentFacts={availability:p.availability,priceMinor:p.price_minor,quantityUnit:p.quantity_unit,minimumOrderSummary:p.minimum_order_summary,capacitySummary:p.capacity_summary,leadTimeSummary:p.lead_time_summary,description:p.description};
  const nextFacts={...f,description:[plan.productUpdate,e.baseline_description].filter(Boolean).join('\n\n')};
- if(digest(currentFacts)!==digest(nextFacts))await executeBasicProductUpkeep(postgresProductUpkeepPort,state.actor,{
+ let publicPlan=plan;
+ if(products.length){
+  if(digest(products.map(p=>p.productId))!==digest(state.catalog.products.map(p=>p.id).sort((a,b)=>a-b)))throw new DemoDrift('content_changed');
+  const plans=demoCatalogStage(products,next.stage),commands=plans.map(({binding,plan})=>{
+   const p=state.catalog.products.find(p=>p.id===binding.productId)!;
+   if(p.name!==binding.parameters.productName||p.offering_kind!==binding.parameters.productKind||
+     digest([...binding.parameters.businessCategories].sort())!==digest(state.categories))throw new DemoDrift('eligibility_changed');
+   return {kind:'update',businessId:e.business_id,productId:p.id,expectedContentVersion:state.catalog.business.content_version,
+    idempotencyKey:`demo_catalog_${e.business_id}_${next.cycle}_${next.stage}_${p.id}`,
+    name:p.name,...plan.product,description:[plan.productUpdate,binding.baselineDescription].filter(Boolean).join('\n\n'),
+    offeringKind:p.offering_kind,quantityMode:p.quantity_mode,orderScope:p.order_scope??'unspecified',
+    highlights:parseOfferingHighlightsJson(p.highlights_json),videoRef:p.video_ref,categoryId:p.category_id,
+    imageAction:'keep',preserveMetadata:true,updateSellingFacts:true,updateListingState:true};
+  });
+  await executeProductUpkeepBatch(postgresProductUpkeepPort,state.actor,commands);
+  publicPlan=plans[0].plan;
+ }else if(digest(currentFacts)!==digest(nextFacts))await executeBasicProductUpkeep(postgresProductUpkeepPort,state.actor,{
   kind:'update',businessId:e.business_id,productId:p.id,expectedContentVersion:state.catalog.business.content_version,
   idempotencyKey:demoScenarioCommandKey(e.business_id,e.scenario_key,e.scenario_version,next.stage,next.cycle),
   name:p.name,...nextFacts,offeringKind:p.offering_kind,quantityMode:p.quantity_mode,
@@ -117,28 +183,31 @@ async function advance(e:Enrollment,slot:number,now:number){
  // Both current clients display About before the introductory fallback. Publish
  // the stage there as well, preserving the original story without accumulating
  // copies on later cycles. Enrollment reserves room within the ordinary limit.
- const content:ShopPageContent={...state.draft.content,introduction:`${plan.stage.title}. ${plan.businessUpdate}`,
-  about:[plan.businessUpdate,baseline.about||baseline.introduction].filter(Boolean).join('\n\n')};
+ const content:ShopPageContent={...state.draft.content,introduction:`${publicPlan.stage.title}. ${publicPlan.businessUpdate}`,
+  about:[publicPlan.businessUpdate,baseline.about||baseline.introduction].filter(Boolean).join('\n\n')};
  if(digest(content)!==digest(state.draft.content))await saveOwnerPageAndPublication(state.actor,e.business_id,{action:'save',version:state.draft.version,content});
- const after=await currentState(e);
+ const after=await currentState(e,products.length>0);
  await runtimeRun(`UPDATE demo_simulator_enrollments SET stage=?,cycle=?,stage_started_at=?,due_at=?,expected_hash=? WHERE business_id=?`,
   [next.stage,next.cycle,now,now+plan.durationMs,after.hash,e.business_id]);
- await audit(state.actor,e.business_id,{kind:'advanced',scenario:e.scenario_key,version:e.scenario_version,stage:plan.stage.key,cycle:next.cycle,slot});
+ await audit(state.actor,e.business_id,{kind:'advanced',scenario:e.scenario_key,version:e.scenario_version,stage:plan.stage.key,cycle:next.cycle,slot,
+  ...(products.length?{products:products.map(p=>p.productId)}:{})});
  return next;
 }
 
 function parseEnrollmentRequest(raw:string,businessId:number):DemoEnrollmentInput{
- const value:unknown=JSON.parse(raw),keys=['businessId','handle','ownerUserId','providerUserId','productId','scenarioKey','parameters','initializeUnit','expectedContentVersion','expectedDraftVersion','expectedPageRevision'];
+ const value:unknown=JSON.parse(raw),keys=['businessId','handle','ownerUserId','providerUserId','productId','scenarioKey','parameters','initializeUnit','expectedContentVersion','expectedDraftVersion','expectedPageRevision','catalogProducts'];
  if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(k=>!keys.includes(k)))throw Error('Invalid private enrollment request.');
  const v=value as Record<string,unknown>;
  if(v.businessId!==businessId||!['expectedContentVersion','expectedDraftVersion','expectedPageRevision'].every(k=>Number.isSafeInteger(v[k])&&Number(v[k])>=0)||
   v.initializeUnit!==undefined&&typeof v.initializeUnit!=='boolean')throw Error('Invalid private enrollment request.');
- return {...v,parameters:parseDemoScenarioParameters(v.parameters)} as DemoEnrollmentInput;
+ return {...v,parameters:parseDemoScenarioParameters(v.parameters),...(v.catalogProducts!==undefined?{catalogProducts:parseDemoCatalogInputs(v.catalogProducts)}:{})} as DemoEnrollmentInput;
 }
 async function processEnrollmentRequests(now:number){
- const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 2 FOR UPDATE");
+ const started=Date.now();
+ const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 8 FOR UPDATE");
  let enrolled=0,enrollmentRejected=0;
  for(const request of requests){
+  if(Date.now()-started>=12000)break;
   await runtimeRun('SAVEPOINT demo_enrollment');
   let accepted=false;
   try{await enrollDemoScenario(parseEnrollmentRequest(request.input_json,request.business_id),now);accepted=true;enrolled++;}
@@ -180,7 +249,7 @@ export async function runDemoSimulatorTick(now=Date.now()):Promise<DemoTickResul
   const due=await runtimeAll<Enrollment>("SELECT * FROM demo_simulator_enrollments WHERE status='active' AND due_at<=? ORDER BY due_at,business_id LIMIT ? FOR UPDATE",[now,Math.min(2,control.daily_limit-used)]);
   const out=result('advanced');
   for(const e of due){
-   if(Date.now()-started>=16000)break;
+   if(Date.now()-started>=16000||(out.advanced>0&&Date.now()-started>=8000))break;
    await runtimeRun('SAVEPOINT demo_stage');
    let outcome='advanced',next={stage:e.stage,cycle:e.cycle};
    try{next=nextDemoScenarioStage(e.scenario_key,e.scenario_version,e.stage,e.cycle);await advance(e,slot,now);out.advanced++;}

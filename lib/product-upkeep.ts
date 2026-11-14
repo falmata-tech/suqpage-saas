@@ -29,6 +29,33 @@ export interface BasicProductUpkeepPort {
   ): ProductUpkeepResult | Promise<ProductUpkeepResult>;
 }
 
+export type ProductBatchMember = {command: BasicProductCommand; payloadHash: string};
+export interface BatchProductUpkeepPort extends BasicProductUpkeepPort {
+  publishBatch(user: SessionUser, members: readonly ProductBatchMember[]): Promise<ProductUpkeepResult[]>;
+}
+
+/** Narrow existing-product selling-fact batches; no upload or structural surface. */
+export function validateProductUpkeepBatch(commands: readonly BasicProductCommand[]) {
+  const first = commands[0];
+  if (commands.length < 2 || commands.length > 8 || !first ||
+      new Set(commands.map(c => c.productId)).size !== commands.length ||
+      new Set(commands.map(c => c.idempotencyKey)).size !== commands.length ||
+      commands.some(c => c.kind !== 'update' || c.businessId !== first.businessId ||
+        c.expectedContentVersion !== first.expectedContentVersion || c.imageAction !== 'keep' ||
+        !c.preserveMetadata || !c.updateSellingFacts || c.media !== undefined ||
+        c.optionGroups !== undefined || c.isPublished !== undefined)) {
+    throw new ProductUpkeepError('Choose two to eight distinct existing products from one business and version.', 400, 'invalid_batch');
+  }
+}
+
+export async function executeProductUpkeepBatch(port: BatchProductUpkeepPort, user: SessionUser,
+  rawCommands: readonly Record<string, unknown>[]): Promise<ProductUpkeepResult[]> {
+  const commands = rawCommands.map(command => parseBasicProductCommand(command));
+  validateProductUpkeepBatch(commands);
+  for (const command of commands) await port.assertAuthorized(user, command);
+  return port.publishBatch(user, commands.map(command => ({command, payloadHash: commandHash(command, '')})));
+}
+
 const commandHash = (
   command: BasicProductCommand,
   imageDigest: string,

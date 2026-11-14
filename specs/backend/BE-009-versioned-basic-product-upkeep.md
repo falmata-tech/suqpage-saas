@@ -2,13 +2,28 @@
 id: BE-009
 title: Tenant-scoped versioned product upkeep
 status: done
-related: [BE-042, BE-040, BE-001, BE-003, BE-007, BE-008, BE-014, BE-015, FE-007, FE-008, DEP-008, ADR-0006, BE-033, BE-034, BE-056, BE-060]
+related: [FE-079, BE-067, BE-042, BE-040, BE-001, BE-003, BE-007, BE-008, BE-014, BE-015, FE-007, FE-008, DEP-008, ADR-0006, BE-033, BE-034, BE-056, BE-060]
 owners: [product, backend, security]
 last_updated: 2026-09-21
 change_level: L3
 ---
 
 # BE-009 — Tenant-scoped versioned product upkeep
+
+## Planned S196 — bounded atomic selling-fact batch
+
+BE-067's full-catalog service needs the ordinary upkeep boundary to accept two
+to eight distinct existing products from one business at one expected version.
+Every command retains the normal parser, current authority, product/media tenant
+checks and validation. This server application command admits updates with kept
+media and preserved metadata; it adds no public bulk-editor or upload surface.
+One transaction publishes one monotonic final catalog version. Each member keeps
+its own idempotency/audit receipt; an all-member replay is unchanged, while a
+partial replay/conflicting payload, foreign product, revoked authority, stale
+version or late validation failure rejects the entire batch. Preserve all other
+products, metadata, identities, private state and immutable historical versions.
+Mapped mixed-tenant, replay, version/history and failed-member PostgreSQL tests
+must pass before this planned extension is described as current behavior.
 
 ## Planned S146 — administrator-granted staff authority
 

@@ -1,6 +1,15 @@
 // BE-067. Private operational state; immutable merchant histories stay in their
 // existing tables. No enrollment is inferred or created by the migration.
 export const DEMO_SIMULATOR_TABLES = ['demo_simulator_control','demo_simulator_enrollments','demo_simulator_runs','demo_simulator_requests'] as const;
+export const DEMO_SIMULATOR_CATALOG_SCHEMA_SQL = `
+ALTER TABLE demo_simulator_enrollments ADD COLUMN catalog_products_json TEXT NOT NULL DEFAULT '[]'
+ CHECK(length(catalog_products_json)<=80000 AND jsonb_typeof(catalog_products_json::jsonb)='array');
+ALTER TABLE demo_simulator_enrollments DROP CONSTRAINT demo_simulator_enrollments_scenario_key_check;
+ALTER TABLE demo_simulator_enrollments ADD CONSTRAINT demo_simulator_enrollments_scenario_key_check
+ CHECK(scenario_key IN ('seasonal-harvest','workshop-production','wholesale-replenishment','production-cycle','food-preparation','fresh-food-batch'));
+ALTER TABLE demo_simulator_requests DROP CONSTRAINT demo_simulator_requests_input_json_check;
+ALTER TABLE demo_simulator_requests ADD CONSTRAINT demo_simulator_requests_input_json_check CHECK(length(input_json)<=12000);
+`;
 export const DEMO_SIMULATOR_SCHEMA_SQL = `
 CREATE TABLE demo_simulator_control (
  id INTEGER PRIMARY KEY CHECK(id=1), enabled INTEGER NOT NULL DEFAULT 0 CHECK(enabled IN (0,1)),

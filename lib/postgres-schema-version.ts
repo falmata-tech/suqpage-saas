@@ -1,5 +1,5 @@
 /** Required PostgreSQL history ends here; retired data-only27–30 form one group. */
-export const LATEST_POSTGRES_MIGRATION_VERSION = 82;
+export const LATEST_POSTGRES_MIGRATION_VERSION = 83;
 // Migration81 changes permissions/settings only; schema80 stays compatible
 // while the separately guarded hosted correction is being rolled out.
 // Migration82 adds private, disabled demo state. Ordinary application readiness
@@ -8,7 +8,7 @@ export const MINIMUM_POSTGRES_MIGRATION_VERSION = 80;
 
 /** Input is bounded and ascending; admit only exact reviewed rollout histories. */
 export function isSupportedPostgresMigrationLedger(versions: readonly unknown[]): boolean {
-  for (const end of [MINIMUM_POSTGRES_MIGRATION_VERSION,81,LATEST_POSTGRES_MIGRATION_VERSION]) {
+  for (const end of [MINIMUM_POSTGRES_MIGRATION_VERSION,81,82,LATEST_POSTGRES_MIGRATION_VERSION]) {
     const full = versions.length === end;
     if (!full && versions.length !== end - 4) continue;
     const expected=Array.from({length:end},(_,index)=>index+1)
