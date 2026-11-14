@@ -9,7 +9,8 @@ import xml.etree.ElementTree as ET
 
 source = ast.parse(Path('scripts/native-qa-ui.py').read_text())
 selected = [n for n in source.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))
-            and n.name in {'UiHierarchyNotReady', 'tree', 'bounds', 'find', 'dismiss_keyboard'}]
+            and n.name in {'UiHierarchyNotReady', 'tree', 'bounds', 'find', 'dismiss_keyboard',
+                           'public_crash_summary'}]
 code = compile(ast.Module(body=selected, type_ignores=[]), 'actual-native-driver', 'exec')
 xml = '<hierarchy><node text="Business locations" enabled="true" clickable="true" bounds="[0,0][100,40]"/></hierarchy>'
 
@@ -82,3 +83,31 @@ for shown in [False, True]:
     scope['dismiss_keyboard']()
     assert len(calls) == (2 if shown else 1)
 print('PASS native inputs exclude clipped labels and hide only an observed keyboard before form scrolling.')
+
+with tempfile.TemporaryDirectory() as root:
+    scope = {'APP': 'com.africmade.qa', 're': re}
+    exec(code, scope)
+    public_crash_summary = scope['public_crash_summary']
+    logs = ('11-14 E ReactNativeJS: TypeError: private@example.com ' +
+            'https://private.example/secret?token=abc123\n' +
+            '11-14 E AndroidRuntime: FATAL EXCEPTION: mqt_js\n' +
+            '11-14 E AndroidRuntime: Process: com.africmade.qa, PID: 913\n' +
+            '11-14 E AndroidRuntime: java.lang.RuntimeException: api-key=secret123\n' +
+            '11-14 E AndroidRuntime:   at com.facebook.react.JSApplication.onError(App.java:52)\n')
+    report = public_crash_summary(logs)
+    assert report['fatalException'] is True
+    assert report['fatalProcesses'] == ['qa-app']
+    assert report['exceptionTypes'] == ['TypeError', 'java.lang.RuntimeException']
+    assert report['stackMethods'] == ['com.facebook.react.JSApplication.onError']
+    assert report['logLinesExamined'] == 5
+    serialized = str(report)
+    assert all(secret not in serialized for secret in
+               ['private@example.com', 'private.example', 'secret123', 'abc123'])
+    assert public_crash_summary('11-14 E AndroidRuntime: No exception')['fatalException'] is False
+    other = public_crash_summary('11-14 E AndroidRuntime: FATAL EXCEPTION: main\n'
+                                 '11-14 E AndroidRuntime: Process: com.unexpected.app, PID: 3')
+    assert other['fatalProcesses'] == ['other']
+    many = public_crash_summary('\n'.join('11-14 E AndroidRuntime: at com.example.C%d.fail(F.java:1)' % i
+                                           for i in range(1000)))
+    assert many['logLinesExamined'] == 1000 and len(many['stackMethods']) == 16
+print('PASS native crash receipt retains bounded identifiers without raw messages or runtime data.')
