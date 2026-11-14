@@ -25,11 +25,16 @@ stage with no iframe. At 1440px, the 354.4×630 iframe fits the 559.4×630 stage
 and photo return restores its 559.4px square. Expo web on 8083 receives two
 HTTP 200 shop responses with no page errors; at 390px its 151.9×270 player
 fits the 354×270 stage and Photo 1 removes the iframe. Local screenshots were
-inspected. The provider frame remained blank in this environment, so these are
-layout, unmount and API findings, not decoded TikTok playback or hosted delivery.
-The finite source-bound CI review checks actual Chrome playback and retains
-screenshots and a run receipt. Its verdict and current-head release gates remain
-required before completion.
+inspected. The provider frame remained blank locally, so that review establishes
+layout, unmount and API access. PR75's finite GitHub run `43642623765` at source
+`082713bbeb8d742734acfc7ee4f15a482367aad6` separately passes decoded
+720×1280 TikTok playback on actual Chrome desktop/phone web and Expo web. The
+video advances beyond two seconds on each product and story surface; the phone
+product frame fits both stage axes, and Photo 1 removes the iframe. Artifact
+`14132642389` retains the report and screenshots; inspected frames show the
+complete player and soap footage. This is disposable-schema source evidence,
+not a hosted media correction, installed Android or signed release. Current-head
+live-media and required quality checks must repeat before integration.
 
 FE-061/BE-049 own the exact64/256 public-demo media review; FE-057/FE-060 own
 inline social playback and BE-067 protects scenario continuity. Read-only browser
