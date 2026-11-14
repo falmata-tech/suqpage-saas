@@ -1722,9 +1722,29 @@ authorized app-scoped submission credential; neither method starts the test cloc
 
 FE-049/052/055/063/064/070/071; DEP-041/044/049.
 
-- [ ] Verify canonical/sitemap/robots/structured/public product HTML and that private,
+- [x] Verify canonical/sitemap/robots/structured/public product HTML and that private,
   draft and demo records have the intended indexing exclusions. Search Console
   submission and actual indexing require separate provider evidence.
+  The 2026-11-14 live R07 review on published main `0aa9ede` passed canonical
+  Market/About/Featured/directory/legal pages, robots and tracking exclusions,
+  server-visible product links/text, bounded sitemap shape, flagged-demo and
+  invalid-product `noindex`, and missing-showroom HTTP 404. It found two
+  fictional portfolio examples mistakenly recorded with `is_demo=0`: Dara Clay
+  Works (business 50) and Wabi Bottled Water (business 62), which put two
+  showroom and eight product URLs in the sitemap with `index, follow` and
+  JSON-LD. Their briefs establish fictional identity; neither belongs to the
+  S196 64/256 simulator cohort. After an exact protected before-image and owner
+  approval, the only hosted change set those two `is_demo` values to 1 in the
+  independently verified `africmade` Supabase project. Exact readback found all
+  other selected identity/discovery/product/enrollment fields unchanged, the
+  64/256 cohort intact, direct pages `noindex, follow` without JSON-LD, and
+  both example product listings still discoverable in Market search. At
+  22:16:02 UTC, after the sitemap's 300-second cache window, an ordinary GET of
+  `/sitemaps/0` returned six static URLs and no Dara/Wabi entries, down from
+  16 URLs before correction; robots still points to the canonical sitemap and
+  published health reports source `0aa9ede`. Live draft/suspended and >10k
+  paging were not exercised; local FE-071 tests cover those paths. Search Console
+  submission and actual indexing remain separate provider evidence.
 - [ ] Reconcile professional current-brand Play and coming-soon media/copy in
   en/am/om with actual UI; retain the approved charcoal layout and single logo
   palette. Business narrative covers what businesses sell, make or grow without
