@@ -83,14 +83,25 @@ and scenario progress remain protected. National origin is not a quality test.
    effective gallery/publication coherence on disposable PostgreSQL. Exercise
    actual desktop/phone web and Android inline playback, including TikTok;
    record provider/device limits honestly before full required gates.
+   Portrait web/Expo correction (FE-057) is ordered within this step:
+   (a) [x] inspect PR68's source-bound partial verdict and the current gallery,
+   dialog and Expo stage rules; (b) [x] specify and implement a bounded portrait
+   product stage with photo-return behavior; (c) [ ] CURRENT check real CSS
+   geometry and actual desktop/phone web plus Expo playback and unmount, then
+   record the visual verdict before broader gates. Component geometry passes
+   with controlled frames at 1440/390/320, including both vertical edges,
+   photo return and retained dialog; local external playback remains blocked.
+   The PR68 fixture branch is evidence only; the focused fix starts from main
+   and retains no native claim.
 4. [ ] Retain protected before-images and the exact admitted media manifest;
    deliver qualified source normally, apply bounded corrections while paused,
    verify all64/256 public effective media and preserved data, then resume only
    the unchanged reviewed cohort. Refresh the monitor's approved media baseline
    to the retained after-image and verify scheduled continuation.
 
-S196 final documentation/coverage evidence and S191's signed phone APK remain
-active dependencies; neither a video audit nor an emulator build completes them.
+S196's full64/256 exact-version readback and documentation are recorded below.
+S191's signed phone APK remains a separate active dependency; a video audit or
+emulator build does not complete it.
 
 ### S196 — every public demo business and current product (BE-009 / BE-067 / DEP-054)
 

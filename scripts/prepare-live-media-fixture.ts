@@ -1,0 +1,72 @@
+// One disposable public-demo media fixture for the finite Chrome/Expo player check.
+// It never reads a hosted target or changes a real merchant.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {assertNativeDemoTarget,nativeQaSchema} from './native-qa-target';
+import {runtimeGet,runtimeTransaction} from '../lib/runtime-sql';
+import {runtimeCatalogByHandle,runtimeUserById} from '../lib/catalog-runtime';
+import {ownerPagePort} from '../lib/owner-page-runtime';
+import {saveOwnerPageAndPublication} from '../lib/owner-page-save-runtime';
+import {executeBasicProductUpkeep} from '../lib/product-upkeep';
+import {postgresProductUpkeepPort} from '../lib/product-upkeep-postgres';
+import {parseOfferingHighlightsJson} from '../lib/offering-presentation';
+import {productMedia} from '../lib/product-media';
+import {productVideoWatchUrl} from '../lib/video/product-video';
+import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
+
+const videoRef='tiktok:7703762862484851981';
+const handle='demo-liya-soap-kitchen';
+const productName='Oat Everyday Bar';
+
+async function main(){
+  const target=assertNativeDemoTarget();
+  if(process.argv[2]==='--preflight')return;
+  assert.equal(process.argv.length,2,'Use only the finite fixture action or --preflight.');
+  const original=JSON.parse(fs.readFileSync('.local/native-qa/fixture.json','utf8'));
+  const source=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+  assert.equal(original.source,source);
+  target.searchParams.set('options',`-csearch_path=${nativeQaSchema(original.schema)}`);
+  Object.assign(process.env,{SUQPAGE_DATABASE_DRIVER:'postgres',SUQPAGE_POSTGRES_URL:target.href,SUQPAGE_AUTH_DRIVER:'local',SUQPAGE_MEDIA_DRIVER:'filesystem'});
+  const record=await runtimeTransaction(async()=>{
+    const catalog=await runtimeCatalogByHandle(handle);
+    assert.ok(catalog&&catalog.business.is_demo===1&&catalog.business.status==='active');
+    const products=catalog.products.filter(product=>product.is_published);
+    assert.equal(products.length,4);
+    const product=products.find(item=>item.name===productName);
+    assert.ok(product&&product.offering_kind==='standard_product');
+    const owner=await runtimeGet<{id:number}>(`SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id
+      WHERE u.business_id=? AND p.access_role='client' ORDER BY u.id LIMIT 1`,[catalog.business.id]);
+    const actor=owner&&await runtimeUserById(owner.id);
+    assert.ok(actor&&actor.access_role==='client'&&actor.business_id===catalog.business.id);
+    const draft=await ownerPagePort.read(catalog.business.id);
+    assert.ok(draft);
+    const before=productMedia(product);
+    assert.equal(before.filter(item=>item.kind==='video').length,1);
+    assert.ok(before.some(item=>item.kind==='image'));
+    assert.ok(!before.some(item=>item.ref===videoRef));
+    const media=before.map(item=>item.kind==='video'?{kind:'video' as const,ref:videoRef}:item);
+    await executeBasicProductUpkeep(postgresProductUpkeepPort,actor,{
+      kind:'update',businessId:catalog.business.id,productId:product.id,
+      expectedContentVersion:catalog.business.content_version,idempotencyKey:`live_media_fixture_${product.id}`,
+      name:product.name,description:product.description,availability:product.availability,
+      offeringKind:product.offering_kind,quantityMode:product.quantity_mode,
+      orderScope:product.order_scope??'unspecified',priceMinor:product.price_minor,
+      quantityUnit:product.quantity_unit,highlights:parseOfferingHighlightsJson(product.highlights_json),
+      capacitySummary:product.capacity_summary,minimumOrderSummary:product.minimum_order_summary,
+      leadTimeSummary:product.lead_time_summary,media,videoRef,categoryId:product.category_id,
+      imageAction:'keep',preserveMetadata:true,
+    },null);
+    await saveOwnerPageAndPublication(actor,catalog.business.id,{action:'save',version:draft.version,
+      content:{...draft.content,videoUrl:productVideoWatchUrl(videoRef)}});
+    return {businessId:catalog.business.id,productId:product.id};
+  });
+  const after=await runtimeCatalogByHandle(handle),page=await ownerPagePort.read(record.businessId);
+  assert.ok(after&&page);
+  assert.ok(productMedia(after.products.find(product=>product.id===record.productId)!).some(item=>item.ref===videoRef));
+  assert.equal(page.content.videoUrl,productVideoWatchUrl(videoRef));
+  fs.mkdirSync('.local/live-media-review',{recursive:true,mode:0o700});
+  fs.writeFileSync('.local/live-media-review/fixture.json',JSON.stringify({source,handle,videoRef,...record})+'\n',{mode:0o600});
+  console.log('PASS disposable public-demo media fixture prepared through ordinary commands.');
+}
+void main().catch(()=>{console.error('Disposable live-media fixture failed.');process.exitCode=1;}).finally(closePostgresRuntimeForTests);

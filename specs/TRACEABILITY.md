@@ -10,6 +10,19 @@ run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md)
 
 ## S197 demo video quality — review and qualification in progress
 
+FE-057 portrait containment follow-up: PR68's actual Chrome phone product
+capture crops a 9:16 TikTok frame inside the short gallery stage while its Expo
+capture retains the full frame. The focused source branch gives active portrait
+product media a taller bounded stage and positions the provider iframe inside
+its own 9:16 wrapper; photo selection restores the prior stage and unmounts the
+player. `scripts/test-social-video-layout.ts` mounts the real gallery/frame with
+the retained dialog CSS, and its controlled-frame geometry passes at
+1440/390/320 for TikTok/Instagram, photo return, story and Facebook. The
+inspected 390px fixture capture shows both vertical edges. This is geometry
+evidence, not an actual external playback or hosted delivery verdict. PR68's
+separate source-bound Expo playback uses unchanged Expo code; a new real-provider
+web review and current-head release gates are still required before completion.
+
 FE-061/BE-049 own the exact64/256 public-demo media review; FE-057/FE-060 own
 inline social playback and BE-067 protects scenario continuity. Read-only browser
 inspection confirms the widely reused`wJV9EDe_sFc` is no longer available, and

@@ -304,6 +304,11 @@ to inquire; the inquiry itself still asks only for optional quantity.
 Admitted owner video links use canonical supported provider IDs, never arbitrary
 iframe markup. Preserve media ordering, ownership, visibility and the gallery limits
 in BE-042/BE-048. Example starter footage is not evidence of a merchant's work.
+The source gives an active portrait social product video a taller gallery or
+retained-dialog stage and centers its complete 9:16 player over static image
+fill. Returning to a photo restores the regular gallery height and stops the
+player. Provider playback for a specific external clip still needs its own
+source-bound review under FE-057 and FE-061.
 Details: BE-009/BE-021/BE-040/BE-042/BE-048/BE-056 and FE-047/FE-050/FE-067.
 
 ## 8. Product and inquiry workflow
