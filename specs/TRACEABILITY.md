@@ -18,6 +18,16 @@ Those are demonstrated content defects, not a reason to infer real-account scope
 Primary-creator replacements remain under actual visual/playback review; none
 has been applied to production or admitted from its title/thumbnail alone.
 
+BE-044's local Expo preview fallback accepts only the selected development port
+(8082 by default, or 8083 when explicitly configured) with exact loopback hosts;
+production and foreign origins remain denied. The focused mobile transport tests
+pass three adapter cases including CORS denials; typecheck, 237-spec validation,
+and the changed launcher static check pass. The actual local API on 3102 returns
+the four-product Liya shop to the 8083 preview with scoped CORS, while 8082 is
+denied. Chromium at 390px loads that shop in Expo web with zero application API
+failures and no uncontrolled map tiles. This qualifies local preview access,
+not external video playback or installed Android.
+
 The candidate finite maintenance path reuses private disabled-only requests,
 normal product/page commands and exact identity/version/hash/gallery fences.
 It preserves images, facts and scenario progress, with an operation receipt and

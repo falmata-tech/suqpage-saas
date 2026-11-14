@@ -10,6 +10,11 @@ if (!["web", "android", "phone"].includes(mode))
 const local = parseEnv(
   fs.readFileSync(path.join(root, ".local/supabase-runtime.env"), "utf8"),
 );
+const previewPort = mode === "web"
+  ? process.env.SUQPAGE_LOCAL_EXPO_PORT ?? local.SUQPAGE_LOCAL_EXPO_PORT ?? "8082"
+  : "8082";
+if (!["8082", "8083"].includes(previewPort))
+  throw Error("Local Expo preview port must be 8082 or 8083.");
 const provider = new URL(local.NEXT_PUBLIC_SUPABASE_URL || "");
 if (
   !["127.0.0.1", "localhost"].includes(provider.hostname) ||
@@ -65,7 +70,7 @@ if (mode === "android")
 const args = [
   "start",
   "--port",
-  "8082",
+  previewPort,
   ...(mode === "web"
     ? ["--web", "--host", "localhost"]
     : mode === "android"

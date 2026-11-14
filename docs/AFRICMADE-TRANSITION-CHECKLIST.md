@@ -64,6 +64,13 @@ relevant public TikTok example and verify actual inline web/native playback.
 Real merchants and the private reviewer are excluded; contacts/photos/identity
 and scenario progress remain protected. National origin is not a quality test.
 
+- [x] Local Expo web dependency (BE-044): when this managed host reserves 8082,
+  select exact loopback 8083 in the ignored runtime settings. The development
+  API admits only the selected port's exact loopback origins; focused CORS and
+  launcher checks pass, and the real 390px Expo preview loads the local Liya
+  shop and four products.
+  This qualifies local preview access, not external video or installed Android.
+
 1. [ ] CURRENT: inventory exact effective refs, watch current footage and proposed
    creator-sourced replacements, and record per-business/product relevance and
    actual playback/quality evidence; do not admit a thumbnail or title alone.

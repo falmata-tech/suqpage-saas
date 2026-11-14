@@ -4,11 +4,31 @@ title: Native API and session boundaries
 status: in_progress
 related: [BE-058, BE-055, BE-032, BE-048, BE-047, BE-045, FE-056, FE-054, FE-053, FE-026, DEP-042, BE_BASE, BE-018, BE-040, ADR-0023, BE-046, BE-050, BE-051, BE-052, BE-054, BE-056, FE-041, FE-065, BE-057, FE-068, FE-072, BE-060, FE-073, BE-061, FE-075, BE-062]
 owners: [product, frontend, backend, security]
-last_updated: 2026-10-20
+last_updated: 2026-11-14
 change_level: L3
 ---
 
 # BE-044 — Native API and session boundaries
+
+## S197 — exact alternate local Expo preview port
+
+Some managed development hosts reserve the usual Expo web preview port 8082.
+An operator may set `SUQPAGE_LOCAL_EXPO_PORT=8083` in the ignored local runtime
+file before starting the local API and Expo web preview. The default remains
+8082. Only the selected exact `localhost` or `127.0.0.1` HTTP origin is admitted
+by `/api/mobile/v1` in development; an unknown port value fails closed. Production
+never admits either development origin, regardless of that setting. Native
+requests, token and tenant authority, and all other browser origins are unchanged.
+
+GIVEN a local API and Expo preview configured for 8083 WHEN the preview calls the
+mobile API THEN its exact origin receives the existing scoped CORS headers and
+real application data. GIVEN the default setting, a malformed setting, a foreign
+host, or production mode WHEN a different development origin calls the API THEN
+it is denied without CORS headers. Verify the adapter and launcher selection in
+focused tests, and exercise the preview against disposable local services; no
+hosted setting or new public origin follows from this fallback. The focused
+adapter regression is `scripts/test-transport-plan-mobile.ts`; the guarded
+launcher is `scripts/start-mobile.mjs`.
 
 ## S153 P1 — development credential origin boundary (focused security checks pass)
 
