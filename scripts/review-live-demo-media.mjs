@@ -23,8 +23,8 @@ const product = shop.products.find(p => p.id === fixture.productId);
 assert.ok(product);
 const mediaIndex = product.media.findIndex(m => m.kind === 'video' && m.ref === fixture.externalVideo.ref);
 assert.ok(mediaIndex >= 0);
-const browser = await chromium.launch();
-const results = {source, dataTarget: 'disposable-local-postgres', app: [], creators: [], visualVerdict: 'pending-agent-review'};
+const browser = await chromium.launch({channel: 'chrome'});
+const results = {source, browser: {name: 'Google Chrome', version: browser.version(), mode: 'headless-managed-runner'}, dataTarget: 'disposable-local-postgres', app: [], creators: [], visualVerdict: 'pending-agent-review'};
 const write = () => fs.writeFileSync(out + '/review.json', JSON.stringify(results, null, 2));
 const videoState = frame => frame.locator('video').evaluateAll(nodes => nodes.map(v => ({
   time: v.currentTime, duration: v.duration, width: v.videoWidth, height: v.videoHeight,
@@ -47,8 +47,13 @@ async function actualTikTok(page, label) {
   await page.screenshot({path: out + '/' + label + '-start.png'});
   await expect.poll(async () => (await videoState(frame))[0]?.time ?? 0, {timeout: 20000}).toBeGreaterThan(start[0].time + 2);
   const progress = await videoState(frame);
+  const geometry = await page.locator('iframe').evaluateAll(nodes => nodes.map(node => {
+    const rect = node.getBoundingClientRect();
+    return {width: rect.width, height: rect.height, position: getComputedStyle(node).position};
+  }));
+  assert.ok(geometry.some(g => Math.abs(g.width / g.height - 9 / 16) < .02), 'Portrait iframe must preserve its full frame.');
   await page.screenshot({path: out + '/' + label + '-progress.png'});
-  return {start, progress};
+  return {start, progress, geometry};
 }
 try {
   for (const width of [1440, 390]) {
@@ -78,14 +83,8 @@ try {
   const context = await browser.newContext({viewport: {width: 390, height: 844}, serviceWorkers: 'block'});
   const page = await context.newPage();
   try {
-    // Transport proxy only: the emulator-local origin remains pinned in the app;
-    // the real loopback API handles each request and supplies its real response.
-    await context.route('http://10.0.2.2:3000/**', async route => {
-      const url = new URL(route.request().url());
-      assert.equal(url.origin, 'http://10.0.2.2:3000');
-      const response = await route.fetch({url: base + url.pathname + url.search});
-      await route.fulfill({response});
-    });
+    // The disposable runner binds the emulator address on loopback. The app
+    // reaches the actual API directly; no application response is intercepted.
     await page.goto('http://localhost:8082/product?handle=' + fixture.handle + '&id=' + fixture.productId, {timeout: 120000});
     await page.getByRole('button', {name: 'Video ' + (mediaIndex + 1), exact: true}).click({timeout: 90000});
     await page.getByRole('button', {name: 'Watch video', exact: true}).click();
