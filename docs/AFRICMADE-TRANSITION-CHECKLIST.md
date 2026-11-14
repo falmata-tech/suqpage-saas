@@ -76,6 +76,12 @@ and scenario progress remain protected. National origin is not a quality test.
    effective gallery/publication coherence on disposable PostgreSQL. Exercise
    actual desktop/phone web and Android inline playback, including TikTok;
    record provider/device limits honestly before full required gates.
+   Finite external-player qualification uses the isolated soap fixture on the
+   dedicated test branch: first confirm actual Android progress/unmount, then
+   actual Chrome desktop/phone and Expo web gallery playback. Retain source-bound
+   screenshots/timing and public creator references; provider load alone is not
+   a playable-media verdict. A bounded creator-player review may qualify source
+   imagery, but each exact business/product mapping still requires review.
 4. [ ] Retain protected before-images and the exact admitted media manifest;
    deliver qualified source normally, apply bounded corrections while paused,
    verify all64/256 public effective media and preserved data, then resume only
