@@ -25,6 +25,14 @@ stage enough vertical room within the viewport and center the complete 9:16
 provider iframe. Preserve static image fill beside it. Returning to a photo
 restores the normal gallery height. Facebook and YouTube remain landscape, and
 player security attributes, error/retry and unmount behavior stay intact.
+An active portrait player must keep its selected slide when the browser brings
+an in-player control such as Replay into view. A horizontal scroll received by
+the gallery track can select a photo; the visitor can always use its photo
+thumbnail or arrow. Leaving the video unmounts it and restores normal gallery
+snapping. Other provider layouts keep their existing navigation. A partial
+gallery scroll settles on the active video rather than leaving its stage between
+slides. Touch drags inside a cross-origin player may be consumed by the provider;
+they require a separate provider/device review before being called gallery swipes.
 
 GIVEN a portrait social product video in a modern gallery or retained dialog
 WHEN a visitor presses Play at desktop or phone width THEN its complete iframe
@@ -32,6 +40,13 @@ fits vertically and horizontally inside the visible stage without distortion.
 GIVEN the visitor returns to a photo THEN the normal photo stage returns and the
 player unmounts. Verify the actual CSS geometry and real provider playback in
 web and Expo preview; a deterministic frame alone cannot prove media playback.
+GIVEN a portrait video reaches its end WHEN the visitor activates Replay THEN
+the video remains selected and restarts without the gallery jumping to Photo 1.
+GIVEN that video remains active WHEN the gallery receives a full horizontal
+scroll to Photo 1 or the visitor selects its thumbnail/arrow THEN the photo
+becomes active and the iframe unmounts.
+GIVEN a short gallery scroll does not cross to the previous slide WHEN it ends
+THEN the video slide returns to its full visible position with playback intact.
 
 ## Problem and scope
 
@@ -75,7 +90,9 @@ URLs or account/customer information in logs. No new SDK dependency.
 `scripts/test-video-requests.ts` covers real persisted approval, isolation, bypass,
 header restriction and preserved snapshots; `scripts/capture-tiktok-product.mjs`
 covers desktop/phone and Expo gallery lifecycle/error/retry with a clearly marked
-provider fixture. Actual third-party playback is a separate manual device check.
+provider fixture. `scripts/test-social-video-layout.ts` covers portrait gallery
+geometry and in-player Replay focus versus explicit photo navigation. Actual
+third-party playback is a separate manual device check.
 ## Rollout
 
 Types/localization/spec validation precede visual approval. Full/release gates and

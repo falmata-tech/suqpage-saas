@@ -15,6 +15,22 @@ export default function ProductMediaGallery({items,name}:{items:ProductMedia[];n
   const cover=items.find(item=>item.kind==='image')?.ref;
   const activeItem=items[active];
   const portraitPlaying=playing===active&&activeItem?.kind==='video'&&/^(tiktok|instagram):/.test(activeItem.ref);
+  useEffect(()=>{
+    const element=track.current;if(!element||!portraitPlaying)return;
+    let timer:ReturnType<typeof setTimeout>|undefined;
+    const settle=()=>{
+      const width=element.clientWidth;
+      if(width&&Math.round(element.scrollLeft/width)===active)
+        element.scrollTo({left:active*width,behavior:'smooth'});
+    };
+    const onScroll=()=>{
+      if('onscrollend' in element)return;
+      clearTimeout(timer);timer=setTimeout(settle,240);
+    };
+    element.addEventListener('scrollend',settle);
+    element.addEventListener('scroll',onScroll);
+    return()=>{clearTimeout(timer);element.removeEventListener('scrollend',settle);element.removeEventListener('scroll',onScroll);};
+  },[active,portraitPlaying]);
   function select(index:number) {
     if(index<0||index>=items.length)return;
     setPlaying(null);setActive(index);
