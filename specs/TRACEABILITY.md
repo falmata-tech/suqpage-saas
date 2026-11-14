@@ -34,6 +34,15 @@ projection to the exact reviewed after-gallery, while continuing to compare ever
 other product field (including image identity) unchanged. Retain the failed run;
 the updated rollback/replay/continuation case still requires a complete rerun.
 
+Source`fc4e3fa` passes all five required jobs in43564289980, including the complete
+PostgreSQL correction/rollback/replay/continuation case and388 scenario stages.
+Its Android job43564289953 must rebuild the test client because adding a root
+package script changes the deliberately conservative native-input cache key.
+Register the media-plan test through the existing scenario test entry instead;
+restore the unchanged package metadata and keep the cache/security checks intact.
+This avoids an unnecessary native-input change; verify the resulting managed
+cache/Android run rather than assuming reuse.
+
 ## S196 full public-demo catalog — qualified and deployed
 
 The owner requires all public demo businesses and all current products. The

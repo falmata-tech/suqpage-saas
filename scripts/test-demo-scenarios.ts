@@ -1,4 +1,5 @@
 import test from 'node:test';
+import './test-demo-media-correction';
 import assert from 'node:assert/strict';
 import {demoScenario,demoScenarioStage,parseDemoScenarioParameters,nextDemoScenarioStage,demoScenarioCommandKey} from '../lib/demo-scenarios';
 import {demoCatalogPhaseOffsets,demoCatalogStage,parseDemoCatalogInputs,parseStoredDemoCatalog,type DemoCatalogProduct,type DemoCatalogProductInput} from '../lib/demo-catalog-scenarios';
