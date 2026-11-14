@@ -679,12 +679,12 @@ Preserve each merchant's identity within the current shared showroom contract.
 
 ## 15. Current technical architecture
 
-Planned full-catalog expansion under BE-009/BE-067/DEP-054 covers every reviewed
+The qualified full-catalog service under BE-009/BE-067/DEP-054 covers every reviewed
 public demo business and all its current products. Coordinated ordinary upkeep
 batches publish one catalog version per business stage; fixed global budgets
 and oldest-due rotation preserve bounded frequent marketplace activity. The
-three-business production canary remains current until expanded qualification
-and exact hosted manifest admission complete.
+full reviewed public-demo membership is explicitly admitted; real/new accounts
+and the private reviewer remain excluded. Exact hosted evidence is in S196.
 
 BE-067/FE-079/DEP-054 provide a dedicated minute-scheduled Netlify demo service.
 It advances predefined coherent scenarios through ordinary product and page
@@ -837,7 +837,7 @@ No keyword rule or prior publication proves universal screening of seller media.
 
 ## 17. Data, migrations, and deployment boundary
 
-DEP-054's private schema82 starts demo writes disabled. Only a paused worker
+DEP-054's private schema83 retains full-catalog bindings and starts demo writes disabled. Only a paused worker
 admits exact reviewed enrollment requests through current authority/version
 checks; it never enables itself or infers accounts from their names. The separate
 worker bounds execution, daily writes and stored-data growth, and supports an
@@ -985,6 +985,12 @@ illustration, external sample video and honest no-photo states are not documenta
 claims. Optional ETB price/unit/highlights provide inquiry context, never platform
 checkout, verified stock or a guaranteed quote. Do not silently turn a real service
 business into goods or apply demo corrections to unmarked tenants.
+
+Planned S197/FE-061/BE-049 replaces only reviewed poor, broken or unrelated demo
+video examples after actual creator-source playback and visual review. It retains
+photos, identity, contacts and original stories. A finite paused operation through
+ordinary commands must preserve the BE-067 scenario progress and acknowledge only
+the admitted media change; an unreviewed edit still pauses rather than being erased.
 
 ## 21. Standard page operating workflow
 

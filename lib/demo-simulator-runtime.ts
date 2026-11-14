@@ -11,6 +11,9 @@ import {postgresProductUpkeepPort} from './product-upkeep-postgres';
 import {parseOfferingHighlightsJson} from './offering-presentation';
 import {configuredReviewer} from './reviewer-access-runtime';
 import {demoScenarioCommandKey,demoScenarioStage,nextDemoScenarioStage,parseDemoScenarioParameters,type DemoScenarioParameters,type DemoScenarioKey} from './demo-scenarios';
+import {parseDemoMediaCorrection} from './demo-media-correction';
+import {productMedia} from './product-media';
+import {productVideoWatchUrl} from './video/product-video';
 import type {SessionUser} from './types';
 import {isSupportedPostgresMigrationLedger,LATEST_POSTGRES_MIGRATION_VERSION} from './postgres-schema-version';
 import {parseDemoCatalogInputs,parseStoredDemoCatalog,demoCatalogPhaseOffsets,demoCatalogStage,MAX_DEMO_CATALOG_BUSINESSES,type DemoCatalogProductInput,type DemoCatalogProduct} from './demo-catalog-scenarios';
@@ -20,7 +23,7 @@ export type DemoEnrollmentInput={businessId:number;handle:string;ownerUserId:num
  expectedContentVersion?:number;expectedDraftVersion?:number;expectedPageRevision?:number;catalogProducts?:DemoCatalogProductInput[]};
 type Enrollment={business_id:number;handle:string;owner_user_id:number;provider_user_id:string;product_id:number;
  scenario_key:DemoScenarioKey;scenario_version:number;parameters_json:string;baseline_page_json:string;baseline_description:string;expected_hash:string;
- stage:number;cycle:number;due_at:number;status:'active'|'paused';catalog_products_json:string};
+ stage:number;cycle:number;due_at:number;status:'active'|'paused';reason:string;catalog_products_json:string};
 type Control={enabled:number;last_slot:number;budget_day:number;used_today:number;daily_limit:number;database_limit_bytes:number};
 class DemoDrift extends Error{constructor(readonly reason:'eligibility_changed'|'content_changed'){super(reason);}}
 const digest=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -148,6 +151,56 @@ async function enrollDemoCatalog(input:DemoEnrollmentInput,now:number){
 async function audit(actor:SessionUser,businessId:number,detail:Record<string,unknown>){
  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.scenario',?,'')",[actor.id,businessId,JSON.stringify({automation:'demo-simulator',...detail})]);
 }
+
+/** Explicit finite operator maintenance; cannot enroll, enable or reset progress. */
+export async function correctDemoMedia(raw:unknown){
+ const input=parseDemoMediaCorrection(raw),payloadHash=digest(input);
+ return runtimeTransaction(async()=>{
+  await runtimeRun('SELECT pg_advisory_xact_lock(6870619271382)');
+  if(!await schemaReady())throw Error('The demo schema is not ready.');
+  const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
+  if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before media maintenance.');
+  const e=await runtimeGet<Enrollment>('SELECT * FROM demo_simulator_enrollments WHERE business_id=? FOR UPDATE',[input.businessId]);
+  if(!e||e.status!=='active'||e.reason||e.handle!==input.handle||e.owner_user_id!==input.ownerUserId||e.provider_user_id!==input.providerUserId)throw new DemoDrift('eligibility_changed');
+  const bindings=parseStoredDemoCatalog(e.catalog_products_json),state=await currentState(e,true);
+  if(!bindings.length||digest(bindings.map(p=>p.productId))!==digest(input.products.map(p=>p.productId))||
+   digest(bindings.map(p=>p.productId))!==digest(state.catalog.products.map(p=>p.id).sort((a,b)=>a-b)))throw new DemoDrift('eligibility_changed');
+  if(state.hash!==e.expected_hash)throw new DemoDrift('content_changed');
+  const receipt=await runtimeGet<{payload_hash:string}>("SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs WHERE business_id=? AND action='demo.media_corrected' AND CASE WHEN action='demo.media_corrected' THEN detail::jsonb->>'operationKey' END=? ORDER BY id DESC LIMIT 1",[input.businessId,input.operationKey]);
+  if(receipt){if(receipt.payload_hash!==payloadHash)throw Error('This demo media operation has different reviewed content.');return {duplicate:true};}
+  if(input.expectedHash!==e.expected_hash||input.expectedContentVersion!==state.catalog.business.content_version||
+   input.expectedDraftVersion!==state.draft.version||input.expectedPageRevision!==state.publication.revision||
+   state.draft.version!==state.publication.draftVersion||digest(state.draft.content)!==digest(state.publication.content)||
+   input.coverBefore!==state.draft.content.videoUrl||input.products.some(item=>digest(item.beforeMedia)!==digest(productMedia(state.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
+  const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
+  if(!size||!Number.isFinite(Number(size.bytes))||Number(size.bytes)>=Number(control.database_limit_bytes))throw Error('Demo media storage budget reached.');
+  let version=state.catalog.business.content_version;
+  for(const item of input.products){
+   if(digest(item.beforeMedia)===digest(item.afterMedia))continue;
+   const p=state.catalog.products.find(p=>p.id===item.productId)!;
+   const result=await executeBasicProductUpkeep(postgresProductUpkeepPort,state.actor,{
+    kind:'update',businessId:e.business_id,productId:p.id,expectedContentVersion:version,
+    idempotencyKey:`demo_media_${input.operationKey}_${p.id}`,name:p.name,description:p.description,
+    availability:p.availability,offeringKind:p.offering_kind,quantityMode:p.quantity_mode,
+    orderScope:p.order_scope??'unspecified',priceMinor:p.price_minor,quantityUnit:p.quantity_unit,
+    highlights:parseOfferingHighlightsJson(p.highlights_json),capacitySummary:p.capacity_summary,
+    minimumOrderSummary:p.minimum_order_summary,leadTimeSummary:p.lead_time_summary,
+    media:item.afterMedia,videoRef:item.afterMedia.find(m=>m.kind==='video')!.ref,
+    categoryId:p.category_id,imageAction:'keep',preserveMetadata:true,
+   },null);
+   version=result.contentVersion;
+  }
+  const videoUrl=productVideoWatchUrl(input.coverVideoRef);
+  if(state.draft.content.videoUrl!==videoUrl)await saveOwnerPageAndPublication(state.actor,e.business_id,
+   {action:'save',version:state.draft.version,content:{...state.draft.content,videoUrl}});
+  const after=await currentState(e,true),baseline=parseShopPageContent(JSON.parse(e.baseline_page_json));
+  await runtimeRun('UPDATE demo_simulator_enrollments SET expected_hash=?,baseline_page_json=? WHERE business_id=?',
+   [after.hash,JSON.stringify({...baseline,videoUrl}),e.business_id]);
+  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.media_corrected',?,'')",
+   [state.actor.id,e.business_id,JSON.stringify({automation:'demo-media-maintenance',operationKey:input.operationKey,payloadHash,products:input.products.map(p=>p.productId)})]);
+  return {duplicate:false};
+ });
+}
 async function advance(e:Enrollment,slot:number,now:number){
  const products=parseStoredDemoCatalog(e.catalog_products_json),state=await currentState(e,products.length>0);
  if(state.hash!==e.expected_hash)throw new DemoDrift('content_changed');
@@ -205,21 +258,30 @@ function parseEnrollmentRequest(raw:string,businessId:number):DemoEnrollmentInpu
 async function processEnrollmentRequests(now:number){
  const started=Date.now();
  const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 8 FOR UPDATE");
- let enrolled=0,enrollmentRejected=0;
+ let enrolled=0,enrollmentRejected=0,mediaCorrected=0;
  for(const request of requests){
   if(Date.now()-started>=12000)break;
   await runtimeRun('SAVEPOINT demo_enrollment');
   let accepted=false;
-  try{await enrollDemoScenario(parseEnrollmentRequest(request.input_json,request.business_id),now);accepted=true;enrolled++;}
+  try{
+   const raw:unknown=JSON.parse(request.input_json);
+   if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as Record<string,unknown>).kind==='media_correction'){
+    const correction=parseDemoMediaCorrection(raw);
+    if(correction.businessId!==request.business_id)throw Error('Invalid private media correction target.');
+    await correctDemoMedia(correction);
+    mediaCorrected++;
+   }else{await enrollDemoScenario(parseEnrollmentRequest(request.input_json,request.business_id),now);enrolled++;}
+   accepted=true;
+  }
   catch{await runtimeRun('ROLLBACK TO SAVEPOINT demo_enrollment');enrollmentRejected++;}
   await runtimeRun('RELEASE SAVEPOINT demo_enrollment');
   await runtimeRun('UPDATE demo_simulator_requests SET status=?,reason=?,processed_at=? WHERE business_id=?',
    [accepted?'accepted':'rejected',accepted?'':'enrollment_failed',now,request.business_id]);
  }
- return {enrolled,enrollmentRejected};
+ return {enrolled,enrollmentRejected,...(mediaCorrected?{mediaCorrected}:{})};
 }
 
-export type DemoTickResult={enrolled?:number;enrollmentRejected?:number;status:'advanced'|'disabled'|'busy'|'duplicate'|'budget'|'schema';advanced:number;paused:number;failed:number};
+export type DemoTickResult={enrolled?:number;enrollmentRejected?:number;mediaCorrected?:number;status:'advanced'|'disabled'|'busy'|'duplicate'|'budget'|'schema';advanced:number;paused:number;failed:number};
 /** The scheduled adapter supplies no client input. The clock argument also lets
  * disposable PostgreSQL tests exercise complete timelines without sleeping. */
 export async function runDemoSimulatorTick(now=Date.now()):Promise<DemoTickResult>{
@@ -236,7 +298,7 @@ export async function runDemoSimulatorTick(now=Date.now()):Promise<DemoTickResul
   if(!await schemaReady())return result('schema');
   const control=await runtimeGet<Control>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control)return result('disabled');
-  if(!control.enabled){const admission=await processEnrollmentRequests(now);return admission.enrolled||admission.enrollmentRejected?{...result('disabled'),...admission}:result('disabled');}
+  if(!control.enabled){const admission=await processEnrollmentRequests(now);return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected?{...result('disabled'),...admission}:result('disabled');}
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;

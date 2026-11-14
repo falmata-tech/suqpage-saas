@@ -8,7 +8,42 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
-## S196 full public-demo catalog — qualification in progress
+## S197 demo video quality — review and qualification in progress
+
+FE-061/BE-049 own the exact64/256 public-demo media review; FE-057/FE-060 own
+inline social playback and BE-067 protects scenario continuity. Read-only browser
+inspection confirms the widely reused`wJV9EDe_sFc` is no longer available, and
+the Muna Botanical Studio face-oil story instead plays industrial bar-soap footage.
+Those are demonstrated content defects, not a reason to infer real-account scope.
+Primary-creator replacements remain under actual visual/playback review; none
+has been applied to production or admitted from its title/thumbnail alone.
+
+The candidate finite maintenance path reuses private disabled-only requests,
+normal product/page commands and exact identity/version/hash/gallery fences.
+It preserves images, facts and scenario progress, with an operation receipt and
+atomic acknowledgement only after success. Focused parser, existing11 domain/
+timer/worker checks, typecheck and237-spec validation pass locally. Disposable
+PostgreSQL late-failure, private-boundary, replay and next-stage tests require
+managed CI because this workspace has no local Docker/PostgreSQL service. No
+production pause, media change, credential write or new signed APK is claimed.
+
+Candidate`995b11f` in43563904767 passes legacy simulator PostgreSQL and reaches
+the new successful correction, but its preservation assertion incorrectly expects
+the catalog's derived`media` projection to retain the old video. Compare that
+projection to the exact reviewed after-gallery, while continuing to compare every
+other product field (including image identity) unchanged. Retain the failed run;
+the updated rollback/replay/continuation case still requires a complete rerun.
+
+Source`fc4e3fa` passes all five required jobs in43564289980, including the complete
+PostgreSQL correction/rollback/replay/continuation case and388 scenario stages.
+Its Android job43564289953 must rebuild the test client because adding a root
+package script changes the deliberately conservative native-input cache key.
+Register the media-plan test through the existing scenario test entry instead;
+restore the unchanged package metadata and keep the cache/security checks intact.
+This avoids an unnecessary native-input change; verify the resulting managed
+cache/Android run rather than assuming reuse.
+
+## S196 full public-demo catalog — qualified and deployed
 
 The owner requires all public demo businesses and all current products. The
 read-only production inventory confirms64 active demo owners with managed links,
@@ -23,7 +58,14 @@ Eleven focused domain/timer/inert-worker/fixture-boundary checks pass. The new
 PostgreSQL case covers64 businesses/256 products, complete timelines, legacy
 promotion, one snapshot per business stage, replay/foreign/failed-member refusal,
 media/private/real preservation and product-membership drift. Browser/Android
-fixtures now advance all four products; actual managed-run evidence is pending.
+fixtures advance all four products. Corrected source`e1b3b96` passes all five
+required jobs in43551681110 and actual API35/x86_64 Android in43551681166.
+Full-size PostgreSQL covers388 coordinated stages/194 ticks, all six phases and
+whole-stage rollback. Chrome143 passes21 real acceptance journeys plus component
+checks; Android passes11 states in204.7s, four-product ordinary-write readback,
+open product refresh, retained Back/search and exactly one isolated saved inquiry.
+Inspected browser/native verdict: PASS for those source-bound synthetic states.
+Physical Android, owner Auth, push and a signed phone APK remain separately open.
 
 Local mobile checking first resolved an older sibling checkout's workspace
 contracts; isolated links restore current-workspace resolution. It then exposed
@@ -32,8 +74,36 @@ in the public hook, whose existing runtime guard already makes no request.
 The direct tsx CLI cannot create its local IPC socket; the standard Node
 `--import tsx` entry passes without changing sandbox or test assertions.
 
-No expanded hosted migration/enrollment or production write has been performed.
-The active checklist owns remaining gates and the separate signed phone APK.
+Protected PR65 merges as`564cfc5462a163176cc468d7a8bceac6a0e7ec44`, tree
+`4ec2a46176b0f12e4d47f9c54bce0a8e614cc0e7`. Main quality43552469846 and
+Android43552469869 pass. Automatic Netlify deploy`6af7d7219840bd93a5b8074a`
+reports that exact source, the expected site and healthy API. Private schema83
+and all64 reviewed catalog requests were admitted while paused, preserving the
+original three canaries' progress. The explicit owner-requested resume committed
+at2026-11-14T04:22:45.519378Z; it did not reset progress or extend an old window.
+
+Read-only observation2026-11-14T05:37:00.055147Z confirms64 active enrollments,
+256 bound products,64 accepted requests,74 successful whole-catalog stages since
+resume and all64 businesses advanced. All64 public shops/all256 products match
+their exact immutable catalog/page versions and predefined product phases;
+48 business revisions increase against the previous successful observation.
+The already-open Muna product also shows the committed bottle/minimum/lead-time/
+capacity facts without navigation. Names, effective media, owned contacts,
+all six real businesses, the private reviewer, retained history and private
+permissions remain preserved. No failures, pauses, duplicate slots or oversized
+slots; latest global success age56.1s and longest individual wait63.94minutes.
+
+Protected original before-image SHA256
+`83e4974af258482de366b811b698aaab8b95a0763bfeb3d7223492c9e99ff263`
+and the exact private reviewed manifest remain outside Git. Public membership
+SHA256`e0e8d690c63cb269e59aada7a62c9b8a8bbbf78e3520492849f11c8ce86225af`
+binds the reviewed64/256. Storage27,962,515bytes is10.417% of the unchanged
+268,435,456-byte soft budget. Measured growth forecasts7.12days at the maximum
+two-stage/minute cap,12.95days at observed elapsed growth; neither crosses the
+seven-day warning threshold in that observation. Continue read-only monitoring.
+Actual hosted runtime yielding currently advances about one business per minute;
+allow32–64 successful ticks per rotation and flag individual starvation only
+beyond70minutes while global work advances.
 
 Retained first qualification: source`136f153` in43551401842/43551401841 passes
 fresh schema83 installation and legacy simulator PostgreSQL cases. The new batch
