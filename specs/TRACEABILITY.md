@@ -41,6 +41,31 @@ that healthy source. This is disposable-schema source evidence, not a hosted
 media correction, installed Android or signed release. Full64/256 media review
 and bounded hosted corrections remain open.
 
+FE-057 Replay follow-up: actual product94 TikTok playback reached Replay in
+PR77's disposable runs; the second web run scrolled to Photo 1 and detached the
+iframe as Replay was clicked, while Expo completed. A local exact-player replay
+with gallery snapping disabled stayed on Video 2 and restarted; explicit Photo 1
+then unmounted it. The focused Chrome regression in
+`scripts/test-social-video-layout.ts` fails with the former CSS and separately
+without short-scroll settling, then passes Replay focus, partial/full horizontal
+return, thumbnail and arrow actions with both changes. Chrome for Testing 151
+on the isolated product94 source at 390/1440 confirms the selected video,
+partial-scroll settle, full photo return and arrow hit target. The external
+TikTok frame did not attach in two bounded local follow-up attempts. PR82's
+fixed-head disposable product94 run `43651574483` (head `7b7135c`, artifacts
+`14135903598` and `14135779600`) then passed exact 9.843s
+end-to-Replay-to-renewed-progress on desktop web and Expo web twice. Desktop
+gallery scrollLeft remained equal to clientWidth before and after Replay with
+snap disabled; Photo 1 and reload removed the player. Phone web showed the
+provider's Video unavailable state before Replay in both runs, so its exact
+source-bound Replay remains unqualified. The clip's mango/papaya color,
+packaging and overlaid copy do not qualify it as Sena's demo footage.
+Touch drags over the iframe did not move the gallery in local Chrome; photo
+thumbnail and arrow remain the verified explicit exits. Current Expo web on
+main `1c9a8dc` opens product94 Video 2 and returns to Photo 1 without page/API
+errors; its YouTube player stayed loading, so it does not qualify the web fix
+or external playback.
+
 FE-061/BE-049 own the exact64/256 public-demo media review; FE-057/FE-060 own
 inline social playback and BE-067 protects scenario continuity. Read-only browser
 inspection confirms the widely reused`wJV9EDe_sFc` is no longer available, and
@@ -1005,7 +1030,7 @@ related layers, test criteria and detailed completion evidence.
 | [FE-054] Restrained business storefront accents | in_progress | [FE-040], [FE-053], [BE-031], [BE-041], [BE-044] | [Contract and implementation scope][FE-054] | S181 saved business-accent validation, contrast, defaults and cart A→B isolation pass installed-renderer and PostgreSQL/DTO regressions. Actual web/Expo cases qualify default palette, inquiry-list scope and return; the marked demos lack saved accents, so no actual saved-colour pair is claimed. [Local workflow evidence](#s181s182-map-featured-and-public-footer-qualification); [current delivery](#current-s181s184-delivery). [Test plan][FE-054-tests]: `test-storefront-accent.ts`, `capture-storefront-accent.mjs`, `test-floating-inquiry-web.ts`, `test-mobile-public-action-dock.ts`. |
 | [FE-055] Discoverable account deletion requests | in_progress | [FE-053], [FE-049], [DEP-042], [DEP-044], [BE-053] | scripts/operations/account-erasure.ts | [Test plan][FE-055-tests]: `capture-account-deletion.mjs` |
 | [FE-056] Owner Profile and focused editing | in_progress | [FE-074], [FE-026], [FE-036], [FE-066], [FE-034], [FE-032], [FE-040], [FE-051], [FE-053], [FE-059], [BE-018], [BE-032], [BE-038], [BE-041], [BE-044], [BE-045], [DEP-042], [FE-067], [FE-047], [FE-072], [BE-060], [FE-073] | Existing owner/home, account/page/business/handle ports, city-centered exact-pin selector and focused web/native editors | [Test plan][FE-056-tests]: `test-product-editor-workflow.ts`, `test-owner-editor-failures.ts`, `capture-signup-city.mjs` |
-| [FE-057] Embedded TikTok product videos | in_progress | [ADR-0025], [FE-060], [BE-046], [FE-050], [FE-019], [FE-053], [DEP-039], [DEP-042], [ADR-0024] | [Contract and implementation scope][FE-057] | [Test plan][FE-057-tests]: `test-product-video.ts`, `test-video-requests.ts` |
+| [FE-057] Embedded TikTok product videos | in_progress | [ADR-0025], [FE-060], [BE-046], [FE-050], [FE-019], [FE-053], [DEP-039], [DEP-042], [ADR-0024] | [Contract and implementation scope][FE-057] | [Replay qualification](#s197-demo-video-quality--review-and-qualification-in-progress); [test plan][FE-057-tests]: `test-product-video.ts`, `test-video-requests.ts`, `test-social-video-layout.ts` |
 | [FE-058] Free exploration of the world map | in_progress | [FE-021], [BE-041], [FE-030], [FE-053], [DEP-042], [ADR-0016], [ADR-0023], [BE-023] | [Contract and implementation scope][FE-058] | [Test plan][FE-058-tests]: `test-mobile-map.ts`, `capture-world-map.mjs` |
 | [FE-059] Choose the business city during initial setup | in_progress | [BE-047], [FE-051], [FE-053], [FE-056], [BE-031], [BE-038], [BE-041], [DEP-042], [FE-065], [BE-054] | Canonical city selection and optional exact-public map point during signup | [Test plan][FE-059-tests]: `app.spec.ts`, `test-signup.ts`, `test-mobile-api.ts`, `capture-signup-city.mjs` |
 | [FE-060] Direct cover and product video links | in_progress | [FE-061], [ADR-0025], [BE-048], [FE-057], [FE-050], [FE-040], [FE-019], [FE-053], [BE-032], [BE-042], [DEP-039], [DEP-042], [ADR-0024] | [Contract and implementation scope][FE-060] | [Test plan][FE-060-tests]: `test-product-video.ts`, `test-owner-page.ts` |
