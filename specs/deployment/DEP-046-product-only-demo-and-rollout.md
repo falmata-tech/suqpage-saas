@@ -2,7 +2,7 @@
 id: DEP-046
 title: Product-only demo correction and compatible rollout
 status: in_progress
-related: [FE-067, BE-056, DEP-034, DEP-038, DEP-042, DEP-044, DEP-045, BE-022]
+related: [DEP-054, FE-067, BE-056, DEP-034, DEP-038, DEP-042, DEP-044, DEP-045, BE-022]
 owners: [operations, security]
 last_updated: 2026-10-20
 change_level: L3

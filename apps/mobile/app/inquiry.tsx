@@ -10,6 +10,7 @@ import {publicContactIsPhone,publicContactDisplay} from "../../../lib/public-con
 import type {Shop,InquiryReceipt} from "@africmade/contracts";
 import {inquiryOptions} from "../src/inquiry-options";
 import {useApp,useLoad,request,API,type BasketItem} from "../src/runtime";
+import {usePublicShop} from '../src/use-public-shop';
 import {useBlockedBusinesses} from "../src/blocked-businesses";
 import {CatalogSafety} from "../src/CatalogSafety";
 import {inquiryCatalogProduct,restoreCatalogSelections} from "../src/catalog-products";
@@ -20,14 +21,15 @@ import {Screen,Copy,Field,Card,Button,Status,Icon,s,colors,openLink} from "../sr
 export default function Inquiry(){
  const blocked=useBlockedBusinesses(),{t}=useApp();
  const {handle,id,options}=useLocalSearchParams<{handle?:string;id?:string;options?:string}>();
- const load=useLoad(()=>handle?request<Shop>("shops/"+encodeURIComponent(handle)):Promise.resolve(null),[handle]);
+ const load=usePublicShop(handle);
  const shop=load.data,catalogReady=Boolean(shop&&!load.loading&&!load.error),inquiry=useBusinessInquiry(shop);
  const items=useMemo<BasketItem[]>(()=>{if(id){const p=shop?.products.find(p=>p.id===Number(id)&&inquiryCatalogProduct(p));return shop&&p?restoreCatalogSelections(shop,[{product:p,quantity:"",options:inquiryOptions(options)}]):[];}return inquiry.items;},[id,shop,options,inquiry.items]);
  const [name,setName]=useState(""),[phone,setPhone]=useState(""),[inboxMessage,setInboxMessage]=useState(""),[error,setError]=useState(""),[feedback,setFeedback]=useState(""),[busy,setBusy]=useState(false),[receipt,setReceipt]=useState<number|null>(null),[showPlatform,setShowPlatform]=useState(false);
  const submission=useRef<{payload:string;key:string}|null>(null);
  useEffect(()=>{setName("");setPhone("");setInboxMessage("");setError("");setFeedback("");setReceipt(null);setShowPlatform(false);submission.current=null;},[handle,id,options]);
  const message=shop?buildSocialInquiryMessage(shop,items.map(item=>({id:item.product.id,name:item.product.name,quantity:item.quantity,options:item.options,service:false})),API,t):"";
- useEffect(()=>{setInboxMessage(message);},[message]);
+ const generatedMessage=useRef(message);
+ useEffect(()=>{const previous=generatedMessage.current;setInboxMessage(current=>current===previous?message:current);generatedMessage.current=message;},[message]);
  const handoffs=shop?inquiryHandoffs(shop.contacts,message):[];
  const phoneDevice=publicContactIsPhone(Platform.OS,Platform.OS==="web"&&typeof navigator!=="undefined"?navigator.userAgent:"");
  const inquiryChannels=shop?handoffs.filter(link=>link.kind!=="phone"&&canOpenPublicContact(shop.isDemo,shop.approvedDemoContactMethods,link.kind)):[];

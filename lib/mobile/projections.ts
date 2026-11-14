@@ -14,6 +14,7 @@ import {isPublicProduct} from '../offerings';
 import {readOrderScope} from '../order-scope';
 import {approvedDemoContactMethods} from '../demo-inquiry-policy';
 import {showroomCategories,showroomProductCategory} from '../showroom-categories';
+import {publicShopRevision} from '../public-shop-revision';
 export function offeringDto(p: Product): Offering {
   return {
     id: p.id,
@@ -37,7 +38,7 @@ export function offeringDto(p: Product): Offering {
     })),
   };
 }
-export function shopDto(c: Catalog, p: ShopPageContent, includeRetired = false): Shop {
+export function shopDto(c: Catalog, p: ShopPageContent, includeRetired = false,pageRevision?:number): Shop {
   const b = c.business;
   const categories = showroomCategories(c);
   return {
@@ -45,6 +46,7 @@ export function shopDto(c: Catalog, p: ShopPageContent, includeRetired = false):
     handle: b.handle,
     name: b.name,
     about: p.about || p.introduction,
+    ...(pageRevision!==undefined?{publicRevision:publicShopRevision(b.id,b.handle,b.content_version,pageRevision)}:{}),
     cover: p.heroImage,
     logo: b.logo_path,
     videoUrl: p.videoUrl,

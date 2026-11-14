@@ -679,6 +679,12 @@ Preserve each merchant's identity within the current shared showroom contract.
 
 ## 15. Current technical architecture
 
+Planned under BE-067/FE-079/DEP-054: a separate minute-scheduled demo service
+advances a reviewed catalog of coherent scenarios through ordinary product and
+page publication commands. Foreground public screens check for changes every
+15 seconds. Implementation is being qualified; this is not an active hosted
+service or a verified Supabase Realtime subscription.
+
 Use the pinned Node/Next.js web/API and Expo/React Native app with shared typed
 contracts. Runtime/dependency versions come from the lockfiles, package metadata
 and supported baseline, not duplicated prose here. PostgreSQL access and managed
@@ -732,6 +738,11 @@ conventions. Architecture and environment details: BE-027/BE-030/BE-035/BE-044,
 DEP-022/DEP-026/DEP-027 and the linked ADRs.
 
 ## 16. Security requirements
+
+BE-067's planned simulator requires explicit private enrollment plus the current
+demo flag, owner/provider identity, selected product tenancy and unchanged saved
+content. New or real accounts never qualify. Drift pauses automation; it must
+not overwrite manual edits, publish pending geography or change contacts/Auth.
 
 Security, tenant isolation, privacy and data integrity are product requirements.
 Read [SECURITY.md](SECURITY.md) for vulnerability handling. Preserve at least these
@@ -818,6 +829,11 @@ and scoped reports/moderation. Ordinary tools are not automatically weapons.
 No keyword rule or prior publication proves universal screening of seller media.
 
 ## 17. Data, migrations, and deployment boundary
+
+DEP-054's planned additive migration 82 starts demo writes disabled. The separate
+worker has bounded execution, daily/stored-data budgets and a pause switch.
+Existing merchant/publication/inquiry history remains immutable; only private
+operational run evidence has bounded retention. Hosted qualification is pending.
 
 PostgreSQL and managed-provider records are durable authority. Use additive,
 versioned migrations with ordered ledger checks and transaction/tenant/history
@@ -948,6 +964,10 @@ safeguards. FE-035/FE-053/FE-056/FE-065 and relevant task specs provide the deta
 
 ## 20. Product-data accuracy
 
+BE-067's planned marked examples use predefined, unit-aware scenario facts and
+ordered stages. Random independent values and fabricated customer transactions,
+transport activity or certification claims are excluded.
+
 Do not invent product features, availability, models, prices, capacity or merchant
 history. Preserve merchant-entered data; verify current recognizable product facts
 against official manufacturer sources when authoring new factual examples. Demo
@@ -986,6 +1006,10 @@ business into goods or apply demo corrections to unmarked tenants.
 Details: FE-040/FE-048/FE-056/FE-072 and BE-032/BE-033/BE-039/BE-041/BE-060.
 
 ## 22. Testing and definition of done
+
+BE-067/FE-079/DEP-054 require mixed-tenant PostgreSQL failure/race tests plus
+ordinary write → stored publication → fresh public API → already-open web/native
+screen evidence. Scenario/timer unit tests do not prove hosted delivery.
 
 Use the task/spec/gate process in AGENTS.md, not release anecdotes in this file.
 Test changed positive/negative criteria, tenant/role/privacy/race boundaries and

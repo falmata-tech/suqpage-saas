@@ -1,6 +1,7 @@
 "use client";
 
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {startForegroundPoll} from './foreground-poll';
 
 export type MarketBatch<Data, Item> = {
   data: Data; items: Item[]; page: number; pages: number; total: number;
@@ -10,6 +11,9 @@ export type MarketFeedOptions = {
   scopeKey?: string;
   /** Server data can describe a different query from restored client criteria. */
   initialSnapshotKey?: string;
+  /** Opt in only for public foreground discovery consumers. */
+  refreshMs?: number;
+  active?: boolean;
 };
 
 /** One bounded request at a time; a new search invalidates all earlier pages. */
@@ -33,6 +37,9 @@ export function useMarketFeed<Data, Item extends {id: number | string}>(
   const more = useRef<AbortController | null>(null);
   const [attempt, setAttempt] = useState(0);
   const lastAttempt = useRef(attempt);
+  const fingerprint=(batch:MarketBatch<Data,Item>)=>JSON.stringify([batch.items,batch.total,batch.pages]);
+  const firstPage=useRef(initial?{key:options.initialSnapshotKey??key,scopeKey,value:fingerprint(initial)}:null);
+  const [updates,setUpdates]=useState({key,scopeKey,available:false});
 
   useEffect(() => {
     const version = ++generation.current;
@@ -48,8 +55,11 @@ export function useMarketFeed<Data, Item extends {id: number | string}>(
     setState(old => ({...old, key, scopeKey, batch: old.scopeKey === scopeKey ? old.batch : undefined, displayedSnapshotKey: old.scopeKey === scopeKey ? old.displayedSnapshotKey : null, loading: true, loadingMore: false, error: '', moreError: ''}));
     const timer = setTimeout(() => {
       void loader.current(key, controller.signal).then(batch => {
-        if (!controller.signal.aborted && generation.current === version && activeKey.current === key && activeScope.current === scopeKey)
+        if (!controller.signal.aborted && generation.current === version && activeKey.current === key && activeScope.current === scopeKey){
+          firstPage.current={key,scopeKey,value:fingerprint(batch)};
+          setUpdates({key,scopeKey,available:false});
           setState({key, scopeKey, displayedSnapshotKey: key, batch, loading: false, loadingMore: false, error: '', moreError: ''});
+        }
       }).catch(() => {
         if (!controller.signal.aborted && generation.current === version && activeKey.current === key && activeScope.current === scopeKey)
           setState(old => ({...old, loading: false, error: 'Search is unavailable. Try again.'}));
@@ -57,6 +67,34 @@ export function useMarketFeed<Data, Item extends {id: number | string}>(
     }, 250);
     return () => {clearTimeout(timer); controller.abort(); more.current?.abort();};
   }, [key, scopeKey, attempt]);
+
+  useEffect(()=>{
+    if(!options.refreshMs||options.active===false)return;
+    return startForegroundPoll({intervalMs:options.refreshMs,
+      active:()=>typeof document==='undefined'||document.visibilityState==='visible',
+      subscribe:changed=>{if(typeof document==='undefined')return()=>{};document.addEventListener('visibilitychange',changed);return()=>document.removeEventListener('visibilitychange',changed);},
+      onError:()=>setState(old=>old.key===key&&old.scopeKey===scopeKey?{...old,error:'Search is unavailable. Try again.'}:old),
+      read:async signal=>{
+        const before=current.current,version=generation.current;
+        if(before.key!==key||before.scopeKey!==scopeKey||before.displayedSnapshotKey!==key||!before.batch||before.loading||more.current)return;
+        const params=new URLSearchParams(key);params.set('page','1');
+        const fresh=await loader.current(params.toString(),signal);
+        if(signal.aborted||generation.current!==version||activeKey.current!==key||activeScope.current!==scopeKey||current.current!==before||more.current)return;
+        const value=fingerprint(fresh),baseline=firstPage.current;
+        if(before.batch.page>1){
+          // Keep every loaded result and its scroll anchor; an explicit refresh
+          // admits the changed first page rather than dropping deeper pages.
+          setUpdates({key,scopeKey,available:Boolean(baseline&&baseline.key===key&&baseline.scopeKey===scopeKey&&baseline.value!==value)});
+          setState(old=>old===before?{...old,error:''}:old);return;
+        }
+        setState(old=>{
+          if(old!==before)return old;
+          firstPage.current={key,scopeKey,value};
+          return {...old,batch:fingerprint(old.batch!)===value?old.batch:fresh,error:''};
+        });
+      },
+    });
+  },[key,scopeKey,options.refreshMs,options.active]);
 
   const loadMore = useCallback(() => {
     const old = current.current;
@@ -93,5 +131,5 @@ export function useMarketFeed<Data, Item extends {id: number | string}>(
   const requested = sameScope && state.key === key;
   const loading = requested ? state.loading : !snapshotCurrent;
   const visible = {...state, key, scopeKey, batch, displayedSnapshotKey, loading, loadingMore: requested && snapshotCurrent && state.loadingMore, error: requested ? state.error : '', moreError: requested && snapshotCurrent ? state.moreError : ''};
-  return {...visible, requestedKey: key, snapshotCurrent, initialLoading: loading && !batch, updating: loading && Boolean(batch), loadMore, hasMore: Boolean(snapshotCurrent && !loading && !visible.error && batch && batch.page < batch.pages), retry: () => setAttempt(n => n + 1)};
+  return {...visible,updatesAvailable:updates.key===key&&updates.scopeKey===scopeKey&&updates.available, requestedKey: key, snapshotCurrent, initialLoading: loading && !batch, updating: loading && Boolean(batch), loadMore, hasMore: Boolean(snapshotCurrent && !loading && !visible.error && batch && batch.page < batch.pages), retry: () => setAttempt(n => n + 1)};
 }

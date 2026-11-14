@@ -2,7 +2,7 @@
 id: FE-075
 title: Business inquiry channels and a focused owner Inbox
 status: in_progress
-related: [BE-062, FE-066, FE-041, FE-049, FE-053, FE-056, FE-062, BE-001, BE-044, BE-050, BE-055, DEP-044, DEP-049]
+related: [FE-079, BE-062, FE-066, FE-041, FE-049, FE-053, FE-056, FE-062, BE-001, BE-044, BE-050, BE-055, DEP-044, DEP-049]
 owners: [product, frontend, security]
 last_updated: 2026-10-21
 change_level: L2

@@ -25,14 +25,16 @@ export default function ProductPage({ product, backHref, onBack, onAdd, onInquir
   const [options, setOptions] = useState<Record<string, string>>(() => Object.fromEntries((product?.option_groups || []).map(g => [g.name, g.values[0]?.value || ""])));
   useEffect(() => { heading.current?.focus({ preventScroll: true }); heading.current?.closest("[data-product-page]")?.scrollIntoView({ block: "start" }); }, []);
   const noun = product ? offeringNoun(product.offering_kind) : "item";
-  const unit = product ? productSellingUnit(product) : "";
+  const unit = product ? productSellingUnit(product, t) : "";
   return <article className={styles.page} data-product-page>
     <div className={styles.navigation}><a href={backHref} onClick={onBack}><ArrowLeft size={18} aria-hidden="true" />{t("Back to {value1}", { value1: t(catalogLabel).toLowerCase() })}</a>{product ? <button type="button" onClick={copyLink}><Copy size={16} aria-hidden="true" />{t("Copy {value1} link", { value1: t(noun) })}</button> : null}</div>
     {!product ? <div className={styles.unavailable}><PackageOpen size={36} aria-hidden="true" /><h2 ref={heading} tabIndex={-1}>{t("Item unavailable")}</h2><p>{t("This item is no longer listed. Browse the shop’s other products.")}</p></div> : <div className={styles.layout}>
       <div className={styles.media}><ProductMediaGallery key={product.id} items={productMedia(product)} name={product.name} /></div>
       <div className={styles.copy}>
-        {isDemo ? <span className={styles.category}>{t("Example product")}</span> : null}
-        {product.category_name ? <span className={styles.category}>{product.category_name}</span> : null}
+        <div className={styles.labels}>
+          {isDemo ? <span className={styles.category}>{t("Example product")}</span> : null}
+          {product.category_name ? <span className={styles.category}>{product.category_name}</span> : null}
+        </div>
         <h2 ref={heading} tabIndex={-1}>{product.name}</h2>
         <div className={styles.priceRow}><strong>{product.price_minor !== null ? formatEtbPrice(product.price_minor) : t("Ask for price")}</strong>{unit ? <span>{unit}</span> : null}</div>
         {orderScopeLabels(product.order_scope).length ? <ul className={styles.orderTags} aria-label={t("Order sizes")}>{orderScopeLabels(product.order_scope).map(label=><li key={label}>{t(label)}</li>)}</ul> : null}

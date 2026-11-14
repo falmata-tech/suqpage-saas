@@ -15,13 +15,11 @@ import {visibleCatalogProduct} from '../src/catalog-products';
 import {CatalogSafety} from '../src/CatalogSafety';
 import {useBusinessInquiry} from '../src/use-business-inquiry';
 import ResourceLoading from '../src/ResourceLoading';
+import {usePublicShop} from '../src/use-public-shop';
 export default function Product() {
   const { handle, id } = useLocalSearchParams<{ handle: string; id: string }>(),
     { t } = useApp();
-  const load = useLoad(
-    () => request<Shop>("shops/" + encodeURIComponent(handle)),
-    [handle],
-  );
+  const load = usePublicShop(handle);
   const identity=JSON.stringify([handle,id]);
   const emptySelection=()=>({identity,options:{} as Record<string,string>,notice:''});
   const [selection,setSelection]=useState(emptySelection);

@@ -8,6 +8,7 @@ import { PAGE_REVIEW_SCHEMA_SQL } from "./page-review-schema";
 import { CONTACT_SCHEMA_SQL } from "./contact-schema";
 import type { PostgresTransactionRunner } from "./postgres-runtime";
 import { OWNER_PAGE_SCHEMA_SQL, OWNER_PAGE_PUBLICATION_SCHEMA_SQL } from "./owner-page-schema";
+import { DEMO_SIMULATOR_SCHEMA_SQL, DEMO_SIMULATOR_TABLES } from './demo-simulator-schema';
 
 const SCHEMA_NAME = /^[a-z_][a-z0-9_]*$/i;
 
@@ -1279,6 +1280,24 @@ export async function migratePostgresDatabase(
         await runner.query(`REVOKE ALL ON ALL SEQUENCES IN SCHEMA ${quotedSchema(schema)} FROM ${quotedRole(role)}`);
       }
       await runner.query('INSERT INTO schema_migrations(version) VALUES(81)');applied.push(81);
+    }
+    const migration82=await runner.query('SELECT version FROM schema_migrations WHERE version=82');
+    if(!migration82.rows.length){
+      if(!(await runner.query('SELECT version FROM schema_migrations WHERE version=81')).rows.length)throw new Error('Migration 82 requires schema 81.');
+      await runner.query(DEMO_SIMULATOR_SCHEMA_SQL);
+      for(const table of DEMO_SIMULATOR_TABLES){
+        const target=`${quotedSchema(schema)}.${quotedRole(table)}`;
+        await runner.query(`REVOKE ALL ON TABLE ${target} FROM PUBLIC`);
+        for(const role of ['anon','authenticated','service_role']){
+          if((await runner.query('SELECT 1 FROM pg_roles WHERE rolname=?',[role])).rows.length)await runner.query(`REVOKE ALL ON TABLE ${target} FROM ${quotedRole(role)}`);
+        }
+        for(const role of ['mirtpage_runtime','suqpage_runtime']){
+          if(!(await runner.query('SELECT 1 FROM pg_roles WHERE rolname=?',[role])).rows.length)continue;
+          await runner.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON TABLE ${target} TO ${quotedRole(role)}`);
+          await runner.query(`CREATE POLICY ${quotedRole(`${role}_demo_access`)} ON ${target} TO ${quotedRole(role)} USING (true) WITH CHECK (true)`);
+        }
+      }
+      await runner.query('INSERT INTO schema_migrations(version) VALUES(82)');applied.push(82);
     }
     return { applied };
   });

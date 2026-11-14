@@ -2,7 +2,7 @@
 id: BE-055
 title: Retired public business-inquiry submission with preserved history
 status: in_progress
-related: [BE-062, FE-075, BE-032, FE-066, DEP-045, BE-001, BE-044, BE-050]
+related: [BE-067, BE-062, FE-075, BE-032, FE-066, DEP-045, BE-001, BE-044, BE-050]
 owners: [backend, security]
 last_updated: 2026-10-17
 change_level: L2

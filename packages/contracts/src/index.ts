@@ -48,6 +48,7 @@ export type Shop = {
   products: Offering[];
   categories?: Array<{ id: number; name: string }>;
   version: number;
+  publicRevision?: string;
   status: string;
   isDemo: boolean;
   approvedDemoContactMethods?: Array<"phone" | "whatsapp" | "telegram" | "website" | "tiktok" | "instagram" | "facebook">;

@@ -61,7 +61,7 @@ store screenshots and Play qualification remain separate unfinished work.
 
 ## Ordered work
 
-### S194 — recurring demo marketplace simulator
+### S194 — scenario-driven demo marketplace simulator (BE-067 / FE-079 / DEP-054)
 
 Owner instruction 2026-11-13: operate a dedicated recurring demo service and
 verify storage, public refresh and rendered changes after production deployment.
@@ -75,20 +75,32 @@ The owner additionally requires frequent visible activity for early users: advan
 short coordinated demo stages about every minute and refresh already-open public
 screens, with measured storage/write budgets and a bounded active demo cohort.
 
-1. [ ] Inventory supported business/product fields, current write/publication/
+1. [x] Inventory supported business/product fields, current write/publication/
    refresh contracts and existing worker hosting; specify the simulated data
    matrix and cadence before implementation.
-2. [ ] Implement a bounded, idempotent scheduler with demo-only registration,
+2. [x] Implement a bounded, idempotent scheduler with demo-only registration,
    current-flag/identity checks, concurrency control, pause/kill switch and safe
    run evidence; preserve contacts, identity/Auth, customers and notifications.
-3. [ ] Prove non-demo/new-signup exclusion, ownership/flag drift refusal, mixed
+3. [x] Prove non-demo/new-signup exclusion, ownership/flag drift refusal, mixed
    data preservation, failures/replay and normal database-to-public-read paths.
 4. [ ] Qualify browser update journeys, required CI, exact hosted migration/data
    plan and production deployment; enable only the reviewed enrolled demos and
    independently verify scheduled runs and real-account preservation.
 
-Current step: 1. Prefer the existing scheduled-function infrastructure if its
-bounded execution contract fits; no new paid VM or background mutation exists yet.
+Current step: 4. The field/scenario and refresh inventory is in
+`docs/operations/DEMO-SIMULATOR.md`. Use predefined coherent accelerated timelines,
+private explicit enrollment, a dedicated one-minute scheduled function and at most
+two due stages per tick in a small active cohort. Open screens refresh at15s while
+active. Real/new/private accounts remain excluded; record versions and guard
+concurrent human edits, writes and retained-data growth. No hosted mutation yet.
+
+Implementation and mixed-data PostgreSQL qualification pass on candidate
+`aeea8ae` in run43535106712, including explicit private request admission,
+empty-unit preparation and failed-admission rollback. Domain/timer/worker-load/
+fixture-boundary tests, root/mobile types and237 specs pass. Browser/native live
+refresh screenshots, all required current-head gates and hosted rollout remain
+open. This host refuses Chromium's singleton socket; actual Chrome and Android
+run in the existing managed QA workflows. No simulator hosted mutation yet.
 
 ### S195 — native Android emulator development testing (DEP-053 / ADR-0033)
 

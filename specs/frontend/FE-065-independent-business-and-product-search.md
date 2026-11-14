@@ -2,7 +2,7 @@
 id: FE-065
 title: Independent business-map and product-card discovery
 status: in_progress
-related: [FE-074, FE-026, BE-054, DEP-045, FE-030, FE-042, FE-049, FE-053, FE-059, BE-047, ADR-0027, FE-067, BE-044, FE-021, FE-052, FE-070]
+related: [FE-079, FE-074, FE-026, BE-054, DEP-045, FE-030, FE-042, FE-049, FE-053, FE-059, BE-047, ADR-0027, FE-067, BE-044, FE-021, FE-052, FE-070]
 owners: [product, frontend]
 last_updated: 2026-10-26
 change_level: L2

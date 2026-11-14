@@ -3,6 +3,7 @@ import ProductSupply from '../../src/ProductSupply';
 import {marketSearchParams,marketWorkspaceParams,type MarketScope,type MarketSearch} from '../../../../lib/market-search';
 import {emptyMarketWorkspace,hasExplicitMarketIntent,marketWorkspaceFromParams} from '../../../../lib/market-workspace';
 import {useMarketFeed,type MarketBatch} from '../../../../lib/use-market-feed';
+import {useAppForeground} from '../../src/use-app-foreground';
 import {countryName} from '../../../../lib/countries';
 import {MAP_MAX_ZOOM,MAP_NATIVE_MAX_ZOOM,mapGroupCapacity} from '../../../../lib/map/map-clustering';
 import React,{useCallback,useEffect,useMemo,useRef,useState} from 'react';
@@ -30,9 +31,9 @@ async function loadBatch(params:string,signal:AbortSignal):Promise<MarketBatch<M
  const data=await request<Market>('market?'+params,{signal});
  return {data,items:data.items,page:data.page,pages:data.pages,total:data.total};
 }
-function useIndependentMarket(scope:MarketScope,value:MarketSearch,excluded:string) {
+function useIndependentMarket(scope:MarketScope,value:MarketSearch,excluded:string,active:boolean) {
  const key=marketSearchParams(scope,value).toString()+(excluded?'&exclude='+excluded:'');
- return useMarketFeed(key,loadBatch,undefined,{scopeKey:JSON.stringify([API,scope,excluded])});
+ return useMarketFeed(key,loadBatch,undefined,{scopeKey:JSON.stringify([API,scope,excluded]),refreshMs:15000,active});
 }
 export default function MarketScreen() {
  const blocked=useBlockedBusinesses(),{t,locale}=useApp(),openLink=useOpenLink(),{width,height:viewportHeight,fontScale}=useWindowDimensions(),insets=useSafeAreaInsets(),focused=useIsFocused();
@@ -66,7 +67,8 @@ export default function MarketScreen() {
   onPanResponderTerminate:()=>settlePanel(dragOrigin.current),
   onPanResponderTerminationRequest:()=>true,
  }),[progress,settlePanel,width]);
- const excluded=blocked.list.map(v=>v.id).join(','),businesses=useIndependentMarket('businesses',businessSearch,excluded),products=useIndependentMarket('products',productSearch,excluded);
+ const foreground=useAppForeground();
+ const excluded=blocked.list.map(v=>v.id).join(','),businesses=useIndependentMarket('businesses',businessSearch,excluded,focused&&foreground&&!panel),products=useIndependentMarket('products',productSearch,excluded,focused&&foreground&&panel);
  const businessData=businesses.batch?.data,productData=products.batch?.data;
  const shops=useMemo(()=>blocked.ready?businessData?.showrooms.filter(s=>!blocked.list.some(b=>b.id===s.id))||EMPTY_SHOPS:EMPTY_SHOPS,[blocked.ready,businessData?.showrooms,blocked.list]);
  const currentMapIndex=useMemo(()=>markerIndex(shops,groupCapacity),[shops,groupCapacity]);
@@ -115,7 +117,7 @@ export default function MarketScreen() {
    <Text accessibilityRole="header" style={m.introTitle}>{t(MARKET_COMPACT_COPY.title)}</Text>
   </View>
   <View testID="market-mode-row" style={m.modeRow}><View style={m.modeSwitch} accessibilityRole="tablist" accessibilityLabel={t('Search for')}>{[{key:'businesses',label:'Business locations',icon:'map'},{key:'products',label:'Product listings',icon:'package'}].map(mode=><Pressable key={mode.key} accessibilityRole="tab" accessibilityState={{selected:panel===(mode.key==='products')}} aria-selected={panel===(mode.key==='products')} onPress={()=>settlePanel(mode.key==='products')} style={[m.modeButton,panel===(mode.key==='products')&&m.activeMode]}>{width>360&&<Icon name={mode.icon} size={16}/>}<Text style={m.modeText}>{t(mode.label)}</Text></Pressable>)}</View></View>
-  <View style={m.activeControls}><MarketSearchControls active={focused} scope={panel?'products':'businesses'} value={panel?productSearch:businessSearch} onChange={panel?setProductSearch:setBusinessSearch} metadata={(panel?productData:businessData)||null}/>{Boolean(panel?products.error:businesses.error)&&<Status error={panel?products.error:businesses.error} retry={panel?products.retry:businesses.retry}/>}</View>
+  <View style={m.activeControls}><MarketSearchControls active={focused} scope={panel?'products':'businesses'} value={panel?productSearch:businessSearch} onChange={panel?setProductSearch:setBusinessSearch} metadata={(panel?productData:businessData)||null}/>{Boolean(panel?products.error:businesses.error)&&<Status error={panel?products.error:businesses.error} retry={panel?products.retry:businesses.retry}/>}{panel&&products.updatesAvailable&&<Button label={t('Refresh')} onPress={products.retry}/>}</View>
   <View testID="market-stage" style={m.stage} onLayout={e=>setStageHeight(e.nativeEvent.layout.height)}>
    <Animated.View testID="market-map-panel" aria-hidden={panel} {...(Platform.OS==='web'?{inert:panel}:{})} accessibilityElementsHidden={panel} importantForAccessibility={panel?'no-hide-descendants':'auto'} style={[m.mapPanel,{pointerEvents:panel?'none':'auto',width:drawerWidth,zIndex:panel?1:8,transform:[{translateX:progress.interpolate({inputRange:[0,1],outputRange:[0,-width]})}]}]}>
     <MarketMap ref={map} height={Math.max(100,stageHeight)} shops={shops} groupCapacity={groupCapacity} onSelect={chooseBusiness} groups={blocked.ready?businessData?.nearbyGroups:[]} selectedId={selectedShop?.id} onGroup={openGroup} onZoomChange={setMapZoom} initialView={camera.current} onViewChange={rememberView}/>

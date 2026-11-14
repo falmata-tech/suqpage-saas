@@ -28,7 +28,7 @@ const bundled = build({ entryPoints: ["apps/mobile/app/(tabs)/index.tsx", "apps/
   name: "market-component-ports",
   setup(b) {
     b.onResolve({ filter: /^(react(?:\/jsx-runtime)?|react-native|react-native-safe-area-context|expo-router)$/ }, args => ({ path: args.path, namespace: "ports" }));
-    b.onResolve({ filter: /(?:^|\/)(runtime|ui|chrome|blocked-businesses|MarketMap|MapGroupPicker|use-market-feed|PublicActionDock)$/ }, args => ({ path: args.path.split("/").at(-1)!, namespace: "ports" }));
+    b.onResolve({ filter: /(?:^|\/)(runtime|ui|chrome|blocked-businesses|MarketMap|MapGroupPicker|use-market-feed|use-app-foreground|PublicActionDock)$/ }, args => ({ path: args.path.split("/").at(-1)!, namespace: "ports" }));
     b.onLoad({ filter: /.*/, namespace: "ports" }, args => ({ loader: "js", contents:
       args.path === "react" ? `
         export const createContext=initial=>({Provider:'ContextProvider',initial}),useContext=context=>context.initial;export const useState=initial=>{const i=fixture.stateCursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return [fixture.states[i],value=>{fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value;}];};
@@ -44,6 +44,7 @@ const bundled = build({ entryPoints: ["apps/mobile/app/(tabs)/index.tsx", "apps/
           export const Animated={View:'AnimatedView',Value:class {constructor(value){this.value=value;this.listeners=new Map();fixture.values.push(this);}addListener(fn){const id=String(this.listeners.size);this.listeners.set(id,fn);return id;}removeListener(id){this.listeners.delete(id);}setValue(value){this.value=value;for(const fn of this.listeners.values())fn({value});}interpolate(options){return options;}},timing:(value,options)=>({start(){fixture.animations.push(options);value.setValue(options.toValue);},stop(){}})};
         ` : args.path === "react-native-safe-area-context" ? `export const useSafeAreaInsets=()=>({top:0,bottom:0,left:0,right:0});`
         : args.path === "expo-router" ? `import {useEffect} from 'react';export const router={push:path=>{fixture.routes.push(path);fixture.focused=false;},navigate:path=>fixture.routes.push(path)},useIsFocused=()=>fixture.focused,useLocalSearchParams=()=>fixture.params,useFocusEffect=create=>useEffect(()=>fixture.focused?create():undefined,[fixture.focused,create]);`
+        : args.path === "use-app-foreground" ? `export const useAppForeground=()=>true;`
         : args.path === "runtime" ? `export const API='https://suqpage.example',useApp=()=>({t:fixture.t,locale:fixture.locale}),request=async()=>{throw Error('No API request expected in the component fixture');};`
         : args.path === "use-market-feed" ? `export const useMarketFeed=()=>fixture.feed;`
         : args.path === "blocked-businesses" ? `export const useBlockedBusinesses=()=>({ready:true,list:[]});`

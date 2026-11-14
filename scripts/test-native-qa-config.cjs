@@ -40,5 +40,9 @@ const key='native-qa-apk-v2-Linux-X64-'+'a'.repeat(64),digest='b'.repeat(64),art
 assert.equal(verifyNativeQaArtifact(artifact,key,digest).source,artifact.source);
 for(const changed of [{...artifact,key:'foreign'},{...artifact,sha256:'0'.repeat(64)},{...artifact,source:'unknown'},null])
  assert.throws(()=>verifyNativeQaArtifact(changed,key,digest));
+const {assertNativeDemoTarget}=require('./native-qa-target.ts');
+assert.equal(assertNativeDemoTarget({...local,...good}).pathname,'/suqpage_native_qa');
+assert.throws(()=>assertNativeDemoTarget({...local,...good,EXPO_PUBLIC_API_ORIGIN:'https://africmade.com'}));
+assert.throws(()=>assertNativeDemoTarget({...local,...good,CI:'false'}));
 console.log('PASS native QA configuration: distinct identity, local-only target, no hosted/Auth/Firebase inputs.');
 assert.equal(spawnSync('python3',['scripts/test-native-qa-ui.py'],{stdio:'inherit'}).status,0);

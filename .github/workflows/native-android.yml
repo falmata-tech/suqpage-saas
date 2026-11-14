@@ -70,6 +70,7 @@ jobs:
           mkdir -p .local/native-qa/evidence
           node --import tsx scripts/native-qa-backend.ts > .local/native-qa/backend.log 2>&1 &
           node --import tsx scripts/native-qa-backend.ts --check
+          node --import tsx scripts/native-qa-demo.ts --prepare
       - name: Generate the separate native project
         working-directory: apps/mobile
         run: npx expo prebuild --platform android --no-install

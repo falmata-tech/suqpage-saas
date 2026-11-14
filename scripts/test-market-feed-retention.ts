@@ -3,20 +3,49 @@ import {after,test} from 'node:test';
 import {build} from 'esbuild';
 import {chromium,expect,type Browser,type Page} from '@playwright/test';
 
-type Config={key:string;scope:string;retain:boolean;initial:boolean;initialKey:string};
-type Snapshot={ids:number[];requestedKey:string;displayedSnapshotKey:string|null;snapshotCurrent:boolean;initialLoading:boolean;updating:boolean;loading:boolean;hasMore:boolean;error:string;page:number|null};
+type Config={key:string;scope:string;retain:boolean;initial:boolean;initialKey:string;refreshMs?:number;active?:boolean};
+type Snapshot={ids:number[];requestedKey:string;displayedSnapshotKey:string|null;snapshotCurrent:boolean;initialLoading:boolean;updating:boolean;loading:boolean;hasMore:boolean;error:string;page:number|null;updatesAvailable:boolean};
 type Probe={mount:(config?:Partial<Config>)=>void;change:(config:Partial<Config>)=>void;resolve:(index:number,ids:number[],page?:number,pages?:number)=>void;reject:(index:number)=>void;more:()=>void;retry:()=>void;snapshot:()=>Snapshot;requests:()=>Array<{params:string;aborted:boolean}>};
 let browser:Browser|undefined;
 after(async()=>{await browser?.close();});
-const bundled=build({stdin:{loader:'tsx',resolveDir:process.cwd(),contents:`import React,{useState}from'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';import{useMarketFeed}from'./lib/use-market-feed';const root=createRoot(document.getElementById('root')),requests=[],initial={data:{query:'alpha'},items:[{id:1},{id:2}],page:1,pages:3,total:6};let serial=0,latest;function Feed({config}){const[state,setState]=useState(config);const load=(params,signal)=>new Promise((resolve,reject)=>requests.push({params,signal,resolve,reject}));const feed=useMarketFeed(state.key,load,state.initial?initial:undefined,state.retain?{scopeKey:state.scope,initialSnapshotKey:state.initialKey}:{initialSnapshotKey:state.initialKey});latest=feed;window.feedFixture.change=value=>setState(old=>({...old,...value}));return <section aria-busy={feed.loading}><output id='items'>{(feed.batch?.items||[]).map(item=>item.id).join(',')}</output></section>}window.feedFixture={mount:config=>{serial++;requests.length=0;flushSync(()=>root.render(<Feed key={serial} config={{key:'q=alpha',scope:'public',retain:true,initial:true,initialKey:'q=alpha',...config}}/>))},resolve:(index,ids,page=1,pages=3)=>{const request=requests[index];request.resolve({data:{query:new URLSearchParams(request.params).get('q')},items:ids.map(id=>({id})),page,pages,total:pages*2})},reject:index=>requests[index].reject(Error('controlled unavailable read')),more:()=>latest.loadMore(),retry:()=>latest.retry(),snapshot:()=>({ids:(latest.batch?.items||[]).map(item=>item.id),requestedKey:latest.requestedKey,displayedSnapshotKey:latest.displayedSnapshotKey,snapshotCurrent:latest.snapshotCurrent,initialLoading:latest.initialLoading,updating:latest.updating,loading:latest.loading,hasMore:latest.hasMore,error:latest.error,page:latest.batch?.page??null}),requests:()=>requests.map(({params,signal})=>({params,aborted:signal.aborted}))};window.feedFixture.mount();`},bundle:true,write:false,format:'iife',platform:'browser',jsx:'automatic'});
+const bundled=build({stdin:{loader:'tsx',resolveDir:process.cwd(),contents:`import React,{useState}from'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';import{useMarketFeed}from'./lib/use-market-feed';const root=createRoot(document.getElementById('root')),requests=[],initial={data:{query:'alpha'},items:[{id:1},{id:2}],page:1,pages:3,total:6};let serial=0,latest;function Feed({config}){const[state,setState]=useState(config);const load=(params,signal)=>new Promise((resolve,reject)=>requests.push({params,signal,resolve,reject}));const feed=useMarketFeed(state.key,load,state.initial?initial:undefined,state.retain?{scopeKey:state.scope,initialSnapshotKey:state.initialKey,refreshMs:state.refreshMs,active:state.active}:{initialSnapshotKey:state.initialKey});latest=feed;window.feedFixture.change=value=>setState(old=>({...old,...value}));return <section aria-busy={feed.loading}><output id='items'>{(feed.batch?.items||[]).map(item=>item.id).join(',')}</output></section>}window.feedFixture={mount:config=>{serial++;requests.length=0;flushSync(()=>root.render(<Feed key={serial} config={{key:'q=alpha',scope:'public',retain:true,initial:true,initialKey:'q=alpha',...config}}/>))},resolve:(index,ids,page=1,pages=3)=>{const request=requests[index];request.resolve({data:{query:new URLSearchParams(request.params).get('q')},items:ids.map(id=>({id})),page,pages,total:pages*2})},reject:index=>requests[index].reject(Error('controlled unavailable read')),more:()=>latest.loadMore(),retry:()=>latest.retry(),snapshot:()=>({ids:(latest.batch?.items||[]).map(item=>item.id),requestedKey:latest.requestedKey,displayedSnapshotKey:latest.displayedSnapshotKey,snapshotCurrent:latest.snapshotCurrent,initialLoading:latest.initialLoading,updating:latest.updating,loading:latest.loading,hasMore:latest.hasMore,error:latest.error,page:latest.batch?.page??null,updatesAvailable:latest.updatesAvailable}),requests:()=>requests.map(({params,signal})=>({params,aborted:signal.aborted}))};window.feedFixture.mount();`},bundle:true,write:false,format:'iife',platform:'browser',jsx:'automatic'});
 async function boot(config:Partial<Config>={}){
- browser??=await chromium.launch({channel:'chrome',headless:true});const context=await browser.newContext({serviceWorkers:'block'}),page=await context.newPage();const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await page.setContent('<main><div id="root"></div></main>');await page.addScriptTag({content:(await bundled).outputFiles[0].text});if(Object.keys(config).length)await page.evaluate(config=>(window as unknown as{feedFixture:Probe}).feedFixture.mount(config),config);return{page,close:async()=>{assert.deepEqual(errors,[]);await context.close();}};
+ browser??=await chromium.launch({channel:'chrome',headless:true});const context=await browser.newContext({serviceWorkers:'block'}),page=await context.newPage();const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));if(config.refreshMs)await page.clock.install();await page.setContent('<main><div id="root"></div></main>');await page.addScriptTag({content:(await bundled).outputFiles[0].text});if(Object.keys(config).length)await page.evaluate(config=>(window as unknown as{feedFixture:Probe}).feedFixture.mount(config),config);return{page,close:async()=>{assert.deepEqual(errors,[]);await context.close();}};
 }
 const state=(page:Page)=>page.evaluate(()=>(window as unknown as{feedFixture:Probe}).feedFixture.snapshot());
 const requests=(page:Page)=>page.evaluate(()=>(window as unknown as{feedFixture:Probe}).feedFixture.requests());
 const count=async(page:Page,n:number)=>expect.poll(async()=>(await requests(page)).length).toBe(n);
 const change=(page:Page,key:string,scope?:string)=>page.evaluate(value=>(window as unknown as{feedFixture:Probe}).feedFixture.change(value),{key,...(scope?{scope}:{})});
 const resolve=(page:Page,index:number,ids:number[],pageNumber=1,pages=3)=>page.evaluate(v=>(window as unknown as{feedFixture:Probe}).feedFixture.resolve(v.index,v.ids,v.pageNumber,v.pages),{index,ids,pageNumber,pages});
+
+test('FE-079 foreground updates are quiet and preserve deeper pages until explicit refresh',async()=>{
+ const {page,close}=await boot({refreshMs:15000,active:true});
+ try{
+  await page.clock.runFor(15000);await count(page,1);
+  assert.equal((await state(page)).loading,false);assert.deepEqual((await state(page)).ids,[1,2]);
+  await resolve(page,0,[101,102]);await expect(page.locator('#items')).toHaveText('101,102');
+  await page.evaluate(()=>(window as unknown as{feedFixture:Probe}).feedFixture.more());await count(page,2);
+  await resolve(page,1,[103,104],2);await expect(page.locator('#items')).toHaveText('101,102,103,104');
+  await page.clock.runFor(15000);await count(page,3);await resolve(page,2,[201,202]);
+  await expect.poll(async()=>(await state(page)).updatesAvailable).toBe(true);
+  assert.deepEqual((await state(page)).ids,[101,102,103,104]);assert.equal((await state(page)).page,2);
+  await page.evaluate(()=>(window as unknown as{feedFixture:Probe}).feedFixture.retry());await page.clock.runFor(250);await count(page,4);
+  await resolve(page,3,[201,202]);await expect(page.locator('#items')).toHaveText('201,202');assert.equal((await state(page)).updatesAvailable,false);
+ }finally{await close();}
+});
+
+test('FE-079 inactive discovery panes abort pending polls and reject late or departed results',async()=>{
+ const {page,close}=await boot({refreshMs:15000,active:true});
+ try{
+  await page.clock.runFor(15000);await count(page,1);
+  await page.evaluate(()=>(window as unknown as{feedFixture:Probe}).feedFixture.change({active:false}));
+  await expect.poll(async()=>(await requests(page))[0].aborted).toBe(true);
+  await resolve(page,0,[999]);await page.clock.runFor(60000);assert.deepEqual((await state(page)).ids,[1,2]);await count(page,1);
+  await page.evaluate(()=>(window as unknown as{feedFixture:Probe}).feedFixture.change({active:true}));await page.clock.runFor(15000);await count(page,2);
+  await change(page,'q=new');await page.clock.runFor(250);await count(page,3);
+  await resolve(page,1,[888]);await resolve(page,2,[301]);await expect(page.locator('#items')).toHaveText('301');
+ }finally{await close();}
+});
 
 test('FE-074/065 same-scope criteria retain cards with honest keys and forbid stale pagination',async()=>{
  const{page,close}=await boot();try{await expect(page.locator('#items')).toHaveText('1,2');await change(page,'q=beta');await expect.poll(async()=>(await state(page)).updating).toBe(true);assert.deepEqual((await state(page)).ids,[1,2]);assert.equal((await state(page)).displayedSnapshotKey,'q=alpha');assert.equal((await state(page)).requestedKey,'q=beta');assert.equal((await state(page)).snapshotCurrent,false);assert.equal((await state(page)).hasMore,false);await page.evaluate(()=>(window as unknown as{feedFixture:Probe}).feedFixture.more());await count(page,1);assert.equal(new URLSearchParams((await requests(page))[0].params).has('page'),false);await resolve(page,0,[101,102]);await expect(page.locator('#items')).toHaveText('101,102');const s=await state(page);assert.ok(s.snapshotCurrent&&!s.loading&&!s.updating);assert.equal(s.displayedSnapshotKey,'q=beta');}finally{await close();}

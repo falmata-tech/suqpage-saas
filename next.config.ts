@@ -43,6 +43,9 @@ const securityHeaders = [
 const publicEnvironment = platformEnvironment();
 const nextConfig: NextConfig = {
   env: {
+    AFRICMADE_BUILD_SOURCE: /^[a-f0-9]{40}$/.test(process.env.COMMIT_REF || "") ? process.env.COMMIT_REF! : "",
+    AFRICMADE_BUILD_SITE: /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(process.env.SITE_ID || "") ? process.env.SITE_ID! : "",
+    AFRICMADE_BUILD_DEPLOY: /^[a-f0-9]{24}$/.test(process.env.DEPLOY_ID || "") ? process.env.DEPLOY_ID! : "",
     NEXT_PUBLIC_SUQPAGE_PWA_ENABLED: publicEnvironment.NEXT_PUBLIC_SUQPAGE_PWA_ENABLED ?? "true",
     NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER: publicEnvironment.NEXT_PUBLIC_SUQPAGE_MAP_PROVIDER ?? "osm-standard",
     NEXT_PUBLIC_SUQPAGE_TIKTOK_URL: publicEnvironment.NEXT_PUBLIC_SUQPAGE_TIKTOK_URL ?? "",

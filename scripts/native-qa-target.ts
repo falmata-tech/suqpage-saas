@@ -18,3 +18,9 @@ export function verifyNativeQaArtifact(value:unknown,key:string,digest:string):{
     !/^[a-f0-9]{64}$/.test(digest)||v.sha256!==digest)throw Error('Native QA cached artifact identity does not match its inputs.');
  return {source:v.source,key,sha256:digest};
 }
+
+export function assertNativeDemoTarget(env:NodeJS.ProcessEnv=process.env){
+ const target=nativeQaDatabaseUrl(env);
+ if(env.AFRICMADE_NATIVE_QA!=='1'||env.EXPO_PUBLIC_API_ORIGIN!=='http://10.0.2.2:3000'||env.EXPO_PUBLIC_NATIVE_MAP_FIXTURE!=='1')throw Error('Demo QA requires the isolated native app.');
+ return target;
+}
