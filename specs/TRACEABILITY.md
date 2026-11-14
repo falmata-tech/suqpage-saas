@@ -8,30 +8,66 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
-## S194 scenario-driven demo activity (qualification in progress)
+## S194 scenario-driven demo activity — qualified and deployed
 
-BE-067 / FE-079 / DEP-054 / ADR-0034 map three versioned timelines, ordinary
-transactional writes, exact demo enrollment, private disabled-only requests,
-rollback/budgets and foreground public refresh to the simulator runtime and
-operating inventory. Nine domain/timer/inert-worker/fixture-boundary tests,
-18 controlled native inquiry/product cases, root/mobile types and237 specs pass.
+BE-067 / FE-079 / DEP-054 / ADR-0034 map the versioned scenarios, ordinary
+transactional commands, exact demo registration, private disabled-only requests,
+rollback/budgets and foreground public refresh to the runtime and operating
+inventory. Source `3d67d3c0b13a7ef24810cca1be959d39da54006b` passes all five
+required quality jobs in43537103591:143 browser/component cases and21 actual
+acceptance journeys, including live desktop/phone updates, edited-draft/expanded-
+copy retention and English/Amharic/Afaan Oromo fit in20.7s. Inspected visual
+verdict: PASS for those states; merchant content stays literal. Browser
+artifact14089508450 SHA256
+`3ff3827c731f7e2c384f07edbdd1edd38464ab04bdf65b046602687909f9ea20`
+retains synthetic review evidence seven days.
 
-Candidate `aeea8ae` passes core, PostgreSQL, container and dependency jobs in
-43535106712. PostgreSQL covers complete timelines, mixed real/new/private data,
-identity/content/version drift, retry/overlap, stage rollback, private privileges,
-storage/daily budgets, one public read snapshot during a concurrent commit, and
-private request admission with rollback of late failed empty-unit preparation.
-Its native fixture admits through that same request path before compilation.
+Native43537103714 passes11 actual API35/x86_64 states in197s: an already-open
+product changes from Ready to ship/120 shawls to Limited availability/20 shawls,
+Back retains search, and exactly one selected tenant/product inquiry is saved.
+Independent public/SQL readback preserves other businesses; no fatal exception.
+Inspected English native verdict: PASS. Artifact14090976106 SHA256
+`66a60b345c841d15fb5bd82b3ad85bf1845a26e9852a4b8fac540cc70b9bde6c`.
+Metro source is3d67d3c; compiled QA source is`aeea8ae`, APK SHA256
+`568f3a90c8d98b4dc3347c45db767656b01a71ca9fdf1b3918df31a17c8b4484`.
+Physical devices, owner Auth, native locales/offline, push and Play remain separate.
 
-The actual Chrome desktop/phone journey persists limited supply, refreshes open
-screens and retains edited inquiry drafts plus expanded business copy in20.8s.
-The143 browser/component cases and20 existing journeys pass; the new journey
-then stops at its responsive Language selector. Artifact14089970416 SHA256
-`f21ab40295cf13cce66b1df7de3b2762c7b57678e0d67c522a5afbc82d21227d`
-retains its before/after evidence for seven days. Inspected English data-flow and
-layout decision: PASS for those states; correct the joined example/category
-labels and redundant newly initialized unit wording, then qualify enabled
-languages and the actual Android refresh on the corrected source.
+Protected PR63 merges as`dc00100810e49ddca1b619348f265df0550d9bb3`, with the
+identical qualified tree`9e7aea517f42eaf0260ed72306d0dd9e579b8596`. Automatic
+Netlify deploy`6af7b32d639d3dc44d23f262` independently reports that exact source,
+healthy status and site`26c795eb-5560-4a88-b38d-3cc922c2a5e6` before schema writes.
+Main quality43538109685 and native43538109755 pass. Supabase project`sjeiiqxgscuqajpgddcc` is independently
+healthy. Protected before-images SHA256
+`5e9f6d4ab18ac3901476e720ce49cf9296dcf9918894a7003e4f9caabbd109fa`
+retain the original schema/privileges and selected demo baselines without credentials.
+
+The atomic migration proves existing81 hardening equivalence, records81 and adds82
+without replaying old data patches. All four private tables have RLS, no public/
+anon/authenticated/service-role grants and the admitted server role's DML access.
+The first bigint-ledger guard refused an integer-array comparison before DDL;
+readback proved ledger80/no simulator objects before the corrected atomic apply.
+No Auth/SMTP/configuration sync, reset or customer/history restore was performed.
+
+Production Netlify scheduling accepts Selam at01:09UTC while disabled; its selling
+unit appears on an already-open browser. Observed stage0/1/2 runs at01:11/01:13/
+01:14 change stored publication, public API and open UI together while an edited
+unsent draft survives. Addis Metalworks and Green Terrace Farm are accepted by
+the actual01:17 schedule while paused, then the exact three-demo cohort resumes.
+Through01:25, all three have started and13 stages are successful, with no failed/
+paused stage, duplicate business/slot or slot exceeding two stages. Independent
+public API facts match their immutable catalog/page revisions for all three.
+
+Readback preserves all six real businesses/products/drafts/publication/catalog
+histories, existing trigger bodies/owners/permissions, and cohort identity/Auth
+links, contacts, geography, categories, branding and media. All12 effective cohort
+galleries retain their references/order; ordinary upkeep materializes only the
+three selected legacy gallery fallbacks. A focused PostgreSQL regression now
+covers that representation. Database size is24,587,411 bytes against the256MiB
+soft budget; this initial growth includes schema/warm-up as well as13 stages and
+three unit preparations, not a per-stage cost forecast. Catalog history grows
+306→322 and page history263→276, consistent with those ordinary appends.
+
+Retained qualification failures (corrected without weakening contracts):
 
 | Candidate/run | Retained failure and correction |
 |---|---|
@@ -40,19 +76,13 @@ languages and the actual Android refresh on the corrected source.
 | `aeea8ae` /43535106712 | Both live English views/drafts and ordinary readback pass, then two responsive Language selects match. Scope the test to the visible control; do not weaken localization/overflow assertions. |
 | `aeea8ae` /43535106720 | Native private admission and stage2 public readback pass; the inspected screen shows updated capacity/description without a crash. The driver scrolls past the availability label while waiting. Position the initial selling facts first and wait without further scrolling; keep the45s bound. |
 
-Native artifact14090160960 SHA256
-`64550aead23d23a2a756085e9cf8cd335d67fe27528a8d6a15f4bccefa9a301a`
-retains the failed selector state and independent changed public facts. Its
-compiled QA client remains valid for the next source-bound Metro/driver iteration.
-Newly exposed selling-unit prefixes also use the existing active-language catalog;
-unit strings remain literal. Pure and real browser assertions cover that binding.
 
-Actual native/localized refresh, all required current-head gates and hosted
-execution remain pending; no simulator migration, registration or recurring
-writes are deployed. Local Chromium is blocked by its singleton socket; the
-separate cloud browser cannot reach that loopback. It can review the public
-production site independently. DEP-054 owns the protected before-images, exact
-cohort and code-before-schema canary plan; no Auth/SMTP settings are changed.
+The protected before-images and exact request plan remain outside Git. The active
+checklist and operating inventory own pause/recovery and remaining coverage.
+Google mailbox verification and signed-release admission remain deferred. Local
+Chromium's socket restriction does not qualify a local UI pass; actual Chrome/
+Android evidence above comes from the isolated managed workflows, and production
+browser observation is independent of the local loopback preview.
 
 ## S195 native Android QA — initial smoke qualified
 

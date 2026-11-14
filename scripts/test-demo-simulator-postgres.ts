@@ -12,6 +12,7 @@ import {ownerPagePort} from '../lib/owner-page-runtime';
 import {saveOwnerPageAndPublication} from '../lib/owner-page-save-runtime';
 import {runtimePublicShowroom} from '../lib/public-showroom-runtime';
 import {demoScenarioStage} from '../lib/demo-scenarios';
+import {productMedia} from '../lib/product-media';
 import {DEMO_SIMULATOR_TABLES} from '../lib/demo-simulator-schema';
 
 async function main(){
@@ -48,6 +49,10 @@ async function main(){
    for(const table of ['auth_identity_links','attention_notifications','attention_preferences','attention_subscriptions','attention_deliveries','attention_email_deliveries'])hashes[table]=await db.prepare(`SELECT COUNT(*)::integer total,md5(COALESCE(string_agg(h,'' ORDER BY h),'')) digest FROM (SELECT md5(to_jsonb(t)::text) h FROM ${table} t) rows`).get();
    return hashes;
   };
+  // Existing legacy image/video fields may be materialized by ordinary upkeep.
+  // Preserve the effective approved gallery across every scenario stage.
+  await db.prepare('UPDATE products SET image_path=?,video_ref=? WHERE id=?').run('/uploads/seed/benchmarks/green-terrace-farm/product-1.jpg','youtube:wJV9EDe_sFc',a.productId);
+  const beforeGallery=productMedia((await runtimeCatalogByHandle(a.handle))!.products.find(p=>p.id===a.productId)!);
   const beforePrivate=await privateState();
   const rollback=Error('Restore fixture ledger');
   await assert.rejects(()=>db.runner.transaction(async()=>{
@@ -72,6 +77,7 @@ async function main(){
    const result=await runDemoSimulatorTick(now);assert.deepEqual(result,{status:'advanced',advanced:1,paused:0,failed:0});
    const progress=await get(a.businessId);assert.equal(progress.stage,index);assert.equal(progress.cycle,0);
    const plan=demoScenarioStage(a.scenarioKey,1,index,a.parameters),catalog=await runtimeCatalogByHandle(a.handle),product=catalog!.products.find(p=>p.id===a.productId)!;
+   assert.deepEqual(productMedia(product),beforeGallery,'Normal scenario writes preserve legacy media references and order.');
    assert.equal(product.availability,plan.product.availability);assert.equal(product.price_minor,plan.product.priceMinor);assert.equal(product.capacity_summary,plan.product.capacitySummary);
    assert.equal(product.description,plan.productUpdate+'\n\nExample wholesale onions.','Listing descriptions expose each coherent stage while preserving the original product story.');
    assert.match((await runtimePublishedPage(a.businessId))!.introduction,new RegExp(plan.stage.title));

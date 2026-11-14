@@ -3,43 +3,33 @@
 Current product authority: [master brief](../AFRICMADE-MASTER-PROMPT.md).
 Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 [DEP-049](../specs/deployment/DEP-049-africmade-domain-and-app-cutover.md).
-Updated 2026-11-13. This working board replaces dated `CURRENT` labels; it does
+Updated 2026-11-14. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
 ## Current position
 
-Business-only transport is integrated through main `2872313` (PR #59), with all
-five required PR/main checks passed. Housekeeping is integrated in PR #58.
-The preceding main `120f480` (PR #57) included: AfricMade naming,
-Android version4 preparation, standalone Expo binding (#56) and the approved
-phone headline are merged. All five required jobs passed on that exact main
-commit in run `40819547526`. S190 now owns business-only transport; earlier unchecked integration statements
-are not new source tasks.
+The qualified application source includes business-only transport (PR59), phone
+messaging/demo destinations (PR61), actual native Android QA (PR62) and the
+scenario-driven simulator (PR63). PR63's protected functional merge is`dc001008`;
+all five required source/main quality jobs pass, and the source-bound Android
+scenario/inquiry smoke passes. Exact receipts and remaining limits live in
+traceability rather than earlier unmerged-branch notes.
 
-The existing Netlify project `africmade`, ID
-`26c795eb-5560-4a88-b38d-3cc922c2a5e6`, is independently verified on
-2026-11-12. GitHub main is linked and automatic publication is enabled. The
-native Git build of main `5557d5e` is published as `6af656dfc37bdf4701b82d65`;
-`africmade.com` serves it directly. Netlify's primary domain remains
-`mirtpage.com`; domains and credentials were preserved. Branch deploys and PR
-previews are disabled until their backend is isolated. The previous deploy
-`6ae0a7fb4ccd545c7dd13f55` remains available for recovery. DEP-052 owns the new
-ordinary delivery contract; traceability owns the exact build/runtime evidence.
+Netlify project`africmade`, ID`26c795eb-5560-4a88-b38d-3cc922c2a5e6`, automatically
+publishes GitHub main. Deploy`6af7b32d639d3dc44d23f262` independently reports the
+qualified merge, expected site and healthy API at`africmade.com`. The primary
+legacy domain remains`mirtpage.com`; domains, credentials and previous deployments
+are preserved. Non-production deploys remain disabled until their backend is
+isolated. The no-store health endpoint reports current public build identifiers.
 
-Live desktop review verifies buyer/supplier About tabs, current Featured timing
-and four examples, supplier preview/page/product search and details, separate
-single-product/saved inquiry selection, and the unsent Inbox form. No business
-inquiry, chat, email or external message was sent. Phone, full map, authenticated
-roles, Expo and installed Android are not established by this review.
-
-Supabase project `sjeiiqxgscuqajpgddcc` is independently active/healthy, with
-application schema 80 and one private/no public Storage buckets. No development
-branch is listed. BE-065's guarded metadata-only correction fixed all nine
-trigger search paths and removed 408 unnecessary API-role grants, including
-MAINTAIN. Fresh readback preserves function bodies/owners, server ACLs, RLS and
-ledger 80; effective public API-role table/sequence privileges are empty. The only
-remaining security advisory is the separate disabled leaked-password protection
-setting; Auth settings and credentials were not changed.
+Supabase project`sjeiiqxgscuqajpgddcc` is active/healthy on application ledger82.
+The already-applied81 trigger/privilege hardening is verified and recorded without
+replaying data patches. The four simulator tables have RLS, no public API-role
+privileges and only admitted server access. All six real-business content/history
+fingerprints are preserved. The exact three-demo cohort is enabled and actual
+scheduled effects, normal public API and open-browser draft retention pass S194.
+Auth/SMTP settings and credentials are unchanged; the separate leaked-password
+protection setting remains outside this rollout.
 
 The last recorded signed `com.africmade.app` artifact is version3. It passed
 static inspection but is held from Play because it predates the final identity
@@ -53,8 +43,9 @@ store screenshots and Play qualification remain separate unfinished work.
 
 | Surface | Source / evidence | Remaining qualification |
 | --- | --- | --- |
-| AfricMade web source | PR #59 / main `2872313`; five required PR/main jobs passed | S191 native release preparation remains separate |
-| Published website | PR #59 business-only transport is deployed; public guest aliases return410 and unauthenticated private owner APIs return401 | Complete Expo/physical-device qualification; managed Auth/domain cutover remains separately guarded |
+| AfricMade web source | PR63 / functional main`dc001008`; required PR/main quality and source-bound native QA pass | S191 signed release preparation remains separate |
+| Published website | Automatic Netlify delivery and the three-demo simulator are verified; public guest transport remains retired | Wider native owner/physical-device work and managed Auth/domain cutover remain separately guarded |
+| Android development QA | Actual navigation, keyboard, Back, live product update and saved inquiry pass in an isolated emulator | Native owner/locales/offline, physical devices, push and Play remain separate |
 | Android new package | Signed v3 recorded; version4 config and standalone Expo binding merged | Fresh build admission, signed v4, binary/device/push/Play checks |
 | Android former packages | Retained signed artifacts and compatibility records | Historical inputs; do not submit them as the new package |
 | AfricMade Play app | Previously verified Free/App draft and local listing material | Current Console readback, declarations/screenshots, admitted bundle and actual testing |
@@ -83,24 +74,25 @@ screens, with measured storage/write budgets and a bounded active demo cohort.
    run evidence; preserve contacts, identity/Auth, customers and notifications.
 3. [x] Prove non-demo/new-signup exclusion, ownership/flag drift refusal, mixed
    data preservation, failures/replay and normal database-to-public-read paths.
-4. [ ] Qualify browser update journeys, required CI, exact hosted migration/data
+4. [x] Qualify browser update journeys, required CI, exact hosted migration/data
    plan and production deployment; enable only the reviewed enrolled demos and
    independently verify scheduled runs and real-account preservation.
 
-Current step: 4. The field/scenario and refresh inventory is in
-`docs/operations/DEMO-SIMULATOR.md`. Use predefined coherent accelerated timelines,
-private explicit enrollment, a dedicated one-minute scheduled function and at most
-two due stages per tick in a small active cohort. Open screens refresh at15s while
-active. Real/new/private accounts remain excluded; record versions and guard
-concurrent human edits, writes and retained-data growth. No hosted mutation yet.
+Complete for the reviewed initial cohort: Selam Weave, Addis Metalworks and
+Green Terrace Farm. The dedicated minute schedule advances at most two coherent
+stages, and public screens refresh at15s while active. Actual scheduled private
+admission, canary0/1/2 transitions, normal stored/public readback and the open
+production browser's retained unsent draft pass. All three enrolled demos start;
+through the recorded window13 stages succeed without failed/paused outcomes or
+duplicate business/slot. All six real businesses and histories remain unchanged.
 
-Implementation and mixed-data PostgreSQL qualification pass on candidate
-`aeea8ae` in run43535106712, including explicit private request admission,
-empty-unit preparation and failed-admission rollback. Domain/timer/worker-load/
-fixture-boundary tests, root/mobile types and237 specs pass. Browser/native live
-refresh screenshots, all required current-head gates and hosted rollout remain
-open. This host refuses Chromium's singleton socket; actual Chrome and Android
-run in the existing managed QA workflows. No simulator hosted mutation yet.
+The operating inventory owns fields, scenario/capacity values, budgets and pause/
+recovery. Traceability owns exact source/deploy/test/artifact and protected
+before-image receipts. New signups remain non-demo by default. The ordinary
+upkeep path materializes legacy image/video fallbacks without changing effective
+gallery references/order; the regression covers that form. Do not expand the
+cohort, rewrite a paused baseline or raise spending limits as automatic cleanup.
+Google mailbox S192 and signed release S191 remain separate unfinished work.
 
 ### S195 — native Android emulator development testing (DEP-053 / ADR-0033)
 
@@ -116,9 +108,9 @@ instance while developing, inspect its UI and compare web/native capabilities.
 3. [x] Boot an emulator, run actual app workflows, inspect evidence and fix
    demonstrated native gaps; wire repeatable checks into development/CI.
 
-Initial smoke complete: run43529393814 passes ten actual Android states and the
-saved tenant/product inquiry check in151s; all five source-matched quality jobs
-pass. Screenshots were inspected. Exact native caching avoids the ten-minute
+Initial smoke and the S194 live-update extension are complete: actual Android
+map/search/product/Back/form/keyboard, open-screen scenario changes and independent
+saved tenant/product inquiry checks pass. Screenshots were inspected. Exact native caching avoids the ten-minute
 compile for UI-only iterations. Broader locale/filter/offline/owner workflows
 remain follow-ups in `docs/MOBILE-TESTING.md`; DEP-044 signing/Firebase/physical/
 Play admission remains separate. Protected integration/delivery follows DEP-052.

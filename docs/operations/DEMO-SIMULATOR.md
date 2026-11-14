@@ -1,8 +1,10 @@
 # Recurring demo marketplace simulator — implementation inventory
 
-Checklist S194 owns this requested work. This inventory records current source
-contracts and the proposed first simulation matrix. No recurring worker,
-enrollment, migration or hosted write is implemented by this document.
+Checklist S194 and BE-067 / FE-079 / DEP-054 own this service. Three versioned
+scenario catalogs publish coordinated example updates through ordinary application
+commands. This inventory records supported fields, current operating controls and
+the reviewed initial cohort. Exact delivery, test and hosted receipts live in
+`specs/TRACEABILITY.md`; controls and identities never belong in public DTOs.
 
 The production contact audit found 65 marked demos, 64 published demos and six
 non-demo businesses. Those counts are observations, never an enrollment rule.
@@ -66,13 +68,12 @@ an entire timeline. It is not a collection of independent field toggles.
 
 | Scenario | Planned stages | Related facts that move together |
 |---|---|---|
-| Seasonal harvest | Preparing → harvest available → limited seasonal supply → next window | Availability, capacity, lead time, minimum order, predefined price and showroom update |
-| Workshop production cycle | Open production slots → busy schedule → capacity recovers | Made-to-order identity, available/limited state, capacity, lead time and matching introduction |
-| New product/model launch | Announced → available for inquiry → normal supply | Existing enrolled product visibility/availability, description, selling facts and matching showroom announcement |
-| Wholesale batch replenishment | Available batch → limited batch → replenished batch | Availability, quantity unit, minimum order, capacity and dispatch promise |
-| Planned assortment update | Existing choices → declared revised choices → stable assortment | Product-owned variants/media, descriptions and safe inquiry-selection revalidation |
+| Seasonal harvest | Preparing → checking → available → dispatch → limited → replenished | Availability, capacity, lead time, minimum order, predefined price and showroom update |
+| Workshop production cycle | Slots open → scheduled → production → finishing → planning → capacity restored | Made-to-order identity, available/limited state, capacity, lead time and matching introduction |
+| Wholesale batch replenishment | Batch open → dispatch → limited → preparing → checking → replenished | Availability, quantity unit, minimum order, capacity and dispatch promise |
 
-Each definition needs an immutable scenario ID/version, eligible business/product
+Product/model launches and assortment/variant changes remain later scenarios;
+they are not currently automated. Each current definition has an immutable scenario ID/version, eligible business/product
 types, required target bindings, ordered stages, minimum stage duration, explicit
 field values, consistency checks, completion/loop cooldown and coverage cases.
 Assign a compatible scenario to an explicitly enrolled demo; its values must fit
@@ -91,47 +92,46 @@ Use curated coherent scenarios; selection may choose among compatible plans,
 but field values and transitions come from the selected scenario. No random
 prices, destinations, coordinates, names or unrelated supplier facts.
 Retain the exact baseline/version for conflict detection; never overwrite a
-concurrent human edit silently. One bounded tenant operation per tick is the
-initial write unit. The owner's frequency clarification requires visible activity
+concurrent human edit silently. One coordinated tenant stage is the
+write unit, with at most two due stages per tick. The owner's frequency clarification requires visible activity
 about every minute across a rotating active cohort. Compress planned scenario
 durations and refresh already-open screens; do not make users wait hours to see
 a demo change. Bound each tick to the coordinated affected records, skip unchanged
 facts, and measure snapshot/history growth when choosing cohort size. Keep concurrency locking, replay
 protection, a pause switch and bounded runtime/run retention.
 
-## Refresh gap and verification
+## Foreground refresh and verification
 
-Current chat clients poll while active. The marketplace feed retains its loaded
-snapshot, the native `useResourceLoad` refreshes on explicit/selected focus events,
-and public showroom rendering has no recurring catalog subscription. Backend
-writes alone do not update an already-open marketplace/showroom automatically.
-Mobile shop DTO `version` is the business content version; page publication also
-has an independent revision that must participate in any refresh fingerprint.
+Public shop revision includes the business content version and the current public
+page revision. Private drafts/messages do not advance it. The public API and
+server page read product/profile facts in one read-only repeatable snapshot.
+Web/native screens poll every15 seconds while active, abort/fence departed reads,
+back off failures and retain navigation, filters, selections and edited drafts.
+First-page marketplace updates stay quiet; deeper pagination offers explicit
+Refresh rather than discarding the reader's loaded pages.
 
-The implementation needs a bounded foreground refresh contract for web/native,
-with current-scope/stale-response fencing and retained filter, selection, scroll
-and inquiry-draft state. Stop hidden/background requests, back off failures and
-show recovery; do not call polling a verified Supabase Realtime subscription.
-
-Prove on disposable mixed real/demo/new-signup fixtures: normal write → stored
-version/publication → fresh public API → already-open rendered values, measured
-with one selected scenario. Cover replay, overlapping runs, rollback, flag/owner/
-product drift, immutable history and no notification creation. Production rollout
-then needs exact project/site, protected before-images/enrollment plan, guarded
-canary, scheduled-run readback and independent real-account preservation checks.
+Disposable mixed-data PostgreSQL proves normal writes, full timelines, identity/
+version drift, new-signup exclusion, replay/overlap, rollback, private privileges
+and budgets. Actual Chrome desktop/phone journeys cover open-screen updates,
+draft/expanded-copy retention and English/Amharic/Afaan Oromo fit. Actual Android
+covers open product updates, Back/search, selection and a saved local inquiry.
+Neither controlled fixtures nor this English emulator smoke qualify physical
+Android, owner Auth, push or Play. Production uses the actual Netlify clock,
+public API/readback and an already-open browser; no supplied test clock or HTTP
+trigger is exposed in the hosted worker.
 
 ## Hosting choice
 
-Prefer a dedicated Netlify scheduled function, separate from `attention-worker`,
+A dedicated Netlify scheduled function runs separately from `attention-worker`,
 using existing server-only PostgreSQL application ports. Netlify scheduled work
 has a 30-second bound and runs only on published deployments. Keep each tick below
 that bound and pause safely if data/schema/budget admission fails. A VM or a new
 Supabase scheduling/provider credential is unnecessary if this measured contract
-fits. A fresh read-only production measurement reports 24,112,275 database bytes, 306
+fits. The pre-rollout read-only measurement was24,112,275 database bytes,306
 retained catalog versions averaging 8,591 snapshot bytes, 263 page publications
-and application ledger version 80. Source migration 81 is a separate metadata/
-privilege hardening step; verify its hosted equivalence and ledger before any
-later simulator migration. These are observations, not an admission to mutate.
+and application ledger80. The rollout verifies the already-applied81 metadata/
+privilege equivalence before recording81 and adding private schema82. No earlier
+data patches, seed/reset, Auth/SMTP or configuration sync is replayed.
 
 At one product change per minute, catalog snapshots alone add roughly 12.4 MB/day
 before PostgreSQL/index overhead and compression. Each selected stage now changes
@@ -140,23 +140,24 @@ the maximum two stages per minute, budget roughly 24.8 MB/day of raw snapshot JS
 before measuring actual stored growth. Identical retries create no new snapshot.
 Preserve immutable history and pause at the explicit storage budget; never delete
 retained publications or raise provider spending limits. The selected
-cadence and limits are now fixed in the implementation candidate: one minute,
+cadence and limits are now fixed in the runtime: one minute,
 two due stages, at most six active enrollments, 2,880 successful stages per UTC
 day and a 256 MiB database soft limit. PostgreSQL17 imposes a 23-second transaction
 deadline. Storage pressure disables demo work; the daily limit defers it until
 the next day. Neither condition changes merchant history or provider billing.
 Only seven-day private operational run rows are pruned during active work.
 
-The candidate publishes each short stage summary before the preserved original
+The service publishes each short stage summary before the preserved original
 product description and business story, so cards and showrooms expose activity.
 Enrollment reserves space in the ordinary text limits without truncating either.
 Public catalog/profile reads use one read-only repeatable snapshot to avoid
-mixed stages during concurrent writes. The candidate uses ordinary product upkeep and owner page save/publication in
+mixed stages during concurrent writes. The service uses ordinary product upkeep and owner page save/publication in
 one transaction. It refuses pending location proposals and page-owned Storage
 images so a stage cannot approve geography or fetch Storage while holding locks.
 Current catalog, draft/publication, identity and geography fingerprints fence
-human edits. Qualification and hosted enrollment remain pending; deployment does
-not enable the disabled control or infer any enrolled business from its name.
+human edits. Deployment/migration never enables the control or infers enrollment.
+The operator explicitly admits a reviewed cohort and enables bounded execution;
+current hosted evidence and preserved-real-account checks belong in traceability.
 
 Native qualification extends DEP-053 with `scripts/native-qa-demo.ts`: the exact
 source-bound local QA fixture advances through ordinary scenario commands while
@@ -176,3 +177,36 @@ copying management credentials into the application.
 The public no-store health endpoint includes validated build commit/deployment IDs
 when Netlify supplies them at build time. Only these public identifiers are
 embedded; no credential or private simulator state enters health or client code.
+
+## Reviewed initial cohort
+
+| Example business | Scenario | Product | Unit | Minimum | Normal / limited capacity per week |
+|---|---|---|---|---|---|
+| Selam Weave | Wholesale replenishment | Indigo Kuta Shawl | shawls |10|120 /20|
+| Addis Metalworks | Workshop production | Powder-Coated Equipment Frame | frames |1|12 /4|
+| Green Terrace Farm | Seasonal harvest | Highland Greens Mix | crates |5|200 /40|
+
+Preserve each existing base price, identity, category, geography, media and contact.
+These units were explicitly initialized only where empty, through normal upkeep.
+The initial cohort is deliberately smaller than the65 marked examples; the flag
+alone never authorizes updates. Normal signup keeps `is_demo=0`.
+
+Pause via the verified private control before any new request. The worker admits
+at most two requests per disabled tick and never resumes itself. Inspect every
+accepted/rejected result before enabling. A rejected request rolls back its unit
+preparation as well as enrollment. Drift pauses the affected example; do not
+rewrite an expected hash or re-enroll blindly. Storage pressure pauses the service
+rather than deleting immutable history or raising provider billing.
+
+After ledger82, retain a qualified82-compatible deployment or roll forward;
+redeploying an81-only app would fail its future-ledger check. The first rollback
+is the private pause control. Keep protected before-images outside Git and never
+restore customer/history rows automatically. Hosted ledger versions are bigint;
+exact array guards must use the matching type. The first rollout guard refused
+an integer-array comparison before any DDL; readback proved no change before the
+corrected single atomic migration was applied.
+
+Ordinary upkeep materializes the selected products’ legacy image/video fallbacks
+into explicit gallery JSON. Source-aware comparison verifies the effective gallery
+references/order remain identical for all12 cohort products; raw JSON byte equality
+is not the media contract. The PostgreSQL regression covers that legacy form.
