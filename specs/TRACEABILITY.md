@@ -10,6 +10,13 @@ run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md)
 
 ## S197 demo video quality — review and qualification in progress
 
+FE-061's finite primary-source runner probes two named official-page
+candidates in an unprivileged PR job, retaining exact player identity, decoded
+playback timing and frames or bounded failures. Its script preflight and static
+workflow check are source checks; only a current-head artifact and agent visual
+inspection can qualify particular footage. Neither candidate is
+admitted or applied to a public demo by introducing the review harness.
+
 FE-061/BE-049 own the exact64/256 public-demo media review; FE-057/FE-060 own
 inline social playback and BE-067 protects scenario continuity. Read-only browser
 inspection confirms the widely reused`wJV9EDe_sFc` is no longer available, and

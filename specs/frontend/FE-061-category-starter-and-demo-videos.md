@@ -23,6 +23,12 @@ process for bottled face oil, furniture for basket weaving, or crops for tools.
 Retain a primary creator URL and a bounded playback/visual verdict for each
 admitted clip. Identify third-party footage as an example, retaining the official
 player's creator attribution; it is not documentary evidence of a fictional shop.
+For a candidate that cannot be played locally, a finite read-only managed-runner
+check may record its exact creator page, watch URL, player identity, decoded video
+dimensions, playback progress and frame captures. A failed or inaccessible player
+remains unqualified. A decoded player alone is not a visual relevance or quality
+verdict; an agent must inspect the captured frames before using the candidate in
+an admitted mapping.
 Include at least one relevant TikTok example with actual inline web/phone/Android
 playback evidence, or report the exact external/provider blocker without claiming
 success. Existing FE-060 permits supported social providers for story covers too.
@@ -100,6 +106,12 @@ abort. GIVEN portrait playback THEN one player uses existing soft static cover
 fills, without duplicate audio/live-frame extraction.
 
 ## Test plan
+
+`scripts/review-primary-video-candidates.mjs` provides a finite official-source
+playback check in an unprivileged pull-request runner. Its offline preflight
+validates exact source identity and read-only target shape; the run retains
+per-candidate progress or bounded failure receipts and short-lived frames for
+agent visual review. It does not read or change the application database.
 
 Category table/ref/media admission tests, scripts/test-business-starters.ts,
 product-upkeep/gallery and scoped one-time-plan checks. Focused desktop/phone and

@@ -74,6 +74,9 @@ and scenario progress remain protected. National origin is not a quality test.
 1. [ ] CURRENT: inventory exact effective refs, watch current footage and proposed
    creator-sourced replacements, and record per-business/product relevance and
    actual playback/quality evidence; do not admit a thumbnail or title alone.
+   A finite read-only runner probe for two official-source candidates is in
+   progress under FE-061. Its decoded-player receipts and frames still require
+   agent visual inspection and exact product matching; failures stay unqualified.
 2. [ ] Qualify a finite, version/identity-fenced media correction through ordinary
    product and page commands. Reuse existing private requests while paused;
    reject drift before writes, retain history/photos/order/scenario facts, and
