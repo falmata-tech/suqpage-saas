@@ -1,7 +1,7 @@
 ---
 id: DEP-054
 title: Dedicated recurring demo scenario service
-status: done
+status: in_progress
 related: [BE-067, FE-079, ADR-0034, DEP-045, DEP-046, DEP-052, BE-065]
 owners: [operations, backend, security]
 last_updated: 2026-11-14
@@ -32,6 +32,16 @@ migration 81 and hosted application ledger must be reconciled deliberately.
 Never run config push, seed/reset, Auth/SMTP or credential writes for this task.
 
 ## Budgets and observability
+
+S196 expands the reviewed target to all64 public demo businesses/all256 current
+products. The global cadence/budgets remain unchanged: at most two coordinated
+business stages per minute and one catalog snapshot per business stage. Qualify
+full-size fairness and batch cost before hosted admission. Additive private
+schema83 starts with no inferred catalog enrollment; existing schema82 remains
+read-compatible during code-before-schema delivery. Retain protected before-
+images and exact membership, migrate while paused, admit every reviewed catalog,
+then verify manifest completeness and actual scheduled public/product effects.
+Update the read-only monitor to that exact manifest rather than its old canary.
 
 The owner requires visible activity about every minute, with accelerated coherent
 timelines and foreground UI refresh. Start a small reviewed active cohort and

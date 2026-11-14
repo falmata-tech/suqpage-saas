@@ -52,6 +52,32 @@ store screenshots and Play qualification remain separate unfinished work.
 
 ## Ordered work
 
+### S196 — every public demo business and current product (BE-009 / BE-067 / DEP-054)
+
+Owner instruction: expand the service to all demo businesses and all current
+products. Production inventory is 64 public demo businesses with 256 published
+products; the private draft reviewer and real/new accounts remain excluded.
+The earlier three-business canary is qualified, not the requested final scope.
+
+1. [x] Inventory the exact public demo/business/product set and current budgets.
+2. [x] Implement coordinated whole-catalog scenarios through ordinary
+   validated upkeep commands, one catalog version per business stage, identity/
+   version fences, and unchanged global execution/storage budgets.
+3. [ ] CURRENT: prove full-catalog timelines, mixed kinds, phase coherence, complete
+   coverage, fairness, failed-member rollback, replay/drift and tenant exclusion;
+   qualify actual UI refresh and all required source checks.
+4. [ ] Retain protected before-images and the exact64/256 manifest, deploy
+   compatible code, apply additive private schema, admit the full reviewed set
+   while paused, and verify real/private-data preservation before resuming.
+5. [ ] Observe scheduled full-catalog stages in production, verify every public
+   business/product against immutable publications, update monitoring to the
+   admitted manifest, and record exact delivery/coverage evidence.
+
+Do not infer new enrollments from a demo-looking name, publish the private
+reviewer, delete immutable histories, expand billing, or overwrite human drift.
+The signed phone APK remains a separate active request under S191; preserve its
+canonical signer/Firebase/predecessor requirements while completing this scope.
+
 ### S194 — scenario-driven demo marketplace simulator (BE-067 / FE-079 / DEP-054)
 
 Owner instruction 2026-11-13: operate a dedicated recurring demo service and

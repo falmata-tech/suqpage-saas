@@ -6,6 +6,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { getDb, closeDbForTests } from './testing/postgres-fixture';
 import { migratePostgresDatabase } from '../lib/postgres-migrations';
+import { LATEST_POSTGRES_MIGRATION_VERSION } from '../lib/postgres-schema-version';
 
 async function main() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'suqpage-native-'));
@@ -13,10 +14,10 @@ async function main() {
   try {
     const schema = (await db.prepare('SELECT current_schema() name').get()).name as string;
     assert.match(schema, /^suqpage_test_[a-f0-9]{32}$/);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 82);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, LATEST_POSTGRES_MIGRATION_VERSION);
     assert.deepEqual(
       (await db.prepare('SELECT version FROM schema_migrations WHERE version>=75 ORDER BY version').all()).map(row => Number(row.version)),
-      [75, 76, 77, 78, 79, 80, 81, 82],
+      Array.from({length:LATEST_POSTGRES_MIGRATION_VERSION-74},(_,index)=>75+index),
       'A fresh native install includes shipment bounds, staff grants, owner email changes, inquiry migrations, product order scope and security housekeeping in order.',
     );
     const privateTables = await db.prepare(`SELECT c.relname,c.relrowsecurity FROM pg_class c

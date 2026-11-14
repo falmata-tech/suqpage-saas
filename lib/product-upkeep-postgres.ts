@@ -4,7 +4,7 @@ import { canMaintainBasicProducts } from "./capabilities";
 import { runtimeBusinessById, runtimeCatalogByBusinessId, runtimeHasRetainedPublication } from "./catalog-runtime";
 import { productUpkeepEnabled } from "./config";
 import { ProductUpkeepError, type BasicProductCommand } from "./product-upkeep-domain";
-import type { BasicProductUpkeepPort, ProductUpkeepResult } from "./product-upkeep";
+import {validateProductUpkeepBatch, type BatchProductUpkeepPort, type ProductBatchMember, type StagedProductImage, type ProductUpkeepResult} from "./product-upkeep";
 import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
 import { requireRevisionSnapshotV4 } from "./revision-v4-domain";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
@@ -119,11 +119,8 @@ async function validateProspectiveSnapshot(command: BasicProductCommand, imageRe
   requireRevisionSnapshotV4(snapshot, SHOWROOM_COMPONENT_BANK_LATEST);
 }
 
-export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
-  async assertAuthorized(user, command) {
-    await authorize(user, command);
-  },
-  async publish(user, command, stagedImage, payloadHash, stagedGallery = []): Promise<ProductUpkeepResult> {
+async function publishOne(user: SessionUser, command: BasicProductCommand, stagedImage: StagedProductImage | null,
+  payloadHash: string, stagedGallery: StagedProductImage[] = [], batch = false): Promise<ProductUpkeepResult> {
     return runtimeTransaction(async () => {
       await authorize(user, command, true);
       const locked=await runtimeRun("UPDATE businesses SET content_version=content_version WHERE id=?",[command.businessId]);
@@ -187,12 +184,14 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
       const slug = command.kind === "create" ? await uniqueSlug(command.businessId, command.name) : undefined;
       await validateProspectiveSnapshot(command, imageRef, slug);
 
-      const currentCatalog = (await runtimeCatalogByBusinessId(command.businessId, true))!;
-      await runtimeRun(
-        `INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id)
-         VALUES(?,?,?,'baseline',?) ON CONFLICT (business_id,content_version) DO NOTHING`,
-        [command.businessId, business.content_version, JSON.stringify(catalogToRevisionSnapshotV4(currentCatalog)), user.id],
-      );
+      if (!batch) {
+        const currentCatalog = (await runtimeCatalogByBusinessId(command.businessId, true))!;
+        await runtimeRun(
+          `INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id)
+           VALUES(?,?,?,'baseline',?) ON CONFLICT (business_id,content_version) DO NOTHING`,
+          [command.businessId, business.content_version, JSON.stringify(catalogToRevisionSnapshotV4(currentCatalog)), user.id],
+        );
+      }
 
       let productId: number;
       if (command.kind === "create") {
@@ -244,16 +243,18 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
 
 
       const nextVersion = business.content_version + 1;
-      const bumped = await runtimeRun(
-        "UPDATE businesses SET content_version=? WHERE id=? AND content_version=?",
-        [nextVersion, command.businessId, business.content_version],
-      );
-      if (bumped.changes !== 1) throw new ProductUpkeepError("The showroom changed while saving.", 409, "stale_version");
-      const finalCatalog = (await runtimeCatalogByBusinessId(command.businessId, true))!;
-      await runtimeRun(
-        "INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id) VALUES(?,?,?,'product_upkeep',?)",
-        [command.businessId, nextVersion, JSON.stringify(catalogToRevisionSnapshotV4(finalCatalog)), user.id],
-      );
+      if (!batch) {
+        const bumped = await runtimeRun(
+          "UPDATE businesses SET content_version=? WHERE id=? AND content_version=?",
+          [nextVersion, command.businessId, business.content_version],
+        );
+        if (bumped.changes !== 1) throw new ProductUpkeepError("The showroom changed while saving.", 409, "stale_version");
+        const finalCatalog = (await runtimeCatalogByBusinessId(command.businessId, true))!;
+        await runtimeRun(
+          "INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id) VALUES(?,?,?,'product_upkeep',?)",
+          [command.businessId, nextVersion, JSON.stringify(catalogToRevisionSnapshotV4(finalCatalog)), user.id],
+        );
+      }
       await runtimeRun(
         `INSERT INTO product_upkeep_commands(business_id,idempotency_key,payload_hash,actor_user_id,result_product_id,result_content_version)
          VALUES(?,?,?,?,?,?)`,
@@ -271,5 +272,52 @@ export const postgresProductUpkeepPort: BasicProductUpkeepPort = {
       );
       return { productId, contentVersion: nextVersion, duplicate: false };
     });
-  },
+}
+
+async function publishBatch(user: SessionUser, members: readonly ProductBatchMember[]): Promise<ProductUpkeepResult[]> {
+  validateProductUpkeepBatch(members.map(member => member.command));
+  return runtimeTransaction(async () => {
+    const first = members[0].command;
+    await authorize(user, first, true);
+    await runtimeRun('UPDATE businesses SET content_version=content_version WHERE id=?', [first.businessId]);
+    const stored = await runtimeAll<StoredCommand & {idempotency_key: string}>(
+      `SELECT idempotency_key,payload_hash,result_product_id,result_content_version FROM product_upkeep_commands
+       WHERE business_id=? AND idempotency_key IN (${members.map(() => '?').join(',')})`,
+      [first.businessId, ...members.map(member => member.command.idempotencyKey)]);
+    if (stored.length) {
+      if (stored.length !== members.length || new Set(stored.map(row => row.result_content_version)).size !== 1 ||
+          members.some(member => !stored.some(row => row.idempotency_key === member.command.idempotencyKey &&
+            row.payload_hash === member.payloadHash && row.result_product_id === member.command.productId))) {
+        throw new ProductUpkeepError('The batch was already used for different or partial content.', 409, 'idempotency_conflict');
+      }
+      return members.map(member => {
+        const row = stored.find(row => row.idempotency_key === member.command.idempotencyKey)!;
+        return {productId: row.result_product_id, contentVersion: row.result_content_version, duplicate: true};
+      });
+    }
+    const business = await authorize(user, first, true);
+    if (business.content_version !== first.expectedContentVersion) {
+      throw new ProductUpkeepError('The showroom changed while the batch was open.', 409, 'stale_version');
+    }
+    const before = (await runtimeCatalogByBusinessId(first.businessId, true))!;
+    await runtimeRun(`INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id)
+      VALUES(?,?,?,'baseline',?) ON CONFLICT(business_id,content_version) DO NOTHING`,
+      [first.businessId, business.content_version, JSON.stringify(catalogToRevisionSnapshotV4(before)), user.id]);
+    const results: ProductUpkeepResult[] = [];
+    for (const member of members) results.push(await publishOne(user, member.command, null, member.payloadHash, [], true));
+    const version = business.content_version + 1;
+    const bumped = await runtimeRun('UPDATE businesses SET content_version=? WHERE id=? AND content_version=?',
+      [version, first.businessId, business.content_version]);
+    if (bumped.changes !== 1) throw new ProductUpkeepError('The showroom changed while saving the batch.', 409, 'stale_version');
+    const after = (await runtimeCatalogByBusinessId(first.businessId, true))!;
+    await runtimeRun(`INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id)
+      VALUES(?,?,?,'product_upkeep',?)`, [first.businessId, version, JSON.stringify(catalogToRevisionSnapshotV4(after)), user.id]);
+    return results;
+  });
+}
+
+export const postgresProductUpkeepPort: BatchProductUpkeepPort = {
+  async assertAuthorized(user, command) { await authorize(user, command); },
+  publish: (user, command, image, hash, gallery) => publishOne(user, command, image, hash, gallery),
+  publishBatch,
 };

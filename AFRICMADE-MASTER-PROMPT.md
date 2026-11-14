@@ -679,6 +679,13 @@ Preserve each merchant's identity within the current shared showroom contract.
 
 ## 15. Current technical architecture
 
+Planned full-catalog expansion under BE-009/BE-067/DEP-054 covers every reviewed
+public demo business and all its current products. Coordinated ordinary upkeep
+batches publish one catalog version per business stage; fixed global budgets
+and oldest-due rotation preserve bounded frequent marketplace activity. The
+three-business production canary remains current until expanded qualification
+and exact hosted manifest admission complete.
+
 BE-067/FE-079/DEP-054 provide a dedicated minute-scheduled Netlify demo service.
 It advances predefined coherent scenarios through ordinary product and page
 publication commands. Foreground public screens check for changes every15 seconds,

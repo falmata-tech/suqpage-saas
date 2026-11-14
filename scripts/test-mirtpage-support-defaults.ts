@@ -17,7 +17,7 @@ async function main() {
     assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, LATEST_POSTGRES_MIGRATION_VERSION);
     // Replay migration 73 against the complete current ledger, including the
     // inquiry and provider-interest tables in 78–79 and product scope in 80.
-    assert.equal(LATEST_POSTGRES_MIGRATION_VERSION, 82, 'Update this migration-specific regression deliberately when appending migrations.');
+    assert.equal(LATEST_POSTGRES_MIGRATION_VERSION, 83, 'Update this migration-specific regression deliberately when appending migrations.');
     const businessId = (await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('default-history','Suqpage tenant-authored name','composition','active')").run()).insertedId;
     const otherBusinessId = (await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('default-other','Other business','composition','active')").run()).insertedId;
     const ownerId = (await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES('default-owner@example.test','unused','Owner','owner',?,0)").run(businessId)).insertedId;

@@ -7,7 +7,7 @@ import {startForegroundPoll} from '../../../lib/foreground-poll';
 
 /** Only public shop reads opt into recurring refresh. Owner/private resources
  * retain their existing command/focus authority and never inherit this poll. */
-export function usePublicShop(handle:string){
+export function usePublicShop(handle:string|undefined){
  const load=useLoad(()=>handle?request<Shop>('shops/'+encodeURIComponent(handle)):Promise.resolve(null),[handle]);
  const focused=useIsFocused(),latest=useRef(load);latest.current=load;
  const [failure,setFailure]=useState({handle,message:''});

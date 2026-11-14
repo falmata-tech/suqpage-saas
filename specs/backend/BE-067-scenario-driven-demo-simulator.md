@@ -1,8 +1,8 @@
 ---
 id: BE-067
 title: Scenario-driven demo marketplace simulation
-status: done
-related: [FE-079, DEP-054, ADR-0034, BE-055, BE-054, BE-035]
+status: in_progress
+related: [BE-009, FE-079, DEP-054, ADR-0034, BE-055, BE-054, BE-035]
 owners: [backend, security, operations]
 last_updated: 2026-11-14
 change_level: L3
@@ -67,21 +67,65 @@ ticks. Stage failure rolls back every related ordinary write before recording a
 generic failed/paused result. A bad enrollment does not grant authority over
 another tenant. No unbounded retries, catch-up loops or external credential use.
 
+## Full public-demo catalog coverage (S196)
+
+The owner requires every public demo business and every current product, not a
+permanent canary. The reviewed inventory contains 64 public demos/256 products.
+An explicit full-catalog enrollment binds the exact sorted current product IDs,
+names, kinds, units, categories and owner/provider identity. Draft/reviewer/real
+accounts remain excluded. New products or human edits pause the affected demo;
+they never silently rewrite the enrolled baseline.
+
+One business stage advances every enrolled product through its compatible
+predefined timeline. Deliberate phase offsets keep at least one product usable;
+ready-made replenishment, seasonal harvest, general made-to-order production,
+short-window food preparation and fresh-food batches
+remain distinct. Preserve each original story, price baseline, media and unit.
+An explicitly reviewed empty unit is initialized by the first ordinary stage.
+
+BE-009's bounded batch command validates each ordinary product command under one
+tenant/version lock, retains per-product idempotency/audit evidence and publishes
+one final catalog version. Product facts, business publication and progress are
+atomic. A late member failure rolls back the whole stage. No intermediate public
+versions or extra notification activity are created.
+
+Private additive schema83 retains the previous three single-product enrollments
+until explicitly upgraded. Full-catalog membership is bounded to 64 businesses
+and eight products per business, covering the reviewed current inventory. A
+minute tick advances at most two businesses; the oldest due business runs first,
+so every business participates and work remains bounded independently of breadth.
+Keep the existing 2,880-stage/day and 256MiB limits, retention and execution
+deadlines. With 64 businesses, a business normally participates approximately
+once per 32 successful minute ticks; its entire current catalog moves together.
+Do not promise every product changes every minute or raise provider billing.
+
+GIVEN all current public demos WHEN exact full-catalog enrollment completes THEN
+the recorded manifest covers every one of their current products. GIVEN a stage
+WHEN ordinary batch upkeep succeeds THEN every member matches its coherent plan,
+one catalog/page version advances and public/read/UI facts agree. GIVEN replay,
+drift, a foreign member or late failure THEN no partial/public/private data leaks
+or real-account mutation occurs. Prove fairness and all-product coverage on the
+full-size disposable inventory, then verify hosted scheduled coverage/readback.
+
 ## Limits and controls
 
-One scheduled tick per minute; initially at most two due stages and one selected
-product per stage in a small reviewed active cohort. Keep one additional usable
-published product per showroom. Use an execution deadline with room inside
+One scheduled tick per minute; at most two due business stages, each updating
+its complete enrolled catalog under S196. Legacy single-product canaries remain
+compatible until explicitly upgraded. Keep at least one usable published product
+in a full catalog, and an additional companion for legacy single-product plans.
+Use an execution deadline with room inside
 Netlify's 30-second limit. A server-only control starts disabled, supports pause,
 and enforces explicit per-day mutation and database-size budgets. Budget pressure
 pauses demo work; it never deletes immutable history or blocks real users.
 
 Operator enrollment requests are private database records, never an HTTP/admin
-endpoint. The disabled worker admits at most two explicit requests per tick using
+endpoint. The disabled worker admits at most eight explicit requests per tick,
+starting no new admission after its12-second work budget, using
 the ordinary enrollment checks, reviewed content/draft/publication versions and
 exact demo owner/product bindings. It records accepted/rejected outcomes and never
-enables itself. When explicitly requested, an empty product unit may be initialized
-through ordinary product upkeep before enrollment; an existing unit is preserved.
+enables itself. When explicitly requested, an empty product unit is initialized
+through ordinary upkeep before legacy enrollment or in the first full-catalog
+stage; an existing unit is preserved.
 A refused request rolls back all preparation. Active simulation does not consume
 requests. Migration creates no request or enrollment.
 

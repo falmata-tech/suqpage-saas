@@ -1,7 +1,37 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {demoScenario,demoScenarioStage,parseDemoScenarioParameters,nextDemoScenarioStage,demoScenarioCommandKey} from '../lib/demo-scenarios';
+import {demoCatalogPhaseOffsets,demoCatalogStage,parseDemoCatalogInputs,parseStoredDemoCatalog,type DemoCatalogProduct,type DemoCatalogProductInput} from '../lib/demo-catalog-scenarios';
 const base={productName:'Example harvest',productKind:'standard_product',businessCategories:['agriculture-growers'],unit:'kg',minimumOrder:10,normalCapacity:1000,limitedCapacity:200,basePriceMinor:10000};
+
+test('BE-067 full catalogs mix supply/production timelines and keep every phase usable',()=>{
+ const keys=['seasonal-harvest','wholesale-replenishment','production-cycle','food-preparation','fresh-food-batch'] as const;
+ for(const left of keys)for(const right of keys)for(const size of [2,3,4,8]){
+  const raw=Array.from({length:size},(_,i)=>{
+   const scenarioKey=i===0?left:i===1?right:keys[i%3];
+   return {productId:i+1,scenarioKey,parameters:{...base,productName:`Example line ${i}`,productKind:['production-cycle','food-preparation'].includes(scenarioKey)?'made_to_order':'standard_product',businessCategories:['food-farming']}};
+  });
+  const inputs=parseDemoCatalogInputs(raw),offsets=demoCatalogPhaseOffsets(inputs);
+  assert.deepEqual(offsets,demoCatalogPhaseOffsets(inputs));
+  const products:DemoCatalogProduct[]=inputs.map((p,i)=>({...p,scenarioVersion:1,baselineDescription:'Original product story.',phaseOffset:offsets[i]}));
+  assert.deepEqual(parseStoredDemoCatalog(JSON.stringify(products)),products);
+  const seen=new Map(products.map(p=>[p.productId,new Set<string>()]));
+  for(let stage=0;stage<6;stage++){
+   const plans=demoCatalogStage(products,stage);assert.equal(plans.length,size);
+   assert.ok(plans.some(p=>['available','limited'].includes(p.plan.product.availability)));
+   for(const {binding,plan} of plans){seen.get(binding.productId)!.add(plan.stage.key);assert.equal(plan.product.quantityUnit,'kg');}
+  }
+  assert.ok([...seen.values()].every(stages=>stages.size===6),'Every member visits its complete coherent timeline.');
+ }
+});
+test('BE-067 full-catalog membership refuses duplicate, foreign-shape and truncated plans',()=>{
+ const member:DemoCatalogProductInput={productId:1,scenarioKey:'wholesale-replenishment',parameters:parseDemoScenarioParameters(base)};
+ for(const raw of [[],[member],Array(9).fill(member),[member,member],[{...member,unknown:true},{...member,productId:2}],
+  [{...member,productId:2},member],[member,{...member,productId:2,parameters:{...base,productKind:'service'}}]])assert.throws(()=>parseDemoCatalogInputs(raw));
+ const products=[member,{...member,productId:2}].map((p,i)=>({...p,scenarioVersion:1,baselineDescription:'Original.',phaseOffset:i*2}));
+ for(const change of [{scenarioVersion:2},{phaseOffset:6},{baselineDescription:'x'.repeat(2501)},{unexpected:'field'}])assert.throws(()=>parseStoredDemoCatalog(JSON.stringify([{...products[0],...change},products[1]])));
+ assert.throws(()=>demoCatalogStage(products as DemoCatalogProduct[],6));
+});
 
 test('BE-067 complete predefined harvest timeline keeps related facts and units coherent',()=>{
  const states=Array.from({length:6},(_,i)=>demoScenarioStage('seasonal-harvest',1,i,base));

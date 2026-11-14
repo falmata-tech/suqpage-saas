@@ -1,5 +1,32 @@
 # Recurring demo marketplace simulator — implementation inventory
 
+## Full-catalog expansion under qualification (S196)
+
+The requested final target is all64 public demo businesses and all256 current
+published products, with the private draft reviewer and real accounts excluded.
+The existing three-business cohort remains live until the expanded source and
+exact hosted plan qualify. No broad enrollment has been applied yet.
+
+Each coordinated business stage updates every enrolled product through the
+ordinary bounded upkeep batch, retaining one final catalog version and normal
+per-product audit/idempotency receipts. Deliberate phase offsets retain at least
+one usable product. General production, short-window food preparation and fresh-
+food batches supplement the original replenishment/harvest/workshop timelines.
+The exact owner/provider/product/quantity/unit manifest is protected outside Git;
+new products and manual edits are drift, never silent enrollment authority.
+
+Private schema83 adds catalog bindings and the reviewed scenario/request bounds;
+it creates no inferred enrollment or Auth identity. The paused worker can admit
+at most eight reviewed requests per tick, stopping new admissions after12seconds.
+The global minute schedule, at-most-two business stages,2,880 daily stages,
+256MiB storage guard and retained-history policy remain. With64 businesses,
+normal oldest-due rotation updates each whole catalog about every32 successful
+minute ticks; marketplace activity remains frequent across the full set.
+
+Qualification and actual full-manifest rollout evidence belong in traceability
+S196. After schema83, pause first and retain a qualified83-compatible build or
+roll forward; an82-only application refuses the future ledger.
+
 Checklist S194 and BE-067 / FE-079 / DEP-054 own this service. Three versioned
 scenario catalogs publish coordinated example updates through ordinary application
 commands. This inventory records supported fields, current operating controls and

@@ -13,6 +13,7 @@ import {enrollDemoScenario,runDemoSimulatorTick} from '../../lib/demo-simulator-
 import {runtimePublishedPage} from '../../lib/owner-page-publication-runtime';
 import {readPublicShopRevision} from '../../lib/public-shop-revision';
 import {demoScenarioStage,type DemoScenarioParameters} from '../../lib/demo-scenarios';
+import {parseStoredDemoCatalog,demoCatalogStage,type DemoCatalogProductInput} from '../../lib/demo-catalog-scenarios';
 
 const services=createRequire(path.resolve('package.json'))('./scripts/acceptance-supabase-readiness.mjs') as {
  browserSupabasePorts:()=>{api:number;db:number};inspectBrowserServices:(id:string)=>unknown;browserServicesReady:(id:string,value:unknown)=>boolean};
@@ -56,8 +57,16 @@ async function main(){
    imageAction:'keep',preserveMetadata:true,updateSellingFacts:true},null);
   const categories=(await runtimeAll<{industry_key:string}>('SELECT industry_key FROM business_industries WHERE business_id=? ORDER BY industry_key',[business.id])).map(v=>v.industry_key);
   const parameters:DemoScenarioParameters={productName:product.name,productKind:'standard_product',businessCategories:categories,unit:product.quantity_unit||'bars',minimumOrder:10,normalCapacity:120,limitedCapacity:20,basePriceMinor:product.price_minor};
+  const freshCatalog=(await runtimeCatalogByBusinessId(business.id,true))!;
+  const units=['bars','bottles','jars','tubs'];
+  const catalogProducts:DemoCatalogProductInput[]=[...freshCatalog.products].sort((a,b)=>a.id-b.id).map((p,index)=>({productId:p.id,
+   scenarioKey:p.offering_kind==='made_to_order'?'production-cycle':'wholesale-replenishment',initializeUnit:true,
+   parameters:{...parameters,productName:p.name,productKind:p.offering_kind as 'standard_product'|'made_to_order',unit:p.quantity_unit||units[index],basePriceMinor:p.price_minor}}));
+  const versions=await runtimeGet<{draft_version:number;page_revision:number}>('SELECT d.version draft_version,(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=d.business_id) page_revision FROM owner_page_drafts d WHERE d.business_id=?',[business.id]);
+  if(!versions||catalogProducts.length!==4||catalogProducts[0].productId!==product.id)throw Error('The full synthetic catalog differs.');
   phase='enrollment';
-  await enrollDemoScenario({businessId:business.id,handle:'afia-botanics',ownerUserId:owner.id,providerUserId:owner.provider_user_id,productId:product.id,scenarioKey:'wholesale-replenishment',parameters});
+  await enrollDemoScenario({businessId:business.id,handle:'afia-botanics',ownerUserId:owner.id,providerUserId:owner.provider_user_id,productId:product.id,scenarioKey:'wholesale-replenishment',parameters,catalogProducts,
+   expectedContentVersion:freshCatalog.business.content_version,expectedDraftVersion:versions.draft_version,expectedPageRevision:versions.page_revision});
   await runtimeRun('UPDATE demo_simulator_control SET enabled=1 WHERE id=1');
  }else{
   phase='advance';
@@ -68,10 +77,15 @@ async function main(){
   const now=Math.max(Date.now(),Number(state.due_at),(Number(state.last_slot)+1)*60000);
   const result=await runDemoSimulatorTick(now);if(result.advanced!==1||result.failed||result.paused)throw Error('The local scenario did not advance.');
  }
- const state=await runtimeGet<{stage:number;parameters_json:string;product_id:number}>('SELECT stage,parameters_json,product_id FROM demo_simulator_enrollments WHERE business_id=?',[business.id]);
+ const state=await runtimeGet<{stage:number;parameters_json:string;product_id:number;catalog_products_json:string}>('SELECT stage,parameters_json,product_id,catalog_products_json FROM demo_simulator_enrollments WHERE business_id=?',[business.id]);
  if(!state)throw Error('Scenario progress is missing.');
  const plan=state.stage>=0?demoScenarioStage('wholesale-replenishment',1,state.stage,JSON.parse(state.parameters_json)):null;
+ const bindings=parseStoredDemoCatalog(state.catalog_products_json),catalog=(await runtimeCatalogByBusinessId(business.id,true))!;
+ if(state.stage>=0)for(const {binding,plan} of demoCatalogStage(bindings,state.stage)){
+  const p=catalog.products.find(p=>p.id===binding.productId);
+  if(!p||p.description!==plan.productUpdate+'\n\n'+binding.baselineDescription||p.availability!==plan.product.availability||p.capacity_summary!==plan.product.capacitySummary)throw Error('A full-catalog member does not match its normal publication.');
+ }
  process.stdout.write(JSON.stringify({handle:'afia-botanics',businessId:business.id,productId:state.product_id,stage:state.stage,
-  update:plan?.businessUpdate??'',product:plan?.product??null,about:(await runtimePublishedPage(business.id))?.about,revision:await readPublicShopRevision('afia-botanics')}));
+  update:plan?.businessUpdate??'',product:plan?.product??null,catalogProductIds:bindings.map(p=>p.productId),about:(await runtimePublishedPage(business.id))?.about,revision:await readPublicShopRevision('afia-botanics')}));
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href)main().catch(()=>{console.error('Disposable scenario acceptance failed.',{phase});process.exitCode=1;}).finally(closePostgresRuntimeForTests);

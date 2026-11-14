@@ -10,6 +10,7 @@ import {runtimeCatalogByBusinessId,runtimeUserById} from '../lib/catalog-runtime
 import {runDemoSimulatorTick} from '../lib/demo-simulator-runtime';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 import {runtimePublicShowroom} from '../lib/public-showroom-runtime';
+import {parseStoredDemoCatalog,demoCatalogStage} from '../lib/demo-catalog-scenarios';
 
 const root='.local/native-qa';
 const hash=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -47,7 +48,10 @@ async function main(){
   if(!versions)throw Error('Native scenario publication is missing.');
   const request={businessId:fixture.businessId,handle:fixture.handle,ownerUserId:owner.id,providerUserId:provider,productId:product.id,scenarioKey:'wholesale-replenishment',
    parameters:{productName:product.name,productKind:'standard_product',businessCategories:categories,unit:product.quantity_unit||'shawls',minimumOrder:10,normalCapacity:120,limitedCapacity:20,basePriceMinor:product.price_minor},
-   initializeUnit:true,expectedContentVersion:catalog.business.content_version,expectedDraftVersion:versions.draft_version,expectedPageRevision:versions.page_revision};
+   initializeUnit:true,expectedContentVersion:catalog.business.content_version,expectedDraftVersion:versions.draft_version,expectedPageRevision:versions.page_revision,
+   catalogProducts:[...catalog.products].sort((a,b)=>a.id-b.id).map((p,index)=>({productId:p.id,scenarioKey:p.offering_kind==='made_to_order'?'production-cycle':'wholesale-replenishment',initializeUnit:true,
+    parameters:{productName:p.name,productKind:p.offering_kind,businessCategories:categories,unit:p.quantity_unit||['shawls','wraps','linens','totes'][index],minimumOrder:10,normalCapacity:120,limitedCapacity:20,basePriceMinor:p.price_minor}}))};
+  assert.equal(request.catalogProducts.length,4);
   await runtimeRun('INSERT INTO demo_simulator_requests(business_id,input_json,requested_at) VALUES(?,?,?)',[fixture.businessId,JSON.stringify(request),Date.now()]);
   const admission=await runDemoSimulatorTick();assert.equal(admission.enrolled,1);assert.equal(admission.enrollmentRejected,0);assert.equal(admission.status,'disabled');
   await runtimeRun('UPDATE demo_simulator_control SET enabled=1 WHERE id=1');
@@ -60,15 +64,21 @@ async function main(){
   assert.equal(tick.advanced,1);assert.equal(tick.failed,0);assert.equal(tick.paused,0);
  }
  assert.equal(await preserved(fixture.businessId),before,'Other demo and real businesses must remain unchanged.');
- const state=await runtimeGet<{stage:number}>('SELECT stage FROM demo_simulator_enrollments WHERE business_id=?',[fixture.businessId]);
+ const state=await runtimeGet<{stage:number;catalog_products_json:string}>('SELECT stage,catalog_products_json FROM demo_simulator_enrollments WHERE business_id=?',[fixture.businessId]);
  assert.equal(state?.stage,action==='--prepare'?0:2);
  const snapshot=await runtimePublicShowroom(fixture.handle),product=snapshot?.catalog.products.find(p=>p.id===fixture.productId);
  assert.equal(product?.availability,action==='--prepare'?'available':'limited');
+ const products=parseStoredDemoCatalog(state!.catalog_products_json);assert.equal(products.length,4);
+ for(const {binding,plan} of demoCatalogStage(products,state!.stage)){
+  const actual=snapshot!.catalog.products.find(p=>p.id===binding.productId)!;
+  assert.equal(actual.description,plan.productUpdate+'\n\n'+binding.baselineDescription);assert.equal(actual.availability,plan.product.availability);
+  assert.equal(actual.capacity_summary,plan.product.capacitySummary);assert.equal(actual.price_minor,plan.product.priceMinor);
+ }
  await runtimeRun("UPDATE demo_simulator_control SET enabled=0,pause_reason='operator' WHERE id=1");
  // Enable only inside the next explicitly requested disposable QA action.
  if(action==='--prepare')await runtimeRun('UPDATE demo_simulator_control SET enabled=1 WHERE id=1');
  fs.writeFileSync(path.join(root,'evidence',action==='--prepare'?'demo-before.json':'demo-after.json'),JSON.stringify({source:fixture.source,result:'passed',stage:state?.stage,
-  availability:product?.availability,publicRevision:snapshot?.revision,otherBusinessesUnchanged:true})+'\n');
+  availability:product?.availability,publicRevision:snapshot?.revision,catalogProductIds:products.map(p=>p.productId),otherBusinessesUnchanged:true})+'\n');
  console.log('PASS native demo scenario persisted through ordinary application writes.');
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href)main().catch(()=>{console.error('Native demo scenario QA failed.');process.exitCode=1;}).finally(closePostgresRuntimeForTests);
