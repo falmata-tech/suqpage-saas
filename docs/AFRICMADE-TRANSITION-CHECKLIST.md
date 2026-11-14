@@ -10,24 +10,26 @@ not authorize a provider write or rerun an already completed migration/build.
 
 The qualified application source includes business-only transport (PR59), phone
 messaging/demo destinations (PR61), actual native Android QA (PR62) and the
-scenario-driven simulator (PR63). PR63's protected functional merge is`dc001008`;
+scenario-driven simulator (PR63), expanded to complete public-demo catalogs in
+PR65. PR65's protected functional merge is`564cfc5`;
 all five required source/main quality jobs pass, and the source-bound Android
 scenario/inquiry smoke passes. Exact receipts and remaining limits live in
 traceability rather than earlier unmerged-branch notes.
 
 Netlify project`africmade`, ID`26c795eb-5560-4a88-b38d-3cc922c2a5e6`, automatically
-publishes GitHub main. Deploy`6af7b32d639d3dc44d23f262` independently reports the
+publishes GitHub main. Deploy`6af7d7219840bd93a5b8074a` independently reports the
 qualified merge, expected site and healthy API at`africmade.com`. The primary
 legacy domain remains`mirtpage.com`; domains, credentials and previous deployments
 are preserved. Non-production deploys remain disabled until their backend is
 isolated. The no-store health endpoint reports current public build identifiers.
 
-Supabase project`sjeiiqxgscuqajpgddcc` is active/healthy on application ledger82.
+Supabase project`sjeiiqxgscuqajpgddcc` is active/healthy on application ledger83.
 The already-applied81 trigger/privilege hardening is verified and recorded without
 replaying data patches. The four simulator tables have RLS, no public API-role
 privileges and only admitted server access. All six real-business content/history
-fingerprints are preserved. The exact three-demo cohort is enabled and actual
-scheduled effects, normal public API and open-browser draft retention pass S194.
+fingerprints are preserved. The exact64-public-demo/256-product cohort is enabled,
+and every business has actually advanced. Scheduled facts and all public shops
+match immutable catalog/page versions; current evidence is in S196.
 Auth/SMTP settings and credentials are unchanged; the separate leaked-password
 protection setting remains outside this rollout.
 
@@ -43,14 +45,45 @@ store screenshots and Play qualification remain separate unfinished work.
 
 | Surface | Source / evidence | Remaining qualification |
 | --- | --- | --- |
-| AfricMade web source | PR63 / functional main`dc001008`; required PR/main quality and source-bound native QA pass | S191 signed release preparation remains separate |
-| Published website | Automatic Netlify delivery and the three-demo simulator are verified; public guest transport remains retired | Wider native owner/physical-device work and managed Auth/domain cutover remain separately guarded |
+| AfricMade web source | PR65 / functional main`564cfc5`; required PR/main quality and source-bound native QA pass | S191 signed release preparation and S197 media correction remain separate |
+| Published website | Automatic Netlify delivery and the complete64/256 simulator are verified; public guest transport remains retired | S197 video review/correction and native owner/physical-device work remain open |
 | Android development QA | Actual navigation, keyboard, Back, live product update and saved inquiry pass in an isolated emulator | Native owner/locales/offline, physical devices, push and Play remain separate |
 | Android new package | Signed v3 recorded; version4 config and standalone Expo binding merged | Fresh build admission, signed v4, binary/device/push/Play checks |
 | Android former packages | Retained signed artifacts and compatibility records | Historical inputs; do not submit them as the new package |
 | AfricMade Play app | Previously verified Free/App draft and local listing material | Current Console readback, declarations/screenshots, admitted bundle and actual testing |
 
 ## Ordered work
+
+### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
+
+The owner requests a careful visual and playback review of all64 public demo
+showrooms and all256 current products, replacing missing, broken, poor-quality
+or unrelated videos. Retain the liked farm/wheat footage in suitable contexts.
+A business's qualified story video may serve its related products. Include a
+relevant public TikTok example and verify actual inline web/native playback.
+Real merchants and the private reviewer are excluded; contacts/photos/identity
+and scenario progress remain protected. National origin is not a quality test.
+
+1. [ ] CURRENT: inventory exact effective refs, watch current footage and proposed
+   creator-sourced replacements, and record per-business/product relevance and
+   actual playback/quality evidence; do not admit a thumbnail or title alone.
+2. [ ] Qualify a finite, version/identity-fenced media correction through ordinary
+   product and page commands. Reuse existing private requests while paused;
+   reject drift before writes, retain history/photos/order/scenario facts, and
+   acknowledge only that exact media change in the enrollment's baseline/hash.
+   Do not reset, re-enroll, blind-refresh fingerprints or add a sync daemon.
+3. [ ] Prove rollback, replay, preserved stage/cycle, real/private exclusion and
+   effective gallery/publication coherence on disposable PostgreSQL. Exercise
+   actual desktop/phone web and Android inline playback, including TikTok;
+   record provider/device limits honestly before full required gates.
+4. [ ] Retain protected before-images and the exact admitted media manifest;
+   deliver qualified source normally, apply bounded corrections while paused,
+   verify all64/256 public effective media and preserved data, then resume only
+   the unchanged reviewed cohort. Refresh the monitor's approved media baseline
+   to the retained after-image and verify scheduled continuation.
+
+S196 final documentation/coverage evidence and S191's signed phone APK remain
+active dependencies; neither a video audit nor an emulator build completes them.
 
 ### S196 — every public demo business and current product (BE-009 / BE-067 / DEP-054)
 
@@ -63,15 +96,19 @@ The earlier three-business canary is qualified, not the requested final scope.
 2. [x] Implement coordinated whole-catalog scenarios through ordinary
    validated upkeep commands, one catalog version per business stage, identity/
    version fences, and unchanged global execution/storage budgets.
-3. [ ] CURRENT: prove full-catalog timelines, mixed kinds, phase coherence, complete
+3. [x] Prove full-catalog timelines, mixed kinds, phase coherence, complete
    coverage, fairness, failed-member rollback, replay/drift and tenant exclusion;
    qualify actual UI refresh and all required source checks.
-4. [ ] Retain protected before-images and the exact64/256 manifest, deploy
+4. [x] Retain protected before-images and the exact64/256 manifest, deploy
    compatible code, apply additive private schema, admit the full reviewed set
    while paused, and verify real/private-data preservation before resuming.
-5. [ ] Observe scheduled full-catalog stages in production, verify every public
+5. [x] Observe scheduled full-catalog stages in production, verify every public
    business/product against immutable publications, update monitoring to the
-   admitted manifest, and record exact delivery/coverage evidence.
+   admitted manifest, and record exact delivery/coverage evidence in S196.
+
+Full production rotation and all64/256 exact-version readback pass. Hosted
+runtime yielding currently produces about one business stage per minute, so
+allow32–64 successful ticks per rotation and the70-minute starvation threshold.
 
 Do not infer new enrollments from a demo-looking name, publish the private
 reviewer, delete immutable histories, expand billing, or overwrite human drift.

@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import {getDb,closeDbForTests} from './testing/postgres-fixture';
 import {curatedManifestForLegacyDesign} from '../lib/showroom-manifests';
-import {enrollDemoScenario,runDemoSimulatorTick,type DemoEnrollmentInput} from '../lib/demo-simulator-runtime';
+import {enrollDemoScenario,runDemoSimulatorTick,correctDemoMedia,type DemoEnrollmentInput} from '../lib/demo-simulator-runtime';
 import {runtimeCatalogByHandle,runtimeUserById} from '../lib/catalog-runtime';
 import {executeProductUpkeepBatch,executeBasicProductUpkeep} from '../lib/product-upkeep';
 import {postgresProductUpkeepPort} from '../lib/product-upkeep-postgres';
 import {parseOfferingHighlightsJson} from '../lib/offering-presentation';
 import {parseStoredDemoCatalog,demoCatalogStage,type DemoCatalogProductInput} from '../lib/demo-catalog-scenarios';
 import {productMedia} from '../lib/product-media';
+import type {DemoMediaCorrection} from '../lib/demo-media-correction';
 
 async function main(){
  const started=Date.now(),db=await getDb();
@@ -109,6 +110,58 @@ async function main(){
    assert.equal((await db.prepare("SELECT count(*) total FROM audit_logs WHERE business_id=? AND action='product.basic_upkeep_published'").get(input.businessId)).total,promoted?2+(advances-1)*4:advances*4);
   }
   assert.equal(covered.size,256);assert.equal(await snapshot(real.businessId),realBefore);assert.equal(await snapshot(privateDemo.businessId),privateBefore);assert.equal(await privateHash(),privateAfterExtra);
+  // Finite operator media repair uses ordinary publications without re-enrollment
+  // or resetting any live scenario progress. Provider IDs here are fixtures;
+  // external playback is separately qualified in FE-061.
+  const mediaTarget=fixtures[0],mediaCatalog=(await runtimeCatalogByHandle(mediaTarget.handle))!;
+  const mediaEnrollment=await db.prepare('SELECT * FROM demo_simulator_enrollments WHERE business_id=?').get(mediaTarget.businessId);
+  const mediaVersions=await db.prepare('SELECT d.version,(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=d.business_id) revision FROM owner_page_drafts d WHERE business_id=?').get(mediaTarget.businessId);
+  const correction:DemoMediaCorrection={kind:'media_correction',operationKey:'catalog_media_test_01',businessId:mediaTarget.businessId,handle:mediaTarget.handle,
+   ownerUserId:mediaTarget.ownerUserId,providerUserId:mediaTarget.providerUserId,expectedHash:String(mediaEnrollment.expected_hash),
+   expectedContentVersion:mediaCatalog.business.content_version,expectedDraftVersion:Number(mediaVersions.version),expectedPageRevision:Number(mediaVersions.revision),
+   coverBefore:'',coverVideoRef:'youtube:EBrvynBWYzY',products:mediaCatalog.products.map(p=>({productId:p.id,beforeMedia:productMedia(p),
+    afterMedia:productMedia(p).map(m=>m.kind==='video'?{kind:'video' as const,ref:'youtube:EBrvynBWYzY'}:m)})).sort((a,b)=>a.productId-b.productId)};
+  await assert.rejects(()=>correctDemoMedia(correction),/Pause/);
+  await db.exec("UPDATE demo_simulator_control SET enabled=0,pause_reason='operator' WHERE id=1");
+  const mediaBefore=await snapshot(mediaTarget.businessId);
+  for(const invalid of [
+   {...correction,providerUserId:crypto.randomUUID()},
+   {...correction,businessId:real.businessId},
+   {...correction,expectedContentVersion:correction.expectedContentVersion-1},
+   {...correction,expectedHash:'0'.repeat(64)},
+   {...correction,products:[...correction.products.slice(0,3),{...correction.products[3],productId:real.productId}]},
+   {...correction,products:correction.products.map(p=>({...p,beforeMedia:p.beforeMedia.map(m=>m.kind==='video'?{kind:'video' as const,ref:'youtube:NJMPGgcDylY'}:m)}))},
+  ]){await assert.rejects(()=>correctDemoMedia(invalid));assert.equal(await snapshot(mediaTarget.businessId),mediaBefore);}
+  await db.exec(`CREATE FUNCTION fail_demo_media_page() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'Synthetic late media failure'; END; $$;
+   CREATE TRIGGER fail_demo_media_page BEFORE INSERT ON owner_page_publications FOR EACH ROW WHEN (NEW.business_id=${mediaTarget.businessId}) EXECUTE FUNCTION fail_demo_media_page()`);
+  await assert.rejects(()=>correctDemoMedia(correction),/Synthetic late media failure/);
+  assert.equal(await snapshot(mediaTarget.businessId),mediaBefore);assert.deepEqual(await db.prepare('SELECT * FROM demo_simulator_enrollments WHERE business_id=?').get(mediaTarget.businessId),mediaEnrollment);
+  await db.exec('DROP TRIGGER fail_demo_media_page ON owner_page_publications; DROP FUNCTION fail_demo_media_page()');
+  await db.prepare('INSERT INTO demo_simulator_requests(business_id,input_json,requested_at) VALUES(?,?,?)').run(mediaTarget.businessId,JSON.stringify(correction),now);
+  assert.equal((await runDemoSimulatorTick(now)).mediaCorrected,1);
+  assert.equal((await db.prepare('SELECT status FROM demo_simulator_requests WHERE business_id=?').get(mediaTarget.businessId)).status,'accepted');
+  const mediaAfter=await snapshot(mediaTarget.businessId),ack=await db.prepare('SELECT * FROM demo_simulator_enrollments WHERE business_id=?').get(mediaTarget.businessId);
+  assert.notEqual(ack.expected_hash,mediaEnrollment.expected_hash);
+  for(const [key,value] of Object.entries(mediaEnrollment))if(!['expected_hash','baseline_page_json'].includes(key))assert.deepEqual(ack[key],value,key);
+  const oldPage=JSON.parse(String(mediaEnrollment.baseline_page_json)),newPage=JSON.parse(String(ack.baseline_page_json));
+  assert.deepEqual(newPage,{...oldPage,videoUrl:'https://www.youtube.com/watch?v=EBrvynBWYzY'});
+  const corrected=(await runtimeCatalogByHandle(mediaTarget.handle))!;
+  for(const p of corrected.products){const before=mediaCatalog.products.find(x=>x.id===p.id)!;
+   assert.deepEqual(productMedia(p),correction.products.find(x=>x.productId===p.id)!.afterMedia);
+   for(const [key,value] of Object.entries(before))if(!['video_ref','media_json'].includes(key))assert.deepEqual(p[key as keyof typeof p],value,key);
+  }
+  assert.deepEqual(await correctDemoMedia(correction),{duplicate:true});assert.equal(await snapshot(mediaTarget.businessId),mediaAfter);
+  await assert.rejects(()=>correctDemoMedia({...correction,coverVideoRef:'youtube:NJMPGgcDylY'}),/different reviewed/);
+  assert.equal(await snapshot(real.businessId),realBefore);assert.equal(await snapshot(privateDemo.businessId),privateBefore);assert.equal(await privateHash(),privateAfterExtra);
+  // Replays after subsequent scenario work stay inert and the acknowledged media
+  // survives ordinary scheduled stages without a content_changed pause.
+  await db.prepare("UPDATE demo_simulator_enrollments SET status='paused',reason='operator' WHERE business_id<>?").run(mediaTarget.businessId);
+  await db.exec("UPDATE demo_simulator_control SET enabled=1,pause_reason='' WHERE id=1");now+=600000;
+  assert.equal((await runDemoSimulatorTick(now)).advanced,1);assert.equal((await db.prepare('SELECT status FROM demo_simulator_enrollments WHERE business_id=?').get(mediaTarget.businessId)).status,'active');
+  assert.deepEqual((await runtimeCatalogByHandle(mediaTarget.handle))!.products.map(p=>productMedia(p)),corrected.products.map(p=>productMedia(p)));
+  await db.exec("UPDATE demo_simulator_control SET enabled=0,pause_reason='operator' WHERE id=1");
+  const afterMediaStage=await snapshot(mediaTarget.businessId);assert.deepEqual(await correctDemoMedia(correction),{duplicate:true});assert.equal(await snapshot(mediaTarget.businessId),afterMediaStage);
+  await db.exec("UPDATE demo_simulator_control SET enabled=1,pause_reason='' WHERE id=1; UPDATE demo_simulator_enrollments SET status='active',reason=''");
   const fault=fixtures.at(-1)!,faultProduct=fault.catalogProducts![3].productId;
   await db.prepare("UPDATE demo_simulator_enrollments SET status='paused',reason='operator' WHERE business_id<>?").run(fault.businessId);
   const faultBefore=await snapshot(fault.businessId);

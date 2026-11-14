@@ -2,7 +2,7 @@
 id: BE-067
 title: Scenario-driven demo marketplace simulation
 status: in_progress
-related: [BE-009, FE-079, DEP-054, ADR-0034, BE-055, BE-054, BE-035]
+related: [BE-049, FE-061, BE-009, FE-079, DEP-054, ADR-0034, BE-055, BE-054, BE-035]
 owners: [backend, security, operations]
 last_updated: 2026-11-14
 change_level: L3
@@ -108,6 +108,12 @@ or real-account mutation occurs. Prove fairness and all-product coverage on the
 full-size disposable inventory, then verify hosted scheduled coverage/readback.
 
 ## Limits and controls
+
+S197's planned explicit media maintenance is defined in BE-049. It may reuse a
+private disabled-only request to execute the exact reviewed ordinary correction
+and atomically acknowledge only that change. It must preserve enrollment progress
+and all scenario baselines except the approved page video URL. Routine stage work
+continues to preserve media and fail closed on any unreviewed content drift.
 
 One scheduled tick per minute; at most two due business stages, each updating
 its complete enrolled catalog under S196. Legacy single-product canaries remain

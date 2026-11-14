@@ -1,11 +1,12 @@
 # Recurring demo marketplace simulator — implementation inventory
 
-## Full-catalog expansion under qualification (S196)
+## Qualified full public-demo catalogs (S196)
 
-The requested final target is all64 public demo businesses and all256 current
+The admitted target is all64 public demo businesses and all256 current
 published products, with the private draft reviewer and real accounts excluded.
-The existing three-business cohort remains live until the expanded source and
-exact hosted plan qualify. No broad enrollment has been applied yet.
+All64 enrollments are active, all64 requests accepted and every business has
+completed scheduled whole-catalog work. S196 retains source/deploy, protected
+manifest and exact public-version/identity/history preservation evidence.
 
 Each coordinated business stage updates every enrolled product through the
 ordinary bounded upkeep batch, retaining one final catalog version and normal
@@ -20,11 +21,13 @@ it creates no inferred enrollment or Auth identity. The paused worker can admit
 at most eight reviewed requests per tick, stopping new admissions after12seconds.
 The global minute schedule, at-most-two business stages,2,880 daily stages,
 256MiB storage guard and retained-history policy remain. With64 businesses,
-normal oldest-due rotation updates each whole catalog about every32 successful
-minute ticks; marketplace activity remains frequent across the full set.
+normal oldest-due rotation updates each whole catalog in32–64 successful minute
+ticks. Hosted runtime yielding currently produces about one business per tick;
+individual starvation is a wait beyond70minutes while global stages advance.
+Do not demand every business/product change in a90-second public sample.
 
-Qualification and actual full-manifest rollout evidence belong in traceability
-S196. After schema83, pause first and retain a qualified83-compatible build or
+Exact rollout and full-manifest evidence belong in traceability S196. After
+schema83, pause first and retain a qualified83-compatible build or
 roll forward; an82-only application refuses the future ledger.
 
 Checklist S194 and BE-067 / FE-079 / DEP-054 own this service. Three versioned
@@ -168,7 +171,7 @@ before measuring actual stored growth. Identical retries create no new snapshot.
 Preserve immutable history and pause at the explicit storage budget; never delete
 retained publications or raise provider spending limits. The selected
 cadence and limits are now fixed in the runtime: one minute,
-two due stages, at most six active enrollments, 2,880 successful stages per UTC
+two due stages, at most64 explicitly enrolled public-demo catalogs, 2,880 successful stages per UTC
 day and a 256 MiB database soft limit. PostgreSQL17 imposes a 23-second transaction
 deadline. Storage pressure disables demo work; the daily limit defers it until
 the next day. Neither condition changes merchant history or provider billing.
@@ -194,7 +197,8 @@ This local synthetic identity is never a hosted Auth account or session.
 
 Hosted registration uses private `demo_simulator_requests` rows for exact reviewed
 inputs and content/draft/publication versions. A disabled scheduled worker admits
-at most two per tick through ordinary enrollment, then stays disabled. An explicit
+at most eight per tick, starting no new admission after12seconds, through ordinary
+enrollment, then stays disabled. An explicit
 `initializeUnit` may fill only an empty selling unit using normal product upkeep;
 all related preparation rolls back on refusal. Existing units are preserved.
 Accepted/rejected outcomes are private and contain no raw exception. Active

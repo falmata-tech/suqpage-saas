@@ -2,13 +2,40 @@
 id: FE-061
 title: Category-relevant starter and multi-provider demo videos
 status: in_progress
-related: [BE-049, FE-046, BE-039, FE-060, BE-048, FE-050, FE-053, DEP-039, DEP-042]
+related: [BE-049, BE-067, FE-057, FE-046, BE-039, FE-060, BE-048, FE-050, FE-053, DEP-039, DEP-042]
 owners: [product, frontend, backend, operations]
-last_updated: 2026-10-21
+last_updated: 2026-11-14
 change_level: L3
 ---
 
 # FE-061 — Category-relevant video examples
+
+## S197 — full public-demo media review
+
+Review all64 currently public demo stories and all256 current products. Actually
+play the existing clips and candidates, checking subject, image clarity, framing
+and professional presentation. Titles, thumbnails and player-document load are
+insufficient evidence. Select on quality and relevance, independently of national
+origin. Preserve suitable owner-liked farm and wheat footage. Reusing a qualified
+business story for its related products is permitted; do not substitute a soap
+process for bottled face oil, furniture for basket weaving, or crops for tools.
+
+Retain a primary creator URL and a bounded playback/visual verdict for each
+admitted clip. Identify third-party footage as an example, retaining the official
+player's creator attribution; it is not documentary evidence of a fictional shop.
+Include at least one relevant TikTok example with actual inline web/phone/Android
+playback evidence, or report the exact external/provider blocker without claiming
+success. Existing FE-060 permits supported social providers for story covers too.
+
+The BE-049/BE-067 maintenance contract protects the live simulator. No production
+media write precedes a protected exact plan and qualified normal-command path.
+Private/reviewer and real accounts, photos/order/contacts/branding, original
+stories, current selling facts and scenario progress remain unchanged.
+
+GIVEN a reviewed demo correction WHEN published THEN its story and every bound
+product has an appropriate playable video after reload, preserved photos and
+unchanged contacts. GIVEN a removed/private/blocked provider video THEN visible
+recovery remains available and no external app is launched automatically.
 
 ## S154 proposed correction — ready for root review, source not changed
 

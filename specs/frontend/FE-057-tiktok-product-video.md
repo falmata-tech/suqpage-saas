@@ -2,13 +2,18 @@
 id: FE-057
 title: Embedded TikTok product videos
 status: in_progress
-related: [ADR-0025, FE-060, BE-046, FE-050, FE-019, FE-053, DEP-039, DEP-042, ADR-0024]
+related: [FE-061, ADR-0025, FE-060, BE-046, FE-050, FE-019, FE-053, DEP-039, DEP-042, ADR-0024]
 owners: [product, frontend, backend, operations]
-last_updated: 2026-10-07
+last_updated: 2026-11-14
 change_level: L3
 ---
 
 # FE-057 — Embedded TikTok product videos
+
+FE-060/BE-048 supersede the original staff-only and YouTube-only cover restrictions
+below: admitted self-service social links also support business story videos.
+S197/FE-061 separately qualifies actual curated demo playback, including Android;
+deterministic provider frames do not establish external video availability.
 
 ## Problem and scope
 
