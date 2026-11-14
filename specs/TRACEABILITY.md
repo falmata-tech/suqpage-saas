@@ -44,6 +44,8 @@ Native artifact14090160960 SHA256
 `64550aead23d23a2a756085e9cf8cd335d67fe27528a8d6a15f4bccefa9a301a`
 retains the failed selector state and independent changed public facts. Its
 compiled QA client remains valid for the next source-bound Metro/driver iteration.
+Newly exposed selling-unit prefixes also use the existing active-language catalog;
+unit strings remain literal. Pure and real browser assertions cover that binding.
 
 Actual native/localized refresh, all required current-head gates and hosted
 execution remain pending; no simulator migration, registration or recurring

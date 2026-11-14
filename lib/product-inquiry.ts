@@ -15,10 +15,10 @@ export function linkedProduct(catalog: Catalog, value: string | null): Product |
 export function inquiryEligible(product: Product): boolean {
   return isPublicProduct(product) && Boolean(product.is_published) && ["available", "limited"].includes(product.availability);
 }
-export function productSellingUnit(product: Pick<Product, "quantity_unit"> & Partial<Pick<Product, "offering_kind">>): string {
+export function productSellingUnit(product: Pick<Product, "quantity_unit"> & Partial<Pick<Product, "offering_kind">>, t: UiText = createUiText({})): string {
   const unit = product.quantity_unit.trim();
-  if (product.offering_kind === "service") return unit ? `Per ${unit.replace(/^per\s+/i, "")}` : "";
-  return /^(pieces?|pcs?|units?|each)$/i.test(unit) ? "By the piece" : /^bulk$/i.test(unit) ? "In bulk" : unit ? `Sold by ${unit}` : "";
+  if (product.offering_kind === "service") return unit ? t("Per {value1}", {value1: unit.replace(/^per\s+/i, "")}) : "";
+  return /^(pieces?|pcs?|units?|each)$/i.test(unit) ? t("By the piece") : /^bulk$/i.test(unit) ? t("In bulk") : unit ? t("Sold by {value1}", {value1: unit}) : "";
 }
 export function selectionOptions(product: Product, raw: unknown): Record<string, string> | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;

@@ -21,6 +21,14 @@ test("selling units are concise without inferring bulk or production claims", ()
   assert.equal(productSellingUnit({ quantity_unit: "bulk" }), "In bulk");
   assert.equal(productSellingUnit({ quantity_unit: "kg" }), "Sold by kg");
   assert.equal(productSellingUnit({ quantity_unit: "" }), "");
+  for(const locale of ['am','om']){
+    const t=createUiText(JSON.parse(fs.readFileSync(`lib/i18n/messages/${locale}.json`,'utf8')));
+    const label=productSellingUnit({quantity_unit:'shawls {value1}'},t);
+    assert.notEqual(label,'Sold by shawls {value1}');
+    assert.ok(label.includes('shawls {value1}'),'Merchant units remain literal after one interpolation.');
+    assert.equal(productSellingUnit({quantity_unit:'piece'},t),t('By the piece'));
+    assert.equal(productSellingUnit({quantity_unit:'bulk'},t),t('In bulk'));
+  }
 });
 test("stored carts reject foreign, draft, unavailable, malformed and duplicate selections", () => {
   const raw = [null, false, { productId: 1, quantity: "2 pieces" }, { productId: 1, quantity: "forged duplicate" }, ...[2, 3, 4].map(productId => ({ productId })), { productId: 1, options: { injected: "x" } }];

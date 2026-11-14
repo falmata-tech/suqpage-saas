@@ -1,3 +1,6 @@
+import {createUiText} from '../../lib/i18n/core';
+import am from '../../lib/i18n/messages/am.json';
+import om from '../../lib/i18n/messages/om.json';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {test,expect} from './fixtures';
@@ -43,6 +46,7 @@ test('FE-079 ordinary demo stages reach already-open desktop and phone without l
   }
   for(const locale of ['am','om'])for(const surface of pages){
    await surface.page.locator('.language-selector select:visible').selectOption(locale);await expect(surface.page.locator('html')).toHaveAttribute('lang',locale);
+   await expect(surface.page.locator('[data-product-page] [class*=priceRow] span')).toHaveText(createUiText(locale==='am'?am:om)('Sold by {value1}',{value1:'bars'}));
    await expect(surface.page.locator('[data-business-profile]').getByText(limited.update,{exact:false}).first()).toBeVisible();
    expect(await surface.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
    await surface.page.screenshot({path:testInfo.outputPath('workflow',`demo-${surface.width}-${locale}.png`),fullPage:true});

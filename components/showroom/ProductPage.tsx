@@ -25,7 +25,7 @@ export default function ProductPage({ product, backHref, onBack, onAdd, onInquir
   const [options, setOptions] = useState<Record<string, string>>(() => Object.fromEntries((product?.option_groups || []).map(g => [g.name, g.values[0]?.value || ""])));
   useEffect(() => { heading.current?.focus({ preventScroll: true }); heading.current?.closest("[data-product-page]")?.scrollIntoView({ block: "start" }); }, []);
   const noun = product ? offeringNoun(product.offering_kind) : "item";
-  const unit = product ? productSellingUnit(product) : "";
+  const unit = product ? productSellingUnit(product, t) : "";
   return <article className={styles.page} data-product-page>
     <div className={styles.navigation}><a href={backHref} onClick={onBack}><ArrowLeft size={18} aria-hidden="true" />{t("Back to {value1}", { value1: t(catalogLabel).toLowerCase() })}</a>{product ? <button type="button" onClick={copyLink}><Copy size={16} aria-hidden="true" />{t("Copy {value1} link", { value1: t(noun) })}</button> : null}</div>
     {!product ? <div className={styles.unavailable}><PackageOpen size={36} aria-hidden="true" /><h2 ref={heading} tabIndex={-1}>{t("Item unavailable")}</h2><p>{t("This item is no longer listed. Browse the shop’s other products.")}</p></div> : <div className={styles.layout}>
