@@ -1,7 +1,7 @@
 ---
 id: DEP-054
 title: Dedicated recurring demo scenario service
-status: ready
+status: done
 related: [BE-067, FE-079, ADR-0034, DEP-045, DEP-046, DEP-052, BE-065]
 owners: [operations, backend, security]
 last_updated: 2026-11-14
@@ -104,5 +104,11 @@ exhaustion WHEN a tick runs THEN demo writes pause without blocking real account
 BE-067/FE-079 define scope and acceptance. The field/scenario inventory and current
 storage measurements are in the operating document. Mapped domain, PostgreSQL,
 browser/native, worker and operations checks qualify implementation; exact hosted
-receipts qualify deployment separately. This ready plan is not a claim that the
-service, migration or production enrollment already exists.
+receipts qualify deployment separately.
+
+## Evidence:
+
+[Traceability S194](../TRACEABILITY.md#s194-scenario-driven-demo-activity--qualified-and-deployed)
+records the exact protected source and automatic Netlify deployment, verified
+Supabase schema/private grants, protected before-images, scheduled admission and
+multi-stage public/open-screen readback, and preservation of all real accounts.

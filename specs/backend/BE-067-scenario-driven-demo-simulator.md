@@ -1,7 +1,7 @@
 ---
 id: BE-067
 title: Scenario-driven demo marketplace simulation
-status: in_progress
+status: done
 related: [FE-079, DEP-054, ADR-0034, BE-055, BE-054, BE-035]
 owners: [backend, security, operations]
 last_updated: 2026-11-14
@@ -57,7 +57,9 @@ Keep related product facts and profile publication in one outer transaction,
 including ordinary version/history/idempotency/audit records and timeline progress.
 Skip unchanged commands to avoid redundant snapshots. Preserve product identity,
 merchant name, contacts (including owned demo WhatsApp/Telegram), geography,
-approved media, ownership, Auth, customers and notifications. Never rewrite or
+approved media, ownership, Auth, customers and notifications. Ordinary upkeep may
+materialize a legacy image/video fallback into its gallery JSON; effective media
+references and ordering must remain identical. Never rewrite or
 delete earlier catalog/publication/inquiry history.
 
 A fixed per-minute slot plus PostgreSQL locking prevents overlapping/replayed
@@ -129,6 +131,12 @@ partial preparation rolls back on refusal, and simulation stays disabled.
 
 Contracts, failure/identity boundaries, limits, tests and ordered rollout are
 explicit. DEP-054 owns exact hosted verification, backups, migration/enrollment,
-disabled deployment, canary and recurring readback. No hosted write is performed
-by this specification. Master §§15–17/20/22 describe the planned service until
-implementation and mapped evidence qualify current behavior.
+disabled deployment, canary and recurring readback. Master §§15–17/20/22 describe
+the qualified service.
+
+## Evidence:
+
+[Traceability S194](../TRACEABILITY.md#s194-scenario-driven-demo-activity--qualified-and-deployed)
+records source-bound domain/PostgreSQL/browser/native checks, the protected
+functional merge and the monitored three-demo production rollout. The operating
+inventory retains the current cohort, budgets and pause/recovery contract.

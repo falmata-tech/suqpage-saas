@@ -1,8 +1,8 @@
 ---
 id: FE-079
 title: Visible scenario updates in public marketplace screens
-status: in_progress
-related: [BE-067, DEP-054, ADR-0034, FE-053, FE-065, FE-066, FE-075]
+status: done
+related: [DEP-053, BE-067, DEP-054, ADR-0034, FE-053, FE-065, FE-066, FE-075]
 owners: [frontend, product, security]
 last_updated: 2026-11-14
 change_level: L3

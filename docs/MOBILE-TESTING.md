@@ -10,10 +10,11 @@ Play/physical-device qualification. Current work and release blockers belong in
 [Native Android QA](https://github.com/falmata-tech/suqpage-saas/actions/workflows/native-android.yml)
 builds the actual React Native development client on a standard Ubuntu runner
 and starts an accelerated API 35 x86_64 emulator. It runs on relevant pull requests
-and main changes, with manual dispatch available after integration. The first
-native English smoke is qualified in run43529393814: native navigation, keyboard,
-Back, inquiry submission and independent PostgreSQL verification pass. See
-traceability for the exact source/artifact and inspected visual decision.
+and main changes, with manual dispatch available after integration. The English smoke and live
+scenario extension are qualified: native navigation, keyboard, Back, an already-
+open product update, inquiry submission and independent PostgreSQL verification
+pass. See traceability S194/S195 for exact sources/artifacts, inspected visual
+decisions and retained initial failures.
 
 The disposable app is **AfricMade QA**, package `com.africmade.qa`. It uses the
 runner-local API at `http://10.0.2.2:3000`, a fresh local PostgreSQL fixture schema
@@ -32,7 +33,7 @@ credentials are excluded from public artifacts. Do not attach customer data.
 | Workflow | Initial native automation | Additional qualification |
 |---|---|---|
 | Market | Map/list switch, actual product search, keyboard | Filter combinations, map groups, pagination, locales and large text |
-| Product | Real API-backed detail and native Back preserving search | Gallery/video, options, unavailable states, external app handoff |
+| Product | Real API-backed detail, scheduled-scenario facts arriving on an open screen, native Back preserving search | Gallery/video, options, unavailable states, external app handoff |
 | Inquiry | Add/list/form/keyboard, local Inbox submit, exact saved tenant/product | Cross-business basket return, validation/retry and offline recovery |
 | Navigation | About and Login entry | Wider screen/rotation/accessibility audit |
 | Owner | Not exercised without isolated managed Auth | Sign-in/out, edits, publish, inbox/support and transport |
@@ -41,7 +42,10 @@ credentials are excluded from public artifacts. Do not attach customer data.
 The smoke's POST goes through the ordinary application/domain/database path.
 It sends no WhatsApp/Telegram, email or push message. `scripts/native-qa-ui.py`
 drives observed native nodes through ADB; `scripts/native-qa-verify.ts` independently
-checks the saved inquiry and unchanged other-business inquiry count.
+checks the saved inquiry and unchanged other-business inquiry count. The guarded
+`native-qa-demo.ts` fixture submits private enrollment requests while disabled,
+then advances ordinary demo commands on a local accelerated clock. The actual
+Android screen observes those saved facts through normal foreground refresh.
 
 Use focused component/API/type checks during iteration, then review native
 artifacts on a coherent source. Preserve initial failures and classify setup,

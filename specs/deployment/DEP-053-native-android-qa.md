@@ -2,9 +2,9 @@
 id: DEP-053
 title: Isolated native Android development testing
 status: done
-related: [DEP-042, DEP-044, FE-053, ADR-0033]
+related: [FE-079, DEP-042, DEP-044, FE-053, ADR-0033]
 owners: [operations, frontend, security]
-last_updated: 2026-11-13
+last_updated: 2026-11-14
 change_level: L3
 ---
 
@@ -44,7 +44,7 @@ The public repository uses standard runners; no new paid service is provisioned.
   Metro; report native compiled source and JavaScript source separately. No
   restore-prefix fallback, production credentials or cache-limit expansion.
 - The initial bounded English smoke covers Market map/list switching, a real
-  product, native Back, inquiry selection/form/keyboard, local Inbox submission,
+  product and already-open scenario update, native Back, inquiry selection/form/keyboard, local Inbox submission,
   authoritative saved inquiry, About and Login entry. Use actual native nodes
   and their observed bounds; record unmet cases as failures, never mock success.
 - Save screenshots and sanitized UI/run evidence on success and failure, bind
@@ -78,6 +78,7 @@ and explicit failed step. A passed browser test cannot substitute for that resul
 | QA isolation and mixed-context refusal | configuration | `scripts/test-native-qa-config.cjs`, existing mobile build/release safety tests |
 | Actual install/navigation/keyboard/Back | native UI | `scripts/native-qa-ui.py`, Android workflow screenshots/hierarchies |
 | Ordinary API persistence and tenant boundary | integration | `scripts/native-qa-backend.ts`, `scripts/native-qa-verify.ts` |
+| Normal scenario writes reach an open Android screen | native/integration | `scripts/native-qa-demo.ts`, driver screenshots and public readback (FE-079) |
 | Repeatable bounded runner and safe artifacts | operations | workflow/script checks, first native workflow run |
 
 ## Evidence:
@@ -91,8 +92,8 @@ failures and remaining coverage are recorded in
 
 ## Remaining coverage
 
-The QA app uses the existing English UI and accessibility labels, changes no
-merchant content and publishes no production behavior. Add locale/font-scale,
+The QA app uses the existing English UI and accessibility labels. FE-079 changes
+only its disposable synthetic merchant data; it publishes no production behavior. Add locale/font-scale,
 offline/recovery, owner Auth/edit/publish and broader web/native parity cases
 incrementally after this first real smoke. Missing Auth/push credentials remain
 explicit coverage gaps. Native accessibility nodes do not prove TalkBack, and
