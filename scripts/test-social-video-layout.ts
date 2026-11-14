@@ -82,3 +82,49 @@ test('FE-057 portrait product frames fit both axes and photos restore their stag
     }
   }finally{await browser.close();}
 });
+
+test('FE-057 replay focus keeps the portrait player selected until explicit navigation',{timeout:45_000},async()=>{
+  const output=await bundle;
+  const script=output.outputFiles.find(file=>file.path.endsWith('.js'))?.text;
+  const css=output.outputFiles.find(file=>file.path.endsWith('.css'))?.text;
+  assert.ok(script&&css);
+  const browser=await chromium.launch({timeout:20_000});
+  try{
+    const page=await browser.newPage({viewport:{width:390,height:900}});
+    await page.route('https://www.tiktok.com/player/v1/**',route=>route.fulfill({contentType:'text/html',body:`<html><body style="margin:0;height:100vh;background:#f3e9e4;display:grid;place-items:center"><button type="button" aria-label="Replay" style="padding:20px">Replay</button></body></html>`}));
+    await page.setContent('<main id="root" style="width:350px;margin:16px"></main>');
+    await page.addStyleTag({content:css});
+    await page.addScriptTag({content:script});
+    await page.evaluate(()=>(window as unknown as{mountGallery:(ref:string)=>void}).mountGallery('tiktok:7703762862484851981'));
+    await page.getByRole('button',{name:'Video 2',exact:true}).click();
+    await page.getByRole('button',{name:'Play video 2',exact:true}).click();
+    const track=page.locator('[class*="galleryTrack"]');
+    const before=await track.evaluate(element=>({left:element.scrollLeft,width:element.clientWidth,snap:getComputedStyle(element).scrollSnapType}));
+    assert.equal(before.left,before.width,'Video 2 is fully selected before Replay.');
+    const replay=page.frameLocator('iframe').getByRole('button',{name:'Replay',exact:true});
+    await replay.evaluate(element=>element.scrollIntoView({block:'center',inline:'center'}));
+    await replay.click();
+    const after=await track.evaluate(element=>({left:element.scrollLeft,width:element.clientWidth}));
+    assert.equal(after.left,after.width,'Replay focus keeps Video 2 selected.');
+    assert.equal(before.snap,'none','Active portrait playback disables scroll snapping.');
+    assert.equal(await page.getByRole('button',{name:'Video 2',exact:true}).getAttribute('aria-pressed'),'true');
+    assert.equal(await page.locator('iframe').count(),1);
+    const partial=await track.evaluate(element=>{element.scrollTo({left:element.clientWidth-70,behavior:'instant'});return element.scrollLeft;});
+    assert.equal(partial,before.width-70,'A short horizontal gesture moves the active portrait slide.');
+    await page.waitForFunction(()=>{const element=document.querySelector('[class*="galleryTrack"]');return element?.scrollLeft===element?.clientWidth;},null,{timeout:3000});
+    assert.equal(await page.locator('iframe').count(),1,'The short gesture settles on the video without unmounting it.');
+    await track.evaluate(element=>element.scrollTo({left:0,behavior:'instant'}));
+    await page.waitForFunction(()=>document.querySelector('[aria-label="Photo 1"]')?.getAttribute('aria-pressed')==='true');
+    assert.equal(await page.locator('iframe').count(),0,'A full horizontal return to Photo 1 unmounts the player.');
+    assert.equal(await track.evaluate(element=>getComputedStyle(element).scrollSnapType),'x mandatory','Photo stage restores normal snapping.');
+    await page.getByRole('button',{name:'Video 2',exact:true}).click();
+    await page.getByRole('button',{name:'Play video 2',exact:true}).click();
+    await page.getByRole('button',{name:'Photo 1',exact:true}).click();
+    assert.equal(await page.locator('iframe').count(),0,'The photo thumbnail still stops playback.');
+    await page.getByRole('button',{name:'Video 2',exact:true}).click();
+    await page.getByRole('button',{name:'Play video 2',exact:true}).click();
+    await page.getByRole('button',{name:'Previous media',exact:true}).click();
+    assert.equal(await page.getByRole('button',{name:'Photo 1',exact:true}).getAttribute('aria-pressed'),'true');
+    assert.equal(await page.locator('iframe').count(),0,'The gallery arrow still stops playback.');
+  }finally{await browser.close();}
+});

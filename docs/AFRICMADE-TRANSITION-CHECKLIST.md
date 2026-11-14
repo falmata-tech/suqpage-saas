@@ -107,6 +107,20 @@ and scenario progress remain protected. National origin is not a quality test.
    complete frame and source-bound soap footage. The fixture is disposable
    and does not qualify all64/256 media. PR68's fixture branch remains
    evidence only; the merged portrait fix carries no installed Android claim.
+   (d) [ ] Keep an active portrait player selected when Replay receives browser
+   focus, while preserving gallery-scroll/thumb/arrow photo navigation.
+   PR77's first disposable product94 run passed Replay on web and Expo; its
+   second run reached the video end, then web Replay focus scrolled the gallery
+   back to Photo 1 and detached the iframe. A controlled local reproduction
+   measured that scroll and a CSS-only containment probe kept Replay active and
+   Photo 1 navigation working. The focused source fix also settles an incomplete
+   gallery scroll and restores the portrait arrow hit target; two deterministic regression
+   cases pass and installed Chrome 151 confirms partial/full scroll and arrow
+   return on the disposable product at 390/1440px. The exact provider frame did
+   not attach in two bounded local follow-up attempts, so Replay on this source
+   still awaits a passing source-bound run. Touch drags inside the iframe did not
+   move the gallery in Chrome; provider/device gesture behavior remains a separate
+   UX qualification. No hosted video was changed.
 4. [ ] Retain protected before-images and the exact admitted media manifest;
    deliver qualified source normally, apply bounded corrections while paused,
    verify all64/256 public effective media and preserved data, then resume only
