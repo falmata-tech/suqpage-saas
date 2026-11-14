@@ -28,6 +28,16 @@ Those are demonstrated content defects, not a reason to infer real-account scope
 Primary-creator replacements remain under actual visual/playback review; none
 has been applied to production or admitted from its title/thumbnail alone.
 
+The finite maintenance path is deployed through PR66, main
+`b5486408ec4200e0e53af3b46ba28f9a95c5075e`, tree
+`49aa8f9d0bb471b6c007021353784f7e8bdaa67c`. It reuses private disabled-only
+requests, ordinary product/page commands and exact identity/version/hash/gallery
+fences. Parser, rollback, replay, next-stage media continuity and protected
+real/private boundaries pass, including388 successful whole-catalog scenario
+stages. All five main quality jobs in43567277821 and Android43567277813 pass.
+Automatic Netlify deploy`6af801bd1efb5643dfad1c6b` reports that source and the
+expected site with a healthy API. No production media correction has been applied.
+
 BE-044's local Expo preview fallback accepts only the selected development port
 (8082 by default, or 8083 when explicitly configured) with exact loopback hosts;
 production and foreign origins remain denied. The focused mobile transport tests
@@ -38,30 +48,23 @@ denied. Chromium at 390px loads that shop in Expo web with zero application API
 failures and no uncontrolled map tiles. This qualifies local preview access,
 not external video playback or installed Android.
 
-The candidate finite maintenance path reuses private disabled-only requests,
-normal product/page commands and exact identity/version/hash/gallery fences.
-It preserves images, facts and scenario progress, with an operation receipt and
-atomic acknowledgement only after success. Focused parser, existing11 domain/
-timer/worker checks, typecheck and237-spec validation pass locally. Disposable
-PostgreSQL late-failure, private-boundary, replay and next-stage tests require
-managed CI because this workspace has no local Docker/PostgreSQL service. No
-production pause, media change, credential write or new signed APK is claimed.
+The finite actual-provider branch`fc020396ddea5c9005605d36041a14fe5af9589d`
+qualifies TikTok`7703762862484851981` inside the real Android app. The reviewed
+captures show actual soap-making footage and seek progression from0:00 to0:16;
+selecting Photo1 removes the WebView, and Back preserves search. Run43607030339
+attempt2 completes the remaining actual navigation and authoritative saved-inquiry
+checks. Attempt1 reached the same playback/unmount but later lost adb during
+inquiry phone entry; retain that infrastructure failure. Its five required
+quality jobs in43607030261 also pass. These are disposable-schema QA results,
+not a canonical phone APK, physical-device, Auth or push qualification.
 
-Candidate`995b11f` in43563904767 passes legacy simulator PostgreSQL and reaches
-the new successful correction, but its preservation assertion incorrectly expects
-the catalog's derived`media` projection to retain the old video. Compare that
-projection to the exact reviewed after-gallery, while continuing to compare every
-other product field (including image identity) unchanged. Retain the failed run;
-the updated rollback/replay/continuation case still requires a complete rerun.
-
-Source`fc4e3fa` passes all five required jobs in43564289980, including the complete
-PostgreSQL correction/rollback/replay/continuation case and388 scenario stages.
-Its Android job43564289953 must rebuild the test client because adding a root
-package script changes the deliberately conservative native-input cache key.
-Register the media-plan test through the existing scenario test entry instead;
-restore the unchanged package metadata and keep the cache/security checks intact.
-This avoids an unnecessary native-input change; verify the resulting managed
-cache/Android run rather than assuming reuse.
+Desktop/phone web and Expo real-provider qualification is running separately in
+the finite evidence draft. Source review confirms clean gloved soap-making and
+body-butter footage from the primary creator; neither player readiness nor a
+thumbnail admits an unreviewed business/product mapping. The good farm/wheat
+examples remain unchanged. The earlier removed video, incorrect face-oil soap
+story, multiword search timeout and gallery-scroll test failures remain recorded;
+the latter is corrected in the finite test, not described as a product fix.
 
 ## S196 full public-demo catalog — qualified and deployed
 
@@ -291,30 +294,50 @@ query-string import adapter is unchanged. `test-mobile-dependencies.cjs` adds
 32,000 distinct malformed percent runs in a three-second child-process bound;
 the existing Unicode/repeated-malformed-input/UUID checks still pass. A clean
 locked install, `test:mobile:build`, mobile typecheck and the public-script
-static gate pass. Dependency changes are limited to the decoder pin; no SDK
-upgrade or product UI change is introduced.
+static gate pass. The initial decoder-only patch is retained; current preparation
+also refreshes compatible Expo57 patches as described below, with no product UI
+change or major SDK/React Native upgrade.
 The same adversarial payload times out against isolated decoder 0.5.0 and passes
 with 0.5.1. The existing full-install browser CI job now enforces the compatibility
 check before browser setup; the offline workflow contract requires that order.
 
-The full local `npm run check` passes its prechecks and stops at the first
+The initial decoder patch's local `npm run check` passes its prechecks and stops at the first
 PostgreSQL fixture because this session has no fixture database URL. This is an
 environment failure; required provider-backed remote checks remain necessary.
 
-The current native audit has three high, six moderate, one low and zero critical
-findings after the decoder patch (previously six high). Remaining roots are
-node-forge, Zod, glob/minimatch and deepmerge in Expo build tooling. The audit
-remains failed; its SHA-256 is
-`fd6971ef9069c443f2bee3f28b9594f183df51788bc1b11337085e96e7fcbd2e`.
-No finding or historical artifact exception is waived.
+The compatible Expo57.0.33 refresh adopts upstream patched CLI/config/glob/forge
+packages while preserving React Native0.86.3, package/signer/Firebase/targets and
+the decoder adapter. Fingerprint0.20.16 retains minimatch10.2.6 upstream; its
+reviewed `Minimatch`/`match`/`pattern`/`negate` consumer uses none of v11's removed
+APIs. An override scoped to that exact fingerprint version selects11.0.8.
 
-The recovered existing keystore/password pass an independent `keytool`
-certificate comparison with the pinned release policy. Firebase's exact
-project/app/certificates are independently visible, but configuration downloads
-time out. The pinned client and canonical v3 APK are absent; no Android build
-or signed-artifact/device/Play qualification is claimed. DEP-044 S191 and the
-active checklist retain the missing-input dependencies. Current-head protected
-checks and source integration remain required for this patch.
+A clean `npm ci` accepts the final lockfile, including retained cross-platform
+optional packages. The full locked audit has zero critical/high/moderate/low
+findings. Existing dependency checks plus actual fingerprint ignore/negation/
+Unicode/monorepo path and native-directory hash tests pass. The bounded
+adversarial glob aborts at its96-MB heap ceiling under10.2.6 and completes with
+11.0.8; the stable fixture hash remains`d35f43100b8f9eea999628f2d0c48c1945307863`.
+Native typecheck, resolved config/release-safety,237-spec validation and actual
+Android Hermes export pass. The export uses the explicitly separate QA profile
+and synthetic loopback backend target; it does not admit a production artifact.
+The local operations check stops because Docker is unavailable. Required remote
+source/operations/browser/PostgreSQL checks still apply to this new lockfile.
+
+PR #69 native QA run `43609385834` reached map, product search and the typed
+keyboard, then `uiautomator dump` exited 255 at the product action. Retained
+artifact `14120525466` reports a fatal exception without a process or stack,
+so the cause remains unclassified. DEP-053 now prepares a bounded public
+exception/process identifier receipt; its synthetic privacy/bound tests pass
+locally. Current-head Android evidence is still required before integration.
+
+The original keystore/password were independently matched to the release policy
+in the prior provider session. The protected key file, pinned Firebase client and
+canonical signed v3 APK are absent in the resumed checkout. Library title search
+and scoped scratch discovery find no matching AfricMade inputs; unrelated project
+keys/APKs are excluded. Reconnect the verified provider session or recover those
+exact inputs before signing. No replacement signer, fabricated client, first-
+release shortcut, advisory waiver or canonical signed compilation is claimed.
+DEP-044 S191 and the active checklist retain those dependencies.
 
 ## S190 business dashboard transport only
 
