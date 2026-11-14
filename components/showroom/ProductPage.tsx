@@ -31,8 +31,10 @@ export default function ProductPage({ product, backHref, onBack, onAdd, onInquir
     {!product ? <div className={styles.unavailable}><PackageOpen size={36} aria-hidden="true" /><h2 ref={heading} tabIndex={-1}>{t("Item unavailable")}</h2><p>{t("This item is no longer listed. Browse the shop’s other products.")}</p></div> : <div className={styles.layout}>
       <div className={styles.media}><ProductMediaGallery key={product.id} items={productMedia(product)} name={product.name} /></div>
       <div className={styles.copy}>
-        {isDemo ? <span className={styles.category}>{t("Example product")}</span> : null}
-        {product.category_name ? <span className={styles.category}>{product.category_name}</span> : null}
+        <div className={styles.labels}>
+          {isDemo ? <span className={styles.category}>{t("Example product")}</span> : null}
+          {product.category_name ? <span className={styles.category}>{product.category_name}</span> : null}
+        </div>
         <h2 ref={heading} tabIndex={-1}>{product.name}</h2>
         <div className={styles.priceRow}><strong>{product.price_minor !== null ? formatEtbPrice(product.price_minor) : t("Ask for price")}</strong>{unit ? <span>{unit}</span> : null}</div>
         {orderScopeLabels(product.order_scope).length ? <ul className={styles.orderTags} aria-label={t("Order sizes")}>{orderScopeLabels(product.order_scope).map(label=><li key={label}>{t(label)}</li>)}</ul> : null}

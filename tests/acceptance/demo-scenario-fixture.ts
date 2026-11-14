@@ -51,11 +51,11 @@ async function main(){
   if(!product.quantity_unit)await executeBasicProductUpkeep(postgresProductUpkeepPort,actor,{kind:'update',businessId:business.id,productId:product.id,
    expectedContentVersion:catalog.business.content_version,idempotencyKey:'scenario_acceptance_unit_0001',name:product.name,description:product.description,
    availability:product.availability,offeringKind:product.offering_kind,quantityMode:product.quantity_mode,orderScope:product.order_scope??'unspecified',
-   priceMinor:product.price_minor,quantityUnit:'per bar',highlights:parseOfferingHighlightsJson(product.highlights_json),capacitySummary:product.capacity_summary,
+   priceMinor:product.price_minor,quantityUnit:'bars',highlights:parseOfferingHighlightsJson(product.highlights_json),capacitySummary:product.capacity_summary,
    minimumOrderSummary:product.minimum_order_summary,leadTimeSummary:product.lead_time_summary,videoRef:product.video_ref,categoryId:product.category_id,
    imageAction:'keep',preserveMetadata:true,updateSellingFacts:true},null);
   const categories=(await runtimeAll<{industry_key:string}>('SELECT industry_key FROM business_industries WHERE business_id=? ORDER BY industry_key',[business.id])).map(v=>v.industry_key);
-  const parameters:DemoScenarioParameters={productName:product.name,productKind:'standard_product',businessCategories:categories,unit:product.quantity_unit||'per bar',minimumOrder:10,normalCapacity:120,limitedCapacity:20,basePriceMinor:product.price_minor};
+  const parameters:DemoScenarioParameters={productName:product.name,productKind:'standard_product',businessCategories:categories,unit:product.quantity_unit||'bars',minimumOrder:10,normalCapacity:120,limitedCapacity:20,basePriceMinor:product.price_minor};
   phase='enrollment';
   await enrollDemoScenario({businessId:business.id,handle:'afia-botanics',ownerUserId:owner.id,providerUserId:owner.provider_user_id,productId:product.id,scenarioKey:'wholesale-replenishment',parameters});
   await runtimeRun('UPDATE demo_simulator_control SET enabled=1 WHERE id=1');

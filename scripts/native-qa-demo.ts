@@ -46,7 +46,7 @@ async function main(){
   const versions=await runtimeGet<{draft_version:number;page_revision:number}>('SELECT d.version draft_version,(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=d.business_id) page_revision FROM owner_page_drafts d WHERE d.business_id=?',[fixture.businessId]);
   if(!versions)throw Error('Native scenario publication is missing.');
   const request={businessId:fixture.businessId,handle:fixture.handle,ownerUserId:owner.id,providerUserId:provider,productId:product.id,scenarioKey:'wholesale-replenishment',
-   parameters:{productName:product.name,productKind:'standard_product',businessCategories:categories,unit:product.quantity_unit||'per shawl',minimumOrder:10,normalCapacity:120,limitedCapacity:20,basePriceMinor:product.price_minor},
+   parameters:{productName:product.name,productKind:'standard_product',businessCategories:categories,unit:product.quantity_unit||'shawls',minimumOrder:10,normalCapacity:120,limitedCapacity:20,basePriceMinor:product.price_minor},
    initializeUnit:true,expectedContentVersion:catalog.business.content_version,expectedDraftVersion:versions.draft_version,expectedPageRevision:versions.page_revision};
   await runtimeRun('INSERT INTO demo_simulator_requests(business_id,input_json,requested_at) VALUES(?,?,?)',[fixture.businessId,JSON.stringify(request),Date.now()]);
   const admission=await runDemoSimulatorTick();assert.equal(admission.enrolled,1);assert.equal(admission.enrollmentRejected,0);assert.equal(admission.status,'disabled');

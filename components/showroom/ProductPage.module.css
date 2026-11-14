@@ -9,6 +9,7 @@
 .stage > iframe { background: #202428; }
 .placeholder { display: grid; place-content: center; justify-items: center; gap: 12px; height: 100%; padding: 24px; color: #667178; }
 .play { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; white-space: nowrap; min-height: 44px; padding: 10px 18px; border: 0; border-radius: 24px; background: #202428; color: #fff; box-shadow: 0 4px 18px #0002; }
+.labels { display: flex; flex-wrap: wrap; gap: 8px; }
 .category { font-size: 12px; color: #a43107; font-weight: 650; }
 .copy h2 { margin: 8px 0 14px; font-size: clamp(24px,2.5vw,34px); line-height: 1.2; overflow-wrap: anywhere; }
 .copy h2:focus, .unavailable h2:focus { outline: none; }

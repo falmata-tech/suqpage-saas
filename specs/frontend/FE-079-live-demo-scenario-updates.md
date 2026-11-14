@@ -38,6 +38,8 @@ data and use the same visibility-filtered public reading capability.
 - Preserve a visitor's edited Inbox message across automatic catalog refresh.
   Reconcile stored product/options through current ordinary selection rules; never
   replace a direct item with an unrelated saved group or submit automatically.
+- Keep example labels and product categories visually separate, and use sensible
+  selling-unit nouns in newly initialized demo fixtures.
 - Keep existing external contact approval and the owned demo number unchanged.
   Demo labels remain clear; a real business is not labeled by its name/handle.
 

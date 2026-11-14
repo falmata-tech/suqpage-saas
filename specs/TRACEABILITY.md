@@ -10,34 +10,47 @@ run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md)
 
 ## S194 scenario-driven demo activity (qualification in progress)
 
-BE-067 / FE-079 / DEP-054 / ADR-0034 define coherent versioned timelines,
-minute-level activity through ordinary application writes, strict enrolled-demo
-identity/version checks and bounded foreground public refresh. The operating
-inventory maps supported business/product fields, existing write/read paths and
-actual storage measurements. The three scenario catalogs, disabled migration82,
-private explicit enrollment, transactional ordinary-command worker and foreground
-public revision/feed adapters are implemented. Nine domain/timer/inert-worker/fixture-boundary
-tests, 18 existing controlled native inquiry/product cases and root/mobile types
-pass. These controlled ports are not PostgreSQL, Chrome or Android refresh proof.
-Initial source `ce8bfee` passes the actual PostgreSQL simulator cases in CI43529933691.
-That run's core/PostgreSQL gates stop on legacy hard-coded81 endpoint assertions;
-the browser gate catches an introduced raw-space native View child and an
-undeclared navigation import in an existing fixture. The fixes retain those
-assertions, use the installed Expo Router API and keep the new refresh lifecycle
-tests. Current description/read-snapshot and end-to-end additions require fresh
-qualification. Run43534062393 stops core on a stale scalable-query source assertion after the
-public read adapter changed; native43534062384 reaches ordinary scenario writes
-but its test-only pause reason violates the real control constraint. These are
-corrected without weakening the contract. The143 browser/component cases and
-20 existing journeys pass; the new scenario stops during preparation. Selam is shared with an
-earlier controlled-video test that writes publications independently of its
-draft; move this journey to an untouched Afia fixture and retain phase-only
-failure diagnosis, preserving the enrollment drift checks.
-Private enrollment-request admission
-and empty-unit preparation now require fresh PostgreSQL/native qualification.
-Actual refresh journeys and hosted execution remain
-pending; no recurring service or enrollment is deployed yet. Local Chromium is
-blocked by its singleton socket; the cloud browser cannot reach that loopback.
+BE-067 / FE-079 / DEP-054 / ADR-0034 map three versioned timelines, ordinary
+transactional writes, exact demo enrollment, private disabled-only requests,
+rollback/budgets and foreground public refresh to the simulator runtime and
+operating inventory. Nine domain/timer/inert-worker/fixture-boundary tests,
+18 controlled native inquiry/product cases, root/mobile types and237 specs pass.
+
+Candidate `aeea8ae` passes core, PostgreSQL, container and dependency jobs in
+43535106712. PostgreSQL covers complete timelines, mixed real/new/private data,
+identity/content/version drift, retry/overlap, stage rollback, private privileges,
+storage/daily budgets, one public read snapshot during a concurrent commit, and
+private request admission with rollback of late failed empty-unit preparation.
+Its native fixture admits through that same request path before compilation.
+
+The actual Chrome desktop/phone journey persists limited supply, refreshes open
+screens and retains edited inquiry drafts plus expanded business copy in20.8s.
+The143 browser/component cases and20 existing journeys pass; the new journey
+then stops at its responsive Language selector. Artifact14089970416 SHA256
+`f21ab40295cf13cce66b1df7de3b2762c7b57678e0d67c522a5afbc82d21227d`
+retains its before/after evidence for seven days. Inspected English data-flow and
+layout decision: PASS for those states; correct the joined example/category
+labels and redundant newly initialized unit wording, then qualify enabled
+languages and the actual Android refresh on the corrected source.
+
+| Candidate/run | Retained failure and correction |
+|---|---|
+| `ce8bfee` /43529933691 | Simulator PostgreSQL passes; legacy latest81 assertions, raw space under a native View and an undeclared navigation fixture import stop gates. Preserve assertions at82, remove the invalid child and use installed Expo Router. |
+| `ef06128` /43534062393 and43534062384 | Stale scalable-query source assertion and a test-only pause value violate current contracts. The scenario also stops during preparation; its shared Selam fixture is touched by a previous publication-only video fixture. Use an untouched Afia target and phase-only diagnosis while retaining drift refusal. |
+| `aeea8ae` /43535106712 | Both live English views/drafts and ordinary readback pass, then two responsive Language selects match. Scope the test to the visible control; do not weaken localization/overflow assertions. |
+| `aeea8ae` /43535106720 | Native private admission and stage2 public readback pass; the inspected screen shows updated capacity/description without a crash. The driver scrolls past the availability label while waiting. Position the initial selling facts first and wait without further scrolling; keep the45s bound. |
+
+Native artifact14090160960 SHA256
+`64550aead23d23a2a756085e9cf8cd335d67fe27528a8d6a15f4bccefa9a301a`
+retains the failed selector state and independent changed public facts. Its
+compiled QA client remains valid for the next source-bound Metro/driver iteration.
+
+Actual native/localized refresh, all required current-head gates and hosted
+execution remain pending; no simulator migration, registration or recurring
+writes are deployed. Local Chromium is blocked by its singleton socket; the
+separate cloud browser cannot reach that loopback. It can review the public
+production site independently. DEP-054 owns the protected before-images, exact
+cohort and code-before-schema canary plan; no Auth/SMTP settings are changed.
 
 ## S195 native Android QA — initial smoke qualified
 

@@ -42,7 +42,7 @@ test('FE-079 ordinary demo stages reach already-open desktop and phone without l
    expect(await surface.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
   }
   for(const locale of ['am','om'])for(const surface of pages){
-   await surface.page.locator('.language-selector select').selectOption(locale);await expect(surface.page.locator('html')).toHaveAttribute('lang',locale);
+   await surface.page.locator('.language-selector select:visible').selectOption(locale);await expect(surface.page.locator('html')).toHaveAttribute('lang',locale);
    await expect(surface.page.locator('[data-business-profile]').getByText(limited.update,{exact:false}).first()).toBeVisible();
    expect(await surface.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
    await surface.page.screenshot({path:testInfo.outputPath('workflow',`demo-${surface.width}-${locale}.png`),fullPage:true});
