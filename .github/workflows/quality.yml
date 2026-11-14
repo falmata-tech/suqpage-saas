@@ -66,6 +66,7 @@ jobs:
         run: >-
           node --import tsx --test --test-concurrency=1
           scripts/test-browser-clipboard.ts
+          scripts/test-social-video-layout.ts
           scripts/test-market-feed-retention.ts
           scripts/test-public-shop-refresh.ts
           scripts/test-public-transport-launcher.ts

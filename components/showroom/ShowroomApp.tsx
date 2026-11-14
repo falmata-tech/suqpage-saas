@@ -557,7 +557,7 @@ function ProductVideo({ product }: { product: Product }) {
   } catch {
     return null;
   }
-  if (!product.video_ref.startsWith("youtube:")) return <div className="product-dialog-video"><SocialVideoFrame poster={product.image_path} video={product.video_ref} title={t("{value1} video", {value1:product.name})}/></div>;
+  if (!product.video_ref.startsWith("youtube:")) return <div className="product-dialog-video" data-portrait-active={/^(tiktok|instagram):/.test(product.video_ref)||undefined}><SocialVideoFrame poster={product.image_path} video={product.video_ref} title={t("{value1} video", {value1:product.name})}/></div>;
   return (
     <div className="product-dialog-video">
       <iframe
