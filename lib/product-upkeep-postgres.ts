@@ -255,23 +255,20 @@ async function publishOne(user: SessionUser, command: BasicProductCommand, stage
           [command.businessId, nextVersion, JSON.stringify(catalogToRevisionSnapshotV4(finalCatalog)), user.id],
         );
       }
-      await runtimeRun(
-        `INSERT INTO product_upkeep_commands(business_id,idempotency_key,payload_hash,actor_user_id,result_product_id,result_content_version)
-         VALUES(?,?,?,?,?,?)`,
-        [command.businessId, command.idempotencyKey, payloadHash, user.id, productId, nextVersion],
-      );
-      await runtimeRun(
-        "INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,?,?,?)",
-        [user.id, command.businessId, "product.basic_upkeep_published", JSON.stringify({
-          productId,
-          kind: command.kind,
-          serviceAttribution: Boolean(command.serviceNote),
-          baseVersion: business.content_version,
-          contentVersion: nextVersion,
-        }), ""],
-      );
+      if (!batch) await recordPublication(user, command, payloadHash, productId, business.content_version, nextVersion);
       return { productId, contentVersion: nextVersion, duplicate: false };
     });
+}
+
+async function recordPublication(user: SessionUser, command: BasicProductCommand, payloadHash: string,
+  productId: number, baseVersion: number, contentVersion: number) {
+  // Receipts reference an existing immutable catalog version. Batch callers
+  // record every member only after publishing their shared final snapshot.
+  await runtimeRun(`INSERT INTO product_upkeep_commands(business_id,idempotency_key,payload_hash,actor_user_id,result_product_id,result_content_version)
+    VALUES(?,?,?,?,?,?)`, [command.businessId, command.idempotencyKey, payloadHash, user.id, productId, contentVersion]);
+  await runtimeRun('INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,?,?,?)',
+    [user.id, command.businessId, 'product.basic_upkeep_published', JSON.stringify({productId,kind:command.kind,
+      serviceAttribution:Boolean(command.serviceNote),baseVersion,contentVersion}), '']);
 }
 
 async function publishBatch(user: SessionUser, members: readonly ProductBatchMember[]): Promise<ProductUpkeepResult[]> {
@@ -312,6 +309,9 @@ async function publishBatch(user: SessionUser, members: readonly ProductBatchMem
     const after = (await runtimeCatalogByBusinessId(first.businessId, true))!;
     await runtimeRun(`INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id)
       VALUES(?,?,?,'product_upkeep',?)`, [first.businessId, version, JSON.stringify(catalogToRevisionSnapshotV4(after)), user.id]);
+    for (const [index,member] of members.entries()) {
+      await recordPublication(user, member.command, member.payloadHash, results[index].productId, business.content_version, version);
+    }
     return results;
   });
 }

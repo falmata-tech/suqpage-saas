@@ -35,6 +35,14 @@ The direct tsx CLI cannot create its local IPC socket; the standard Node
 No expanded hosted migration/enrollment or production write has been performed.
 The active checklist owns remaining gates and the separate signed phone APK.
 
+Retained first qualification: source`136f153` in43551401842/43551401841 passes
+fresh schema83 installation and legacy simulator PostgreSQL cases. The new batch
+then writes its per-product receipt before the referenced final catalog version,
+and the existing immediate foreign key rejects it. Native preparation exposes
+the same ordering defect. Preserve the FK and late-foreign rollback assertion;
+publish the shared final snapshot first, then record all member receipts/audits
+inside the same transaction before requalifying the corrected source.
+
 ## S194 scenario-driven demo activity — qualified and deployed
 
 BE-067 / FE-079 / DEP-054 / ADR-0034 map the versioned scenarios, ordinary
