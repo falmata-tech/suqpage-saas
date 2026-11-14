@@ -32,9 +32,14 @@ layout, unmount and API access. PR75's finite GitHub run `43642623765` at source
 video advances beyond two seconds on each product and story surface; the phone
 product frame fits both stage axes, and Photo 1 removes the iframe. Artifact
 `14132642389` retains the report and screenshots; inspected frames show the
-complete player and soap footage. This is disposable-schema source evidence,
-not a hosted media correction, installed Android or signed release. Current-head
-live-media and required quality checks must repeat before integration.
+complete player and soap footage. PR75's final head
+`4a9fd72f5675a21f7f7c83096ca80bd0eac2ee0f` repeats that live-media
+result in `43644041451`; all five required quality jobs pass in `43644041447`.
+The portrait correction is merged as main
+`ff94208842db93cc4e3ef71b7547a79cf13b0412`, and the live API reports
+that healthy source. This is disposable-schema source evidence, not a hosted
+media correction, installed Android or signed release. Full64/256 media review
+and bounded hosted corrections remain open.
 
 FE-061/BE-049 own the exact64/256 public-demo media review; FE-057/FE-060 own
 inline social playback and BE-067 protects scenario continuity. Read-only browser
@@ -74,13 +79,14 @@ inquiry phone entry; retain that infrastructure failure. Its five required
 quality jobs in43607030261 also pass. These are disposable-schema QA results,
 not a canonical phone APK, physical-device, Auth or push qualification.
 
-Desktop/phone web and Expo real-provider qualification is running separately in
-the finite evidence draft. Source review confirms clean gloved soap-making and
-body-butter footage from the primary creator; neither player readiness nor a
-thumbnail admits an unreviewed business/product mapping. The good farm/wheat
-examples remain unchanged. The earlier removed video, incorrect face-oil soap
-story, multiword search timeout and gallery-scroll test failures remain recorded;
-the latter is corrected in the finite test, not described as a product fix.
+Desktop/phone web and Expo real-provider qualification passes on the merged
+portrait source as described above. Source review confirms clean gloved
+soap-making and body-butter footage from the primary creator; neither player
+readiness nor a thumbnail admits an unreviewed business/product mapping. The
+good farm/wheat examples remain unchanged. The earlier removed video, incorrect
+face-oil soap story, multiword search timeout and gallery-scroll test failures
+remain recorded; the latter is corrected in the finite test, not described as a
+product fix.
 
 ## S196 full public-demo catalog — qualified and deployed
 

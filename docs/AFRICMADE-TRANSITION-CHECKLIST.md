@@ -86,27 +86,27 @@ and scenario progress remain protected. National origin is not a quality test.
    PostgreSQL rollback/replay/continuation and full388-stage coverage pass.
    Actual Android TikTok progress, player unmount, live update and inquiry
    persistence pass in43607030339 attempt2 on the finite qualification branch.
-   Attempt1's later adb connection failure is retained. The focused PR75
-   web/Expo live-media run at source `082713b` passes decoded TikTok progress
-   and unmount; its current-head repeat remains a merge gate. No production
-   video replacement has been applied.
+   Attempt1's later adb connection failure is retained. PR75's final-head
+   web/Expo live-media run `43644041451` at `4a9fd72` passes decoded TikTok
+   progress and unmount; all five final-head quality jobs in `43644041447`
+   pass. The portrait fix is merged as main `ff94208`, with a healthy live API
+   reporting that source. No production video replacement has been applied.
    Portrait web/Expo correction (FE-057) is ordered within this step:
    (a) [x] inspect PR68's source-bound partial verdict and the current gallery,
    dialog and Expo stage rules; (b) [x] specify and implement a bounded portrait
    product stage with photo-return behavior; (c) [x] check real CSS geometry and
-   actual desktop/phone web plus Expo playback and unmount, with a current-head
-   repeat required before integration. Component geometry passes
-   with controlled frames at 1440/390/320, including both vertical edges,
+   actual desktop/phone web plus Expo playback and unmount. Component geometry
+   passes with controlled frames at 1440/390/320, including both vertical edges,
    photo return and retained dialog. The real local web gallery at 390/1440
    contains the full portrait iframe in its 630px stage and restores the photo
    stage on return. Expo 8083 loads the disposable four-product API (HTTP 200),
    contains its 270px portrait frame, and unmounts it on Photo 1. Local TikTok
-   content remains blocked. GitHub run `43642623765` at source `082713b` shows
+   content remains blocked. PR75's final-head run `43644041451` repeats the
    decoded 720×1280 TikTok video advancing on desktop web, phone web and Expo
-   web; inspected captures contain the complete frame and source-bound soap
-   footage. The fixture is disposable and does not qualify all64/256 media.
-   The PR68 fixture branch is evidence only; the focused fix starts from main
-   and retains no native claim.
+   web after the earlier inspected run `43642623765`; captures contain the
+   complete frame and source-bound soap footage. The fixture is disposable
+   and does not qualify all64/256 media. PR68's fixture branch remains
+   evidence only; the merged portrait fix carries no installed Android claim.
 4. [ ] Retain protected before-images and the exact admitted media manifest;
    deliver qualified source normally, apply bounded corrections while paused,
    verify all64/256 public effective media and preserved data, then resume only
