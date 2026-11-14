@@ -29,6 +29,10 @@ dimensions, playback progress and frame captures. A failed or inaccessible playe
 remains unqualified. A decoded player alone is not a visual relevance or quality
 verdict; an agent must inspect the captured frames before using the candidate in
 an admitted mapping.
+If the provider blocks its watch page with a traffic challenge, make at most one
+ordinary official no-cookie embed attempt for that exact ID in an isolated local
+page. Retain both outcomes. Do not solve the challenge, spoof an identity, route
+through a proxy or infer availability from a loaded iframe alone.
 Include at least one relevant TikTok example with actual inline web/phone/Android
 playback evidence, or report the exact external/provider blocker without claiming
 success. Existing FE-060 permits supported social providers for story covers too.
@@ -110,8 +114,9 @@ fills, without duplicate audio/live-frame extraction.
 `scripts/review-primary-video-candidates.mjs` provides a finite official-source
 playback check in an unprivileged pull-request runner. Its offline preflight
 validates exact source identity and read-only target shape; the run retains
-per-candidate progress or bounded failure receipts and short-lived frames for
-agent visual review. It does not read or change the application database.
+per-candidate watch and no-cookie embed progress or bounded failure receipts
+and short-lived frames for agent visual review. It does not read or change the
+application database.
 
 Category table/ref/media admission tests, scripts/test-business-starters.ts,
 product-upkeep/gallery and scoped one-time-plan checks. Focused desktop/phone and

@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
+import {createServer} from 'node:http';
 
 const candidates = [
   {id: 'xqH2qBNsOYM', creator: 'Acme Corrugated Box', source: 'https://www.acmebox.com/about-us/our-videos/', fit: 'Omo Packaging: corrugated cartons and dividers'},
@@ -46,80 +47,125 @@ const review = {
 const save = () => fs.writeFileSync(`${out}/review.json`, JSON.stringify(review, null, 2) + '\n', {mode: 0o600});
 save();
 
-const browser = await chromium.launch({channel: 'chrome'});
+async function playExactVideo(page, player, candidate, prefix) {
+  const video = player.locator('video.html5-main-video').first();
+  await video.waitFor({state: 'attached', timeout: 25000});
+  const details = await player.evaluate(() => window.ytInitialPlayerResponse?.videoDetails);
+  assert.equal(details?.videoId, candidate.id, 'The player must identify the exact creator video.');
+  const result = {player: {videoId: details.videoId, title: details.title, author: details.author}};
+  if (await video.evaluate(element => element.paused)) {
+    for (const selector of ['.ytp-large-play-button', '.ytp-play-button']) {
+      const button = player.locator(selector).first();
+      if (await button.isVisible().catch(() => false)) {
+        await button.click({timeout: 5000}).catch(() => {});
+        break;
+      }
+    }
+  }
+  const state = () => video.evaluate(element => ({
+    time: element.currentTime, duration: element.duration,
+    ready: element.readyState, width: element.videoWidth,
+    height: element.videoHeight, paused: element.paused,
+    adShowing: !!document.querySelector('.ad-showing'),
+  }));
+  const deadline = Date.now() + 45000;
+  while (Date.now() < deadline) {
+    const current = await state();
+    if (!current.adShowing && current.ready >= 2 && current.width > 0 && current.height > 0 && current.time >= 1.5 && !current.paused) {
+      result.start = current;
+      break;
+    }
+    await page.waitForTimeout(500);
+  }
+  assert.ok(result.start, 'The exact video did not decode and advance beyond 1.5 seconds.');
+  await page.screenshot({path: `${out}/${candidate.id}-${prefix}-start.png`, animations: 'disabled'});
+  while (Date.now() < deadline) {
+    const current = await state();
+    if (!current.adShowing && current.time >= result.start.time + 2 && !current.paused) {
+      result.progress = current;
+      break;
+    }
+    await page.waitForTimeout(500);
+  }
+  assert.ok(result.progress, 'The exact video did not advance by two more seconds.');
+  await page.screenshot({path: `${out}/${candidate.id}-${prefix}-progress.png`, animations: 'disabled'});
+  return result;
+}
+
+const server = createServer((request, response) => {
+  const id = new URL(request.url ?? '/', 'http://127.0.0.1').searchParams.get('id');
+  if (!candidates.some(candidate => candidate.id === id)) {
+    response.writeHead(404).end();
+    return;
+  }
+  const embed = `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
+  response.writeHead(200, {'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'no-store', 'referrer-policy': 'strict-origin-when-cross-origin'});
+  response.end(`<html><body style="margin:0;background:#202428"><iframe title="Exact creator video" src="${embed}" style="border:0;width:100vw;height:100vh" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" sandbox="allow-scripts allow-same-origin allow-presentation" referrerpolicy="strict-origin-when-cross-origin"></iframe></body></html>`);
+});
+await new Promise((resolve, reject) => {
+  server.once('error', reject);
+  server.listen(0, '127.0.0.1', resolve);
+});
+const localPage = `http://127.0.0.1:${server.address().port}/`;
+let browser;
 try {
+  browser = await chromium.launch({channel: 'chrome'});
   for (const candidate of candidates) {
     const context = await browser.newContext({viewport: {width: 1280, height: 850}, serviceWorkers: 'block'});
     const page = await context.newPage();
     const receipt = {
       creator: candidate.creator, creatorSource: candidate.source,
       watchUrl: watchUrl(candidate.id), intendedDemoFit: candidate.fit,
+      watch: {result: 'failed'}, embed: {result: 'failed'},
       result: 'failed', visualVerdict: 'unqualified',
     };
     review.candidates.push(receipt);
     save();
     try {
-      await page.goto(receipt.watchUrl, {waitUntil: 'domcontentloaded', timeout: 45000});
-      const reject = page.getByRole('button', {name: /reject all/i}).first();
-      if (await reject.isVisible().catch(() => false)) await reject.click({timeout: 5000});
-      const video = page.locator('video.html5-main-video').first();
-      await video.waitFor({state: 'attached', timeout: 25000});
-      const details = await page.evaluate(() => window.ytInitialPlayerResponse?.videoDetails);
-      assert.equal(details?.videoId, candidate.id, 'The player must identify the exact creator video.');
-      receipt.player = {videoId: details.videoId, title: details.title, author: details.author};
-      if (await video.evaluate(element => element.paused)) {
-        for (const selector of ['.ytp-large-play-button', '.ytp-play-button']) {
-          const button = page.locator(selector).first();
-          if (await button.isVisible().catch(() => false)) {
-            await button.click({timeout: 5000}).catch(() => {});
-            break;
-          }
-        }
+      try {
+        await page.goto(receipt.watchUrl, {waitUntil: 'domcontentloaded', timeout: 45000});
+        const reject = page.getByRole('button', {name: /reject all/i}).first();
+        if (await reject.isVisible().catch(() => false)) await reject.click({timeout: 5000});
+        Object.assign(receipt.watch, await playExactVideo(page, page, candidate, 'watch'), {result: 'decoded_playback'});
+      } catch (error) {
+        receipt.watch.failure = String(error).split('\n')[0].slice(0, 400);
+        await page.screenshot({path: `${out}/${candidate.id}-watch-failure.png`, animations: 'disabled'}).catch(() => {});
       }
-      const state = () => video.evaluate(element => ({
-        time: element.currentTime, duration: element.duration,
-        ready: element.readyState, width: element.videoWidth,
-        height: element.videoHeight, paused: element.paused,
-        adShowing: !!document.querySelector('.ad-showing'),
-      }));
-      const deadline = Date.now() + 45000;
-      let start;
-      while (Date.now() < deadline) {
-        const current = await state();
-        if (!current.adShowing && current.ready >= 2 && current.width > 0 && current.height > 0 && current.time >= 1.5 && !current.paused) {
-          start = current;
-          break;
+      save();
+      try {
+        await page.goto(`${localPage}?id=${candidate.id}`, {waitUntil: 'domcontentloaded', timeout: 15000});
+        const deadline = Date.now() + 30000;
+        let frame;
+        while (Date.now() < deadline) {
+          frame = page.frames().find(item => {
+            try {
+              const url = new URL(item.url());
+              return ['www.youtube-nocookie.com', 'www.youtube.com'].includes(url.hostname)
+                && url.pathname === `/embed/${candidate.id}`;
+            } catch { return false; }
+          });
+          if (frame) break;
+          await page.waitForTimeout(500);
         }
-        await page.waitForTimeout(500);
+        assert.ok(frame, 'The official no-cookie embed did not load the exact ID.');
+        receipt.embed.playerUrl = frame.url();
+        Object.assign(receipt.embed, await playExactVideo(page, frame, candidate, 'embed'), {result: 'decoded_playback'});
+        receipt.result = 'decoded_playback';
+        receipt.visualVerdict = 'pending human frame review';
+      } catch (error) {
+        receipt.embed.failure = String(error).split('\n')[0].slice(0, 400);
+        await page.screenshot({path: `${out}/${candidate.id}-embed-failure.png`, animations: 'disabled'}).catch(() => {});
       }
-      assert.ok(start, 'The exact video did not decode and advance beyond 1.5 seconds.');
-      receipt.start = start;
-      await page.screenshot({path: `${out}/${candidate.id}-start.png`, animations: 'disabled'});
-      let progress;
-      while (Date.now() < deadline) {
-        const current = await state();
-        if (!current.adShowing && current.time >= start.time + 2 && !current.paused) {
-          progress = current;
-          break;
-        }
-        await page.waitForTimeout(500);
-      }
-      assert.ok(progress, 'The exact video did not advance by two more seconds.');
-      receipt.progress = progress;
-      await page.screenshot({path: `${out}/${candidate.id}-progress.png`, animations: 'disabled'});
-      receipt.result = 'decoded_playback';
-      receipt.visualVerdict = 'pending human frame review';
-    } catch (error) {
-      receipt.failure = String(error).split('\n')[0].slice(0, 400);
-      await page.screenshot({path: `${out}/${candidate.id}-failure.png`, animations: 'disabled'}).catch(() => {});
     } finally {
       save();
       await context.close();
     }
   }
 } finally {
-  await browser.close();
+  await browser?.close();
+  await new Promise(resolve => server.close(resolve));
   save();
 }
-assert.ok(review.candidates.every(candidate => candidate.result === 'decoded_playback'),
-  'At least one official candidate lacks decoded playback; inspect the retained review.');
+assert.ok(review.candidates.every(candidate => candidate.embed.result === 'decoded_playback'),
+  'At least one official no-cookie embed lacks decoded playback; inspect both retained attempts.');
