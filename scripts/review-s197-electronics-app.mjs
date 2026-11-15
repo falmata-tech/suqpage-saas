@@ -17,19 +17,24 @@ fs.mkdirSync(out, {recursive:true});
 const fixture = JSON.parse(fs.readFileSync(out+'/fixture.json','utf8'));
 const source = execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(source,fixture.source);
-assert.equal(fixture.handle,'demo-liya-soap-kitchen');
-assert.equal(fixture.videoRef,'tiktok:7657534434601700615');
-assert.equal(fixture.coverRef,'tiktok:7706559803509755144');
+assert.deepEqual(fixture.cases.map(item=>[item.key,item.handle,item.videoRef,item.coverRef]),[
+  ['nova-harness','nova-assembly','tiktok:7660000446525836566','tiktok:7352781700881026347'],
+  ['abay-panel','demo-abay-electrical-assembly','tiktok:7522117073733012750','tiktok:7706559803509755144'],
+]);
 const base='http://127.0.0.1:3000';
-const api=await fetch(base+'/api/mobile/v1/shops/'+fixture.handle,{signal:AbortSignal.timeout(10000)});
-assert.equal(api.status,200);
-const shop=await api.json();
-assert.equal(shop.id,fixture.businessId);
-assert.ok(shop.isDemo && shop.products.length===4);
-const product=shop.products.find(p=>p.id===fixture.productId);
-assert.ok(product);
-const mediaIndex=product.media.findIndex(m=>m.kind==='video'&&m.ref===fixture.videoRef);
-assert.ok(mediaIndex>=0);
+const details=[];
+for(const item of fixture.cases){
+  const api=await fetch(base+'/api/mobile/v1/shops/'+item.handle,{signal:AbortSignal.timeout(10000)});
+  assert.equal(api.status,200);
+  const shop=await api.json();
+  assert.equal(shop.id,item.businessId);
+  assert.ok(shop.isDemo && shop.products.length===4);
+  const product=shop.products.find(p=>p.id===item.productId);
+  assert.ok(product);
+  const mediaIndex=product.media.findIndex(m=>m.kind==='video'&&m.ref===item.videoRef);
+  assert.ok(mediaIndex>=0);
+  details.push({...item,shop,mediaIndex,videoId:item.videoRef.split(':')[1],coverId:item.coverRef.split(':')[1]});
+}
 const browser=await chromium.launch({channel:'chrome'});
 const result={source,browser:{name:'Google Chrome',version:browser.version(),mode:'headless-managed-runner'},dataTarget:'disposable-local-postgres',cases:[],visualVerdict:'pending-agent-review'};
 const write=()=>fs.writeFileSync(out+'/review.json',JSON.stringify(result,null,2));
@@ -93,39 +98,41 @@ async function waitServer(url){
   throw Error('Isolated Expo preview did not become ready.');
 }
 try{
-  for(const width of [1440,390]){
+  for(const width of [1440,390])for(const item of details){
     const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'});
     const page=await context.newPage();
     try{
-      await page.goto(base+'/@'+fixture.handle+'?product='+fixture.productId,{timeout:90000});
+      await page.goto(base+'/@'+item.handle+'?product='+item.productId,{timeout:90000});
       const gallery=page.getByRole('region',{name:'Photos and videos',exact:true});
-      await gallery.getByRole('button',{name:'Video '+(mediaIndex+1),exact:true}).click();
-      await gallery.getByRole('button',{name:'Play video '+(mediaIndex+1),exact:true}).click();
-      await probe(page,'web-product-'+width,'tiktok','7657534434601700615');
-      await page.goto(base+'/@'+fixture.handle,{timeout:90000});
-      await page.getByRole('button',{name:'Play business video about '+shop.name,exact:true}).click();
-      await probe(page,'web-cover-'+width,'tiktok','7706559803509755144');
+      await gallery.getByRole('button',{name:'Video '+(item.mediaIndex+1),exact:true}).click();
+      await gallery.getByRole('button',{name:'Play video '+(item.mediaIndex+1),exact:true}).click();
+      await probe(page,item.key+'-web-product-'+width,'tiktok',item.videoId);
+      await page.goto(base+'/@'+item.handle,{timeout:90000});
+      await page.getByRole('button',{name:'Play business video about '+item.shop.name,exact:true}).click();
+      await probe(page,item.key+'-web-cover-'+width,'tiktok',item.coverId);
     }catch(error){
-      result.cases.push({key:'web-navigation-'+width,result:'failed',error:String(error).slice(0,1000)});
-      await page.screenshot({path:out+'/web-navigation-'+width+'-failure.png'}).catch(()=>{});
+      result.cases.push({key:item.key+'-web-navigation-'+width,result:'failed',error:String(error).slice(0,1000)});
+      await page.screenshot({path:out+'/'+item.key+'-web-navigation-'+width+'-failure.png'}).catch(()=>{});
       write();
     }finally{await context.close();}
   }
   await waitServer('http://localhost:8082');
+  for(const item of details){
   const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
   const page=await context.newPage();
   try{
-    await page.goto('http://localhost:8082/product?handle='+fixture.handle+'&id='+fixture.productId,{timeout:120000});
-    await page.getByRole('button',{name:'Video '+(mediaIndex+1),exact:true}).click({timeout:90000});
+    await page.goto('http://localhost:8082/product?handle='+item.handle+'&id='+item.productId,{timeout:120000});
+    await page.getByRole('button',{name:'Video '+(item.mediaIndex+1),exact:true}).click({timeout:90000});
     await page.getByRole('button',{name:'Watch video',exact:true}).click();
-    await probe(page,'expo-product-390','tiktok','7657534434601700615');
-    await page.goto('http://localhost:8082/shop/'+fixture.handle,{timeout:90000});
+    await probe(page,item.key+'-expo-product-390','tiktok',item.videoId);
+    await page.goto('http://localhost:8082/shop/'+item.handle,{timeout:90000});
     await page.getByRole('button',{name:'Watch video',exact:true}).first().click({timeout:60000});
-    await probe(page,'expo-cover-390','tiktok','7706559803509755144');
+    await probe(page,item.key+'-expo-cover-390','tiktok',item.coverId);
   }catch(error){
-    result.cases.push({key:'expo-navigation-390',result:'failed',error:String(error).slice(0,1000)});
-    await page.screenshot({path:out+'/expo-navigation-390-failure.png'}).catch(()=>{});
+    result.cases.push({key:item.key+'-expo-navigation-390',result:'failed',error:String(error).slice(0,1000)});
+    await page.screenshot({path:out+'/'+item.key+'-expo-navigation-390-failure.png'}).catch(()=>{});
     write();
   }finally{await context.close();}
+  }
 }finally{write();await browser.close();}
 console.log(JSON.stringify(result));

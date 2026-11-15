@@ -15,10 +15,10 @@ import {productMedia} from '../lib/product-media';
 import {productVideoWatchUrl} from '../lib/video/product-video';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 
-const videoRef='tiktok:7657534434601700615';
-const coverRef='tiktok:7706559803509755144';
-const handle='demo-liya-soap-kitchen';
-const productName='Oat Everyday Bar';
+const cases=[
+  {key:'nova-harness',videoRef:'tiktok:7660000446525836566',coverRef:'tiktok:7352781700881026347',handle:'nova-assembly',productName:'Custom Cable Harness Kit'},
+  {key:'abay-panel',videoRef:'tiktok:7522117073733012750',coverRef:'tiktok:7706559803509755144',handle:'demo-abay-electrical-assembly',productName:'Motor Control Panels'},
+] as const;
 
 async function main(){
   const target=assertNativeDemoTarget();
@@ -29,6 +29,8 @@ async function main(){
   assert.equal(original.source,source);
   target.searchParams.set('options',`-csearch_path=${nativeQaSchema(original.schema)}`);
   Object.assign(process.env,{SUQPAGE_DATABASE_DRIVER:'postgres',SUQPAGE_POSTGRES_URL:target.href,SUQPAGE_AUTH_DRIVER:'local',SUQPAGE_MEDIA_DRIVER:'filesystem'});
+  const records=[];
+  for(const {key,videoRef,coverRef,handle,productName} of cases){
   const record=await runtimeTransaction(async()=>{
     const catalog=await runtimeCatalogByHandle(handle);
     assert.ok(catalog&&catalog.business.is_demo===1&&catalog.business.status==='active');
@@ -67,7 +69,9 @@ async function main(){
   assert.ok(productMedia(after.products.find(product=>product.id===record.productId)!).some(item=>item.ref===videoRef));
   assert.equal(page.content.videoUrl,productVideoWatchUrl(coverRef));
   fs.mkdirSync('.local/s197-electronics-app',{recursive:true,mode:0o700});
-  fs.writeFileSync('.local/s197-electronics-app/fixture.json',JSON.stringify({source,handle,videoRef,coverRef,...record})+'\n',{mode:0o600});
+  records.push({key,handle,videoRef,coverRef,...record});
+  }
+  fs.writeFileSync('.local/s197-electronics-app/fixture.json',JSON.stringify({source,cases:records})+'\n',{mode:0o600});
   console.log('PASS disposable public-demo media fixture prepared through ordinary commands.');
 }
 void main().catch(()=>{console.error('Disposable live-media fixture failed.');process.exitCode=1;}).finally(closePostgresRuntimeForTests);
