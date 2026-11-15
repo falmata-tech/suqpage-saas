@@ -4,7 +4,7 @@ title: Scenario-driven demo marketplace simulation
 status: in_progress
 related: [BE-049, FE-061, BE-009, FE-079, DEP-054, ADR-0034, BE-055, BE-054, BE-035]
 owners: [backend, security, operations]
-last_updated: 2026-11-15
+last_updated: 2026-11-14
 change_level: L3
 ---
 
@@ -194,22 +194,6 @@ through ordinary upkeep before legacy enrollment or in the first full-catalog
 stage; an existing unit is preserved.
 A refused request rolls back all preparation. Active simulation does not consume
 requests. Migration creates no request or enrollment.
-
-For the finite DEP-054 maintenance schedule, the adapter admits ticks only in
-the fixed two-hour UTC window and requests a maintenance-only transaction.
-GIVEN the control is enabled or disabled for any reason other than `operator`
-WHEN that transaction runs THEN it does not process requests or stages and
-does not change `last_slot` or `used_today`. GIVEN the control is disabled with
-`pause_reason='operator'` WHEN pending requests exist THEN it first verifies
-that every selected request is valid JSON with kind `media_correction` or
-`unenrolled_media_correction`. Any other kind or invalid JSON fails the entire
-tick without processing or acknowledging a request. Only after that check does
-it apply the existing identity/version checks, at-most-eight selection,
-12-second admission limit and per-request rollback; accepted/rejected status
-remains authoritative. Normal three-time admission retains all request kinds.
-GIVEN the window ends WHEN Netlify invokes the old temporary schedule THEN no
-database connection opens. Resume stages only after the original three-time
-adapter is published and independently identified.
 
 The control, requests, enrollment and seven-day bounded operational run records are private
 PostgreSQL tables with RLS and no anon/authenticated/service-role access. Only the

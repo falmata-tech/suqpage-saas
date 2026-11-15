@@ -215,13 +215,13 @@ async function main(){
   await db.exec('DROP TRIGGER fail_copy_audit ON audit_logs; DROP FUNCTION fail_copy_audit()');
   await db.prepare('INSERT INTO demo_simulator_requests(business_id,input_json,requested_at) VALUES(?,?,?)')
    .run(legacyId,JSON.stringify(legacyReapply),now+120000);
-  assert.equal((await runDemoSimulatorTick(now+120000,1,'maintenance')).copyCorrected,1);
+  assert.equal((await runDemoSimulatorTick(now+120000,1)).copyCorrected,1);
   assert.equal((await db.prepare('SELECT status FROM demo_simulator_requests WHERE business_id=?').get(legacyId)).status,'accepted');
   const accepted=await db.prepare('SELECT * FROM businesses WHERE id=?').get(legacyId);
   const stale={...legacyInput,operationKey:'s200_copy_dara_stale_1'};
   await db.prepare(`UPDATE demo_simulator_requests SET input_json=?,status='pending',reason='',processed_at=0
    WHERE business_id=?`).run(JSON.stringify(stale),legacyId);
-  assert.equal((await runDemoSimulatorTick(now+180000,1,'maintenance')).enrollmentRejected,1);
+  assert.equal((await runDemoSimulatorTick(now+180000,1)).enrollmentRejected,1);
   assert.equal((await db.prepare('SELECT status FROM demo_simulator_requests WHERE business_id=?').get(legacyId)).status,'rejected');
   assert.deepEqual(await db.prepare('SELECT * FROM businesses WHERE id=?').get(legacyId),accepted);
   const rejection=await db.prepare(`SELECT detail FROM audit_logs WHERE business_id=? AND action='demo.copy_rejected'
