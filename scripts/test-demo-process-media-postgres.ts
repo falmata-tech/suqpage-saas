@@ -70,6 +70,9 @@ async function main(){
   await assert.rejects(()=>correctDemoProcessMedia(input),/Pause/);
   assert.deepEqual(await state(),before);
   await db.exec("UPDATE demo_simulator_control SET enabled=0,pause_reason='operator' WHERE id=1");
+  await assert.rejects(()=>correctDemoProcessMedia({...input,providerUserId:crypto.randomUUID()}),/eligibility_changed/);
+  await assert.rejects(()=>correctDemoProcessMedia({...input,ownerUserId:ownerUserId+1}),/eligibility_changed/);
+  await assert.rejects(()=>correctDemoProcessMedia({...input,expectedStage:0}),/content_changed/);
   await assert.rejects(()=>correctDemoProcessMedia({...input,expectedHash:'b'.repeat(64)}),/content_changed/);
   assert.deepEqual(await state(),before);
   const forged=catalogToRevisionSnapshotV4((await runtimeCatalogByBusinessId(businessId,true))!);
