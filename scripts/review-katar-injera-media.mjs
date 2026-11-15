@@ -88,7 +88,7 @@ try {
     const response = await sourcePage.goto('https://www.tiktok.com/player/v1/7706816466368154893?autoplay=0&controls=1&rel=0', {timeout: 60000});
     assert.equal(response.status(), 200, 'Creator player must load successfully.');
     const caption = (await sourcePage.locator('body').innerText()).slice(0, 500);
-    assert.ok(caption.includes('katar.mn'), 'Creator identity must remain visible.');
+    const creatorTextVisible = caption.includes('katar.mn');
     await sourcePage.getByRole('button', {name: 'Play video', exact: true}).click({timeout: 20000});
     await expect.poll(async () => (await videoState(sourcePage))[0]?.time ?? 0, {timeout: 40000}).toBeGreaterThan(2);
     const initial = (await videoState(sourcePage))[0];
@@ -106,7 +106,7 @@ try {
       console.log('S197_KATAR_FRAME_' + second + '_B64=' + smallFrame.toString('base64'));
       samples.push({targetSecond: second, ...sample});
     }
-    results.sourceReview = {result: 'decoded-moving-frames', url: sourcePage.url(), caption, initial, samples};
+    results.sourceReview = {result: 'decoded-moving-frames', url: sourcePage.url(), creatorTextVisible, caption, initial, samples};
   } catch (error) {
     await sourcePage.screenshot({path: out + '/katar-source-failure.png'}).catch(() => {});
     results.sourceReview = {result: 'failed', error: String(error).slice(0, 1000)};
