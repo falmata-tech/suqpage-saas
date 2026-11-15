@@ -14,6 +14,7 @@ import type { ShopPageContent } from "@/lib/owner-page-domain";
 import { formatEtbPrice } from "@/lib/offering-presentation";
 import {normalizeProductVideoUrl,productVideoEmbedUrl} from "@/lib/video/product-video";
 import SocialVideoFrame from "../SocialVideoFrame";
+import FirstPartyDemoVideo from "../FirstPartyDemoVideo";
 import type { DesignProps } from "./designs";
 import { businessProfileDescription } from "@/lib/business-profile";
 import { legacyPublicContacts, publicContactLinks, type PublicContactKind, type PublicContactLink } from "@/lib/business-profile-contacts";
@@ -38,8 +39,9 @@ function CoverMedia({ image, video, name }: { image: string; video: string; name
   const t = useUiText();
   const [playing, setPlaying] = useState(false);
   if (!image && !video) return null;
-  return <div className={styles.coverMedia} style={playing&&video&&['tiktok','instagram'].includes(normalizeProductVideoUrl(video).provider)?{height:'min(70vh,560px)',minHeight:320}:undefined}>
-    {playing && video ? normalizeProductVideoUrl(video).provider !== "youtube" ? <SocialVideoFrame video={normalizeProductVideoUrl(video).managedRef} poster={image} title={t("Video about {value1}",{value1:name})}/> : <iframe src={`${productVideoEmbedUrl(normalizeProductVideoUrl(video).managedRef)}?autoplay=1`}
+  const parsed = video ? normalizeProductVideoUrl(video) : null;
+  return <div className={styles.coverMedia} style={playing&&parsed&&['tiktok','instagram','demo'].includes(parsed.provider)?{height:'min(70vh,560px)',minHeight:320}:undefined}>
+    {playing && parsed ? parsed.provider === "demo" ? <FirstPartyDemoVideo video={parsed.managedRef} title={t("Video about {value1}",{value1:name})}/> : parsed.provider !== "youtube" ? <SocialVideoFrame video={parsed.managedRef} poster={image} title={t("Video about {value1}",{value1:name})}/> : <iframe src={`${productVideoEmbedUrl(parsed.managedRef)}?autoplay=1`}
       title={t("Video about {value1}", { value1: name })} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /> : <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {image ? <><img src={image} alt="" fetchPriority="high" /><span className={styles.coverTint} aria-hidden="true" /></> : null}
@@ -64,14 +66,14 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
   const BusinessHeading = p.embedded ? "h2" : "h1";
   const contacts = publicContactLinks(profile.contacts || legacyPublicContacts(business)).filter(contact=>["website","tiktok","instagram","facebook"].includes(contact.kind));
   return <div className={styles.profile} data-business-profile data-store-accent={profile.accentColor || undefined} style={storefrontAccentVariables(profile.accentColor) as CSSProperties}>
-    {Boolean(business.is_demo) ? <div className={launchStyles.notice}>{t("Example page. This business and its products are fictional.")}</div> : null}
+    {Boolean(business.is_demo) ? <div className={styles.exampleBusiness}><span className={launchStyles.example}>{t("Example business")}</span></div> : null}
     <section className={styles.cover} aria-label={t("Business introduction")}>
       <CoverMedia key={`${business.id}:${profile.heroImage}:${profile.videoUrl}`} image={profile.heroImage} video={profile.videoUrl} name={business.name} />
       <div className={styles.identity}>
         <div className={styles.identityHeading}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {business.logo_path ? <img className={styles.logo} src={business.logo_path} alt="" /> : null}
-          <div><span className={styles.handle}>@{business.handle}</span><BusinessHeading className={styles.businessName}>{business.name}</BusinessHeading></div>
+          <div>{!business.is_demo ? <span className={styles.handle}>@{business.handle}</span> : null}<BusinessHeading className={styles.businessName}>{business.name}</BusinessHeading></div>
         </div>
         <ProfileDescription key={business.id} text={businessProfileDescription(profile)} />
       </div>
@@ -107,7 +109,6 @@ export default function BusinessProfile(p: DesignProps & { profile: ShopPageCont
             {product.image_path ? <img src={product.image_path} alt="" loading="lazy" decoding="async" /> : <PackageOpen size={32} aria-hidden="true" />}
           </a>
           <div className={styles.productCopy}>
-            {business.is_demo ? <span className={launchStyles.example}>{t("Example product")}</span> : null}
             {category ? <span className={styles.productCategory} data-product-category>{category.name}</span> : null}
             <h3><a href={productHref(business.handle, product.id)} onClick={e => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); p.openProduct(product); } }}>{product.name}</a></h3>
             {product.description ? <p>{product.description}</p> : null}

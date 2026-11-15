@@ -35,6 +35,7 @@ async function main(){
  const approve={decision:'approved',youtubeUrl:'https://www.youtube.com/watch?v=aqz-KE-bpKQ',reply:'Your product video is ready.'};
  await assert.rejects(()=>reviewVideoRequest(owner,request.id,approve));await assert.rejects(()=>reviewVideoRequest(other,request.id,approve));await assert.rejects(()=>getVideoRequest(foreign,request.id));
  await assert.rejects(()=>reviewVideoRequest(staff,request.id,{...approve,youtubeUrl:'https://example.com/not-youtube'}));
+ await assert.rejects(()=>reviewVideoRequest(staff,request.id,{...approve,videoUrl:'/videos/demo/business-15.mp4'}),/supported video link/);
  assert.equal((await getVideoRequest(owner,request.id))?.status,'pending');
  await joinAssignedSupportConversation(staff,request.id);
  const decisions=await Promise.all([reviewVideoRequest(staff,request.id,approve),reviewVideoRequest(staff,request.id,approve)]);assert.equal(decisions.filter(r=>r.duplicate).length,1);

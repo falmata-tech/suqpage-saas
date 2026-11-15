@@ -10,6 +10,7 @@ import { pagePublicationPort } from './owner-page-publication-runtime';
 import { runtimeGet, runtimeTransaction } from './runtime-sql';
 import type { SessionUser } from './types';
 import { currentBusinessAuthority } from './staff-business-authority';
+import { approvedDemoVideo } from './video/demo-video-catalog';
 
 // Keep the draft and live publication in one PostgreSQL transaction. Any current
 // business manager may update an active page under the publication version fence.
@@ -18,8 +19,19 @@ export async function saveOwnerPageAndPublication(actor: SessionUser, businessId
 ): Promise<OwnerPageDraft & { publication: PagePublication | null }> {
   await readOwnerPage(ownerPagePort,actor,businessId);
   const content=ownerPageRecord(input.content,['template','coverStyle','introduction','about','heroImage','videoUrl','contacts','accentColor']);
-  if(content.videoUrl){try{input={...input,content:{...content,videoUrl:productVideoWatchUrl(await resolveProductVideoUrl(content.videoUrl))}};}catch{throw new OwnerPageError('Use a supported video link.');}}
+  let demoVideo = false;
+  let demoVideoRef = '';
+  if(content.videoUrl){try{
+    const ref=await resolveProductVideoUrl(content.videoUrl);
+    demoVideo=ref.startsWith('demo:');
+    demoVideoRef=ref;
+    input={...input,content:{...content,videoUrl:productVideoWatchUrl(ref)}};
+  }catch{throw new OwnerPageError('Use a supported video link.');}}
   return runtimeTransaction(async () => {
+    if(demoVideo){
+      const business=await runtimeGet<{is_demo:number}>('SELECT is_demo FROM businesses WHERE id=?',[businessId]);
+      if(!business?.is_demo||!approvedDemoVideo(demoVideoRef,businessId))throw new OwnerPageError('Use a public video link for this business.');
+    }
     const saved = input.action === 'start'
       ? await startOwnerPage(ownerPagePort, actor, businessId, input.content)
       : await saveOwnerPage(ownerPagePort, actor, businessId, input.version, input.content);

@@ -61,7 +61,7 @@ for(const locale of ['en','am','om'])test(`FE-021 S182 ${locale} Featured puts o
  assert.equal(nodes(summary).filter(node=>node.props.accessibilityRole==='link').length,0,'Missing stream/recording destinations create no dead action');
  const times=tree.filter(node=>String(node.props.testID||'').startsWith('featured-presentation-')).map(node=>text(node.props.children));
  assert.deepEqual(times,['8:15 PM–8:35 PM EAT','8:38 PM–8:58 PM EAT','9:00 PM–9:20 PM EAT']);
- assert.equal(tree.filter(node=>node.type==='Photo').length,3);assert.equal(tree.filter(node=>node.type==='Text'&&text(node.props.children)===f.fixture.t('Example page')).length,3,'Demo disclosure remains part of the simple cards');
+ assert.equal(tree.filter(node=>node.type==='Photo').length,3);assert.equal(tree.filter(node=>node.type==='Text'&&text(node.props.children)===f.fixture.t('Example business')).length,0,'Featured cards leave the example label to the showroom');
  const carousel=tree.find(node=>node.type==='SponsorCarousel')!;assert.equal(carousel.props.sponsors,program.sponsors);assert.equal(carousel.props.visible,false,'The unchanged sponsor controller waits for actual visibility');
  const scroll=tree.find(node=>node.type==='ScrollView'&&!node.props.horizontal)!;
  (sponsors.props.onLayout as Function)({nativeEvent:{layout:{y:900,height:100}}});(scroll.props.onLayout as Function)({nativeEvent:{layout:{height:400}}});(scroll.props.onScroll as Function)({nativeEvent:{contentOffset:{y:700}}});f.render();assert.equal(f.tree().find(node=>node.type==='SponsorCarousel')!.props.visible,true,'Moving sponsors below cards preserves their viewport visibility input');

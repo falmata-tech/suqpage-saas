@@ -76,7 +76,7 @@ assert.match(read("components/MarketSearchControls.tsx"), /Search products/);
 assert.match(discovery, /Open page/);
 // FE-030/S54: the list contains offerings; businesses remain map results.
 assert.match(discovery, /className="discovery-results-heading">\{t\("Products"\)\}/);
-assert.match(discovery, /useIndependentSearch\('businesses',businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey\)/, "The shared active toolbar retains an independent business search controller");
+assert.match(discovery, /useIndependentSearch\('businesses',businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey,!panelOpen\)/, "The shared active toolbar retains an independent business search controller");
 assert.match(discovery, /marketSearchParams\('products',productSearch\)/, "The shared active toolbar retains a separate product feed/query");
 assert.doesNotMatch(publicNarrative, /water bottling|bottled water|diaper (?:company|factory|manufacturer)/i);
 
@@ -140,7 +140,7 @@ assert.doesNotMatch(about, /transport arrangements|report a concern|commercial t
 
 assert.match(signup, /Set up your business/);
 assert.match(signup, /name, category, and contact number/);
-assert.match(signup, /Next, make the example page your own/);
+assert.match(signup, /Next, add your business details/);
 assert.match(signupForm, />\{t\("Category"\)\}</);
 assert.match(signupForm, /Finish setup/);
 assert.doesNotMatch(signupForm, /requestText/);
@@ -170,14 +170,14 @@ assert.match(directory,/No business pages are listed yet\./);
 assert.match(directory,/Browse product listings/);
 assert.match(directory,/href="\/\?view=search"/);
 assert.doesNotMatch(directory,/Explore example showrooms in the Market/);
-assert.match(discovery,/Example product/);
-assert.match(discovery,/Example page/);
-assert.match(read('components/FeaturedShowroomsWorkspace.tsx'),/Example page/);
-assert.match(read('apps/mobile/app/(tabs)/featured.tsx'),/Example page/);
-assert.match(read('components/showroom/ShowroomApp.tsx'),/Example page\. This business and its products are fictional\./);
-assert.match(read('components/showroom/BusinessProfile.tsx'),/Example product/);
-assert.match(read('apps/mobile/src/ShowroomContent.tsx'),/Example product/);
-assert.match(read('apps/mobile/src/ShowroomContent.tsx'),/This business and its products are fictional/);
+assert.doesNotMatch(discovery,/Example product|Example page/);
+assert.doesNotMatch(read('components/FeaturedShowroomsWorkspace.tsx'),/Example page/);
+assert.doesNotMatch(read('apps/mobile/app/(tabs)/featured.tsx'),/Example page/);
+assert.match(read('components/showroom/ShowroomApp.tsx'),/Example business/);
+assert.match(read('components/showroom/BusinessProfile.tsx'),/Example business/);
+assert.match(read('apps/mobile/src/ShowroomContent.tsx'),/Example business/);
+assert.doesNotMatch(read('components/showroom/ProductPage.tsx'),/Example product/);
+assert.doesNotMatch(read('apps/mobile/src/YouTubeVideo.tsx'),/Illustrative video/);
 assert.doesNotMatch(read('scripts/setup.ts'),/Custom inquiry|Standard/,'Demo setup does not seed generic database-like product choices');
 // FE-041 replaces the repeated page footer with a direct link per selected product.
 assert.match(businessPage, /buildInquiryMessage/);

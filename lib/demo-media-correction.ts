@@ -1,5 +1,6 @@
 import {parseProductMedia,type ProductMedia} from './product-media';
 import {normalizeProductVideoUrl,productVideo,productVideoWatchUrl} from './video/product-video';
+import {approvedDemoVideo} from './video/demo-video-catalog';
 
 export type DemoMediaCorrection = {
  kind:'media_correction'; operationKey:string; businessId:number; handle:string;
@@ -26,9 +27,11 @@ export function parseDemoMediaCorrection(raw:unknown):DemoMediaCorrection{
  if(v.coverBefore)normalizeProductVideoUrl(v.coverBefore);
  if(typeof v.coverVideoRef!=='string')return invalid();
  productVideo(v.coverVideoRef);
+ if(v.coverVideoRef.startsWith('demo:')&&!approvedDemoVideo(v.coverVideoRef,Number(v.businessId)))return invalid();
  const products=v.products.map(raw=>{
   const p=object(raw,['productId','beforeMedia','afterMedia']);
   const beforeMedia=parseProductMedia(p.beforeMedia),afterMedia=parseProductMedia(p.afterMedia);
+  if(afterMedia.some(item=>item.kind==='video'&&item.ref.startsWith('demo:')&&!approvedDemoVideo(item.ref,Number(v.businessId))))return invalid();
   const oldVideos=beforeMedia.filter(x=>x.kind==='video');
   if(!afterMedia.some(x=>x.kind==='video')||
    (oldVideos.length ? afterMedia.length!==beforeMedia.length : afterMedia.length!==beforeMedia.length+1))return invalid();

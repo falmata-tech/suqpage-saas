@@ -3,7 +3,7 @@ import { parseShopPageContent } from './owner-page-domain';
 import type { OfferingKind } from './offerings';
 
 // Explicit sample content for NEW private workspaces, never runtime fallbacks.
-export const STARTER_NOTICE = 'Make this example page your own before publishing.';
+export const STARTER_NOTICE = 'Add your business details before publishing.';
 export const STARTER_ABOUT = 'Sample page: Thoughtful pieces for everyday use. Browse our collection or tell us about a product you would like made. Based in Addis Ababa, we welcome questions about colors, sizes and custom orders.';
 export const STARTER_VIDEO_REF = 'youtube:M7lc1UVf-VE';
 export const STARTER_VIDEO_URL = 'https://www.youtube.com/watch?v=M7lc1UVf-VE';

@@ -3,6 +3,7 @@ import {useEffect,useRef,useState} from 'react';
 import {ChevronLeft,ChevronRight,ImageOff,Play} from 'lucide-react';
 import type {ProductMedia} from '@/lib/product-media';
 import {productVideoEmbedUrl} from '@/lib/video/product-video';
+import FirstPartyDemoVideo from '@/components/FirstPartyDemoVideo';
 import SocialVideoFrame from '../SocialVideoFrame';
 import {useUiText} from '@/lib/i18n/ui';
 import styles from './ProductPage.module.css';
@@ -14,7 +15,7 @@ export default function ProductMediaGallery({items,name}:{items:ProductMedia[];n
   useEffect(()=>{setReady(true);const element=track.current;if(!element)return;let width=element.clientWidth;const observer=new ResizeObserver(()=>{if(element.clientWidth!==width){width=element.clientWidth;element.scrollTo({left:activeRef.current*width,behavior:'instant'});}});observer.observe(element);return()=>observer.disconnect();},[]);
   const cover=items.find(item=>item.kind==='image')?.ref;
   const activeItem=items[active];
-  const portraitPlaying=playing===active&&activeItem?.kind==='video'&&/^(tiktok|instagram):/.test(activeItem.ref);
+  const portraitPlaying=playing===active&&activeItem?.kind==='video'&&/^(tiktok|instagram|demo):/.test(activeItem.ref);
   useEffect(()=>{
     const element=track.current;if(!element||!portraitPlaying)return;
     let timer:ReturnType<typeof setTimeout>|undefined;
@@ -49,7 +50,7 @@ export default function ProductMediaGallery({items,name}:{items:ProductMedia[];n
       }}>
         {items.map((item,index)=><div className={styles.gallerySlide} inert={index!==active} key={`${item.kind}:${item.ref}`} aria-label={t('Media {number} of {total}',{number:index+1,total:items.length})}>
           {item.kind==='image' ? failed.includes(item.ref)?<div className={styles.placeholder}><ImageOff aria-hidden="true" /><span>{t('Photo unavailable')}</span></div>:<img src={item.ref} alt={`${name} — ${t('Photo {number}',{number:index+1})}`} loading={index===0?'eager':'lazy'} draggable={false} onError={()=>setFailed(current=>[...current,item.ref])} />
-          : playing===index&&active===index ? !item.ref.startsWith('youtube:') ? <SocialVideoFrame poster={cover} video={item.ref} title={t('{value1} video',{value1:name})}/> : <iframe src={`${productVideoEmbedUrl(item.ref)}?autoplay=1`} title={t('{value1} video',{value1:name})} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
+          : playing===index&&active===index ? item.ref.startsWith('demo:') ? <FirstPartyDemoVideo video={item.ref} title={t('{value1} video',{value1:name})}/> : !item.ref.startsWith('youtube:') ? <SocialVideoFrame poster={cover} video={item.ref} title={t('{value1} video',{value1:name})}/> : <iframe src={`${productVideoEmbedUrl(item.ref)}?autoplay=1`} title={t('{value1} video',{value1:name})} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
           : <div className={styles.galleryVideoPoster}>{cover&&!failed.includes(cover)?<img src={cover} alt="" loading="lazy" onError={()=>setFailed(current=>[...current,cover])}/>:null}<button type="button" disabled={!ready} onClick={()=>setPlaying(index)} aria-label={t('Play video {number}',{number:index+1})}><Play aria-hidden="true" /><span>{t('Play video')}</span></button></div>}
         </div>)}
       </div>

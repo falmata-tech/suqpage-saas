@@ -7,6 +7,7 @@ import LoadingBar from './LoadingBar';
 export default function SocialVideoFrame({video,title,poster}:{video:string;title:string;poster?:string}) {
   const t=useUiText(),frame=useRef<HTMLIFrameElement>(null);
   const provider=productVideo(video).provider;
+  if(provider==='demo')throw new Error('Use the first-party demo player.');
   const [state,setState]=useState<'loading'|'ready'|'error'>('loading'),[attempt,setAttempt]=useState(0);
   useEffect(()=>{
     setState('loading');

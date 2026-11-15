@@ -14,6 +14,7 @@ import type { Product, SessionUser } from "./types";
 import { isPublicProduct } from "./offerings";
 import { readOrderScope } from "./order-scope";
 import { currentBusinessAuthority } from './staff-business-authority';
+import { approvedDemoVideo } from './video/demo-video-catalog';
 
 type StoredCommand = {
   payload_hash: string;
@@ -168,6 +169,10 @@ async function publishOne(user: SessionUser, command: BasicProductCommand, stage
         ? stagedImage!.imageRef
         : command.imageAction === "remove" ? "" : existing?.image_path || "";
       let media = command.media ?? updateLegacyMedia(existing || null, imageRef, command.videoRef);
+      if (media.some(item => item.kind === "video" && item.ref.startsWith("demo:") &&
+        (!business.is_demo || !approvedDemoVideo(item.ref,command.businessId)))) {
+        throw new ProductUpkeepError("Use a public video link for this business.", 400, "demo_video_forbidden");
+      }
       const currentVideos = existing ? productMedia(existing).filter(item => item.kind === "video").map(item => item.ref) : [];
       if (!existing && !media.some(item => item.kind === "video")) {
         const exampleVideo = await runtimeCategoryExampleVideo(command.businessId);

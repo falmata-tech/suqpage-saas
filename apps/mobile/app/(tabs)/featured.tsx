@@ -194,9 +194,6 @@ export default function FeaturedScreen() {
                       <Text style={f.name}>{slot.shop.name}</Text>
                       <Text style={f.small}>{slot.shop.city}</Text>
                       <Text testID={`featured-presentation-${slot.slot}`} style={f.presentationTime}>{presentationTimes.get(slot.slot)} {t('EAT')}</Text>
-                      {slot.shop.isDemo && (
-                        <Text style={f.demo}>{t("Example page")}</Text>
-                      )}
                     </View>
                   </Pressable>
                 ) : (
@@ -267,12 +264,5 @@ const f = StyleSheet.create({
     borderRadius: 7,
     overflow: "hidden",
     backgroundColor: "white",
-  },
-  demo: {
-    alignSelf: "flex-start",
-    fontSize: 10,
-    color: colors.muted,
-    backgroundColor: colors.background,
-    padding: 3,
   },
 });

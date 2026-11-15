@@ -156,6 +156,7 @@
     "test:mobile:app-links": "node --import tsx scripts/test-mobile-app-links.ts",
     "test:mobile:links": "node --import tsx scripts/test-mobile-links.ts",
     "test:mobile:video": "tsx scripts/test-mobile-video.ts",
+    "test:demo-video": "node --import tsx --test scripts/test-demo-first-party-video.ts",
     "test:mobile:rendering": "node scripts/test-native-render-boundaries.mjs",
     "postinstall": "node scripts/patch-mobile-dependencies.cjs",
     "test:mobile:release-safety": "node --import tsx --test scripts/test-android-release-safety.ts",

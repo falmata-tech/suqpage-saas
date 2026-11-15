@@ -12,9 +12,8 @@ import {orderScopeLabels} from "@/lib/order-scope";
 import ProductMediaGallery from "./ProductMediaGallery";
 import styles from "./ProductPage.module.css";
 
-export default function ProductPage({ product, backHref, onBack, onAdd, onInquire, isAdded, copyLink, ready, catalogLabel = "Products", isDemo = false }: {
+export default function ProductPage({ product, backHref, onBack, onAdd, onInquire, isAdded, copyLink, ready, catalogLabel = "Products" }: {
   catalogLabel?: string;
-  isDemo?: boolean;
   ready: boolean;
   product: Product | null; backHref: string; onBack: (event: MouseEvent<HTMLAnchorElement>) => void;
   onAdd: (options: Record<string, string>) => void; onInquire: (options: Record<string, string>) => void;
@@ -32,7 +31,6 @@ export default function ProductPage({ product, backHref, onBack, onAdd, onInquir
       <div className={styles.media}><ProductMediaGallery key={product.id} items={productMedia(product)} name={product.name} /></div>
       <div className={styles.copy}>
         <div className={styles.labels}>
-          {isDemo ? <span className={styles.category}>{t("Example product")}</span> : null}
           {product.category_name ? <span className={styles.category}>{product.category_name}</span> : null}
         </div>
         <h2 ref={heading} tabIndex={-1}>{product.name}</h2>

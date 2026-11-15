@@ -39,12 +39,12 @@ const definitions:Record<DemoScenarioKey,DemoScenarioDefinition>={
   available:{availability:'available',capacity:'normal',leadTime:'New orders: 10–14 working days',pricePercent:100},
   limited:{availability:'limited',capacity:'limited',leadTime:'New orders: 21–28 working days',pricePercent:100},
  },stages:[
-  {key:'slots-open',title:'Production capacity available',facts:'available',minutes:1,update:'The example production team has open capacity for new orders.'},
-  {key:'scheduled',title:'Next production batch scheduled',facts:'planned',minutes:1,update:'The next example production batch is scheduled; reduced capacity and the longer new-order lead time apply.'},
-  {key:'production',title:'Production batch in progress',facts:'limited',minutes:2,update:'The example production batch is in progress; new orders remain subject to the stated limited capacity.'},
-  {key:'finishing',title:'Production batch being finished',facts:'limited',minutes:1,update:'The current example production batch is being finished; the longer lead time still applies to new orders.'},
-  {key:'planning',title:'Next production allocation planned',facts:'limited',minutes:2,update:'The next example production allocation is being planned; new-order capacity remains limited.'},
-  {key:'capacity-restored',title:'Production capacity restored',facts:'available',minutes:1,update:'The next example production allocation is open; normal capacity and the shorter lead time are restored.'},
+  {key:'slots-open',title:'Production capacity available',facts:'available',minutes:1,update:'The production team has open capacity for new orders.'},
+  {key:'scheduled',title:'Next production batch scheduled',facts:'planned',minutes:1,update:'The next production batch is scheduled; reduced capacity and the longer new-order lead time apply.'},
+  {key:'production',title:'Production batch in progress',facts:'limited',minutes:2,update:'The production batch is in progress; new orders remain subject to the stated limited capacity.'},
+  {key:'finishing',title:'Production batch being finished',facts:'limited',minutes:1,update:'The current production batch is being finished; the longer lead time still applies to new orders.'},
+  {key:'planning',title:'Next production allocation planned',facts:'limited',minutes:2,update:'The next production allocation is being planned; new-order capacity remains limited.'},
+  {key:'capacity-restored',title:'Production capacity restored',facts:'available',minutes:1,update:'The next production allocation is open; normal capacity and the shorter lead time are restored.'},
  ]},
  'seasonal-harvest':{key:'seasonal-harvest',version:1,productKind:'standard_product',categories:['agriculture-growers','food-farming'],facts:{
   planned:{availability:'coming_soon',capacity:'planned',leadTime:'Next example harvest in 5–7 days',pricePercent:100},
@@ -64,7 +64,7 @@ const definitions:Record<DemoScenarioKey,DemoScenarioDefinition>={
   limited:{availability:'limited',capacity:'limited',leadTime:'New orders: 21–28 working days',pricePercent:100},
  },stages:[
   {key:'slots-open',title:'Production slots open',facts:'available',minutes:1,update:'The example workshop has open production slots at its normal capacity.'},
-  {key:'scheduled',title:'Next run scheduled',facts:'planned',minutes:1,update:'The next example production run is scheduled; fewer new-order slots and the longer lead time apply.'},
+  {key:'scheduled',title:'Next run scheduled',facts:'planned',minutes:1,update:'The next production run is scheduled; fewer new-order slots and the longer lead time apply.'},
   {key:'production',title:'Production run in progress',facts:'limited',minutes:2,update:'The example workshop run is in progress; new orders remain subject to limited capacity.'},
   {key:'finishing',title:'Finishing the current run',facts:'limited',minutes:1,update:'The current example run is being finished; the published new-order lead time still applies.'},
   {key:'planning',title:'Planning the next allocation',facts:'limited',minutes:2,update:'The next example capacity allocation is being planned; new-order slots remain limited.'},

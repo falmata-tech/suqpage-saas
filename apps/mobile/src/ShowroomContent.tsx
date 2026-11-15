@@ -99,7 +99,6 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
   if (preview && previewProduct) return <View style={{ gap: 14 }}>
     <Button secondary label={t("Back")} onPress={() => setSelected(null)} />
     <Gallery media={previewProduct.media} privateImage />
-    {shop.isDemo&&<Text style={v.demo}>{t("Example product")}</Text>}
     <Text style={v.title}>{previewProduct.name}</Text>
     <ProductSupply kind={previewProduct.kind} availability={previewProduct.availability}/>
     {previewProduct.priceMinor !== null && <Text style={v.price}>{(previewProduct.priceMinor / 100).toLocaleString()} ETB</Text>}
@@ -125,7 +124,7 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
           <>
             {shop.isDemo && (
               <Text style={v.demo}>
-                {t("Example page. This business and its products are fictional.")}
+                {t("Example business")}
               </Text>
             )}
             <View style={accent ? { borderBottomWidth: 4, borderColor: accent.accent } : undefined}>
@@ -133,7 +132,7 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
               <YouTubeVideo
                 video={shop.videoUrl}
                 allowSocial
-                height={/tiktok.com|instagram.com/.test(shop.videoUrl)?420:210}
+                height={/tiktok.com|instagram.com|\/videos\/demo\//.test(shop.videoUrl)?420:210}
                 poster={shop.cover}
                 posterTint={accent?.accent}
                 privateImage={preview}
@@ -144,7 +143,7 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
             </View>
             <View style={v.section}>
               {shop.logo ? <View style={{ width: 60, padding: 5, borderRadius: 12, borderWidth: 2, borderColor: accent?.edge || colors.line, backgroundColor: accent?.soft || "white" }}><Photo refPath={shop.logo} height={46} privateImage={preview} /></View> : null}
-              <Text style={v.handle}>@{shop.handle}</Text>
+              {!shop.isDemo&&<Text style={v.handle}>@{shop.handle}</Text>}
               <Text style={v.title}>{shop.name}</Text>
               <LinkedText style={v.body}>{shop.about}</LinkedText>
             </View>
@@ -205,7 +204,6 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
                     />
                     <View style={{ padding: 10, gap: 6 }}>
                       {categories.some(category=>category.id===p.categoryId)&&<Text testID={`showroom-product-category-${p.id}`} style={v.description}>{categories.find(category=>category.id===p.categoryId)!.name}</Text>}
-                      {shop.isDemo&&<Text style={v.demo}>{t("Example product")}</Text>}
                       <Text style={v.productName}>{p.name}</Text>
                       {Boolean(p.description)&&<Text testID={`showroom-product-description-${p.id}`} numberOfLines={2} style={v.description}>{p.description}</Text>}
                       <ProductSupply kind={p.kind} availability={p.availability}/>
@@ -273,8 +271,10 @@ const v = StyleSheet.create({
     backgroundColor: colors.soft,
     color: colors.brand,
     fontSize: 11,
-    padding: 9,
-    textAlign: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    alignSelf: "flex-start",
+    borderRadius: 5,
   },
   play: {
     position: "absolute",

@@ -312,6 +312,9 @@ scroll settles on that video, while a complete gallery scroll, thumbnail or
 arrow stops it. Touch input inside an external iframe may stay with the provider.
 Provider playback for a specific external clip still needs its own
 source-bound review under FE-057 and FE-061.
+The S197 contingency for licensed first-party fictional-demo MP4 examples is
+planned in FE-061/BE-049 and ADR-0035; it is not an admitted owner upload or
+published media source until its source rights and web/native rollout pass.
 Details: BE-009/BE-021/BE-040/BE-042/BE-048/BE-056 and FE-047/FE-050/FE-067.
 
 ## 8. Product and inquiry workflow

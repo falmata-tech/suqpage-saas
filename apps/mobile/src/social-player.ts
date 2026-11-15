@@ -17,7 +17,7 @@ export function socialPlayerEvent(raw:unknown):PlayerEvent|null {
   try {const message:unknown=JSON.parse(raw);if(!message||typeof message!=='object')return null;const value=message as Record<string,unknown>;return value.source==='suqpage-social-video'&&(value.event==='ready'||value.event==='error')?value.event:null;}catch{return null;}
 }
 export function socialPlayerHtml(ref:string,origin:string):string {
-  const video=productVideo(ref);if(video.provider==='youtube')throw new Error('Invalid social video');
+  const video=productVideo(ref);if(video.provider==='youtube'||video.provider==='demo')throw new Error('Invalid social video');
   const base=new URL(origin);
   if(!['http:','https:'].includes(base.protocol)||base.origin!==origin||base.username||base.password)throw new Error('Invalid player origin');
   const config=JSON.stringify({url:productVideoEmbedUrl(ref),origin,providerOrigin:video.provider==='facebook'?'https://www.facebook.com':video.provider==='instagram'?'https://www.instagram.com':'https://www.tiktok.com'}).replace(/</g,'\\u003c');

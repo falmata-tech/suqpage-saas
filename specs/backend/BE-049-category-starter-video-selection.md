@@ -2,13 +2,29 @@
 id: BE-049
 title: Persist category-specific example videos atomically
 status: in_progress
-related: [BE-067, BE-047, BE-041, FE-061, BE-039, BE-031, BE-042, BE-048, FE-046, FE-050, DEP-039, DEP-042]
+related: [BE-067, BE-047, BE-041, FE-061, BE-039, BE-031, BE-042, BE-048, FE-046, FE-050, DEP-039, DEP-042, ADR-0035]
 owners: [backend, security, operations]
 last_updated: 2026-11-14
 change_level: L2
 ---
 
 # BE-049 — Category example video selection
+
+## S197 first-party demo admission
+
+The finite correction path may accept an internal `demo:<slug>` reference
+only for a reviewed `is_demo=1` business with a matching packaged asset and
+source/license ledger. It maps to exactly `/videos/demo/<slug>.mp4` and never
+to a caller-provided host or path. Generic owner product/page saves for real
+businesses reject the internal ref. The ordinary correction's exact target,
+version, gallery-image, page-publication, audit and simulator-fingerprint
+guards still apply. The owner-entered social-provider contract is unchanged.
+
+GIVEN an internal demo ref and a real business WHEN product or page upkeep is
+attempted THEN the write is rejected with no partial catalog or page change.
+GIVEN a demo ref with a missing or unapproved static asset WHEN an operator
+prepares a correction THEN the request is not admitted. Source rights and
+decoded web/Expo/Android playback are release gates, not DB metadata claims.
 
 ## S197 planned finite correction for enrolled demos
 

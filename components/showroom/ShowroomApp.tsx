@@ -43,6 +43,7 @@ import {
 import { formatEtbPrice } from "@/lib/offering-presentation";
 import { normalizeProductDetailPattern } from "@/lib/product-detail-patterns";
 import { productVideoEmbedUrl } from "@/lib/video/product-video";
+import FirstPartyDemoVideo from "@/components/FirstPartyDemoVideo";
 import { showroomCategories, showroomProductCategory } from "@/lib/showroom-categories";
 import SocialVideoFrame from "../SocialVideoFrame";
 import { AlHayaDesign, HomeVibeDesign, NovaTechDesign, UsaShopDesign, type DesignProps } from "./designs";
@@ -401,10 +402,10 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         style={runtimeTokenVariables as CSSProperties | undefined}
       >
       {!embedded && !businessProfile ? <h1 className="sr-only">{catalog.business.name} {" "}{t("on AfricMade")}</h1> : null}
-      {catalog.business.is_demo && !businessProfile ? <p className="showroom-example-note" role="note">{t("Example page. This business and its products are fictional.")}</p> : null}
+      {catalog.business.is_demo && !businessProfile ? <p className="showroom-example-note" role="note">{t("Example business")}</p> : null}
       {businessProfile ? <BusinessProfile {...designProps} profile={businessProfile} previewMode={previewMode} embedded={embedded}
         selectedIds={savedCart.map(line => line.product.id)} onBackToProducts={backToProducts} onContact={contactWithSelections}
-        productDetail={selected || routedProduct ? <ProductPage isDemo={Boolean(catalog.business.is_demo)} ready={previewMode || hydratedKey === storageKey} catalogLabel={catalogOfferingLabel(catalog.products.filter(product => product.is_published))} key={selected?.id || "unavailable"} product={selected ? {...selected, category_name: showroomProductCategory(catalog.business.id, categories, selected)?.name} : null}
+        productDetail={selected || routedProduct ? <ProductPage ready={previewMode || hydratedKey === storageKey} catalogLabel={catalogOfferingLabel(catalog.products.filter(product => product.is_published))} key={selected?.id || "unavailable"} product={selected ? {...selected, category_name: showroomProductCategory(catalog.business.id, categories, selected)?.name} : null}
           backHref={`/@${catalog.business.handle}`} onBack={backToProducts}
           onAdd={options => selected && add(selected, options)} onInquire={options => selected && inquireNow(selected, options)}
           isAdded={options => Boolean(selected && savedCart.some(line => selectionKey(line.product.id, line.options) === selectionKey(selected.id, options)))}
@@ -557,6 +558,7 @@ function ProductVideo({ product }: { product: Product }) {
   } catch {
     return null;
   }
+  if (product.video_ref.startsWith("demo:")) return <div className="product-dialog-video" data-portrait-active="true"><FirstPartyDemoVideo video={product.video_ref} title={t("{value1} video", {value1:product.name})}/></div>;
   if (!product.video_ref.startsWith("youtube:")) return <div className="product-dialog-video" data-portrait-active={/^(tiktok|instagram):/.test(product.video_ref)||undefined}><SocialVideoFrame poster={product.image_path} video={product.video_ref} title={t("{value1} video", {value1:product.name})}/></div>;
   return (
     <div className="product-dialog-video">
