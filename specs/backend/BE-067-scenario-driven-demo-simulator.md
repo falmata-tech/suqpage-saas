@@ -28,6 +28,13 @@ the original product description, so listing cards visibly change every tick.
 Enrollment reserves space within the ordinary text limits; no original story or
 description is truncated. No independent random fields, fabricated customer transactions,
 stock counts, certifications, transport activity or external media/message calls.
+Stage copy states the current product, capacity and timing directly. The page's
+single “Example business” badge identifies the fictional tenant, so simulator
+updates and lead-time summaries must not add “example”, “fictional” or similar
+disclaimers. Changing the wording leaves stage keys, durations, eligibility,
+availability, quantities and prices intact; prior published versions remain in
+immutable history. A finite guarded correction of already published copy is
+separate from deploying the recurring template fix.
 
 ## Identity and authority
 
@@ -222,7 +229,7 @@ partial preparation rolls back on refusal, and simulation stays disabled.
 
 | Acceptance | Evidence |
 |---|---|
-| Coherent full timelines and predefined values | `scripts/test-demo-scenarios.ts` |
+| Coherent full timelines, predefined values and direct visitor copy | `scripts/test-demo-scenarios.ts` |
 | Mixed tenants/new signup/drift/replay/concurrency/rollback | `scripts/test-demo-simulator-postgres.ts` |
 | Exact reviewed category batch request shape | `scripts/test-demo-scenarios.ts` synthetic parser case |
 | Six-member atomic category correction, late failure, drift, replay and later stage | Private disposable PostgreSQL fixture retained outside public source; publication qualification pending |

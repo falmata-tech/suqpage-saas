@@ -58,6 +58,18 @@ retained private starter publication blocking; localization/type checks and
 affected browser journeys qualify the copy. Source publication and any
 hosted legacy starter correction remain separate steps.
 
+## S200 one public demo marker — source correction in progress
+
+[FE-070] owns the single “Example business” marker and direct storefront copy;
+[BE-067] owns the recurring simulator templates. A read-only crawl of all 66
+public demo showrooms on 2026-11-15 found exactly one badge per page, 45 pages
+with stale “fictional” story text and 56 with simulator-written “example”
+availability wording. `lib/demo-scenarios.ts` and
+`scripts/test-demo-scenarios.ts` remove those repeated words from future stage
+text while preserving all stage and selling facts. Current hosted text needs a
+separate selected-field backup, guarded ordinary correction, and readback after
+video maintenance; this source patch alone does not clean existing pages.
+
 ## S197 demo video quality — review and qualification in progress
 
 Fifteen first-party MP4 examples are already packaged, deployed and used by

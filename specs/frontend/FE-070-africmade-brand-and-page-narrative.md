@@ -307,9 +307,12 @@ translation or a long sector list in the hero.
 Fictional demo businesses are intentional product examples as well as QA
 fixtures. Across the Market, Featured and showroom pages, give each one a
 believable, business-specific story and catalog representing shops, makers,
-workshops, farms, manufacturers or suppliers. Label every fictional showroom
-and product visibly as an example, including handles that do not contain the
-word “demo”. A no-results public directory may direct visitors to example
+workshops, farms, manufacturers or suppliers. Show one concise “Example business”
+badge per business page, including handles that do not contain the word “demo”.
+The badge carries the disclosure; do not repeat “fictional”, “illustrative”,
+“demo”, or “example” as a disclaimer in its story, product description or
+simulated availability update. Keep legitimate physical product samples and
+useful supply facts in the catalog. A no-results public directory may direct visitors to example
 showrooms in the Market, but the directory itself and canonical sitemap continue
 to include eligible real businesses only. Do not imply that examples are real
 merchants, that illustrative media is documentary, or that listed availability
@@ -333,8 +336,8 @@ the business view includes shops, workshops, growers, makers, importers and
 suppliers without promising checkout or verified stock.
 
 GIVEN a fictional example appears in Market, Featured, or a showroom WHEN its
-name or products render THEN it is identified as an example and its distinct
-story/catalog avoids generic option or database-test wording.
+name or products render THEN the business has one “Example business” marker and
+its distinct story/catalog avoids repeated demo disclaimers and database-test wording.
 
 GIVEN the public business directory has no eligible real showrooms WHEN its
 empty state renders THEN it says no public business showrooms are listed and
