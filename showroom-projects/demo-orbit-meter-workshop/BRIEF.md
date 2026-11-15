@@ -55,9 +55,9 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-orbit-meter-workshop/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-1.webp` | Pump Hour Counter | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-1.webp` | Analog Panel Ammeter | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-2.webp` | Water Level Display | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-3.webp` | Temperature Panel | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-3.webp` | Pump Hour Counter | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-orbit-meter-workshop/product-4.webp` | Sensor Display Assembly | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-orbit-meter-workshop.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 

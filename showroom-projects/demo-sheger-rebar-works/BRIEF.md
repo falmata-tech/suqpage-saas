@@ -55,10 +55,10 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-sheger-rebar-works/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-1.webp` | Steel Entrance Gate | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-2.webp` | Window Guard Set | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-3.webp` | Stair and Balcony Railing | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-4.webp` | Workshop Bracket Run | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-1.webp` | Cut-and-Bent Rebar | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-2.webp` | Welded Mesh Panels | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-3.webp` | Stirrup Production Runs | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-sheger-rebar-works/product-4.webp` | Tagged Project Bundles | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-sheger-rebar-works.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 
 ## Composition Direction

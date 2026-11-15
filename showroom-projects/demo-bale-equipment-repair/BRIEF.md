@@ -55,9 +55,12 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-bale-equipment-repair/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-bale-equipment-repair/product-1.webp` | Field Hoe Head | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-bale-equipment-repair/product-2.webp` | Compact Grain Hopper | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-bale-equipment-repair/product-3.webp` | Pulley Guard Set | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-bale-equipment-repair/product-1.webp` | grain cleaner machine | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-bale-equipment-repair/product-2.webp` | pump housing | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-bale-equipment-repair/product-3.webp` | bearing housing | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-bale-equipment-repair/s197-product-153.png` | Field Hoe Head diagram | illustrative demo artwork | yes | video source |
+| `/uploads/seed/portfolio/demo-bale-equipment-repair/s197-product-154.png` | Compact Grain Hopper diagram | illustrative demo artwork | yes | video source |
+| `/uploads/seed/portfolio/demo-bale-equipment-repair/s197-product-155.png` | Pulley Guard Set diagram | illustrative demo artwork | yes | video source |
 | `/uploads/seed/portfolio/demo-bale-equipment-repair/product-4.webp` | Replacement Thresher Guard | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-bale-equipment-repair.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 
