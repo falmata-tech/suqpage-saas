@@ -75,7 +75,6 @@ export default function Product() {
           <Gallery media={product.media} />
           <Copy big>{product.name}</Copy>
           <Copy muted>{shop.name}</Copy>
-          {shop.isDemo&&<Copy muted>{t("Example business")}</Copy>}
           <ProductSupply kind={product.kind} availability={product.availability}/>
           {product.priceMinor !== null ? (
             <Copy big>{(product.priceMinor / 100).toLocaleString()} ETB</Copy>
