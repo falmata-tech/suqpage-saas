@@ -155,8 +155,7 @@ function ControlledVideoFrame({
         <button type="button" onClick={() => setPlaying(true)} aria-label={t("Play {value1}", { value1: title })}>
           <i aria-hidden="true" />
           <span>
-            <strong>{t("Watch the process")}</strong>
-            <small>{t("Play securely on this page")}</small>
+            <strong>{t(demo ? "Watch video" : "Watch the process")}</strong>
           </span>
         </button>
       )}
@@ -448,10 +447,10 @@ export function BankContentSection({
         <p>{contentBlock?.body || context.business.description}</p>
         {processVideoRef ? (
           <div className={styles.processVideo}>
-            <span>{t("Inside the process")}</span>
+            <span>{t(processVideoRef.startsWith('demo:') ? "Video" : "Inside the process")}</span>
             <ControlledVideoFrame
               asset={processVideoRef}
-              title={t("{value1} process video", { value1: context.business.name })}
+              title={t(processVideoRef.startsWith('demo:') ? "{value1} video" : "{value1} process video", { value1: context.business.name })}
               businessId={context.business.id}
             />
           </div>
