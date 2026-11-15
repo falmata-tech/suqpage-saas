@@ -55,7 +55,8 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-lume-solar-repair/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-lume-solar-repair/product-1.webp` | Courtyard Solar Lamp | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-lume-solar-repair/product-1.webp` | controller assembly with small courtyard lamp in background | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-lume-solar-repair/s197-product-45.png` | Courtyard Solar Lamp diagram | illustrative demo artwork | yes | video source |
 | `/uploads/seed/portfolio/demo-lume-solar-repair/product-2.webp` | Market Stall Light Kit | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-lume-solar-repair/product-3.webp` | Two-Room Solar Kit | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-lume-solar-repair/product-4.webp` | Weatherproof DC Cable Set | illustrative demo artwork | yes | offering |

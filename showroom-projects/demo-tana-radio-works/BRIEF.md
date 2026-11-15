@@ -55,9 +55,11 @@
 | File | Subject | Factual Or Illustrative | Rights Confirmed | Preferred Role |
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-tana-radio-works/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
-| `/uploads/seed/portfolio/demo-tana-radio-works/product-1.webp` | Compact PA Speaker | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-tana-radio-works/product-2.webp` | Floor Monitor Cabinet | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-tana-radio-works/product-3.webp` | Speaker Stand Pair | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-tana-radio-works/product-1.webp` | vintage tabletop radio | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-tana-radio-works/product-2.webp` | open amplifier chassis | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-tana-radio-works/s197-product-49.png` | Compact PA Speaker diagram | illustrative demo artwork | yes | video source |
+| `/uploads/seed/portfolio/demo-tana-radio-works/s197-product-50.png` | Floor Monitor Cabinet diagram | illustrative demo artwork | yes | video source |
+| `/uploads/seed/portfolio/demo-tana-radio-works/product-3.webp` | Outdoor FM Antenna Kit | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-tana-radio-works/product-4.webp` | Custom Audio Cable Loom | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-tana-radio-works.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 
