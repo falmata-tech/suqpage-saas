@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {existsSync} from 'node:fs';
 import Module from 'node:module';
 import path from 'node:path';
 import test from 'node:test';
@@ -8,6 +9,9 @@ test('DEP-054 restored scheduled worker loads without Next request context',asyn
  const result=await build({entryPoints:['netlify/functions/demo-simulator.mts'],bundle:true,write:false,platform:'node',format:'cjs',packages:'external',logLevel:'silent'});
  const source=result.outputFiles[0].text;
  assert.doesNotMatch(source,/next\/(?:headers|server)/);
+ assert.doesNotMatch(source,/demo-copy-background|\* \* \* \* \*/);
+ assert.equal(existsSync('netlify/functions/demo-copy-background.mts'),false);
+ assert.equal(existsSync('lib/demo-copy-background.ts'),false);
  const filename=path.resolve('netlify/functions/demo-simulator.cjs');
  // Match Node's existing CommonJS worker admission used by DEP-043. Loading is
  // inert: do not invoke the scheduled mutation adapter or open a database.
@@ -28,7 +32,7 @@ test('DEP-054 restored scheduled worker loads without Next request context',asyn
  // opening the database or invoking the scheduled mutation runtime.
  const dateNow=Date.now,log=console.log,error=console.error,logs:unknown[][]=[],errors:unknown[][]=[];
  try{
-  Date.now=()=>Date.UTC(2026,10,16,0,30);
+  Date.now=()=>Date.UTC(2026,10,16,1,30);
   console.log=(...args:unknown[])=>{logs.push(args);};
   console.error=(...args:unknown[])=>{errors.push(args);};
   await worker.exports.default();

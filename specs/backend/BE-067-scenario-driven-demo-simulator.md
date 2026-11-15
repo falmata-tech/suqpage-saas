@@ -191,8 +191,8 @@ and enforces explicit per-day mutation and database-size budgets. Budget pressur
 pauses demo work; it never deletes immutable history or blocks real users.
 
 Operator enrollment requests are private database records, never an HTTP/admin
-endpoint. The disabled worker admits at most eight explicit requests per tick,
-starting no new admission after its12-second work budget, using
+endpoint. The disabled ordinary worker admits at most eight explicit requests
+per tick, starting no new admission after its 12-second work budget, using
 the ordinary enrollment checks, reviewed content/draft/publication versions and
 exact demo owner/product bindings. It records accepted/rejected outcomes and never
 enables itself. When explicitly requested, an empty product unit is initialized

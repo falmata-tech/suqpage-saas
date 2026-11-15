@@ -25,19 +25,19 @@ and existing server-only PostgreSQL application ports. A delayed invocation or
 manual Run now may enter only within 15 minutes of one of those times; the
 corresponding hourly slot admits at most one tick.
 Do not provision a VM, add production management tokens, share notification
-execution budgets, enable previews against production or invent an HTTP trigger.
+execution budgets, or enable previews against production.
 
-S200 temporarily replaces the cron with one invocation per minute from 22:30
-UTC on 2026-11-15 inclusive to 00:30 UTC on 2026-11-16 exclusive. The function
-returns before any database call outside this two-hour window. Inside it,
-maintenance mode requires `enabled=0,pause_reason='operator'` and admits only
-`copy_correction` requests; it cannot advance a stage even if the control row
-is enabled. The queued cohort is at most 64 businesses, with four reviewed
-targets per batch and full readback before another batch. This window permits
-at most 120 scheduled invocations if deployed for its entire duration; actual
-invocations depend on publication time and early restoration. A separate
-source change restores the ordinary three-per-day schedule immediately after
-64/64 target readback and zero pending requests.
+S200 used a one-time signed scheduled trigger and Netlify background function
+from 22:30 UTC on 2026-11-15 through 01:30 UTC on 2026-11-16. The background
+transaction admitted only reviewed `copy_correction` requests under an explicit
+operator pause, at most four per minute, and never advanced a scenario stage.
+Its 180-second deadline, finite time gate, private slot receipt and signed
+request prevented an unsigned or replayed call from consuming another batch.
+Netlify's 202 admission was not completion evidence; request, audit and public
+readback remained authoritative. After 64/64 target readback and zero pending
+requests, the restore source removes the temporary endpoint, helper and minute
+trigger. The normal three-per-day schedule above is the only standing worker;
+this historical repair grants no ongoing HTTP trigger.
 
 The reviewed enrolled process-video operator uses the same paused private
 request queue, one exact business per request, and publishes one new process
