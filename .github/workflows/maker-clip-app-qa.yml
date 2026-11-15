@@ -60,7 +60,7 @@ jobs:
       - name: Start the isolated Expo web server
         working-directory: apps/mobile
         run: npx expo start --web --host localhost --port 8082 --max-workers 2 > ../../.local/maker-clip-app-qa/expo.log 2>&1 &
-      - name: Exercise three actual maker clips on web and Expo
+      - name: Exercise four actual maker clips on web and Expo
         run: node scripts/review-maker-clip-app.mjs
       - name: Retain source-bound run receipt
         if: always()

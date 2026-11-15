@@ -1,5 +1,5 @@
-// Three maker stories published through ordinary commands into the native QA
-// disposable PostgreSQL schema only. Source footage does not match product forms.
+// Four creator examples published through ordinary commands into the native QA
+// disposable PostgreSQL schema only. These show a business-type process.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
@@ -16,9 +16,10 @@ import {productVideoWatchUrl} from '../lib/video/product-video';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 
 const cases=[
-  {handle:'entoto-ceramics',videoRef:'tiktok:7685918227163057438',productName:null},
-  {handle:'demo-wabi-joinery-studio',videoRef:'tiktok:7217517593786141995',productName:null},
-  {handle:'demo-meda-furniture-studio',videoRef:'tiktok:7067689673266744623',productName:null},
+  {handle:'koba-leather',videoRef:'tiktok:7534842640882224406',productName:null},
+  {handle:'demo-biftu-leather-goods',videoRef:'tiktok:7534842640882224406',productName:null},
+  {handle:'demo-buna-basket-house',videoRef:'tiktok:7595737756416904462',productName:null},
+  {handle:'demo-lemi-building-products',videoRef:'tiktok:7702450432588647711',productName:null},
 ] as const;
 
 async function main(){
@@ -76,6 +77,6 @@ async function main(){
   }
   fs.mkdirSync('.local/maker-clip-app-qa',{recursive:true,mode:0o700});
   fs.writeFileSync('.local/maker-clip-app-qa/fixture.json',JSON.stringify({source,cases:records})+'\n',{mode:0o600});
-  console.log('PASS three disposable maker-clip fixtures prepared through ordinary commands.');
+  console.log('PASS four disposable maker-clip fixtures prepared through ordinary commands.');
 }
 void main().catch(error=>{console.error('Disposable maker-clip fixture failed.',error);process.exitCode=1;}).finally(closePostgresRuntimeForTests);
