@@ -6,6 +6,7 @@ import {
 import { RevisionError } from "../lib/revision-domain";
 import { SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE } from "../lib/showroom-bank-release";
 import { DEMO_VIDEO_ASSETS } from "../lib/video/demo-video-catalog";
+import { validateShowroomRecipe } from "../lib/showroom-recipe-domain";
 
 const block = {
   key: "opening",
@@ -159,6 +160,24 @@ assert.equal(canonicalLegacy.designManifest.sections.length, 6);
 const canonicalChapter = canonicalLegacy.contentBlocks.blocks.find((entry) => entry.type === "highlights");
 assert.ok(canonicalChapter && canonicalChapter.body.includes("A retained business story."));
 assert.ok(canonicalChapter && canonicalChapter.body.includes("A retained process introduction."));
+
+const demoProcessPolicy={businessId:50,isDemo:true};
+const demoSnapshot=parseRevisionSnapshotV4({...canonicalLegacy,
+  business:{...canonicalLegacy.business,processVideoRef:'demo:business-50'}},
+  SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,demoProcessPolicy);
+const {schemaVersion:_demoSchema,designManifest:demoDesign,...demoContent}=demoSnapshot;
+const demoRecipe={schemaVersion:1,baseContentVersion:1,
+  content:{schemaVersion:1,...demoContent},design:demoDesign,
+  summary:'Reviewed demo process update.',rationale:'Retain current showroom.',
+  questions:[],warnings:[],mediaPlan:[],
+  declaredRemovals:{collections:[],categories:[],products:[]},provenance:[]};
+const recipeContext={baseContentVersion:1,baseSnapshot:demoSnapshot,
+  allowedAssetKeys:new Set(['']),allowedSourceKeys:new Set<string>(),assetDetails:new Map(),
+  processVideoPolicy:demoProcessPolicy};
+assert.equal(validateShowroomRecipe(demoRecipe,recipeContext).snapshot.business.processVideoRef,'demo:business-50');
+assert.throws(()=>validateShowroomRecipe(demoRecipe,{...recipeContext,processVideoPolicy:undefined}));
+assert.throws(()=>validateShowroomRecipe({...demoRecipe,content:{...demoRecipe.content,
+  business:{...demoRecipe.content.business,processVideoRef:legacyProcess}}},recipeContext));
 
 assert.throws(
   () => parseRevisionSnapshotV4({ ...input, unexpected: true }, SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE),

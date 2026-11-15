@@ -736,6 +736,7 @@ export async function buildShowroomRecipeBrief(
   const validatedCurrentRecipe = validateShowroomRecipe(currentRecipeInput, {
     baseContentVersion: state.revision.base_content_version,
     baseSnapshot: exportableSnapshot,
+    processVideoPolicy: approvedProcessVideoPolicy(state.business),
     allowedAssetKeys: new Set(["", ...assets.actualToOpaque.keys()]),
     allowedSourceKeys: new Set(sources.sources.map((source) => source.key)),
     assetDetails: assets.details,
@@ -1084,6 +1085,7 @@ export async function importShowroomRecipe(
   const validated = validateShowroomRecipe(normalized, {
     baseContentVersion: state.revision.base_content_version,
     baseSnapshot,
+    processVideoPolicy: approvedProcessVideoPolicy(state.business),
     allowedAssetKeys: new Set([
       "",
       ...assets.opaqueToActual.values(),
