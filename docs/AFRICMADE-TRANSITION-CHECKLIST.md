@@ -90,7 +90,7 @@ and scenario progress remain protected. National origin is not a quality test.
    web/Expo live-media run `43644041451` at `4a9fd72` passes decoded TikTok
    progress and unmount; all five final-head quality jobs in `43644041447`
    pass. The portrait fix is merged as main `ff94208`, with a healthy live API
-   reporting that source. No production video replacement has been applied.
+   reporting that source. At that point no production video replacement had been applied.
    Portrait web/Expo correction (FE-057) is ordered within this step:
    (a) [x] inspect PR68's source-bound partial verdict and the current gallery,
    dialog and Expo stage rules; (b) [x] specify and implement a bounded portrait
@@ -132,6 +132,29 @@ and scenario progress remain protected. National origin is not a quality test.
    verify all64/256 public effective media and preserved data, then resume only
    the unchanged reviewed cohort. Refresh the monitor's approved media baseline
    to the retained after-image and verify scheduled continuation.
+   Partial hosted correction on 2026-11-15: business21
+   `demo-liya-soap-kitchen` now publishes the attributed Bramble Berry
+   soap-making example `tiktok:7703762862484851981` as its story; product81
+   Oat Everyday Bar now uses Ashley Marie Soap's attributed oat-making example
+   `tiktok:7692083064184245517`. The normal BE-049 correction request
+   `s197_liya21_story_oat_20261115_a` was accepted with one
+   `demo.media_corrected` audit (id6854). The fresh paused readback found
+   owner draft and publication revision23, business version24, active cycle3
+   stage0, and the exact 81–84 gallery. After correction, draft/publication
+   revision24 agree on the new story; business version25 and product81 gallery
+   agree on the new product ref. Product82–84 galleries, all other63 enrolled
+   demo businesses, their252 products and enrollments matched the paused
+   before-state. The simulator was resumed; its enabled slot advanced from
+   29911705 to29911712 without a Liya drift pause. The accepted private request
+   retains exact before/after media for reversal, and the ignored discovery
+   before-image and L4 plan remain under `.local/s197-liya-story/`.
+   The final paused snapshot was checked in the operation session but could
+   not be exported as a file when the managed shell became unavailable.
+   Product81 decoded in disposable desktop/phone web and Expo web; phone Replay
+   passed, while desktop/Expo provider Replay clicks were unstable in two
+   bounded CI attempts. Installed Android and a fresh post-correction public
+   browser check remain open. This correction does not close the 64/256 audit
+   or the remaining removed/generic video refs.
 
 S196's full64/256 exact-version readback and documentation are recorded below.
 S191's signed phone APK remains a separate active dependency; a video audit or
