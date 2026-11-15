@@ -78,4 +78,4 @@ async function main(){
   fs.writeFileSync('.local/maker-clip-app-qa/fixture.json',JSON.stringify({source,cases:records})+'\n',{mode:0o600});
   console.log('PASS three disposable maker-clip fixtures prepared through ordinary commands.');
 }
-void main().catch(()=>{console.error('Disposable maker-clip fixture failed.');process.exitCode=1;}).finally(closePostgresRuntimeForTests);
+void main().catch(error=>{console.error('Disposable maker-clip fixture failed.',error);process.exitCode=1;}).finally(closePostgresRuntimeForTests);
