@@ -90,8 +90,9 @@ BE-049/FE-061/DEP-054: exact ID/handle, enrollment fingerprint/progress,
 current ref/version, same-business approved asset, retained before/after V4,
 audit, idempotency and inverse. Parser negative checks are in
 `scripts/test-demo-media-correction.ts`; real isolated PostgreSQL apply,
-late rollback, replay, inverse and next-stage checks are in
-`scripts/test-demo-process-media-postgres.ts`. Hosted readback remains a
+late rollback, sanitized rejected-request diagnostic, replay, inverse and
+next-stage checks are in `scripts/test-demo-process-media-postgres.ts`.
+Hosted readback remains a
 separate S197 checklist gate.
 
 FE-057 portrait containment follow-up: PR68's actual Chrome phone product

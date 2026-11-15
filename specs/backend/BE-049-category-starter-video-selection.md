@@ -79,7 +79,10 @@ receipt. Products, photos, owner page, draft/publication versions, business
 identity/contact/story, stage/cycle/due, and other tenants must not change.
 One private request targets one business; a duplicate operation key with the
 same payload is inert, and a conflict or late snapshot/audit failure rolls
-back the whole write. The minute worker may admit bounded private requests
+back the whole write. A rejected, parsed request records only a fixed phase,
+error code and operation key after its media savepoint rolls back; it never
+logs raw external media refs or private identity. The minute worker may admit
+bounded private requests
 while explicitly operator-paused; normal scenario stages remain disabled.
 
 GIVEN a paused and unchanged enrolled example WHEN its guarded process plan
