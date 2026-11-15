@@ -15,7 +15,8 @@ import {productMedia} from '../lib/product-media';
 import {productVideoWatchUrl} from '../lib/video/product-video';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 
-const videoRef='tiktok:7703762862484851981';
+const videoRef='tiktok:7692083064184245517';
+const storyRef='tiktok:7703762862484851981';
 const handle='demo-liya-soap-kitchen';
 const productName='Oat Everyday Bar';
 
@@ -41,8 +42,10 @@ async function main(){
     assert.ok(actor&&actor.access_role==='client'&&actor.business_id===catalog.business.id);
     const draft=await ownerPagePort.read(catalog.business.id);
     assert.ok(draft);
+    assert.equal(catalog.business.process_video_ref,'youtube:WHyh9auBmA0');
     const before=productMedia(product);
     assert.equal(before.filter(item=>item.kind==='video').length,1);
+    assert.equal(before.find(item=>item.kind==='video')?.ref,'youtube:WHyh9auBmA0');
     assert.ok(before.some(item=>item.kind==='image'));
     assert.ok(!before.some(item=>item.ref===videoRef));
     const media=before.map(item=>item.kind==='video'?{kind:'video' as const,ref:videoRef}:item);
@@ -58,15 +61,15 @@ async function main(){
       imageAction:'keep',preserveMetadata:true,
     },null);
     await saveOwnerPageAndPublication(actor,catalog.business.id,{action:'save',version:draft.version,
-      content:{...draft.content,videoUrl:productVideoWatchUrl(videoRef)}});
+      content:{...draft.content,videoUrl:productVideoWatchUrl(storyRef)}});
     return {businessId:catalog.business.id,productId:product.id};
   });
   const after=await runtimeCatalogByHandle(handle),page=await ownerPagePort.read(record.businessId);
   assert.ok(after&&page);
   assert.ok(productMedia(after.products.find(product=>product.id===record.productId)!).some(item=>item.ref===videoRef));
-  assert.equal(page.content.videoUrl,productVideoWatchUrl(videoRef));
+  assert.equal(page.content.videoUrl,productVideoWatchUrl(storyRef));
   fs.mkdirSync('.local/live-media-review',{recursive:true,mode:0o700});
-  fs.writeFileSync('.local/live-media-review/fixture.json',JSON.stringify({source,handle,videoRef,...record})+'\n',{mode:0o600});
+  fs.writeFileSync('.local/live-media-review/fixture.json',JSON.stringify({source,handle,videoRef,storyRef,...record})+'\n',{mode:0o600});
   console.log('PASS disposable public-demo media fixture prepared through ordinary commands.');
 }
 void main().catch(()=>{console.error('Disposable live-media fixture failed.');process.exitCode=1;}).finally(closePostgresRuntimeForTests);

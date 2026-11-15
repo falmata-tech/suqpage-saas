@@ -25,7 +25,8 @@ const fixture = JSON.parse(fs.readFileSync(out + '/fixture.json', 'utf8'));
 const source = execFileSync('git', ['rev-parse', 'HEAD'], {encoding: 'utf8'}).trim();
 assert.equal(fixture.source, source);
 assert.equal(fixture.handle, 'demo-liya-soap-kitchen');
-assert.equal(fixture.videoRef, 'tiktok:7703762862484851981');
+assert.equal(fixture.videoRef, 'tiktok:7692083064184245517');
+assert.equal(fixture.storyRef, 'tiktok:7703762862484851981');
 const base = 'http://127.0.0.1:3000';
 const api = await fetch(base + '/api/mobile/v1/shops/' + fixture.handle, {signal: AbortSignal.timeout(10000)});
 assert.equal(api.status, 200);
@@ -51,9 +52,10 @@ async function waitServer(url) {
   }
   throw Error('Isolated Expo preview did not become ready.');
 }
-async function actualTikTok(page, label, stage) {
-  await expect.poll(() => page.frames().filter(f => f.url().startsWith('https://www.tiktok.com/player/v1/7703762862484851981')).length, {timeout: 30000}).toBe(1);
-  const frame = page.frames().find(f => f.url().startsWith('https://www.tiktok.com/player/v1/7703762862484851981'));
+async function actualTikTok(page, label, ref, stage, verifyReplay = false) {
+  const playerUrl = 'https://www.tiktok.com/player/v1/' + ref.slice('tiktok:'.length);
+  await expect.poll(() => page.frames().filter(f => f.url().startsWith(playerUrl)).length, {timeout: 30000}).toBe(1);
+  const frame = page.frames().find(f => f.url().startsWith(playerUrl));
   await frame.getByRole('button', {name: 'Play video', exact: true}).click({timeout: 30000});
   await expect.poll(async () => (await videoState(frame)).some(v => v.ready >= 2 && v.width > 0 && v.time > 1), {timeout: 40000}).toBe(true);
   const start = await videoState(frame);
@@ -79,7 +81,36 @@ async function actualTikTok(page, label, stage) {
     }
   }
   await page.screenshot({path: out + '/' + label + '-progress.png'});
-  return {start, progress, frameBox, stageBox};
+  if (!verifyReplay) return {start, progress, frameBox, stageBox};
+  await expect.poll(async () => (await videoState(frame))[0]?.time ?? 0, {timeout: 30000})
+    .toBeGreaterThan(start[0].duration - .1);
+  await frame.getByRole('button', {name: 'Replay', exact: true}).waitFor({timeout: 10000});
+  const end = await videoState(frame);
+  const track = stage ? page.locator('[class*="galleryTrack"]') : null;
+  const galleryBeforeReplay = track ? await track.evaluate(element => ({
+    left: element.scrollLeft, width: element.clientWidth,
+    snap: getComputedStyle(element).scrollSnapType,
+  })) : null;
+  await page.screenshot({path: out + '/' + label + '-end.png'});
+  await frame.getByRole('button', {name: 'Replay', exact: true}).click({timeout: 10000});
+  await expect.poll(async () => (await videoState(frame))[0]?.time ?? Infinity, {timeout: 15000})
+    .toBeLessThan(start[0].duration - 3);
+  const replayStart = await videoState(frame);
+  await expect.poll(async () => (await videoState(frame))[0]?.time ?? 0, {timeout: 20000})
+    .toBeGreaterThan(replayStart[0].time + 1);
+  const replayProgress = await videoState(frame);
+  const galleryAfterReplay = track ? await track.evaluate(element => ({
+    left: element.scrollLeft, width: element.clientWidth,
+    snap: getComputedStyle(element).scrollSnapType,
+  })) : null;
+  if (galleryBeforeReplay && galleryAfterReplay) {
+    assert.equal(galleryBeforeReplay.snap, 'none');
+    assert.ok(Math.abs(galleryBeforeReplay.left - galleryBeforeReplay.width) <= 1);
+    assert.ok(Math.abs(galleryAfterReplay.left - galleryAfterReplay.width) <= 1);
+  }
+  await page.screenshot({path: out + '/' + label + '-replay.png'});
+  return {start, progress, end, replayStart, replayProgress, frameBox, stageBox,
+    galleryBeforeReplay, galleryAfterReplay};
 }
 try {
   for (const width of [1440, 390]) {
@@ -91,15 +122,15 @@ try {
       await gallery.getByRole('button', {name: 'Video ' + (mediaIndex + 1), exact: true}).click();
       await gallery.getByRole('button', {name: 'Play video ' + (mediaIndex + 1), exact: true}).click();
       await gallery.scrollIntoViewIfNeeded();
-      const playback = await actualTikTok(page, 'web-' + width,
-        gallery.getByLabel('Media ' + (mediaIndex + 1) + ' of ' + product.media.length, {exact: true}));
+      const playback = await actualTikTok(page, 'web-' + width, fixture.videoRef,
+        gallery.getByLabel('Media ' + (mediaIndex + 1) + ' of ' + product.media.length, {exact: true}), true);
       assert.equal(context.pages().length, 1, 'Inline playback must not open another tab.');
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
       await gallery.getByRole('button', {name: 'Photo 1', exact: true}).click();
       await expect(gallery.locator('iframe')).toHaveCount(0);
       await page.goto(base + '/@' + fixture.handle, {timeout: 90000});
       await page.getByRole('button', {name: 'Play business video about ' + shop.name, exact: true}).click();
-      const cover = await actualTikTok(page, 'web-cover-' + width);
+      const cover = await actualTikTok(page, 'web-cover-' + width, fixture.storyRef);
       results.app.push({surface: 'web', width, result: 'playback-and-unmount-observed', ...playback, cover});
     } catch (error) {
       await page.screenshot({path: out + '/web-' + width + '-failure.png'}).catch(() => {});
@@ -115,13 +146,13 @@ try {
     await page.goto('http://localhost:8082/product?handle=' + fixture.handle + '&id=' + fixture.productId, {timeout: 120000});
     await page.getByRole('button', {name: 'Video ' + (mediaIndex + 1), exact: true}).click({timeout: 90000});
     await page.getByRole('button', {name: 'Watch video', exact: true}).click();
-    const playback = await actualTikTok(page, 'expo-390');
+    const playback = await actualTikTok(page, 'expo-390', fixture.videoRef, undefined, true);
     await page.getByRole('button', {name: 'Photo 1', exact: true}).click();
     await expect(page.locator('iframe')).toHaveCount(0);
     assert.equal(context.pages().length, 1);
     await page.goto('http://localhost:8082/shop/' + fixture.handle, {timeout: 90000});
     await page.getByRole('button', {name: 'Watch video', exact: true}).first().click({timeout: 60000});
-    const cover = await actualTikTok(page, 'expo-cover-390');
+    const cover = await actualTikTok(page, 'expo-cover-390', fixture.storyRef);
     results.app.push({surface: 'Expo web', width: 390, result: 'playback-and-unmount-observed', ...playback, cover});
   } catch (error) {
     await page.screenshot({path: out + '/expo-390-failure.png'}).catch(() => {});
