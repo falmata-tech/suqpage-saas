@@ -149,25 +149,31 @@ and atomically acknowledge only that change. It must preserve enrollment progres
 and all scenario baselines except the approved page video URL. Routine stage work
 continues to preserve media and fail closed on any unreviewed content drift.
 
-An operator may correct the reviewed six-demo agriculture cohort through one
-private, disabled-only `category_correction_batch` request. The request binds six
-sorted, distinct business/owner/provider identities, four sorted product IDs per
-business, current simulator hash and progress, and content/draft/publication
-versions. Before any write, each member must remain an active demo with a complete
-enrolled catalog, exactly the `food-farming` public membership, and a reviewed
-version-one `agriculture-growers` owner proposal whose update matches the
-approved discovery profile. The operation requires no existing agriculture
-membership and adds it while retaining food cross-listing. It acknowledges the
-new sorted category set in each primary and catalog scenario binding and
-recomputes the enrollment hash. One transaction covers all six or none. A
-single operation key and audit receipt make replay inert. Stage, cycle, due
-time, page, products, media, geography and all other tenants remain unchanged.
-An overlong transaction fails closed under the worker deadline. This finite
-operator path does not infer future category changes or enable the simulator.
+An operator may correct the eight current public agriculture examples through one
+private, disabled-only `category_correction_batch` request. The finite cohort
+binds business IDs 5, 6, 27, 28, 29, 31, 32 and 33 to their exact handles,
+owner/provider identities, four sorted product IDs per business, current
+simulator hash and progress, and content/draft/publication versions. Six growers
+(5, 6, 27, 29, 31, 33) must have reviewed version-one
+`agriculture-growers` owner proposals whose update matches approved discovery.
+Two mills (28 `demo-laga-grain-mill`, 32 `demo-wabi-flour-mill`) are explicitly
+cross-listed under agriculture by the seed source; their reviewed primary
+proposals must remain `food-farming` and match approved discovery. All eight
+must remain active demos with complete enrolled catalogs and exactly the
+`food-farming` public membership. The three seed handles absent from production
+and all real or draft businesses are excluded. The operation requires no
+existing agriculture membership and adds it while retaining food membership.
+It acknowledges the new sorted category set in each primary and catalog
+scenario binding and recomputes the enrollment hash. One transaction covers all
+eight or none. A single operation key and audit receipt make replay inert.
+Stage, cycle, due time, reviewed primary proposal, page, products, media,
+geography and all other tenants remain unchanged. An overlong transaction fails
+closed under the worker deadline. This finite operator path does not infer
+future category changes or enable the simulator.
 
 GIVEN a drifted member, changed review, foreign product, or late insert failure
 WHEN the batch runs THEN no membership or enrollment is partly corrected. GIVEN
-a valid reviewed batch WHEN it commits THEN all six remain active and their next
+a valid reviewed batch WHEN it commits THEN all eight remain active and their next
 scheduled stages advance without a `content_changed` pause. GIVEN replay before
 or after later stages THEN no second mutation or audit receipt is created.
 
@@ -235,7 +241,7 @@ partial preparation rolls back on refusal, and simulation stays disabled.
 | Coherent full timelines, predefined values and direct visitor copy | `scripts/test-demo-scenarios.ts` |
 | Mixed tenants/new signup/drift/replay/concurrency/rollback | `scripts/test-demo-simulator-postgres.ts` |
 | Exact reviewed category batch request shape | `scripts/test-demo-scenarios.ts` synthetic parser case |
-| Six-member atomic category correction, late failure, drift, replay and later stage | Private disposable PostgreSQL fixture retained outside public source; publication qualification pending |
+| Eight-member atomic category correction, distinct mill/grower review guards, late failure, drift, replay and later stage | Private disposable PostgreSQL fixture retained outside public source; publication qualification pending |
 | Migration, private privileges and bounded controls | existing PostgreSQL/security/preflight gates plus simulator integration |
 | Actual write → public revision/API → UI | FE-079 browser/native journeys |
 

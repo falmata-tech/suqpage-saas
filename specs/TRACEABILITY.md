@@ -276,18 +276,21 @@ inside the same transaction before requalifying the corrected source.
 
 ## BE-067 reviewed agriculture membership correction — local qualification only
 
-Six current active demo farms have reviewed agriculture proposals but only
-food-farming public memberships. A locally qualified private correction path
-binds six exact identities, four products each, current hashes/versions and
-progress to one disabled-worker request. It adds agriculture cross-listing and
-acknowledges all simulator category bindings in one transaction. A synthetic
-public parser test and a private disposable-PostgreSQL case pass: late sixth
-insert rollback, proposal drift/foreign product refusal, guarded rearm of an
-existing accepted request row, replay before/after a later stage, real-tenant
-preservation and a 2,398-byte request. The successful local batch took under
-one second after fixture setup, within the 23-second bound. No hosted data was
-changed; source review, deployment, a fresh protected before-image and the
-separately guarded L4 admission precede production execution.
+Six active public demo growers have reviewed agriculture proposals but only
+food-farming memberships. Two active public food mills have explicit agriculture
+cross-listings in `scripts/setup.ts`; their reviewed primary proposals remain
+food-farming. A finite private correction path binds all eight exact IDs/handles,
+four products each, current hashes/versions and progress to one disabled-worker
+request. Distinct grower and mill proposal guards prevent converting a mill's
+primary category. The operator adds eight agriculture memberships and
+acknowledges all 32 simulator catalog bindings in one transaction. The public
+parser test and private disposable-PostgreSQL case pass: late eighth insert
+rollback, both proposal-drift cases, foreign product refusal, guarded rearm of an
+accepted request row, replay before/after a later stage and real-tenant
+preservation. The 3,213-byte request completed in 2.1 seconds after fixture
+setup, inside the 23-second bound. No hosted category data changed; source
+review, deployment, a fresh protected before-image and separately guarded L4
+admission precede production execution.
 
 ## S194 scenario-driven demo activity — qualified and deployed
 
