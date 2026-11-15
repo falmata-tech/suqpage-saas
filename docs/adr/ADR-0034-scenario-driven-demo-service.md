@@ -19,17 +19,18 @@ isolate test businesses. A stage invokes ordinary product and page application
 commands in one transaction, with automation attribution and replay/overlap guards.
 Real accounts/new signups and private customer workflows remain outside its scope.
 
-Use once-per-minute execution and accelerated stages for visible early-user
-activity. Limit active work and retained-data growth; pause on budget or human
-edit rather than deleting immutable history or expanding paid capacity silently.
+Use three daytime Netlify invocations at 09:00, 13:00 and 17:00 Ethiopia time
+and a bounded multi-business batch for coherent activity. Limit active work and
+retained-data growth; pause on budget or human edit rather than deleting
+immutable history or expanding paid capacity silently.
 This fits short scheduled work and needs no VM or new production credential.
 
 The requested full-catalog expansion enrolls all reviewed public demos and their
 exact current products. A bounded ordinary upkeep batch retains each command's
 validation/authority/idempotency/audit semantics but publishes one atomic catalog
 snapshot for the coordinated business stage. Predefined product phase offsets
-retain a usable showroom. Rotate oldest-due businesses under the same global
-minute/write/storage budgets; breadth never requires a per-business worker or
+retain a usable showroom. Rotate oldest-due businesses under global
+time/write/storage budgets; breadth never requires a per-business worker or
 unbounded publication growth. Human/product-membership drift pauses the business.
 
 Current public catalog screens do not subscribe to changes. Add bounded foreground

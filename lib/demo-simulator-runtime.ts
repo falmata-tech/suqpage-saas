@@ -282,11 +282,21 @@ async function processEnrollmentRequests(now:number){
 }
 
 export type DemoTickResult={enrolled?:number;enrollmentRejected?:number;mediaCorrected?:number;status:'advanced'|'disabled'|'busy'|'duplicate'|'budget'|'schema';advanced:number;paused:number;failed:number};
-/** The scheduled adapter supplies no client input. The clock argument also lets
- * disposable PostgreSQL tests exercise complete timelines without sleeping. */
-export async function runDemoSimulatorTick(now=Date.now()):Promise<DemoTickResult>{
+// The production schedule has three daily invocations. Retain the hosted
+// control row's ability to lower this cap without requiring a schema change.
+const MAX_DAILY_STAGES=12;
+export function canStartDemoStage(elapsedMs:number,previousStageMs:number|null){
+ // Reserve the last observed full-stage cost (at least eight seconds) plus
+ // three seconds for the final control update, pruning and transaction commit.
+ return elapsedMs<12000&&(previousStageMs===null||elapsedMs+Math.max(previousStageMs,8000)+3000<23000);
+}
+/** The scheduled adapter supplies no client input and uses hourly slots.
+ * The clock and default minute slot let disposable PostgreSQL tests exercise
+ * complete timelines without sleeping. Stage times always use the actual now. */
+export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1):Promise<DemoTickResult>{
  if(!Number.isSafeInteger(now)||now<0)throw new Error('Invalid demo tick clock.');
- const started=Date.now(),slot=Math.floor(now/60000),day=Math.floor(now/86400000);
+ if(!Number.isSafeInteger(slotMinutes)||slotMinutes<1||slotMinutes>60)throw new Error('Invalid demo tick slot.');
+ const started=Date.now(),slot=Math.floor(now/(slotMinutes*60000))*slotMinutes,day=Math.floor(now/86400000);
  const result=(status:DemoTickResult['status']):DemoTickResult=>({status,advanced:0,paused:0,failed:0});
  return runtimeTransaction(async()=>{
   // PostgreSQL17 terminates an overlong transaction atomically. Leave time for
@@ -302,16 +312,22 @@ export async function runDemoSimulatorTick(now=Date.now()):Promise<DemoTickResul
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;
+  const dailyLimit=Math.min(MAX_DAILY_STAGES,control.daily_limit);
   if(Number(size?.bytes)>=Number(control.database_limit_bytes)){
    await runtimeRun("UPDATE demo_simulator_control SET enabled=0,pause_reason='database_budget' WHERE id=1");return result('budget');
   }
   // Daily exhaustion defers until tomorrow. It does not silently raise a limit.
-  if(used>=control.daily_limit){await runtimeRun("UPDATE demo_simulator_control SET pause_reason='daily_budget' WHERE id=1");return result('budget');}
+  if(used>=dailyLimit){await runtimeRun("UPDATE demo_simulator_control SET pause_reason='daily_budget' WHERE id=1");return result('budget');}
   await runtimeRun("UPDATE demo_simulator_control SET last_slot=?,budget_day=?,used_today=?,pause_reason='' WHERE id=1",[slot,day,used]);
-  const due=await runtimeAll<Enrollment>("SELECT * FROM demo_simulator_enrollments WHERE status='active' AND due_at<=? ORDER BY due_at,business_id LIMIT ? FOR UPDATE",[now,Math.min(2,control.daily_limit-used)]);
+  const due=await runtimeAll<Enrollment>("SELECT * FROM demo_simulator_enrollments WHERE status='active' AND due_at<=? ORDER BY due_at,business_id LIMIT ? FOR UPDATE",[now,Math.min(4,dailyLimit-used)]);
   const out=result('advanced');
+  let previousStageMs:number|null=null;
   for(const e of due){
-   if(Date.now()-started>=16000||(out.advanced>0&&Date.now()-started>=8000))break;
+   // Each full-catalog stage can make several ordinary application writes.
+   // Admit another only while there is room for it and the final commit before
+   // PostgreSQL's 23-second transaction and Netlify's 30-second function limits.
+   if(!canStartDemoStage(Date.now()-started,previousStageMs))break;
+   const stageStarted=Date.now();
    await runtimeRun('SAVEPOINT demo_stage');
    let outcome='advanced',next={stage:e.stage,cycle:e.cycle};
    try{next=nextDemoScenarioStage(e.scenario_key,e.scenario_version,e.stage,e.cycle);await advance(e,slot,now);out.advanced++;}
@@ -326,6 +342,7 @@ export async function runDemoSimulatorTick(now=Date.now()):Promise<DemoTickResul
    }
    await runtimeRun('RELEASE SAVEPOINT demo_stage');
    await runtimeRun('INSERT INTO demo_simulator_runs(slot,business_id,scenario_key,stage,cycle,outcome,created_at) VALUES(?,?,?,?,?,?,?)',[slot,e.business_id,e.scenario_key,next.stage,next.cycle,outcome,now]);
+   previousStageMs=Date.now()-stageStarted;
   }
   await runtimeRun('UPDATE demo_simulator_control SET used_today=used_today+? WHERE id=1',[out.advanced]);
   await runtimeRun('DELETE FROM demo_simulator_runs WHERE created_at<?',[now-7*86400000]);

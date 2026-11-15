@@ -8,6 +8,31 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+## S198 limited hosted demo simulation — source qualification in progress
+
+BE-067 / DEP-054 / ADR-0034 map the owner's selected 09:00, 13:00 and 17:00
+Ethiopia schedule to the Netlify cron `0 6,10,14 * * *` UTC. The adapter bounds
+late or manual invocations to 15 minutes after each scheduled hour and uses one
+canonical slot for that hour. The runtime admits at most four oldest-due
+businesses, starts no new stage after 12 seconds or without a stage/commit
+reserve, and enforces the tighter of 12 successful stages per UTC day or the
+private control-row limit. Existing
+23-second transaction, 256MiB storage, identity, drift, rollback and tenant
+checks remain. The legacy hosted control row may still display 2,880 until a
+separate guarded update; its value cannot lift the code cap.
+
+`scripts/test-demo-worker-boundary.ts` passes the compiled scheduled adapter,
+three scheduled hours, 15-minute windows and an outside-window Run now. Disposable
+`scripts/test-demo-simulator-postgres.ts` passes four-business advancement,
+same-window replay, the observed-stage reserve, the 12-stage code cap and
+retained safety invariants. `scripts/test-demo-catalog-postgres.ts` passed
+64/256 fairness and six-stage coverage in 387 stages/97 ticks before the final
+timing-reserve edit; source-matched CI still needs to rerun it. Typecheck,
+spec validation and Netlify readiness pass locally. Source work does not
+establish the published schedule or next hosted run. A 64-business rotation
+takes at least six days at maximum four-per-run throughput, or about 22 days
+at the previously observed one per run.
+
 ## S197 demo video quality — review and qualification in progress
 
 FE-057 portrait containment follow-up: PR68's actual Chrome phone product
@@ -171,9 +196,9 @@ binds the reviewed64/256. Storage27,962,515bytes is10.417% of the unchanged
 268,435,456-byte soft budget. Measured growth forecasts7.12days at the maximum
 two-stage/minute cap,12.95days at observed elapsed growth; neither crosses the
 seven-day warning threshold in that observation. Continue read-only monitoring.
-Actual hosted runtime yielding currently advances about one business per minute;
-allow32–64 successful ticks per rotation and flag individual starvation only
-beyond70minutes while global work advances.
+At this S196 observation, hosted runtime yielded about one business per minute;
+the then-current32–64-tick rotation and70-minute threshold are superseded by
+the S198 cadence after its rollout.
 
 Retained first qualification: source`136f153` in43551401842/43551401841 passes
 fresh schema83 installation and legacy simulator PostgreSQL cases. The new batch

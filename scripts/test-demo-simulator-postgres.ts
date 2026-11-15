@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import {getDb,closeDbForTests} from './testing/postgres-fixture';
 import {curatedManifestForLegacyDesign} from '../lib/showroom-manifests';
-import {enrollDemoScenario,runDemoSimulatorTick,type DemoEnrollmentInput} from '../lib/demo-simulator-runtime';
+import {canStartDemoStage,enrollDemoScenario,runDemoSimulatorTick,type DemoEnrollmentInput} from '../lib/demo-simulator-runtime';
 import {createPostgresPublicClientWorkspace} from '../lib/signup-postgres';
 import {findPlaceSuggestions} from '../lib/place-catalog';
 import {runtimeCatalogByHandle,runtimeUserById} from '../lib/catalog-runtime';
@@ -16,6 +16,12 @@ import {productMedia} from '../lib/product-media';
 import {DEMO_SIMULATOR_TABLES} from '../lib/demo-simulator-schema';
 
 async function main(){
+ assert.equal(canStartDemoStage(0,null),true);
+ assert.equal(canStartDemoStage(11999,null),true);
+ assert.equal(canStartDemoStage(12000,null),false);
+ assert.equal(canStartDemoStage(8500,8500),true,'A second similar-cost stage fits with reserve.');
+ assert.equal(canStartDemoStage(11900,11900),false,'A slow first stage must not risk rolling back both.');
+ assert.equal(canStartDemoStage(10000,10000),false,'Commit reserve remains inside the 23-second transaction.');
  const db=await getDb();
  try{
   const schema=String((await db.prepare('SELECT current_schema() name').get()).name);
@@ -100,6 +106,18 @@ async function main(){
   const edited=await snapshot(a.businessId);now+=60000;
   assert.equal((await runDemoSimulatorTick(now)).paused,1);assert.equal((await get(a.businessId)).reason,'content_changed');assert.equal(await snapshot(a.businessId),edited);
   assert.deepEqual(await privateState(),beforePrivate,'The service creates no Auth identity, notification, preference, subscription or delivery.');
+  // A limited Netlify schedule needs multiple due businesses in one bounded
+  // invocation. The legacy demo is paused above, so these are the only due rows.
+  await db.exec('UPDATE demo_simulator_control SET enabled=0 WHERE id=1');
+  const batch=await Promise.all([0,1,2,3].map(index=>make(`demo-batch-${index}`)));
+  for(const e of batch)await enrollDemoScenario(e,now);
+  await db.exec('UPDATE demo_simulator_control SET enabled=1 WHERE id=1');
+  now=Math.ceil((now+60000)/3600000)*3600000;
+  assert.deepEqual(await runDemoSimulatorTick(now,60),{status:'advanced',advanced:4,paused:0,failed:0});
+  assert.equal((await db.prepare('SELECT count(*)::integer total FROM demo_simulator_runs WHERE slot=? AND outcome=\'advanced\'').get(Math.floor(now/3600000)*60)).total,4);
+  for(const e of batch)assert.equal((await get(e.businessId)).stage,0);
+  assert.equal((await runDemoSimulatorTick(now+7*60000,60)).status,'duplicate','A manual replay in the same scheduled hour must not add a stage.');
+  for(const e of batch)await db.prepare("UPDATE demo_simulator_enrollments SET status='paused',reason='operator' WHERE business_id=?").run(e.businessId);
   // New public workspaces ignore forged demo fields and receive no enrollment.
   const signup=await createPostgresPublicClientWorkspace(db.runner,{name:'Real Merchant',phone:'+251911234567',businessName:'New Real Business',businessCategory:'agriculture-growers',placeId:findPlaceSuggestions('Hawassa')[0].id,idempotencyKey:'demo-exclusion-signup-0001',consent:true,is_demo:1,isDemo:true},{providerUserId:crypto.randomUUID(),email:'new-real@example.test'});
   assert.equal((await db.prepare('SELECT is_demo FROM businesses WHERE id=?').get(signup.businessId)).is_demo,0);assert.equal(await get(signup.businessId),undefined);
@@ -147,6 +165,9 @@ async function main(){
   // Budgets stop demo work without deleting or editing merchant history.
   await db.exec('UPDATE demo_simulator_control SET daily_limit=1,used_today=1 WHERE id=1');now+=60000;
   const beforeBudget=await snapshot(good.businessId);assert.equal((await runDemoSimulatorTick(now)).status,'budget');assert.equal(await snapshot(good.businessId),beforeBudget);
+  await db.exec('UPDATE demo_simulator_control SET daily_limit=2880,used_today=12 WHERE id=1');now+=60000;
+  assert.equal((await runDemoSimulatorTick(now)).status,'budget','The legacy hosted control limit cannot lift the new 12-stage code cap.');
+  assert.equal(await snapshot(good.businessId),beforeBudget);
   // Exercise the real database-size guard even on a small empty CI database.
   // This disposable-schema relation disables TOAST compression; it is not a
   // provider quota change or a production storage-pressure experiment.
