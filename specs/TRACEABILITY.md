@@ -46,6 +46,19 @@ hosted legacy starter correction remain separate steps.
 
 ## S197 demo video quality — review and qualification in progress
 
+Fifteen first-party MP4 examples are already packaged, deployed and used by
+their exact fictional demo showrooms after guarded corrections. A later
+phone-web check reproduced an unavailable TikTok player for Liya Soap Kitchen
+product 81; its cover and other products also use external TikTok examples.
+The Liya follow-up packages five small rights-confirmed artwork-motion clips:
+one soap-shop story and exact oat, citrus, coffee and wrapped-guest product
+visuals. `lib/video/demo-video-catalog.ts` binds each to business 21;
+`S197-DEMO-VIDEO-ASSETS.json` records source images, bytes and SHA-256;
+`scripts/test-demo-first-party-video.ts` verifies the package and tenant
+boundary. Local FFmpeg full decode, 1/5/8-second visual review and Chromium
+phone playback beyond three seconds pass for all five. Hosted media refs remain
+unchanged until separate guarded BE-049 correction and deployed-asset checks.
+
 FE-057 portrait containment follow-up: PR68's actual Chrome phone product
 capture crops a 9:16 TikTok frame inside the short gallery stage while its Expo
 capture retains the full frame. The focused source branch gives active portrait
@@ -1085,7 +1098,7 @@ related layers, test criteria and detailed completion evidence.
 | [FE-058] Free exploration of the world map | in_progress | [FE-021], [BE-041], [FE-030], [FE-053], [DEP-042], [ADR-0016], [ADR-0023], [BE-023] | [Contract and implementation scope][FE-058] | [Test plan][FE-058-tests]: `test-mobile-map.ts`, `capture-world-map.mjs` |
 | [FE-059] Choose the business city during initial setup | in_progress | [BE-047], [FE-051], [FE-053], [FE-056], [BE-031], [BE-038], [BE-041], [DEP-042], [FE-065], [BE-054] | Canonical city selection and optional exact-public map point during signup | [Test plan][FE-059-tests]: `app.spec.ts`, `test-signup.ts`, `test-mobile-api.ts`, `capture-signup-city.mjs` |
 | [FE-060] Direct cover and product video links | in_progress | [FE-061], [ADR-0025], [BE-048], [FE-057], [FE-050], [FE-040], [FE-019], [FE-053], [BE-032], [BE-042], [DEP-039], [DEP-042], [ADR-0024] | [Contract and implementation scope][FE-060] | [Test plan][FE-060-tests]: `test-product-video.ts`, `test-owner-page.ts` |
-| [FE-061] Category-relevant starter and multi-provider demo videos | in_progress | [BE-049], [FE-046], [BE-039], [FE-060], [BE-048], [FE-050], [FE-053], [DEP-039], [DEP-042], [ADR-0035] | [Contract and implementation scope][FE-061]; S197 first-party contingency remains unlaunched | [Test plan][FE-061-tests]: `test-business-starters.ts`, `test-demo-first-party-video.ts` |
+| [FE-061] Category-relevant starter and multi-provider demo videos | in_progress | [BE-049], [FE-046], [BE-039], [FE-060], [BE-048], [FE-050], [FE-053], [DEP-039], [DEP-042], [ADR-0035] | [Contract and implementation scope][FE-061]; reviewed first-party demo assets are deployed; Liya five-clip correction is pending | [Test plan][FE-061-tests]: `test-business-starters.ts`, `test-demo-first-party-video.ts` |
 | [FE-062] Inquiry and chat alerts with truthful read receipts | in_progress | [FE-069], [FE-066], [BE-050], [DEP-043], [ADR-0026], [FE-019], [FE-026], [FE-049], [FE-053], [FE-068] | attention contracts/PostgreSQL events/receipts, web/native controls and scoped provider outbox | [Test plan][FE-062-tests]: `test-visible-chat-reads.ts`, `capture-notification-workflows.mjs` |
 | [FE-063] Listing reports and business blocking | in_progress | [BE-051], [DEP-044], [FE-049], [FE-053] | Local pure catalog-safety/listing-report contracts, private PostgreSQL port/migration 63, scoped web Reports queue, web/native… | [Test plan][FE-063-tests]: `test-catalog-safety.ts` |
 | [FE-064] Restricted reusable store-review access | in_progress | [BE-052], [DEP-044], [FE-053] | [reviewer-access.ts](../lib/reviewer-access.ts) | [Test plan][FE-064-tests] |
@@ -1150,7 +1163,7 @@ related layers, test criteria and detailed completion evidence.
 | [BE-046] Reviewed TikTok and YouTube product references | in_progress | [ADR-0025], [BE-048], [FE-050], [FE-057], [BE-042], [BE-018], [BE-044], [DEP-039], [DEP-042], [ADR-0024] | [Contract and implementation scope][BE-046] | [Test plan][BE-046-tests]: `test-product-video.ts`, `test-video-requests.ts` |
 | [BE-047] Canonical business city in signup transaction | in_progress | [BE-049], [FE-059], [BE-031], [BE-038], [BE-041], [FE-051], [BE-044], [DEP-042], [FE-065], [BE-054] | [Contract and implementation scope][BE-047] | [Test plan][BE-047-tests]: `test-signup.ts`, `test-mobile-api.ts` |
 | [BE-048] Owner-controlled canonical video references | in_progress | [FE-061], [BE-049], [ADR-0025], [FE-060], [BE-046], [BE-032], [BE-041], [BE-042], [BE-044], [FE-050], [FE-019], [DEP-039], [DEP-042], [ADR-0024] | [Contract and implementation scope][BE-048] | [Test plan][BE-048-tests]: `test-product-video.ts`, `test-owner-page.ts` |
-| [BE-049] Persist category-specific example videos atomically | in_progress | [BE-047], [BE-041], [FE-061], [BE-039], [BE-031], [BE-042], [BE-048], [FE-046], [FE-050], [DEP-039], [DEP-042], [ADR-0035] | [Contract and implementation scope][BE-049]; no first-party asset admitted | [Test plan][BE-049-tests], `test-demo-first-party-video.ts` |
+| [BE-049] Persist category-specific example videos atomically | in_progress | [BE-047], [BE-041], [FE-061], [BE-039], [BE-031], [BE-042], [BE-048], [FE-046], [FE-050], [DEP-039], [DEP-042], [ADR-0035] | [Contract and implementation scope][BE-049]; first-party assets admitted only for exact reviewed fictional demos | [Test plan][BE-049-tests], `test-demo-first-party-video.ts` |
 | [BE-050] Scoped notification events and confirmed chat reads | in_progress | [BE-055], [FE-062], [DEP-043], [ADR-0026], [BE-001], [BE-018], [BE-044], [FE-019], [FE-053], [BE-057], [ADR-0031] | attention contracts/PostgreSQL events/receipts, web/native controls and scoped provider outbox | [Test plan][BE-050-tests]: `test-support-assignment-response-migration.ts`, `test-support-assignment-response.ts` |
 | [BE-051] Private listing reports and discovery exclusions | in_progress | [FE-063], [DEP-044], [BE-044] | Local pure catalog-safety/listing-report contracts, private PostgreSQL port/migration 63, scoped web Reports queue, web/native… | [Test plan][BE-051-tests]: `test-catalog-safety.ts` |
 | [BE-052] Server-bound reviewer authentication | in_progress | [FE-064], [DEP-044], [BE-044] | [reviewer-access.ts](../lib/reviewer-access.ts) | [Test plan][BE-052-tests] |

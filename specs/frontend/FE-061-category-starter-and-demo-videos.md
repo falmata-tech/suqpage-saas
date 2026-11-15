@@ -10,7 +10,25 @@ change_level: L3
 
 # FE-061 — Category-relevant video examples
 
-## S197 first-party contingency (local package; no hosted admission yet)
+## S197 Liya Soap Kitchen phone playback follow-up
+
+The fictional Liya Soap Kitchen's externally hosted story and product players
+can return an unavailable state on phone web even when their player pages load.
+Use only the approved, repository-owned Liya soap artwork to prepare one
+first-party story video and four product-specific videos for its oat, citrus,
+coffee and wrapped guest bars. Keep the media illustrative through the existing
+single `Example business` label; do not imply the image-motion clips document
+real manufacturing. Preserve each product's photo as gallery item one.
+
+GIVEN the five Liya clips have a reviewed source and immutable asset digest WHEN
+the exact demo-only correction is admitted THEN the cover and all four product
+videos use their respective first-party refs without changing photos, business
+copy, selling facts, inquiry data or simulator progress. GIVEN a phone visitor
+plays each video THEN decoded time advances and the normal photo/video controls
+remain usable. A file that fails source, range, visual or player checks is not
+admitted to the hosted correction.
+
+## S197 first-party demo media
 
 When an external example cannot be proved playable, a reviewed fictional demo
 may use a **first-party** MP4 committed as an immutable static asset at

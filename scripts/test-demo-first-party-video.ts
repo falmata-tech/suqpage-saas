@@ -37,6 +37,10 @@ test("published page and product media can read an internal demo ref", () => {
 test("approved footage is bound to one fictional business", () => {
   assert.equal(approvedDemoVideo(ref,15), true);
   assert.equal(approvedDemoVideo(ref,6), false);
+  for (const slug of ["business-21", "business-21-oat", "business-21-citrus", "business-21-coffee", "business-21-guest"]) {
+    assert.equal(approvedDemoVideo(`demo:${slug}`,21), true);
+    assert.equal(approvedDemoVideo(`demo:${slug}`,22), false);
+  }
   const request = {
     kind: "media_correction", operationKey: "s197_demo_preview_01", businessId: 15,
     handle: "demo-desta-injera-stove-works", ownerUserId: 1,
@@ -55,10 +59,28 @@ test("approved footage is bound to one fictional business", () => {
   }));
 });
 
+test("one reviewed Liya request can bind its story and four distinct product clips", () => {
+  const slugs=["oat","citrus","coffee","guest"];
+  const request={kind:"media_correction",operationKey:"synthetic_liya_review_01",businessId:21,
+    handle:"demo-liya-soap-kitchen",ownerUserId:1,
+    providerUserId:"00000000-0000-4000-8000-000000000001",
+    expectedHash:"a".repeat(64),expectedContentVersion:1,expectedDraftVersion:1,expectedPageRevision:1,
+    coverBefore:"https://www.youtube.com/watch?v=abcdefghijk",coverVideoRef:"demo:business-21",
+    products:slugs.map((slug,index)=>({productId:index+1,
+      beforeMedia:[{kind:"image",ref:`/uploads/seed/portfolio/demo-liya-soap-kitchen/product-${index+1}.webp`},{kind:"video",ref:"youtube:abcdefghijk"}],
+      afterMedia:[{kind:"image",ref:`/uploads/seed/portfolio/demo-liya-soap-kitchen/product-${index+1}.webp`},{kind:"video",ref:`demo:business-21-${slug}`}],
+    })),
+  };
+  const parsed=parseDemoMediaCorrection(request);
+  assert.equal(parsed.coverVideoRef,"demo:business-21");
+  assert.deepEqual(parsed.products.map(product=>product.afterMedia[1].ref),slugs.map(slug=>`demo:business-21-${slug}`));
+  assert.throws(()=>parseDemoMediaCorrection({...request,businessId:22}));
+});
+
 test("every admitted static asset matches its source and release ledger", () => {
   const ledger=JSON.parse(fs.readFileSync(new URL("../docs/operations/S197-DEMO-VIDEO-ASSETS.json",import.meta.url),"utf8"));
-  assert.equal(ledger.assets.length,15);
-  assert.equal(Object.keys(DEMO_VIDEO_ASSETS).length,15);
+  assert.equal(ledger.assets.length,20);
+  assert.equal(Object.keys(DEMO_VIDEO_ASSETS).length,20);
   for(const entry of ledger.assets){
     const asset=DEMO_VIDEO_ASSETS[entry.slug],file=new URL(`../public/videos/demo/${entry.slug}.mp4`,import.meta.url);
     assert.equal(asset.businessId,entry.businessId);

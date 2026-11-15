@@ -316,9 +316,11 @@ scroll settles on that video, while a complete gallery scroll, thumbnail or
 arrow stops it. Touch input inside an external iframe may stay with the provider.
 Provider playback for a specific external clip still needs its own
 source-bound review under FE-057 and FE-061.
-The S197 contingency for licensed first-party fictional-demo MP4 examples is
-planned in FE-061/BE-049 and ADR-0035; it is not an admitted owner upload or
-published media source until its source rights and web/native rollout pass.
+The S197 first-party fictional-demo MP4 examples are published for reviewed
+showrooms under FE-061/BE-049 and ADR-0035. They are bounded to demo businesses
+and do not create an owner video-upload path. Each additional clip still needs
+source-rights, visual-fit, web/Expo and static-delivery checks before its exact
+hosted media correction.
 Details: BE-009/BE-021/BE-040/BE-042/BE-048/BE-056 and FE-047/FE-050/FE-067.
 
 ## 8. Product and inquiry workflow
@@ -1005,8 +1007,8 @@ claims. Optional ETB price/unit/highlights provide inquiry context, never platfo
 checkout, verified stock or a guaranteed quote. Do not silently turn a real service
 business into goods or apply demo corrections to unmarked tenants.
 
-Planned S197/FE-061/BE-049 replaces only reviewed poor, broken or unrelated demo
-video examples after actual creator-source playback and visual review. It retains
+S197/FE-061/BE-049 replaces only reviewed poor, broken or unrelated demo
+video examples after source and player review. It retains
 photos, identity, contacts and original stories. A finite paused operation through
 ordinary commands must preserve the BE-067 scenario progress and acknowledge only
 the admitted media change; an unreviewed edit still pauses rather than being erased.

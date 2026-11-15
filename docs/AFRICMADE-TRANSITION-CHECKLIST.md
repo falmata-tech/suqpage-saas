@@ -89,6 +89,22 @@ starter publication safety, and current web/Expo owner forms.
 
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 
+#### Liya Soap Kitchen phone playback follow-up
+
+- [ ] Package five source-reviewed, first-party Liya soap clips from the approved
+  fictional showroom artwork: one story and one for each of the oat, citrus,
+  coffee and wrapped guest products. Record SHA-256, dimensions, codec, rights,
+  product fit, phone playback and deployed byte-range delivery.
+- [ ] After an exact protected before-image and hosted admission, correct only
+  Liya business 21's cover and product 81–84 media through BE-049 while the
+  simulator is operator-paused. Keep first gallery photos, page copy, product
+  facts, stages and other tenants unchanged. Verify public web/Expo playback,
+  accepted request/hash and normal simulator continuation before closing.
+
+The follow-up is prompted by a production phone-web unavailable state for
+Liya product 81's TikTok player and a separate intermittent test-player failure.
+The earlier 15 first-party business corrections remain complete.
+
 The owner requests a careful visual and playback review of all66 active demo
 showrooms and all264 current products (64/256 simulator-enrolled plus two
 legacy demos), replacing missing, broken, poor-quality
