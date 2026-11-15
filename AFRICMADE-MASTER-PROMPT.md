@@ -715,6 +715,12 @@ publication commands. Foreground public screens check for changes every15 second
 preserve inquiry drafts and read one consistent product/profile snapshot. This
 is bounded foreground polling, not a Supabase Realtime subscription.
 
+During the finite S200 copy correction, an operator pause and a signed
+minute-scheduled background adapter admit at most four reviewed private copy
+requests per tick through 01:30 UTC on 16 November 2026. This path cannot
+advance ordinary stages; the three daytime moments resume after guarded
+readback and source restoration.
+
 Use the pinned Node/Next.js web/API and Expo/React Native app with shared typed
 contracts. Runtime/dependency versions come from the lockfiles, package metadata
 and supported baseline, not duplicated prose here. PostgreSQL access and managed

@@ -10,6 +10,7 @@ import {runtimeCatalogByBusinessId} from '../lib/catalog-runtime';
 import {ownerPagePort} from '../lib/owner-page-runtime';
 import {pagePublicationPort} from '../lib/owner-page-publication-runtime';
 import {runtimeAll,runtimeGet} from '../lib/runtime-sql';
+import {COPY_MAINTENANCE_START} from '../lib/demo-copy-background';
 
 const digest=(value:unknown)=>crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
 async function currentHash(businessId:number){
@@ -239,6 +240,32 @@ async function main(){
    ORDER BY id DESC LIMIT 1`).get(legacyId);
   assert.deepEqual(JSON.parse(String(rejection.detail)),{automation:'demo-copy-maintenance',
    operationKey:stale.operationKey,phase:'reviewed_before',code:'content_changed'});
+  const windowNow=COPY_MAINTENANCE_START+30*60000,windowSlot=Math.floor(windowNow/60000);
+  const realNow=Date.now;
+  try{
+   Date.now=()=>windowNow;
+   await db.prepare("UPDATE demo_simulator_requests SET input_json='{}',status='pending',reason='',processed_at=0 WHERE business_id=?")
+    .run(legacyId);
+   await assert.rejects(()=>runDemoSimulatorTick(windowNow,1,'copy_background',windowSlot),
+    /Unexpected pending request during copy maintenance/);
+   assert.equal((await db.prepare("SELECT count(*) n FROM audit_logs WHERE action='demo.copy_background_slot'").get()).n,0,
+    'Failed background transaction must not consume its slot.');
+   await db.prepare("UPDATE demo_simulator_requests SET input_json=?,status='pending',reason='',processed_at=0 WHERE business_id=?")
+    .run(JSON.stringify(stale),legacyId);
+   assert.equal((await runDemoSimulatorTick(windowNow,1,'copy_background',windowSlot)).enrollmentRejected,1);
+   await db.prepare("UPDATE demo_simulator_requests SET status='pending',reason='',processed_at=0 WHERE business_id=?")
+    .run(legacyId);
+   assert.equal((await runDemoSimulatorTick(windowNow,1,'copy_background',windowSlot)).status,'duplicate');
+   assert.equal((await db.prepare('SELECT status FROM demo_simulator_requests WHERE business_id=?').get(legacyId)).status,'pending');
+   const later=windowNow+60000;
+   Date.now=()=>later;
+   assert.equal((await runDemoSimulatorTick(later,1,'copy_background',windowSlot+1)).enrollmentRejected,1);
+   await db.prepare("UPDATE demo_simulator_requests SET status='pending',reason='',processed_at=0 WHERE business_id=?")
+    .run(legacyId);
+   assert.equal((await runDemoSimulatorTick(later,1,'copy_background',windowSlot)).status,'duplicate',
+    'A delayed older slot must not consume the next reviewed batch.');
+   assert.equal((await db.prepare('SELECT status FROM demo_simulator_requests WHERE business_id=?').get(legacyId)).status,'pending');
+  }finally{Date.now=realNow;}
   console.log('PASS S200 copy: enrolled/legacy exact text, retained writes, replay, inverse, late rollback, queue rejection and next-stage continuity.');
  }finally{await closeDbForTests();}
 }
