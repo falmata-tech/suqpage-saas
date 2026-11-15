@@ -12,9 +12,8 @@ import {parseOfferingHighlightsJson} from './offering-presentation';
 import {configuredReviewer} from './reviewer-access-runtime';
 import {demoScenarioCommandKey,demoScenarioStage,nextDemoScenarioStage,parseDemoScenarioParameters,type DemoScenarioParameters,type DemoScenarioKey} from './demo-scenarios';
 import {parseDemoMediaCorrection,parseUnenrolledDemoMediaCorrection,parseQueuedDemoMediaCorrection,type UnenrolledDemoMediaCorrection} from './demo-media-correction';
-import {parseDemoProcessMediaCorrection,type DemoProcessMediaCorrection} from './demo-process-media-correction';
+import {parseDemoProcessMediaCorrection} from './demo-process-media-correction';
 import {parseDemoCategoryCorrection} from './demo-category-correction';
-import {catalogToRevisionSnapshotV4} from './revision-v4-defaults';
 import {productMedia} from './product-media';
 import {ProductUpkeepError} from './product-upkeep-domain';
 import {RevisionError} from './revision-domain';
@@ -256,9 +255,16 @@ export async function correctDemoProcessMedia(raw:unknown){
    throw Error('Demo media storage budget reached.');
   const version=state.catalog.business.content_version;
   const beforeSnapshot=catalogToRevisionSnapshotV4(state.catalog);
-  await runtimeRun(`INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id)
-   VALUES(?,?,?,'baseline',?) ON CONFLICT (business_id,content_version) DO NOTHING`,
-   [input.businessId,version,JSON.stringify(beforeSnapshot),state.actor.id]);
+  const retained=await runtimeGet<{snapshot_json:string}>(
+   'SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
+   [input.businessId,version]);
+  if(retained){
+   const checked=requireRevisionSnapshotV4(retained.snapshot_json,SHOWROOM_COMPONENT_BANK_LATEST,
+    processVideoPolicyForCatalog(state.catalog));
+   if(digest(checked)!==digest(beforeSnapshot))throw new DemoDrift('content_changed');
+  }else await runtimeRun(`INSERT INTO published_catalog_versions
+   (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+   VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(beforeSnapshot),state.actor.id]);
   const updated=await runtimeRun(`UPDATE businesses SET process_video_ref=?,content_version=?
    WHERE id=? AND handle=? AND is_demo=1 AND status='active' AND content_version=? AND process_video_ref=?`,
    [input.processVideoAfter,version+1,input.businessId,input.handle,version,input.processVideoBefore]);

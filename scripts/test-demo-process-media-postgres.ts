@@ -4,6 +4,8 @@ import {getDb,closeDbForTests} from './testing/postgres-fixture';
 import {curatedManifestForLegacyDesign} from '../lib/showroom-manifests';
 import {enrollDemoScenario,correctDemoProcessMedia,runDemoSimulatorTick,type DemoEnrollmentInput} from '../lib/demo-simulator-runtime';
 import {parseDemoProcessMediaCorrection,PROCESS_MEDIA_TARGETS,type DemoProcessMediaCorrection} from '../lib/demo-process-media-correction';
+import {runtimeCatalogByBusinessId} from '../lib/catalog-runtime';
+import {catalogToRevisionSnapshotV4} from '../lib/revision-v4-defaults';
 
 async function main(){
  const db=await getDb();
@@ -69,6 +71,15 @@ async function main(){
   assert.deepEqual(await state(),before);
   await db.exec("UPDATE demo_simulator_control SET enabled=0,pause_reason='operator' WHERE id=1");
   await assert.rejects(()=>correctDemoProcessMedia({...input,expectedHash:'b'.repeat(64)}),/content_changed/);
+  assert.deepEqual(await state(),before);
+  const forged=catalogToRevisionSnapshotV4((await runtimeCatalogByBusinessId(businessId,true))!);
+  forged.business.processVideoRef='youtube:NJMPGgcDylY';
+  await db.prepare("INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id) VALUES(?,1,?,'baseline',?)")
+   .run(businessId,JSON.stringify(forged),ownerUserId);
+  const forgedState=await state();
+  await assert.rejects(()=>correctDemoProcessMedia(input),/content_changed/);
+  assert.deepEqual(await state(),forgedState,'A stale retained baseline must not be silently accepted.');
+  await db.prepare('DELETE FROM published_catalog_versions WHERE business_id=? AND content_version=1').run(businessId);
   assert.deepEqual(await state(),before);
   await db.exec(`CREATE FUNCTION fail_process_version() RETURNS trigger LANGUAGE plpgsql AS $$
    BEGIN RAISE EXCEPTION 'Synthetic process version failure'; END; $$;
