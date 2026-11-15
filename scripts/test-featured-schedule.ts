@@ -155,6 +155,44 @@ async function main() {
         assert.equal(Number((await db.prepare("SELECT COUNT(*) total FROM featured_program_lineup").get() as {
             total: number;
         }).total), 0, "automatic restoration removes the retained lineup");
+        // A category with no retained memberships can still show its current,
+        // reviewed growers without changing their stored categories or simulator state.
+        await db.prepare("INSERT INTO discovery_industries(key,label,icon,position,active) VALUES('food-farming','Food & farming','leaf',2,1) ON CONFLICT(key) DO NOTHING").run();
+        await db.prepare("INSERT INTO discovery_industries(key,label,icon,position,active) VALUES('agriculture-growers','Farms, livestock & feed','leaf',3,1) ON CONFLICT(key) DO NOTHING").run();
+        const growerIds: number[] = [];
+        for (let index = 0; index < 6; index += 1) {
+            const handle = `reviewed-grower-${index + 1}`;
+            const id = Number((await db.prepare("INSERT INTO businesses(handle,name,design_key,hero_image_path,status) VALUES(?,?,?,?,'active')").run(handle, `Reviewed Grower ${index + 1}`, "composition", `/heroes/${handle}.webp`)).insertedId);
+            const updatedAt = Date.now() + index;
+            await db.prepare("INSERT INTO business_industries(business_id,industry_key) VALUES(?,'food-farming')").run(id);
+            await db.prepare(`INSERT INTO business_discovery_profiles(business_id,booth_image_path,city,zone,region,latitude,longitude,fallback_style,is_featured,is_excluded,approved_at,updated_at)
+              VALUES(?,?,'Adama','East Shewa','Oromia',8.54,39.27,'food',0,0,?,?)`).run(id, `/booths/${handle}.webp`, updatedAt, updatedAt);
+            await db.prepare("INSERT INTO owner_location_proposals(business_id,version,category_key,city,region,location_mode,latitude,longitude,reviewed_version,updated_at) VALUES(?,1,'agriculture-growers','Adama','Oromia','storefront',8.54,39.27,1,?)").run(id, updatedAt);
+            await db.prepare("INSERT INTO products(business_id,name,slug,is_published) VALUES(?,?,?,1)").run(id, `Grower crop ${index + 1}`, `grower-crop-${index + 1}`);
+            growerIds.push(id);
+        }
+        const sundayOptions = { featuredDay: 0, now: new Date("2026-08-16T09:00:00+03:00"), readPort: settingsPort };
+        await db.prepare("UPDATE products SET offering_kind='service' WHERE business_id=?").run(growerIds[5]);
+        assert.deepEqual((await listFeaturedProgramEligibleBusinesses("agriculture-growers", settingsPort)).map(row => row.id), growerIds.slice(0, 5), "service-only growers are not eligible for public or admin Featured");
+        await db.prepare("UPDATE products SET offering_kind='standard_product' WHERE business_id=?").run(growerIds[5]);
+        assert.deepEqual((await listFeaturedProgramEligibleBusinesses("agriculture-growers", settingsPort)).map(row => row.id), growerIds);
+        const sundayAuto = await getFeaturedShowroomsView(sundayOptions);
+        assert.deepEqual(sundayAuto.featured.booths.flatMap(booth => booth.revealed ? [booth.showroom.id] : []),
+            automaticFeaturedLineup("2026-08-16", growerIds), "Sunday rotates reviewed growers from an otherwise empty category");
+        await saveFeaturedProgramDay({ dateIso: "2026-08-16", mode: "manual", businessIds: [growerIds[4], growerIds[1]], eligibleBusinessIds: growerIds, actorUserId: adminId }, settingsPort);
+        assert.deepEqual((await getFeaturedShowroomsView(sundayOptions)).featured.booths.flatMap(booth => booth.revealed ? [booth.showroom.id] : []), [growerIds[4], growerIds[1]], "a reviewed grower remains selectable in the manual Sunday lineup");
+        await saveFeaturedProgramDay({ dateIso: "2026-08-16", mode: "automatic", businessIds: [], eligibleBusinessIds: growerIds, actorUserId: adminId }, settingsPort);
+        await db.prepare("UPDATE owner_location_proposals SET reviewed_version=0 WHERE business_id=?").run(growerIds[0]);
+        await db.prepare("UPDATE owner_location_proposals SET updated_at=updated_at+1 WHERE business_id=?").run(growerIds[1]);
+        assert.deepEqual((await listFeaturedProgramEligibleBusinesses("agriculture-growers", settingsPort)).map(row => row.id), growerIds.slice(2), "pending and stale proposals cannot enter the fallback");
+        assert.deepEqual((await getFeaturedShowroomsView(sundayOptions)).featured.booths.flatMap(booth => booth.revealed ? [booth.showroom.id] : []),
+            automaticFeaturedLineup("2026-08-16", growerIds.slice(2)));
+        await db.prepare("INSERT INTO business_industries(business_id,industry_key) VALUES(?,'agriculture-growers')").run(growerIds[2]);
+        assert.deepEqual((await listFeaturedProgramEligibleBusinesses("agriculture-growers", settingsPort)).map(row => row.id), [growerIds[2]], "any direct agriculture membership disables the fallback");
+        assert.deepEqual((await getFeaturedShowroomsView(sundayOptions)).featured.booths.flatMap(booth => booth.revealed ? [booth.showroom.id] : []), [growerIds[2]]);
+        await db.prepare("UPDATE business_discovery_profiles SET is_excluded=1 WHERE business_id=?").run(growerIds[2]);
+        assert.deepEqual(await listFeaturedProgramEligibleBusinesses("agriculture-growers", settingsPort), []);
+        assert.equal((await getFeaturedShowroomsView(sundayOptions)).featured.boothCount, 0, "an ineligible direct member cannot reactivate the fallback");
         console.log("Daily Featured schedule policy, agenda, migration, and atomic override tests passed.");
     }
     finally {

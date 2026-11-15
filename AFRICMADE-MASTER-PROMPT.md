@@ -229,6 +229,10 @@ status row and timed business cards replace duplicate agenda text; a manually
 chosen category stays selected. “Scheduled now” identifies the scheduled window,
 not a verified live broadcast. Historical manual rows are preserved while public
 projection and new selections obey the four-business cap.
+When the Sunday agriculture membership set is entirely empty, Featured may use
+current reviewed agriculture location proposals under the same eligibility
+rules. Direct memberships take precedence when present. This does not change
+Market categories or stored business classifications.
 
 Sponsors are clearly labelled promotional placements in an independent, manually ordered global
 pool of up to five eligible showrooms or validated external ads. External ads never
