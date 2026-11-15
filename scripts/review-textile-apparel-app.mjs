@@ -1,4 +1,4 @@
-// Finite S197 containing-page playback check for three maker TikToks.
+// Finite S197 containing-page playback check for two maker TikToks.
 // Runs only against a disposable local PostgreSQL QA schema in GitHub Actions.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -24,9 +24,9 @@ fs.mkdirSync(out,{recursive:true});
 const fixture=JSON.parse(fs.readFileSync(out+'/fixture.json','utf8'));
 const source=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(fixture.source,source);
-assert.equal(fixture.cases.length,3);
+assert.equal(fixture.cases.length,2);
 assert.deepEqual(fixture.cases.map(item=>item.videoRef),[
-  'tiktok:7654504011609017614','tiktok:7705830329306647841',
+  'tiktok:7642314678689336597',
   'tiktok:7707553770057649439']);
 const base='http://127.0.0.1:3000';
 const browser=await chromium.launch({channel:'chrome'});

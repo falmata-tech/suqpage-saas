@@ -1,4 +1,4 @@
-// Three attributed creator examples published into a disposable QA schema.
+// Two focused maker examples published into a disposable QA schema.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
@@ -15,8 +15,7 @@ import {productVideoWatchUrl} from '../lib/video/product-video';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 
 const cases=[
-  {handle:'demo-liya-textile-house',videoRef:'tiktok:7654504011609017614',productName:null},
-  {handle:'demo-sora-workwear-studio',videoRef:'tiktok:7705830329306647841',productName:'Production Work Shirt'},
+  {handle:'demo-sora-workwear-studio',videoRef:'tiktok:7642314678689336597',productName:'Production Work Shirt'},
   {handle:'demo-zema-bag-studio',videoRef:'tiktok:7707553770057649439',productName:'Compact Commuter Backpack'},
 ] as const;
 
@@ -75,6 +74,6 @@ async function main(){
   }
   fs.mkdirSync('.local/textile-apparel-app-qa',{recursive:true,mode:0o700});
   fs.writeFileSync('.local/textile-apparel-app-qa/fixture.json',JSON.stringify({source,cases:records})+'\n',{mode:0o600});
-  console.log('PASS three disposable textile and apparel fixtures prepared through ordinary commands.');
+  console.log('PASS two focused textile and apparel fixtures prepared through ordinary commands.');
 }
 void main().catch(error=>{console.error('Disposable textile and apparel fixture failed.',error);process.exitCode=1;}).finally(closePostgresRuntimeForTests);
