@@ -5,15 +5,17 @@ import {currentBusinessAuthority} from './staff-business-authority';
 import {ownerPagePort} from './owner-page-runtime';
 import {pagePublicationPort} from './owner-page-publication-runtime';
 import {saveOwnerPageAndPublication} from './owner-page-save-runtime';
-import {ownerPageImageKey,parseShopPageContent,type ShopPageContent} from './owner-page-domain';
+import {OwnerPageError,ownerPageImageKey,parseShopPageContent,type ShopPageContent} from './owner-page-domain';
 import {executeBasicProductUpkeep,executeProductUpkeepBatch} from './product-upkeep';
 import {postgresProductUpkeepPort} from './product-upkeep-postgres';
 import {parseOfferingHighlightsJson} from './offering-presentation';
 import {configuredReviewer} from './reviewer-access-runtime';
 import {demoScenarioCommandKey,demoScenarioStage,nextDemoScenarioStage,parseDemoScenarioParameters,type DemoScenarioParameters,type DemoScenarioKey} from './demo-scenarios';
-import {parseDemoMediaCorrection,parseUnenrolledDemoMediaCorrection,parseQueuedDemoMediaCorrection} from './demo-media-correction';
+import {parseDemoMediaCorrection,parseUnenrolledDemoMediaCorrection,parseQueuedDemoMediaCorrection,type UnenrolledDemoMediaCorrection} from './demo-media-correction';
 import {parseDemoCategoryCorrection} from './demo-category-correction';
 import {productMedia} from './product-media';
+import {ProductUpkeepError} from './product-upkeep-domain';
+import {RevisionError} from './revision-domain';
 import {productVideoWatchUrl} from './video/product-video';
 import type {SessionUser} from './types';
 import {isSupportedPostgresMigrationLedger,LATEST_POSTGRES_MIGRATION_VERSION} from './postgres-schema-version';
@@ -266,6 +268,20 @@ export async function correctDemoCategoryBatch(raw:unknown){
 }
 
 const unenrolledMediaTargets={50:'demo-dara-clay-works',62:'demo-wabi-bottled-water'} as const;
+type UnenrolledMediaPhase='admission'|'eligibility'|'receipt'|'reviewed_before'|
+ 'product_1'|'product_2'|'product_3'|'product_4'|'page'|'postcondition'|'audit';
+const unenrolledMediaFailurePhases=new WeakMap<object,UnenrolledMediaPhase>();
+function unenrolledMediaFailureCode(error:unknown){
+ if(error instanceof DemoDrift)return error.reason;
+ if(error instanceof ProductUpkeepError){
+  const allowed=new Set(['invalid_command','invalid_product_kind','service_note_required','forbidden',
+   'stale_version','idempotency_conflict','foreign_media','demo_video_forbidden','structure_not_found','write_conflict']);
+  return allowed.has(error.code)?error.code:'product_upkeep';
+ }
+ if(error instanceof RevisionError)return 'revision_validation';
+ if(error instanceof OwnerPageError)return 'page_validation';
+ return 'unexpected';
+}
 
 async function unenrolledMediaState(businessId:50|62,actorUserId:number){
  const handle=unenrolledMediaTargets[businessId];
@@ -300,12 +316,15 @@ async function unenrolledMediaState(businessId:50|62,actorUserId:number){
 /** One-time ordinary publication for two unenrolled legacy demos; inverse plans roll back. */
 export async function correctUnenrolledDemoMedia(raw:unknown){
  const input=parseUnenrolledDemoMediaCorrection(raw),payloadHash=digest(input);
- return runtimeTransaction(async()=>{
+ let phase:UnenrolledMediaPhase='admission';
+ try{return await runtimeTransaction(async()=>{
   await runtimeRun('SELECT pg_advisory_xact_lock(6870619271382)');
   if(!await schemaReady())throw Error('The demo schema is not ready.');
   const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before media maintenance.');
+  phase='eligibility';
   const state=await unenrolledMediaState(input.businessId,input.actorUserId);
+  phase='receipt';
   const receipt=await runtimeGet<{payload_hash:string}>(`SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs
    WHERE business_id=? AND action='demo.unenrolled_media_corrected'
    AND CASE WHEN action='demo.unenrolled_media_corrected' THEN detail::jsonb->>'operationKey' END=? ORDER BY id DESC LIMIT 1`,[input.businessId,input.operationKey]);
@@ -315,6 +334,7 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
      input.products.some(item=>digest(item.afterMedia)!==digest(productMedia(state.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
    return {duplicate:true};
   }
+  phase='reviewed_before';
   if(input.expectedContentVersion!==state.catalog.business.content_version||
    input.expectedDraftVersion!==state.draft.version||input.expectedPageRevision!==state.publication.revision||
    input.coverBefore!==state.draft.content.videoUrl||
@@ -322,12 +342,13 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   if(!size||!Number.isFinite(Number(size.bytes))||Number(size.bytes)>=Number(control.database_limit_bytes))throw Error('Demo media storage budget reached.');
   let version=state.catalog.business.content_version;
-  for(const item of input.products){
+  for(const [index,item] of input.products.entries()){
+   phase=(`product_${index+1}` as UnenrolledMediaPhase);
    const p=state.catalog.products.find(p=>p.id===item.productId)!;
    const result=await executeBasicProductUpkeep(postgresProductUpkeepPort,state.actor,{
     kind:'update',businessId:input.businessId,productId:p.id,expectedContentVersion:version,
     idempotencyKey:`demo_legacy_media_${input.operationKey}_${p.id}`,name:p.name,description:p.description,
-    availability:p.availability,offeringKind:p.offering_kind,quantityMode:p.quantity_mode,
+    availability:p.availability,quantityMode:p.quantity_mode,
     orderScope:p.order_scope??'unspecified',priceMinor:p.price_minor,quantityUnit:p.quantity_unit,
     highlights:parseOfferingHighlightsJson(p.highlights_json),capacitySummary:p.capacity_summary,
     minimumOrderSummary:p.minimum_order_summary,leadTimeSummary:p.lead_time_summary,
@@ -337,19 +358,25 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
    },null);
    version=result.contentVersion;
   }
+  phase='page';
   const videoUrl=productVideoWatchUrl(input.coverVideoRef);
   await saveOwnerPageAndPublication(state.actor,input.businessId,
    {action:'save',version:state.draft.version,content:{...state.draft.content,videoUrl}});
+  phase='postcondition';
   const after=await unenrolledMediaState(input.businessId,input.actorUserId);
   if(after.catalog.business.content_version!==version||after.draft.version!==state.draft.version+1||
    after.publication.revision!==state.publication.revision+1||after.draft.content.videoUrl!==videoUrl||
    input.products.some(item=>digest(item.afterMedia)!==digest(productMedia(after.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
+  phase='audit';
   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.unenrolled_media_corrected',?,'')",
    [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
     actorRole:input.actorRole,operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
     products:input.products.map(p=>p.productId)})]);
   return {duplicate:false};
- });
+ });}catch(error){
+  if(error&&typeof error==='object')unenrolledMediaFailurePhases.set(error,phase);
+  throw error;
+ }
 }
 async function advance(e:Enrollment,slot:number,now:number){
  const products=parseStoredDemoCatalog(e.catalog_products_json),state=await currentState(e,products.length>0);
@@ -413,6 +440,7 @@ async function processEnrollmentRequests(now:number){
   if(Date.now()-started>=12000)break;
   await runtimeRun('SAVEPOINT demo_enrollment');
   let accepted=false;
+  let unenrolledCorrection:UnenrolledDemoMediaCorrection|null=null;
   try{
    const raw:unknown=JSON.parse(request.input_json);
    if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as Record<string,unknown>).kind==='category_correction_batch'){
@@ -424,12 +452,20 @@ async function processEnrollmentRequests(now:number){
     ['media_correction','unenrolled_media_correction'].includes(String((raw as Record<string,unknown>).kind))){
     const correction=parseQueuedDemoMediaCorrection(raw,request.business_id);
     if(correction.kind==='media_correction')await correctDemoMedia(correction);
-    else await correctUnenrolledDemoMedia(correction);
+    else{unenrolledCorrection=correction;await correctUnenrolledDemoMedia(correction);}
     mediaCorrected++;
    }else{await enrollDemoScenario(parseEnrollmentRequest(request.input_json,request.business_id),now);enrolled++;}
    accepted=true;
   }
-  catch{await runtimeRun('ROLLBACK TO SAVEPOINT demo_enrollment');enrollmentRejected++;}
+  catch(error){
+   await runtimeRun('ROLLBACK TO SAVEPOINT demo_enrollment');enrollmentRejected++;
+   if(unenrolledCorrection){
+    const phase=error&&typeof error==='object'?unenrolledMediaFailurePhases.get(error)??'admission':'admission';
+    await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(NULL,?,'demo.unenrolled_media_rejected',?,'')",
+     [unenrolledCorrection.businessId,JSON.stringify({automation:'demo-media-maintenance',
+      operationKey:unenrolledCorrection.operationKey,phase,code:unenrolledMediaFailureCode(error)})]);
+   }
+  }
   await runtimeRun('RELEASE SAVEPOINT demo_enrollment');
   await runtimeRun('UPDATE demo_simulator_requests SET status=?,reason=?,processed_at=? WHERE business_id=?',
    [accepted?'accepted':'rejected',accepted?'':'enrollment_failed',now,request.business_id]);

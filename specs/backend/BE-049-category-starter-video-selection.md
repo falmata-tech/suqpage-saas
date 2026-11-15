@@ -86,6 +86,11 @@ Within the correction transaction, recheck zero linked users, the same page
 attributions, current administrator authority, and that the actor is not the
 configured private reviewer. Each ordinary product update carries a fixed
 service note; page publication and audit records retain that actor's ID.
+Ordinary upkeep preserves an existing non-service legacy offering kind while
+changing only reviewed video refs. A failed parsed request retains the normal
+private rejected status and appends one audit record with fixed phase/error-code
+values and operation key after the media savepoint rolls back. No raw error,
+product copy, contact, provider identity, or media payload enters that audit.
 
 GIVEN either exact demo with no enrollment, the bound current admin authority, coherent
 draft/publication, unchanged versions/before refs, and approved
@@ -100,8 +105,9 @@ An exact operation-key replay is inert.
 GIVEN another business, a linked user, an enrollment, changed page actor,
 revoked admin authority, private reviewer actor, stale state, pending location, changed
 gallery, unapproved asset, active simulator, or a late product/page failure WHEN
-the request runs THEN the correction is rejected without partial media/history
-change. A rollback uses a new, reviewed inverse request with fresh versions and
+the request runs THEN the correction is rejected without partial product, page,
+or catalog history change; the sanitized rejection audit is retained. A rollback
+uses a new, reviewed inverse request with fresh versions and
 before refs; it restores only the prior cover and four video
 refs through the same ordinary publication path. Neither direction runs
 automatically after an ambiguous hosted outcome.
@@ -157,8 +163,8 @@ unchanged-progress and subsequent scheduled-stage cases to
 `scripts/test-demo-catalog-postgres.ts`. External content/inline playback remains
 the separate FE-061 review; test fixture provider IDs are not curated defaults.
 The unenrolled legacy path maps its synthetic parser and queue-binding cases
-to `scripts/test-demo-media-correction.ts`. A local synthetic disposable-
-PostgreSQL test in ignored `.local/s197-unenrolled-media/` covers exact targets,
+to `scripts/test-demo-media-correction.ts`. An ignored local disposable
+PostgreSQL test covers exact targets,
 current admin/page attribution, service note, foreign/linked-user refusal,
 private queue admission, stale-version refusal, late publication rollback,
 replay, inverse rollback and cross-business isolation. No production payload or
