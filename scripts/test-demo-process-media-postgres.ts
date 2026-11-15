@@ -96,7 +96,7 @@ async function main(){
   assert.deepEqual(await state(),before,'A late history error must roll back the process ref, version, enrollment and audit.');
   await db.exec('DROP TRIGGER fail_process_version ON published_catalog_versions; DROP FUNCTION fail_process_version()');
   await db.prepare('INSERT INTO demo_simulator_requests(business_id,input_json,requested_at) VALUES(?,?,?)').run(businessId,JSON.stringify(input),now);
-  assert.equal((await runDemoSimulatorTick(now,1,'maintenance')).mediaCorrected,1);
+  assert.equal((await runDemoSimulatorTick(now)).mediaCorrected,1);
   assert.equal((await db.prepare('SELECT status FROM demo_simulator_requests WHERE business_id=?').get(businessId)).status,'accepted');
   const after=await state();
   assert.equal(after.business.process_video_ref,newRef);assert.equal(Number(after.business.content_version),2);
@@ -165,7 +165,7 @@ async function main(){
   const stale={...input,operationKey:'reviewed_process_stale_0001'};
   await db.prepare("UPDATE demo_simulator_requests SET input_json=?,status='pending',reason='',requested_at=?,processed_at=0 WHERE business_id=?")
    .run(JSON.stringify(stale),now+120000,businessId);
-  assert.equal((await runDemoSimulatorTick(now+120000,1,'maintenance')).enrollmentRejected,1);
+  assert.equal((await runDemoSimulatorTick(now+120000)).enrollmentRejected,1);
   const rejected=await state();
   assert.deepEqual(rejected.business,reconciled.business);assert.deepEqual(rejected.products,reconciled.products);
   assert.deepEqual(rejected.page,reconciled.page);assert.deepEqual(rejected.enrollment,reconciled.enrollment);
