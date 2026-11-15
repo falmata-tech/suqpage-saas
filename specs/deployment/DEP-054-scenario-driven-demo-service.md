@@ -36,6 +36,13 @@ row is both disabled and operator-paused. An unexpected pending request kind or
 invalid JSON fails the entire tick, leaving all selected requests pending.
 The locked runtime must refuse all stage work if the control is enabled or has
 another pause reason; it must not change the stage slot or daily stage budget.
+The reviewed enrolled process-video operator uses the same paused private
+request queue, one exact business per request, and publishes one new process
+catalog version while preserving owner-page and scenario progress. If the
+immutable current-version baseline is stale, it first reserves an exact current
+baseline version, so the business content version advances by two instead of one.
+Read back accepted request/audit/version and the new enrollment fingerprint
+before restoring the daytime schedule. No operator request becomes a stage.
 Source qualification alone does not authorize request admission. A changed date
 or time needs fresh source qualification.
 
