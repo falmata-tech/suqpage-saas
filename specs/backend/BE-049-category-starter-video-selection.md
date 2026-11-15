@@ -118,10 +118,15 @@ The finite plan also requires exact `processVideoBefore` and
 `processVideoAfter` refs. Apply accepts only the existing managed TikTok ref
 for these two demos and the approved first-party process ref for the matching
 business; inverse rollback swaps them. The worker checks the old ref and
-content version under the business lock, retains the old V4 catalog snapshot,
-and changes the process ref in the same transaction before the first ordinary
-product upkeep. That first upkeep versions the process and product media
-together; four product updates still advance content version by four overall.
+content version under the business lock and preserves any existing immutable
+catalog-version row. The apply path reserves the next content version with a
+compare-and-swap and appends an exact V4 snapshot of the current TikTok catalog
+there, even if an older retained row has a different generated design or content
+representation. It rejects an occupied next version. Within the same transaction,
+the worker changes the process ref before the first ordinary product upkeep.
+That first upkeep versions the process and product media together; the reserved
+baseline and four product updates advance content version by five overall.
+Inverse rollback from a matching current snapshot advances it by four.
 The final postcondition and a distinct process audit verify the new ref and
 hashes. Retained TikTok is accepted by V4 only for the exact trusted prior
 snapshot of demo 50 or 62. New revision authoring accepts only YouTube or an
