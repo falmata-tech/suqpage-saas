@@ -28,8 +28,8 @@ Do not provision a VM, add production management tokens, share notification
 execution budgets, enable previews against production or invent an HTTP trigger.
 
 A separately reviewed, finite maintenance deployment may temporarily replace
-that schedule with one invocation per minute only from 18:15 inclusive to 22:15
-exclusive UTC on 2026-11-15 (21:15–01:15 Ethiopia time, ending on November 16). Before or after those
+that schedule with one invocation per minute only from 18:15 inclusive to 23:15
+exclusive UTC on 2026-11-15 (21:15–02:15 Ethiopia time, ending on November 16). Before or after those
 exact instants its adapter returns without opening the database. Within the
 window it may process only private video-correction requests while the control
 row is both disabled and operator-paused. An unexpected pending request kind or
