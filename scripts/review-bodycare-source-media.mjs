@@ -47,7 +47,7 @@ async function youtube(page, id, key) {
   ]) {
     try {
       await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 25000});
-      await page.locator('video').first().evaluate(v => v.play().catch(() => {})).catch(() => {});
+      await page.locator('video').first().evaluate(v => { void v.play().catch(() => {}); }, undefined, {timeout: 3000}).catch(() => {});
       await page.locator('button.ytp-large-play-button').first().click({timeout: 3000}).catch(() => {});
       await waitForVideo(page);
       const start = await videoState(page);
