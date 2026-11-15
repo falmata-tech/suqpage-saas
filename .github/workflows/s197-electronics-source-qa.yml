@@ -1,0 +1,38 @@
+name: Finite electronics source review
+
+on:
+  pull_request:
+    paths: ['.github/workflows/s197-electronics-source-qa.yml', 'scripts/review-s197-electronics-sources.mjs']
+
+permissions:
+  contents: read
+
+jobs:
+  source-media:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      ALLOW_S197_ELECTRONICS_SOURCE_QA: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+      - run: npm ci
+      - run: npm run check:workflow-scripts -- scripts/review-s197-electronics-sources.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: google-chrome --version
+      - name: Inspect original provider players
+        run: node scripts/review-s197-electronics-sources.mjs
+      - name: Retain public source evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: s197-electronics-source-review
+          path: .local/s197-electronics-source/*
+          if-no-files-found: warn
+          retention-days: 7
