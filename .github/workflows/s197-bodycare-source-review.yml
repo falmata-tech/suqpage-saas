@@ -1,0 +1,41 @@
+name: S197 body care source review
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/s197-bodycare-source-review.yml
+      - scripts/review-bodycare-source-media.mjs
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s197-bodycare-source-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: google-chrome --version
+      - name: Review public creator players
+        run: node scripts/review-bodycare-source-media.mjs
+      - name: Retain finite source evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: s197-bodycare-source-review
+          path: .local/bodycare-source-review/
+          if-no-files-found: warn
+          retention-days: 7
