@@ -1,9 +1,12 @@
 import { controlledYouTubeWatchUrl, normalizeControlledYouTubeUrl, privacyEnhancedYouTubeEmbedUrl } from '../youtube-provider';
 
-export type ProductVideo = { provider: 'youtube' | 'tiktok' | 'facebook' | 'instagram'; providerId: string; managedRef: string };
+export type ProductVideo = { provider: 'youtube' | 'tiktok' | 'facebook' | 'instagram' | 'demo'; providerId: string; managedRef: string };
 const tikTokId = /^[1-9]\d{16,19}$/;
+const demoId = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/;
+const demoPath = /^\/videos\/demo\/([a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?)\.mp4$/;
 
 export function productVideo(ref: string): ProductVideo {
+  if (ref.startsWith('demo:') && demoId.test(ref.slice(5))) return {provider:'demo',providerId:ref.slice(5),managedRef:ref};
   if (/^youtube:[A-Za-z0-9_-]{11}$/.test(ref)) return {provider:'youtube',providerId:ref.slice(8),managedRef:ref};
   if (ref.startsWith('tiktok:') && tikTokId.test(ref.slice(7))) return {provider:'tiktok',providerId:ref.slice(7),managedRef:ref};
   if (/^facebook:[1-9]\d{4,24}$/.test(ref)) return {provider:'facebook',providerId:ref.slice(9),managedRef:ref};
@@ -13,6 +16,8 @@ export function productVideo(ref: string): ProductVideo {
 
 export function normalizeProductVideoUrl(input: unknown): ProductVideo {
   if (typeof input !== 'string' || input.length > 500) throw new Error('Use a supported video link.');
+  const demo = demoPath.exec(input.trim());
+  if (demo) return productVideo(`demo:${demo[1]}`);
   const url = new URL(input.trim());
   if (url.protocol !== 'https:' || url.username || url.password || url.port) throw new Error('Use a supported video link.');
   if (['www.tiktok.com','tiktok.com'].includes(url.hostname)) {
@@ -35,6 +40,7 @@ export function normalizeProductVideoUrl(input: unknown): ProductVideo {
 
 export function productVideoEmbedUrl(ref: string): string {
   const video = productVideo(ref);
+  if(video.provider==='demo')return `/videos/demo/${video.providerId}.mp4`;
   if(video.provider==='instagram')return `https://www.instagram.com/reel/${video.providerId}/embed/`;
   if(video.provider==='facebook')return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(productVideoWatchUrl(ref))}&show_text=false&autoplay=false`;
   return video.provider === 'youtube' ? privacyEnhancedYouTubeEmbedUrl(ref)
@@ -43,6 +49,7 @@ export function productVideoEmbedUrl(ref: string): string {
 
 export function productVideoWatchUrl(ref: string): string {
   const video = productVideo(ref);
+  if(video.provider==='demo')return `/videos/demo/${video.providerId}.mp4`;
   if(video.provider==='instagram')return `https://www.instagram.com/reel/${video.providerId}/`;
   if(video.provider==='facebook')return `https://www.facebook.com/watch/?v=${video.providerId}`;
   return video.provider === 'youtube' ? controlledYouTubeWatchUrl(ref)

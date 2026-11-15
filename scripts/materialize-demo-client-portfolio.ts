@@ -123,7 +123,7 @@ function boothSvg(name: string, primary: string, secondary: string, concept: str
     `<rect x="195" y="485" width="145" height="115" rx="10" fill="#ffffff" stroke="${primary}" stroke-width="12"/><path d="M215 555h105" stroke="${secondary}" stroke-width="18"/>`,
     `<path d="M205 590l70-125 70 125z" fill="${primary}"/><circle cx="275" cy="535" r="24" fill="${secondary}"/>`,
   ];
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Illustrative booth for ${escapedName}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="${escapedName} booth">
   <rect width="1200" height="800" fill="#edf0f4"/>
   <path d="M0 655L600 535l600 120v145H0z" fill="#d8dde3"/>
   <path d="M120 170h960v500H120z" fill="#ffffff" stroke="#c5ccd4" stroke-width="8"/>

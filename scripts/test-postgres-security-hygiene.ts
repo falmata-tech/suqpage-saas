@@ -83,9 +83,15 @@ async function main(){
   }finally{
     // Revoke fixture grants and remove only the disposable roles created here.
     const runner=db.runner;
-    for(const role of createdRoles)await runner.query(`DROP OWNED BY "${role}"`);
-    for(const role of createdRoles)await runner.query(`DROP ROLE "${role}"`);
-    await closeDbForTests();
+    try{
+      for(const role of createdRoles){
+        // PostgreSQL 17 requires role membership before DROP OWNED, even for
+        // the CREATEROLE user that created this disposable fixture role.
+        await runner.query(`GRANT "${role}" TO CURRENT_USER`);
+        await runner.query(`DROP OWNED BY "${role}"`);
+        await runner.query(`DROP ROLE "${role}"`);
+      }
+    }finally{await closeDbForTests();}
   }
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

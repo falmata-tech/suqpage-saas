@@ -25,6 +25,8 @@ import { evaluateCompositionFitness } from "./showroom-guidance";
 import { parseShowroomContentBlocks } from "./showroom-content-blocks";
 import type { ContentRevision, SessionUser } from "./types";
 import {isActiveProductKind} from './offerings';
+import {productMedia} from './product-media';
+import {approvedDemoVideo} from './video/demo-video-catalog';
 
 const row = <T,>(value: unknown): T =>
   ({ ...(value as Record<string, unknown>) }) as T;
@@ -567,6 +569,11 @@ async function replaceCanonicalCatalog(
   );
   if (!business) throw new RevisionError("Business not found.", 404);
   const catalog = snapshotToCatalog(snapshot, business as never);
+  if (catalog.products.some(product => productMedia(product).some(item =>
+    item.kind === 'video' && item.ref.startsWith('demo:') &&
+    (!business.is_demo || !approvedDemoVideo(item.ref,businessId))))) {
+    throw new RevisionError("Use a public video link for this business.");
+  }
   await runtimeRun(
     `UPDATE businesses
        SET design_key=?,design_manifest_json=?,content_blocks_json=?,

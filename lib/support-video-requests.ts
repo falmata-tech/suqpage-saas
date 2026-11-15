@@ -60,7 +60,12 @@ export async function reviewVideoRequest(user:SessionUser,conversationId:number,
     const request=await runtimeGet<VideoRequest>('SELECT * FROM support_video_requests WHERE conversation_id=?',[conversationId]);
     if(!request)return fail('Video request not found.');
     const url=input.videoUrl??input.youtubeUrl;
-    try { approvedRef=request.target_kind==='product'?await resolveProductVideoUrl(url):normalizeControlledYouTubeUrl(url).managedRef; }
+    try {
+      approvedRef=request.target_kind==='product'?await resolveProductVideoUrl(url):normalizeControlledYouTubeUrl(url).managedRef;
+      // Staff review approves external owner-supplied links. Packaged demo assets
+      // enter only through the business-bound S197 correction workflow.
+      if (approvedRef.startsWith('demo:')) throw new Error('Packaged demo media is not an owner link.');
+    }
     catch { return fail(request.target_kind==='product'?'Use a supported video link.':'Use a supported YouTube video.'); }
   }
   return runtimeTransaction(async()=>{

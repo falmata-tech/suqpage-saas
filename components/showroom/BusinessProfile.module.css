@@ -1,4 +1,5 @@
 .profile { container-type: inline-size; min-width: 0; background: #fff; color: #252a2d; font-family: var(--font-body), Arial, sans-serif; letter-spacing: 0; }
+.exampleBusiness { padding: 10px 16px; }
 .profile * { box-sizing: border-box; letter-spacing: 0; }
 .profile button, .profile a, .profile input, .profile select { font: inherit; }
 .profile button { cursor: pointer; }

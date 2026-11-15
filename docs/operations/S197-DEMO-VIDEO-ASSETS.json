@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "scope": "fictional demo examples only",
+  "rightsNote": "Source artwork is repository-owned fictional demo material; each linked brief records demonstration use. No third-party social clip was downloaded or rehosted.",
+  "assets": [
+    {
+      "businessId": 5,
+      "slug": "business-5",
+      "sha256": "1e1d6554adb1595b7bfb99579cb969fcd96e818c6dc53549098235e7dc2602c7",
+      "bytes": 359131,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/green-terrace-farm/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/benchmarks/green-terrace-farm/hero.jpg",
+        "public/uploads/seed/benchmarks/green-terrace-farm/product-1.jpg",
+        "public/uploads/seed/benchmarks/green-terrace-farm/product-2.jpg",
+        "public/uploads/seed/benchmarks/green-terrace-farm/product-3.jpg",
+        "public/uploads/seed/benchmarks/green-terrace-farm/product-4.jpg"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false,
+      "sourceTreatment": "Benchmark source collage seams cropped from product images 1 and 2 before square framing."
+    },
+    {
+      "businessId": 6,
+      "slug": "business-6",
+      "sha256": "9a579e7513fd1eef2a29f80585f5580577cc7a67ecc87f9235c1e3d27a2a0c96",
+      "bytes": 256616,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/blue-nile-apiary/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/benchmarks/blue-nile-apiary/hero.jpg",
+        "public/uploads/seed/benchmarks/blue-nile-apiary/product-1.jpg",
+        "public/uploads/seed/benchmarks/blue-nile-apiary/product-2.jpg",
+        "public/uploads/seed/benchmarks/blue-nile-apiary/product-3.jpg",
+        "public/uploads/seed/benchmarks/blue-nile-apiary/product-4.jpg"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false,
+      "sourceTreatment": "Benchmark source collage seams cropped from product images 1 and 2 before square framing."
+    },
+    {
+      "businessId": 7,
+      "slug": "business-7",
+      "sha256": "e0ccf51681813341c9dd92b552bee7bfd13e698c01fe2b122e75c2d6ed2219c1",
+      "bytes": 264604,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/rift-valley-mill/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/benchmarks/rift-valley-mill/hero.jpg",
+        "public/uploads/seed/benchmarks/rift-valley-mill/product-1.jpg",
+        "public/uploads/seed/benchmarks/rift-valley-mill/product-2.jpg",
+        "public/uploads/seed/benchmarks/rift-valley-mill/product-3.jpg",
+        "public/uploads/seed/benchmarks/rift-valley-mill/product-4.jpg"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 15,
+      "slug": "business-15",
+      "sha256": "ff5e8fae6438a6c44753d0f36a201776a0ea62129fc2627fb6374f6b3dd34f51",
+      "bytes": 286385,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-desta-appliance-repair/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-desta-appliance-repair/product-3.webp",
+        "public/uploads/seed/portfolio/demo-desta-appliance-repair/product-4.webp"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 22,
+      "slug": "business-22",
+      "sha256": "d102360c64cf609f64bfe8f44993c09ddd37bdb46ac9ccc7655352be7dff5a16",
+      "bytes": 208480,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-biftu-natural-oils/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-biftu-natural-oils/hero.webp",
+        "public/uploads/seed/portfolio/demo-biftu-natural-oils/product-1.webp",
+        "public/uploads/seed/portfolio/demo-biftu-natural-oils/product-2.webp",
+        "public/uploads/seed/portfolio/demo-biftu-natural-oils/product-3.webp",
+        "public/uploads/seed/portfolio/demo-biftu-natural-oils/product-4.webp"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 27,
+      "slug": "business-27",
+      "sha256": "2391f4b3953dc7a087f07fb7fbe576a5b958df4153ab05a02ea24f12647a614d",
+      "bytes": 362225,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-bora-highland-farm/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-bora-highland-farm/hero.webp",
+        "public/uploads/seed/portfolio/demo-bora-highland-farm/product-1.webp",
+        "public/uploads/seed/portfolio/demo-bora-highland-farm/product-2.webp",
+        "public/uploads/seed/portfolio/demo-bora-highland-farm/product-3.webp",
+        "public/uploads/seed/portfolio/demo-bora-highland-farm/product-4.webp"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 28,
+      "slug": "business-28",
+      "sha256": "96eb93f423c016c44b5f116faac851b37d9000700fedec0c3a17251f71e1cf1a",
+      "bytes": 299876,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-laga-grain-mill/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-laga-grain-mill/hero.webp",
+        "public/uploads/seed/portfolio/demo-laga-grain-mill/product-1.webp",
+        "public/uploads/seed/portfolio/demo-laga-grain-mill/product-2.webp",
+        "public/uploads/seed/portfolio/demo-laga-grain-mill/product-3.webp",
+        "public/uploads/seed/portfolio/demo-laga-grain-mill/product-4.webp"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 29,
+      "slug": "business-29",
+      "sha256": "52a7165fd461c85ad1d5c2bd086eb357921555e604216a3a54093bf9ebe09df0",
+      "bytes": 351875,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-mulu-family-farm/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-mulu-family-farm/hero.webp",
+        "public/uploads/seed/portfolio/demo-mulu-family-farm/product-1.webp",
+        "public/uploads/seed/portfolio/demo-mulu-family-farm/product-2.webp",
+        "public/uploads/seed/portfolio/demo-mulu-family-farm/product-3.webp",
+        "public/uploads/seed/portfolio/demo-mulu-family-farm/product-4.webp"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 30,
+      "slug": "business-30",
+      "sha256": "939d94fc758dbaffba041d05359eeae200e855d921923f841c6399f38243739b",
+      "bytes": 287244,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-kaffa-spice-kitchen/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-kaffa-spice-kitchen/hero.webp",
+        "public/uploads/seed/portfolio/demo-kaffa-spice-kitchen/product-1.webp",
+        "public/uploads/seed/portfolio/demo-kaffa-spice-kitchen/product-2.webp",
+        "public/uploads/seed/portfolio/demo-kaffa-spice-kitchen/product-3.webp",
+        "public/uploads/seed/portfolio/demo-kaffa-spice-kitchen/product-4.webp"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 31,
+      "slug": "business-31",
+      "sha256": "dcebcc8b52a23830cceaf39f9d60066fa22ba8191820994f93ce88fba1de3ec8",
+      "bytes": 309777,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-sofi-orchard/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-sofi-orchard/hero.webp",
+        "public/uploads/seed/portfolio/demo-sofi-orchard/product-1.webp",
+        "public/uploads/seed/portfolio/demo-sofi-orchard/product-2.webp",
+        "public/uploads/seed/portfolio/demo-sofi-orchard/product-3.webp",
+        "public/uploads/seed/portfolio/demo-sofi-orchard/product-4.webp"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 32,
+      "slug": "business-32",
+      "sha256": "b826ea8791b4f6f5fd04b900520a7bfa650d3f0cf42ae7d4190c51071071da48",
+      "bytes": 190367,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-wabi-flour-mill/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-wabi-flour-mill/hero.webp",
+        "public/uploads/seed/portfolio/demo-wabi-flour-mill/product-1.webp",
+        "public/uploads/seed/portfolio/demo-wabi-flour-mill/product-2.webp",
+        "public/uploads/seed/portfolio/demo-wabi-flour-mill/product-3.webp",
+        "public/uploads/seed/portfolio/demo-wabi-flour-mill/product-4.webp"
+      ],
+      "visualQA": "pass: full MP4 decoded; text-free replacement flour frame at 5s visually inspected",
+      "audio": false,
+      "sourceTreatment": "Expired-date product-2 illustration omitted; same-showroom text-free product-3 flour image used for that segment."
+    },
+    {
+      "businessId": 33,
+      "slug": "business-33",
+      "sha256": "566e4f3491f8971a4308d312ea86c1494134a457ac277e3525db09278a73dec0",
+      "bytes": 277749,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-rift-seed-growers/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-rift-seed-growers/hero.webp",
+        "public/uploads/seed/portfolio/demo-rift-seed-growers/product-1.webp",
+        "public/uploads/seed/portfolio/demo-rift-seed-growers/product-2.webp",
+        "public/uploads/seed/portfolio/demo-rift-seed-growers/product-3.webp",
+        "public/uploads/seed/portfolio/demo-rift-seed-growers/product-4.webp"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 47,
+      "slug": "business-47",
+      "sha256": "ac972f1c352f68193df486838edffa4a29da09fc2bb379408acd314815f7e4e5",
+      "bytes": 200512,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-aster-lighting-works/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-aster-lighting-works/hero.webp",
+        "public/uploads/seed/portfolio/demo-aster-lighting-works/product-1.webp",
+        "public/uploads/seed/portfolio/demo-aster-lighting-works/product-2.webp",
+        "public/uploads/seed/portfolio/demo-aster-lighting-works/product-3.webp",
+        "public/uploads/seed/portfolio/demo-aster-lighting-works/product-4.webp"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 60,
+      "slug": "business-60",
+      "sha256": "c1cfe9bda8e00b5a0ae61dd30c085e5abbc5b6e1855fd239542731e9cf46c99a",
+      "bytes": 47530,
+      "durationSeconds": 9,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-netsa-hygiene-products/BRIEF.md",
+      "sourceImages": [
+        "original vector illustration in render_netsa_60.py"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    },
+    {
+      "businessId": 61,
+      "slug": "business-61",
+      "sha256": "bc045db38b3fb9ae0fd2c6a2976e6b2cfde94c5bd954325103e03574992448ed",
+      "bytes": 319894,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-tena-pasta-works/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-tena-pasta-works/hero.webp",
+        "public/uploads/seed/portfolio/demo-tena-pasta-works/product-1.webp",
+        "public/uploads/seed/portfolio/demo-tena-pasta-works/product-2.webp",
+        "public/uploads/seed/portfolio/demo-tena-pasta-works/product-3.webp",
+        "public/uploads/seed/portfolio/demo-tena-pasta-works/product-4.webp"
+      ],
+      "visualQA": "pass: full video decoded and frames at 1, 5, and 8 seconds inspected; no added captions, labels, or text",
+      "audio": false
+    }
+  ]
+}

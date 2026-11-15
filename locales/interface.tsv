@@ -881,7 +881,6 @@ Email sign-in	በኢሜይል ይግቡ	Imeeliin seeni	Ku gal iimaylkaaga	ብኢ
 Your business page, products, services and customer inquiries in one place.	የንግድ ገጽዎን፣ ምርቶችዎን፣ አገልግሎቶችዎንና የደንበኞችን ጥያቄዎች እዚህ ያስተዳድሩ።	Fuula daldala keetii, oomisha, tajaajilaa fi gaaffii maamiltootaa asitti bulchi.	Halkan ku maamul bogga ganacsigaaga, alaabta, adeegyada iyo su’aalaha macaamiisha.	ገጽ ንግድኹም፣ ኣቕሑ፣ ኣገልግሎታትን ሕቶታት ዓማዊልን ኣብዚ ኣመሓድሩ።
 New business? Enter your email to create your account.	ንግድዎን ለመመዝገብ ኢሜይልዎን ያስገቡ።	Daldala kee galmeessuuf imeelii kee galchi.	Geli iimaylkaaga si aad ganacsigaaga u diiwaangeliso.	ንግድኹም ንምምዝጋብ ኢመይልኩም ኣእትዉ።
 Set up your business.	ንግድዎን ያስተዋውቁ።	Daldala kee beeksisi.	Soo bandhig ganacsigaaga.	ንግድኹም ኣላልዩ።
-Next, make the example page your own.	በመቀጠል፣ የናሙና ገጹን በራስዎ መረጃ ይሙሉ።	Itti aansuun, fuula fakkeenyaa odeeffannoo keetiin guuti.	Kadib bogga tusaalaha ah ku beddel xogta ganacsigaaga.	ቀጺልኩም፣ ነቲ ናሙና ገጽ ብናይ ንግድኹም ሓበሬታ ምልእዎ።
 New inquiries	አዲስ የደንበኛ ጥያቄዎች	Gaaffilee haaraa	Su’aalo cusub	ሓደስቲ ሕቶታት
 Send SMS	የስልክ መልዕክት ላክ	Ergaa gabaabaa ergi	Dir SMS	ናይ ስልኪ መልእኽቲ ስደዱ
 Describe your business	ስለ ንግድዎ ይጻፉ	Waa'ee daldala keetii barreessi	Ka warran ganacsigaaga	ብዛዕባ ንግድኹም ጽሓፉ
@@ -889,14 +888,12 @@ Add your real contact details	የራስዎን መገናኛ ያስገቡ	Odeeffan
 Choose your business location	የንግድዎን ቦታ ይምረጡ	Bakka daldala keetii filadhu	Dooro goobta ganacsigaaga	ቦታ ንግድኹም ምረጹ
 Replace or remove sample offerings	ናሙናዎቹን በራስዎ ይቀይሩ ወይም ያስወግዱ	Fakkeenya jiran kan keetiin bakka buusi ykn haqi	Tusaalooyinka ku beddel kuwaaga ama ka saar	ናሙናታት ብናትኩም ተክኡ ወይ ኣውጽኡ
 Demo	ናሙና	Fakkeenya	Tusaale	ናሙና
-Demo business — products and contact details are examples.	ይህ የናሙና ንግድ ገጽ ነው። ምርቶቹና መገናኛዎቹ ለማሳያ ብቻ ናቸው።	Kun fuula daldalaa fakkeenyaati. Oomishootaa fi odeeffannoon quunnamtii agarsiisaaf qofa.	Kani waa bog tusaale ah. Alaabta iyo xogta xiriirku waa tusaalooyin keliya.	እዚ ናሙና ገጽ ንግዲ እዩ። ኣቕሑን መራኸቢታትን ንመርኣያ ጥራይ እዮም።
 Explore this business	ንግዱን ይመልከቱ	Daldala kana ilaali	Eeg ganacsigan	ነዚ ንግዲ ርኣዩ
 Find businesses in Ethiopia, see what they offer, and contact them directly.	በኢትዮጵያ ያሉ ንግዶችን ያግኙ፣ ምርቶቻቸውንና አገልግሎቶቻቸውን ይመልከቱ፣ በቀጥታም ያነጋግሯቸው።	Daldaloota Itoophiyaa keessaa barbaadi, waan dhiyeessan ilaali, kallattiinis isaan quunnami.	Ka hel ganacsiyada Itoobiya, eeg alaabtooda iyo adeegyadooda, si toos ahna ula xiriir.	ኣብ ኢትዮጵያ ዘለዉ ንግድታት ርኸቡ፣ ዘቕርብዎ ርኣዩ፣ ብቐጥታ እውን ተራኸቡዎም።
 Create your business page	የንግድ ገጽዎን ይፍጠሩ	Fuula daldala keessanii qopheessaa	Samee bogga ganacsigaaga	ገጽ ንግድኹም ፍጠሩ
 Transport request received	የመጓጓዣ ጥያቄዎ ደርሶናል	Gaaffiin geejjibaa kee nu gaheera	Codsigaaga gaadiidka waa na soo gaaray	ሕቶ መጓዓዝያኹም በጺሑና
 Our team will contact you by phone to arrange the next step.	ቀጣዩን እርምጃ ለማመቻቸት ቡድናችን ይደውልልዎታል።	Gareen keenya tarkaanfii itti aanu irratti mari'achuuf siif bilbila.	Kooxdayadu way ku soo wici doontaa si ay kuugala hadasho tallaabada xigta.	ቀጻሊ ስጉምቲ ንምውዳብ ጉጅለና ብስልኪ ክትረኽበኩም እያ።
 Transport arrangements	የመጓጓዣ እርዳታ	Gargaarsa geejjibaa	Caawinta gaadiidka	ሓገዝ መጓዓዝያ
-Make this example page your own before publishing.	ገጹን ይፋ ከማድረግዎ በፊት ምሳሌዎቹን በራስዎ መረጃ ይተኩ።	Fuula kana namootaaf banuu dura fakkeenya kana odeeffannoo keetiin bakka buusi.	Ka hor intaadan bogga daabicin, tusaalaha ku beddel xogtaada.	ገጽኩም ዕላዊ ቅድሚ ምግባርኩም፣ ነቲ ኣብነት ብናትኩም ሓበሬታ ተክእዎ።
 Evening	ማታ	Galgala	Fiid	ምሸት
 Search & results	ፍለጋ እና ውጤቶች	Barbaacha fi bu’aawwan	Raadin iyo natiijooyin	ምድላይን ውጽኢትን
 Your online showroom	የእርስዎ የኦንላይን ማሳያ	Bakka hojii kee onlaayinii irratti itti agarsiistu	Goobta aad alaabtaada ku soo bandhigto	ናትኩም ናይ ኦንላይን መርኣዪ
@@ -1024,6 +1021,7 @@ Photo ready. Save your page to apply it.	ፎቶው ዝግጁ ነው። እንዲ
 Edit offering	ምርት ወይም አገልግሎት አስተካክል	Oomisha ykn tajaajila gulaali	Wax ka beddel alaabta ama adeegga	ፍርያት ወይ ኣገልግሎት ኣስተኻኽል
 Use up to 20 items per inquiry.	በአንድ ጥያቄ እስከ 20 ዕቃዎች ይምረጡ።	Gaaffii tokkoof hanga meeshaalee 20 filadhu.	Hal weydiin ku dar ugu badnaan 20 shay.	ኣብ ሓደ ሕቶ ክሳብ 20 ኣቕሑ ምረጹ።
 Video unavailable	ቪዲዮውን ማጫወት አልተቻለም	Viidiyoon kun taphachuu hin dandeenye	Fiidyowgan lama daawan karo	ቪድዮ ክጻወት ኣይከኣለን
+Refresh	አድስ	Haaromsi	Cusboonaysii	ሓድስ
 Loading video…	ቪዲዮው እየተጫነ ነው…	Viidiyoon fe’amaa jira…	Fiidyowga waa la furayaa…	ቪድዮ ይጽዓን ኣሎ…
 Attach file	ፋይል አያይዝ	Faayila dabali	Ku lifaaq fayl	ፋይል ኣተሓሕዝ
 Save or share file	ፋይሉን አስቀምጥ ወይም አጋራ	Faayila kuusi ykn qoodi	Kaydi ama wadaag faylka	ፋይል ኣቐምጥ ወይ ኣካፍል
@@ -1773,11 +1771,7 @@ Show what you supply.	የሚያቀርቡትን ያሳዩ።	Waan dhiheessitan ag
 Add products, options and listed availability. Organize collections when useful.	ምርቶችን፣ አማራጮችንና ስለ መገኘታቸው መረጃ ያክሉ። ካስፈለገ በስብስብ ያደራጁ።	Oomishaalee, filannoowwan fi odeeffannoo argamaa dabalaa. Yoo gargaare walitti qabamaan qindeessaa.	Add products, options and listed availability. Organize collections when useful.	Add products, options and listed availability. Organize collections when useful.
 Connect with buyers.	ከገዢዎች ጋር ይገናኙ።	Bittoota waliin wal qunnamaa.	Connect with buyers.	Connect with buyers.
 Get product enquiries in your AfricMade Inbox or through the contact channels you provide, then discuss the sale directly.	የምርት ጥያቄዎችን በAfricMade ገቢ መልዕክቶችዎ ወይም በሰጧቸው የእውቂያ መንገዶች ይቀበሉ፤ ስለ ሽያጩ በቀጥታ ይነጋገሩ።	Gaaffii oomishaa saanduqa ergaa AfricMade keessanitti yookaan karaa quunnamtii kennitan fudhadhaa; gurgurtaa irratti kallattiin mariʼadhaa.	Get product enquiries in your AfricMade Inbox or through the contact channels you provide, then discuss the sale directly.	Get product enquiries in your AfricMade Inbox or through the contact channels you provide, then discuss the sale directly.
-Example showroom	ምሳሌ የማሳያ ገጽ	Fuula agarsiisaa fakkeenyaa	Example showroom	Example showroom
-Example product	ምሳሌ ምርት	Oomisha fakkeenyaa	Example product	Example product
-Example showroom. This business and its products are fictional.	የምሳሌ ማሳያ ገጽ። ይህ ንግድና ምርቶቹ ምናባዊ ናቸው።	Fuula agarsiisaa fakkeenyaa. Daldalli kunii fi oomishaaleen isaa fakkeenyaaf qofa.	Example showroom. This business and its products are fictional.	Example showroom. This business and its products are fictional.
 No public business showrooms are listed yet.	ለጊዜው በሕዝብ የሚታይ የንግድ ማሳያ ገጽ የለም።	Ammaaf fuulli agarsiisaa daldalaa ummataaf baname hin jiru.	No public business showrooms are listed yet.	No public business showrooms are listed yet.
-Explore example showrooms in the Market	በገበያው ውስጥ ያሉ የምሳሌ ማሳያ ገጾችን ይመልከቱ	Gabaa keessatti fuula agarsiisaa fakkeenyaa ilaalaa	Explore example showrooms in the Market	Explore example showrooms in the Market
 Chat with a real person	ከእውነተኛ ሰው ጋር በውይይት ይገናኙ	Nama dhugaa waliin haasa’aa	Qof dhab ah kula sheekayso	ምስ እውነተኛ ሰብ ተዘራረቡ
 Talk to a live coordinator	ከማጓጓዣ አስተባባሪ ጋር ይወያዩ	Qindeessaa geejjibaa waliin mari’adhaa	Talk to a live coordinator	Talk to a live coordinator
 Need help moving goods?	ዕቃ ለማጓጓዝ እገዛ ይፈልጋሉ?	Meeshaa geejjibsiisuuf gargaarsa barbaadduu?	Ma u baahan tahay caawimo rarista alaabta?	ኣቑሑ ንምጉዕዓዝ ሓገዝ የድልየኩም ድዩ?
@@ -1890,8 +1884,6 @@ Add product photos, options, availability and any capacity details you choose to
 Hear from buyers.	ከገዢዎች ጥያቄ ይቀበሉ።	Gaaffii bitattootaa fudhadhaa.	Hear from buyers.	Hear from buyers.
 Receive questions in AfricMade Inbox or through your listed contact methods, then agree on an order directly.	ጥያቄዎችን በAfricMade ገቢ መልዕክቶች ወይም በዘረዘሯቸው የእውቂያ መንገዶች ይቀበሉ፤ ከዚያ ስለ ትዕዛዙ በቀጥታ ይስማሙ።	Gaaffii saanduqa ergaa AfricMade keessanitti yookaan karaa quunnamtii tarreessitan fudhadhaa; itti aansuun ajaja irratti kallattiin walii galaa.	Receive questions in AfricMade Inbox or through your listed contact methods, then agree on an order directly.	Receive questions in AfricMade Inbox or through your listed contact methods, then agree on an order directly.
 Find businesses near and far. Open their pages to see their stories and products.	ቅርብም ሆነ ሩቅ ያሉ ንግዶችን ያግኙ። ታሪካቸውንና ምርቶቻቸውን ለማየት ገጻቸውን ይክፈቱ።	Daldaloota dhihoo fi fagoo argadhaa. Seenaa fi oomisha isaanii ilaaluuf fuula isaanii banaa.	Find businesses near and far. Open their pages to see their stories and products.	Find businesses near and far. Open their pages to see their stories and products.
-Example page	ምሳሌ ገጽ	Fuula fakkeenyaa	Example page	Example page
-Example page. This business and its products are fictional.	ምሳሌ ገጽ። ይህ ንግድና ምርቶቹ ምናባዊ ናቸው።	Fuula fakkeenyaa. Daldalli kunii fi oomishaaleen isaa fakkeenyaaf qofa.	Example page. This business and its products are fictional.	Example page. This business and its products are fictional.
 Business category filters	የንግድ ምድብ ማጣሪያዎች	Calleessitoota gosoota daldalaa	Business category filters	Business category filters
 No businesses match that search.	ከፍለጋዎ ጋር የሚስማማ ንግድ የለም።	Daldalli barbaacha keessaniin walsimu hin jiru.	No businesses match that search.	No businesses match that search.
 No business pages are listed yet.	እስካሁን የተዘረዘሩ የንግድ ገጾች የሉም።	Fuulonni daldalaa ammatti tarreeffaman hin jiran.	No business pages are listed yet.	No business pages are listed yet.
@@ -1922,3 +1914,6 @@ Four businesses, two short sponsor mentions. Times are arranged automatically.	�
 Each business has 20 minutes. Smaller lineups finish earlier.	እያንዳንዱ ንግድ 20 ደቂቃ አለው። ንግዶች ሲያንሱ ፕሮግራሙ ቀድሞ ያበቃል።	Daldalli hundi daqiiqaa 20 qaba. Daldaltoonni yoo xiqqaatan sagantaan dursee xumurama.	Each business has 20 minutes. Smaller lineups finish earlier.	Each business has 20 minutes. Smaller lineups finish earlier.
 Choose no more than 4 businesses for Daily Featured.	ለዕለቱ ፕሮግራም ከ4 የማይበልጡ ንግዶችን ይምረጡ።	Filannoo guyyaatiif daldaloota afur caalan hin filatinaa.	Choose no more than 4 businesses for Daily Featured.	Choose no more than 4 businesses for Daily Featured.
 Powered by	አቅራቢ፦	Kan dhiyeesse:	Waxaa bixiya:	ብዝቐርብ፦
+Example business	ምሳሌ ንግድ	Daldala fakkeenyaa	Ganacsi tusaale ah	ናይ ኣብነት ንግዲ
+Next, add your business details.	ቀጥሎ የንግድዎን ዝርዝር መረጃ ያክሉ።	Itti aansuun, odeeffannoo daldala keessanii dabalaa.	Marka xigta, ku dar faahfaahinta ganacsigaaga.	ቀጺልኩም፣ ዝርዝር ሓበሬታ ንግድኹም ወስኹ።
+Add your business details before publishing.	ከማተምዎ በፊት የንግድዎን ዝርዝር መረጃ ያክሉ።	Osoo hin maxxansin dura odeeffannoo daldala keessanii dabalaa.	Ku dar faahfaahinta ganacsigaaga ka hor daabacaadda.	ቅድሚ ምሕታምኩም ዝርዝር ሓበሬታ ንግድኹም ወስኹ።

@@ -2,13 +2,45 @@
 id: FE-061
 title: Category-relevant starter and multi-provider demo videos
 status: in_progress
-related: [BE-049, BE-067, FE-057, FE-046, BE-039, FE-060, BE-048, FE-050, FE-053, DEP-039, DEP-042]
+related: [BE-049, BE-067, FE-057, FE-046, BE-039, FE-060, BE-048, FE-050, FE-053, DEP-039, DEP-042, ADR-0035]
 owners: [product, frontend, backend, operations]
 last_updated: 2026-11-14
 change_level: L3
 ---
 
 # FE-061 — Category-relevant video examples
+
+## S197 first-party contingency (local package; no hosted admission yet)
+
+When an external example cannot be proved playable, a reviewed fictional demo
+may use a **first-party** MP4 committed as an immutable static asset at
+`/videos/demo/<slug>.mp4`. This is limited to explicitly marked demo businesses;
+ordinary owners still enter only supported public provider links. Each asset
+requires a source/license ledger, verified rights for commercial website and
+mobile-app presentation, a content hash, size/duration/codec review, and a
+business/product-type visual verdict before a hosted correction. Never download
+or rehost a social-media clip merely because its embed is blocked.
+
+Use an explicit `demo:<slug>` reference, constructed local URL, no arbitrary
+HTML or external media URL. Show one `Example business` label on the full
+showroom in web and Expo, with no repeated video or product disclaimers. Preserve
+the existing poster until Play; use one bounded player and stop it when the
+visitor switches media, navigates away, or backgrounds the app. Loading failure
+retains photos and offers Try again. Netlify static asset delivery requires
+post-deploy verification; native Android playback is a separate device follow-up.
+
+GIVEN an admitted first-party demo ref WHEN a visitor plays its cover or product
+video THEN the browser and Expo preview use the same static MP4, the showroom
+has one `Example business` label, and no external provider is contacted. GIVEN a missing,
+unlicensed, malformed or unavailable asset THEN no hosted correction is admitted;
+an already published page retains its photos and shows bounded recovery.
+GIVEN a real merchant submits a first-party demo ref THEN the save is rejected.
+
+The local code and assets may be reviewed before any hosted correction. Rollout
+is blocked until the ledger and exact files are inspected, local desktop/phone
+web and Expo playback pass, deployed Netlify range delivery is verified, and
+the BE-049 protected correction plan passes. No existing demo
+video is changed by this implementation alone.
 
 ## S197 — full public-demo media review
 

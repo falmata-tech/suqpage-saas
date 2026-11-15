@@ -56,8 +56,9 @@ store screenshots and Play qualification remain separate unfinished work.
 
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 
-The owner requests a careful visual and playback review of all64 public demo
-showrooms and all256 current products, replacing missing, broken, poor-quality
+The owner requests a careful visual and playback review of all66 active demo
+showrooms and all264 current products (64/256 simulator-enrolled plus two
+legacy demos), replacing missing, broken, poor-quality
 or unrelated videos. Retain the liked farm/wheat footage in suitable contexts.
 A business's qualified story video may serve its related products. Include a
 relevant public TikTok example and verify actual inline web/native playback.
@@ -90,7 +91,7 @@ and scenario progress remain protected. National origin is not a quality test.
    web/Expo live-media run `43644041451` at `4a9fd72` passes decoded TikTok
    progress and unmount; all five final-head quality jobs in `43644041447`
    pass. The portrait fix is merged as main `ff94208`, with a healthy live API
-   reporting that source. At that point no production video replacement had been applied.
+   reporting that source. Later hosted replacements are recorded in step 4.
    Portrait web/Expo correction (FE-057) is ordered within this step:
    (a) [x] inspect PR68's source-bound partial verdict and the current gallery,
    dialog and Expo stage rules; (b) [x] specify and implement a bounded portrait
@@ -126,35 +127,50 @@ and scenario progress remain protected. National origin is not a quality test.
    remains open. The orange mango/papaya butter, packaging and large overlay
    still disqualify this clip as Sena's demo media. Touch drags inside the iframe
    did not move the gallery in local Chrome; provider/device gesture behavior
-   remains a separate UX qualification. No hosted video was changed.
+   remains a separate UX qualification.
 4. [ ] Retain protected before-images and the exact admitted media manifest;
    deliver qualified source normally, apply bounded corrections while paused,
-   verify all64/256 public effective media and preserved data, then resume only
+   verify all66/264 public effective media and preserved data, then resume only
    the unchanged reviewed cohort. Refresh the monitor's approved media baseline
-   to the retained after-image and verify scheduled continuation.
-   Partial hosted correction on 2026-11-15: business21
-   `demo-liya-soap-kitchen` now publishes the attributed Bramble Berry
-   soap-making example `tiktok:7703762862484851981` as its story; product81
-   Oat Everyday Bar now uses Ashley Marie Soap's attributed oat-making example
-   `tiktok:7692083064184245517`. The normal BE-049 correction request
-   `s197_liya21_story_oat_20261115_a` was accepted with one
-   `demo.media_corrected` audit (id6854). The fresh paused readback found
-   owner draft and publication revision23, business version24, active cycle3
-   stage0, and the exact 81–84 gallery. After correction, draft/publication
-   revision24 agree on the new story; business version25 and product81 gallery
-   agree on the new product ref. Product82–84 galleries, all other63 enrolled
-   demo businesses, their252 products and enrollments matched the paused
-   before-state. The simulator was resumed; its enabled slot advanced from
-   29911705 to29911712 without a Liya drift pause. The accepted private request
-   retains exact before/after media for reversal, and the ignored discovery
-   before-image and L4 plan remain under `.local/s197-liya-story/`.
-   The final paused snapshot was checked in the operation session but could
-   not be exported as a file when the managed shell became unavailable.
-   Product81 decoded in disposable desktop/phone web and Expo web; phone Replay
-   passed, while desktop/Expo provider Replay clicks were unstable in two
-   bounded CI attempts. Installed Android and a fresh post-correction public
-   browser check remain open. This correction does not close the 64/256 audit
-   or the remaining removed/generic video refs.
+   to the retained after-image and verify scheduled continuation. Hosted
+   progress on 2026-11-15: 51/66 active demos have a corrected published cover
+   and all four product videos (204/264 product slots). Forty-nine enrolled
+   showrooms used accepted BE-049 requests; legacy demos 50 and 62 used guarded
+   direct corrections. Protected before/after full-row checks passed for these
+   corrections. The first four completed showrooms (8, 21, 48, 62) also have
+   PR80/84/93/94 decoded web/Expo playback and public page/mobile API readbacks.
+   Local Expo preview mirrors the 49 enrolled corrections; its latest 46 shop
+   APIs and Expo routes returned HTTP 200 with exact cover/product refs. This
+   does not qualify every hosted player or installed Android device.
+
+   Earlier Liya evidence retained from the hosted correction: business 21's
+   Bramble Berry story `tiktok:7703762862484851981` and product 81's Ashley
+   Marie Soap oat example `tiktok:7692083064184245517` were admitted by
+   BE-049 operation `s197_liya21_story_oat_20261115_a` (audit 6854).
+   Draft/publication revision 23→24 and business version 24→25 advanced;
+   the other 63 enrolled demos and 252 products were unchanged, and simulator
+   slot 29911705→29911712 resumed without drift. Its protected before-image
+   is under `.local/s197-liya-story/`. Product 81 decoded on desktop, phone
+   and Expo web; phone Replay passed, while desktop/Expo Replay and installed
+   Android remained open in that run.
+
+   Fifteen showrooms (60 products) remain: 5, 7, 27, 28, 31, 32, 33 and 61
+   have fitting farm, grain or pasta footage awaiting playback qualification;
+   6 needs a beeswax-candle clip and 29 an egg clip alongside their fitting
+   existing stories; 15, 22, 30, 47 and 60 need playable clips for electric
+   stoves, pressed oils, spices, lighting and sewn hygiene goods. Keep this
+   step open until their corrections and full public playback checks pass.
+
+   First-party contingency (ADR-0035): [x] review static demo-only MP4 parser,
+   web/Expo player and single `Example business` label; [x] obtain and record licensed or
+   original assets with SHA-256, source rights and business/product fit;
+   [x] verify local phone web/Expo playback; [ ] verify deployed Netlify
+   size/range delivery; [ ] apply only exact BE-049 demo corrections
+   with protected before/after images. All 15 packaged files passed SHA/source
+   checks; two representative businesses (15, 60) decoded in local phone web
+   and Expo web cover and product players with HTTP 206 range reads. Protected
+   local fixtures were restored. This
+   contingency authorizes no asset publication or hosted media write by itself.
 
 S196's full64/256 exact-version readback and documentation are recorded below.
 S191's signed phone APK remains a separate active dependency; a video audit or

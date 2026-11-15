@@ -25,7 +25,7 @@ export default async function RequestPage() {
           <p>{t("Start with a name, category, and contact number.")}</p>
         </div>
         <div className="platform-form-panel">
-          <div className="platform-form-heading"><span>{t("Business details")}</span><h2>{t("Introduce your business")}</h2><p>{t("Next, make the example page your own.")}</p></div>
+          <div className="platform-form-heading"><span>{t("Business details")}</span><h2>{t("Introduce your business")}</h2><p>{t("Next, add your business details.")}</p></div>
           <SignupForm email={identity.email} initialName={identity.displayName} />
           <div className="platform-form-footer"><span>{t("Using the wrong account?")}</span><form action={logoutAction}><button className="platform-link-button" type="submit">{t("Sign out")}</button></form></div>
         </div>

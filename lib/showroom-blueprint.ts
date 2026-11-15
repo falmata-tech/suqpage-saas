@@ -113,7 +113,7 @@ export function parseBlueprintMediaPlan(
     }
     const classification = value.classification;
     if (!["factual", "illustrative"].includes(String(classification))) {
-      throw new ShowroomBlueprintError("Choose factual or illustrative media.", `${path}.classification`);
+      throw new ShowroomBlueprintError("Choose a media type.", `${path}.classification`);
     }
     if (typeof value.required !== "boolean") {
       throw new ShowroomBlueprintError("Media required state must be true or false.", `${path}.required`);
@@ -222,7 +222,7 @@ export function assignBlueprintSlot(
           slotKey: slot.slotKey,
           assetKeys: [assetRef],
           altText: slot.altText || slot.label,
-          caption: slot.classification === "illustrative" ? "Illustrative image" : "",
+          caption: "",
         });
         return { ...block, media } as typeof block;
       }),

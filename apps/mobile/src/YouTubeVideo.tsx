@@ -12,6 +12,7 @@ import { useApp } from "./runtime";
 import { Photo, Icon, Button, Copy, colors } from "./ui";
 import YouTubeFrame from "./YouTubeFrame";
 import SocialVideoFrame from "./SocialVideoFrame";
+import DemoVideoFrame from "./DemoVideoFrame";
 import { productVideo,normalizeProductVideoUrl } from "../../../lib/video/product-video";
 import LoadingBar from "./LoadingBar";
 import { youtubeId, type PlayerEvent } from "./youtube-player";
@@ -34,10 +35,11 @@ export default function YouTubeVideo({
 }) {
   const { t } = useApp(),
     parsed = (()=>{try{return allowSocial ? video.includes(":")&&!video.startsWith("https:") ? productVideo(video) : normalizeProductVideoUrl(video) : null;}catch{return null;}})(),
+    demo = parsed?.provider === "demo",
     tikTok = parsed?.provider === "tiktok" || parsed?.provider === "instagram",
     social = parsed && parsed.provider !== "youtube",
     id = social ? parsed.providerId : youtubeId(video),
-    Frame = social ? SocialVideoFrame : YouTubeFrame;
+    Frame = demo ? DemoVideoFrame : social ? SocialVideoFrame : YouTubeFrame;
   const [focused, setFocused] = useState(true);
   const [playing, setPlaying] = useState(false),
     [state, setState] = useState<"loading" | "ready" | "error">("loading"),
@@ -114,13 +116,13 @@ export default function YouTubeVideo({
       </View>
     );
   return (
-    <Pressable
+    <View><Pressable
       accessibilityRole="button"
       accessibilityLabel={t("Watch video")}
       disabled={!active}
       onPress={start}
     >
-      {social && !poster ? <View style={{height,backgroundColor:colors.background,alignItems:"center",justifyContent:"center"}}><Copy>{parsed.provider === 'instagram' ? 'Instagram' : parsed.provider === 'facebook' ? 'Facebook' : 'TikTok'}</Copy></View> : <Photo
+      {social && !poster ? <View style={{height,backgroundColor:colors.background,alignItems:"center",justifyContent:"center"}}>{demo ? null : <Copy>{parsed.provider === 'instagram' ? 'Instagram' : parsed.provider === 'facebook' ? 'Facebook' : 'TikTok'}</Copy>}</View> : <Photo
         privateImage={privateImage}
         refPath={poster || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
         height={height}
@@ -131,7 +133,7 @@ export default function YouTubeVideo({
           <Icon name="play" color="white" size={28} />
         </View>
       </View>
-    </Pressable>
+    </Pressable></View>
   );
 }
 const p = StyleSheet.create({

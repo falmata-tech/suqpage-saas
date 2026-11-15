@@ -4,7 +4,7 @@ title: Self-service public video embeds across four providers
 status: accepted
 date: 2026-10-07
 deciders: [Suqpage]
-related: [FE-060, BE-048, FE-057, BE-046, DEP-039, DEP-042, ADR-0024]
+related: [FE-060, BE-048, FE-057, BE-046, DEP-039, DEP-042, ADR-0024, ADR-0035]
 ---
 
 # ADR-0025 — Self-service public video embeds across four providers
