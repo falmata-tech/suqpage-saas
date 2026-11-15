@@ -16,8 +16,8 @@ import {productVideoWatchUrl} from '../lib/video/product-video';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 
 const cases=[
-  {key:'nova-harness',videoRef:'tiktok:7660000446525836566',coverRef:'tiktok:7352781700881026347',handle:'nova-assembly',productName:'Custom Cable Harness Kit'},
-  {key:'abay-panel',videoRef:'tiktok:7522117073733012750',coverRef:'tiktok:7706559803509755144',handle:'demo-abay-electrical-assembly',productName:'Motor Control Panels'},
+  {key:'nova-harness',videoRef:'tiktok:7660000446525836566',coverRef:'tiktok:7352781700881026347',handle:'nova-assembly',productName:'Custom Cable Harness Kit',offeringKind:'manufacturing_capability'},
+  {key:'abay-panel',videoRef:'tiktok:7522117073733012750',coverRef:'tiktok:7706559803509755144',handle:'demo-abay-electrical-assembly',productName:'Motor Control Panels',offeringKind:'made_to_order'},
 ] as const;
 
 async function main(){
@@ -30,14 +30,14 @@ async function main(){
   target.searchParams.set('options',`-csearch_path=${nativeQaSchema(original.schema)}`);
   Object.assign(process.env,{SUQPAGE_DATABASE_DRIVER:'postgres',SUQPAGE_POSTGRES_URL:target.href,SUQPAGE_AUTH_DRIVER:'local',SUQPAGE_MEDIA_DRIVER:'filesystem'});
   const records=[];
-  for(const {key,videoRef,coverRef,handle,productName} of cases){
+  for(const {key,videoRef,coverRef,handle,productName,offeringKind} of cases){
   const record=await runtimeTransaction(async()=>{
     const catalog=await runtimeCatalogByHandle(handle);
     assert.ok(catalog&&catalog.business.is_demo===1&&catalog.business.status==='active');
     const products=catalog.products.filter(product=>product.is_published);
     assert.equal(products.length,4);
     const product=products.find(item=>item.name===productName);
-    assert.ok(product&&product.offering_kind==='standard_product');
+    assert.ok(product&&product.offering_kind===offeringKind);
     const owner=await runtimeGet<{id:number}>(`SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id
       WHERE u.business_id=? AND p.access_role='client' ORDER BY u.id LIMIT 1`,[catalog.business.id]);
     const actor=owner&&await runtimeUserById(owner.id);
