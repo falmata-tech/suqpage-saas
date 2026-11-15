@@ -38,21 +38,21 @@ export async function initializeBusinessStarter(runner: PostgresTransactionRunne
     await runner.query(`UPDATE businesses SET tagline=?,description=?,logo_path=?,favicon_path=?,hero_title=?,hero_subtitle=?,hero_image_path=?,
       process_video_ref=?,public_email=?,public_phone=?,whatsapp=?,telegram=?,tiktok=?,site_title=?,site_description=?,
       contact_email=CASE WHEN contact_email='' THEN ? ELSE contact_email END,live_platform='youtube',live_url=? WHERE id=?`, [
-      'Sample collection and made-to-order products', sample.page.about, `${STARTER_IMAGE_ROOT}/logo.png`, `${STARTER_IMAGE_ROOT}/logo.png`,
+      'Collection and made-to-order products', sample.page.about, `${STARTER_IMAGE_ROOT}/logo.png`, `${STARTER_IMAGE_ROOT}/logo.png`,
       business.name, 'Explore our work and tell us what you need.', sample.page.heroImage, sample.videoRef,
       starterContacts.email!, starterContacts.phone!, starterContacts.whatsapp!, starterContacts.telegram!, starterContacts.tiktok!,
-      business.name, 'Sample business page. Browse our collection and made-to-order products, then ask us about the details.',
+      business.name, 'Browse our collection and made-to-order products, then ask us about the details.',
       input.notificationEmail, sample.page.videoUrl, input.businessId,
     ]);
     const collection = await runner.query<{ id: number }>(`INSERT INTO collections(business_id,name,slug,description)
-      VALUES(?,'Sample collection','sample-collection','Example products, including items made to order. Replace these items with your own.') RETURNING id`, [input.businessId]);
+      VALUES(?,'Collection','sample-collection','Products and made-to-order work.') RETURNING id`, [input.businessId]);
     const collectionId = collection.rows[0].id;
     const category = await runner.query<{ id: number }>(`INSERT INTO categories(business_id,collection_id,name,slug)
-      VALUES(?,?,'Sample offerings','sample-offerings') RETURNING id`, [input.businessId, collectionId]);
+      VALUES(?,?,'Products','sample-offerings') RETURNING id`, [input.businessId, collectionId]);
     for (const [index, offering] of sample.offerings.entries()) {
       const product = await runner.query<{ id: number }>(`INSERT INTO products(business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,video_ref,
         price_minor,quantity_unit,highlights_json,offering_kind,quantity_mode,availability,is_published,sort_order)
-        VALUES(?,?,?,?,?,'Editable example',?,?,?,?,?,?,?,'optional','available',1,?) RETURNING id`, [input.businessId, collectionId, category.rows[0].id,
+        VALUES(?,?,?,?,?,'',?,?,?,?,?,?,?,'optional','available',1,?) RETURNING id`, [input.businessId, collectionId, category.rows[0].id,
         offering.name, offering.slug, offering.description, offering.image, sample.videoRef, offering.priceMinor, offering.unit,
         JSON.stringify(offering.highlights), offering.kind, index]);
       await runner.query('UPDATE products SET media_json=? WHERE id=?', [JSON.stringify([

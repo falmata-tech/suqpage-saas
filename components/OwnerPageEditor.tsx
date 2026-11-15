@@ -17,6 +17,7 @@ import type { PagePublication } from "@/lib/owner-page-publication";
 import { legacyPublicContacts, publicContactFields } from "@/lib/business-profile-contacts";
 import styles from "./OwnerPageEditor.module.css";
 import { STARTER_NOTICE } from '@/lib/business-starter';
+import {isStarterAbout} from '@/lib/category-starter';
 import {OWNER_PAGE_TASKS,ownerPageTask,ownerPageReturn,type OwnerPageTask} from '@/lib/owner-page-tasks';
 import {browserJson} from '@/lib/browser-json';
 
@@ -133,7 +134,7 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
 
   return <section className={styles.editor} aria-label={t("Business profile editor")} aria-busy={!ready || busy || uploading}>
     {(busy||uploading)&&<LoadingBar/>}
-    {catalog.business.description.startsWith('Sample page:') && catalog.business.status === 'draft' ? <p className="notice">{t(STARTER_NOTICE)}</p> : null}
+    {isStarterAbout(catalog.business.description) && catalog.business.status === 'draft' ? <p className="notice">{t(STARTER_NOTICE)}</p> : null}
     <header className={styles.toolbar}>
       <div><h1>{t(mode==='preview'&&task!=='color'?'Your page':OWNER_PAGE_TASKS.find(item=>item.key===task)!.label)}</h1><p role="status">{unsaved ? t("Unsaved changes") : draft ? activePage && matchesPublication ? t("Changes saved to your live page") : t("Private draft saved") : t("Private preview")}</p></div>
       <div className={styles.modes} aria-label={t("Editor view")}>
