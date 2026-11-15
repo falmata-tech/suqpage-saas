@@ -13,7 +13,7 @@ import {configuredReviewer} from './reviewer-access-runtime';
 import {demoScenarioCommandKey,demoScenarioStage,nextDemoScenarioStage,parseDemoScenarioParameters,type DemoScenarioParameters,type DemoScenarioKey} from './demo-scenarios';
 import {parseDemoMediaCorrection,parseUnenrolledDemoMediaCorrection,parseQueuedDemoMediaCorrection,type UnenrolledDemoMediaCorrection} from './demo-media-correction';
 import {parseDemoProcessMediaCorrection,type DemoProcessMediaCorrection} from './demo-process-media-correction';
-import {parseDemoCategoryCorrection} from './demo-category-correction';
+import {AGRICULTURE_CORRECTION_TARGETS,parseDemoCategoryCorrection} from './demo-category-correction';
 import {parseDemoCopyCorrection,type DemoCopyCorrection} from './demo-copy-correction-request';
 import {planEnrolledDemoCopy,planLegacyDemoCopy,type PublicDemoCopy} from './demo-copy-correction';
 import {productMedia} from './product-media';
@@ -347,6 +347,8 @@ export async function correctDemoCategoryBatch(raw:unknown){
   const checked: Array<{enrollment:Enrollment;actor:SessionUser;catalogProductsJson:string;parametersJson:string}>=[];
   const categories=['agriculture-growers','food-farming'];
   for(const member of input.members){
+   const target=AGRICULTURE_CORRECTION_TARGETS.find(item=>item.businessId===member.businessId);
+   if(!target||target.handle!==member.handle)throw new DemoDrift('eligibility_changed');
    const e=await runtimeGet<Enrollment>('SELECT * FROM demo_simulator_enrollments WHERE business_id=? FOR UPDATE',[member.businessId]);
    if(!e||e.status!=='active'||e.reason||e.handle!==member.handle||e.owner_user_id!==member.ownerUserId||
       e.provider_user_id!==member.providerUserId||e.product_id!==member.productIds[0]||
@@ -357,7 +359,7 @@ export async function correctDemoCategoryBatch(raw:unknown){
       state.draft.version!==member.expectedDraftVersion||state.publication.revision!==member.expectedPageRevision||
       state.draft.version!==state.publication.draftVersion||digest(state.draft.content)!==digest(state.publication.content))throw new DemoDrift('content_changed');
    if(digest(state.categories)!==digest(['food-farming'])||!state.location||!state.discovery||
-      state.location.category_key!=='agriculture-growers'||state.location.version!==state.location.reviewed_version||
+      state.location.category_key!==target.reviewedPrimary||state.location.version!==state.location.reviewed_version||
       state.location.version!==member.proposalVersion||Number(state.location.updated_at)!==member.proposalUpdatedAt||
       Number(state.location.updated_at)!==Number(state.discovery.updated_at)||
       Number(state.discovery.approved_at)<=0||state.discovery.is_excluded!==0||
@@ -382,7 +384,7 @@ export async function correctDemoCategoryBatch(raw:unknown){
    if(updated.changes!==1)throw new DemoDrift('content_changed');
   }
   const finalMemberships=await runtimeGet<{total:number}>("SELECT COUNT(*) total FROM business_industries WHERE industry_key='agriculture-growers'");
-  if(Number(finalMemberships?.total)!==6)throw new DemoDrift('content_changed');
+  if(Number(finalMemberships?.total)!==AGRICULTURE_CORRECTION_TARGETS.length)throw new DemoDrift('content_changed');
   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.category_corrected',?,'')",
    [checked[0].actor.id,checked[0].enrollment.business_id,JSON.stringify({automation:'demo-category-maintenance',operationKey:input.operationKey,payloadHash,
     businessIds:input.members.map(member=>member.businessId),categories})]);

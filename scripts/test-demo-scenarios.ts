@@ -3,22 +3,23 @@ import './test-demo-media-correction';
 import assert from 'node:assert/strict';
 import {demoScenario,demoScenarioStage,parseDemoScenarioParameters,nextDemoScenarioStage,demoScenarioCommandKey} from '../lib/demo-scenarios';
 import {demoCatalogPhaseOffsets,demoCatalogStage,parseDemoCatalogInputs,parseStoredDemoCatalog,type DemoCatalogProduct,type DemoCatalogProductInput} from '../lib/demo-catalog-scenarios';
-import {parseDemoCategoryCorrection} from '../lib/demo-category-correction';
+import {AGRICULTURE_CORRECTION_TARGETS,parseDemoCategoryCorrection} from '../lib/demo-category-correction';
 const base={productName:'Harvested greens',productKind:'standard_product',businessCategories:['agriculture-growers'],unit:'kg',minimumOrder:10,normalCapacity:1000,limitedCapacity:200,basePriceMinor:10000};
 
-test('BE-067 reviewed category batch binds six distinct exact demo identities and four products each',()=>{
- const members=Array.from({length:6},(_,index)=>({businessId:index+1,handle:`synthetic-farm-${index+1}`,ownerUserId:index+11,
-  providerUserId:`00000000-0000-4000-8000-${String(index+1).padStart(12,'0')}`,productIds:[1,2,3,4].map(id=>id+index*4),
+test('BE-067 reviewed category batch binds all eight exact public identities and four products each',()=>{
+ const members=AGRICULTURE_CORRECTION_TARGETS.map((target,index)=>({businessId:target.businessId,handle:target.handle,ownerUserId:index+11,
+  providerUserId:`00000000-0000-4000-8000-${String(index+1).padStart(12,'0')}`,productIds:[1,2,3,4].map(id=>id+(target.businessId-1)*4),
   expectedHash:'a'.repeat(64),expectedContentVersion:2,expectedDraftVersion:2,expectedPageRevision:2,
   stage:1,cycle:0,dueAt:1800000000000,proposalVersion:1,proposalUpdatedAt:1}));
  const input={kind:'category_correction_batch',operationKey:'synthetic_review_0001',members};
  assert.deepEqual(parseDemoCategoryCorrection(input),input);
  for(const candidate of [
-  {...input,members:members.slice(0,5)},
-  {...input,members:[...members.slice(0,5),members[4]]},
-  {...input,members:[...members.slice(0,5),{...members[5],productIds:[21,22,22,24]}]},
-  {...input,members:[...members.slice(0,5),{...members[5],proposalVersion:2}]},
-  {...input,members:[...members.slice(0,5),{...members[5],expectedHash:'not-a-hash'}]},
+  {...input,members:members.slice(0,7)},
+  {...input,members:[...members.slice(0,7),members[6]]},
+  {...input,members:[...members.slice(0,7),{...members[7],productIds:[129,130,130,132]}]},
+  {...input,members:[...members.slice(0,7),{...members[7],proposalVersion:2}]},
+  {...input,members:[...members.slice(0,7),{...members[7],expectedHash:'not-a-hash'}]},
+  {...input,members:[...members.slice(0,7),{...members[7],handle:'another-farm'}]},
   {...input,enabled:true},
  ])assert.throws(()=>parseDemoCategoryCorrection(candidate));
 });
