@@ -75,6 +75,85 @@
       "audio": false
     },
     {
+      "businessId": 21,
+      "slug": "business-21",
+      "sha256": "4bc121e0076a67d1864f1ca716f3b7393882b2a14f913ac65e390a00fdad90d4",
+      "bytes": 242896,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-liya-soap-kitchen/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-liya-soap-kitchen/hero.webp",
+        "public/uploads/seed/portfolio/demo-liya-soap-kitchen/product-1.webp",
+        "public/uploads/seed/portfolio/demo-liya-soap-kitchen/product-2.webp",
+        "public/uploads/seed/portfolio/demo-liya-soap-kitchen/product-3.webp",
+        "public/uploads/seed/portfolio/demo-liya-soap-kitchen/product-4.webp"
+      ],
+      "visualQA": "pass: 1, 5 and 8 second frames inspected; exact Liya soap/product artwork, no captions or claims; Chromium phone 390 decoded and advanced beyond 3 seconds",
+      "audio": false,
+      "sourceTreatment": "Portrait motion from licensed fictional Liya artwork; blurred frame background and centered subject, no manufacturing footage."
+    },
+    {
+      "businessId": 21,
+      "slug": "business-21-oat",
+      "sha256": "ee4cdf10223826f00c151c675a0b7faa832199a5520e1cd4a10dcb523ba57cae",
+      "bytes": 54702,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-liya-soap-kitchen/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-liya-soap-kitchen/product-1.webp"
+      ],
+      "visualQA": "pass: 1, 5 and 8 second frames inspected; exact Liya soap/product artwork, no captions or claims; Chromium phone 390 decoded and advanced beyond 3 seconds",
+      "audio": false,
+      "sourceTreatment": "Portrait motion from licensed fictional Liya artwork; blurred frame background and centered subject, no manufacturing footage."
+    },
+    {
+      "businessId": 21,
+      "slug": "business-21-citrus",
+      "sha256": "b4da7cb939868695b5bd7d51e47ccab69d34f56c05e165320521e2e6b8497121",
+      "bytes": 44274,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-liya-soap-kitchen/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-liya-soap-kitchen/product-2.webp"
+      ],
+      "visualQA": "pass: 1, 5 and 8 second frames inspected; exact Liya soap/product artwork, no captions or claims; Chromium phone 390 decoded and advanced beyond 3 seconds",
+      "audio": false,
+      "sourceTreatment": "Portrait motion from licensed fictional Liya artwork; blurred frame background and centered subject, no manufacturing footage."
+    },
+    {
+      "businessId": 21,
+      "slug": "business-21-coffee",
+      "sha256": "89d3f1a8f601fe4edb6328557c90d2ad5fcf8a776110d6e7a76b9691eaf8562a",
+      "bytes": 54303,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-liya-soap-kitchen/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-liya-soap-kitchen/product-3.webp"
+      ],
+      "visualQA": "pass: 1, 5 and 8 second frames inspected; exact Liya soap/product artwork, no captions or claims; Chromium phone 390 decoded and advanced beyond 3 seconds",
+      "audio": false,
+      "sourceTreatment": "Portrait motion from licensed fictional Liya artwork; blurred frame background and centered subject, no manufacturing footage."
+    },
+    {
+      "businessId": 21,
+      "slug": "business-21-guest",
+      "sha256": "3f49c1073dbed3d18cccebf62c4717eb655b0953bc0f18d6223568cbc704349c",
+      "bytes": 41689,
+      "durationSeconds": 10,
+      "codec": "h264",
+      "sourceBrief": "showroom-projects/demo-liya-soap-kitchen/BRIEF.md",
+      "sourceImages": [
+        "public/uploads/seed/portfolio/demo-liya-soap-kitchen/product-4.webp"
+      ],
+      "visualQA": "pass: 1, 5 and 8 second frames inspected; exact Liya soap/product artwork, no captions or claims; Chromium phone 390 decoded and advanced beyond 3 seconds",
+      "audio": false,
+      "sourceTreatment": "Portrait motion from licensed fictional Liya artwork; blurred frame background and centered subject, no manufacturing footage."
+    },
+    {
       "businessId": 22,
       "slug": "business-22",
       "sha256": "d102360c64cf609f64bfe8f44993c09ddd37bdb46ac9ccc7655352be7dff5a16",
