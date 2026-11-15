@@ -45,6 +45,8 @@ async function main(){
   await enrollDemoScenario({businessId,handle,ownerUserId,providerUserId,productId:catalogProducts[0].productId,
    scenarioKey:'wholesale-replenishment',parameters:catalogProducts[0].parameters,
    expectedContentVersion:1,expectedDraftVersion:1,expectedPageRevision:1,catalogProducts},now);
+  await db.prepare("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'legacy.note','old plain text','')")
+   .run(ownerUserId,businessId);
   const state=async()=>({
    business:await db.prepare('SELECT * FROM businesses WHERE id=?').get(businessId),
    products:await db.prepare('SELECT * FROM products WHERE business_id=? ORDER BY id').all(businessId),
