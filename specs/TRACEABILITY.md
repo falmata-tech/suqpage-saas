@@ -44,6 +44,37 @@ retained private starter publication blocking; localization/type checks and
 affected browser journeys qualify the copy. Source publication and any
 hosted legacy starter correction remain separate steps.
 
+## S200 one public demo marker — guarded hosted correction in progress
+
+[FE-070] owns the single “Example business” marker and direct storefront copy;
+[BE-067] owns the recurring simulator templates. A read-only crawl of all 66
+public demo showrooms on 2026-11-15 found exactly one badge per page, 45 pages
+with stale “fictional” story text and 56 with simulator-written “example”
+availability wording. `lib/demo-scenarios.ts` and
+`scripts/test-demo-scenarios.ts` remove those repeated words from future stage
+text while preserving all stage and selling facts. Current hosted text needs a
+separate selected-field backup, guarded ordinary correction, and readback after
+video maintenance; the template source patch alone does not clean existing pages.
+The deployed S200 operator holds an exact 64-ID request parser, version-one
+old/new stage map, application-side page/product writes, current baseline/hash
+acknowledgment and an inverse using only selected public text retained inside
+the audit. Synthetic PostgreSQL tests cover enrolled and ownerless paths,
+replay, late rollback, queue rejection and next-stage continuity. Before the
+background repair, twelve production corrections were accepted/read back and
+the fourth four-business batch remained pending because the former 23-second
+scheduled transaction rolled back over the hosted connection. The finite
+DEP-054 repair used a signed scheduled trigger and Netlify background function,
+a 180-second atomic transaction, at most four copy requests, and a database
+slot receipt.
+`scripts/test-demo-worker-boundary.ts` proves signed admission, the exact
+window, unsigned rejection before database access, and the fixed site URL.
+`scripts/test-demo-copy-postgres.ts` proves failed-slot rollback, repeat and
+out-of-order replay protection. Source tests do not establish deployment or
+the remaining hosted corrections. The separate restore source removes the
+temporary endpoint/helper and minute trigger after authoritative 64/64
+readback, then returns to the three daytime moments. No sensitive private
+projection export is permitted by the automatic approval review.
+
 ## S197 demo video quality — review and qualification in progress
 
 Fifteen first-party MP4 examples are already packaged, deployed and used by

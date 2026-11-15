@@ -88,6 +88,42 @@ starter publication safety, and current web/Expo owner forms.
    or page errors. The private publish action stayed disabled and the public
    showroom had one marker. Receipt: `.local/label-review/receipt.json`.
    Installed Google Chrome and the Expo journey remain unverified here.
+### S200 — one clear demo marker and direct showroom copy (FE-070 / BE-067)
+
+The owner requests one “Example business” badge on each fictional showroom and
+removal of repeated fixture disclaimers from business/product copy. The public
+66-showroom read-only audit found one badge on every page, stale “fictional”
+story text on 45 pages and simulator-written “example” status text on 56 pages.
+Legitimate product samples and supply facts remain. Keep private owner-authored
+drafts and real tenants outside the automatic correction.
+
+1. [x] Inventory all 66 public demo pages and identify the recurring source and
+   published-data fields. The 2026-11-15 public HTML audit covered 66/66 HTTP
+   200 pages with one badge each; its local snapshots are ignored.
+2. [ ] CURRENT: change version-one simulator copy templates without changing
+   timeline/facts; update FE-070/BE-067, focused tests and source-bound visual
+   checks. Review and publish a separate protected source PR after media rollout
+   source safety is clear.
+3. [ ] After video maintenance and normal-schedule restoration, source-qualify
+   the S200 operator, bind the 64 reviewed current targets inside the database,
+   and protect only selected public text and hashes. The read-only aggregate
+   finds 50 business summaries, 49 published scenario introductions/About
+   prefixes, 162 product descriptions and 57 lead-time fields with the old
+   wording; IDs 10 and 41 are already clean. The operator must preserve real
+   merchants, unrelated private drafts, contacts, media, scenario progress and
+   immutable history. It may update only the current published demo draft mirror
+   together with the new publication and acknowledged baseline. A four-row
+   private projection export was rejected by automatic approval review; do
+   not retry it. Verify every public page after publication and ensure the next
+   simulator tick does not reintroduce the removed words.
+4. [ ] Use a finite one-minute Netlify copy-only worker window (22:30–01:30
+   UTC, at most 180 invocations) for batches of four, stopping at the exact
+   cutoff even if delivery stalls. Route the short scheduled trigger through
+   the signed background worker with a bounded transaction and replay receipt.
+   Remove the signed background endpoint/helper and restore the normal
+   three-times-daily schedule in a separate protected source change after
+   64/64 guarded corrections and zero pending requests; then resume stages
+   under exact control state.
 
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 

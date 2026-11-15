@@ -28,6 +28,32 @@ the original product description, so listing cards visibly change every tick.
 Enrollment reserves space within the ordinary text limits; no original story or
 description is truncated. No independent random fields, fabricated customer transactions,
 stock counts, certifications, transport activity or external media/message calls.
+Stage copy states the current product, capacity and timing directly. The page's
+single “Example business” badge identifies the fictional tenant, so simulator
+updates and lead-time summaries must not add “example”, “fictional” or similar
+disclaimers. Changing the wording leaves stage keys, durations, eligibility,
+availability, quantities and prices intact; prior published versions remain in
+immutable history. A finite guarded correction of already published copy is
+separate from deploying the recurring template fix.
+The one-time S200 copy operator accepts only the reviewed 64 public demo IDs
+that still have stale wording (the two already clean pages are excluded).
+It requires an explicit operator pause, exact business handle and current
+content/draft/publication versions; enrolled businesses also require their
+acknowledged state hash and stage/cycle/due time. An exact version-one
+old-to-new stage map and the business-name story pattern permit no free-form
+replacement. For enrolled pages, the operator updates only the already
+published simulator-managed draft mirror, appends a page publication, publishes
+changed product descriptions/lead times through ordinary upkeep, updates the
+public business summary and enrollment baseline, then acknowledges the new
+state hash without changing progress. The two ownerless portfolio demos use
+the existing exact admin authority path and do not gain enrollments. Current
+contacts, media, categories, selling facts, real tenants, private unpublished
+work and immutable prior publications remain unchanged.
+Each business is atomic, idempotent and audited with selected public before
+text for an exact guarded inverse. Any drift or late failure rolls back its
+whole transaction; the worker records a sanitized rejection and stops that
+business. The request is assembled inside the database while paused, so
+private simulator bindings and page/contact rows are not exported.
 
 ## Identity and authority
 
@@ -165,8 +191,8 @@ and enforces explicit per-day mutation and database-size budgets. Budget pressur
 pauses demo work; it never deletes immutable history or blocks real users.
 
 Operator enrollment requests are private database records, never an HTTP/admin
-endpoint. The disabled worker admits at most eight explicit requests per tick,
-starting no new admission after its12-second work budget, using
+endpoint. The disabled ordinary worker admits at most eight explicit requests
+per tick, starting no new admission after its 12-second work budget, using
 the ordinary enrollment checks, reviewed content/draft/publication versions and
 exact demo owner/product bindings. It records accepted/rejected outcomes and never
 enables itself. When explicitly requested, an empty product unit is initialized
@@ -212,7 +238,7 @@ partial preparation rolls back on refusal, and simulation stays disabled.
 
 | Acceptance | Evidence |
 |---|---|
-| Coherent full timelines and predefined values | `scripts/test-demo-scenarios.ts` |
+| Coherent full timelines, predefined values and direct visitor copy | `scripts/test-demo-scenarios.ts` |
 | Mixed tenants/new signup/drift/replay/concurrency/rollback | `scripts/test-demo-simulator-postgres.ts` |
 | Exact reviewed category batch request shape | `scripts/test-demo-scenarios.ts` synthetic parser case |
 | Eight-member atomic category correction, distinct mill/grower review guards, late failure, drift, replay and later stage | Private disposable PostgreSQL fixture retained outside public source; publication qualification pending |

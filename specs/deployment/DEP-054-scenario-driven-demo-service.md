@@ -25,7 +25,19 @@ and existing server-only PostgreSQL application ports. A delayed invocation or
 manual Run now may enter only within 15 minutes of one of those times; the
 corresponding hourly slot admits at most one tick.
 Do not provision a VM, add production management tokens, share notification
-execution budgets, enable previews against production or invent an HTTP trigger.
+execution budgets, or enable previews against production.
+
+S200 used a one-time signed scheduled trigger and Netlify background function
+from 22:30 UTC on 2026-11-15 through 01:30 UTC on 2026-11-16. The background
+transaction admitted only reviewed `copy_correction` requests under an explicit
+operator pause, at most four per minute, and never advanced a scenario stage.
+Its 180-second deadline, finite time gate, private slot receipt and signed
+request prevented an unsigned or replayed call from consuming another batch.
+Netlify's 202 admission was not completion evidence; request, audit and public
+readback remained authoritative. After 64/64 target readback and zero pending
+requests, the restore source removes the temporary endpoint, helper and minute
+trigger. The normal three-per-day schedule above is the only standing worker;
+this historical repair grants no ongoing HTTP trigger.
 
 The reviewed enrolled process-video operator uses the same paused private
 request queue, one exact business per request, and publishes one new process

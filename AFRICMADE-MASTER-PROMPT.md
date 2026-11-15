@@ -259,8 +259,10 @@ Details: FE-029/FE-036/FE-040/FE-053/FE-054/FE-056 and the relevant current spec
 Marked fictional demo businesses exercise varied product counts, industries,
 optional categories, media and supply types. They are fixtures, not real clients
 or authority for merchant facts, and intentionally demonstrate the range of
-businesses AfricMade serves to first-time visitors. Keep examples clearly marked;
-never present them as real merchants or as factual availability, capacity or
+businesses AfricMade serves to first-time visitors. Keep examples clearly marked
+with one “Example business” badge per page; the story, product description and
+simulated status text state useful facts directly instead of repeating that label.
+Never present them as real merchants or as factual availability, capacity or
 production evidence. Generated demo illustrations are illustrative, not
 documentary product photographs; use honest no-photo placeholders when genuine
 media is absent. Never fill a real business with unrelated demo logos or videos.
@@ -998,6 +1000,9 @@ safeguards. FE-035/FE-053/FE-056/FE-065 and relevant task specs provide the deta
 BE-067's marked examples use predefined, unit-aware scenario facts and
 ordered stages. Random independent values and fabricated customer transactions,
 transport activity or certification claims are excluded.
+S200's one-time copy operator updates only exact reviewed demo wording through
+retained catalog and page publications under an explicit simulator pause, keeping
+original product detail, contacts, stage progress and real tenants intact.
 
 Do not invent product features, availability, models, prices, capacity or merchant
 history. Preserve merchant-entered data; verify current recognizable product facts
