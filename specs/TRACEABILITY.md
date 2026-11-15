@@ -87,7 +87,8 @@ The S197 separate process-video field has a reviewed 66-business inventory:
 blank, and 11 subject-fit clips stay. The finite enrolled operator maps
 `lib/demo-process-media-correction.ts` and `correctDemoProcessMedia` to
 BE-049/FE-061/DEP-054: exact ID/handle, enrollment fingerprint/progress,
-current ref/version, same-business approved asset, retained before/after V4,
+current ref/version, same-business approved asset, retained before/after V4
+and conditional exact-baseline reserve for stale immutable history,
 audit, idempotency and inverse. Parser negative checks are in
 `scripts/test-demo-media-correction.ts`; real isolated PostgreSQL apply,
 late rollback, sanitized rejected-request diagnostic, replay, inverse and

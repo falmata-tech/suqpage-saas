@@ -266,22 +266,38 @@ export async function correctDemoProcessMedia(raw:unknown){
   const retained=await runtimeGet<{snapshot_json:string}>(
    'SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
    [input.businessId,version]);
+  let processVersion=version;
   if(retained){
-   const checked=requireRevisionSnapshotV4(retained.snapshot_json,SHOWROOM_COMPONENT_BANK_LATEST,
-    processVideoPolicyForCatalog(state.catalog));
-   if(digest(checked)!==digest(beforeSnapshot))throw new DemoDrift('content_changed');
+   let exact=false;
+   try{
+    const checked=requireRevisionSnapshotV4(retained.snapshot_json,SHOWROOM_COMPONENT_BANK_LATEST,
+     processVideoPolicyForCatalog(state.catalog));
+    exact=digest(checked)===digest(beforeSnapshot);
+   }catch(error){if(!(error instanceof RevisionError))throw error;}
+   if(!exact){
+    if(await runtimeGet('SELECT 1 FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
+     [input.businessId,version+1]))throw new DemoDrift('content_changed');
+    const reserved=await runtimeRun(`UPDATE businesses SET content_version=?
+     WHERE id=? AND handle=? AND is_demo=1 AND status='active' AND content_version=? AND process_video_ref=?`,
+     [version+1,input.businessId,input.handle,version,input.processVideoBefore]);
+    if(reserved.changes!==1)throw new DemoDrift('content_changed');
+    await runtimeRun(`INSERT INTO published_catalog_versions
+     (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+     VALUES(?,?,?,'baseline',?)`,[input.businessId,version+1,JSON.stringify(beforeSnapshot),state.actor.id]);
+    processVersion=version+1;
+   }
   }else await runtimeRun(`INSERT INTO published_catalog_versions
    (business_id,content_version,snapshot_json,change_kind,actor_user_id)
    VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(beforeSnapshot),state.actor.id]);
   phase='business';
   const updated=await runtimeRun(`UPDATE businesses SET process_video_ref=?,content_version=?
    WHERE id=? AND handle=? AND is_demo=1 AND status='active' AND content_version=? AND process_video_ref=?`,
-   [input.processVideoAfter,version+1,input.businessId,input.handle,version,input.processVideoBefore]);
+   [input.processVideoAfter,processVersion+1,input.businessId,input.handle,processVersion,input.processVideoBefore]);
   if(updated.changes!==1)throw new DemoDrift('content_changed');
   phase='postcondition';
   const after=await currentState(e,true);
   const unchangedBusiness=(business:typeof state.catalog.business)=>({...business,process_video_ref:'',content_version:0});
-  if(after.catalog.business.content_version!==version+1||
+  if(after.catalog.business.content_version!==processVersion+1||
    after.catalog.business.process_video_ref!==input.processVideoAfter||
    digest(unchangedBusiness(after.catalog.business))!==digest(unchangedBusiness(state.catalog.business))||
    digest(after.catalog.products)!==digest(state.catalog.products)||
@@ -291,7 +307,7 @@ export async function correctDemoProcessMedia(raw:unknown){
   phase='version';
   const afterSnapshot=catalogToRevisionSnapshotV4(after.catalog);
   await runtimeRun(`INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id)
-   VALUES(?,?,?,'publication',?)`,[input.businessId,version+1,JSON.stringify(afterSnapshot),state.actor.id]);
+   VALUES(?,?,?,'publication',?)`,[input.businessId,processVersion+1,JSON.stringify(afterSnapshot),state.actor.id]);
   phase='enrollment';
   const acknowledged=await runtimeRun(`UPDATE demo_simulator_enrollments SET expected_hash=?
    WHERE business_id=? AND status='active' AND reason='' AND expected_hash=? AND stage=? AND cycle=? AND due_at=?`,
@@ -302,7 +318,8 @@ export async function correctDemoProcessMedia(raw:unknown){
    [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
     operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
     beforeRefHash:digest(input.processVideoBefore),afterRefHash:digest(input.processVideoAfter),
-    baseVersion:version,contentVersion:version+1})]);
+    baseVersion:version,baselineVersion:processVersion,contentVersion:processVersion+1,
+    baselineReconciled:processVersion!==version})]);
   return {duplicate:false};
  });}catch(error){
   if(error&&typeof error==='object')processMediaFailurePhases.set(error,phase);

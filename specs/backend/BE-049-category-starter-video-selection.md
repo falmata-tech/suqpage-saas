@@ -77,17 +77,22 @@ version with a current-value guard, retain the new V4 catalog version, then
 acknowledge the enrollment's new fingerprint and append a distinct audit
 receipt. Products, photos, owner page, draft/publication versions, business
 identity/contact/story, stage/cycle/due, and other tenants must not change.
+If the immutable current-version snapshot is stale, preserve it, reserve the
+next version for an exact current baseline, and publish the process ref one
+version later. A clean baseline needs only one version; a stale baseline needs
+two. Never overwrite old history or continue if the reserved version exists.
 One private request targets one business; a duplicate operation key with the
 same payload is inert, and a conflict or late snapshot/audit failure rolls
 back the whole write. A rejected, parsed request records only a fixed phase,
 error code and operation key after its media savepoint rolls back; it never
 logs raw external media refs or private identity. The minute worker may admit
-bounded private requests
-while explicitly operator-paused; normal scenario stages remain disabled.
+bounded private requests while explicitly operator-paused; normal scenario
+stages remain disabled.
 
 GIVEN a paused and unchanged enrolled example WHEN its guarded process plan
 commits THEN the process chapter plays the approved first-party business clip,
-one retained catalog version and audit receipt exist, and the next scenario
+the appropriate retained baseline/process versions and audit receipt exist,
+and the next scenario
 stage continues. GIVEN a forged tenant/ref, stale hash/version/progress,
 incomplete asset, enabled control, or late failure THEN the catalog,
 enrollment and history remain unchanged. Real PostgreSQL tests cover apply,

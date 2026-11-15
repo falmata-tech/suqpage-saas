@@ -78,13 +78,15 @@ async function main(){
   await assert.rejects(()=>correctDemoProcessMedia({...input,expectedHash:'b'.repeat(64)}),/content_changed/);
   assert.deepEqual(await state(),before);
   const forged=catalogToRevisionSnapshotV4((await runtimeCatalogByBusinessId(businessId,true))!);
-  forged.business.processVideoRef='youtube:NJMPGgcDylY';
+  forged.business.siteTitle='Stale retained title';
   await db.prepare("INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id) VALUES(?,1,?,'baseline',?)")
+   .run(businessId,JSON.stringify(forged),ownerUserId);
+  await db.prepare("INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id) VALUES(?,2,?,'baseline',?)")
    .run(businessId,JSON.stringify(forged),ownerUserId);
   const forgedState=await state();
   await assert.rejects(()=>correctDemoProcessMedia(input),/content_changed/);
-  assert.deepEqual(await state(),forgedState,'A stale retained baseline must not be silently accepted.');
-  await db.prepare('DELETE FROM published_catalog_versions WHERE business_id=? AND content_version=1').run(businessId);
+  assert.deepEqual(await state(),forgedState,'A stale baseline with an occupied next version must fail closed.');
+  await db.prepare('DELETE FROM published_catalog_versions WHERE business_id=? AND content_version IN (1,2)').run(businessId);
   assert.deepEqual(await state(),before);
   await db.exec(`CREATE FUNCTION fail_process_version() RETURNS trigger LANGUAGE plpgsql AS $$
    BEGIN RAISE EXCEPTION 'Synthetic process version failure'; END; $$;
@@ -106,6 +108,7 @@ async function main(){
   for(const [key,value] of Object.entries(before.enrollment))if(key!=='expected_hash')assert.deepEqual(after.enrollment[key],value,key);
   assert.notEqual(after.enrollment.expected_hash,before.enrollment.expected_hash);
   assert.equal(after.audit.filter((row:{action:string})=>row.action==='demo.process_media_corrected').length,1);
+  assert.equal(JSON.parse(String(after.audit.at(-1).detail)).baselineReconciled,false);
   assert.deepEqual(await db.prepare('SELECT * FROM businesses WHERE id=99').get(),realBefore);
   assert.deepEqual(await correctDemoProcessMedia(input),{duplicate:true});assert.deepEqual(await state(),after);
   await assert.rejects(()=>correctDemoProcessMedia({...input,processVideoBefore:'youtube:NJMPGgcDylY'}),/different reviewed content/);
@@ -130,14 +133,43 @@ async function main(){
   for(const [key,value] of Object.entries(advanced.enrollment))if(key!=='expected_hash')assert.deepEqual(restored.enrollment[key],value,key);
   assert.notEqual(restored.enrollment.expected_hash,advanced.enrollment.expected_hash);
   assert.equal(JSON.parse(String(restored.versions.at(-1).snapshot_json)).business.processVideoRef,oldRef);
+  const staleVersion=Number(restored.business.content_version);
+  const staleSnapshot=JSON.parse(String(restored.versions.at(-1).snapshot_json));
+  staleSnapshot.business.siteTitle='Stale retained title';
+  await db.prepare('UPDATE published_catalog_versions SET snapshot_json=? WHERE business_id=? AND content_version=?')
+   .run(JSON.stringify(staleSnapshot),businessId,staleVersion);
+  const drifted=await state();
+  const reconcile:DemoProcessMediaCorrection={...input,operationKey:'reviewed_process_reconcile_0001',
+   expectedHash:String(drifted.enrollment.expected_hash),expectedContentVersion:staleVersion,
+   expectedDraftVersion:Number(drifted.draft.version),expectedPageRevision:Number(drifted.page.at(-1).revision),
+   expectedStage:Number(drifted.enrollment.stage),expectedCycle:Number(drifted.enrollment.cycle),
+   expectedDueAt:Number(drifted.enrollment.due_at)};
+  await correctDemoProcessMedia(reconcile);
+  const reconciled=await state();
+  assert.equal(Number(reconciled.business.content_version),staleVersion+2);
+  assert.equal(reconciled.business.process_video_ref,newRef);
+  assert.deepEqual(reconciled.products,drifted.products);assert.deepEqual(reconciled.draft,drifted.draft);
+  assert.deepEqual(reconciled.page,drifted.page);
+  for(const [key,value] of Object.entries(drifted.enrollment))if(key!=='expected_hash')assert.deepEqual(reconciled.enrollment[key],value,key);
+  assert.equal(JSON.parse(String(reconciled.versions.at(-3).snapshot_json)).business.siteTitle,'Stale retained title',
+   'The old retained version stays immutable.');
+  assert.equal(JSON.parse(String(reconciled.versions.at(-2).snapshot_json)).business.processVideoRef,oldRef);
+  assert.equal(JSON.parse(String(reconciled.versions.at(-1).snapshot_json)).business.processVideoRef,newRef);
+  assert.deepEqual(JSON.parse(String(reconciled.audit.at(-1).detail)),{
+   automation:'demo-media-maintenance',direction:'apply',operationKey:reconcile.operationKey,
+   payloadHash:crypto.createHash('sha256').update(JSON.stringify(reconcile)).digest('hex'),
+   beforeStateHash:String(drifted.enrollment.expected_hash),afterStateHash:String(reconciled.enrollment.expected_hash),
+   beforeRefHash:crypto.createHash('sha256').update(JSON.stringify(oldRef)).digest('hex'),
+   afterRefHash:crypto.createHash('sha256').update(JSON.stringify(newRef)).digest('hex'),
+   baseVersion:staleVersion,baselineVersion:staleVersion+1,contentVersion:staleVersion+2,baselineReconciled:true});
   const stale={...input,operationKey:'reviewed_process_stale_0001'};
   await db.prepare("UPDATE demo_simulator_requests SET input_json=?,status='pending',reason='',requested_at=?,processed_at=0 WHERE business_id=?")
    .run(JSON.stringify(stale),now+120000,businessId);
   assert.equal((await runDemoSimulatorTick(now+120000,1,'maintenance')).enrollmentRejected,1);
   const rejected=await state();
-  assert.deepEqual(rejected.business,restored.business);assert.deepEqual(rejected.products,restored.products);
-  assert.deepEqual(rejected.page,restored.page);assert.deepEqual(rejected.enrollment,restored.enrollment);
-  assert.deepEqual(rejected.versions,restored.versions);
+  assert.deepEqual(rejected.business,reconciled.business);assert.deepEqual(rejected.products,reconciled.products);
+  assert.deepEqual(rejected.page,reconciled.page);assert.deepEqual(rejected.enrollment,reconciled.enrollment);
+  assert.deepEqual(rejected.versions,reconciled.versions);
   const failure=rejected.audit.at(-1);
   assert.equal(failure.action,'demo.process_media_rejected');
   assert.deepEqual(JSON.parse(String(failure.detail)),{automation:'demo-media-maintenance',
