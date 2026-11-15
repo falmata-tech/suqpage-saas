@@ -14,6 +14,9 @@ const candidates = [
   {key:'bsw-solar-production',provider:'tiktok',id:'7494550342244240683',creator:'https://www.tiktok.com/@bswsolarstreetlight/video/7494550342244240683'},
   {key:'galaxy-harness',provider:'youtube',id:'J8hBvC1bXtQ',creator:'https://www.youtube.com/watch?v=J8hBvC1bXtQ'},
   {key:'judn-solar-light',provider:'youtube',id:'fTb3r6RFNBQ',creator:'https://www.youtube.com/watch?v=fTb3r6RFNBQ'},
+  {key:'merry-speaker-factory',provider:'tiktok',id:'7580286785029213454',creator:'https://www.tiktok.com/@merryaudio888/video/7580286785029213454'},
+  {key:'electric-panel-factory',provider:'tiktok',id:'7522117073733012750',creator:'https://www.tiktok.com/@electric.control/video/7522117073733012750'},
+  {key:'kabo-lighting-factory',provider:'tiktok',id:'7388823271690521874',creator:'https://www.tiktok.com/@kabolightingricky/video/7388823271690521874'},
 ];
 const browser = await chromium.launch({channel:'chrome'});
 const result = {source,browser:{name:'Google Chrome',version:browser.version(),mode:'headless-managed-runner'},candidates:[],visualVerdict:'pending-agent-review'};
@@ -34,10 +37,15 @@ try {
       const play=page.getByRole('button',{name:/Play video|Play/i}).first();
       if(await play.isVisible({timeout:10000}).catch(()=>false))await play.click({timeout:10000}).catch(()=>{});
       const deadline=Date.now()+25000;
+      let fallbackClicked=false;
       let samples=[];
       while(Date.now()<deadline){
         samples=await state(page);
         if(samples.some(v=>v.ready>=2&&v.width>0&&v.time>1))break;
+        if(candidate.provider==='tiktok'&&!fallbackClicked&&Date.now()>deadline-17000){
+          fallbackClicked=true;
+          await page.mouse.click(500,370).catch(()=>{});
+        }
         await new Promise(resolve=>setTimeout(resolve,1000));
       }
       record.start=samples;
