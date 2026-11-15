@@ -9,6 +9,19 @@ export type DemoCategoryCorrection = {
  members:DemoCategoryCorrectionMember[];
 };
 
+/** Exact current public examples. The two mills are agriculture cross-listings
+ * in scripts/setup.ts; their reviewed primary category remains food-farming. */
+export const AGRICULTURE_CORRECTION_TARGETS = [
+ {businessId:5,handle:'green-terrace-farm',reviewedPrimary:'agriculture-growers'},
+ {businessId:6,handle:'blue-nile-apiary',reviewedPrimary:'agriculture-growers'},
+ {businessId:27,handle:'demo-bora-highland-farm',reviewedPrimary:'agriculture-growers'},
+ {businessId:28,handle:'demo-laga-grain-mill',reviewedPrimary:'food-farming'},
+ {businessId:29,handle:'demo-mulu-family-farm',reviewedPrimary:'agriculture-growers'},
+ {businessId:31,handle:'demo-sofi-orchard',reviewedPrimary:'agriculture-growers'},
+ {businessId:32,handle:'demo-wabi-flour-mill',reviewedPrimary:'food-farming'},
+ {businessId:33,handle:'demo-rift-seed-growers',reviewedPrimary:'agriculture-growers'},
+] as const;
+
 const invalid=():never=>{throw Error('Invalid reviewed demo category correction.');};
 function object(value:unknown,keys:readonly string[]):Record<string,unknown>{
  if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(k=>!keys.includes(k)))return invalid();
@@ -17,10 +30,10 @@ function object(value:unknown,keys:readonly string[]):Record<string,unknown>{
 function integer(value:unknown,min:number){if(!Number.isSafeInteger(value)||Number(value)<min)return invalid();return Number(value);}
 function checkedText(value:unknown,pattern:RegExp){if(typeof value!=='string'||!pattern.test(value))return invalid();return value;}
 
-/** One request binds the entire reviewed cohort; no business identity is built into runtime code. */
+/** The private one-time request must bind the complete, exact public cohort. */
 export function parseDemoCategoryCorrection(raw:unknown):DemoCategoryCorrection{
  const v=object(raw,['kind','operationKey','members']);
- if(v.kind!=='category_correction_batch'||!Array.isArray(v.members)||v.members.length!==6)return invalid();
+ if(v.kind!=='category_correction_batch'||!Array.isArray(v.members)||v.members.length!==AGRICULTURE_CORRECTION_TARGETS.length)return invalid();
  const members=v.members.map(rawMember=>{
   const m=object(rawMember,['businessId','handle','ownerUserId','providerUserId','productIds','expectedHash',
    'expectedContentVersion','expectedDraftVersion','expectedPageRevision','stage','cycle','dueAt','proposalVersion','proposalUpdatedAt']);
@@ -38,6 +51,7 @@ export function parseDemoCategoryCorrection(raw:unknown):DemoCategoryCorrection{
    dueAt:integer(m.dueAt,0),proposalVersion:1,
    proposalUpdatedAt:integer(m.proposalUpdatedAt,0)};
  });
- if(members.some((member,index)=>index>0&&member.businessId<=members[index-1].businessId))return invalid();
+ if(members.some((member,index)=>member.businessId!==AGRICULTURE_CORRECTION_TARGETS[index].businessId||
+  member.handle!==AGRICULTURE_CORRECTION_TARGETS[index].handle))return invalid();
  return {kind:'category_correction_batch',operationKey:checkedText(v.operationKey,/^[a-zA-Z0-9_-]{12,64}$/),members};
 }
