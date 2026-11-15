@@ -3,7 +3,7 @@
 Current product authority: [master brief](../AFRICMADE-MASTER-PROMPT.md).
 Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 [DEP-049](../specs/deployment/DEP-049-africmade-domain-and-app-cutover.md).
-Updated 2026-11-14. This working board replaces dated `CURRENT` labels; it does
+Updated 2026-11-15. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
 ## Current position
@@ -176,6 +176,35 @@ S196's full64/256 exact-version readback and documentation are recorded below.
 S191's signed phone APK remains a separate active dependency; a video audit or
 emulator build does not complete it.
 
+### S198 — limited hosted demo simulation (BE-067 / DEP-054)
+
+Owner instruction 2026-11-15: keep the existing Netlify simulator, reduce its
+schedule to exactly 09:00, 13:00 and 17:00 Ethiopia time, and advance more
+businesses in each invocation. The selected cron is `0 6,10,14 * * *` UTC.
+The adapter accepts at most 15 minutes of delivery delay, with one slot per
+scheduled hour. At most four due businesses start in a tick, no new stage starts
+after 12 seconds or without an observed-stage and commit reserve, and successful
+work is capped at 12 stages per UTC day. The
+existing private control row may lower that cap; its historic 2,880 setting
+cannot raise it. The 23-second transaction and 256MiB database limits remain.
+
+1. [x] Read the hosted control/cohort and recent run counts; confirm the
+   function is already hosted and the selected schedule fits Netlify cron.
+2. [x] Record the owner's exact three daily times and the honest throughput
+   tradeoff: 64 businesses require at least six days per rotation at four
+   stages/tick, or about 22 days at the observed one stage/tick.
+3. [x] Implement the bounded adapter/runtime change and update controlling
+   specs. Source-matched worker, focused PostgreSQL, typecheck, spec and Netlify
+   readiness checks pass. The full64/256 fixture passed before the final
+   timing-reserve edit; rerun it in source-matched CI before protected delivery.
+4. [ ] Run the required release/CI gates and integrate through protected main.
+   The unrelated local Docker restore operations fixture failed its readiness
+   probe; diagnose that environment gate without weakening simulator checks.
+5. [ ] Verify the published cron and next
+   scheduled execution, then compare aggregate elapsed time, advanced count,
+   database growth and active/paused membership. Do not reset the hosted
+   `used_today` counter; the new code cap may defer work until the next UTC day.
+
 ### S196 — every public demo business and current product (BE-009 / BE-067 / DEP-054)
 
 Owner instruction: expand the service to all demo businesses and all current
@@ -197,9 +226,9 @@ The earlier three-business canary is qualified, not the requested final scope.
    business/product against immutable publications, update monitoring to the
    admitted manifest, and record exact delivery/coverage evidence in S196.
 
-Full production rotation and all64/256 exact-version readback pass. Hosted
-runtime yielding currently produces about one business stage per minute, so
-allow32–64 successful ticks per rotation and the70-minute starvation threshold.
+Full production rotation and all64/256 exact-version readback pass under the
+initial minute schedule. S198 changes the cadence after its protected rollout;
+its longer rotation replaces the former 70-minute monitoring threshold.
 
 Do not infer new enrollments from a demo-looking name, publish the private
 reviewer, delete immutable histories, expand billing, or overwrite human drift.
@@ -216,9 +245,9 @@ The owner's clarification requires a scenario catalog with realistic timelines:
 predefined stages coordinate related business/product changes and enforce their
 consistency. Persist progress over time; never select independent arbitrary field
 changes. Test complete scenarios, recovery and concurrent-human-edit protection.
-The owner additionally requires frequent visible activity for early users: advance
-short coordinated demo stages about every minute and refresh already-open public
-screens, with measured storage/write budgets and a bounded active demo cohort.
+The initial owner requirement was visible activity about every minute with
+already-open public screens refreshed and measured storage/write budgets. S198
+supersedes that scheduled cadence while retaining foreground refresh.
 
 1. [x] Inventory supported business/product fields, current write/publication/
    refresh contracts and existing worker hosting; specify the simulated data
@@ -233,7 +262,7 @@ screens, with measured storage/write budgets and a bounded active demo cohort.
    independently verify scheduled runs and real-account preservation.
 
 Complete for the reviewed initial cohort: Selam Weave, Addis Metalworks and
-Green Terrace Farm. The dedicated minute schedule advances at most two coherent
+Green Terrace Farm. The initial minute schedule advanced at most two coherent
 stages, and public screens refresh at15s while active. Actual scheduled private
 admission, canary0/1/2 transitions, normal stored/public readback and the open
 production browser's retained unsent draft pass. All three enrolled demos start;

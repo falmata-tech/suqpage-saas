@@ -87,7 +87,12 @@ async function main(){
   const galleries=new Map<number,ReturnType<typeof productMedia>>();for(const input of fixtures)for(const p of (await runtimeCatalogByHandle(input.handle))!.products)galleries.set(p.id,productMedia(p));
   await db.exec('UPDATE demo_simulator_control SET enabled=1 WHERE id=1');let now=nowStart+60000,ticks=0,stages=0;
   while(true){
-   const result=await runDemoSimulatorTick(now);assert.ok(result.advanced>=1&&result.advanced<=2);assert.equal(result.failed,0);assert.equal(result.paused,0);stages+=result.advanced;ticks++;
+   const result=await runDemoSimulatorTick(now);
+   if(result.status==='budget'){
+    assert.equal((await db.prepare('SELECT used_today FROM demo_simulator_control WHERE id=1').get()).used_today,12);
+    now+=86400000;continue;
+   }
+   assert.ok(result.advanced>=1&&result.advanced<=4);assert.equal(result.failed,0);assert.equal(result.paused,0);stages+=result.advanced;ticks++;
    const remaining=await db.prepare('SELECT count(*) total FROM demo_simulator_enrollments WHERE cycle=0 AND stage<5').get();
    if(!remaining.total)break;
    assert.ok(ticks<400,'Oldest-due rotation covers every reviewed business without starvation.');now+=60000;

@@ -14,8 +14,9 @@ change_level: L3
 
 Operate a dedicated service that advances realistic, predefined demo situations
 through coordinated changes over time. Early visitors should see marketplace
-activity about every minute. Ordinary business/product application writes and
-public reads must carry those changes; no simulated API success or UI-only values.
+activity at three scheduled daytime moments in Ethiopia. Ordinary business/
+product application writes and public reads must carry those changes; no
+simulated API success or UI-only values.
 The field inventory is [DEMO-SIMULATOR](../../docs/operations/DEMO-SIMULATOR.md).
 
 Start with seasonal harvest, workshop production and wholesale replenishment
@@ -62,7 +63,7 @@ materialize a legacy image/video fallback into its gallery JSON; effective media
 references and ordering must remain identical. Never rewrite or
 delete earlier catalog/publication/inquiry history.
 
-A fixed per-minute slot plus PostgreSQL locking prevents overlapping/replayed
+A fixed minute slot plus PostgreSQL locking prevents overlapping/replayed
 ticks. Stage failure rolls back every related ordinary write before recording a
 generic failed/paused result. A bad enrollment does not grant authority over
 another tenant. No unbounded retries, catch-up loops or external credential use.
@@ -92,12 +93,19 @@ versions or extra notification activity are created.
 Private additive schema83 retains the previous three single-product enrollments
 until explicitly upgraded. Full-catalog membership is bounded to 64 businesses
 and eight products per business, covering the reviewed current inventory. A
-minute tick advances at most two businesses; the oldest due business runs first,
-so every business participates and work remains bounded independently of breadth.
-Keep the existing 2,880-stage/day and 256MiB limits, retention and execution
-deadlines. With 64 businesses, a business normally participates approximately
-once per 32 successful minute ticks; its entire current catalog moves together.
-Do not promise every product changes every minute or raise provider billing.
+scheduled tick admits at most four due businesses; the oldest due business runs
+first, and each business advances at most one stage in that tick. Start no new
+stage after 12 seconds of invocation work, or when the previous full stage's
+duration (at least an eight-second reserve) plus three seconds for final work
+would reach PostgreSQL's 23-second transaction deadline. Netlify also limits
+the function to 30 seconds. The runtime allows at most 12 successful stages per
+UTC day and also respects any tighter private control-row limit and the existing
+256MiB database limit. The historic
+installed control row may still report 2,880; that value does not override the
+runtime cap. With 64 businesses, one rotation needs at least 16 successful ticks:
+roughly six days at four per tick or 22 days at one per tick, with three ticks
+daily. Each stage moves its entire current catalog together. Do not promise a
+daily rotation or raise provider billing.
 
 GIVEN all current public demos WHEN exact full-catalog enrollment completes THEN
 the recorded manifest covers every one of their current products. GIVEN a stage
@@ -115,10 +123,14 @@ and atomically acknowledge only that change. It must preserve enrollment progres
 and all scenario baselines except the approved page video URL. Routine stage work
 continues to preserve media and fail closed on any unreviewed content drift.
 
-One scheduled tick per minute; at most two due business stages, each updating
-its complete enrolled catalog under S196. Legacy single-product canaries remain
-compatible until explicitly upgraded. Keep at least one usable published product
-in a full catalog, and an additional companion for legacy single-product plans.
+The dedicated Netlify schedule runs at 09:00, 13:00 and 17:00 Ethiopia time
+(06:00, 10:00 and 14:00 UTC). The adapter admits a run only within 15 minutes
+of a scheduled time; an hourly slot prevents another stage from a manual retry
+in that window. At most four due business stages may advance per tick, each
+updating its complete enrolled catalog under S196. Legacy single-product
+canaries remain compatible until explicitly upgraded. Keep at least one usable
+published product in a full catalog, and an additional companion for legacy
+single-product plans.
 Use an execution deadline with room inside
 Netlify's 30-second limit. A server-only control starts disabled, supports pause,
 and enforces explicit per-day mutation and database-size budgets. Budget pressure

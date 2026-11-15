@@ -19,8 +19,11 @@ the bounded scenario service and independently qualify its scheduled effects.
 ## Runtime and identity
 
 Use a dedicated Netlify scheduled function on the existing AfricMade site,
-separate from `attention-worker`. Run once per minute in production only, with
-bounded stages/deadline and existing server-only PostgreSQL application ports.
+separate from `attention-worker`. Run at 09:00, 13:00 and 17:00 Ethiopia time
+(06:00, 10:00 and 14:00 UTC) in production only, with bounded stages/deadline
+and existing server-only PostgreSQL application ports. A delayed invocation or
+manual Run now may enter only within 15 minutes of one of those times; the
+corresponding hourly slot admits at most one tick.
 Do not provision a VM, add production management tokens, share notification
 execution budgets, enable previews against production or invent an HTTP trigger.
 
@@ -34,8 +37,10 @@ Never run config push, seed/reset, Auth/SMTP or credential writes for this task.
 ## Budgets and observability
 
 S196 expands the reviewed target to all64 public demo businesses/all256 current
-products. The global cadence/budgets remain unchanged: at most two coordinated
-business stages per minute and one catalog snapshot per business stage. Qualify
+products. The revised cadence admits at most four coordinated business stages
+per scheduled tick and 12 successful stages per UTC day, with one catalog
+snapshot per business stage. The private control row can lower the daily limit;
+its existing 2,880 value does not raise the runtime cap. Qualify
 full-size fairness and batch cost before hosted admission. Additive private
 schema83 starts with no inferred catalog enrollment; existing schema82 remains
 read-compatible during code-before-schema delivery. Retain protected before-
@@ -43,12 +48,18 @@ images and exact membership, migrate while paused, admit every reviewed catalog,
 then verify manifest completeness and actual scheduled public/product effects.
 Update the read-only monitor to that exact manifest rather than its old canary.
 
-The owner requires visible activity about every minute, with accelerated coherent
-timelines and foreground UI refresh. Start a small reviewed active cohort and
-at most two due stages per tick. Bound per-day writes, database size, query and
-function duration; measure actual retained snapshot growth rather than assuming
-unlimited free capacity. Do not expand provider storage/billing or delete public
+The owner now chooses three scheduled daytime moments, with coherent timelines
+and foreground UI refresh when a stage commits. The 64-business cohort rotates
+in at least six days at four successful stages per tick, or about 22 days at
+the previously observed one stage per tick. Retain the reviewed 64-business
+cohort and admit at most four due stages per tick. Bound per-day writes, database
+size, query and function duration; measure actual retained snapshot growth
+rather than assuming unlimited free capacity. Do not expand provider storage/billing or delete public
 history as automatic cleanup. A budget/authority/schema failure pauses demo work.
+The worker starts no new stage after 12 seconds or without room for the last
+observed stage duration and final commit inside its 23-second PostgreSQL
+transaction deadline. Log only aggregate counts, status and elapsed handler
+milliseconds; use Netlify's duration metric for billed execution estimates.
 
 The ordinary no-store health response may include only validated public build
 commit, deployment and site IDs, captured at build time, so automatic delivery can be

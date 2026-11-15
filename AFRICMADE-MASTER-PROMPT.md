@@ -697,11 +697,13 @@ Preserve each merchant's identity within the current shared showroom contract.
 The qualified full-catalog service under BE-009/BE-067/DEP-054 covers every reviewed
 public demo business and all its current products. Coordinated ordinary upkeep
 batches publish one catalog version per business stage; fixed global budgets
-and oldest-due rotation preserve bounded frequent marketplace activity. The
+and oldest-due rotation preserve bounded scheduled marketplace activity. The
 full reviewed public-demo membership is explicitly admitted; real/new accounts
 and the private reviewer remain excluded. Exact hosted evidence is in S196.
 
-BE-067/FE-079/DEP-054 provide a dedicated minute-scheduled Netlify demo service.
+BE-067/FE-079/DEP-054 provide a dedicated Netlify demo service scheduled at
+09:00, 13:00 and 17:00 Ethiopia time. At most four due businesses advance in a
+tick, subject to a 12-stage UTC daily cap and the existing time/storage guards.
 It advances predefined coherent scenarios through ordinary product and page
 publication commands. Foreground public screens check for changes every15 seconds,
 preserve inquiry drafts and read one consistent product/profile snapshot. This

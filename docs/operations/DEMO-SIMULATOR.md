@@ -19,12 +19,13 @@ new products and manual edits are drift, never silent enrollment authority.
 Private schema83 adds catalog bindings and the reviewed scenario/request bounds;
 it creates no inferred enrollment or Auth identity. The paused worker can admit
 at most eight reviewed requests per tick, stopping new admissions after12seconds.
-The global minute schedule, at-most-two business stages,2,880 daily stages,
-256MiB storage guard and retained-history policy remain. With64 businesses,
-normal oldest-due rotation updates each whole catalog in32–64 successful minute
-ticks. Hosted runtime yielding currently produces about one business per tick;
-individual starvation is a wait beyond70minutes while global stages advance.
-Do not demand every business/product change in a90-second public sample.
+The Netlify function runs at 09:00, 13:00 and 17:00 Ethiopia time. Each tick
+starts at most four due business stages and the runtime allows at most 12
+successful stages per UTC day, even if the legacy hosted control row still reads
+2,880. The 256MiB storage guard and retained-history policy remain. The oldest
+due business runs first. With 64 enrolled businesses, a full rotation takes at
+least six days at four stages per tick or about 22 days at the previously
+observed one stage per tick. Actual throughput must be read from new hosted runs.
 
 Exact rollout and full-manifest evidence belong in traceability S196. After
 schema83, pause first and retain a qualified83-compatible build or
@@ -123,10 +124,10 @@ but field values and transitions come from the selected scenario. No random
 prices, destinations, coordinates, names or unrelated supplier facts.
 Retain the exact baseline/version for conflict detection; never overwrite a
 concurrent human edit silently. One coordinated tenant stage is the
-write unit, with at most two due stages per tick. The owner's frequency clarification requires visible activity
-about every minute across a rotating active cohort. Compress planned scenario
-durations and refresh already-open screens; do not make users wait hours to see
-a demo change. Bound each tick to the coordinated affected records, skip unchanged
+write unit, with at most four due stages per tick. The owner now chooses three
+scheduled daytime updates rather than minute-by-minute changes. The short
+scenario stage durations make every business due by its next rotation; a delayed
+run never replays missed stages. Bound each tick to the coordinated affected records, skip unchanged
 facts, and measure snapshot/history growth when choosing cohort size. Keep concurrency locking, replay
 protection, a pause switch and bounded runtime/run retention.
 
@@ -163,19 +164,38 @@ and application ledger80. The rollout verifies the already-applied81 metadata/
 privilege equivalence before recording81 and adding private schema82. No earlier
 data patches, seed/reset, Auth/SMTP or configuration sync is replayed.
 
-At one product change per minute, catalog snapshots alone add roughly 12.4 MB/day
-before PostgreSQL/index overhead and compression. Each selected stage now changes
-its predefined listing summary, even when its selling facts remain steady. At
-the maximum two stages per minute, budget roughly 24.8 MB/day of raw snapshot JSON
-before measuring actual stored growth. Identical retries create no new snapshot.
-Preserve immutable history and pause at the explicit storage budget; never delete
-retained publications or raise provider spending limits. The selected
-cadence and limits are now fixed in the runtime: one minute,
-two due stages, at most64 explicitly enrolled public-demo catalogs, 2,880 successful stages per UTC
-day and a 256 MiB database soft limit. PostgreSQL17 imposes a 23-second transaction
+Each selected stage changes its predefined listing summary, even when its
+selling facts remain steady. The 12-stage daily maximum yields at most 12
+catalog snapshots and 12 page publications per UTC day, plus ordinary audit
+and idempotency records. Identical retries create no new snapshot. Measure
+actual stored growth; preserve immutable history and pause at the explicit
+storage budget. Never delete retained publications or raise provider spending
+limits. The selected cadence and limits are three daily Netlify invocations,
+four due stages per tick, at most 64 explicitly enrolled public-demo catalogs,
+12 successful stages per UTC day and a 256MiB database soft limit. PostgreSQL17 imposes a 23-second transaction
 deadline. Storage pressure disables demo work; the daily limit defers it until
 the next day. Neither condition changes merchant history or provider billing.
 Only seven-day private operational run rows are pruned during active work.
+No new stage starts after 12 seconds of invocation time or if the last observed
+stage (with an eight-second minimum reserve) plus three seconds of final work
+would reach that transaction deadline.
+The adapter allows at most 15 minutes of Netlify delivery delay and canonicalizes
+each scheduled hour to one slot, so Run now in the same window cannot double
+advance. Outside those windows it opens no database connection. It logs only
+aggregate counters, status and elapsed handler milliseconds; Netlify's measured
+duration remains the authority for billed execution time.
+
+This reduces scheduled invocations from 1,440 to 3 per day, or 43,200 to 90
+over a 30-day comparison. On Netlify's credit-based plans, a default 1GB
+function is charged at 10 credits per GB-hour: if the measured billed duration
+averages 10–20 seconds, 90 runs would use roughly 2.5–5 execution credits
+over 30 days (`90 × 10–20 / 3600 × 1 × 10`). This is a conditional execution
+estimate, not a measured bill or plan identification. Legacy plans may instead
+bill by request. Read the actual plan, memory and billed duration in Netlify
+after deployment. Netlify documents [scheduled UTC cron and the 30-second
+limit](https://docs.netlify.com/build/functions/scheduled-functions/),
+[function usage and billing](https://docs.netlify.com/build/functions/usage-and-billing/)
+and [credit rates](https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/how-credits-work/).
 
 The service publishes each short stage summary before the preserved original
 product description and business story, so cards and showrooms expose activity.
@@ -223,7 +243,7 @@ The initial cohort is deliberately smaller than the65 marked examples; the flag
 alone never authorizes updates. Normal signup keeps `is_demo=0`.
 
 Pause via the verified private control before any new request. The worker admits
-at most two requests per disabled tick and never resumes itself. Inspect every
+at most eight requests per disabled scheduled tick and never resumes itself. Inspect every
 accepted/rejected result before enabling. A rejected request rolls back its unit
 preparation as well as enrollment. Drift pauses the affected example; do not
 rewrite an expected hash or re-enroll blindly. Storage pressure pauses the service
