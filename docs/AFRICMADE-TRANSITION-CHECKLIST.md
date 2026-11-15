@@ -290,8 +290,8 @@ cannot raise it. The 23-second transaction and 256MiB database limits remain.
 
 #### Prepared finite maintenance option (BE-067 / DEP-054)
 
-The temporary adapter is set for 2026-11-15 18:15–22:15 UTC,
-21:15–01:15 EAT. Restore it as soon as all reviewed requests are verified. Publish it only after the media assets, operator path, exact
+The temporary adapter is set for 2026-11-15 18:15–23:15 UTC,
+21:15–02:15 EAT. Restore it as soon as all reviewed requests are verified. Publish it only after the media assets, operator path, exact
 hosted request plan, and selected-field backups pass review. Date changes
 require new tests and CI.
 
