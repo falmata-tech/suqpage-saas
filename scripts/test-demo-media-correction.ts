@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {parseDemoMediaCorrection} from '../lib/demo-media-correction';
+import {parseDemoMediaCorrection,parseUnenrolledDemoMediaCorrection,parseQueuedDemoMediaCorrection} from '../lib/demo-media-correction';
+import {DEMO_VIDEO_ASSETS} from '../lib/video/demo-video-catalog';
 
 test('BE-049 finite media plans preserve image positions and reject changed authority, duplicate targets and extra videos',()=>{
 const beforeMedia=[{kind:'image',ref:'/uploads/seed/example.jpg'},{kind:'video',ref:'youtube:wJV9EDe_sFc'}];
@@ -20,4 +21,30 @@ for(const value of bad)assert.throws(()=>parseDemoMediaCorrection(value));
 const noVideo=[beforeMedia[0]];
 assert.equal(parseDemoMediaCorrection({...input,products:[{productId:1,beforeMedia:noVideo,afterMedia:input.products[0].afterMedia}]}).products[0].afterMedia.length,2);
 assert.throws(()=>parseDemoMediaCorrection({...input,products:[{productId:1,beforeMedia:noVideo,afterMedia:[input.products[0].afterMedia[1],beforeMedia[0]]}]}));
+});
+
+test('BE-049 legacy demo media queue admits only exact synthetic target, gallery and inverse',()=>{
+ const media=[{kind:'image',ref:'/uploads/seed/example.jpg'},{kind:'video',ref:'youtube:wJV9EDe_sFc'}];
+ const slugs=['synthetic-50-cover',...[197,198,199,200].map(id=>`synthetic-50-product-${id}`)];
+ for(const slug of slugs)DEMO_VIDEO_ASSETS[slug]={businessId:50,status:'approved',sha256:'a'.repeat(64)};
+ try{
+  const input={kind:'unenrolled_media_correction',direction:'apply',operationKey:'synthetic_legacy_50_01',
+   businessId:50,handle:'demo-dara-clay-works',ownerUserId:11,
+   expectedContentVersion:4,expectedDraftVersion:3,expectedPageRevision:3,
+   coverBefore:'https://www.youtube.com/watch?v=wJV9EDe_sFc',coverVideoRef:'demo:synthetic-50-cover',
+   products:[197,198,199,200].map(productId=>({productId,beforeMedia:media,
+    afterMedia:[media[0],{kind:'video',ref:`demo:synthetic-50-product-${productId}`}]}))};
+  assert.equal(parseQueuedDemoMediaCorrection(input,50).businessId,50);
+  assert.throws(()=>parseQueuedDemoMediaCorrection(input,62));
+  for(const bad of [{...input,businessId:62},{...input,handle:'different'},
+   {...input,products:input.products.slice(1)},
+   {...input,products:input.products.map((p,i)=>i? p:{...p,afterMedia:[{kind:'image',ref:'/uploads/seed/other.jpg'},p.afterMedia[1]]})},
+   {...input,products:input.products.map((p,i)=>i? p:{...p,afterMedia:[...p.afterMedia,{kind:'video',ref:'youtube:EBrvynBWYzY'}]})},
+   {...input,expectedStateHash:'b'.repeat(64)},
+   {...input,extra:'unreviewed'}])assert.throws(()=>parseUnenrolledDemoMediaCorrection(bad));
+  const rollback={...input,direction:'rollback',operationKey:'synthetic_legacy_50_02',
+   coverBefore:'/videos/demo/synthetic-50-cover.mp4',coverVideoRef:'youtube:wJV9EDe_sFc',
+   products:input.products.map(p=>({productId:p.productId,beforeMedia:p.afterMedia,afterMedia:p.beforeMedia}))};
+  assert.equal(parseQueuedDemoMediaCorrection(rollback,50).kind,'unenrolled_media_correction');
+ }finally{for(const slug of slugs)delete DEMO_VIDEO_ASSETS[slug];}
 });
