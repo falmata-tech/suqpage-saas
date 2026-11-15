@@ -806,9 +806,16 @@ export async function correctDemoPublicCopy(raw:unknown){
  }
 }
 
-async function processEnrollmentRequests(now:number){
+async function processEnrollmentRequests(now:number,copyOnly=false){
  const started=Date.now();
  const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 8 FOR UPDATE");
+ if(copyOnly)for(const request of requests){
+  let raw:unknown;
+  try{raw=JSON.parse(request.input_json);}catch{throw Error('Unexpected pending request during copy maintenance.');}
+  if(!raw||typeof raw!=='object'||Array.isArray(raw)||
+   (raw as Record<string,unknown>).kind!=='copy_correction')
+   throw Error('Unexpected pending request during copy maintenance.');
+ }
  let enrolled=0,enrollmentRejected=0,mediaCorrected=0,categoryCorrected=0,copyCorrected=0;
  for(const request of requests){
   if(Date.now()-started>=12000)break;
@@ -882,12 +889,13 @@ export function canStartDemoStage(elapsedMs:number,previousStageMs:number|null){
  // three seconds for the final control update, pruning and transaction commit.
  return elapsedMs<12000&&(previousStageMs===null||elapsedMs+Math.max(previousStageMs,8000)+3000<23000);
 }
-/** The scheduled adapter supplies no client input and uses hourly slots.
- * The clock and default minute slot let disposable PostgreSQL tests exercise
- * complete timelines without sleeping. Stage times always use the actual now. */
-export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1):Promise<DemoTickResult>{
+/** Normal calls use hourly slots. A finite minute maintenance call admits
+ * copy requests only under an explicit operator pause and cannot run stages. */
+export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1,
+ mode:'scheduled'|'maintenance'='scheduled'):Promise<DemoTickResult>{
  if(!Number.isSafeInteger(now)||now<0)throw new Error('Invalid demo tick clock.');
  if(!Number.isSafeInteger(slotMinutes)||slotMinutes<1||slotMinutes>60)throw new Error('Invalid demo tick slot.');
+ if(mode!=='scheduled'&&mode!=='maintenance')throw new Error('Invalid demo tick mode.');
  const started=Date.now(),slot=Math.floor(now/(slotMinutes*60000))*slotMinutes,day=Math.floor(now/86400000);
  const result=(status:DemoTickResult['status']):DemoTickResult=>({status,advanced:0,paused:0,failed:0});
  return runtimeTransaction(async()=>{
@@ -898,9 +906,10 @@ export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1):Promise
   const lock=await runtimeGet<{locked:boolean}>('SELECT pg_try_advisory_xact_lock(6870619271382) locked');
   if(!lock?.locked)return result('busy');
   if(!await schemaReady())return result('schema');
-  const control=await runtimeGet<Control>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
+  const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control)return result('disabled');
-  if(!control.enabled){const admission=await processEnrollmentRequests(now);return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected||admission.copyCorrected?{...result('disabled'),...admission}:result('disabled');}
+  if(mode==='maintenance'&&(control.enabled!==0||control.pause_reason!=='operator'))return result('disabled');
+  if(!control.enabled){const admission=await processEnrollmentRequests(now,mode==='maintenance');return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected||admission.copyCorrected?{...result('disabled'),...admission}:result('disabled');}
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;

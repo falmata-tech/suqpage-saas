@@ -27,6 +27,18 @@ corresponding hourly slot admits at most one tick.
 Do not provision a VM, add production management tokens, share notification
 execution budgets, enable previews against production or invent an HTTP trigger.
 
+S200 temporarily replaces the cron with one invocation per minute from 22:30
+UTC on 2026-11-15 inclusive to 00:30 UTC on 2026-11-16 exclusive. The function
+returns before any database call outside this two-hour window. Inside it,
+maintenance mode requires `enabled=0,pause_reason='operator'` and admits only
+`copy_correction` requests; it cannot advance a stage even if the control row
+is enabled. The queued cohort is at most 64 businesses, with four reviewed
+targets per batch and full readback before another batch. This window permits
+at most 120 scheduled invocations if deployed for its entire duration; actual
+invocations depend on publication time and early restoration. A separate
+source change restores the ordinary three-per-day schedule immediately after
+64/64 target readback and zero pending requests.
+
 The reviewed enrolled process-video operator uses the same paused private
 request queue, one exact business per request, and publishes one new process
 catalog version while preserving owner-page and scenario progress. If the

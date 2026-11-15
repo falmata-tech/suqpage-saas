@@ -114,6 +114,12 @@ drafts and real tenants outside the automatic correction.
    private projection export was rejected by automatic approval review; do
    not retry it. Verify every public page after publication and ensure the next
    simulator tick does not reintroduce the removed words.
+4. [ ] Use a finite one-minute Netlify copy-only worker window (22:30–00:30
+   UTC, at most 120 invocations) for batches of four, stopping at the exact
+   cutoff even if delivery stalls. Restore the normal three-times-daily
+   schedule in a separate protected source change after 64/64 guarded
+   corrections and zero pending requests; then resume stages under exact
+   control state.
 
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 

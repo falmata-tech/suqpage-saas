@@ -153,6 +153,13 @@ trigger is exposed in the hosted worker.
 
 ## Hosting choice
 
+A finite S200 correction deployment may run the worker every minute only from
+22:30 UTC 15 November to 00:30 UTC 16 November 2026. It processes paused,
+reviewed copy requests only, with no stages, and opens no database session
+outside that window. At most 120 invocations can occur; restore the normal
+09:00, 13:00 and 17:00 EAT cron after the 64-target receipt and pending-zero
+check. The ordinary schedule above remains the target configuration.
+
 A dedicated Netlify scheduled function runs separately from `attention-worker`,
 using existing server-only PostgreSQL application ports. Netlify scheduled work
 has a 30-second bound and runs only on published deployments. Keep each tick below
