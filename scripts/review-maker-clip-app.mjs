@@ -49,7 +49,7 @@ async function play(page,id,label){
   const frame=page.frames().find(value=>value.url().startsWith(`https://www.tiktok.com/player/v1/${id}`));
   assert.ok(frame);
   const button=frame.getByRole('button',{name:'Play video',exact:true});
-  if(await button.isVisible().catch(()=>false))await button.click({timeout:30000});
+  await button.click({timeout:30000});
   await expect.poll(async()=>(await state(frame)).some(value=>value.ready>=2&&value.width>0&&value.time>1),{timeout:45000}).toBe(true);
   const start=(await state(frame))[0];
   await page.screenshot({path:`${out}/${label}-start.png`});
