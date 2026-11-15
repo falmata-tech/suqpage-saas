@@ -25,7 +25,7 @@ export type DemoEnrollmentInput={businessId:number;handle:string;ownerUserId:num
 type Enrollment={business_id:number;handle:string;owner_user_id:number;provider_user_id:string;product_id:number;
  scenario_key:DemoScenarioKey;scenario_version:number;parameters_json:string;baseline_page_json:string;baseline_description:string;expected_hash:string;
  stage:number;cycle:number;due_at:number;status:'active'|'paused';reason:string;catalog_products_json:string};
-type Control={enabled:number;last_slot:number;budget_day:number;used_today:number;daily_limit:number;database_limit_bytes:number};
+type Control={enabled:number;pause_reason:string;last_slot:number;budget_day:number;used_today:number;daily_limit:number;database_limit_bytes:number};
 class DemoDrift extends Error{constructor(readonly reason:'eligibility_changed'|'content_changed'){super(reason);}}
 const digest=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 async function schemaReady(){
@@ -401,9 +401,16 @@ function parseEnrollmentRequest(raw:string,businessId:number):DemoEnrollmentInpu
   v.initializeUnit!==undefined&&typeof v.initializeUnit!=='boolean')throw Error('Invalid private enrollment request.');
  return {...v,parameters:parseDemoScenarioParameters(v.parameters),...(v.catalogProducts!==undefined?{catalogProducts:parseDemoCatalogInputs(v.catalogProducts)}:{})} as DemoEnrollmentInput;
 }
-async function processEnrollmentRequests(now:number){
+async function processEnrollmentRequests(now:number,mediaOnly=false){
  const started=Date.now();
  const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 8 FOR UPDATE");
+ if(mediaOnly)for(const request of requests){
+  let input:unknown;
+  try{input=JSON.parse(request.input_json);}catch{throw Error('Unexpected pending request during video maintenance.');}
+  if(!input||typeof input!=='object'||Array.isArray(input)||
+   !['media_correction','unenrolled_media_correction'].includes(String((input as Record<string,unknown>).kind)))
+   throw Error('Unexpected pending request during video maintenance.');
+ }
  let enrolled=0,enrollmentRejected=0,mediaCorrected=0,categoryCorrected=0;
  for(const request of requests){
   if(Date.now()-started>=12000)break;
@@ -442,12 +449,13 @@ export function canStartDemoStage(elapsedMs:number,previousStageMs:number|null){
  // three seconds for the final control update, pruning and transaction commit.
  return elapsedMs<12000&&(previousStageMs===null||elapsedMs+Math.max(previousStageMs,8000)+3000<23000);
 }
-/** The scheduled adapter supplies no client input and uses hourly slots.
- * The clock and default minute slot let disposable PostgreSQL tests exercise
- * complete timelines without sleeping. Stage times always use the actual now. */
-export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1):Promise<DemoTickResult>{
+/** The adapter supplies no client input. Normal runs use hourly slots; a
+ * finite maintenance run uses a minute slot but can only process requests.
+ * The clock also lets disposable tests exercise timelines without sleeping. */
+export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1,mode:'scheduled'|'maintenance'='scheduled'):Promise<DemoTickResult>{
  if(!Number.isSafeInteger(now)||now<0)throw new Error('Invalid demo tick clock.');
  if(!Number.isSafeInteger(slotMinutes)||slotMinutes<1||slotMinutes>60)throw new Error('Invalid demo tick slot.');
+ if(mode!=='scheduled'&&mode!=='maintenance')throw new Error('Invalid demo tick mode.');
  const started=Date.now(),slot=Math.floor(now/(slotMinutes*60000))*slotMinutes,day=Math.floor(now/86400000);
  const result=(status:DemoTickResult['status']):DemoTickResult=>({status,advanced:0,paused:0,failed:0});
  return runtimeTransaction(async()=>{
@@ -460,7 +468,10 @@ export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1):Promise
   if(!await schemaReady())return result('schema');
   const control=await runtimeGet<Control>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control)return result('disabled');
-  if(!control.enabled){const admission=await processEnrollmentRequests(now);return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected?{...result('disabled'),...admission}:result('disabled');}
+  // The finite minute schedule may admit private requests only during an
+  // operator pause. An early resume or another pause reason cannot run stages.
+  if(mode==='maintenance'&&(control.enabled!==0||control.pause_reason!=='operator'))return result('disabled');
+  if(!control.enabled){const admission=await processEnrollmentRequests(now,mode==='maintenance');return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected?{...result('disabled'),...admission}:result('disabled');}
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;
