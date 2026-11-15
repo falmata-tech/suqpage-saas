@@ -30,10 +30,18 @@ try {
     const context = await browser.newContext({viewport: {width: 390, height: 844}, serviceWorkers: 'block'});
     const page = await context.newPage();
     try {
-      await page.goto(result.playerUrl, {waitUntil: 'domcontentloaded', timeout: 25000});
+      const response = await page.goto(result.playerUrl, {waitUntil: 'domcontentloaded', timeout: 25000});
+      result.httpStatus = response?.status() ?? null;
       const video = page.locator('video').first();
-      await video.waitFor({state: 'attached', timeout: 20000});
-      await page.getByRole('button', {name: 'Play video', exact: true}).click({timeout: 10000}).catch(() => {});
+      // TikTok shows a poster before play and only then attaches the video element.
+      const play = page.getByRole('button', {name: /Play video|Play/i}).first();
+      if (await play.isVisible({timeout: 10000}).catch(() => false)) {
+        await play.click({timeout: 10000}).catch(() => {});
+      }
+      if (!(await video.waitFor({state: 'attached', timeout: 5000}).then(() => true).catch(() => false))) {
+        await page.mouse.click(195, 360).catch(() => {});
+      }
+      await video.waitFor({state: 'attached', timeout: 12000});
       await expect.poll(async () => {
         const s = await state(video); return s.ready >= 2 && s.width > 0 && s.height > 0 && s.time > .3;
       }, {timeout: 25000}).toBe(true);
