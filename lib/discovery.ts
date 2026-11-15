@@ -962,7 +962,19 @@ async function buildFeaturedProjection(options: DiscoveryOptions, port: Discover
   const featuredRowsForDay = async (day: WeeklyFeaturedDay) => {
     const excluded=excludedBusinessIds(options.excludedBusinessIds);
     const extra=excluded.length?' AND NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint))':'';
-    const eligibleRows = await all<DiscoveryRow>(selectSql("AND b.hero_image_path LIKE '/%' "+extra), [day.industryKey, day.industryKey,...(excluded.length?[JSON.stringify(excluded)]:[])]);
+    let eligibleRows = await all<DiscoveryRow>(selectSql("AND b.hero_image_path LIKE '/%' "+extra), [day.industryKey, day.industryKey,...(excluded.length?[JSON.stringify(excluded)]:[])]);
+    if (day.industryKey === "agriculture-growers" && eligibleRows.length === 0) {
+      // Retained category rows are missing for some reviewed growers. Only use
+      // their current reviewed proposal while the entire category is unassigned.
+      eligibleRows = await all<DiscoveryRow>(selectSql(`
+        AND b.hero_image_path LIKE '/%'
+        AND NOT EXISTS(SELECT 1 FROM business_industries i WHERE i.industry_key=?)
+        AND location.category_key=?
+        AND location.version=location.reviewed_version
+        AND location.updated_at=p.updated_at
+        ${extra}
+      `), ["all", "all", day.industryKey, day.industryKey,...(excluded.length?[JSON.stringify(excluded)]:[])]);
+    }
     eligibleRows.sort((left, right) => left.name.localeCompare(right.name) || left.id - right.id);
     const selection = await getFeaturedProgramDaySelection(day.dateIso, port);
     if (selection.mode !== "manual") return { rows: automaticFeaturedLineup(day.dateIso, eligibleRows), mode: "automatic" as const };

@@ -41,6 +41,13 @@ cron, queue or TikTok integration is introduced.
   non-excluded, media-complete businesses in the date's category. An empty stale
   manual set falls back to Automatic. Old oversized sets project at most four;
   retain their stored history instead of deleting rows for the new capacity.
+- If Sunday's agriculture category has no industry memberships at all and its
+  ordinary eligible pool is empty, Featured may use a reviewed agriculture
+  location proposal only when its version is reviewed and its update time equals
+  the approved discovery profile's update time. The same fallback applies to the
+  admin candidate list. It retains every ordinary eligibility rule, including a
+  published physical product, and stops when a direct category membership exists.
+  Marketplace categories and stored business classifications stay unchanged.
 - Non-today public views redact business identities. During a break or after the
   last segment no business is Featured now. Client and server use the same agenda.
 - Two chronological sponsor slots resolve to the ordered active sponsor pool,
