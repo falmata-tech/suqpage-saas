@@ -3,6 +3,7 @@ import { createSupportConversation, getSupportConversation, postSupportMessage, 
 import { normalizeControlledYouTubeUrl, controlledYouTubeWatchUrl } from './youtube-provider';
 import { resolveProductVideoUrl } from './tiktok-short-link';
 import { productVideoWatchUrl } from './video/product-video';
+import { approvedDemoVideo } from './video/demo-video-catalog';
 import { videoSourceUrl } from './video-request-policy';
 import { STARTER_VIDEO_REF, STARTER_VIDEO_URL } from './business-starter';
 import { productMedia, parseProductMedia } from './product-media';
@@ -14,7 +15,7 @@ import type { Product, SessionUser } from './types';
 export type VideoRequest = { conversation_id:number; business_id:number; target_kind:'header'|'product'; product_id:number|null; target_label:string; source_url:string; request_note:string; baseline_videos:string; status:'pending'|'approved'|'declined'; approved_ref:string|null; reviewed_by:number|null; reviewed_at:number|null };
 const fail = (message:string, code='video_request_invalid'):never => { throw new SupportError(message,code); };
 async function target(businessId:number, kind:'header'|'product', productId:number|null) {
-  const business=await runtimeGet<{id:number;handle:string;process_video_ref:string;content_version:number;status:string}>('SELECT id,handle,process_video_ref,content_version,status FROM businesses WHERE id=?',[businessId]);
+  const business=await runtimeGet<{id:number;handle:string;process_video_ref:string;content_version:number;status:string;is_demo:number}>('SELECT id,handle,process_video_ref,content_version,status,is_demo FROM businesses WHERE id=?',[businessId]);
   if(!business) return fail('Business not found.');
   if(kind==='product') {
     const product=await runtimeGet<Product>('SELECT * FROM products WHERE id=? AND business_id=?',[productId,businessId]);
@@ -23,7 +24,11 @@ async function target(businessId:number, kind:'header'|'product', productId:numb
   }
   const draft=await runtimeGet<{version:number;content_json:string}>('SELECT version,content_json FROM owner_page_drafts WHERE business_id=?',[businessId]);
   const publication=await runtimeGet<{revision:number;draft_version:number;content_json:string|null}>('SELECT revision,draft_version,content_json FROM owner_page_publications WHERE business_id=? ORDER BY revision DESC LIMIT 1',[businessId]);
-  const fallback=business.process_video_ref?controlledYouTubeWatchUrl(business.process_video_ref):STARTER_VIDEO_URL;
+  const fallback=business.process_video_ref
+    ? business.is_demo===1&&approvedDemoVideo(business.process_video_ref,businessId)
+      ? productVideoWatchUrl(business.process_video_ref)
+      : controlledYouTubeWatchUrl(business.process_video_ref)
+    : STARTER_VIDEO_URL;
   return {business,product:null,label:'Business video',videos:[draft?parseShopPageContent(JSON.parse(draft.content_json)).videoUrl:fallback,publication?.content_json?parseShopPageContent(JSON.parse(publication.content_json)).videoUrl:fallback],draft,publication};
 }
 export async function createVideoRequest(user:SessionUser,input:{target:unknown;productId?:unknown;sourceUrl:unknown;note?:unknown;idempotencyKey:unknown}) {

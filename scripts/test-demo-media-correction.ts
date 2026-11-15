@@ -32,12 +32,16 @@ test('BE-049 legacy demo media queue admits only exact synthetic target, gallery
    businessId:50,handle:'demo-dara-clay-works',actorUserId:11,actorRole:'platform_admin',
    expectedContentVersion:4,expectedDraftVersion:3,expectedPageRevision:3,
    coverBefore:'https://www.youtube.com/watch?v=wJV9EDe_sFc',coverVideoRef:'demo:synthetic-50-cover',
+   processVideoBefore:'tiktok:1234567890123456789',processVideoAfter:'demo:synthetic-50-cover',
    products:[197,198,199,200].map(productId=>({productId,beforeMedia:media,
     afterMedia:[media[0],{kind:'video',ref:`demo:synthetic-50-product-${productId}`}]}))};
   assert.equal(parseQueuedDemoMediaCorrection(input,50).businessId,50);
   assert.throws(()=>parseQueuedDemoMediaCorrection(input,62));
   for(const bad of [{...input,businessId:62},{...input,handle:'different'},
    {...input,actorRole:'client'},{...input,ownerUserId:11},
+   {...input,processVideoBefore:'youtube:wJV9EDe_sFc'},
+   {...input,processVideoAfter:'demo:business-62'},
+   {...input,processVideoBefore:input.processVideoAfter},
    {...input,products:input.products.slice(1)},
    {...input,products:input.products.map((p,i)=>i? p:{...p,afterMedia:[{kind:'image',ref:'/uploads/seed/other.jpg'},p.afterMedia[1]]})},
    {...input,products:input.products.map((p,i)=>i? p:{...p,afterMedia:[...p.afterMedia,{kind:'video',ref:'youtube:EBrvynBWYzY'}]})},
@@ -45,6 +49,7 @@ test('BE-049 legacy demo media queue admits only exact synthetic target, gallery
    {...input,extra:'unreviewed'}])assert.throws(()=>parseUnenrolledDemoMediaCorrection(bad));
   const rollback={...input,direction:'rollback',operationKey:'synthetic_legacy_50_02',
    coverBefore:'/videos/demo/synthetic-50-cover.mp4',coverVideoRef:'youtube:wJV9EDe_sFc',
+   processVideoBefore:'demo:synthetic-50-cover',processVideoAfter:'tiktok:1234567890123456789',
    products:input.products.map(p=>({productId:p.productId,beforeMedia:p.afterMedia,afterMedia:p.beforeMedia}))};
   assert.equal(parseQueuedDemoMediaCorrection(rollback,50).kind,'unenrolled_media_correction');
  }finally{for(const slug of slugs)delete DEMO_VIDEO_ASSETS[slug];}

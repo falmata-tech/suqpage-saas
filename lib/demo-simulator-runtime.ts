@@ -16,6 +16,9 @@ import {parseDemoCategoryCorrection} from './demo-category-correction';
 import {productMedia} from './product-media';
 import {ProductUpkeepError} from './product-upkeep-domain';
 import {RevisionError} from './revision-domain';
+import {catalogToRevisionSnapshotV4,processVideoPolicyForCatalog} from './revision-v4-defaults';
+import {requireRevisionSnapshotV4} from './revision-v4-domain';
+import {SHOWROOM_COMPONENT_BANK_LATEST} from './showroom-bank-release';
 import {productVideoWatchUrl} from './video/product-video';
 import type {SessionUser} from './types';
 import {isSupportedPostgresMigrationLedger,LATEST_POSTGRES_MIGRATION_VERSION} from './postgres-schema-version';
@@ -330,7 +333,8 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
    AND CASE WHEN action='demo.unenrolled_media_corrected' THEN detail::jsonb->>'operationKey' END=? ORDER BY id DESC LIMIT 1`,[input.businessId,input.operationKey]);
   if(receipt){
    if(receipt.payload_hash!==payloadHash)throw Error('This demo media operation has different reviewed content.');
-   if(state.draft.content.videoUrl!==productVideoWatchUrl(input.coverVideoRef)||
+   if(state.catalog.business.process_video_ref!==input.processVideoAfter||
+     state.draft.content.videoUrl!==productVideoWatchUrl(input.coverVideoRef)||
      input.products.some(item=>digest(item.afterMedia)!==digest(productMedia(state.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
    return {duplicate:true};
   }
@@ -338,10 +342,28 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
   if(input.expectedContentVersion!==state.catalog.business.content_version||
    input.expectedDraftVersion!==state.draft.version||input.expectedPageRevision!==state.publication.revision||
    input.coverBefore!==state.draft.content.videoUrl||
+   input.processVideoBefore!==state.catalog.business.process_video_ref||
    input.products.some(item=>digest(item.beforeMedia)!==digest(productMedia(state.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   if(!size||!Number.isFinite(Number(size.bytes))||Number(size.bytes)>=Number(control.database_limit_bytes))throw Error('Demo media storage budget reached.');
   let version=state.catalog.business.content_version;
+  // Retain the true old-version snapshot before replacing this legacy process
+  // video. The first ordinary product upkeep then versions both media changes.
+  const baseline=catalogToRevisionSnapshotV4(state.catalog);
+  const retained=await runtimeGet<{snapshot_json:string}>(
+   'SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
+   [input.businessId,version]);
+  if(retained){
+   const checked=requireRevisionSnapshotV4(retained.snapshot_json,SHOWROOM_COMPONENT_BANK_LATEST,
+    processVideoPolicyForCatalog(state.catalog));
+   if(digest(checked)!==digest(baseline))throw new DemoDrift('content_changed');
+  }else await runtimeRun(`INSERT INTO published_catalog_versions
+   (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+   VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(baseline),state.actor.id]);
+  const processChanged=await runtimeRun(`UPDATE businesses SET process_video_ref=?
+   WHERE id=? AND content_version=? AND process_video_ref=? AND is_demo=1 AND status='active'`,
+   [input.processVideoAfter,input.businessId,version,input.processVideoBefore]);
+  if(processChanged.changes!==1)throw new DemoDrift('content_changed');
   for(const [index,item] of input.products.entries()){
    phase=(`product_${index+1}` as UnenrolledMediaPhase);
    const p=state.catalog.products.find(p=>p.id===item.productId)!;
@@ -364,13 +386,18 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
    {action:'save',version:state.draft.version,content:{...state.draft.content,videoUrl}});
   phase='postcondition';
   const after=await unenrolledMediaState(input.businessId,input.actorUserId);
-  if(after.catalog.business.content_version!==version||after.draft.version!==state.draft.version+1||
+  if(after.catalog.business.content_version!==version||after.catalog.business.process_video_ref!==input.processVideoAfter||
+   after.draft.version!==state.draft.version+1||
    after.publication.revision!==state.publication.revision+1||after.draft.content.videoUrl!==videoUrl||
    input.products.some(item=>digest(item.afterMedia)!==digest(productMedia(after.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
   phase='audit';
+  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.unenrolled_process_video_corrected',?,'')",
+   [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
+    operationKey:input.operationKey,beforeRefHash:digest(input.processVideoBefore),afterRefHash:digest(input.processVideoAfter)})]);
   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.unenrolled_media_corrected',?,'')",
    [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
     actorRole:input.actorRole,operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
+    processBeforeHash:digest(input.processVideoBefore),processAfterHash:digest(input.processVideoAfter),
     products:input.products.map(p=>p.productId)})]);
   return {duplicate:false};
  });}catch(error){

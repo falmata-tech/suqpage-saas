@@ -1016,6 +1016,9 @@ For the two legacy public demos without enrollment, the finite paused private
 queue uses ordinary product/page publication and leaves the scenario cohort
 untouched. It binds their existing page author with current platform-admin
 authority, admits only their exact reviewed media and never enrolls them.
+Their legacy process video is replaced in the same guarded transaction and
+retained in catalog history for exact inverse rollback. The composed showroom
+plays an approved first-party process MP4 for the matching demo business.
 
 ## 21. Standard page operating workflow
 

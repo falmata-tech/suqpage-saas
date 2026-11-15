@@ -3,6 +3,7 @@ import type {
   RevisionBusiness,
   RevisionCategory,
   RevisionCollection,
+  RevisionProcessVideoPolicy,
   RevisionProduct,
 } from "./revision-domain";
 import {
@@ -624,5 +625,20 @@ export function catalogToRevisionSnapshotV4(
       designManifest,
     },
     SHOWROOM_COMPONENT_BANK_LATEST,
+    processVideoPolicyForCatalog(catalog),
   );
+}
+
+/** A persisted demo catalog may retain its exact pre-correction TikTok ref. */
+export function processVideoPolicyForCatalog(catalog:Catalog):RevisionProcessVideoPolicy|undefined{
+ const business=catalog.business;
+ if(business.is_demo!==1)return undefined;
+ const legacy=business.id===50||business.id===62;
+ return {businessId:business.id,isDemo:true,
+  ...(legacy&&business.process_video_ref.startsWith('tiktok:')?{retainedProcessVideoRef:business.process_video_ref}:{})};
+}
+
+/** Authoring can retain an approved demo ref, but cannot author a legacy TikTok ref. */
+export function approvedProcessVideoPolicy(business:{id:number;is_demo?:number}):RevisionProcessVideoPolicy|undefined{
+ return business.is_demo===1?{businessId:business.id,isDemo:true}:undefined;
 }

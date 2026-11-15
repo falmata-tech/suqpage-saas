@@ -108,9 +108,26 @@ gallery, unapproved asset, active simulator, or a late product/page failure WHEN
 the request runs THEN the correction is rejected without partial product, page,
 or catalog history change; the sanitized rejection audit is retained. A rollback
 uses a new, reviewed inverse request with fresh versions and
-before refs; it restores only the prior cover and four video
-refs through the same ordinary publication path. Neither direction runs
+before refs; it restores only the prior cover, process video, and four product video
+refs through the same ordinary publication path. The old TikTok process ref is
+retained in immutable catalog history and can be restored exactly, but its
+process player remains blank if restored. Neither direction runs
 automatically after an ambiguous hosted outcome.
+
+The finite plan also requires exact `processVideoBefore` and
+`processVideoAfter` refs. Apply accepts only the existing managed TikTok ref
+for these two demos and the approved first-party process ref for the matching
+business; inverse rollback swaps them. The worker checks the old ref and
+content version under the business lock, retains the old V4 catalog snapshot,
+and changes the process ref in the same transaction before the first ordinary
+product upkeep. That first upkeep versions the process and product media
+together; four product updates still advance content version by four overall.
+The final postcondition and a distinct process audit verify the new ref and
+hashes. Retained TikTok is accepted by V4 only for the exact trusted prior
+snapshot of demo 50 or 62. New revision authoring accepts only YouTube or an
+approved first-party ref bound to its demo business; foreign demos and newly
+authored TikTok refs are rejected. The storefront renders the approved process
+MP4 on visitor Play.
 
 ## S154 proposed selection correction — ready for root review
 

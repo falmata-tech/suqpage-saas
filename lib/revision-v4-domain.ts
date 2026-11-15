@@ -2,6 +2,7 @@ import {
   MAX_REVISION_BYTES,
   RevisionError,
   parseRevisionContent,
+  type RevisionProcessVideoPolicy,
   type RevisionBusiness,
   type RevisionCategory,
   type RevisionCollection,
@@ -54,6 +55,7 @@ function inputRecord(input: unknown): Record<string, unknown> {
 export function parseRevisionSnapshotV4(
   input: unknown,
   bank: ShowroomComponentBankV2,
+  processVideoPolicy?:RevisionProcessVideoPolicy,
 ): RevisionSnapshotV4 {
   const raw = inputRecord(input);
   const allowed = [
@@ -71,7 +73,7 @@ export function parseRevisionSnapshotV4(
   ) {
     throw new RevisionError("The revision-v4 schema is invalid.");
   }
-  const content = parseRevisionContent(raw, REVISION_SCHEMA_VERSION_V4);
+  const content = parseRevisionContent(raw, REVISION_SCHEMA_VERSION_V4,processVideoPolicy);
   let contentBlocks: ShowroomContentBlocksDocument;
   let designManifest: ShowroomDesignProposalV2;
   try {
@@ -119,6 +121,7 @@ export function parseRevisionSnapshotV4(
 export function requireRevisionSnapshotV4(
   input: unknown,
   bank: ShowroomComponentBankV2,
+  processVideoPolicy?:RevisionProcessVideoPolicy,
 ): RevisionSnapshotV4 {
-  return parseRevisionSnapshotV4(input, bank);
+  return parseRevisionSnapshotV4(input, bank,processVideoPolicy);
 }
