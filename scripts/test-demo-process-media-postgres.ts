@@ -128,6 +128,18 @@ async function main(){
   for(const [key,value] of Object.entries(advanced.enrollment))if(key!=='expected_hash')assert.deepEqual(restored.enrollment[key],value,key);
   assert.notEqual(restored.enrollment.expected_hash,advanced.enrollment.expected_hash);
   assert.equal(JSON.parse(String(restored.versions.at(-1).snapshot_json)).business.processVideoRef,oldRef);
+  const stale={...input,operationKey:'reviewed_process_stale_0001'};
+  await db.prepare("UPDATE demo_simulator_requests SET input_json=?,status='pending',reason='',requested_at=?,processed_at=0 WHERE business_id=?")
+   .run(JSON.stringify(stale),now+120000,businessId);
+  assert.equal((await runDemoSimulatorTick(now+120000,1,'maintenance')).enrollmentRejected,1);
+  const rejected=await state();
+  assert.deepEqual(rejected.business,restored.business);assert.deepEqual(rejected.products,restored.products);
+  assert.deepEqual(rejected.page,restored.page);assert.deepEqual(rejected.enrollment,restored.enrollment);
+  assert.deepEqual(rejected.versions,restored.versions);
+  const failure=rejected.audit.at(-1);
+  assert.equal(failure.action,'demo.process_media_rejected');
+  assert.deepEqual(JSON.parse(String(failure.detail)),{automation:'demo-media-maintenance',
+   operationKey:stale.operationKey,phase:'reviewed_before',code:'content_changed'});
   console.log('PASS BE-049 enrolled process media: exact tenant, atomic history, replay, inverse and next-stage continuity.');
  }finally{await closeDbForTests();}
 }

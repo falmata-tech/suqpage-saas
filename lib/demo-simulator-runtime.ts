@@ -12,7 +12,7 @@ import {parseOfferingHighlightsJson} from './offering-presentation';
 import {configuredReviewer} from './reviewer-access-runtime';
 import {demoScenarioCommandKey,demoScenarioStage,nextDemoScenarioStage,parseDemoScenarioParameters,type DemoScenarioParameters,type DemoScenarioKey} from './demo-scenarios';
 import {parseDemoMediaCorrection,parseUnenrolledDemoMediaCorrection,parseQueuedDemoMediaCorrection,type UnenrolledDemoMediaCorrection} from './demo-media-correction';
-import {parseDemoProcessMediaCorrection} from './demo-process-media-correction';
+import {parseDemoProcessMediaCorrection,type DemoProcessMediaCorrection} from './demo-process-media-correction';
 import {parseDemoCategoryCorrection} from './demo-category-correction';
 import {productMedia} from './product-media';
 import {ProductUpkeepError} from './product-upkeep-domain';
@@ -212,18 +212,24 @@ export async function correctDemoMedia(raw:unknown){
 
 /** Exact enrolled-example process-video repair. It publishes one ordinary
  * retained catalog version and never edits products, pages or scenario progress. */
+type ProcessMediaPhase='admission'|'eligibility'|'receipt'|'reviewed_before'|'retained'|
+ 'business'|'postcondition'|'version'|'enrollment'|'audit';
+const processMediaFailurePhases=new WeakMap<object,ProcessMediaPhase>();
 export async function correctDemoProcessMedia(raw:unknown){
  const input=parseDemoProcessMediaCorrection(raw),payloadHash=digest(input);
- return runtimeTransaction(async()=>{
+ let phase:ProcessMediaPhase='admission';
+ try{return await runtimeTransaction(async()=>{
   await runtimeRun('SELECT pg_advisory_xact_lock(6870619271382)');
   if(!await schemaReady())throw Error('The demo schema is not ready.');
   const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before process media maintenance.');
+  phase='eligibility';
   const e=await runtimeGet<Enrollment>('SELECT * FROM demo_simulator_enrollments WHERE business_id=? FOR UPDATE',[input.businessId]);
   if(!e||e.status!=='active'||e.reason||e.handle!==input.handle||e.owner_user_id!==input.ownerUserId||
    e.provider_user_id!==input.providerUserId)throw new DemoDrift('eligibility_changed');
   const state=await currentState(e,true);
   if(state.hash!==e.expected_hash)throw new DemoDrift('content_changed');
+  phase='receipt';
   const receipt=await runtimeGet<{payload_hash:string}>(`SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs
    WHERE business_id=? AND action='demo.process_media_corrected'
    AND CASE WHEN action='demo.process_media_corrected' THEN detail::jsonb->>'operationKey' END=? ORDER BY id DESC LIMIT 1`,
@@ -233,6 +239,7 @@ export async function correctDemoProcessMedia(raw:unknown){
    if(state.catalog.business.process_video_ref!==input.processVideoAfter)throw new DemoDrift('content_changed');
    return {duplicate:true};
   }
+  phase='reviewed_before';
   if(input.expectedHash!==e.expected_hash||input.expectedContentVersion!==state.catalog.business.content_version||
    input.expectedDraftVersion!==state.draft.version||input.expectedPageRevision!==state.publication.revision||
    input.expectedStage!==e.stage||input.expectedCycle!==e.cycle||input.expectedDueAt!==Number(e.due_at)||
@@ -255,6 +262,7 @@ export async function correctDemoProcessMedia(raw:unknown){
    throw Error('Demo media storage budget reached.');
   const version=state.catalog.business.content_version;
   const beforeSnapshot=catalogToRevisionSnapshotV4(state.catalog);
+  phase='retained';
   const retained=await runtimeGet<{snapshot_json:string}>(
    'SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
    [input.businessId,version]);
@@ -265,10 +273,12 @@ export async function correctDemoProcessMedia(raw:unknown){
   }else await runtimeRun(`INSERT INTO published_catalog_versions
    (business_id,content_version,snapshot_json,change_kind,actor_user_id)
    VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(beforeSnapshot),state.actor.id]);
+  phase='business';
   const updated=await runtimeRun(`UPDATE businesses SET process_video_ref=?,content_version=?
    WHERE id=? AND handle=? AND is_demo=1 AND status='active' AND content_version=? AND process_video_ref=?`,
    [input.processVideoAfter,version+1,input.businessId,input.handle,version,input.processVideoBefore]);
   if(updated.changes!==1)throw new DemoDrift('content_changed');
+  phase='postcondition';
   const after=await currentState(e,true);
   const unchangedBusiness=(business:typeof state.catalog.business)=>({...business,process_video_ref:'',content_version:0});
   if(after.catalog.business.content_version!==version+1||
@@ -278,20 +288,26 @@ export async function correctDemoProcessMedia(raw:unknown){
    digest(after.draft)!==digest(state.draft)||digest(after.publication)!==digest(state.publication)||
    digest(after.categories)!==digest(state.categories)||digest(after.location??null)!==digest(state.location??null)||
    digest(after.discovery??null)!==digest(state.discovery??null))throw new DemoDrift('content_changed');
+  phase='version';
   const afterSnapshot=catalogToRevisionSnapshotV4(after.catalog);
   await runtimeRun(`INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id)
    VALUES(?,?,?,'publication',?)`,[input.businessId,version+1,JSON.stringify(afterSnapshot),state.actor.id]);
+  phase='enrollment';
   const acknowledged=await runtimeRun(`UPDATE demo_simulator_enrollments SET expected_hash=?
    WHERE business_id=? AND status='active' AND reason='' AND expected_hash=? AND stage=? AND cycle=? AND due_at=?`,
    [after.hash,input.businessId,e.expected_hash,e.stage,e.cycle,e.due_at]);
   if(acknowledged.changes!==1)throw new DemoDrift('content_changed');
+  phase='audit';
   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.process_media_corrected',?,'')",
    [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
     operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
     beforeRefHash:digest(input.processVideoBefore),afterRefHash:digest(input.processVideoAfter),
     baseVersion:version,contentVersion:version+1})]);
   return {duplicate:false};
- });
+ });}catch(error){
+  if(error&&typeof error==='object')processMediaFailurePhases.set(error,phase);
+  throw error;
+ }
 }
 
 /** One finite reviewed cohort correction; the worker must already be operator-paused. */
@@ -560,6 +576,7 @@ async function processEnrollmentRequests(now:number,mediaOnly=false){
   await runtimeRun('SAVEPOINT demo_enrollment');
   let accepted=false;
   let unenrolledCorrection:UnenrolledDemoMediaCorrection|null=null;
+  let processCorrection:DemoProcessMediaCorrection|null=null;
   try{
    const raw:unknown=JSON.parse(request.input_json);
    if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as Record<string,unknown>).kind==='category_correction_batch'){
@@ -571,6 +588,7 @@ async function processEnrollmentRequests(now:number,mediaOnly=false){
     (raw as Record<string,unknown>).kind==='process_media_correction'){
     const correction=parseDemoProcessMediaCorrection(raw);
     if(correction.businessId!==request.business_id)throw Error('Invalid private process media target.');
+    processCorrection=correction;
     await correctDemoProcessMedia(correction);mediaCorrected++;
    }else if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&
     ['media_correction','unenrolled_media_correction'].includes(String((raw as Record<string,unknown>).kind))){
@@ -588,6 +606,12 @@ async function processEnrollmentRequests(now:number,mediaOnly=false){
     await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(NULL,?,'demo.unenrolled_media_rejected',?,'')",
      [unenrolledCorrection.businessId,JSON.stringify({automation:'demo-media-maintenance',
       operationKey:unenrolledCorrection.operationKey,phase,code:unenrolledMediaFailureCode(error)})]);
+   }
+   if(processCorrection){
+    const phase=error&&typeof error==='object'?processMediaFailurePhases.get(error)??'admission':'admission';
+    await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(NULL,?,'demo.process_media_rejected',?,'')",
+     [processCorrection.businessId,JSON.stringify({automation:'demo-media-maintenance',
+      operationKey:processCorrection.operationKey,phase,code:unenrolledMediaFailureCode(error)})]);
    }
   }
   await runtimeRun('RELEASE SAVEPOINT demo_enrollment');
