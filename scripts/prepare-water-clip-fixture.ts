@@ -31,7 +31,7 @@ async function main(){
   target.searchParams.set('options',`-csearch_path=${nativeQaSchema(original.schema)}`);
   Object.assign(process.env,{SUQPAGE_DATABASE_DRIVER:'postgres',SUQPAGE_POSTGRES_URL:target.href,SUQPAGE_AUTH_DRIVER:'local',SUQPAGE_MEDIA_DRIVER:'filesystem'});
   const result=await runtimeTransaction(async()=>{
-    assert.equal(await runtimeCatalogByHandle(handle),null,'Legacy handle must be absent from the disposable setup seed.');
+    assert.ok(!await runtimeCatalogByHandle(handle),'Legacy handle must be absent from the disposable setup seed.');
     const actor=await runtimeGet<{id:number}>('SELECT id FROM users ORDER BY id LIMIT 1');
     assert.ok(actor);
     const business=await runtimeGet<{id:number}>(`INSERT INTO businesses
