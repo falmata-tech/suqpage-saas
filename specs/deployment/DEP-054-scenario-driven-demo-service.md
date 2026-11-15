@@ -4,7 +4,7 @@ title: Dedicated recurring demo scenario service
 status: in_progress
 related: [BE-067, FE-079, ADR-0034, DEP-045, DEP-046, DEP-052, BE-065]
 owners: [operations, backend, security]
-last_updated: 2026-11-15
+last_updated: 2026-11-14
 change_level: L4
 ---
 
@@ -26,23 +26,6 @@ manual Run now may enter only within 15 minutes of one of those times; the
 corresponding hourly slot admits at most one tick.
 Do not provision a VM, add production management tokens, share notification
 execution budgets, enable previews against production or invent an HTTP trigger.
-
-A separately reviewed, finite maintenance deployment may temporarily replace
-that schedule with one invocation per minute only from 19:00 inclusive to 21:00
-exclusive UTC on 2026-11-15 (22:00–00:00 Ethiopia time). Before or after those
-exact instants its adapter returns without opening the database. Within the
-window it may process only private requests while the control row is both
-disabled and operator-paused.
-The locked runtime must refuse all stage work if the control is enabled or has
-another pause reason; it must not change the stage slot or daily stage budget.
-Source qualification alone does not authorize request admission. A changed date
-or time needs fresh source qualification.
-
-Keep the control paused through the request readback and the protected restore
-of the three-times-daily adapter. Verify the exact restored Netlify source and
-schedule before enabling stages. A lagged or failed temporary deploy cannot
-extend the fixed UTC window. A lagged restore leaves the temporary adapter
-inert after cutoff but still scheduled every minute until replaced.
 
 Control/enrollment starts disabled. Independently verify Supabase project
 `sjeiiqxgscuqajpgddcc` / AfricMade and Netlify site
