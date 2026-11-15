@@ -69,8 +69,8 @@ for these two may use the same disabled private request queue with a distinct
 scenario progress, or write directly to product/page columns.
 
 Before queueing, inspect a selected-field before-image: exact business ID and
-handle, owner user ID, content/draft/publication versions, digest of the current
-catalog/page state, cover URL, each ordered gallery, and existing private-request
+handle, owner user ID, content/draft/publication versions, cover URL, each
+ordered gallery, current draft/publication coherence, and existing private-request
 status. Retain that image outside the public repository. A pending request cannot
 be overwritten; an existing accepted/rejected row may be rearmed only by a
 separate guarded update after reviewing its status and the new input. The worker
@@ -78,19 +78,20 @@ processes the plan only while explicitly paused for operator maintenance and
 keeps the normal accepted/rejected private receipt.
 
 GIVEN either exact demo with no enrollment, current owner authority, coherent
-draft/publication, unchanged state digest/versions/before refs, and approved
+draft/publication, unchanged versions/before refs, and approved
 first-party assets WHEN its queued plan runs THEN all four product galleries and
 the page cover change in one transaction through ordinary product upkeep and
 page publication. Images, order, product facts, page copy, contact fields,
 discovery and category membership remain intact. Immutable catalog versions,
 draft events, page revisions, product command receipts and a distinct media audit
-are appended. An exact operation-key replay is inert.
+are appended. The distinct audit includes internal before/after state digests.
+An exact operation-key replay is inert.
 
 GIVEN another business, an enrollment, stale state, pending location, changed
 gallery, unapproved asset, active simulator, or a late product/page failure WHEN
 the request runs THEN the correction is rejected without partial media/history
 change. A rollback uses a new, reviewed inverse request with fresh versions and
-the post-change state digest; it restores only the prior cover and four video
+before refs; it restores only the prior cover and four video
 refs through the same ordinary publication path. Neither direction runs
 automatically after an ambiguous hosted outcome.
 
@@ -147,7 +148,7 @@ the separate FE-061 review; test fixture provider IDs are not curated defaults.
 The unenrolled legacy path maps its synthetic parser and queue-binding cases
 to `scripts/test-demo-media-correction.ts`. A local synthetic disposable-
 PostgreSQL test in ignored `.local/s197-unenrolled-media/` covers exact targets,
-private queue admission, stale-state refusal, late publication rollback, replay,
+private queue admission, stale-version refusal, late publication rollback, replay,
 inverse rollback and cross-business isolation. No production payload or
 database QA fixture is published with the operator source.
 

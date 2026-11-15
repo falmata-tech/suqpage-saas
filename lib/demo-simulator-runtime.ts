@@ -267,20 +267,20 @@ export async function correctDemoCategoryBatch(raw:unknown){
 
 const unenrolledMediaTargets={50:'demo-dara-clay-works',62:'demo-wabi-bottled-water'} as const;
 
-async function unenrolledMediaState(businessId:50|62,lock:boolean){
+async function unenrolledMediaState(businessId:50|62){
  const handle=unenrolledMediaTargets[businessId];
  const owners=await runtimeAll<{id:number}>(`SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id
   WHERE u.business_id=? AND p.access_role='client' ORDER BY u.id`,[businessId]);
  if(owners.length!==1)throw new DemoDrift('eligibility_changed');
  const actor=await runtimeUserById(owners[0].id);
  if(!actor||actor.access_role!=='client'||actor.business_id!==businessId||
-   await currentBusinessAuthority(actor,businessId,lock)!=='owner')throw new DemoDrift('eligibility_changed');
- if(lock)await runtimeGet('SELECT business_id FROM owner_page_drafts WHERE business_id=? FOR UPDATE',[businessId]);
+   await currentBusinessAuthority(actor,businessId,true)!=='owner')throw new DemoDrift('eligibility_changed');
+ await runtimeGet('SELECT business_id FROM owner_page_drafts WHERE business_id=? FOR UPDATE',[businessId]);
  const business=await runtimeGet<{id:number;is_demo:number;status:string;handle:string}>(
-  `SELECT id,is_demo,status,handle FROM businesses WHERE id=? ${lock?'FOR UPDATE':''}`,[businessId]);
+  'SELECT id,is_demo,status,handle FROM businesses WHERE id=? FOR UPDATE',[businessId]);
  if(!business||business.is_demo!==1||business.status!=='active'||business.handle!==handle||
    await runtimeGet('SELECT 1 FROM demo_simulator_enrollments WHERE business_id=?',[businessId]))throw new DemoDrift('eligibility_changed');
- if(lock)await runtimeAll('SELECT id FROM products WHERE business_id=? ORDER BY id FOR UPDATE',[businessId]);
+ await runtimeAll('SELECT id FROM products WHERE business_id=? ORDER BY id FOR UPDATE',[businessId]);
  const catalog=await runtimeCatalogByBusinessId(businessId,true),draft=await ownerPagePort.read(businessId),publication=await pagePublicationPort.latest(businessId);
  if(!catalog||!draft||!publication?.content||
    digest(catalog.products.map(p=>p.id))!==digest(businessId===50?[197,198,199,200]:[245,246,247,248])||
@@ -293,24 +293,6 @@ async function unenrolledMediaState(businessId:50|62,lock:boolean){
  return {actor,catalog,draft,publication,hash:digest({catalog,draft,publication,categories,location,discovery})};
 }
 
-/** Read-only selected-field before-image for a private, reviewed operator plan. */
-export async function inspectUnenrolledDemoMedia(businessId:50|62){
- if(![50,62].includes(businessId))throw Error('Unknown legacy demo target.');
- return runtimeTransaction(async()=>{
-  if(!await schemaReady())throw Error('The demo schema is not ready.');
-  const state=await unenrolledMediaState(businessId,false);
-  const request=await runtimeGet<{status:string;reason:string;requested_at:number;processed_at:number}>(
-   'SELECT status,reason,requested_at,processed_at FROM demo_simulator_requests WHERE business_id=?',[businessId]);
-  return {businessId,handle:unenrolledMediaTargets[businessId],ownerUserId:state.actor.id,
-   expectedStateHash:state.hash,expectedContentVersion:state.catalog.business.content_version,
-   expectedDraftVersion:state.draft.version,expectedPageRevision:state.publication.revision,
-   coverBefore:state.draft.content.videoUrl,
-   products:state.catalog.products.map(p=>({productId:p.id,beforeMedia:productMedia(p)})),
-   request:request?{status:request.status,reason:request.reason,
-    requestedAt:Number(request.requested_at),processedAt:Number(request.processed_at)}:null};
- });
-}
-
 /** One-time ordinary publication for two unenrolled legacy demos; inverse plans roll back. */
 export async function correctUnenrolledDemoMedia(raw:unknown){
  const input=parseUnenrolledDemoMediaCorrection(raw),payloadHash=digest(input);
@@ -319,7 +301,7 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
   if(!await schemaReady())throw Error('The demo schema is not ready.');
   const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before media maintenance.');
-  const state=await unenrolledMediaState(input.businessId,true);
+  const state=await unenrolledMediaState(input.businessId);
   if(state.actor.id!==input.ownerUserId)throw new DemoDrift('eligibility_changed');
   const receipt=await runtimeGet<{payload_hash:string}>(`SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs
    WHERE business_id=? AND action='demo.unenrolled_media_corrected'
@@ -330,7 +312,7 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
      input.products.some(item=>digest(item.afterMedia)!==digest(productMedia(state.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
    return {duplicate:true};
   }
-  if(input.expectedStateHash!==state.hash||input.expectedContentVersion!==state.catalog.business.content_version||
+  if(input.expectedContentVersion!==state.catalog.business.content_version||
    input.expectedDraftVersion!==state.draft.version||input.expectedPageRevision!==state.publication.revision||
    input.coverBefore!==state.draft.content.videoUrl||
    input.products.some(item=>digest(item.beforeMedia)!==digest(productMedia(state.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
@@ -354,13 +336,14 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
   const videoUrl=productVideoWatchUrl(input.coverVideoRef);
   await saveOwnerPageAndPublication(state.actor,input.businessId,
    {action:'save',version:state.draft.version,content:{...state.draft.content,videoUrl}});
-  const after=await unenrolledMediaState(input.businessId,true);
+  const after=await unenrolledMediaState(input.businessId);
   if(after.catalog.business.content_version!==version||after.draft.version!==state.draft.version+1||
    after.publication.revision!==state.publication.revision+1||after.draft.content.videoUrl!==videoUrl||
    input.products.some(item=>digest(item.afterMedia)!==digest(productMedia(after.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.unenrolled_media_corrected',?,'')",
    [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
-    operationKey:input.operationKey,payloadHash,products:input.products.map(p=>p.productId)})]);
+    operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
+    products:input.products.map(p=>p.productId)})]);
   return {duplicate:false};
  });
 }
