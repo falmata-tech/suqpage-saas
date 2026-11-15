@@ -1,0 +1,79 @@
+name: Finite maker-clip app review
+
+on:
+  pull_request:
+    paths: ['.github/workflows/maker-clip-app-qa.yml', 'scripts/review-maker-clip-app.mjs', 'scripts/prepare-maker-clip-fixture.ts']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maker-clip-app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-media:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17.10-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: isolated-live-media-qa
+          POSTGRES_DB: suqpage_native_qa
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SUQPAGE_TEST_POSTGRES_URL: postgresql://postgres:isolated-live-media-qa@127.0.0.1:5432/suqpage_native_qa
+      AFRICMADE_NATIVE_QA: '1'
+      AFRICMADE_MOBILE_BUILD_PROFILE: development
+      EXPO_PUBLIC_API_ORIGIN: http://10.0.2.2:3000
+      EXPO_PUBLIC_NATIVE_MAP_FIXTURE: '1'
+      EXPO_NO_DOTENV: '1'
+      EXPO_NO_TELEMETRY: '1'
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+      - run: npm ci
+      - run: npm run check:workflow-scripts -- scripts/review-maker-clip-app.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: node --import tsx --test scripts/test-social-video-layout.ts
+      - run: google-chrome --version
+      - name: Prepare ordinary publications in a disposable schema
+        run: |
+          mkdir -p .local/native-qa/evidence .local/maker-clip-app-qa
+          node --import tsx scripts/native-qa-backend.ts > .local/maker-clip-app-qa/backend.log 2>&1 &
+          node --import tsx scripts/native-qa-backend.ts --check
+          node --import tsx scripts/prepare-maker-clip-fixture.ts
+      - name: Bind the emulator API on disposable loopback
+        run: sudo ip address add 10.0.2.2/32 dev lo
+      - name: Start the isolated Expo web server
+        working-directory: apps/mobile
+        run: npx expo start --web --host localhost --port 8082 --max-workers 2 > ../../.local/maker-clip-app-qa/expo.log 2>&1 &
+      - name: Exercise three actual maker clips on web and Expo
+        run: node scripts/review-maker-clip-app.mjs
+      - name: Retain source-bound run receipt
+        if: always()
+        run: |
+          mkdir -p .local/maker-clip-app-qa
+          printf '{"result":"%s","source":"%s","run":"%s"}\n' '${{ job.status }}' '${{ github.event.pull_request.head.sha }}' '${{ github.run_id }}' > .local/maker-clip-app-qa/run-receipt.json
+      - name: Retain synthetic public-screen evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: maker-clip-app-review
+          path: |
+            .local/maker-clip-app-qa/*.json
+            .local/maker-clip-app-qa/*.png
+          if-no-files-found: error
+          retention-days: 7
