@@ -41,8 +41,9 @@ in this package.
 
 Before hosted correction, verify the deployed static files and range playback,
 then refresh exact current media and version guards. Forty-nine businesses
-have simulator enrollment and require BE-049's disabled-worker request path;
-businesses 50 and 62 have no enrollment and require guarded ordinary catalog
-and page commands. The selected-field before/after media plan is private and
+have simulator enrollment and use `media_correction` requests; businesses 50
+and 62 have no enrollment and use separate `unenrolled_media_correction`
+requests on the same disabled private queue, with ordinary catalog/page writes.
+The selected-field before/after media plan is private and
 retains current product image entries in their exact positions. Native Android
 playback remains a separate device check.

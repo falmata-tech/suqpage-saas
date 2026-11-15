@@ -32,11 +32,12 @@ does not add a photo to video-only galleries.
 
 The static package and the private selected-field before/after media map only
 prepare a later guarded correction. Of the 51 external-video businesses, 49
-have simulator enrollment and use BE-049; IDs 50 and 62 have no enrollment and
-need separate guarded ordinary catalog/page commands. Do not submit those two
-to BE-049. Before any hosted change, verify deployed range delivery and
-playback, then obtain fresh exact enrollment, version, request and current-media
-guards under disabled simulator control. Reject any stale target.
+have simulator enrollment and use BE-049 `media_correction`. IDs 50 and 62 have
+no enrollment and use the distinct `unenrolled_media_correction` kind on the
+same disabled private queue; it runs guarded ordinary catalog/page commands.
+Before any hosted change, verify deployed range delivery and playback, then
+obtain fresh exact enrollment, version, request and current-media guards under
+disabled simulator control. Reject any stale target.
 
 ## S197 Liya Soap Kitchen phone playback follow-up
 
