@@ -58,7 +58,7 @@
 | `/uploads/seed/portfolio/demo-tana-welding-shop/product-1.webp` | Shopfront Security Frame | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-tana-welding-shop/product-2.webp` | Water Tank Stand | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-tana-welding-shop/product-3.webp` | Mobile Work Stand | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-tana-welding-shop/product-4.webp` | Weld Repair Visit | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-tana-welding-shop/product-4.webp` | Hinged Steel Window Guard | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-tana-welding-shop.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 
 ## Composition Direction

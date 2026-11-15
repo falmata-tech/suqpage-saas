@@ -57,7 +57,7 @@
 | `/uploads/seed/portfolio/demo-shewa-tool-workshop/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
 | `/uploads/seed/portfolio/demo-shewa-tool-workshop/product-1.webp` | Forged Digging Hoe | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-shewa-tool-workshop/product-2.webp` | Workshop Pry Bar | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-shewa-tool-workshop/product-3.webp` | Sharpening and Rehandle Service | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-shewa-tool-workshop/product-3.webp` | Hoe Head & Handle Set | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-shewa-tool-workshop/product-4.webp` | Short-Run Tool Pattern | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-shewa-tool-workshop.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |
 

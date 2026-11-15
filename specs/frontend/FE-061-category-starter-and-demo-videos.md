@@ -10,6 +10,35 @@ change_level: L3
 
 # FE-061 — Category-relevant video examples
 
+## S197 remaining external demo video package
+
+The current 66 public fictional showrooms have 264 products. Fifteen business
+stories already use admitted first-party MP4s. Liya Soap Kitchen's separate
+five-asset package covers business 21 and its four products. The remaining 50
+business stories and 200 products still have external TikTok refs. A bounded
+phone Chromium sweep reached a visible unavailable fallback for 16 distinct
+refs used by 39 businesses (including Liya); the other 13 refs remained
+inconclusive, and none advanced playback in that environment. The finite
+replacement package covers all 51 external-video businesses, with source
+evidence distinguished in `S197-MOBILE-FALLBACK-ASSETS.json`.
+
+Each of the 50 new story clips uses that business's approved hero and four
+product images or diagrams; each product clip uses its matching owned artwork
+or a clearly designed product diagram when the portfolio image depicts another
+item. No clip uses downloaded social footage or implies real production. Eight
+of the 204 current products have video-only media; this includes all six
+diagram exceptions. The correction preserves every existing product photo and
+does not add a photo to video-only galleries.
+
+The static package and the private selected-field before/after media map only
+prepare a later guarded correction. Of the 51 external-video businesses, 49
+have simulator enrollment and use BE-049 `media_correction`. IDs 50 and 62 have
+no enrollment and use the distinct `unenrolled_media_correction` kind on the
+same disabled private queue; it runs guarded ordinary catalog/page commands.
+Before any hosted change, verify deployed range delivery and playback, then
+obtain fresh exact enrollment, version, request and current-media guards under
+disabled simulator control. Reject any stale target.
+
 ## S197 Liya Soap Kitchen phone playback follow-up
 
 The fictional Liya Soap Kitchen's externally hosted story and product players
@@ -62,7 +91,7 @@ video is changed by this implementation alone.
 
 ## S197 — full public-demo media review
 
-Review all64 currently public demo stories and all256 current products. Actually
+Review all66 currently public demo stories and all264 current products. Actually
 play the existing clips and candidates, checking subject, image clarity, framing
 and professional presentation. Titles, thumbnails and player-document load are
 insufficient evidence. Select on quality and relevance, independently of national

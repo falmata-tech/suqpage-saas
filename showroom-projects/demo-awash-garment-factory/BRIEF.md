@@ -56,7 +56,7 @@
 |---|---|---|---|---|
 | `/uploads/seed/portfolio/demo-awash-garment-factory/hero.webp` | business-specific working scene | illustrative demo artwork | yes | hero |
 | `/uploads/seed/portfolio/demo-awash-garment-factory/product-1.webp` | School Uniform Run | illustrative demo artwork | yes | offering |
-| `/uploads/seed/portfolio/demo-awash-garment-factory/product-2.webp` | Cafe Apron Set | illustrative demo artwork | yes | offering |
+| `/uploads/seed/portfolio/demo-awash-garment-factory/product-2.webp` | Hospitality and Clinic Wear | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-awash-garment-factory/product-3.webp` | Branded Work Shirt Run | illustrative demo artwork | yes | offering |
 | `/uploads/seed/portfolio/demo-awash-garment-factory/product-4.webp` | Small-Label Sewing Run | illustrative demo artwork | yes | offering |
 | `/landing/showroom-booths/demo-awash-garment-factory.svg` | coordinated virtual venue booth | illustrative demo artwork | yes | discovery booth |

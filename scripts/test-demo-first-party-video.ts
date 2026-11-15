@@ -79,9 +79,19 @@ test("one reviewed Liya request can bind its story and four distinct product cli
 
 test("every admitted static asset matches its source and release ledger", () => {
   const ledger=JSON.parse(fs.readFileSync(new URL("../docs/operations/S197-DEMO-VIDEO-ASSETS.json",import.meta.url),"utf8"));
+  const mobile=JSON.parse(fs.readFileSync(new URL("../docs/operations/S197-MOBILE-FALLBACK-ASSETS.json",import.meta.url),"utf8"));
   assert.equal(ledger.assets.length,20);
-  assert.equal(Object.keys(DEMO_VIDEO_ASSETS).length,20);
-  for(const entry of ledger.assets){
+  assert.equal(mobile.businesses.length,50);
+  const mobileAssets=mobile.businesses.flatMap((business: any) => {
+    assert.notEqual(business.id,21);
+    assert.equal(business.assets.length,5);
+    assert.equal(business.assets.filter((asset: any) => asset.role==="story").length,1);
+    assert.equal(business.assets.filter((asset: any) => asset.role==="product").length,4);
+    return business.assets.map((asset: any) => ({...asset,businessId:business.id,sourceBrief:business.sourceBrief}));
+  });
+  assert.equal(mobileAssets.length,250);
+  assert.equal(Object.keys(DEMO_VIDEO_ASSETS).length,270);
+  for(const entry of [...ledger.assets,...mobileAssets]){
     const asset=DEMO_VIDEO_ASSETS[entry.slug],file=new URL(`../public/videos/demo/${entry.slug}.mp4`,import.meta.url);
     assert.equal(asset.businessId,entry.businessId);
     assert.equal(asset.status,"approved");
@@ -92,7 +102,10 @@ test("every admitted static asset matches its source and release ledger", () => 
     assert.ok(entry.sourceBrief.startsWith("showroom-projects/"));
     assert.ok(fs.existsSync(new URL(`../${entry.sourceBrief}`,import.meta.url)));
     assert.ok(entry.sourceImages.length>0);
+    assert.ok(entry.visualQA.startsWith("pass:"));
   }
+  assert.equal(approvedDemoVideo("demo:business-39-product-153",39),true);
+  assert.equal(approvedDemoVideo("demo:business-39-product-153",13),false);
 });
 
 test("Expo WebView accepts only its own origin and exact video", () => {
