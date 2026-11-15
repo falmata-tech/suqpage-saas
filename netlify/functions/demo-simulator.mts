@@ -1,11 +1,11 @@
 import {runDemoSimulatorTick} from '../../lib/demo-simulator-runtime.ts';
 // Published Netlify deploy only. It shares the existing server database adapter,
 // not the chat worker's execution budget, credentials or delivery queue.
-// Finite maintenance window: 22:00–00:00 Ethiopia time from
-// 2026-11-15 to 2026-11-16 only. Restore the ordinary schedule separately.
+// Finite maintenance window: 21:15–23:15 Ethiopia time on
+// 2026-11-15 only. Restore the ordinary schedule separately.
 export const config={schedule:'* * * * *'};
-const maintenanceStart=Date.UTC(2026,10,15,19);
-const maintenanceEnd=Date.UTC(2026,10,15,21);
+const maintenanceStart=Date.UTC(2026,10,15,18,15);
+const maintenanceEnd=Date.UTC(2026,10,15,20,15);
 export function isDemoSimulatorWindow(now:number){
  return Number.isSafeInteger(now)&&now>=maintenanceStart&&now<maintenanceEnd;
 }

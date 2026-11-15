@@ -17,16 +17,16 @@ test('DEP-054 actual scheduled demo worker loads without Next request context',a
  worker._compile(source,filename);
  assert.equal(worker.exports.config.schedule,'* * * * *');assert.equal(typeof worker.exports.default,'function');
  const inside=worker.exports.isDemoSimulatorWindow;
- assert.equal(inside(Date.UTC(2026,10,15,18,59,59,999)),false);
- assert.equal(inside(Date.UTC(2026,10,15,19,0)),true);
- assert.equal(inside(Date.UTC(2026,10,15,20,59,59,999)),true);
- assert.equal(inside(Date.UTC(2026,10,15,21,0)),false);
- assert.equal(inside(Date.UTC(2026,10,16,19,0)),false);
+ assert.equal(inside(Date.UTC(2026,10,15,18,14,59,999)),false);
+ assert.equal(inside(Date.UTC(2026,10,15,18,15)),true);
+ assert.equal(inside(Date.UTC(2026,10,15,20,14,59,999)),true);
+ assert.equal(inside(Date.UTC(2026,10,15,20,15)),false);
+ assert.equal(inside(Date.UTC(2026,10,16,18,15)),false);
  // A delayed or manual invocation outside the exact window must return
  // without opening a database or invoking the mutation runtime.
  const dateNow=Date.now,log=console.log,error=console.error,logs:unknown[][]=[],errors:unknown[][]=[];
  try{
-  Date.now=()=>Date.UTC(2026,10,15,21,0);
+  Date.now=()=>Date.UTC(2026,10,15,20,15);
   console.log=(...args:unknown[])=>{logs.push(args);};
   console.error=(...args:unknown[])=>{errors.push(args);};
   await worker.exports.default();

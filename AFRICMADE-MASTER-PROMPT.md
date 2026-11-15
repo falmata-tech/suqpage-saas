@@ -712,7 +712,7 @@ It advances predefined coherent scenarios through ordinary product and page
 publication commands. Foreground public screens check for changes every15 seconds,
 preserve inquiry drafts and read one consistent product/profile snapshot. This
 is bounded foreground polling, not a Supabase Realtime subscription.
-The 2026-11-15 19:00–21:00 UTC maintenance adapter runs every minute
+The 2026-11-15 18:15–20:15 UTC maintenance adapter runs every minute
 only within that finite window and admits only private video-correction
 requests while the control is operator-paused. Unexpected request kinds or
 invalid JSON fail the tick without acknowledgement. It cannot advance scenarios;

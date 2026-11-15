@@ -33,7 +33,7 @@ establish the published schedule or next hosted run. A 64-business rotation
 takes at least six days at maximum four-per-run throughput, or about 22 days
 at the previously observed one per run.
 
-The prepared finite maintenance variant for 2026-11-15 19:00–21:00 UTC remains
+The prepared finite maintenance variant for 2026-11-15 18:15–20:15 UTC remains
 local only. `scripts/test-demo-worker-boundary.ts` verifies the exact minute
 cron and cutoff with no outside-window database call.
 `scripts/test-demo-simulator-postgres.ts` verifies that enabled control or a
