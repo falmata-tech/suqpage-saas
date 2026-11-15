@@ -219,6 +219,21 @@ the same ordering defect. Preserve the FK and late-foreign rollback assertion;
 publish the shared final snapshot first, then record all member receipts/audits
 inside the same transaction before requalifying the corrected source.
 
+## BE-067 reviewed agriculture membership correction — local qualification only
+
+Six current active demo farms have reviewed agriculture proposals but only
+food-farming public memberships. A locally qualified private correction path
+binds six exact identities, four products each, current hashes/versions and
+progress to one disabled-worker request. It adds agriculture cross-listing and
+acknowledges all simulator category bindings in one transaction. A synthetic
+public parser test and a private disposable-PostgreSQL case pass: late sixth
+insert rollback, proposal drift/foreign product refusal, guarded rearm of an
+existing accepted request row, replay before/after a later stage, real-tenant
+preservation and a 2,398-byte request. The successful local batch took under
+one second after fixture setup, within the 23-second bound. No hosted data was
+changed; source review, deployment, a fresh protected before-image and the
+separately guarded L4 admission precede production execution.
+
 ## S194 scenario-driven demo activity — qualified and deployed
 
 BE-067 / FE-079 / DEP-054 / ADR-0034 map the versioned scenarios, ordinary

@@ -123,6 +123,28 @@ and atomically acknowledge only that change. It must preserve enrollment progres
 and all scenario baselines except the approved page video URL. Routine stage work
 continues to preserve media and fail closed on any unreviewed content drift.
 
+An operator may correct the reviewed six-demo agriculture cohort through one
+private, disabled-only `category_correction_batch` request. The request binds six
+sorted, distinct business/owner/provider identities, four sorted product IDs per
+business, current simulator hash and progress, and content/draft/publication
+versions. Before any write, each member must remain an active demo with a complete
+enrolled catalog, exactly the `food-farming` public membership, and a reviewed
+version-one `agriculture-growers` owner proposal whose update matches the
+approved discovery profile. The operation requires no existing agriculture
+membership and adds it while retaining food cross-listing. It acknowledges the
+new sorted category set in each primary and catalog scenario binding and
+recomputes the enrollment hash. One transaction covers all six or none. A
+single operation key and audit receipt make replay inert. Stage, cycle, due
+time, page, products, media, geography and all other tenants remain unchanged.
+An overlong transaction fails closed under the worker deadline. This finite
+operator path does not infer future category changes or enable the simulator.
+
+GIVEN a drifted member, changed review, foreign product, or late insert failure
+WHEN the batch runs THEN no membership or enrollment is partly corrected. GIVEN
+a valid reviewed batch WHEN it commits THEN all six remain active and their next
+scheduled stages advance without a `content_changed` pause. GIVEN replay before
+or after later stages THEN no second mutation or audit receipt is created.
+
 The dedicated Netlify schedule runs at 09:00, 13:00 and 17:00 Ethiopia time
 (06:00, 10:00 and 14:00 UTC). The adapter admits a run only within 15 minutes
 of a scheduled time; an hourly slot prevents another stage from a manual retry
@@ -186,6 +208,8 @@ partial preparation rolls back on refusal, and simulation stays disabled.
 |---|---|
 | Coherent full timelines and predefined values | `scripts/test-demo-scenarios.ts` |
 | Mixed tenants/new signup/drift/replay/concurrency/rollback | `scripts/test-demo-simulator-postgres.ts` |
+| Exact reviewed category batch request shape | `scripts/test-demo-scenarios.ts` synthetic parser case |
+| Six-member atomic category correction, late failure, drift, replay and later stage | Private disposable PostgreSQL fixture retained outside public source; publication qualification pending |
 | Migration, private privileges and bounded controls | existing PostgreSQL/security/preflight gates plus simulator integration |
 | Actual write → public revision/API → UI | FE-079 browser/native journeys |
 
