@@ -1,4 +1,4 @@
-// Finite S197 containing-page playback check for four source-reviewed TikToks.
+// Finite S197 containing-page playback check for five body-care TikToks.
 // Runs only against a disposable local PostgreSQL QA schema in GitHub Actions.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -24,10 +24,11 @@ fs.mkdirSync(out,{recursive:true});
 const fixture=JSON.parse(fs.readFileSync(out+'/fixture.json','utf8'));
 const source=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(fixture.source,source);
-assert.equal(fixture.cases.length,4);
+assert.equal(fixture.cases.length,6);
 assert.deepEqual(fixture.cases.map(item=>item.videoRef),[
-  'tiktok:7534842640882224406','tiktok:7534842640882224406',
-  'tiktok:7595737756416904462','tiktok:7702450432588647711']);
+  'tiktok:7380347307562208558','tiktok:6685177930017934598',
+  'tiktok:7705684643621670175','tiktok:7662483692970986766',
+  'tiktok:7705684643621670175','tiktok:7635674044720827661']);
 const base='http://127.0.0.1:3000';
 const browser=await chromium.launch({channel:'chrome'});
 const review={source,run:process.env.GITHUB_RUN_ID,browser:{name:'Google Chrome',version:browser.version()},
@@ -57,6 +58,18 @@ async function play(page,id,label){
   await expect.poll(async()=>(await state(frame))[0]?.time??0,{timeout:25000}).toBeGreaterThan(start.time+2);
   const progress=(await state(frame))[0];
   await page.screenshot({path:`${out}/${label}-progress.png`});
+  if(label.endsWith('web-1440-cover')&&Number.isFinite(progress.duration)&&progress.duration>5){
+    for(const fraction of [.1,.5,.9]){
+      await frame.locator('video').evaluate(async(video,target)=>{
+        video.currentTime=video.duration*target;
+        await Promise.race([
+          new Promise(resolve=>video.addEventListener('seeked',resolve,{once:true})),
+          new Promise(resolve=>setTimeout(resolve,10000)),
+        ]);
+      },fraction);
+      await page.screenshot({path:`${out}/${label}-sample-${Math.round(fraction*100)}.png`});
+    }
+  }
   const playerBox=await(await frame.frameElement()).boundingBox();
   assert.ok(playerBox&&Math.abs(playerBox.width/playerBox.height-9/16)<.03,'TikTok portrait ratio must hold.');
   assert.equal(page.context().pages().length,1,'Inline playback must not open an external tab.');

@@ -1,5 +1,5 @@
-// Four creator examples published through ordinary commands into the native QA
-// disposable PostgreSQL schema only. These show a business-type process.
+// Body-care creator examples published through ordinary commands into the
+// native QA disposable PostgreSQL schema only.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
@@ -16,10 +16,12 @@ import {productVideoWatchUrl} from '../lib/video/product-video';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 
 const cases=[
-  {handle:'koba-leather',videoRef:'tiktok:7534842640882224406',productName:null},
-  {handle:'demo-biftu-leather-goods',videoRef:'tiktok:7534842640882224406',productName:null},
-  {handle:'demo-buna-basket-house',videoRef:'tiktok:7595737756416904462',productName:null},
-  {handle:'demo-lemi-building-products',videoRef:'tiktok:7702450432588647711',productName:null},
+  {handle:'afia-botanics',videoRef:'tiktok:7380347307562208558',productName:null},
+  {handle:'demo-aloe-field-care',videoRef:'tiktok:6685177930017934598',productName:null},
+  {handle:'demo-muna-botanical-studio',videoRef:'tiktok:7705684643621670175',productName:null},
+  {handle:'demo-hana-herbal-works',videoRef:'tiktok:7662483692970986766',productName:null},
+  {handle:'demo-meriem-hair-care',videoRef:'tiktok:7705684643621670175',productName:null},
+  {handle:'demo-zema-plant-balms',videoRef:'tiktok:7635674044720827661',productName:null},
 ] as const;
 
 async function main(){
@@ -77,6 +79,6 @@ async function main(){
   }
   fs.mkdirSync('.local/maker-clip-app-qa',{recursive:true,mode:0o700});
   fs.writeFileSync('.local/maker-clip-app-qa/fixture.json',JSON.stringify({source,cases:records})+'\n',{mode:0o600});
-  console.log('PASS four disposable maker-clip fixtures prepared through ordinary commands.');
+  console.log('PASS six disposable body-care fixtures prepared through ordinary commands.');
 }
 void main().catch(error=>{console.error('Disposable maker-clip fixture failed.',error);process.exitCode=1;}).finally(closePostgresRuntimeForTests);
