@@ -4,7 +4,7 @@ import path from 'node:path';
 import test from 'node:test';
 import {build} from 'esbuild';
 
-test('DEP-054 actual scheduled demo worker loads without Next request context',async()=>{
+test('DEP-054 finite S200 copy worker loads without Next request context',async()=>{
  const result=await build({entryPoints:['netlify/functions/demo-simulator.mts'],bundle:true,write:false,platform:'node',format:'cjs',packages:'external',logLevel:'silent'});
  const source=result.outputFiles[0].text;
  assert.doesNotMatch(source,/next\/(?:headers|server)/);
@@ -15,22 +15,20 @@ test('DEP-054 actual scheduled demo worker loads without Next request context',a
  worker.filename=filename;
  worker.paths=[path.resolve('node_modules')];
  worker._compile(source,filename);
- assert.equal(worker.exports.config.schedule,'0 6,10,14 * * *');assert.equal(typeof worker.exports.default,'function');
+ assert.equal(worker.exports.config.schedule,'* * * * *');assert.equal(typeof worker.exports.default,'function');
  const inside=worker.exports.isDemoSimulatorWindow;
- assert.equal(inside(Date.UTC(2026,10,15,5,59)),false);
- assert.equal(inside(Date.UTC(2026,10,15,6,0)),true);
- assert.equal(inside(Date.UTC(2026,10,15,6,15)),true);
- assert.equal(inside(Date.UTC(2026,10,15,6,15,1)),false);
- assert.equal(inside(Date.UTC(2026,10,15,6,16)),false);
- assert.equal(inside(Date.UTC(2026,10,15,10,0)),true);
- assert.equal(inside(Date.UTC(2026,10,15,14,0)),true);
- assert.equal(inside(Date.UTC(2026,10,15,14,59)),false);
- assert.equal(inside(Date.UTC(2026,10,15,15,0)),false);
+ assert.equal(inside(Date.UTC(2026,10,15,22,29,59)),false);
+ assert.equal(inside(Date.UTC(2026,10,15,22,30)),true);
+ assert.equal(inside(Date.UTC(2026,10,15,23,59,59)),true);
+ assert.equal(inside(Date.UTC(2026,10,16,0,29,59)),true);
+ assert.equal(inside(Date.UTC(2026,10,16,0,30)),false);
+ assert.equal(inside(Date.UTC(2026,10,16,6,0)),false);
+ assert.equal(inside(Number.NaN),false);
  // Even an operator's manual Run now outside the window must return without
  // opening the database or invoking the scheduled mutation runtime.
  const dateNow=Date.now,log=console.log,error=console.error,logs:unknown[][]=[],errors:unknown[][]=[];
  try{
-  Date.now=()=>Date.UTC(2026,10,15,15,1);
+  Date.now=()=>Date.UTC(2026,10,16,0,30);
   console.log=(...args:unknown[])=>{logs.push(args);};
   console.error=(...args:unknown[])=>{errors.push(args);};
   await worker.exports.default();

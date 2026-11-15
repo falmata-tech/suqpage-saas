@@ -14,6 +14,8 @@ import {demoScenarioCommandKey,demoScenarioStage,nextDemoScenarioStage,parseDemo
 import {parseDemoMediaCorrection,parseUnenrolledDemoMediaCorrection,parseQueuedDemoMediaCorrection,type UnenrolledDemoMediaCorrection} from './demo-media-correction';
 import {parseDemoProcessMediaCorrection,type DemoProcessMediaCorrection} from './demo-process-media-correction';
 import {AGRICULTURE_CORRECTION_TARGETS,parseDemoCategoryCorrection} from './demo-category-correction';
+import {parseDemoCopyCorrection,type DemoCopyCorrection} from './demo-copy-correction-request';
+import {planEnrolledDemoCopy,planLegacyDemoCopy,type PublicDemoCopy} from './demo-copy-correction';
 import {productMedia} from './product-media';
 import {ProductUpkeepError} from './product-upkeep-domain';
 import {RevisionError} from './revision-domain';
@@ -433,7 +435,8 @@ async function unenrolledMediaState(businessId:50|62,actorUserId:number){
  const location=await runtimeGet<{version:number;reviewed_version:number}>('SELECT version,reviewed_version FROM owner_location_proposals WHERE business_id=? FOR SHARE',[businessId]);
  const discovery=await runtimeGet('SELECT * FROM business_discovery_profiles WHERE business_id=?',[businessId]);
  if(location&&location.version!==location.reviewed_version||ownerPageImageKey(businessId,draft.content.heroImage))throw new DemoDrift('eligibility_changed');
- return {actor,catalog,draft,publication,hash:digest({catalog,draft,publication,categories,location,discovery})};
+ return {actor,catalog,draft,publication,categories,location,discovery,
+  hash:digest({catalog,draft,publication,categories,location,discovery})};
 }
 
 /** One-time ordinary publication for two unenrolled legacy demos; inverse plans roll back. */
@@ -600,19 +603,238 @@ function parseEnrollmentRequest(raw:string,businessId:number):DemoEnrollmentInpu
   v.initializeUnit!==undefined&&typeof v.initializeUnit!=='boolean')throw Error('Invalid private enrollment request.');
  return {...v,parameters:parseDemoScenarioParameters(v.parameters),...(v.catalogProducts!==undefined?{catalogProducts:parseDemoCatalogInputs(v.catalogProducts)}:{})} as DemoEnrollmentInput;
 }
-async function processEnrollmentRequests(now:number){
+type CopyAuditFields={businessDescription:string;page:{about:string;introduction:string};
+ products:Array<{id:number;description:string;leadTimeSummary:string}>};
+const copyAuditFields=(copy:PublicDemoCopy):CopyAuditFields=>({
+ businessDescription:copy.businessDescription,
+ page:{about:copy.page.about,introduction:copy.page.introduction},
+ products:copy.products.map(p=>({id:p.id,description:p.description,leadTimeSummary:p.leadTimeSummary})),
+});
+const publicCopyFromState=(state:Pick<Awaited<ReturnType<typeof currentState>>,'catalog'|'draft'>):PublicDemoCopy=>({
+ businessDescription:state.catalog.business.description,
+ page:state.draft.content,
+ products:[...state.catalog.products].sort((a,b)=>a.id-b.id).map(p=>({id:p.id,description:p.description,
+  leadTimeSummary:p.lead_time_summary||''})),
+});
+type CopyPhase='admission'|'eligibility'|'receipt'|'reviewed_before'|'retained'|
+ 'products'|'business'|'page'|'postcondition'|'enrollment'|'audit';
+const copyFailurePhases=new WeakMap<object,CopyPhase>();
+
+/** One selected-field correction for a reviewed public demo. It uses ordinary
+ * catalog/page writes and updates the simulator hash without advancing stage.
+ * The request is bound inside the database; no private row export is needed. */
+export async function correctDemoPublicCopy(raw:unknown){
+ const input=parseDemoCopyCorrection(raw),payloadHash=digest(input);
+ let phase:CopyPhase='admission';
+ try{return await runtimeTransaction(async()=>{
+  await runtimeRun('SELECT pg_advisory_xact_lock(6870619271382)');
+  if(!await schemaReady())throw Error('The demo schema is not ready.');
+  const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
+  if(!control||control.enabled||control.pause_reason!=='operator')
+   throw Error('Pause the demo service explicitly before copy maintenance.');
+  phase='eligibility';
+  const e=input.cohort==='enrolled'
+   ?await runtimeGet<Enrollment>('SELECT * FROM demo_simulator_enrollments WHERE business_id=? FOR UPDATE',[input.businessId])
+   :null;
+  if(input.cohort==='enrolled'&&(!e||e.status!=='active'||e.reason||e.handle!==input.handle))
+   throw new DemoDrift('eligibility_changed');
+  const legacyActor=input.cohort==='legacy'
+   ?await runtimeGet<{updated_by:number}>('SELECT updated_by FROM owner_page_drafts WHERE business_id=?',[input.businessId])
+   :null;
+  const state=e?await currentState(e,true):
+   await unenrolledMediaState(input.businessId as 50|62,Number(legacyActor?.updated_by));
+  if(e&&state.hash!==e.expected_hash)throw new DemoDrift('content_changed');
+  if(state.catalog.business.handle!==input.handle||
+   state.draft.version!==state.publication.draftVersion||
+   digest(state.draft.content)!==digest(state.publication.content)||
+   state.catalog.products.length!==4)throw new DemoDrift('content_changed');
+  const copy=publicCopyFromState(state),beforeFields=copyAuditFields(copy);
+  phase='receipt';
+  const receipt=await runtimeGet<{detail:string}>(`SELECT detail FROM audit_logs WHERE business_id=?
+   AND action='demo.copy_corrected' AND detail::jsonb->>'operationKey'=?
+   ORDER BY id DESC LIMIT 1`,[input.businessId,input.operationKey]);
+  if(receipt){
+   const prior=JSON.parse(receipt.detail) as {payloadHash?:string;afterPublicHash?:string};
+   if(prior.payloadHash!==payloadHash||prior.afterPublicHash!==digest(beforeFields))
+    throw new DemoDrift('content_changed');
+   return {duplicate:true};
+  }
+  phase='reviewed_before';
+  if(state.catalog.business.content_version!==input.expectedContentVersion||
+   state.draft.version!==input.expectedDraftVersion||
+   state.publication.revision!==input.expectedPageRevision||
+   (e&&(e.expected_hash!==input.expectedHash||e.stage!==input.expectedStage||
+    e.cycle!==input.expectedCycle||Number(e.due_at)!==input.expectedDueAt)))
+   throw new DemoDrift('content_changed');
+  const baseline=e?parseShopPageContent(JSON.parse(e.baseline_page_json)):null;
+  let desired:PublicDemoCopy,baselineAfter:ShopPageContent|null=null;
+  if(input.direction==='apply'){
+   if(e){
+    const plan=planEnrolledDemoCopy({businessName:state.catalog.business.name,copy,
+     baseline:baseline!,bindings:parseStoredDemoCatalog(e.catalog_products_json),stage:e.stage});
+    desired=plan.after;baselineAfter=plan.baselineAfter;
+   }else desired=planLegacyDemoCopy({businessId:input.businessId,
+    businessName:state.catalog.business.name,copy}).after;
+  }else{
+   const applied=await runtimeGet<{detail:string}>(`SELECT detail FROM audit_logs WHERE business_id=?
+    AND action='demo.copy_corrected' AND detail::jsonb->>'direction'='apply'
+    ORDER BY id DESC LIMIT 1`,[input.businessId]);
+   if(!applied)throw new DemoDrift('content_changed');
+   const prior=JSON.parse(applied.detail) as {beforePublic?:CopyAuditFields;afterPublicHash?:string;
+    baselineBefore?:{about:string;introduction:string};baselineAfterHash?:string};
+   if(!prior.beforePublic||prior.afterPublicHash!==digest(beforeFields)||
+    (e&&(!baseline||!prior.baselineBefore||prior.baselineAfterHash!==
+     digest({about:baseline.about,introduction:baseline.introduction})))||
+    prior.beforePublic.products.length!==copy.products.length||
+    prior.beforePublic.products.some((p,i)=>p.id!==copy.products[i].id))
+    throw new DemoDrift('content_changed');
+   desired={businessDescription:prior.beforePublic.businessDescription,
+    page:{...copy.page,...prior.beforePublic.page},
+    products:prior.beforePublic.products};
+   baselineAfter=e?{...baseline!,...prior.baselineBefore}:null;
+  }
+  if(desired.products.length!==4||desired.products.some((p,i)=>p.id!==copy.products[i].id))
+   throw new DemoDrift('content_changed');
+  const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
+  if(!size||!Number.isFinite(Number(size.bytes))||Number(size.bytes)>=Number(control.database_limit_bytes))
+   throw Error('Demo copy storage budget reached.');
+  const changedProducts=desired.products.filter((p,i)=>p.description!==copy.products[i].description||
+   p.leadTimeSummary!==copy.products[i].leadTimeSummary);
+  const changedBusiness=desired.businessDescription!==copy.businessDescription;
+  let version=state.catalog.business.content_version;
+  if(changedProducts.length||changedBusiness){
+   phase='retained';
+   if(await runtimeGet('SELECT 1 FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
+    [input.businessId,version+1]))throw new DemoDrift('content_changed');
+   const baselineSnapshot=catalogToRevisionSnapshotV4(state.catalog);
+   const reserved=await runtimeRun(`UPDATE businesses SET content_version=?
+    WHERE id=? AND handle=? AND is_demo=1 AND status='active' AND content_version=? AND description=?`,
+    [version+1,input.businessId,input.handle,version,copy.businessDescription]);
+   if(reserved.changes!==1)throw new DemoDrift('content_changed');
+   version++;
+   await runtimeRun(`INSERT INTO published_catalog_versions
+    (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+    VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(baselineSnapshot),state.actor.id]);
+  }
+  phase='products';
+  const commands=changedProducts.map(item=>{
+   const p=state.catalog.products.find(p=>p.id===item.id)!;
+   return {kind:'update',businessId:input.businessId,productId:p.id,
+    expectedContentVersion:version,idempotencyKey:`demo_copy_${input.operationKey}_${p.id}`,
+    name:p.name,description:item.description,availability:p.availability,
+    offeringKind:p.offering_kind,quantityMode:p.quantity_mode,
+    orderScope:p.order_scope??'unspecified',priceMinor:p.price_minor,
+    quantityUnit:p.quantity_unit,minimumOrderSummary:p.minimum_order_summary,
+    capacitySummary:p.capacity_summary,leadTimeSummary:item.leadTimeSummary,
+    highlights:parseOfferingHighlightsJson(p.highlights_json),videoRef:p.video_ref,
+    categoryId:p.category_id,imageAction:'keep',preserveMetadata:true,
+    updateSellingFacts:true,updateListingState:true};
+  });
+  if(commands.length>=2){
+   const result=await executeProductUpkeepBatch(postgresProductUpkeepPort,state.actor,commands);
+   version=result[0].contentVersion;
+  }else if(commands.length===1){
+   const result=await executeBasicProductUpkeep(postgresProductUpkeepPort,state.actor,commands[0],null);
+   version=result.contentVersion;
+  }
+  phase='business';
+  if(changedBusiness){
+   const updated=await runtimeRun(`UPDATE businesses SET description=?,content_version=?
+    WHERE id=? AND handle=? AND is_demo=1 AND status='active' AND content_version=? AND description=?`,
+    [desired.businessDescription,version+1,input.businessId,input.handle,version,copy.businessDescription]);
+   if(updated.changes!==1)throw new DemoDrift('content_changed');
+   version++;
+   const catalog=await runtimeCatalogByBusinessId(input.businessId,true);
+   if(!catalog)throw new DemoDrift('content_changed');
+   await runtimeRun(`INSERT INTO published_catalog_versions
+    (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+    VALUES(?,?,?,'publication',?)`,
+    [input.businessId,version,JSON.stringify(catalogToRevisionSnapshotV4(catalog)),state.actor.id]);
+  }
+  phase='page';
+  if(digest(desired.page)!==digest(copy.page))
+   await saveOwnerPageAndPublication(state.actor,input.businessId,
+    {action:'save',version:state.draft.version,content:desired.page});
+  phase='postcondition';
+  const after=e?await currentState(e,true):
+   await unenrolledMediaState(input.businessId as 50|62,Number(legacyActor?.updated_by));
+  const afterCopy=publicCopyFromState(after);
+  const businessOther=(b:typeof state.catalog.business)=>({...b,description:'',content_version:0});
+  const productOther=(p:typeof state.catalog.products[number])=>({...p,description:'',
+   lead_time_summary:''});
+  if(digest(copyAuditFields(afterCopy))!==digest(copyAuditFields(desired))||
+   after.catalog.business.content_version!==version||
+   digest(businessOther(after.catalog.business))!==digest(businessOther(state.catalog.business))||
+   digest(after.catalog.products.map(productOther))!==digest(state.catalog.products.map(productOther))||
+   digest({...after.draft.content,about:'',introduction:''})!==
+    digest({...state.draft.content,about:'',introduction:''})||
+   digest({...after.publication.content,about:'',introduction:''})!==
+    digest({...state.publication.content,about:'',introduction:''})||
+   after.draft.version!==state.draft.version+(digest(desired.page)!==digest(copy.page)?1:0)||
+   after.publication.revision!==state.publication.revision+(digest(desired.page)!==digest(copy.page)?1:0)||
+   digest(after.categories)!==digest(state.categories)||
+   digest(after.location??null)!==digest(state.location??null)||
+   digest(after.discovery??null)!==digest(state.discovery??null))
+   throw new DemoDrift('content_changed');
+  phase='enrollment';
+  if(e){
+   const currentBaseline=await runtimeGet<{baseline_page_json:string}>(
+    'SELECT baseline_page_json FROM demo_simulator_enrollments WHERE business_id=? FOR UPDATE',[input.businessId]);
+   if(!currentBaseline||digest(JSON.parse(currentBaseline.baseline_page_json))!==digest(baseline))
+    throw new DemoDrift('content_changed');
+   const acknowledged=await runtimeRun(`UPDATE demo_simulator_enrollments
+    SET expected_hash=?,baseline_page_json=?
+    WHERE business_id=? AND status='active' AND reason='' AND expected_hash=?
+    AND stage=? AND cycle=? AND due_at=?`,
+    [after.hash,JSON.stringify(baselineAfter),input.businessId,e.expected_hash,
+     e.stage,e.cycle,e.due_at]);
+   if(acknowledged.changes!==1)throw new DemoDrift('content_changed');
+  }
+  phase='audit';
+  await runtimeRun(`INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash)
+   VALUES(?,?,'demo.copy_corrected',?,'')`,
+   [state.actor.id,input.businessId,JSON.stringify({automation:'demo-copy-maintenance',
+    direction:input.direction,operationKey:input.operationKey,payloadHash,
+    beforeStateHash:state.hash,afterStateHash:after.hash,
+    beforePublic:beforeFields,afterPublic:copyAuditFields(afterCopy),
+    afterPublicHash:digest(copyAuditFields(afterCopy)),
+    baselineBefore:baseline?{about:baseline.about,introduction:baseline.introduction}:null,
+    baselineAfterHash:baselineAfter?digest({about:baselineAfter.about,
+     introduction:baselineAfter.introduction}):null,
+    contentVersion:version,draftVersion:after.draft.version,pageRevision:after.publication.revision})]);
+  return {duplicate:false};
+ });}catch(error){
+  if(error&&typeof error==='object')copyFailurePhases.set(error,phase);
+  throw error;
+ }
+}
+
+async function processEnrollmentRequests(now:number,copyOnly=false){
  const started=Date.now();
  const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 8 FOR UPDATE");
- let enrolled=0,enrollmentRejected=0,mediaCorrected=0,categoryCorrected=0;
+ if(copyOnly)for(const request of requests){
+  let raw:unknown;
+  try{raw=JSON.parse(request.input_json);}catch{throw Error('Unexpected pending request during copy maintenance.');}
+  if(!raw||typeof raw!=='object'||Array.isArray(raw)||
+   (raw as Record<string,unknown>).kind!=='copy_correction')
+   throw Error('Unexpected pending request during copy maintenance.');
+ }
+ let enrolled=0,enrollmentRejected=0,mediaCorrected=0,categoryCorrected=0,copyCorrected=0;
  for(const request of requests){
   if(Date.now()-started>=12000)break;
   await runtimeRun('SAVEPOINT demo_enrollment');
   let accepted=false;
   let unenrolledCorrection:UnenrolledDemoMediaCorrection|null=null;
   let processCorrection:DemoProcessMediaCorrection|null=null;
+  let copyCorrection:DemoCopyCorrection|null=null;
   try{
    const raw:unknown=JSON.parse(request.input_json);
-   if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as Record<string,unknown>).kind==='category_correction_batch'){
+   if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as Record<string,unknown>).kind==='copy_correction'){
+    const correction=parseDemoCopyCorrection(raw);
+    if(correction.businessId!==request.business_id)throw Error('Invalid private copy correction target.');
+    copyCorrection=correction;
+    await correctDemoPublicCopy(correction);copyCorrected++;
+   }else if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as Record<string,unknown>).kind==='category_correction_batch'){
     const correction=parseDemoCategoryCorrection(raw);
     if(correction.members[0].businessId!==request.business_id)throw Error('Invalid private category correction target.');
     await correctDemoCategoryBatch(correction);
@@ -646,15 +868,22 @@ async function processEnrollmentRequests(now:number){
      [processCorrection.businessId,JSON.stringify({automation:'demo-media-maintenance',
       operationKey:processCorrection.operationKey,phase,code:unenrolledMediaFailureCode(error)})]);
    }
+   if(copyCorrection){
+    const phase=error&&typeof error==='object'?copyFailurePhases.get(error)??'admission':'admission';
+    await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(NULL,?,'demo.copy_rejected',?,'')",
+     [copyCorrection.businessId,JSON.stringify({automation:'demo-copy-maintenance',
+      operationKey:copyCorrection.operationKey,phase,code:unenrolledMediaFailureCode(error)})]);
+   }
   }
   await runtimeRun('RELEASE SAVEPOINT demo_enrollment');
   await runtimeRun('UPDATE demo_simulator_requests SET status=?,reason=?,processed_at=? WHERE business_id=?',
    [accepted?'accepted':'rejected',accepted?'':'enrollment_failed',now,request.business_id]);
  }
- return {enrolled,enrollmentRejected,...(mediaCorrected?{mediaCorrected}:{}),...(categoryCorrected?{categoryCorrected}:{})};
+ return {enrolled,enrollmentRejected,...(mediaCorrected?{mediaCorrected}:{}),
+  ...(categoryCorrected?{categoryCorrected}:{}),...(copyCorrected?{copyCorrected}:{})};
 }
 
-export type DemoTickResult={enrolled?:number;enrollmentRejected?:number;mediaCorrected?:number;categoryCorrected?:number;status:'advanced'|'disabled'|'busy'|'duplicate'|'budget'|'schema';advanced:number;paused:number;failed:number};
+export type DemoTickResult={enrolled?:number;enrollmentRejected?:number;mediaCorrected?:number;categoryCorrected?:number;copyCorrected?:number;status:'advanced'|'disabled'|'busy'|'duplicate'|'budget'|'schema';advanced:number;paused:number;failed:number};
 // The production schedule has three daily invocations. Retain the hosted
 // control row's ability to lower this cap without requiring a schema change.
 const MAX_DAILY_STAGES=12;
@@ -663,12 +892,13 @@ export function canStartDemoStage(elapsedMs:number,previousStageMs:number|null){
  // three seconds for the final control update, pruning and transaction commit.
  return elapsedMs<12000&&(previousStageMs===null||elapsedMs+Math.max(previousStageMs,8000)+3000<23000);
 }
-/** The scheduled adapter supplies no client input and uses hourly slots.
- * The clock and default minute slot let disposable PostgreSQL tests exercise
- * complete timelines without sleeping. Stage times always use the actual now. */
-export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1):Promise<DemoTickResult>{
+/** Normal calls use hourly slots. A finite minute maintenance call admits
+ * copy requests only under an explicit operator pause and cannot run stages. */
+export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1,
+ mode:'scheduled'|'maintenance'='scheduled'):Promise<DemoTickResult>{
  if(!Number.isSafeInteger(now)||now<0)throw new Error('Invalid demo tick clock.');
  if(!Number.isSafeInteger(slotMinutes)||slotMinutes<1||slotMinutes>60)throw new Error('Invalid demo tick slot.');
+ if(mode!=='scheduled'&&mode!=='maintenance')throw new Error('Invalid demo tick mode.');
  const started=Date.now(),slot=Math.floor(now/(slotMinutes*60000))*slotMinutes,day=Math.floor(now/86400000);
  const result=(status:DemoTickResult['status']):DemoTickResult=>({status,advanced:0,paused:0,failed:0});
  return runtimeTransaction(async()=>{
@@ -679,9 +909,10 @@ export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1):Promise
   const lock=await runtimeGet<{locked:boolean}>('SELECT pg_try_advisory_xact_lock(6870619271382) locked');
   if(!lock?.locked)return result('busy');
   if(!await schemaReady())return result('schema');
-  const control=await runtimeGet<Control>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
+  const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control)return result('disabled');
-  if(!control.enabled){const admission=await processEnrollmentRequests(now);return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected?{...result('disabled'),...admission}:result('disabled');}
+  if(mode==='maintenance'&&(control.enabled!==0||control.pause_reason!=='operator'))return result('disabled');
+  if(!control.enabled){const admission=await processEnrollmentRequests(now,mode==='maintenance');return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected||admission.copyCorrected?{...result('disabled'),...admission}:result('disabled');}
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;
