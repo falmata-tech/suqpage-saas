@@ -15,22 +15,18 @@ test('DEP-054 actual scheduled demo worker loads without Next request context',a
  worker.filename=filename;
  worker.paths=[path.resolve('node_modules')];
  worker._compile(source,filename);
- assert.equal(worker.exports.config.schedule,'0 6,10,14 * * *');assert.equal(typeof worker.exports.default,'function');
+ assert.equal(worker.exports.config.schedule,'* * * * *');assert.equal(typeof worker.exports.default,'function');
  const inside=worker.exports.isDemoSimulatorWindow;
- assert.equal(inside(Date.UTC(2026,10,15,5,59)),false);
- assert.equal(inside(Date.UTC(2026,10,15,6,0)),true);
- assert.equal(inside(Date.UTC(2026,10,15,6,15)),true);
- assert.equal(inside(Date.UTC(2026,10,15,6,15,1)),false);
- assert.equal(inside(Date.UTC(2026,10,15,6,16)),false);
- assert.equal(inside(Date.UTC(2026,10,15,10,0)),true);
- assert.equal(inside(Date.UTC(2026,10,15,14,0)),true);
- assert.equal(inside(Date.UTC(2026,10,15,14,59)),false);
- assert.equal(inside(Date.UTC(2026,10,15,15,0)),false);
- // Even an operator's manual Run now outside the window must return without
- // opening the database or invoking the scheduled mutation runtime.
+ assert.equal(inside(Date.UTC(2026,10,15,18,59,59,999)),false);
+ assert.equal(inside(Date.UTC(2026,10,15,19,0)),true);
+ assert.equal(inside(Date.UTC(2026,10,15,20,59,59,999)),true);
+ assert.equal(inside(Date.UTC(2026,10,15,21,0)),false);
+ assert.equal(inside(Date.UTC(2026,10,16,19,0)),false);
+ // A delayed or manual invocation outside the exact window must return
+ // without opening a database or invoking the mutation runtime.
  const dateNow=Date.now,log=console.log,error=console.error,logs:unknown[][]=[],errors:unknown[][]=[];
  try{
-  Date.now=()=>Date.UTC(2026,10,15,15,1);
+  Date.now=()=>Date.UTC(2026,10,15,21,0);
   console.log=(...args:unknown[])=>{logs.push(args);};
   console.error=(...args:unknown[])=>{errors.push(args);};
   await worker.exports.default();

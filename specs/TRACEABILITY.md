@@ -33,6 +33,19 @@ establish the published schedule or next hosted run. A 64-business rotation
 takes at least six days at maximum four-per-run throughput, or about 22 days
 at the previously observed one per run.
 
+The prepared finite maintenance variant for 2026-11-15 19:00–21:00 UTC remains
+local only. `scripts/test-demo-worker-boundary.ts` verifies the exact minute
+cron and cutoff with no outside-window database call.
+`scripts/test-demo-simulator-postgres.ts` verifies that enabled control or a
+non-operator pause performs no stage/request work and does not spend slot or
+daily budget, while the operator pause admits bounded private requests.
+`scripts/test-demo-catalog-postgres.ts` verifies media correction through that
+mode alongside 64/256 fairness and retained real/private data. Typecheck and
+spec validation pass; protected CI, Netlify publication and hosted request
+admission are not claimed by this local preparation. The dependent restore
+commit must return the adapter and tests to the three-time source before stages
+resume.
+
 ## S199 concise starter and demo copy — local verification
 
 [BE-039], [FE-046], [FE-061] and [FE-067] map to `lib/business-starter.ts`,
