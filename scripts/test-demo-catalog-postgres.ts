@@ -143,7 +143,7 @@ async function main(){
   assert.equal(await snapshot(mediaTarget.businessId),mediaBefore);assert.deepEqual(await db.prepare('SELECT * FROM demo_simulator_enrollments WHERE business_id=?').get(mediaTarget.businessId),mediaEnrollment);
   await db.exec('DROP TRIGGER fail_demo_media_page ON owner_page_publications; DROP FUNCTION fail_demo_media_page()');
   await db.prepare('INSERT INTO demo_simulator_requests(business_id,input_json,requested_at) VALUES(?,?,?)').run(mediaTarget.businessId,JSON.stringify(correction),now);
-  assert.equal((await runDemoSimulatorTick(now,1,'maintenance')).mediaCorrected,1);
+  assert.equal((await runDemoSimulatorTick(now)).mediaCorrected,1);
   assert.equal((await db.prepare('SELECT status FROM demo_simulator_requests WHERE business_id=?').get(mediaTarget.businessId)).status,'accepted');
   const mediaAfter=await snapshot(mediaTarget.businessId),ack=await db.prepare('SELECT * FROM demo_simulator_enrollments WHERE business_id=?').get(mediaTarget.businessId);
   assert.notEqual(ack.expected_hash,mediaEnrollment.expected_hash);
@@ -184,7 +184,7 @@ async function main(){
   await db.exec("UPDATE demo_simulator_control SET enabled=0,pause_reason='operator' WHERE id=1");
   await db.prepare("INSERT INTO demo_simulator_requests(business_id,input_json,requested_at,status,reason,processed_at) VALUES(?,'{}',1,'accepted','',1)").run(coverTarget.businessId);
   const queued=await db.prepare("UPDATE demo_simulator_requests SET input_json=?,requested_at=?,status='pending',reason='',processed_at=0 WHERE business_id=? AND status='accepted' AND reason=''").run(JSON.stringify(coverOnly),now+=60000,coverTarget.businessId);
-  assert.equal(queued.changes,1);assert.equal((await runDemoSimulatorTick(now,1,'maintenance')).mediaCorrected,1);
+  assert.equal(queued.changes,1);assert.equal((await runDemoSimulatorTick(now)).mediaCorrected,1);
   assert.equal((await db.prepare('SELECT status FROM demo_simulator_requests WHERE business_id=?').get(coverTarget.businessId)).status,'accepted');
   assert.deepEqual(await db.prepare('SELECT * FROM products WHERE business_id=? ORDER BY id').all(coverTarget.businessId),coverProductsBefore);
   assert.deepEqual(await db.prepare('SELECT count(*) total FROM product_upkeep_commands WHERE business_id=?').get(coverTarget.businessId),coverCommandsBefore);

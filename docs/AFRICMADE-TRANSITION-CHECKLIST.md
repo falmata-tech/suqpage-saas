@@ -288,36 +288,6 @@ cannot raise it. The 23-second transaction and 256MiB database limits remain.
    database growth and active/paused membership. Do not reset the hosted
    `used_today` counter; the new code cap may defer work until the next UTC day.
 
-#### Prepared finite maintenance option (BE-067 / DEP-054)
-
-The temporary adapter is set for 2026-11-15 18:15–23:15 UTC,
-21:15–02:15 EAT. Restore it as soon as all reviewed requests are verified. Publish it only after the media assets, operator path, exact
-hosted request plan, and selected-field backups pass review. Date changes
-require new tests and CI.
-
-1. [ ] Prepare the temporary minute adapter with an absolute cutoff and a
-   locked operator-pause-only request guard; prepare a matching restore patch
-   that returns to `0 6,10,14 * * *` and the 15-minute delivery gate.
-2. [ ] Pass focused worker/PostgreSQL boundary tests, typecheck, spec validation
-   and release gates on both exact source trees; publish no branch yet.
-3. [ ] If selected, retain protected hosted before-images, verify target/site,
-   pause control, then publish the temporary source through five required CI
-   checks and Netlify. Confirm exact deployed source before staging requests.
-4. [ ] Admit only the 49 reviewed enrolled media requests through the private
-   worker. If the guarded operator request path for non-enrolled demo businesses
-   50 and 62 integrates and passes its own gates, queue those two exact ordinary
-   media/page corrections too (51 video requests in all). Otherwise keep them
-   out of this worker window and use their separately guarded correction path.
-   Retain selected-field before-images and rollback for each path; never use
-   raw SQL media writes. Do not queue the agriculture membership batch. Inspect
-   every accepted/rejected result, public media, and preserved real accounts.
-   Any unexpected pending request kind or invalid JSON fails the whole tick
-   with no acknowledgement. Stop on drift, rejection, timeout or cutoff.
-5. [ ] Merge and verify the restore source through the same gates while control
-   stays paused. Resume only after the restored Netlify schedule/source is
-   independently confirmed and no requests remain pending. Observe the next
-   ordinary stage; retain data rollback as a separate exact before-image plan.
-
 ### S196 — every public demo business and current product (BE-009 / BE-067 / DEP-054)
 
 Owner instruction: expand the service to all demo businesses and all current
