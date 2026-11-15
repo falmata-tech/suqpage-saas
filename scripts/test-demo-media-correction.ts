@@ -7,13 +7,14 @@ import {parseDemoProcessMediaCorrection,PROCESS_MEDIA_TARGETS} from '../lib/demo
 test('BE-049 process repair binds the reviewed enrolled cohort and same-business asset',()=>{
  assert.equal(PROCESS_MEDIA_TARGETS.length,53);
  assert.ok(PROCESS_MEDIA_TARGETS.every(([id,handle],index)=>index===0||id>PROCESS_MEDIA_TARGETS[index-1][0]&&Boolean(handle)));
+ assert.ok([5,6,7,27,28,29,31,32,33,46,61].every(id=>!PROCESS_MEDIA_TARGETS.some(([target])=>target===id)));
  const input={kind:'process_media_correction',direction:'apply',operationKey:'reviewed_process_0001',
   businessId:1,handle:'selam-weave',ownerUserId:7,providerUserId:'01234567-1234-1234-1234-012345678901',
   expectedHash:'a'.repeat(64),expectedContentVersion:4,expectedDraftVersion:3,expectedPageRevision:3,
   expectedStage:2,expectedCycle:0,expectedDueAt:1800000000000,
   processVideoBefore:'youtube:wJV9EDe_sFc',processVideoAfter:'demo:business-1'};
  assert.deepEqual(parseDemoProcessMediaCorrection(input),input);
- for(const bad of [{...input,businessId:46,handle:'demo-bora-highland-farm'},
+ for(const bad of [{...input,businessId:46,handle:'demo-kora-ceramic-house'},
   {...input,handle:'different-showroom'},{...input,processVideoAfter:'demo:business-2'},
   {...input,processVideoBefore:'tiktok:7703762862484851981'},{...input,expectedStage:6},
   {...input,direction:'rollback'},{...input,extra:'unreviewed'}])assert.throws(()=>parseDemoProcessMediaCorrection(bad));
