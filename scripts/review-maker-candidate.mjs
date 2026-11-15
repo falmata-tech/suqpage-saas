@@ -84,7 +84,8 @@ async function actualProvider(page,label,stage){
   else {
     const box=await frame.locator('body').boundingBox();
     assert.ok(box,'Provider body must be visible.');
-    await frame.locator('body').click({position:{x:box.width/2,y:box.height/2},timeout:10000});
+    await frame.locator('body').click({position:provider==='tiktok'
+      ?{x:24,y:box.height-30}:{x:box.width/2,y:box.height/2},timeout:10000});
   }
   if(provider==='tiktok')await expect.poll(()=>playerTime(frame),{timeout:40000}).toBeGreaterThan(1);
   else await expect.poll(async()=>(await videoState(frame))
