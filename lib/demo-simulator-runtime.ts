@@ -389,7 +389,7 @@ export async function correctDemoCategoryBatch(raw:unknown){
 }
 
 const unenrolledMediaTargets={50:'demo-dara-clay-works',62:'demo-wabi-bottled-water'} as const;
-type UnenrolledMediaPhase='admission'|'eligibility'|'receipt'|'reviewed_before'|
+type UnenrolledMediaPhase='admission'|'eligibility'|'receipt'|'reviewed_before'|'retained_baseline'|'process_cas'|
  'product_1'|'product_2'|'product_3'|'product_4'|'page'|'postcondition'|'audit';
 const unenrolledMediaFailurePhases=new WeakMap<object,UnenrolledMediaPhase>();
 function unenrolledMediaFailureCode(error:unknown){
@@ -465,19 +465,39 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   if(!size||!Number.isFinite(Number(size.bytes))||Number(size.bytes)>=Number(control.database_limit_bytes))throw Error('Demo media storage budget reached.');
   let version=state.catalog.business.content_version;
-  // Retain the true old-version snapshot before replacing this legacy process
-  // video. The first ordinary product upkeep then versions both media changes.
+  const startVersion=version;
+  phase='retained_baseline';
+  // A prior immutable version may reflect older metadata from before this
+  // maintenance. Preserve it unchanged and reserve a new, exact version of the
+  // current TikTok catalog before replacing the process video.
   const baseline=catalogToRevisionSnapshotV4(state.catalog);
   const retained=await runtimeGet<{snapshot_json:string}>(
    'SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
    [input.businessId,version]);
-  if(retained){
+  if(input.direction==='apply'){
+   if(retained)requireRevisionSnapshotV4(retained.snapshot_json,SHOWROOM_COMPONENT_BANK_LATEST,
+    processVideoPolicyForCatalog(state.catalog));
+   else await runtimeRun(`INSERT INTO published_catalog_versions
+    (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+    VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(baseline),state.actor.id]);
+   if(await runtimeGet('SELECT 1 FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
+    [input.businessId,version+1]))throw new DemoDrift('content_changed');
+   const reserved=await runtimeRun(`UPDATE businesses SET content_version=content_version+1
+    WHERE id=? AND content_version=? AND process_video_ref=? AND is_demo=1 AND status='active'`,
+    [input.businessId,version,input.processVideoBefore]);
+   if(reserved.changes!==1)throw new DemoDrift('content_changed');
+   version++;
+   await runtimeRun(`INSERT INTO published_catalog_versions
+    (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+    VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(baseline),state.actor.id]);
+  }else if(retained){
    const checked=requireRevisionSnapshotV4(retained.snapshot_json,SHOWROOM_COMPONENT_BANK_LATEST,
     processVideoPolicyForCatalog(state.catalog));
    if(digest(checked)!==digest(baseline))throw new DemoDrift('content_changed');
   }else await runtimeRun(`INSERT INTO published_catalog_versions
    (business_id,content_version,snapshot_json,change_kind,actor_user_id)
    VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(baseline),state.actor.id]);
+  phase='process_cas';
   const processChanged=await runtimeRun(`UPDATE businesses SET process_video_ref=?
    WHERE id=? AND content_version=? AND process_video_ref=? AND is_demo=1 AND status='active'`,
    [input.processVideoAfter,input.businessId,version,input.processVideoBefore]);
@@ -511,7 +531,8 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
   phase='audit';
   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.unenrolled_process_video_corrected',?,'')",
    [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
-    operationKey:input.operationKey,beforeRefHash:digest(input.processVideoBefore),afterRefHash:digest(input.processVideoAfter)})]);
+    operationKey:input.operationKey,beforeRefHash:digest(input.processVideoBefore),afterRefHash:digest(input.processVideoAfter),
+    baselineVersion:input.direction==='apply'?startVersion+1:startVersion,contentVersionDelta:version-startVersion})]);
   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.unenrolled_media_corrected',?,'')",
    [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
     actorRole:input.actorRole,operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
