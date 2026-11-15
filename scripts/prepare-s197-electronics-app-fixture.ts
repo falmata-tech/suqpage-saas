@@ -15,8 +15,8 @@ import {productMedia} from '../lib/product-media';
 import {productVideoWatchUrl} from '../lib/video/product-video';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 
-const videoRef='youtube:J8hBvC1bXtQ';
-const coverRef='tiktok:7352781700881026347';
+const videoRef='tiktok:7657534434601700615';
+const coverRef='tiktok:7706559803509755144';
 const handle='demo-liya-soap-kitchen';
 const productName='Oat Everyday Bar';
 

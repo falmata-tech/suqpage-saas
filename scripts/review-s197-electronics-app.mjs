@@ -18,8 +18,8 @@ const fixture = JSON.parse(fs.readFileSync(out+'/fixture.json','utf8'));
 const source = execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(source,fixture.source);
 assert.equal(fixture.handle,'demo-liya-soap-kitchen');
-assert.equal(fixture.videoRef,'youtube:J8hBvC1bXtQ');
-assert.equal(fixture.coverRef,'tiktok:7352781700881026347');
+assert.equal(fixture.videoRef,'tiktok:7657534434601700615');
+assert.equal(fixture.coverRef,'tiktok:7706559803509755144');
 const base='http://127.0.0.1:3000';
 const api=await fetch(base+'/api/mobile/v1/shops/'+fixture.handle,{signal:AbortSignal.timeout(10000)});
 assert.equal(api.status,200);
@@ -101,10 +101,10 @@ try{
       const gallery=page.getByRole('region',{name:'Photos and videos',exact:true});
       await gallery.getByRole('button',{name:'Video '+(mediaIndex+1),exact:true}).click();
       await gallery.getByRole('button',{name:'Play video '+(mediaIndex+1),exact:true}).click();
-      await probe(page,'web-product-'+width,'youtube','J8hBvC1bXtQ');
+      await probe(page,'web-product-'+width,'tiktok','7657534434601700615');
       await page.goto(base+'/@'+fixture.handle,{timeout:90000});
       await page.getByRole('button',{name:'Play business video about '+shop.name,exact:true}).click();
-      await probe(page,'web-cover-'+width,'tiktok','7352781700881026347');
+      await probe(page,'web-cover-'+width,'tiktok','7706559803509755144');
     }catch(error){
       result.cases.push({key:'web-navigation-'+width,result:'failed',error:String(error).slice(0,1000)});
       await page.screenshot({path:out+'/web-navigation-'+width+'-failure.png'}).catch(()=>{});
@@ -118,10 +118,10 @@ try{
     await page.goto('http://localhost:8082/product?handle='+fixture.handle+'&id='+fixture.productId,{timeout:120000});
     await page.getByRole('button',{name:'Video '+(mediaIndex+1),exact:true}).click({timeout:90000});
     await page.getByRole('button',{name:'Watch video',exact:true}).click();
-    await probe(page,'expo-product-390','youtube','J8hBvC1bXtQ');
+    await probe(page,'expo-product-390','tiktok','7657534434601700615');
     await page.goto('http://localhost:8082/shop/'+fixture.handle,{timeout:90000});
     await page.getByRole('button',{name:'Watch video',exact:true}).first().click({timeout:60000});
-    await probe(page,'expo-cover-390','tiktok','7352781700881026347');
+    await probe(page,'expo-cover-390','tiktok','7706559803509755144');
   }catch(error){
     result.cases.push({key:'expo-navigation-390',result:'failed',error:String(error).slice(0,1000)});
     await page.screenshot({path:out+'/expo-navigation-390-failure.png'}).catch(()=>{});
