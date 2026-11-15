@@ -2,6 +2,25 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {parseDemoMediaCorrection,parseUnenrolledDemoMediaCorrection,parseQueuedDemoMediaCorrection} from '../lib/demo-media-correction';
 import {DEMO_VIDEO_ASSETS} from '../lib/video/demo-video-catalog';
+import {parseDemoProcessMediaCorrection,PROCESS_MEDIA_TARGETS} from '../lib/demo-process-media-correction';
+
+test('BE-049 process repair binds the reviewed enrolled cohort and same-business asset',()=>{
+ assert.equal(PROCESS_MEDIA_TARGETS.length,53);
+ assert.ok(PROCESS_MEDIA_TARGETS.every(([id,handle],index)=>index===0||id>PROCESS_MEDIA_TARGETS[index-1][0]&&Boolean(handle)));
+ const input={kind:'process_media_correction',direction:'apply',operationKey:'reviewed_process_0001',
+  businessId:1,handle:'selam-weave',ownerUserId:7,providerUserId:'01234567-1234-1234-1234-012345678901',
+  expectedHash:'a'.repeat(64),expectedContentVersion:4,expectedDraftVersion:3,expectedPageRevision:3,
+  expectedStage:2,expectedCycle:0,expectedDueAt:1800000000000,
+  processVideoBefore:'youtube:wJV9EDe_sFc',processVideoAfter:'demo:business-1'};
+ assert.deepEqual(parseDemoProcessMediaCorrection(input),input);
+ for(const bad of [{...input,businessId:46,handle:'demo-bora-highland-farm'},
+  {...input,handle:'different-showroom'},{...input,processVideoAfter:'demo:business-2'},
+  {...input,processVideoBefore:'tiktok:7703762862484851981'},{...input,expectedStage:6},
+  {...input,direction:'rollback'},{...input,extra:'unreviewed'}])assert.throws(()=>parseDemoProcessMediaCorrection(bad));
+ const inverse={...input,direction:'rollback',operationKey:'reviewed_process_inverse_0001',
+  processVideoBefore:input.processVideoAfter,processVideoAfter:input.processVideoBefore};
+ assert.deepEqual(parseDemoProcessMediaCorrection(inverse),inverse);
+});
 
 test('BE-049 finite media plans preserve image positions and reject changed authority, duplicate targets and extra videos',()=>{
 const beforeMedia=[{kind:'image',ref:'/uploads/seed/example.jpg'},{kind:'video',ref:'youtube:wJV9EDe_sFc'}];

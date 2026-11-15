@@ -59,6 +59,37 @@ partial media/baseline/progress/history change occurs. Test those boundaries on
 disposable PostgreSQL, retain protected before/after baselines and qualify source
 before hosted application. Do not pause the running service during curation.
 
+## S197 enrolled process-video correction
+
+The separate showroom process chapter needs a finite correction for 53 enrolled
+public examples whose existing footage was reviewed as unavailable, unrelated or
+poor quality. The two unenrolled legacy examples use their separate operator;
+11 reviewed subject-fit process clips remain. Admit only the exact reviewed
+business ID/handle cohort, current owner/provider binding, unchanged enrollment
+fingerprint and scenario progress, current catalog/draft/publication versions,
+and exact current managed process-video ref. An apply plan changes a managed
+YouTube process ref to the same business's approved first-party `demo:` asset.
+An inverse plan restores the exact reviewed YouTube ref with fresh guards.
+
+Under the existing operator pause, advisory lock and one transaction, retain
+the old V4 catalog version, update only the process ref and business content
+version with a current-value guard, retain the new V4 catalog version, then
+acknowledge the enrollment's new fingerprint and append a distinct audit
+receipt. Products, photos, owner page, draft/publication versions, business
+identity/contact/story, stage/cycle/due, and other tenants must not change.
+One private request targets one business; a duplicate operation key with the
+same payload is inert, and a conflict or late snapshot/audit failure rolls
+back the whole write. The minute worker may admit bounded private requests
+while explicitly operator-paused; normal scenario stages remain disabled.
+
+GIVEN a paused and unchanged enrolled example WHEN its guarded process plan
+commits THEN the process chapter plays the approved first-party business clip,
+one retained catalog version and audit receipt exist, and the next scenario
+stage continues. GIVEN a forged tenant/ref, stale hash/version/progress,
+incomplete asset, enabled control, or late failure THEN the catalog,
+enrollment and history remain unchanged. Real PostgreSQL tests cover apply,
+replay, inverse, tenant exclusion, late rollback, and stage continuation.
+
 ## S197 finite correction for two unenrolled legacy demos
 
 Businesses 50 (`demo-dara-clay-works`, products 197–200) and 62

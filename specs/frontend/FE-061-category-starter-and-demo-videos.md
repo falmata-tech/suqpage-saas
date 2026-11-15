@@ -39,6 +39,16 @@ Before any hosted change, verify deployed range delivery and playback, then
 obtain fresh exact enrollment, version, request and current-media guards under
 disabled simulator control. Reject any stale target.
 
+The composed process chapter is a separate video field. The reviewed full
+66-business inventory identifies 53 enrolled process refs as unavailable,
+unrelated or poor quality, plus two unenrolled TikTok refs that render an empty
+player. Replace those 55 with matching approved first-party business clips
+through BE-049's finite guarded operators. Preserve the 11 process clips whose
+actual reviewed subject suits the business. Process correction must not alter
+the cover, products, gallery images, page copy, scenario progress or other
+businesses. The first-party process player remains click-to-play with a visible
+loading or unavailable state and works on phone web and Expo preview.
+
 ## S197 Liya Soap Kitchen phone playback follow-up
 
 The fictional Liya Soap Kitchen's externally hosted story and product players
