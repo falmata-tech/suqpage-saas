@@ -53,7 +53,7 @@ async function main(){
       kind:'update',businessId:catalog.business.id,productId:product.id,
       expectedContentVersion:catalog.business.content_version,idempotencyKey:`live_media_fixture_${product.id}`,
       name:product.name,description:product.description,availability:product.availability,
-      offeringKind:product.offering_kind,quantityMode:product.quantity_mode,
+      quantityMode:product.quantity_mode,
       orderScope:product.order_scope??'unspecified',priceMinor:product.price_minor,
       quantityUnit:product.quantity_unit,highlights:parseOfferingHighlightsJson(product.highlights_json),
       capacitySummary:product.capacity_summary,minimumOrderSummary:product.minimum_order_summary,
