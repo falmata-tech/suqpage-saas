@@ -1,13 +1,14 @@
 [
-  {"ref":"tiktok:7703762862484851981","creator":"brambleberry","purpose":"known-good soap story control"},
-  {"ref":"tiktok:7685918227163057438","creator":"dragonflyceramics","purpose":"ceramic studio candidate"},
-  {"ref":"tiktok:7217517593786141995","creator":"rainanicolewoodworks","purpose":"wood joinery candidate"},
-  {"ref":"tiktok:7067689673266744623","creator":"rainanicolewoodworks","purpose":"furniture side tables candidate"},
-  {"ref":"tiktok:7571887505444801822","creator":"rainanicolewoodworks","purpose":"furniture entry bench candidate"},
-  {"ref":"tiktok:7245894243019934977","creator":"foldergluer_xgm","purpose":"corrugated packaging candidate"},
-  {"ref":"tiktok:7623452398849215758","creator":"izcustoms1","purpose":"welding shop candidate"},
-  {"ref":"tiktok:7623975849296989454","creator":"izcustoms1","purpose":"steel rack fabrication candidate"},
-  {"ref":"tiktok:7574122408706100502","creator":"thecosmeticformulator","purpose":"body butter candidate"},
-  {"ref":"tiktok:7352781700881026347","creator":"nextpcb","purpose":"electronics assembly candidate"},
-  {"ref":"tiktok:7494550342244240683","creator":"judnsolar","purpose":"solar lighting candidate"}
+  {"ref":"tiktok:7352781700881026347","creator":"nextpcb","purpose":"known-good electronics control"},
+  {"ref":"tiktok:7198361229532876075","creator":"ambientpottery","purpose":"ceramic bowl process candidate"},
+  {"ref":"tiktok:7213474502590598443","creator":"ambientpottery","purpose":"ceramic cup process candidate"},
+  {"ref":"tiktok:7385295717197221138","creator":"wildwoodbotanical","purpose":"botanical bodycare range story candidate"},
+  {"ref":"tiktok:7407311566867025170","creator":"wildwoodbotanical","purpose":"clay face mask candidate"},
+  {"ref":"tiktok:7157563218557160705","creator":"wildwoodbotanical","purpose":"citrus soap bar candidate"},
+  {"ref":"tiktok:7460780086837431560","creator":"wildwoodbotanical","purpose":"grapefruit soap bar candidate"},
+  {"ref":"tiktok:7279907164385201410","creator":"wildwoodbotanical","purpose":"mini guest soap candidate"},
+  {"ref":"tiktok:7567766530918862135","creator":"kynhormachine","purpose":"bottled-water filling and labeling candidate"},
+  {"ref":"tiktok:7680266097295101198","creator":"kynhormachine","purpose":"five-gallon water jar filling candidate"},
+  {"ref":"tiktok:7678776228966436109","creator":"kynhormachine","purpose":"bottled-water packing candidate"},
+  {"ref":"tiktok:7522117073733012750","creator":"electric.control","purpose":"electrical control cabinet candidate"}
 ]
