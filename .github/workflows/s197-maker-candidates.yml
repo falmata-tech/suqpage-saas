@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        candidate: [sabahar, zaaf, uniform]
+        candidate: [arcadia]
     services:
       postgres:
         image: postgres:17.10-alpine

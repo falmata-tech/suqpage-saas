@@ -14,7 +14,7 @@ assert.ok(['127.0.0.1','localhost'].includes(target.hostname));
 assert.equal(target.pathname,'/suqpage_native_qa');
 assert.equal(process.env.EXPO_PUBLIC_API_ORIGIN,'http://10.0.2.2:3000');
 assert.equal(process.env.EXPO_PUBLIC_NATIVE_MAP_FIXTURE,'1');
-assert.ok(['sabahar','zaaf','uniform'].includes(process.env.S197_MAKER_CANDIDATE));
+assert.ok(['sabahar','zaaf','uniform','arcadia'].includes(process.env.S197_MAKER_CANDIDATE));
 if(process.argv[2]==='--preflight'){
   assert.equal(process.argv.length,3);
   console.log('PASS finite maker review has isolated local target.');
@@ -59,16 +59,21 @@ async function waitServer(url){
   }
   throw Error('Isolated Expo preview did not become ready.');
 }
-const id=fixture.videoRef.slice('youtube:'.length);
-assert.match(id,/^[A-Za-z0-9_-]{11}$/);
-const embedPrefix='https://www.youtube-nocookie.com/embed/'+id;
-async function actualYouTube(page,label,stage){
+const [provider,id]=fixture.videoRef.split(':');
+assert.ok(provider==='youtube'||provider==='tiktok');
+if(provider==='youtube')assert.match(id,/^[A-Za-z0-9_-]{11}$/);
+else assert.match(id,/^[1-9]\d{16,19}$/);
+const embedPrefix=provider==='youtube'
+  ?'https://www.youtube-nocookie.com/embed/'+id
+  :'https://www.tiktok.com/player/v1/'+id;
+async function actualProvider(page,label,stage){
   await expect.poll(()=>page.frames().filter(f=>f.url().startsWith(embedPrefix)).length,
     {timeout:30000}).toBe(1);
   const frame=page.frames().find(f=>f.url().startsWith(embedPrefix));
   await page.screenshot({path:out+'/'+label+'-loaded.png'});
-  const play=frame.locator('.ytp-large-play-button');
+  const play=frame.locator(provider==='youtube'?'.ytp-large-play-button':'button[aria-label*="Play"], button[aria-label*="play"]');
   if(await play.count()&&await play.first().isVisible())await play.first().click({timeout:10000});
+  else if(await frame.locator('video').count())await frame.locator('video').first().click({timeout:10000});
   else await frame.locator('body').click({position:{x:180,y:100},timeout:10000});
   await expect.poll(async()=>(await videoState(frame))
     .some(v=>v.ready>=2&&v.width>0&&v.height>0&&v.time>1),{timeout:40000}).toBe(true);
@@ -106,7 +111,7 @@ try{
       await gallery.getByRole('button',{name:'Video '+(mediaIndex+1),exact:true}).click();
       await gallery.getByRole('button',{name:'Play video '+(mediaIndex+1),exact:true}).click();
       await gallery.scrollIntoViewIfNeeded();
-      const playback=await actualYouTube(page,'web-'+width,
+      const playback=await actualProvider(page,'web-'+width,
         gallery.getByLabel('Media '+(mediaIndex+1)+' of '+product.media.length,{exact:true}));
       assert.equal(context.pages().length,1);
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
@@ -131,7 +136,7 @@ try{
       {timeout:120000});
     await page.getByRole('button',{name:'Video '+(mediaIndex+1),exact:true}).click({timeout:90000});
     await page.getByRole('button',{name:'Watch video',exact:true}).click();
-    const playback=await actualYouTube(page,'expo-390');
+    const playback=await actualProvider(page,'expo-390');
     await page.getByRole('button',{name:'Photo 1',exact:true}).click();
     await expect(page.locator('iframe')).toHaveCount(0);
     assert.equal(context.pages().length,1);
