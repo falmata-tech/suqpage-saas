@@ -54,6 +54,19 @@ store screenshots and Play qualification remain separate unfinished work.
 
 ## Ordered work
 
+### Reviewed agriculture demo memberships (BE-067 / BE-029)
+
+- [x] Add a private six-business category correction request with exact reviewed
+  identity, proposal, catalog and simulator-hash guards. Keep food cross-listing,
+  correct agriculture membership and scenario bindings atomically, and preserve
+  progress and unrelated tenants. Verify late rollback, replay, subsequent tick
+  and completion inside the 23-second transaction limit in disposable PostgreSQL.
+  Local source and private disposable-PostgreSQL proof are complete; publication,
+  deployment and hosted execution remain separate.
+- [ ] After source review and the separately guarded hosted-change admission,
+  protect a before-image, run the exact disabled-worker request, verify all six
+  memberships and active enrollments, then resume the worker and public reads.
+
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 
 The owner requests a careful visual and playback review of all66 active demo

@@ -12,6 +12,7 @@ import {parseOfferingHighlightsJson} from './offering-presentation';
 import {configuredReviewer} from './reviewer-access-runtime';
 import {demoScenarioCommandKey,demoScenarioStage,nextDemoScenarioStage,parseDemoScenarioParameters,type DemoScenarioParameters,type DemoScenarioKey} from './demo-scenarios';
 import {parseDemoMediaCorrection} from './demo-media-correction';
+import {parseDemoCategoryCorrection} from './demo-category-correction';
 import {productMedia} from './product-media';
 import {productVideoWatchUrl} from './video/product-video';
 import type {SessionUser} from './types';
@@ -34,7 +35,7 @@ async function schemaReady(){
 
 // Lock in the same order as ordinary page writers: current owner/profile/link,
 // draft, business, product. No Auth session or owner login is created.
-async function currentState(e:Pick<Enrollment,'business_id'|'handle'|'owner_user_id'|'provider_user_id'|'product_id'>,fullCatalog=false){
+async function currentState(e:Pick<Enrollment,'business_id'|'handle'|'owner_user_id'|'provider_user_id'|'product_id'>,fullCatalog=false,lockDiscovery=false){
  const actor=await runtimeUserById(e.owner_user_id),reviewer=configuredReviewer();
  if(!actor||actor.access_role!=='client'||actor.business_id!==e.business_id||
     await currentBusinessAuthority(actor,e.business_id,true)!=='owner')throw new DemoDrift('eligibility_changed');
@@ -50,14 +51,15 @@ async function currentState(e:Pick<Enrollment,'business_id'|'handle'|'owner_user
  if(!catalog||!draft||!publication?.content||!product||!product.is_published||product.offering_kind==='service'||product.currency!=='ETB'||Number(owners?.total)!==1||
     !catalog.products.some(p=>(fullCatalog||p.id!==e.product_id)&&p.is_published&&p.offering_kind!=='service'&&['available','limited'].includes(p.availability)))throw new DemoDrift('eligibility_changed');
  const categories=(await runtimeAll<{industry_key:string}>('SELECT industry_key FROM business_industries WHERE business_id=? ORDER BY industry_key',[e.business_id])).map(v=>v.industry_key);
- const location=await runtimeGet<{version:number;reviewed_version:number}>('SELECT * FROM owner_location_proposals WHERE business_id=? FOR SHARE',[e.business_id]);
- const discovery=await runtimeGet('SELECT * FROM business_discovery_profiles WHERE business_id=?',[e.business_id]);
+ const location=await runtimeGet<{version:number;reviewed_version:number;category_key:string;updated_at:number}>('SELECT * FROM owner_location_proposals WHERE business_id=? FOR SHARE',[e.business_id]);
+ const discovery=await runtimeGet<{updated_at:number;approved_at:number;is_excluded:number}>(`SELECT * FROM business_discovery_profiles WHERE business_id=? ${lockDiscovery?'FOR SHARE':''}`,[e.business_id]);
  // Publication can normally apply a pending location. Demo automation must
  // never approve geography or do a Storage lookup while holding its transaction.
  if(location&&location.version!==location.reviewed_version||ownerPageImageKey(e.business_id,draft.content.heroImage))throw new DemoDrift('eligibility_changed');
  // Includes ordinary versions AND content, so direct SQL drift without a version
  // bump also pauses. Customer inquiries and other tenants are deliberately absent.
- return {actor,catalog,product,draft,publication:{...publication,content:publication.content},categories,hash:digest({catalog,draft,publication,categories,location,discovery})};
+ return {actor,catalog,product,draft,publication:{...publication,content:publication.content},categories,location,discovery,
+  hash:digest({catalog,draft,publication,categories,location,discovery})};
 }
 
 /** Explicit server/operator enrollment only. Calling it cannot enable the worker. */
@@ -201,6 +203,67 @@ export async function correctDemoMedia(raw:unknown){
   return {duplicate:false};
  });
 }
+
+/** One finite reviewed cohort correction; the worker must already be operator-paused. */
+export async function correctDemoCategoryBatch(raw:unknown){
+ const input=parseDemoCategoryCorrection(raw),payloadHash=digest(input);
+ return runtimeTransaction(async()=>{
+  await runtimeRun("SET LOCAL transaction_timeout='23s'");
+  await runtimeRun("SET LOCAL lock_timeout='1500ms'");
+  await runtimeRun("SET LOCAL statement_timeout='4000ms'");
+  await runtimeRun('SELECT pg_advisory_xact_lock(6870619271382)');
+  if(!await schemaReady())throw Error('The demo schema is not ready.');
+  const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
+  if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before category maintenance.');
+  const receipt=await runtimeGet<{payload_hash:string}>("SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs WHERE action='demo.category_corrected' AND detail::jsonb->>'operationKey'=? ORDER BY id DESC LIMIT 1",[input.operationKey]);
+  if(receipt){if(receipt.payload_hash!==payloadHash)throw Error('This demo category operation has different reviewed content.');return {duplicate:true};}
+  const agriculture=await runtimeGet<{total:number}>("SELECT COUNT(*) total FROM business_industries WHERE industry_key='agriculture-growers'");
+  if(Number(agriculture?.total)!==0)throw new DemoDrift('content_changed');
+  const checked: Array<{enrollment:Enrollment;actor:SessionUser;catalogProductsJson:string;parametersJson:string}>=[];
+  const categories=['agriculture-growers','food-farming'];
+  for(const member of input.members){
+   const e=await runtimeGet<Enrollment>('SELECT * FROM demo_simulator_enrollments WHERE business_id=? FOR UPDATE',[member.businessId]);
+   if(!e||e.status!=='active'||e.reason||e.handle!==member.handle||e.owner_user_id!==member.ownerUserId||
+      e.provider_user_id!==member.providerUserId||e.product_id!==member.productIds[0]||
+      e.stage!==member.stage||e.cycle!==member.cycle||Number(e.due_at)!==member.dueAt)throw new DemoDrift('eligibility_changed');
+   const state=await currentState(e,true,true),bindings=parseStoredDemoCatalog(e.catalog_products_json);
+   if(state.hash!==e.expected_hash||state.hash!==member.expectedHash||
+      state.catalog.business.content_version!==member.expectedContentVersion||
+      state.draft.version!==member.expectedDraftVersion||state.publication.revision!==member.expectedPageRevision||
+      state.draft.version!==state.publication.draftVersion||digest(state.draft.content)!==digest(state.publication.content))throw new DemoDrift('content_changed');
+   if(digest(state.categories)!==digest(['food-farming'])||!state.location||!state.discovery||
+      state.location.category_key!=='agriculture-growers'||state.location.version!==state.location.reviewed_version||
+      state.location.version!==member.proposalVersion||Number(state.location.updated_at)!==member.proposalUpdatedAt||
+      Number(state.location.updated_at)!==Number(state.discovery.updated_at)||
+      Number(state.discovery.approved_at)<=0||state.discovery.is_excluded!==0||
+      bindings.length!==4||digest(bindings.map(p=>p.productId))!==digest(member.productIds)||
+      digest(state.catalog.products.map(p=>p.id).sort((a,b)=>a-b))!==digest(member.productIds)||
+      state.catalog.products.some(p=>!p.is_published||p.offering_kind==='service'||p.currency!=='ETB')||
+      e.scenario_key!==bindings[0].scenarioKey)throw new DemoDrift('eligibility_changed');
+   const parameters=parseDemoScenarioParameters(JSON.parse(e.parameters_json));
+   if(digest(parameters.businessCategories)!==digest(['food-farming'])||
+      bindings.some(binding=>digest(binding.parameters.businessCategories)!==digest(['food-farming'])))throw new DemoDrift('content_changed');
+   const catalogProductsJson=JSON.stringify(bindings.map(binding=>({...binding,parameters:{...binding.parameters,businessCategories:categories}})));
+   const parametersJson=JSON.stringify({...parameters,businessCategories:categories});
+   if(catalogProductsJson.length>80000||parametersJson.length>4000)throw new DemoDrift('content_changed');
+   checked.push({enrollment:e,actor:state.actor,catalogProductsJson,parametersJson});
+  }
+  for(const {enrollment} of checked)await runtimeRun("INSERT INTO business_industries(business_id,industry_key) VALUES(?,'agriculture-growers')",[enrollment.business_id]);
+  for(const {enrollment,parametersJson,catalogProductsJson} of checked){
+   const after=await currentState(enrollment,true,true);
+   if(digest(after.categories)!==digest(categories))throw new DemoDrift('content_changed');
+   const updated=await runtimeRun('UPDATE demo_simulator_enrollments SET parameters_json=?,catalog_products_json=?,expected_hash=? WHERE business_id=? AND expected_hash=?',
+    [parametersJson,catalogProductsJson,after.hash,enrollment.business_id,enrollment.expected_hash]);
+   if(updated.changes!==1)throw new DemoDrift('content_changed');
+  }
+  const finalMemberships=await runtimeGet<{total:number}>("SELECT COUNT(*) total FROM business_industries WHERE industry_key='agriculture-growers'");
+  if(Number(finalMemberships?.total)!==6)throw new DemoDrift('content_changed');
+  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.category_corrected',?,'')",
+   [checked[0].actor.id,checked[0].enrollment.business_id,JSON.stringify({automation:'demo-category-maintenance',operationKey:input.operationKey,payloadHash,
+    businessIds:input.members.map(member=>member.businessId),categories})]);
+  return {duplicate:false};
+ });
+}
 async function advance(e:Enrollment,slot:number,now:number){
  const products=parseStoredDemoCatalog(e.catalog_products_json),state=await currentState(e,products.length>0);
  if(state.hash!==e.expected_hash)throw new DemoDrift('content_changed');
@@ -258,14 +321,19 @@ function parseEnrollmentRequest(raw:string,businessId:number):DemoEnrollmentInpu
 async function processEnrollmentRequests(now:number){
  const started=Date.now();
  const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 8 FOR UPDATE");
- let enrolled=0,enrollmentRejected=0,mediaCorrected=0;
+ let enrolled=0,enrollmentRejected=0,mediaCorrected=0,categoryCorrected=0;
  for(const request of requests){
   if(Date.now()-started>=12000)break;
   await runtimeRun('SAVEPOINT demo_enrollment');
   let accepted=false;
   try{
    const raw:unknown=JSON.parse(request.input_json);
-   if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as Record<string,unknown>).kind==='media_correction'){
+   if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as Record<string,unknown>).kind==='category_correction_batch'){
+    const correction=parseDemoCategoryCorrection(raw);
+    if(correction.members[0].businessId!==request.business_id)throw Error('Invalid private category correction target.');
+    await correctDemoCategoryBatch(correction);
+    categoryCorrected++;
+   }else if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as Record<string,unknown>).kind==='media_correction'){
     const correction=parseDemoMediaCorrection(raw);
     if(correction.businessId!==request.business_id)throw Error('Invalid private media correction target.');
     await correctDemoMedia(correction);
@@ -278,10 +346,10 @@ async function processEnrollmentRequests(now:number){
   await runtimeRun('UPDATE demo_simulator_requests SET status=?,reason=?,processed_at=? WHERE business_id=?',
    [accepted?'accepted':'rejected',accepted?'':'enrollment_failed',now,request.business_id]);
  }
- return {enrolled,enrollmentRejected,...(mediaCorrected?{mediaCorrected}:{})};
+ return {enrolled,enrollmentRejected,...(mediaCorrected?{mediaCorrected}:{}),...(categoryCorrected?{categoryCorrected}:{})};
 }
 
-export type DemoTickResult={enrolled?:number;enrollmentRejected?:number;mediaCorrected?:number;status:'advanced'|'disabled'|'busy'|'duplicate'|'budget'|'schema';advanced:number;paused:number;failed:number};
+export type DemoTickResult={enrolled?:number;enrollmentRejected?:number;mediaCorrected?:number;categoryCorrected?:number;status:'advanced'|'disabled'|'busy'|'duplicate'|'budget'|'schema';advanced:number;paused:number;failed:number};
 // The production schedule has three daily invocations. Retain the hosted
 // control row's ability to lower this cap without requiring a schema change.
 const MAX_DAILY_STAGES=12;
@@ -308,7 +376,7 @@ export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1):Promise
   if(!await schemaReady())return result('schema');
   const control=await runtimeGet<Control>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control)return result('disabled');
-  if(!control.enabled){const admission=await processEnrollmentRequests(now);return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected?{...result('disabled'),...admission}:result('disabled');}
+  if(!control.enabled){const admission=await processEnrollmentRequests(now);return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected?{...result('disabled'),...admission}:result('disabled');}
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;
