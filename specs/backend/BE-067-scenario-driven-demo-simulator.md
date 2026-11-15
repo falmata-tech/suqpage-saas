@@ -207,7 +207,9 @@ minute slot and records a private receipt in the same transaction under the
 existing advisory lock; a successful replay is inert, while a rolled-back
 attempt can retry. It admits at most four requests within a 180-second
 transaction, and starts no new request after 150 seconds or near the exact
-window cutoff. It cannot advance ordinary stages or accept a public request.
+window cutoff. It reserves the last observed request cost plus commit time
+against the current transaction deadline. It cannot advance ordinary stages or
+accept a public request.
 
 The control, requests, enrollment and seven-day bounded operational run records are private
 PostgreSQL tables with RLS and no anon/authenticated/service-role access. Only the

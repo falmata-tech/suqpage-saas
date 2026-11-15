@@ -37,7 +37,8 @@ window. The background function authenticates a current minute slot with a
 domain-separated MAC derived from the server-only database credential, and
 records a private transaction-scoped slot receipt so automatic retries or
 replayed requests cannot process another batch for the same minute. Its
-transaction is capped at 180 seconds and ends before the hard cutoff. Inside
+transaction is capped at 180 seconds, reserves the prior request cost plus
+commit time before starting another, and ends before the hard cutoff. Inside
 it, maintenance mode requires `enabled=0,pause_reason='operator'` and admits
 only `copy_correction` requests, at most four per tick; it cannot advance a
 stage even if the control row is enabled. The queued cohort is at most 64

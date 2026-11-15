@@ -4,6 +4,17 @@ import path from 'node:path';
 import test from 'node:test';
 import {build} from 'esbuild';
 import {copyMaintenanceBody,signCopyMaintenanceBody,verifyCopyMaintenanceRequest} from '../lib/demo-copy-background';
+import {canStartBackgroundCopy} from '../lib/demo-simulator-runtime';
+
+test('DEP-054 background copy reserves the last request and commit before its transaction deadline',()=>{
+ const deadline=180000;
+ assert.equal(canStartBackgroundCopy(0,deadline,null),true);
+ assert.equal(canStartBackgroundCopy(131000,deadline,30000),false);
+ assert.equal(canStartBackgroundCopy(118000,deadline,30000),true);
+ assert.equal(canStartBackgroundCopy(136000,deadline,1000),false);
+ assert.equal(canStartBackgroundCopy(135000,deadline,1000),false);
+ assert.equal(canStartBackgroundCopy(149000,deadline,50000),false);
+});
 
 test('DEP-054 finite S200 copy worker loads without Next request context',async()=>{
  const result=await build({entryPoints:['netlify/functions/demo-simulator.mts'],bundle:true,write:false,platform:'node',format:'cjs',packages:'external',logLevel:'silent'});

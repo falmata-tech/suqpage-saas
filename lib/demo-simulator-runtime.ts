@@ -810,7 +810,11 @@ export async function correctDemoPublicCopy(raw:unknown){
  }
 }
 
-async function processEnrollmentRequests(now:number,copyOnly=false,background=false){
+export function canStartBackgroundCopy(now:number,deadlineAt:number,previousMs:number|null){
+ return now+Math.max(40000,Math.ceil((previousMs??0)*1.5))+10000<deadlineAt;
+}
+
+async function processEnrollmentRequests(now:number,copyOnly=false,background=false,deadlineAt=Infinity){
  const started=Date.now();
  const requests=await runtimeAll<{business_id:number;input_json:string}>(`SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT ${background?4:8} FOR UPDATE`);
  if(copyOnly)for(const request of requests){
@@ -821,9 +825,11 @@ async function processEnrollmentRequests(now:number,copyOnly=false,background=fa
    throw Error('Unexpected pending request during copy maintenance.');
  }
  let enrolled=0,enrollmentRejected=0,mediaCorrected=0,categoryCorrected=0,copyCorrected=0;
+ let previousRequestMs:number|null=null;
  for(const request of requests){
   if(Date.now()-started>=(background?150000:12000)||
-   background&&Date.now()>=COPY_MAINTENANCE_END-10000)break;
+   background&&!canStartBackgroundCopy(Date.now(),deadlineAt,previousRequestMs))break;
+  const requestStarted=Date.now();
   await runtimeRun('SAVEPOINT demo_enrollment');
   let accepted=false;
   let unenrolledCorrection:UnenrolledDemoMediaCorrection|null=null;
@@ -880,6 +886,7 @@ async function processEnrollmentRequests(now:number,copyOnly=false,background=fa
   await runtimeRun('RELEASE SAVEPOINT demo_enrollment');
   await runtimeRun('UPDATE demo_simulator_requests SET status=?,reason=?,processed_at=? WHERE business_id=?',
    [accepted?'accepted':'rejected',accepted?'':'enrollment_failed',now,request.business_id]);
+  if(background)previousRequestMs=Date.now()-requestStarted;
  }
  return {enrolled,enrollmentRejected,...(mediaCorrected?{mediaCorrected}:{}),
   ...(categoryCorrected?{categoryCorrected}:{}),...(copyCorrected?{copyCorrected}:{})};
@@ -914,6 +921,7 @@ export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1,
   // before either the 15-minute function limit or the finite cutoff.
   const timeout=mode==='copy_background'?Math.min(180000,COPY_MAINTENANCE_END-Date.now()-5000):23000;
   if(timeout<30000&&mode==='copy_background')return result('disabled');
+  const transactionDeadlineAt=Date.now()+timeout;
   await runtimeRun(`SET LOCAL transaction_timeout='${timeout}ms'`);
   await runtimeRun("SET LOCAL lock_timeout='1500ms'");await runtimeRun("SET LOCAL statement_timeout='4000ms'");
   const lock=await runtimeGet<{locked:boolean}>('SELECT pg_try_advisory_xact_lock(6870619271382) locked');
@@ -931,7 +939,7 @@ export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1,
    if(previous&&Number(JSON.parse(previous.detail).slot)>=slot)return result('duplicate');
    await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(NULL,NULL,'demo.copy_background_slot',?,'')",[detail]);
   }
-  if(!control.enabled){const admission=await processEnrollmentRequests(now,mode!=='scheduled',mode==='copy_background');return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected||admission.copyCorrected?{...result('disabled'),...admission}:result('disabled');}
+  if(!control.enabled){const admission=await processEnrollmentRequests(now,mode!=='scheduled',mode==='copy_background',transactionDeadlineAt);return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected||admission.copyCorrected?{...result('disabled'),...admission}:result('disabled');}
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;
