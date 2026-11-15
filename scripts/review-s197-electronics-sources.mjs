@@ -10,19 +10,17 @@ const out = '.local/s197-electronics-source';
 fs.mkdirSync(out, {recursive: true});
 const source = execFileSync('git', ['rev-parse', 'HEAD'], {encoding: 'utf8'}).trim();
 const candidates = [
-  {key:'nextpcb-assembly',provider:'tiktok',id:'7352781700881026347',creator:'https://www.tiktok.com/@nextpcbofficial/video/7352781700881026347'},
-  {key:'bsw-solar-production',provider:'tiktok',id:'7494550342244240683',creator:'https://www.tiktok.com/@bswsolarstreetlight/video/7494550342244240683'},
-  {key:'galaxy-harness',provider:'youtube',id:'J8hBvC1bXtQ',creator:'https://www.youtube.com/watch?v=J8hBvC1bXtQ'},
-  {key:'judn-solar-light',provider:'youtube',id:'fTb3r6RFNBQ',creator:'https://www.youtube.com/watch?v=fTb3r6RFNBQ'},
-  {key:'merry-speaker-factory',provider:'tiktok',id:'7580286785029213454',creator:'https://www.tiktok.com/@merryaudio888/video/7580286785029213454'},
-  {key:'electric-panel-factory',provider:'tiktok',id:'7522117073733012750',creator:'https://www.tiktok.com/@electric.control/video/7522117073733012750'},
-  {key:'kabo-lighting-factory',provider:'tiktok',id:'7388823271690521874',creator:'https://www.tiktok.com/@kabolightingricky/video/7388823271690521874'},
-  {key:'cvr-pro-audio-production',provider:'tiktok',id:'7494829805028822280',creator:'https://www.tiktok.com/@cvraudio_china/video/7494829805028822280'},
-  {key:'merry-speaker-workshop',provider:'tiktok',id:'7657534434601700615',creator:'https://www.tiktok.com/@speakerfactory888/video/7657534434601700615'},
-  {key:'nhf-cable-production',provider:'tiktok',id:'7200198008225484033',creator:'https://www.tiktok.com/@nhf.frances/video/7200198008225484033'},
-  {key:'rattan-cafe-pendant',provider:'tiktok',id:'7625153258092350740',creator:'https://www.tiktok.com/@rattanstudio/video/7625153258092350740'},
-  {key:'jf-courtyard-solar',provider:'tiktok',id:'7705381006890503425',creator:'https://www.tiktok.com/@jd_solarlight/video/7705381006890503425'},
-  {key:'kinee-pv-combiner',provider:'tiktok',id:'7706559803509755144',creator:'https://www.tiktok.com/@kineeelectricals/video/7706559803509755144'},
+  {key:'connectpro-wire-harness',provider:'tiktok',id:'7660000446525836566',creator:'https://www.tiktok.com/@connectpromfg/video/7660000446525836566'},
+  {key:'sunfounder-water-display',provider:'tiktok',id:'7690902002590551327',creator:'https://www.tiktok.com/@sunfounder_official/video/7690902002590551327'},
+  {key:'sunfounder-temperature',provider:'tiktok',id:'7676359233994050846',creator:'https://www.tiktok.com/@sunfounder_official/video/7676359233994050846'},
+  {key:'xkc-water-alert',provider:'tiktok',id:'7356139583588912392',creator:'https://www.tiktok.com/@waterlevelsensorx/video/7356139583588912392'},
+  {key:'saier-sensor-production',provider:'tiktok',id:'7520459875109899540',creator:'https://www.tiktok.com/@saier_sensor_factory/video/7520459875109899540'},
+  {key:'jz-pressure-production',provider:'tiktok',id:'7314967881823948037',creator:'https://www.tiktok.com/@jzsensor/video/7314967881823948037'},
+  {key:'nuoying-instrument-maker',provider:'tiktok',id:'7449702031918468382',creator:'https://www.tiktok.com/@nuoying1/video/7449702031918468382'},
+  {key:'merry-speaker-assembly',provider:'tiktok',id:'7700891449390517522',creator:'https://www.tiktok.com/@speakerfactory888/video/7700891449390517522'},
+  {key:'hezhonghui-solar-light',provider:'tiktok',id:'7700859530430795038',creator:'https://www.tiktok.com/@hezhonghui3/video/7700859530430795038'},
+  {key:'imaloys-solar-maker',provider:'tiktok',id:'7188930405431561514',creator:'https://www.tiktok.com/@imaloys/video/7188930405431561514'},
+  {key:'lampfactory-production',provider:'tiktok',id:'7579065245407169805',creator:'https://www.tiktok.com/@lampfactory0/video/7579065245407169805'},
 ];
 const browser = await chromium.launch({channel:'chrome'});
 const result = {source,browser:{name:'Google Chrome',version:browser.version(),mode:'headless-managed-runner'},candidates:[],visualVerdict:'pending-agent-review'};
