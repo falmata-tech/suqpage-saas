@@ -24,8 +24,7 @@ const fixture=JSON.parse(fs.readFileSync(`${out}/fixture.json`,'utf8'));
 const source=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(fixture.source,source);
 assert.deepEqual(fixture.products.map(p=>[p.handle,p.videoRef]),[
-  ['afia-botanics','tiktok:7407311566867025170'],
-  ['demo-liya-soap-kitchen','tiktok:7157563218557160705'],
+  ['demo-sena-body-care','tiktok:7683170511496482061'],
 ]);
 const base='http://127.0.0.1:3000';
 const cases=[];
@@ -86,26 +85,32 @@ async function actualTikTok(page,item,label,stage){
 try{
   for(const item of cases){
     for(const width of [1440,390]){
-      const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'});
-      const page=await context.newPage();
       const label=`web-${item.productId}-${width}`;
-      try{
-        await page.goto(`${base}/@${item.handle}?product=${item.productId}`,{timeout:90000});
-        const gallery=page.getByRole('region',{name:'Photos and videos',exact:true});
-        await gallery.getByRole('button',{name:`Video ${item.mediaIndex+1}`,exact:true}).click();
-        await gallery.getByRole('button',{name:`Play video ${item.mediaIndex+1}`,exact:true}).click();
-        await gallery.scrollIntoViewIfNeeded();
-        const stage=gallery.getByLabel(`Media ${item.mediaIndex+1} of ${item.mediaCount}`,{exact:true});
-        const playback=await actualTikTok(page,item,label,stage);
-        assert.equal(context.pages().length,1);
-        assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-        await gallery.getByRole('button',{name:'Photo 1',exact:true}).click();
-        await expect(gallery.locator('iframe')).toHaveCount(0);
-        results.app.push({surface:'web',productId:item.productId,width,result:'playback-and-unmount-observed',...playback});
-      }catch(error){
-        await capture(page,label,'failure').catch(()=>{});
-        results.app.push({surface:'web',productId:item.productId,width,result:'failed',error:String(error).slice(0,1000)});
-      }finally{write();await context.close();}
+      for(let attempt=1;attempt<=2;attempt++){
+        const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'});
+        const page=await context.newPage();
+        try{
+          await page.goto(`${base}/@${item.handle}?product=${item.productId}`,{timeout:90000});
+          const gallery=page.getByRole('region',{name:'Photos and videos',exact:true});
+          await gallery.getByRole('button',{name:`Video ${item.mediaIndex+1}`,exact:true}).click();
+          await gallery.getByRole('button',{name:`Play video ${item.mediaIndex+1}`,exact:true}).click();
+          await gallery.scrollIntoViewIfNeeded();
+          const stage=gallery.getByLabel(`Media ${item.mediaIndex+1} of ${item.mediaCount}`,{exact:true});
+          const playback=await actualTikTok(page,item,label,stage);
+          assert.equal(context.pages().length,1);
+          assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+          await gallery.getByRole('button',{name:'Photo 1',exact:true}).click();
+          await expect(gallery.locator('iframe')).toHaveCount(0);
+          results.app.push({surface:'web',productId:item.productId,width,attempt,result:'playback-and-unmount-observed',...playback});
+          break;
+        }catch(error){
+          const unavailable=await page.getByText('Video unavailable',{exact:true}).count().catch(()=>0);
+          await capture(page,label,`failure-${attempt}`).catch(()=>{});
+          results.app.push({surface:'web',productId:item.productId,width,attempt,result:'failed',unavailable:unavailable>0,error:String(error).slice(0,1000)});
+          if(attempt===2||!unavailable)break;
+          console.log(`Retrying ${label} once after provider-unavailable state.`);
+        }finally{write();await context.close();}
+      }
     }
   }
   await waitServer('http://localhost:8082');
@@ -127,6 +132,8 @@ try{
       results.app.push({surface:'Expo web',productId:item.productId,width:390,result:'failed',error:String(error).slice(0,1000)});
     }finally{write();await context.close();}
   }
-  assert.equal(results.app.length,6);
-  assert.ok(results.app.every(r=>r.result==='playback-and-unmount-observed'),'Inspect actual-player evidence.');
+  assert.ok(results.app.length>=3&&results.app.length<=5);
+  assert.ok([94].every(productId=>['web:1440','web:390','Expo web:390'].every(surface=>
+    results.app.some(r=>r.productId===productId&&`${r.surface}:${r.width}`===surface&&r.result==='playback-and-unmount-observed'))),
+  'Inspect actual-player evidence.');
 }finally{write();await browser.close();}
