@@ -5,7 +5,7 @@ import { runtimeBusinessById, runtimeCatalogByBusinessId, runtimeHasRetainedPubl
 import { productUpkeepEnabled } from "./config";
 import { ProductUpkeepError, type BasicProductCommand } from "./product-upkeep-domain";
 import {validateProductUpkeepBatch, type BatchProductUpkeepPort, type ProductBatchMember, type StagedProductImage, type ProductUpkeepResult} from "./product-upkeep";
-import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
+import { catalogToRevisionSnapshotV4,processVideoPolicyForCatalog } from "./revision-v4-defaults";
 import { requireRevisionSnapshotV4 } from "./revision-v4-domain";
 import { runtimeAll, runtimeGet, runtimeRun, runtimeTransaction } from "./runtime-sql";
 import { SHOWROOM_COMPONENT_BANK_LATEST } from "./showroom-bank-release";
@@ -117,7 +117,7 @@ async function validateProspectiveSnapshot(command: BasicProductCommand, imageRe
       leadTimeSummary: command.leadTimeSummary,
     });
   }
-  requireRevisionSnapshotV4(snapshot, SHOWROOM_COMPONENT_BANK_LATEST);
+  requireRevisionSnapshotV4(snapshot, SHOWROOM_COMPONENT_BANK_LATEST,processVideoPolicyForCatalog(catalog));
 }
 
 async function publishOne(user: SessionUser, command: BasicProductCommand, stagedImage: StagedProductImage | null,

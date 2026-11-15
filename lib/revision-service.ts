@@ -10,7 +10,7 @@ import {
   snapshotToCatalog,
   withAuthoritativeBusinessSettings,
 } from "./revision-domain";
-import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
+import { approvedProcessVideoPolicy, catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
 import {
   assignBlueprintSlot,
   blueprintReadiness,
@@ -114,9 +114,12 @@ async function validatedV4ForRequest(
   requestId: number,
   businessId: number,
 ) {
+  const catalog = await runtimeCatalogByBusinessId(businessId, true);
+  if (!catalog) throw new RevisionError("Business catalog not found.", 404);
   const snapshot = requireRevisionSnapshotV4(
     snapshotInput,
     SHOWROOM_COMPONENT_BANK_LATEST,
+    approvedProcessVideoPolicy(catalog.business),
   );
   const allowed = await allowedAssetRefs(requestId, businessId);
   for (const ref of snapshotAssetRefs(snapshot)) {
@@ -127,8 +130,6 @@ async function validatedV4ForRequest(
       );
     }
   }
-  const catalog = await runtimeCatalogByBusinessId(businessId, true);
-  if (!catalog) throw new RevisionError("Business catalog not found.", 404);
   return withAuthoritativeBusinessSettings(snapshot, catalog.business);
 }
 
@@ -329,6 +330,7 @@ export async function fulfillBlueprintMediaSlot(
   const snapshot = requireRevisionSnapshotV4(
     revision.snapshot_json,
     SHOWROOM_COMPONENT_BANK_LATEST,
+    approvedProcessVideoPolicy((await runtimeCatalogByBusinessId(revision.business_id,true))!.business),
   );
   const mediaPlan = mediaPlanFromRecipeMetadata(
     revision.recipe_metadata_json,
@@ -498,7 +500,7 @@ export async function decideRevision(
   });
 }
 
-async function stagePrivateImages(snapshot: RevisionSnapshotV4, requestId: number) {
+async function stagePrivateImages(snapshot: RevisionSnapshotV4, requestId: number, businessId:number) {
   const replacements = new Map<string, string>();
   const staged: string[] = [];
   const store = getMediaObjectStore();
@@ -552,7 +554,8 @@ async function stagePrivateImages(snapshot: RevisionSnapshotV4, requestId: numbe
         : value,
   );
   return {
-    snapshot: requireRevisionSnapshotV4(replaced, SHOWROOM_COMPONENT_BANK_LATEST),
+    snapshot: requireRevisionSnapshotV4(replaced, SHOWROOM_COMPONENT_BANK_LATEST,
+      approvedProcessVideoPolicy((await runtimeCatalogByBusinessId(businessId,true))!.business)),
     staged,
     store,
   };
@@ -569,6 +572,10 @@ async function replaceCanonicalCatalog(
   );
   if (!business) throw new RevisionError("Business not found.", 404);
   const catalog = snapshotToCatalog(snapshot, business as never);
+  if (catalog.business.process_video_ref.startsWith('demo:') &&
+    (business.is_demo !== 1 || !approvedDemoVideo(catalog.business.process_video_ref,businessId))) {
+    throw new RevisionError("Use a public video link for this business.");
+  }
   if (catalog.products.some(product => productMedia(product).some(item =>
     item.kind === 'video' && item.ref.startsWith('demo:') &&
     (!business.is_demo || !approvedDemoVideo(item.ref,businessId))))) {
@@ -712,7 +719,7 @@ export async function publishApprovedRevision(
   if (validated.products.some(product=>!isActiveProductKind(product.offeringKind))) {
     throw new RevisionError("Choose Ready to ship or Made to order for this product.",400);
   }
-  const staged = await stagePrivateImages(validated, revision.request_id);
+  const staged = await stagePrivateImages(validated, revision.request_id, revision.business_id);
   try {
     return runtimeTransaction(async () => {
       const now = (await runtimeCatalogByBusinessId(revision.business_id, true))!;
@@ -802,6 +809,14 @@ export async function rollbackCatalogVersion(
   const snapshot = requireRevisionSnapshotV4(
     target.snapshot_json,
     SHOWROOM_COMPONENT_BANK_LATEST,
+    (()=>{
+      const currentPolicy=approvedProcessVideoPolicy(current.business);
+      if(!currentPolicy||!(businessId===50||businessId===62))return currentPolicy;
+      const raw=JSON.parse(target.snapshot_json) as {business?:{processVideoRef?:unknown}};
+      const ref=raw.business?.processVideoRef;
+      return typeof ref==='string'&&ref.startsWith('tiktok:')
+        ?{...currentPolicy,retainedProcessVideoRef:ref}:currentPolicy;
+    })(),
   );
   return runtimeTransaction(async () => {
     const now = (await runtimeCatalogByBusinessId(businessId, true))!;
