@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { RevisionSnapshotV3 } from "./revision-domain";
+import type { RevisionProcessVideoPolicy, RevisionSnapshotV3 } from "./revision-domain";
 import {
   requireRevisionSnapshotV4,
   type RevisionSnapshotV4,
@@ -73,6 +73,7 @@ export type ShowroomRecipeEnvelope = {
 export type RecipeValidationContext = {
   baseContentVersion: number;
   baseSnapshot: RevisionSnapshotV4;
+  processVideoPolicy?: RevisionProcessVideoPolicy;
   allowedAssetKeys: ReadonlySet<string>;
   allowedSourceKeys: ReadonlySet<string>;
   assetDetails: ReadonlyMap<
@@ -470,7 +471,7 @@ export function validateShowroomRecipe(
       })),
       contentBlocks: recipe.content.contentBlocks,
       designManifest: design,
-    }, SHOWROOM_COMPONENT_BANK_LATEST);
+    }, SHOWROOM_COMPONENT_BANK_LATEST, context.processVideoPolicy);
   } catch (error) {
     issue(
       "content",

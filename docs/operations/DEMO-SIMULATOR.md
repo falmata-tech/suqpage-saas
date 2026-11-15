@@ -153,6 +153,13 @@ trigger is exposed in the hosted worker.
 
 ## Hosting choice
 
+The S197 video maintenance adapter runs once per minute only from 18:15
+inclusive to 22:15 exclusive UTC on 2026-11-15. It admits private media
+requests only while the simulator is disabled and operator-paused. At or after
+22:15 UTC it returns before opening a database session. Restore the ordinary
+three-times-daily schedule as soon as all reviewed requests are verified; the
+later cutoff is a finite safety margin, not an extension of daily simulation.
+
 A dedicated Netlify scheduled function runs separately from `attention-worker`,
 using existing server-only PostgreSQL application ports. Netlify scheduled work
 has a 30-second bound and runs only on published deployments. Keep each tick below

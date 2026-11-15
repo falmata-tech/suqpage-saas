@@ -712,6 +712,11 @@ It advances predefined coherent scenarios through ordinary product and page
 publication commands. Foreground public screens check for changes every15 seconds,
 preserve inquiry drafts and read one consistent product/profile snapshot. This
 is bounded foreground polling, not a Supabase Realtime subscription.
+The 2026-11-15 18:15–22:15 UTC maintenance adapter runs every minute
+only within that finite window and admits only private video-correction
+requests while the control is operator-paused. Unexpected request kinds or
+invalid JSON fail the tick without acknowledgement. It cannot advance scenarios;
+ordinary stage service resumes only after the three-time adapter is restored.
 
 Use the pinned Node/Next.js web/API and Expo/React Native app with shared typed
 contracts. Runtime/dependency versions come from the lockfiles, package metadata
@@ -1012,9 +1017,16 @@ video examples after source and player review. It retains
 photos, identity, contacts and original stories. A finite paused operation through
 ordinary commands must preserve the BE-067 scenario progress and acknowledge only
 the admitted media change; an unreviewed edit still pauses rather than being erased.
+The separate process chapter uses a finite guarded demo-only correction that
+retains catalog history and leaves owner pages, products and scenario progress
+unchanged. Matching first-party demo clips can play in that chapter.
 For the two legacy public demos without enrollment, the finite paused private
 queue uses ordinary product/page publication and leaves the scenario cohort
-untouched. It admits only their exact reviewed media and never enrolls them.
+untouched. It binds their existing page author with current platform-admin
+authority, admits only their exact reviewed media and never enrolls them.
+Their legacy process video is replaced in the same guarded transaction and
+retained in catalog history for exact inverse rollback. The composed showroom
+plays an approved first-party process MP4 for the matching demo business.
 
 ## 21. Standard page operating workflow
 

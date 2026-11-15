@@ -5,15 +5,21 @@ import {currentBusinessAuthority} from './staff-business-authority';
 import {ownerPagePort} from './owner-page-runtime';
 import {pagePublicationPort} from './owner-page-publication-runtime';
 import {saveOwnerPageAndPublication} from './owner-page-save-runtime';
-import {ownerPageImageKey,parseShopPageContent,type ShopPageContent} from './owner-page-domain';
+import {OwnerPageError,ownerPageImageKey,parseShopPageContent,type ShopPageContent} from './owner-page-domain';
 import {executeBasicProductUpkeep,executeProductUpkeepBatch} from './product-upkeep';
 import {postgresProductUpkeepPort} from './product-upkeep-postgres';
 import {parseOfferingHighlightsJson} from './offering-presentation';
 import {configuredReviewer} from './reviewer-access-runtime';
 import {demoScenarioCommandKey,demoScenarioStage,nextDemoScenarioStage,parseDemoScenarioParameters,type DemoScenarioParameters,type DemoScenarioKey} from './demo-scenarios';
-import {parseDemoMediaCorrection,parseUnenrolledDemoMediaCorrection,parseQueuedDemoMediaCorrection} from './demo-media-correction';
+import {parseDemoMediaCorrection,parseUnenrolledDemoMediaCorrection,parseQueuedDemoMediaCorrection,type UnenrolledDemoMediaCorrection} from './demo-media-correction';
+import {parseDemoProcessMediaCorrection,type DemoProcessMediaCorrection} from './demo-process-media-correction';
 import {AGRICULTURE_CORRECTION_TARGETS,parseDemoCategoryCorrection} from './demo-category-correction';
 import {productMedia} from './product-media';
+import {ProductUpkeepError} from './product-upkeep-domain';
+import {RevisionError} from './revision-domain';
+import {catalogToRevisionSnapshotV4,processVideoPolicyForCatalog} from './revision-v4-defaults';
+import {requireRevisionSnapshotV4} from './revision-v4-domain';
+import {SHOWROOM_COMPONENT_BANK_LATEST} from './showroom-bank-release';
 import {productVideoWatchUrl} from './video/product-video';
 import type {SessionUser} from './types';
 import {isSupportedPostgresMigrationLedger,LATEST_POSTGRES_MIGRATION_VERSION} from './postgres-schema-version';
@@ -25,7 +31,7 @@ export type DemoEnrollmentInput={businessId:number;handle:string;ownerUserId:num
 type Enrollment={business_id:number;handle:string;owner_user_id:number;provider_user_id:string;product_id:number;
  scenario_key:DemoScenarioKey;scenario_version:number;parameters_json:string;baseline_page_json:string;baseline_description:string;expected_hash:string;
  stage:number;cycle:number;due_at:number;status:'active'|'paused';reason:string;catalog_products_json:string};
-type Control={enabled:number;last_slot:number;budget_day:number;used_today:number;daily_limit:number;database_limit_bytes:number};
+type Control={enabled:number;pause_reason:string;last_slot:number;budget_day:number;used_today:number;daily_limit:number;database_limit_bytes:number};
 class DemoDrift extends Error{constructor(readonly reason:'eligibility_changed'|'content_changed'){super(reason);}}
 const digest=(value:unknown)=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 async function schemaReady(){
@@ -204,6 +210,123 @@ export async function correctDemoMedia(raw:unknown){
  });
 }
 
+/** Exact enrolled-example process-video repair. It publishes one ordinary
+ * retained catalog version and never edits products, pages or scenario progress. */
+type ProcessMediaPhase='admission'|'eligibility'|'receipt'|'reviewed_before'|'retained'|
+ 'business'|'postcondition'|'version'|'enrollment'|'audit';
+const processMediaFailurePhases=new WeakMap<object,ProcessMediaPhase>();
+export async function correctDemoProcessMedia(raw:unknown){
+ const input=parseDemoProcessMediaCorrection(raw),payloadHash=digest(input);
+ let phase:ProcessMediaPhase='admission';
+ try{return await runtimeTransaction(async()=>{
+  await runtimeRun('SELECT pg_advisory_xact_lock(6870619271382)');
+  if(!await schemaReady())throw Error('The demo schema is not ready.');
+  const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
+  if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before process media maintenance.');
+  phase='eligibility';
+  const e=await runtimeGet<Enrollment>('SELECT * FROM demo_simulator_enrollments WHERE business_id=? FOR UPDATE',[input.businessId]);
+  if(!e||e.status!=='active'||e.reason||e.handle!==input.handle||e.owner_user_id!==input.ownerUserId||
+   e.provider_user_id!==input.providerUserId)throw new DemoDrift('eligibility_changed');
+  const state=await currentState(e,true);
+  if(state.hash!==e.expected_hash)throw new DemoDrift('content_changed');
+  phase='receipt';
+  const receipt=await runtimeGet<{payload_hash:string}>(`SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs
+   WHERE business_id=? AND action='demo.process_media_corrected'
+   AND CASE WHEN action='demo.process_media_corrected' THEN detail::jsonb->>'operationKey' END=? ORDER BY id DESC LIMIT 1`,
+   [input.businessId,input.operationKey]);
+  if(receipt){
+   if(receipt.payload_hash!==payloadHash)throw Error('This process media operation has different reviewed content.');
+   if(state.catalog.business.process_video_ref!==input.processVideoAfter)throw new DemoDrift('content_changed');
+   return {duplicate:true};
+  }
+  phase='reviewed_before';
+  if(input.expectedHash!==e.expected_hash||input.expectedContentVersion!==state.catalog.business.content_version||
+   input.expectedDraftVersion!==state.draft.version||input.expectedPageRevision!==state.publication.revision||
+   input.expectedStage!==e.stage||input.expectedCycle!==e.cycle||input.expectedDueAt!==Number(e.due_at)||
+   state.draft.version!==state.publication.draftVersion||digest(state.draft.content)!==digest(state.publication.content)||
+   input.processVideoBefore!==state.catalog.business.process_video_ref)throw new DemoDrift('content_changed');
+  if(input.direction==='rollback'){
+   const applied=await runtimeGet<{before_ref_hash:string;after_ref_hash:string}>(`SELECT
+    detail::jsonb->>'beforeRefHash' before_ref_hash,detail::jsonb->>'afterRefHash' after_ref_hash
+    FROM audit_logs WHERE business_id=? AND action='demo.process_media_corrected'
+    AND CASE WHEN action='demo.process_media_corrected' THEN detail::jsonb->>'direction' END='apply'
+    ORDER BY id DESC LIMIT 1`,[input.businessId]);
+   if(!applied||applied.before_ref_hash!==digest(input.processVideoAfter)||
+    applied.after_ref_hash!==digest(input.processVideoBefore))throw new DemoDrift('content_changed');
+  }
+  const bindings=parseStoredDemoCatalog(e.catalog_products_json);
+  if(!bindings.length||digest(bindings.map(p=>p.productId))!==digest(state.catalog.products.map(p=>p.id).sort((a,b)=>a-b)))
+   throw new DemoDrift('eligibility_changed');
+  const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
+  if(!size||!Number.isFinite(Number(size.bytes))||Number(size.bytes)>=Number(control.database_limit_bytes))
+   throw Error('Demo media storage budget reached.');
+  const version=state.catalog.business.content_version;
+  const beforeSnapshot=catalogToRevisionSnapshotV4(state.catalog);
+  phase='retained';
+  const retained=await runtimeGet<{snapshot_json:string}>(
+   'SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
+   [input.businessId,version]);
+  let processVersion=version;
+  if(retained){
+   let exact=false;
+   try{
+    const checked=requireRevisionSnapshotV4(retained.snapshot_json,SHOWROOM_COMPONENT_BANK_LATEST,
+     processVideoPolicyForCatalog(state.catalog));
+    exact=digest(checked)===digest(beforeSnapshot);
+   }catch(error){if(!(error instanceof RevisionError))throw error;}
+   if(!exact){
+    if(await runtimeGet('SELECT 1 FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
+     [input.businessId,version+1]))throw new DemoDrift('content_changed');
+    const reserved=await runtimeRun(`UPDATE businesses SET content_version=?
+     WHERE id=? AND handle=? AND is_demo=1 AND status='active' AND content_version=? AND process_video_ref=?`,
+     [version+1,input.businessId,input.handle,version,input.processVideoBefore]);
+    if(reserved.changes!==1)throw new DemoDrift('content_changed');
+    await runtimeRun(`INSERT INTO published_catalog_versions
+     (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+     VALUES(?,?,?,'baseline',?)`,[input.businessId,version+1,JSON.stringify(beforeSnapshot),state.actor.id]);
+    processVersion=version+1;
+   }
+  }else await runtimeRun(`INSERT INTO published_catalog_versions
+   (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+   VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(beforeSnapshot),state.actor.id]);
+  phase='business';
+  const updated=await runtimeRun(`UPDATE businesses SET process_video_ref=?,content_version=?
+   WHERE id=? AND handle=? AND is_demo=1 AND status='active' AND content_version=? AND process_video_ref=?`,
+   [input.processVideoAfter,processVersion+1,input.businessId,input.handle,processVersion,input.processVideoBefore]);
+  if(updated.changes!==1)throw new DemoDrift('content_changed');
+  phase='postcondition';
+  const after=await currentState(e,true);
+  const unchangedBusiness=(business:typeof state.catalog.business)=>({...business,process_video_ref:'',content_version:0});
+  if(after.catalog.business.content_version!==processVersion+1||
+   after.catalog.business.process_video_ref!==input.processVideoAfter||
+   digest(unchangedBusiness(after.catalog.business))!==digest(unchangedBusiness(state.catalog.business))||
+   digest(after.catalog.products)!==digest(state.catalog.products)||
+   digest(after.draft)!==digest(state.draft)||digest(after.publication)!==digest(state.publication)||
+   digest(after.categories)!==digest(state.categories)||digest(after.location??null)!==digest(state.location??null)||
+   digest(after.discovery??null)!==digest(state.discovery??null))throw new DemoDrift('content_changed');
+  phase='version';
+  const afterSnapshot=catalogToRevisionSnapshotV4(after.catalog);
+  await runtimeRun(`INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id)
+   VALUES(?,?,?,'publication',?)`,[input.businessId,processVersion+1,JSON.stringify(afterSnapshot),state.actor.id]);
+  phase='enrollment';
+  const acknowledged=await runtimeRun(`UPDATE demo_simulator_enrollments SET expected_hash=?
+   WHERE business_id=? AND status='active' AND reason='' AND expected_hash=? AND stage=? AND cycle=? AND due_at=?`,
+   [after.hash,input.businessId,e.expected_hash,e.stage,e.cycle,e.due_at]);
+  if(acknowledged.changes!==1)throw new DemoDrift('content_changed');
+  phase='audit';
+  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.process_media_corrected',?,'')",
+   [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
+    operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
+    beforeRefHash:digest(input.processVideoBefore),afterRefHash:digest(input.processVideoAfter),
+    baseVersion:version,baselineVersion:processVersion,contentVersion:processVersion+1,
+    baselineReconciled:processVersion!==version})]);
+  return {duplicate:false};
+ });}catch(error){
+  if(error&&typeof error==='object')processMediaFailurePhases.set(error,phase);
+  throw error;
+ }
+}
+
 /** One finite reviewed cohort correction; the worker must already be operator-paused. */
 export async function correctDemoCategoryBatch(raw:unknown){
  const input=parseDemoCategoryCorrection(raw),payloadHash=digest(input);
@@ -215,7 +338,7 @@ export async function correctDemoCategoryBatch(raw:unknown){
   if(!await schemaReady())throw Error('The demo schema is not ready.');
   const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before category maintenance.');
-  const receipt=await runtimeGet<{payload_hash:string}>("SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs WHERE action='demo.category_corrected' AND detail::jsonb->>'operationKey'=? ORDER BY id DESC LIMIT 1",[input.operationKey]);
+  const receipt=await runtimeGet<{payload_hash:string}>("SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs WHERE action='demo.category_corrected' AND CASE WHEN action='demo.category_corrected' THEN detail::jsonb->>'operationKey' END=? ORDER BY id DESC LIMIT 1",[input.operationKey]);
   if(receipt){if(receipt.payload_hash!==payloadHash)throw Error('This demo category operation has different reviewed content.');return {duplicate:true};}
   const agriculture=await runtimeGet<{total:number}>("SELECT COUNT(*) total FROM business_industries WHERE industry_key='agriculture-growers'");
   if(Number(agriculture?.total)!==0)throw new DemoDrift('content_changed');
@@ -268,23 +391,41 @@ export async function correctDemoCategoryBatch(raw:unknown){
 }
 
 const unenrolledMediaTargets={50:'demo-dara-clay-works',62:'demo-wabi-bottled-water'} as const;
+type UnenrolledMediaPhase='admission'|'eligibility'|'receipt'|'reviewed_before'|'retained_baseline'|'process_cas'|
+ 'product_1'|'product_2'|'product_3'|'product_4'|'page'|'postcondition'|'audit';
+const unenrolledMediaFailurePhases=new WeakMap<object,UnenrolledMediaPhase>();
+function unenrolledMediaFailureCode(error:unknown){
+ if(error instanceof DemoDrift)return error.reason;
+ if(error instanceof ProductUpkeepError){
+  const allowed=new Set(['invalid_command','invalid_product_kind','service_note_required','forbidden',
+   'stale_version','idempotency_conflict','foreign_media','demo_video_forbidden','structure_not_found','write_conflict']);
+  return allowed.has(error.code)?error.code:'product_upkeep';
+ }
+ if(error instanceof RevisionError)return 'revision_validation';
+ if(error instanceof OwnerPageError)return 'page_validation';
+ return 'unexpected';
+}
 
-async function unenrolledMediaState(businessId:50|62){
+async function unenrolledMediaState(businessId:50|62,actorUserId:number){
  const handle=unenrolledMediaTargets[businessId];
- const owners=await runtimeAll<{id:number}>(`SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id
-  WHERE u.business_id=? AND p.access_role='client' ORDER BY u.id`,[businessId]);
- if(owners.length!==1)throw new DemoDrift('eligibility_changed');
- const actor=await runtimeUserById(owners[0].id);
- if(!actor||actor.access_role!=='client'||actor.business_id!==businessId||
-   await currentBusinessAuthority(actor,businessId,true)!=='owner')throw new DemoDrift('eligibility_changed');
+ const actor=await runtimeUserById(actorUserId),reviewer=configuredReviewer();
+ if(!actor||actor.role!=='admin'||actor.access_role!=='platform_admin'||
+   await currentBusinessAuthority(actor,businessId,true)!=='administrator'||
+   reviewer?.email===actor.email.toLowerCase())throw new DemoDrift('eligibility_changed');
+ const link=await runtimeGet<{provider_user_id:string}>(
+  "SELECT provider_user_id FROM auth_identity_links WHERE user_id=? AND provider='supabase' FOR SHARE",[actor.id]);
+ if(reviewer?.providerId&&reviewer.providerId===link?.provider_user_id)throw new DemoDrift('eligibility_changed');
  await runtimeGet('SELECT business_id FROM owner_page_drafts WHERE business_id=? FOR UPDATE',[businessId]);
  const business=await runtimeGet<{id:number;is_demo:number;status:string;handle:string}>(
   'SELECT id,is_demo,status,handle FROM businesses WHERE id=? FOR UPDATE',[businessId]);
  if(!business||business.is_demo!==1||business.status!=='active'||business.handle!==handle||
    await runtimeGet('SELECT 1 FROM demo_simulator_enrollments WHERE business_id=?',[businessId]))throw new DemoDrift('eligibility_changed');
+ const linked=await runtimeGet<{total:number}>('SELECT COUNT(*) total FROM users WHERE business_id=?',[businessId]);
+ if(Number(linked?.total)!==0)throw new DemoDrift('eligibility_changed');
  await runtimeAll('SELECT id FROM products WHERE business_id=? ORDER BY id FOR UPDATE',[businessId]);
  const catalog=await runtimeCatalogByBusinessId(businessId,true),draft=await ownerPagePort.read(businessId),publication=await pagePublicationPort.latest(businessId);
  if(!catalog||!draft||!publication?.content||
+   draft.updatedBy!==actor.id||publication.publishedBy!==actor.id||
    digest(catalog.products.map(p=>p.id))!==digest(businessId===50?[197,198,199,200]:[245,246,247,248])||
    catalog.products.some(p=>!p.is_published||p.offering_kind==='service'||p.currency!=='ETB')||
    draft.version!==publication.draftVersion||digest(draft.content)!==digest(publication.content))throw new DemoDrift('eligibility_changed');
@@ -298,56 +439,112 @@ async function unenrolledMediaState(businessId:50|62){
 /** One-time ordinary publication for two unenrolled legacy demos; inverse plans roll back. */
 export async function correctUnenrolledDemoMedia(raw:unknown){
  const input=parseUnenrolledDemoMediaCorrection(raw),payloadHash=digest(input);
- return runtimeTransaction(async()=>{
+ let phase:UnenrolledMediaPhase='admission';
+ try{return await runtimeTransaction(async()=>{
   await runtimeRun('SELECT pg_advisory_xact_lock(6870619271382)');
   if(!await schemaReady())throw Error('The demo schema is not ready.');
   const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before media maintenance.');
-  const state=await unenrolledMediaState(input.businessId);
-  if(state.actor.id!==input.ownerUserId)throw new DemoDrift('eligibility_changed');
+  phase='eligibility';
+  const state=await unenrolledMediaState(input.businessId,input.actorUserId);
+  phase='receipt';
   const receipt=await runtimeGet<{payload_hash:string}>(`SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs
    WHERE business_id=? AND action='demo.unenrolled_media_corrected'
-   AND detail::jsonb->>'operationKey'=? ORDER BY id DESC LIMIT 1`,[input.businessId,input.operationKey]);
+   AND CASE WHEN action='demo.unenrolled_media_corrected' THEN detail::jsonb->>'operationKey' END=? ORDER BY id DESC LIMIT 1`,[input.businessId,input.operationKey]);
   if(receipt){
    if(receipt.payload_hash!==payloadHash)throw Error('This demo media operation has different reviewed content.');
-   if(state.draft.content.videoUrl!==productVideoWatchUrl(input.coverVideoRef)||
+   if(state.catalog.business.process_video_ref!==input.processVideoAfter||
+     state.draft.content.videoUrl!==productVideoWatchUrl(input.coverVideoRef)||
      input.products.some(item=>digest(item.afterMedia)!==digest(productMedia(state.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
    return {duplicate:true};
   }
+  phase='reviewed_before';
   if(input.expectedContentVersion!==state.catalog.business.content_version||
    input.expectedDraftVersion!==state.draft.version||input.expectedPageRevision!==state.publication.revision||
    input.coverBefore!==state.draft.content.videoUrl||
+   input.processVideoBefore!==state.catalog.business.process_video_ref||
    input.products.some(item=>digest(item.beforeMedia)!==digest(productMedia(state.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   if(!size||!Number.isFinite(Number(size.bytes))||Number(size.bytes)>=Number(control.database_limit_bytes))throw Error('Demo media storage budget reached.');
   let version=state.catalog.business.content_version;
-  for(const item of input.products){
+  const startVersion=version;
+  phase='retained_baseline';
+  // A prior immutable version may reflect older metadata from before this
+  // maintenance. Preserve it unchanged and reserve a new, exact version of the
+  // current TikTok catalog before replacing the process video.
+  const baseline=catalogToRevisionSnapshotV4(state.catalog);
+  const retained=await runtimeGet<{snapshot_json:string}>(
+   'SELECT snapshot_json FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
+   [input.businessId,version]);
+  if(input.direction==='apply'){
+   if(retained)requireRevisionSnapshotV4(retained.snapshot_json,SHOWROOM_COMPONENT_BANK_LATEST,
+    processVideoPolicyForCatalog(state.catalog));
+   else await runtimeRun(`INSERT INTO published_catalog_versions
+    (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+    VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(baseline),state.actor.id]);
+   if(await runtimeGet('SELECT 1 FROM published_catalog_versions WHERE business_id=? AND content_version=? FOR SHARE',
+    [input.businessId,version+1]))throw new DemoDrift('content_changed');
+   const reserved=await runtimeRun(`UPDATE businesses SET content_version=content_version+1
+    WHERE id=? AND content_version=? AND process_video_ref=? AND is_demo=1 AND status='active'`,
+    [input.businessId,version,input.processVideoBefore]);
+   if(reserved.changes!==1)throw new DemoDrift('content_changed');
+   version++;
+   await runtimeRun(`INSERT INTO published_catalog_versions
+    (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+    VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(baseline),state.actor.id]);
+  }else if(retained){
+   const checked=requireRevisionSnapshotV4(retained.snapshot_json,SHOWROOM_COMPONENT_BANK_LATEST,
+    processVideoPolicyForCatalog(state.catalog));
+   if(digest(checked)!==digest(baseline))throw new DemoDrift('content_changed');
+  }else await runtimeRun(`INSERT INTO published_catalog_versions
+   (business_id,content_version,snapshot_json,change_kind,actor_user_id)
+   VALUES(?,?,?,'baseline',?)`,[input.businessId,version,JSON.stringify(baseline),state.actor.id]);
+  phase='process_cas';
+  const processChanged=await runtimeRun(`UPDATE businesses SET process_video_ref=?
+   WHERE id=? AND content_version=? AND process_video_ref=? AND is_demo=1 AND status='active'`,
+   [input.processVideoAfter,input.businessId,version,input.processVideoBefore]);
+  if(processChanged.changes!==1)throw new DemoDrift('content_changed');
+  for(const [index,item] of input.products.entries()){
+   phase=(`product_${index+1}` as UnenrolledMediaPhase);
    const p=state.catalog.products.find(p=>p.id===item.productId)!;
    const result=await executeBasicProductUpkeep(postgresProductUpkeepPort,state.actor,{
     kind:'update',businessId:input.businessId,productId:p.id,expectedContentVersion:version,
     idempotencyKey:`demo_legacy_media_${input.operationKey}_${p.id}`,name:p.name,description:p.description,
-    availability:p.availability,offeringKind:p.offering_kind,quantityMode:p.quantity_mode,
+    availability:p.availability,quantityMode:p.quantity_mode,
     orderScope:p.order_scope??'unspecified',priceMinor:p.price_minor,quantityUnit:p.quantity_unit,
     highlights:parseOfferingHighlightsJson(p.highlights_json),capacitySummary:p.capacity_summary,
     minimumOrderSummary:p.minimum_order_summary,leadTimeSummary:p.lead_time_summary,
     media:item.afterMedia,videoRef:item.afterMedia.find(m=>m.kind==='video')!.ref,
     categoryId:p.category_id,imageAction:'keep',preserveMetadata:true,
+    serviceNote:'S197 reviewed fictional-demo video correction.',
    },null);
    version=result.contentVersion;
   }
+  phase='page';
   const videoUrl=productVideoWatchUrl(input.coverVideoRef);
   await saveOwnerPageAndPublication(state.actor,input.businessId,
    {action:'save',version:state.draft.version,content:{...state.draft.content,videoUrl}});
-  const after=await unenrolledMediaState(input.businessId);
-  if(after.catalog.business.content_version!==version||after.draft.version!==state.draft.version+1||
+  phase='postcondition';
+  const after=await unenrolledMediaState(input.businessId,input.actorUserId);
+  if(after.catalog.business.content_version!==version||after.catalog.business.process_video_ref!==input.processVideoAfter||
+   after.draft.version!==state.draft.version+1||
    after.publication.revision!==state.publication.revision+1||after.draft.content.videoUrl!==videoUrl||
    input.products.some(item=>digest(item.afterMedia)!==digest(productMedia(after.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
+  phase='audit';
+  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.unenrolled_process_video_corrected',?,'')",
+   [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
+    operationKey:input.operationKey,beforeRefHash:digest(input.processVideoBefore),afterRefHash:digest(input.processVideoAfter),
+    baselineVersion:input.direction==='apply'?startVersion+1:startVersion,contentVersionDelta:version-startVersion})]);
   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.unenrolled_media_corrected',?,'')",
    [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
-    operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
+    actorRole:input.actorRole,operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
+    processBeforeHash:digest(input.processVideoBefore),processAfterHash:digest(input.processVideoAfter),
     products:input.products.map(p=>p.productId)})]);
   return {duplicate:false};
- });
+ });}catch(error){
+  if(error&&typeof error==='object')unenrolledMediaFailurePhases.set(error,phase);
+  throw error;
+ }
 }
 async function advance(e:Enrollment,slot:number,now:number){
  const products=parseStoredDemoCatalog(e.catalog_products_json),state=await currentState(e,products.length>0);
@@ -403,14 +600,23 @@ function parseEnrollmentRequest(raw:string,businessId:number):DemoEnrollmentInpu
   v.initializeUnit!==undefined&&typeof v.initializeUnit!=='boolean')throw Error('Invalid private enrollment request.');
  return {...v,parameters:parseDemoScenarioParameters(v.parameters),...(v.catalogProducts!==undefined?{catalogProducts:parseDemoCatalogInputs(v.catalogProducts)}:{})} as DemoEnrollmentInput;
 }
-async function processEnrollmentRequests(now:number){
+async function processEnrollmentRequests(now:number,mediaOnly=false){
  const started=Date.now();
  const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 8 FOR UPDATE");
+ if(mediaOnly)for(const request of requests){
+  let input:unknown;
+  try{input=JSON.parse(request.input_json);}catch{throw Error('Unexpected pending request during video maintenance.');}
+  if(!input||typeof input!=='object'||Array.isArray(input)||
+   !['media_correction','unenrolled_media_correction','process_media_correction'].includes(String((input as Record<string,unknown>).kind)))
+   throw Error('Unexpected pending request during video maintenance.');
+ }
  let enrolled=0,enrollmentRejected=0,mediaCorrected=0,categoryCorrected=0;
  for(const request of requests){
   if(Date.now()-started>=12000)break;
   await runtimeRun('SAVEPOINT demo_enrollment');
   let accepted=false;
+  let unenrolledCorrection:UnenrolledDemoMediaCorrection|null=null;
+  let processCorrection:DemoProcessMediaCorrection|null=null;
   try{
    const raw:unknown=JSON.parse(request.input_json);
    if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as Record<string,unknown>).kind==='category_correction_batch'){
@@ -419,15 +625,35 @@ async function processEnrollmentRequests(now:number){
     await correctDemoCategoryBatch(correction);
     categoryCorrected++;
    }else if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&
+    (raw as Record<string,unknown>).kind==='process_media_correction'){
+    const correction=parseDemoProcessMediaCorrection(raw);
+    if(correction.businessId!==request.business_id)throw Error('Invalid private process media target.');
+    processCorrection=correction;
+    await correctDemoProcessMedia(correction);mediaCorrected++;
+   }else if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&
     ['media_correction','unenrolled_media_correction'].includes(String((raw as Record<string,unknown>).kind))){
     const correction=parseQueuedDemoMediaCorrection(raw,request.business_id);
     if(correction.kind==='media_correction')await correctDemoMedia(correction);
-    else await correctUnenrolledDemoMedia(correction);
+    else{unenrolledCorrection=correction;await correctUnenrolledDemoMedia(correction);}
     mediaCorrected++;
    }else{await enrollDemoScenario(parseEnrollmentRequest(request.input_json,request.business_id),now);enrolled++;}
    accepted=true;
   }
-  catch{await runtimeRun('ROLLBACK TO SAVEPOINT demo_enrollment');enrollmentRejected++;}
+  catch(error){
+   await runtimeRun('ROLLBACK TO SAVEPOINT demo_enrollment');enrollmentRejected++;
+   if(unenrolledCorrection){
+    const phase=error&&typeof error==='object'?unenrolledMediaFailurePhases.get(error)??'admission':'admission';
+    await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(NULL,?,'demo.unenrolled_media_rejected',?,'')",
+     [unenrolledCorrection.businessId,JSON.stringify({automation:'demo-media-maintenance',
+      operationKey:unenrolledCorrection.operationKey,phase,code:unenrolledMediaFailureCode(error)})]);
+   }
+   if(processCorrection){
+    const phase=error&&typeof error==='object'?processMediaFailurePhases.get(error)??'admission':'admission';
+    await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(NULL,?,'demo.process_media_rejected',?,'')",
+     [processCorrection.businessId,JSON.stringify({automation:'demo-media-maintenance',
+      operationKey:processCorrection.operationKey,phase,code:unenrolledMediaFailureCode(error)})]);
+   }
+  }
   await runtimeRun('RELEASE SAVEPOINT demo_enrollment');
   await runtimeRun('UPDATE demo_simulator_requests SET status=?,reason=?,processed_at=? WHERE business_id=?',
    [accepted?'accepted':'rejected',accepted?'':'enrollment_failed',now,request.business_id]);
@@ -444,12 +670,13 @@ export function canStartDemoStage(elapsedMs:number,previousStageMs:number|null){
  // three seconds for the final control update, pruning and transaction commit.
  return elapsedMs<12000&&(previousStageMs===null||elapsedMs+Math.max(previousStageMs,8000)+3000<23000);
 }
-/** The scheduled adapter supplies no client input and uses hourly slots.
- * The clock and default minute slot let disposable PostgreSQL tests exercise
- * complete timelines without sleeping. Stage times always use the actual now. */
-export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1):Promise<DemoTickResult>{
+/** The adapter supplies no client input. Normal runs use hourly slots; a
+ * finite maintenance run uses a minute slot but can only process requests.
+ * The clock also lets disposable tests exercise timelines without sleeping. */
+export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1,mode:'scheduled'|'maintenance'='scheduled'):Promise<DemoTickResult>{
  if(!Number.isSafeInteger(now)||now<0)throw new Error('Invalid demo tick clock.');
  if(!Number.isSafeInteger(slotMinutes)||slotMinutes<1||slotMinutes>60)throw new Error('Invalid demo tick slot.');
+ if(mode!=='scheduled'&&mode!=='maintenance')throw new Error('Invalid demo tick mode.');
  const started=Date.now(),slot=Math.floor(now/(slotMinutes*60000))*slotMinutes,day=Math.floor(now/86400000);
  const result=(status:DemoTickResult['status']):DemoTickResult=>({status,advanced:0,paused:0,failed:0});
  return runtimeTransaction(async()=>{
@@ -462,7 +689,10 @@ export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1):Promise
   if(!await schemaReady())return result('schema');
   const control=await runtimeGet<Control>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control)return result('disabled');
-  if(!control.enabled){const admission=await processEnrollmentRequests(now);return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected?{...result('disabled'),...admission}:result('disabled');}
+  // The finite minute schedule may admit private requests only during an
+  // operator pause. An early resume or another pause reason cannot run stages.
+  if(mode==='maintenance'&&(control.enabled!==0||control.pause_reason!=='operator'))return result('disabled');
+  if(!control.enabled){const admission=await processEnrollmentRequests(now,mode==='maintenance');return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected?{...result('disabled'),...admission}:result('disabled');}
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;

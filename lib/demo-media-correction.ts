@@ -13,9 +13,9 @@ export type DemoMediaCorrection = {
 /** Finite media maintenance for the two legacy public demos outside the simulator. */
 export type UnenrolledDemoMediaCorrection = {
  kind:'unenrolled_media_correction'; direction:'apply'|'rollback'; operationKey:string;
- businessId:50|62; handle:string; ownerUserId:number;
+ businessId:50|62; handle:string; actorUserId:number; actorRole:'platform_admin';
  expectedContentVersion:number; expectedDraftVersion:number; expectedPageRevision:number;
- coverBefore:string; coverVideoRef:string;
+ coverBefore:string; coverVideoRef:string; processVideoBefore:string; processVideoAfter:string;
  products:Array<{productId:number;beforeMedia:ProductMedia[];afterMedia:ProductMedia[]}>;
 };
 
@@ -67,19 +67,28 @@ export function parseDemoMediaCorrection(raw:unknown):DemoMediaCorrection{
 
 /** No tenant, product, or media expansion is admitted by this one-time path. */
 export function parseUnenrolledDemoMediaCorrection(raw:unknown):UnenrolledDemoMediaCorrection{
- const v=object(raw,['kind','direction','operationKey','businessId','handle','ownerUserId',
-  'expectedContentVersion','expectedDraftVersion','expectedPageRevision','coverBefore','coverVideoRef','products']);
+ const v=object(raw,['kind','direction','operationKey','businessId','handle','actorUserId','actorRole',
+  'expectedContentVersion','expectedDraftVersion','expectedPageRevision','coverBefore','coverVideoRef',
+  'processVideoBefore','processVideoAfter','products']);
  const businessId=integer(v.businessId,1);
  if(v.kind!=='unenrolled_media_correction'||(v.direction!=='apply'&&v.direction!=='rollback')||
+  v.actorRole!=='platform_admin'||
   (businessId!==50&&businessId!==62)||v.handle!==legacyTargets[businessId].handle||
   typeof v.coverBefore!=='string'||v.coverBefore.length>500||!Array.isArray(v.products)||v.products.length!==4)return invalid();
  if(v.coverBefore)normalizeProductVideoUrl(v.coverBefore);
  if(typeof v.coverVideoRef!=='string')return invalid();
  productVideo(v.coverVideoRef);
+ if(typeof v.processVideoBefore!=='string'||typeof v.processVideoAfter!=='string'||
+  v.processVideoBefore===v.processVideoAfter)return invalid();
+ const processBefore=productVideo(v.processVideoBefore),processAfter=productVideo(v.processVideoAfter);
  const direction=v.direction;
  if(direction==='apply'&&(!v.coverVideoRef.startsWith('demo:')||!approvedDemoVideo(v.coverVideoRef,businessId)))return invalid();
+ if(direction==='apply'&&(processBefore.provider!=='tiktok'||v.processVideoAfter!==v.coverVideoRef||
+  !approvedDemoVideo(v.processVideoAfter,businessId)))return invalid();
  if(direction==='rollback'&&(!v.coverBefore.startsWith('/videos/demo/')||v.coverVideoRef.startsWith('demo:')||
   !approvedDemoVideo(normalizeProductVideoUrl(v.coverBefore).managedRef,businessId)))return invalid();
+ if(direction==='rollback'&&(v.processVideoBefore!==normalizeProductVideoUrl(v.coverBefore).managedRef||
+  !approvedDemoVideo(v.processVideoBefore,businessId)||processAfter.provider!=='tiktok'))return invalid();
  const products=v.products.map((raw,index)=>{
   const p=object(raw,['productId','beforeMedia','afterMedia']);
   const productId=integer(p.productId,1);
@@ -98,9 +107,10 @@ export function parseUnenrolledDemoMediaCorrection(raw:unknown):UnenrolledDemoMe
  });
  if(v.coverBefore===productVideoWatchUrl(v.coverVideoRef))return invalid();
  return {kind:'unenrolled_media_correction',direction,operationKey:text(v.operationKey,/^[a-zA-Z0-9_-]{12,64}$/),
-  businessId,handle:legacyTargets[businessId].handle,ownerUserId:integer(v.ownerUserId,1),
+  businessId,handle:legacyTargets[businessId].handle,actorUserId:integer(v.actorUserId,1),actorRole:'platform_admin',
   expectedContentVersion:integer(v.expectedContentVersion,1),expectedDraftVersion:integer(v.expectedDraftVersion,1),
-  expectedPageRevision:integer(v.expectedPageRevision,1),coverBefore:v.coverBefore,coverVideoRef:v.coverVideoRef,products};
+  expectedPageRevision:integer(v.expectedPageRevision,1),coverBefore:v.coverBefore,coverVideoRef:v.coverVideoRef,
+  processVideoBefore:v.processVideoBefore,processVideoAfter:v.processVideoAfter,products};
 }
 
 /** Bind a private queue row to its parsed media target before dispatch. */

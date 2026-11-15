@@ -91,16 +91,34 @@ starter publication safety, and current web/Expo owner forms.
 
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 
+#### Separate showroom process videos
+
+- [x] Review the full 66-business process-video field against actual prior
+  footage notes. Fifty-five need replacement: 53 enrolled, plus legacy IDs
+  50/62; preserve 11 subject-fit clips. The new approved first-party business
+  assets and exact public target list are available for a finite correction.
+- [ ] After the guarded legacy video rollout, deploy the exact enrolled
+  `process_media_correction` operator; qualify its PostgreSQL apply, replay,
+  inverse, late rollback, tenant exclusion and resumed-stage behavior.
+- [ ] Back up current process refs, versions and enrollment fingerprints outside
+  Git. Apply exact requests while control is operator-paused, then verify all
+  55 process players, immutable retained versions, audit receipts, untouched
+  products/pages/progress and preservation of the 11 reviewed clips before
+  restoring the normal simulator schedule.
+
 #### Legacy demos outside simulator enrollment
 
 - [ ] Publish the approved first-party MP4 assets for demo businesses 50 and 62
   and verify exact files, source rights, phone web/Expo playback and deployed
   byte-range responses before changing public media refs.
 - [ ] Capture the private selected-field before-image for those two businesses,
-  inspect existing request-row statuses, then queue exact
+  verify both remain ownerless and derive the same current platform admin from
+  both draft updaters and latest publication publishers inside the database.
+  Inspect existing request-row statuses, then queue exact
   `unenrolled_media_correction` plans through the disabled simulator worker.
   Rearm only a reviewed accepted/rejected row; never overwrite pending input.
-  The new operator path is limited to those IDs and their eight exact products.
+  The operator path is limited to those IDs and their eight exact products;
+  each ordinary product update records a service note and the admin actor.
 - [ ] Verify two accepted private requests, distinct media audit receipts,
   ordinary catalog/page version increments, all two covers/eight galleries,
   preserved nonmedia fields, no enrollments, and public web/Expo playback.
@@ -271,6 +289,36 @@ cannot raise it. The 23-second transaction and 256MiB database limits remain.
    scheduled execution, then compare aggregate elapsed time, advanced count,
    database growth and active/paused membership. Do not reset the hosted
    `used_today` counter; the new code cap may defer work until the next UTC day.
+
+#### Prepared finite maintenance option (BE-067 / DEP-054)
+
+The temporary adapter is set for 2026-11-15 18:15–22:15 UTC,
+21:15–01:15 EAT. Restore it as soon as all reviewed requests are verified. Publish it only after the media assets, operator path, exact
+hosted request plan, and selected-field backups pass review. Date changes
+require new tests and CI.
+
+1. [ ] Prepare the temporary minute adapter with an absolute cutoff and a
+   locked operator-pause-only request guard; prepare a matching restore patch
+   that returns to `0 6,10,14 * * *` and the 15-minute delivery gate.
+2. [ ] Pass focused worker/PostgreSQL boundary tests, typecheck, spec validation
+   and release gates on both exact source trees; publish no branch yet.
+3. [ ] If selected, retain protected hosted before-images, verify target/site,
+   pause control, then publish the temporary source through five required CI
+   checks and Netlify. Confirm exact deployed source before staging requests.
+4. [ ] Admit only the 49 reviewed enrolled media requests through the private
+   worker. If the guarded operator request path for non-enrolled demo businesses
+   50 and 62 integrates and passes its own gates, queue those two exact ordinary
+   media/page corrections too (51 video requests in all). Otherwise keep them
+   out of this worker window and use their separately guarded correction path.
+   Retain selected-field before-images and rollback for each path; never use
+   raw SQL media writes. Do not queue the agriculture membership batch. Inspect
+   every accepted/rejected result, public media, and preserved real accounts.
+   Any unexpected pending request kind or invalid JSON fails the whole tick
+   with no acknowledgement. Stop on drift, rejection, timeout or cutoff.
+5. [ ] Merge and verify the restore source through the same gates while control
+   stays paused. Resume only after the restored Netlify schedule/source is
+   independently confirmed and no requests remain pending. Observe the next
+   ordinary stage; retain data rollback as a separate exact before-image plan.
 
 ### S196 — every public demo business and current product (BE-009 / BE-067 / DEP-054)
 
