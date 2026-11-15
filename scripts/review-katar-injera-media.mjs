@@ -102,6 +102,8 @@ try {
       }, {timeout: 20000}).toBe(true);
       const sample = (await videoState(sourcePage))[0];
       await sourcePage.screenshot({path: out + '/katar-source-' + second + 's.png'});
+      const smallFrame = await sourcePage.screenshot({type: 'jpeg', quality: 40});
+      console.log('S197_KATAR_FRAME_' + second + '_B64=' + smallFrame.toString('base64'));
       samples.push({targetSecond: second, ...sample});
     }
     results.sourceReview = {result: 'decoded-moving-frames', url: sourcePage.url(), caption, initial, samples};
@@ -155,6 +157,7 @@ try {
     results.app.push({surface: 'Expo web', width: 390, result: 'failed', error: String(error).slice(0, 1000)});
   } finally { write(); await context.close(); }
 
+  console.log('S197_KATAR_REVIEW_B64=' + Buffer.from(JSON.stringify(results)).toString('base64'));
   assert.equal(results.app.length, 3);
   assert.equal(results.sourceReview?.result, 'decoded-moving-frames', 'Inspect creator source frames before admission.');
   assert.ok(results.app.every(r => r.result === 'playback-and-unmount-observed'), 'Inspect retained actual-player app evidence.');
