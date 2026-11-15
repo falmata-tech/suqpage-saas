@@ -1,0 +1,79 @@
+name: Finite Afia body care media review
+
+on:
+  pull_request:
+    paths: ['.github/workflows/s197-bodycare-live-media.yml', 'scripts/review-bodycare-live-media.mjs', 'scripts/prepare-bodycare-live-media-fixture.ts']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s197-bodycare-live-media-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-media:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17.10-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: isolated-live-media-qa
+          POSTGRES_DB: suqpage_native_qa
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SUQPAGE_TEST_POSTGRES_URL: postgresql://postgres:isolated-live-media-qa@127.0.0.1:5432/suqpage_native_qa
+      AFRICMADE_NATIVE_QA: '1'
+      AFRICMADE_MOBILE_BUILD_PROFILE: development
+      EXPO_PUBLIC_API_ORIGIN: http://10.0.2.2:3000
+      EXPO_PUBLIC_NATIVE_MAP_FIXTURE: '1'
+      EXPO_NO_DOTENV: '1'
+      EXPO_NO_TELEMETRY: '1'
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.18.1
+          cache: npm
+      - run: npm ci
+      - run: npm run check:workflow-scripts -- scripts/review-bodycare-live-media.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: node --import tsx --test scripts/test-social-video-layout.ts
+      - run: google-chrome --version
+      - name: Prepare ordinary publications in a disposable schema
+        run: |
+          mkdir -p .local/native-qa/evidence .local/bodycare-live-media-review
+          node --import tsx scripts/native-qa-backend.ts > .local/bodycare-live-media-review/backend.log 2>&1 &
+          node --import tsx scripts/native-qa-backend.ts --check
+          node --import tsx scripts/prepare-bodycare-live-media-fixture.ts
+      - name: Bind the emulator API on disposable loopback
+        run: sudo ip address add 10.0.2.2/32 dev lo
+      - name: Start the isolated Expo web server
+        working-directory: apps/mobile
+        run: npx expo start --web --host localhost --port 8082 --max-workers 2 > ../../.local/bodycare-live-media-review/expo.log 2>&1 &
+      - name: Exercise actual public players and retain visual review evidence
+        run: node scripts/review-bodycare-live-media.mjs
+      - name: Retain source-bound run receipt
+        if: always()
+        run: |
+          mkdir -p .local/bodycare-live-media-review
+          printf '{"result":"%s","source":"%s","run":"%s"}\n' '${{ job.status }}' '${{ github.event.pull_request.head.sha }}' '${{ github.run_id }}' > .local/bodycare-live-media-review/run-receipt.json
+      - name: Retain synthetic public-screen evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: s197-bodycare-live-media-review
+          path: |
+            .local/bodycare-live-media-review/*.json
+            .local/bodycare-live-media-review/*.jpg
+          if-no-files-found: error
+          retention-days: 7
