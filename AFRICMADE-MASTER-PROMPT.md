@@ -501,7 +501,9 @@ historical aliases and actor/version audit under BE-043.
 
 Verified signup or an individual invitation atomically creates a complete private
 starter business; successful setup opens the populated preview. Starter products,
-media and public examples are explicitly fictional until replaced. No public page,
+media and public examples are editable private content until replaced. New starter
+fields have no repeated sample labels; the publication guard still rejects
+unchanged starter content. Public demos carry one "Example business" marker. No public page,
 custom-design request or fabricated project is created merely by signing up.
 Account and public page management stay together under Account but open focused
 tasks. Owners can edit only their linked business and their own private profile.
@@ -1012,8 +1014,8 @@ the admitted media change; an unreviewed edit still pauses rather than being era
 ## 21. Standard page operating workflow
 
 1. The owner completes verified account/business setup or an individual invitation,
-   receiving a private sample workspace and preview, not automatic public discovery.
-2. They replace sample content, save valid identity/location/public contacts and
+   receiving a populated private workspace and preview, not automatic public discovery.
+2. They replace starter content, save valid identity/location/public contacts and
    add at least one eligible physical product. Optional categories organize a range;
    they are not required to create a showroom.
 3. They edit one page/product/details task at a time, preview and use the current

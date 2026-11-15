@@ -4,7 +4,7 @@ title: Product-only showrooms and made-to-order discovery
 status: in_progress
 related: [BE-056, DEP-046, FE-044, FE-047, FE-049, FE-052, FE-053, FE-056, FE-065, FE-066]
 owners: [product, frontend]
-last_updated: 2026-10-17
+last_updated: 2026-11-15
 change_level: L2
 ---
 
@@ -42,6 +42,10 @@ introduced. Existing social handoffs and selected-product copy remain intact.
   product-only catalog wording in all five languages, explaining custom products
   in everyday contextual wording. Do not remove references to support/transport
   services, legal service terms or merchant-authored real-tenant text.
+- GIVEN a new private starter or a demo showroom WHEN its page is shown THEN
+  starter product copy has no repeated example disclaimers, while the demo
+  business has one visible "Example business" marker. Legacy private starter
+  content still blocks publication until replaced by the owner.
 - GIVEN product cards/details THEN show useful product supply context without
   implying an unavailable item is ready, preserving source-business links,
   descriptions, media, options and external localized inquiry preparation.

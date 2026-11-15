@@ -703,7 +703,7 @@ function InquiryDrawer({
   const item = (line: CartLine, index: number, grouped: boolean) => <div className={inquiryStyles.summary}>
     {line.product.image_path ? <img src={line.product.image_path} alt="" /> : <span className={inquiryStyles.thumb}><PackageOpen size={24} aria-hidden="true" /></span>}
     <div className={inquiryStyles.itemCopy}><h3>{line.product.name}</h3><p>{Object.entries(line.options).filter(([name]) => (line.product.option_groups?.find(group => group.name === name)?.values.length || 0) > 1).map(([name, value]) => `${name}: ${value}`).join(" · ")}</p>
-      <details className={inquiryStyles.quantity}><summary>{line.quantity ? t("{value1}: {value2}", { value1: t("Quantity"), value2: line.quantity }) : t("Add quantity (optional)")}</summary><label>{t("Quantity")}<input type="text" value={line.quantity} maxLength={80} placeholder={t("e.g. 2 pieces or 5 kg")} disabled={busy} onChange={e => setDesiredQuantity(index, e.target.value)} /></label></details>
+      <details className={inquiryStyles.quantity}><summary>{line.quantity ? t("{value1}: {value2}", { value1: t("Quantity"), value2: line.quantity }) : t("Add quantity (optional)")}</summary><label>{t("Quantity")}<input type="text" value={line.quantity} maxLength={80} placeholder={t("2 pieces or 5 kg")} disabled={busy} onChange={e => setDesiredQuantity(index, e.target.value)} /></label></details>
     </div>
     {grouped ? <button type="button" className={inquiryStyles.remove} disabled={busy} onClick={() => remove(index)} aria-label={t("Remove {value1} from inquiry", { value1: line.product.name })}><X size={18} aria-hidden="true" /></button> : null}
   </div>;

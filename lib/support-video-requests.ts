@@ -79,7 +79,7 @@ export async function reviewVideoRequest(user:SessionUser,conversationId:number,
     let ref:string|null=null;
     if(input.decision==='approved') {
       ref=approvedRef;
-      if(ref===STARTER_VIDEO_REF)return fail('Choose the business video, not the example.');
+      if(ref===STARTER_VIDEO_REF)return fail('Choose a different video for this business.');
     }
     if(request.status!=='pending') {
       if(request.status===input.decision&&request.approved_ref===ref)return {businessId:request.business_id,duplicate:true};

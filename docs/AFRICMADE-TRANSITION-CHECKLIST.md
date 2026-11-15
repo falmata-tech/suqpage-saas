@@ -67,6 +67,26 @@ store screenshots and Play qualification remain separate unfinished work.
   protect a before-image, run the exact disabled-worker request, verify all six
   memberships and active enrollments, then resume the worker and public reads.
 
+### S199 — concise starter and demo copy (BE-039 / FE-067)
+
+Dependency: one visible `Example business` marker for public demos, private
+starter publication safety, and current web/Expo owner forms.
+
+1. [x] Remove repeated sample/example labels from new private starter fields;
+   preserve detection of retained private starters and the publish guard.
+2. [ ] Remove remaining example helper copy from owner/staff forms and review
+   the affected web and Expo journeys at desktop and phone widths.
+3. [ ] Run focused starter, localization and type checks, then source-match
+   protected CI and publish. Existing hosted private starter rows are out of
+   scope for automatic rewriting.
+
+   Local source-matched Chromium inspected owner Business details, Add product,
+   private Publish review and one demo showroom at 1440/390px. Amharic and
+   Afaan Oromo Add product also fit at 390px; all ten captures had no overflow
+   or page errors. The private publish action stayed disabled and the public
+   showroom had one marker. Receipt: `.local/label-review/receipt.json`.
+   Installed Google Chrome and the Expo journey remain unverified here.
+
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 
 The owner requests a careful visual and playback review of all66 active demo

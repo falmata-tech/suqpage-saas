@@ -33,6 +33,11 @@ async function main() {
       assert.equal(catalog.business.is_live, 0);
       assert.equal(catalog.business.process_video_ref,categoryStarter(selectedCategory).videoRef);
       assert.equal(catalog.products.length, 3);
+      const visibleStarterCopy=[catalog.business.tagline,catalog.business.description,catalog.business.site_description,
+        ...catalog.products.flatMap(product=>[product.name,product.eyebrow,product.description])].join(' ');
+      assert.doesNotMatch(visibleStarterCopy,/\b(?:sample|example|illustrative)\b/i,'New private starter copy has no disclaimer labels');
+      const groups=await db.runner.query<{name:string}>(`SELECT name FROM collections WHERE business_id=? UNION ALL SELECT name FROM categories WHERE business_id=?`,[businessId,businessId]);
+      assert.ok(groups.rows.every(group=>! /\b(?:sample|example|illustrative)\b/i.test(group.name)),'New starter collection and category names have no disclaimer labels');
       assert.deepEqual(catalog.products.map(p => p.offering_kind).sort(), ['made_to_order','standard_product','standard_product']);
       for (const p of catalog.products) {
         for (const key of ['name','slug','description','image_path','video_ref','availability','category_id','collection_id'] as const) assert.ok(p[key], `Offering ${key} is filled`);

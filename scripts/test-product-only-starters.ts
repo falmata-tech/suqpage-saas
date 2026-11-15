@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {test} from 'node:test';
 import {BUSINESS_CATEGORY_OPTIONS} from '../lib/business-categories';
-import {categoryStarter,isStarterOffering} from '../lib/category-starter';
-import {starterOfferings} from '../lib/business-starter';
+import {categoryStarter,isStarterAbout,isStarterOffering} from '../lib/category-starter';
+import {STARTER_ABOUT,starterOfferings} from '../lib/business-starter';
 import {SCALE_DEMO_BUSINESSES} from '../lib/scale-demo-seed';
 import {DENSE_DEMO_BUSINESSES} from '../lib/dense-demo-seed';
 import {simplifyDemoOffering} from '../lib/simple-demo-offering';
@@ -25,10 +25,17 @@ test('BE-056/DEP-046: seed normalization preserves physical custom production an
 
 test('FE-067/BE-039: every new starter has physical ready-made and custom items; old sample content still blocks publishing',()=>{
   assert.deepEqual(starterOfferings.map(item=>item.kind),['standard_product','standard_product','made_to_order']);
+  assert.equal(isStarterAbout(STARTER_ABOUT),true);
+  assert.doesNotMatch(STARTER_ABOUT,/\b(?:sample|example|illustrative)\b/i);
+  for(const item of starterOfferings)assert.doesNotMatch(`${item.name} ${item.description}`,/\b(?:sample|example|illustrative)\b/i);
   for(const category of BUSINESS_CATEGORY_OPTIONS){
     const pack=categoryStarter(category.key);
+    assert.equal(isStarterAbout(pack.page.about),true);
+    assert.equal(publicationReadiness(pack.page,[],true).find(item=>item.key==='about')?.ready,false);
+    assert.doesNotMatch(pack.page.about,/\b(?:sample|example|illustrative)\b/i);
     assert.deepEqual(pack.offerings.map(item=>item.kind),['standard_product','standard_product','made_to_order']);
     for(const item of pack.offerings){
+      assert.doesNotMatch(`${item.name} ${item.description}`,/\b(?:sample|example|illustrative)\b/i);
       assert.doesNotMatch(item.name+' '+item.description,/consultation|repair|service|session/i);
       assert.ok(fs.existsSync('public'+item.image));
       assert.ok(isStarterOffering(item.name,item.description));
@@ -37,6 +44,10 @@ test('FE-067/BE-039: every new starter has physical ready-made and custom items;
   }
   for(const name of ['Sample consultation service','Sample device setup and repair','Sample fitting and styling service'])
     assert.equal(isStarterOffering(name,'An edited description.'),true,'Renaming the sample pack cannot make retained examples ready');
+  for(const name of ['Sample charge controller','Sample backup power box','Sample custom audio amplifier','Sample ceramic vase'])
+    assert.equal(isStarterOffering(name,'An edited description.'),true,'Existing private starters still block publishing');
+  assert.equal(isStarterAbout('Sample page: Existing private starter text.'),true);
+  assert.equal(isStarterAbout('We make ceramic cups in Addis Ababa.'),false);
   assert.equal(isStarterOffering('An edited title','Sample service: A one-to-one session to plan a collection.'),true);
   assert.equal(isStarterOffering('Real ceramic bowl','A hand-thrown bowl in a blue glaze.'),false);
 });

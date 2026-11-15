@@ -35,9 +35,9 @@ try{
  }
  checks.push('Publish/unfinished review fit at 320px in English, Amharic, Afaan Oromo, Somali and Tigrinya');await page.setViewportSize({width:390,height:844});
 
- await page.getByRole('button',{name:'Publish',exact:true}).click();await expect(page.getByRole('button',{name:'Publish page',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Replace or remove sample offerings',exact:true})).toBeVisible();await shot(page,'unfinished-review');assert.equal((await call('owner/home')).shop.status,'draft');
+ await page.getByRole('button',{name:'Publish',exact:true}).click();await expect(page.getByRole('button',{name:'Publish page',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Review your products',exact:true})).toBeVisible();await shot(page,'unfinished-review');assert.equal((await call('owner/home')).shop.status,'draft');
  const denied=await fetch(base+'/api/mobile/v1/owner/publish',{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({version:home.draft.version,revision:home.publicationRevision})});assert.equal(denied.status,400);checks.push('Review and server both prevent publishing unfinished samples');
- await page.getByRole('button',{name:'Replace or remove sample offerings',exact:true}).click();await expect(page).toHaveURL(/owner\/products/);await expect(page.getByRole('button',{name:'Add product',exact:true})).toBeVisible();checks.push('Missing offering action opens the real product editor list');
+ await page.getByRole('button',{name:'Review your products',exact:true}).click();await expect(page).toHaveURL(/owner\/products/);await expect(page.getByRole('button',{name:'Add product',exact:true})).toBeVisible();checks.push('Missing offering action opens the real product editor list');
  for(let index=0;index<home.shop.products.length;index++){home=await call('owner/home');await updateProduct(home.shop.products[index],home.shop.version,index);}
  home=await call('owner/home');await call('owner/page',{action:'save',version:home.draft.version,content:{...home.draft.content,about:'Woven Wardrobe makes cotton clothing and scarves in Hawassa. Ask us about fabric, fit and made-to-order work.',contacts:{website:'https://suqpage.com/'}}});
  home=await call('owner/home');assert.deepEqual(home.issues,[]);

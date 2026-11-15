@@ -57,7 +57,7 @@ async function main() {
     assert.equal(applied.proposal.place_id,nextPlace.id);assert.equal(applied.existing.city_id,nextPlace.id);
     assert.equal(applied.existing.city,nextPlace.name);assert.ok(applied.existing.approved_at>0);
     assert.equal((await firstPublicationIssues(businessId,draft.content)).some(x=>x.key==='location'),false);
-    await assert.rejects(publish,/Replace or remove sample offerings/);
+    await assert.rejects(publish,/Review your products/);
     await db.prepare('UPDATE products SET is_published=0 WHERE business_id=?').run(businessId);
     assert.equal((await firstPublicationIssues(businessId,draft.content)).some(x=>x.key==='offerings'),true,'At least one real offering is needed');
     await db.prepare("INSERT INTO products(business_id,name,slug,description,offering_kind,is_published) VALUES(?,'Portable radio','portable-radio','Compact radio with a built-in speaker.','standard_product',1)").run(businessId);

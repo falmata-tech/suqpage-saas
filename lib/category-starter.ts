@@ -2,7 +2,7 @@ import {isBusinessCategoryKey,type BusinessCategoryKey} from './business-categor
 import {parseShopPageContent} from './owner-page-domain';
 import {DEMO_PROCESS_VIDEOS} from './demo-process-videos';
 import {productVideoWatchUrl} from './video/product-video';
-import {starterContacts,starterOfferings,type StarterOffering} from './business-starter';
+import {STARTER_ABOUT,starterContacts,starterOfferings,type StarterOffering} from './business-starter';
 
 // Explicit editable examples, persisted only when a NEW workspace/item is created.
 const examples={
@@ -18,14 +18,33 @@ const examples={
 
 export function categoryStarter(category:BusinessCategoryKey,city='Addis Ababa'){
  const example=examples[category],root=`/uploads/seed/benchmarks/${example.image}`;
- const offerings:StarterOffering[]=starterOfferings.map((offering,index)=>({...offering,name:`Sample ${index===0?example.item:index===1?example.second:example.custom}`,slug:offering.slug,description:`Sample ${index===2?'made-to-order product':'product'}: ${example.description} ${index===2?'Tell us the product, size or finish you would like made.':'Ask about available choices.'}`,image:`${root}/product-${index+1}.jpg`,galleryImage:`${root}/product-${index===2?1:index+2}.jpg`}));
- const page=parseShopPageContent({template:'profile-v1',coverStyle:'blended',introduction:'',about:`Sample page: ${example.description} Based in ${city}, we welcome questions about our collection and made-to-order products. Replace this example with your own story.`,heroImage:`${root}/hero.jpg`,videoUrl:productVideoWatchUrl(example.video),contacts:starterContacts});
+ const offerings:StarterOffering[]=starterOfferings.map((offering,index)=>{
+  const item=index===0?example.item:index===1?example.second:example.custom;
+  return {...offering,name:item[0].toUpperCase()+item.slice(1),slug:offering.slug,description:`${example.description} ${index===2?'Tell us the product, size or finish you would like made.':'Ask about available choices.'}`,image:`${root}/product-${index+1}.jpg`,galleryImage:`${root}/product-${index===2?1:index+2}.jpg`};
+ });
+ const page=parseShopPageContent({template:'profile-v1',coverStyle:'blended',introduction:'',about:`${example.description} Based in ${city}, we welcome questions about our collection and made-to-order products.`,heroImage:`${root}/hero.jpg`,videoUrl:productVideoWatchUrl(example.video),contacts:starterContacts});
  return {videoRef:example.video,page,offerings};
 }
 export function categoryExampleVideo(category:unknown):string{return typeof category==='string'&&isBusinessCategoryKey(category)?examples[category].video:'';}
 const allSamples=[...starterOfferings,...Object.keys(examples).flatMap(category=>categoryStarter(category as BusinessCategoryKey).offerings)];
 const sampleNames=new Set(allSamples.map(sample=>sample.name)),sampleDescriptions=new Set(allSamples.map(sample=>sample.description));
+const legacyStarterNames=['Sample everyday product','Sample ceramic vase','Sample custom order'];
+const legacyStarterDescriptions=[
+ 'Sample product: A ceramic cup for everyday coffee or tea. A simple shape, a comfortable handle and a soft neutral finish make it easy to use at home or give as a gift. Ask about colors and matching pieces.',
+ 'Sample product: A textured ceramic vase for a shelf, table or small flower arrangement. Compare the shape and finish, then ask about available colors and sizes.',
+ 'Sample made-to-order product: A ceramic set for your table, a special gift or your business. Tell us the colors, shapes and number of pieces you have in mind. We will discuss the design and price before making it.',
+];
+const previousCategoryNames=Object.values(examples).flatMap(example=>[example.item,example.second,example.custom].map(item=>`Sample ${item}`));
+const previousCategoryDescriptions=Object.values(examples).flatMap(example=>[
+ `Sample product: ${example.description} Ask about available choices.`,
+ `Sample made-to-order product: ${example.description} Tell us the product, size or finish you would like made.`,
+]);
 // Retained private starter records must still fail publication readiness after
 // the starter vocabulary changes. This recognizes examples, never converts them.
-const legacySampleNames=new Set(['everyday product','consultation service','custom order','electronic device','device setup and repair','custom device assembly','personal care product','personal care consultation','custom care set','fresh produce','growing consultation','produce supply order','honey jar','food supply consultation','custom food gift set','metalwork piece','fabrication service','custom metalwork order','furniture piece','furniture design consultation','made-to-order furniture','woven garment','fitting and styling service','custom garment order','handmade piece','custom work consultation','made-to-order set'].map(name=>`Sample ${name}`));
-export function isStarterOffering(name:string,description:string):boolean{return sampleNames.has(name)||sampleDescriptions.has(description)||legacySampleNames.has(name)||/^Sample (?:product|service|custom work): /.test(description);}
+const legacySampleNames=new Set([...legacyStarterNames,...previousCategoryNames,...['everyday product','consultation service','custom order','electronic device','device setup and repair','custom device assembly','personal care product','personal care consultation','custom care set','fresh produce','growing consultation','produce supply order','honey jar','food supply consultation','custom food gift set','metalwork piece','fabrication service','custom metalwork order','furniture piece','furniture design consultation','made-to-order furniture','woven garment','fitting and styling service','custom garment order','handmade piece','custom work consultation','made-to-order set'].map(name=>`Sample ${name}`)]);
+const legacySampleDescriptions=new Set([...legacyStarterDescriptions,...previousCategoryDescriptions]);
+export function isStarterOffering(name:string,description:string):boolean{return sampleNames.has(name)||sampleDescriptions.has(description)||legacySampleNames.has(name)||legacySampleDescriptions.has(description)||/^Sample (?:product|service|custom work): /.test(description);}
+export function isStarterAbout(about:string):boolean{
+ if(about===STARTER_ABOUT||about.startsWith('Sample page:'))return true;
+ return Object.values(examples).some(example=>about.startsWith(`${example.description} Based in `)&&about.endsWith(', we welcome questions about our collection and made-to-order products.'));
+}

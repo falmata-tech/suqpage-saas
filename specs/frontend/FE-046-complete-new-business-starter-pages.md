@@ -4,7 +4,7 @@ title: Complete new business starter pages
 status: done
 related: [FE-061, BE-049, FE-052, FE-051, FE-038, BE-039, DEP-036, FE-040]
 owners: [product, backend, operations]
-last_updated: 2026-09-21
+last_updated: 2026-11-15
 change_level: L2
 ---
 
@@ -29,7 +29,7 @@ File chooser controls stay empty by browser design while stored images are shown
 Operational forms (passwords, support messages, search, consent), actual account
 identity and authorization fields are never populated with fake values.
 
-Examples are visibly described as examples. New tenants remain private drafts;
+New starter fields avoid repeated example labels. New tenants remain private drafts;
 no discovery approval, fabricated exact storefront, live-now flag, message or
 public publication is created. Initial location is the existing Addis Ababa general
 area example, awaiting owner correction and existing admin geographic review.
@@ -53,7 +53,7 @@ of existing records, Save/publication redesign or checkout is included.
   it remains private and its location is absent from the public map.
 - GIVEN an owner on desktop or phone WHEN they open the page, business and offering
   editors THEN all applicable presentation values and stored images are populated,
-  sample content is explained, and editing/saving/reloading preserves their values.
+  publication requirements are clear, and editing/saving/reloading preserves their values.
 
 ## Quality, observability and test plan
 

@@ -4,7 +4,7 @@ title: Atomic business starter content
 status: done
 related: [FE-061, BE-049, BE-043, BE-031, FE-046, DEP-036, BE-034, BE-056]
 owners: [product, backend, operations]
-last_updated: 2026-09-21
+last_updated: 2026-11-15
 change_level: L2
 ---
 
@@ -29,7 +29,7 @@ File chooser controls stay empty by browser design while stored images are shown
 Operational forms (passwords, support messages, search, consent), actual account
 identity and authorization fields are never populated with fake values.
 
-Examples are visibly described as examples. New tenants remain private drafts;
+New starter fields avoid repeated example labels. New tenants remain private drafts;
 no discovery approval, fabricated exact storefront, live-now flag, message or
 public publication is created. Initial location is the existing Addis Ababa general
 area example, awaiting owner correction and existing admin geographic review.
@@ -53,7 +53,7 @@ of existing records, Save/publication redesign or checkout is included.
   it remains private and its location is absent from the public map.
 - GIVEN an owner on desktop or phone WHEN they open the page, business and offering
   editors THEN all applicable presentation values and stored images are populated,
-  sample content is explained, and editing/saving/reloading preserves their values.
+  publication requirements are clear, and editing/saving/reloading preserves their values.
 
 ## Quality, observability and test plan
 
@@ -127,3 +127,13 @@ products. Existing businesses are not backfilled. Replacement videos follow
 FE-019/BE-018 support review; approved videos may come from any YouTube channel.
 Evidence: `scripts/test-business-starters.ts` asserts the exact starter reference
 for signup and invitations, and `scripts/test-video-requests.ts` covers posting.
+
+## S199 starter copy correction
+
+New private starters retain complete editable content and the existing publication
+guard, but their visible names, descriptions, collections and categories do not
+carry repeated "sample", "example" or "illustrative" labels. A concise owner
+notice still asks for business details before publishing. Previously stored
+private starters retain their original values and must remain blocked from
+publication until the owner replaces them; this source change does not backfill
+hosted records. Public demo showrooms retain one "Example business" marker.

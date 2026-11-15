@@ -247,7 +247,7 @@ export function PageEditor({
   }
   function openMissing(label:string){
     setPublicationReview(null);
-    if(label==='Replace or remove sample offerings')router.push({pathname:'/owner/[section]',params:{section:'products'}});
+    if(label==='Review your products')router.push({pathname:'/owner/[section]',params:{section:'products'}});
     else if(label==='Choose your business location')router.push({pathname:'/owner/[section]',params:{section:'business'}});
     else switchTask(label==='Add your real contact details'?'contacts':'about');
   }
