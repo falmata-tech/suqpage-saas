@@ -1,4 +1,4 @@
-// Finite S197 containing-page playback check for four source-reviewed TikToks.
+// Finite S197 containing-page playback check for six industrial TikToks.
 // Runs only against a disposable local PostgreSQL QA schema in GitHub Actions.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -24,10 +24,11 @@ fs.mkdirSync(out,{recursive:true});
 const fixture=JSON.parse(fs.readFileSync(out+'/fixture.json','utf8'));
 const source=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(fixture.source,source);
-assert.equal(fixture.cases.length,4);
+assert.equal(fixture.cases.length,6);
 assert.deepEqual(fixture.cases.map(item=>item.videoRef),[
-  'tiktok:7534842640882224406','tiktok:7534842640882224406',
-  'tiktok:7595737756416904462','tiktok:7702450432588647711']);
+  'tiktok:7513023761034136863','tiktok:7647938752505040159',
+  'tiktok:7597844094781492510','tiktok:7356499573638057258',
+  'tiktok:7273958219549019434','tiktok:7661543283876728078']);
 const base='http://127.0.0.1:3000';
 const browser=await chromium.launch({channel:'chrome'});
 const review={source,run:process.env.GITHUB_RUN_ID,browser:{name:'Google Chrome',version:browser.version()},

@@ -1,4 +1,4 @@
-// Four creator examples published through ordinary commands into the native QA
+// Six creator examples published through ordinary commands into the native QA
 // disposable PostgreSQL schema only. These show a business-type process.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -16,10 +16,12 @@ import {productVideoWatchUrl} from '../lib/video/product-video';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 
 const cases=[
-  {handle:'koba-leather',videoRef:'tiktok:7534842640882224406',productName:null},
-  {handle:'demo-biftu-leather-goods',videoRef:'tiktok:7534842640882224406',productName:null},
-  {handle:'demo-buna-basket-house',videoRef:'tiktok:7595737756416904462',productName:null},
-  {handle:'demo-lemi-building-products',videoRef:'tiktok:7702450432588647711',productName:null},
+  {handle:'demo-tana-radio-works',videoRef:'tiktok:7513023761034136863',productName:null},
+  {handle:'demo-shewa-cable-studio',videoRef:'tiktok:7647938752505040159',productName:null},
+  {handle:'demo-shewa-tool-workshop',videoRef:'tiktok:7597844094781492510',productName:null},
+  {handle:'demo-abay-machine-works',videoRef:'tiktok:7356499573638057258',productName:null},
+  {handle:'demo-aster-lighting-works',videoRef:'tiktok:7273958219549019434',productName:null},
+  {handle:'demo-sheger-rebar-works',videoRef:'tiktok:7661543283876728078',productName:null},
 ] as const;
 
 async function main(){
@@ -77,6 +79,6 @@ async function main(){
   }
   fs.mkdirSync('.local/maker-clip-app-qa',{recursive:true,mode:0o700});
   fs.writeFileSync('.local/maker-clip-app-qa/fixture.json',JSON.stringify({source,cases:records})+'\n',{mode:0o600});
-  console.log('PASS four disposable maker-clip fixtures prepared through ordinary commands.');
+  console.log('PASS six disposable maker-clip fixtures prepared through ordinary commands.');
 }
 void main().catch(error=>{console.error('Disposable maker-clip fixture failed.',error);process.exitCode=1;}).finally(closePostgresRuntimeForTests);
