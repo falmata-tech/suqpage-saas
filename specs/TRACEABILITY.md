@@ -59,6 +59,15 @@ boundary. Local FFmpeg full decode, 1/5/8-second visual review and Chromium
 phone playback beyond three seconds pass for all five. Hosted media refs remain
 unchanged until separate guarded BE-049 correction and deployed-asset checks.
 
+The additional S197 mobile fallback package in
+`docs/operations/S197-MOBILE-FALLBACK-REVIEW.md` prepares 250 source-reviewed
+MP4s for the other 50 external-video businesses and 200 products, including
+six exact-title diagrams where source portfolio art does not depict the
+product. The static allowlist now binds 270 exact files across the existing,
+Liya and new packages. No new public media refs are applied by this source
+change. The eventual 51-business correction splits into 49 enrolled BE-049
+requests and guarded ordinary catalog/page updates for non-enrolled IDs 50/62.
+
 FE-057 portrait containment follow-up: PR68's actual Chrome phone product
 capture crops a 9:16 TikTok frame inside the short gallery stage while its Expo
 capture retains the full frame. The focused source branch gives active portrait
