@@ -20,8 +20,10 @@ const candidates={
     productName:'Structured Work Tote',videoRef:'youtube:Vpn2755Q9Y8'},
   uniform:{handle:'demo-meda-uniform-works',businessId:54,productId:213,
     productName:'Service Polo Shirt',videoRef:'youtube:rbr9-o2ZeqQ'},
-  arcadia:{handle:'demo-meda-uniform-works',businessId:54,productId:213,
-    productName:'Service Polo Shirt',videoRef:'tiktok:7641573227709386005'},
+  arcadia:{handle:'demo-sora-workwear-studio',businessId:51,productId:203,
+    productName:'Service Team Trouser',videoRef:'tiktok:7641573227709386005'},
+  lemlem:{handle:'demo-liya-textile-house',businessId:52,productId:208,
+    productName:'Custom Color Weave Run',videoRef:'tiktok:7301802607297711391'},
 } as const;
 type Candidate=keyof typeof candidates;
 

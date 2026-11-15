@@ -14,7 +14,7 @@ assert.ok(['127.0.0.1','localhost'].includes(target.hostname));
 assert.equal(target.pathname,'/suqpage_native_qa');
 assert.equal(process.env.EXPO_PUBLIC_API_ORIGIN,'http://10.0.2.2:3000');
 assert.equal(process.env.EXPO_PUBLIC_NATIVE_MAP_FIXTURE,'1');
-assert.ok(['sabahar','zaaf','uniform','arcadia'].includes(process.env.S197_MAKER_CANDIDATE));
+assert.ok(['sabahar','zaaf','uniform','arcadia','lemlem'].includes(process.env.S197_MAKER_CANDIDATE));
 if(process.argv[2]==='--preflight'){
   assert.equal(process.argv.length,3);
   console.log('PASS finite maker review has isolated local target.');
@@ -51,6 +51,11 @@ const videoState=frame=>frame.locator('video').evaluateAll(nodes=>nodes.map(v=>(
   time:v.currentTime,duration:v.duration,width:v.videoWidth,height:v.videoHeight,
   ready:v.readyState,paused:v.paused,
 })));
+const playerTime=async frame=>{
+  const text=await frame.locator('body').innerText();
+  const match=text.match(/(\d\d):(\d\d)\s*\/\s*\d\d:\d\d/);
+  return match?Number(match[1])*60+Number(match[2]):0;
+};
 async function waitServer(url){
   const deadline=Date.now()+120000;
   while(Date.now()<deadline){
@@ -71,17 +76,26 @@ async function actualProvider(page,label,stage){
     {timeout:30000}).toBe(1);
   const frame=page.frames().find(f=>f.url().startsWith(embedPrefix));
   await page.screenshot({path:out+'/'+label+'-loaded.png'});
-  const play=frame.locator(provider==='youtube'?'.ytp-large-play-button':'button[aria-label*="Play"], button[aria-label*="play"]');
-  if(await play.count()&&await play.first().isVisible())await play.first().click({timeout:10000});
-  else if(await frame.locator('video').count())await frame.locator('video').first().click({timeout:10000});
-  else await frame.locator('body').click({position:{x:180,y:100},timeout:10000});
-  await expect.poll(async()=>(await videoState(frame))
+  const play=frame.locator('.ytp-large-play-button');
+  if(provider==='youtube'&&await play.count()&&await play.first().isVisible())
+    await play.first().click({timeout:10000});
+  else if(provider==='youtube'&&await frame.locator('video').count())
+    await frame.locator('video').first().click({timeout:10000});
+  else {
+    const box=await frame.locator('body').boundingBox();
+    assert.ok(box,'Provider body must be visible.');
+    await frame.locator('body').click({position:{x:box.width/2,y:box.height/2},timeout:10000});
+  }
+  if(provider==='tiktok')await expect.poll(()=>playerTime(frame),{timeout:40000}).toBeGreaterThan(1);
+  else await expect.poll(async()=>(await videoState(frame))
     .some(v=>v.ready>=2&&v.width>0&&v.height>0&&v.time>1),{timeout:40000}).toBe(true);
-  const start=await videoState(frame);
+  const start=provider==='tiktok'?{time:await playerTime(frame),video:await videoState(frame)}:await videoState(frame);
   await page.screenshot({path:out+'/'+label+'-start.png'});
-  await expect.poll(async()=>(await videoState(frame))[0]?.time??0,{timeout:20000})
+  if(provider==='tiktok')await expect.poll(()=>playerTime(frame),{timeout:20000})
+    .toBeGreaterThan(start.time+2);
+  else await expect.poll(async()=>(await videoState(frame))[0]?.time??0,{timeout:20000})
     .toBeGreaterThan(start[0].time+2);
-  const progress=await videoState(frame);
+  const progress=provider==='tiktok'?{time:await playerTime(frame),video:await videoState(frame)}:await videoState(frame);
   const frameBox=await(await frame.frameElement()).boundingBox();
   assert.ok(frameBox&&frameBox.width>100&&frameBox.height>50);
   if(stage){
