@@ -5,6 +5,7 @@ import {
 } from "../lib/revision-v4-domain";
 import { RevisionError } from "../lib/revision-domain";
 import { SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE } from "../lib/showroom-bank-release";
+import { DEMO_VIDEO_ASSETS } from "../lib/video/demo-video-catalog";
 
 const block = {
   key: "opening",
@@ -84,6 +85,25 @@ const input = {
 const parsed = parseRevisionSnapshotV4(input, SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE);
 assert.equal(parsed.schemaVersion, 4);
 assert.equal(parsed.contentBlocks.blocks[0].type, "hero");
+const withProcess=(processVideoRef:string)=>({...input,business:{...input.business,processVideoRef}});
+const legacyProcess='tiktok:1234567890123456789';
+assert.throws(()=>parseRevisionSnapshotV4(withProcess(legacyProcess),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE),RevisionError);
+assert.throws(()=>parseRevisionSnapshotV4(withProcess(legacyProcess),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  {businessId:50,isDemo:true}),RevisionError);
+assert.throws(()=>parseRevisionSnapshotV4(withProcess(legacyProcess),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  {businessId:51,isDemo:true,retainedProcessVideoRef:legacyProcess}),RevisionError);
+assert.throws(()=>parseRevisionSnapshotV4(withProcess(legacyProcess),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  {businessId:50,isDemo:false,retainedProcessVideoRef:legacyProcess}),RevisionError);
+assert.equal(parseRevisionSnapshotV4(withProcess(legacyProcess),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  {businessId:50,isDemo:true,retainedProcessVideoRef:legacyProcess}).business.processVideoRef,legacyProcess);
+assert.throws(()=>parseRevisionSnapshotV4(withProcess('demo:business-50'),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE),RevisionError);
+assert.throws(()=>parseRevisionSnapshotV4(withProcess('demo:business-50'),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  {businessId:51,isDemo:true}),RevisionError);
+assert.throws(()=>parseRevisionSnapshotV4(withProcess('demo:business-50'),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  {businessId:50,isDemo:false}),RevisionError);
+assert.equal(DEMO_VIDEO_ASSETS['business-50'].status,'approved');
+assert.equal(parseRevisionSnapshotV4(withProcess('demo:business-50'),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  {businessId:50,isDemo:true}).business.processVideoRef,'demo:business-50');
 assert.equal(
   parsed.designManifest.sections.find((section) => section.component === hero.id)?.contentBlockKey,
   "opening",

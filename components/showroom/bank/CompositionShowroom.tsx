@@ -99,6 +99,7 @@ export function CompositionShowroom({
       heroImageRef: props.catalog.business.hero_image_path,
       contactLabel:t("Send an inquiry to this business."),
       processVideoRef: props.catalog.business.process_video_ref,
+      id: props.catalog.business.id,
       isLive: Boolean(props.catalog.business.is_live),
       livePlatform: props.catalog.business.live_platform,
       liveUrl: props.catalog.business.live_url,

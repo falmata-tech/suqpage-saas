@@ -712,7 +712,7 @@ It advances predefined coherent scenarios through ordinary product and page
 publication commands. Foreground public screens check for changes every15 seconds,
 preserve inquiry drafts and read one consistent product/profile snapshot. This
 is bounded foreground polling, not a Supabase Realtime subscription.
-The 2026-11-15 18:15–20:15 UTC maintenance adapter runs every minute
+The 2026-11-15 18:15–22:15 UTC maintenance adapter runs every minute
 only within that finite window and admits only private video-correction
 requests while the control is operator-paused. Unexpected request kinds or
 invalid JSON fail the tick without acknowledgement. It cannot advance scenarios;
@@ -1021,6 +1021,9 @@ For the two legacy public demos without enrollment, the finite paused private
 queue uses ordinary product/page publication and leaves the scenario cohort
 untouched. It binds their existing page author with current platform-admin
 authority, admits only their exact reviewed media and never enrolls them.
+Their legacy process video is replaced in the same guarded transaction and
+retained in catalog history for exact inverse rollback. The composed showroom
+plays an approved first-party process MP4 for the matching demo business.
 
 ## 21. Standard page operating workflow
 

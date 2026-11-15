@@ -8,7 +8,7 @@ import {
   requireRevisionSnapshotV4,
   type RevisionSnapshotV4,
 } from "./revision-v4-domain";
-import { catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
+import { approvedProcessVideoPolicy, catalogToRevisionSnapshotV4 } from "./revision-v4-defaults";
 import {
   getContentRevision,
   saveRecipeDraftRevision,
@@ -680,6 +680,7 @@ export async function buildShowroomRecipeBrief(
     requireRevisionSnapshotV4(
       state.revision.snapshot_json,
       SHOWROOM_COMPONENT_BANK_LATEST,
+      approvedProcessVideoPolicy(state.business),
     ),
     state.business,
   );
@@ -1067,6 +1068,7 @@ export async function importShowroomRecipe(
     requireRevisionSnapshotV4(
       state.revision.snapshot_json,
       SHOWROOM_COMPONENT_BANK_LATEST,
+      approvedProcessVideoPolicy(state.business),
     ),
     state.business,
   );

@@ -154,9 +154,9 @@ trigger is exposed in the hosted worker.
 ## Hosting choice
 
 The S197 video maintenance adapter runs once per minute only from 18:15
-inclusive to 21:15 exclusive UTC on 2026-11-15. It admits private media
+inclusive to 22:15 exclusive UTC on 2026-11-15. It admits private media
 requests only while the simulator is disabled and operator-paused. At or after
-21:15 UTC it returns before opening a database session. Restore the ordinary
+22:15 UTC it returns before opening a database session. Restore the ordinary
 three-times-daily schedule as soon as all reviewed requests are verified; the
 later cutoff is a finite safety margin, not an extension of daily simulation.
 
