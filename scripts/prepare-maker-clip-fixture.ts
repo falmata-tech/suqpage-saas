@@ -1,5 +1,5 @@
-// Three read-only-to-production examples published through ordinary commands
-// into the native QA disposable PostgreSQL schema only.
+// Three maker stories published through ordinary commands into the native QA
+// disposable PostgreSQL schema only. Source footage does not match product forms.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
@@ -17,8 +17,8 @@ import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 
 const cases=[
   {handle:'entoto-ceramics',videoRef:'tiktok:7685918227163057438',productName:null},
-  {handle:'demo-wabi-joinery-studio',videoRef:'tiktok:7217517593786141995',productName:'Compact Entry Cabinet'},
-  {handle:'demo-meda-furniture-studio',videoRef:'tiktok:7067689673266744623',productName:'Round Side Table'},
+  {handle:'demo-wabi-joinery-studio',videoRef:'tiktok:7217517593786141995',productName:null},
+  {handle:'demo-meda-furniture-studio',videoRef:'tiktok:7067689673266744623',productName:null},
 ] as const;
 
 async function main(){
