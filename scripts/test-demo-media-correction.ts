@@ -29,7 +29,7 @@ test('BE-049 legacy demo media queue admits only exact synthetic target, gallery
  for(const slug of slugs)DEMO_VIDEO_ASSETS[slug]={businessId:50,status:'approved',sha256:'a'.repeat(64)};
  try{
   const input={kind:'unenrolled_media_correction',direction:'apply',operationKey:'synthetic_legacy_50_01',
-   businessId:50,handle:'demo-dara-clay-works',ownerUserId:11,
+   businessId:50,handle:'demo-dara-clay-works',actorUserId:11,actorRole:'platform_admin',
    expectedContentVersion:4,expectedDraftVersion:3,expectedPageRevision:3,
    coverBefore:'https://www.youtube.com/watch?v=wJV9EDe_sFc',coverVideoRef:'demo:synthetic-50-cover',
    products:[197,198,199,200].map(productId=>({productId,beforeMedia:media,
@@ -37,6 +37,7 @@ test('BE-049 legacy demo media queue admits only exact synthetic target, gallery
   assert.equal(parseQueuedDemoMediaCorrection(input,50).businessId,50);
   assert.throws(()=>parseQueuedDemoMediaCorrection(input,62));
   for(const bad of [{...input,businessId:62},{...input,handle:'different'},
+   {...input,actorRole:'client'},{...input,ownerUserId:11},
    {...input,products:input.products.slice(1)},
    {...input,products:input.products.map((p,i)=>i? p:{...p,afterMedia:[{kind:'image',ref:'/uploads/seed/other.jpg'},p.afterMedia[1]]})},
    {...input,products:input.products.map((p,i)=>i? p:{...p,afterMedia:[...p.afterMedia,{kind:'video',ref:'youtube:EBrvynBWYzY'}]})},
