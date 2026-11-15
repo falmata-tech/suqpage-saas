@@ -24,6 +24,8 @@ const candidates={
     productName:'Service Team Trouser',videoRef:'tiktok:7641573227709386005'},
   lemlem:{handle:'demo-liya-textile-house',businessId:52,productId:208,
     productName:'Custom Color Weave Run',videoRef:'tiktok:7301802607297711391'},
+  shanbai:{handle:'demo-liya-textile-house',businessId:52,productId:208,
+    productName:'Custom Color Weave Run',videoRef:'tiktok:7654504011609017614'},
 } as const;
 type Candidate=keyof typeof candidates;
 

@@ -14,7 +14,7 @@ assert.ok(['127.0.0.1','localhost'].includes(target.hostname));
 assert.equal(target.pathname,'/suqpage_native_qa');
 assert.equal(process.env.EXPO_PUBLIC_API_ORIGIN,'http://10.0.2.2:3000');
 assert.equal(process.env.EXPO_PUBLIC_NATIVE_MAP_FIXTURE,'1');
-assert.ok(['sabahar','zaaf','uniform','arcadia','lemlem'].includes(process.env.S197_MAKER_CANDIDATE));
+assert.ok(['sabahar','zaaf','uniform','arcadia','lemlem','shanbai'].includes(process.env.S197_MAKER_CANDIDATE));
 if(process.argv[2]==='--preflight'){
   assert.equal(process.argv.length,3);
   console.log('PASS finite maker review has isolated local target.');

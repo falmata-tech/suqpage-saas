@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        candidate: [lemlem]
+        candidate: [shanbai]
     services:
       postgres:
         image: postgres:17.10-alpine
