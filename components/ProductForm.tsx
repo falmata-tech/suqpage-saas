@@ -160,7 +160,7 @@ export default function ProductForm({
           maxLength={40}
           value={quantityUnit}
           onChange={(event) => setQuantityUnit(event.target.value)}
-          placeholder={t("Example: piece, kg, box or set")}
+          placeholder={t("piece, kg, box or set")}
         />
       </div>
 
@@ -281,7 +281,6 @@ export default function ProductForm({
             name="serviceNote"
             required
             maxLength={300}
-            placeholder={t("Example: Updated for the client during a support call")}
           />
           </div>
       ) : null}

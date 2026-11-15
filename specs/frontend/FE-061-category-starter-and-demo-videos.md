@@ -4,7 +4,7 @@ title: Category-relevant starter and multi-provider demo videos
 status: in_progress
 related: [BE-049, BE-067, FE-057, FE-046, BE-039, FE-060, BE-048, FE-050, FE-053, DEP-039, DEP-042, ADR-0035]
 owners: [product, frontend, backend, operations]
-last_updated: 2026-11-14
+last_updated: 2026-11-15
 change_level: L3
 ---
 
@@ -107,8 +107,8 @@ to communicate the intended cover/product media experience.
 
 New private starter pages and all three sample offerings use admitted example
 videos selected from the business's declared category instead of a developer demo.
-Reuse fictional category media/copy where needed so the sample remains coherent;
-label it as an editable example, never as factual footage of that business.
+Reuse fictional category media/copy where needed so the starter remains coherent;
+keep it private and editable, never presenting footage as proof of that business.
 No media network request occurs during signup. Preserve private preview, contact,
 handle, city, accent and publication contracts. Existing edited stores are not
 backfilled. Newly added offerings without a selected video receive that business's

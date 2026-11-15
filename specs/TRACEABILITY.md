@@ -33,6 +33,17 @@ establish the published schedule or next hosted run. A 64-business rotation
 takes at least six days at maximum four-per-run throughput, or about 22 days
 at the previously observed one per run.
 
+## S199 concise starter and demo copy — local verification
+
+[BE-039], [FE-046], [FE-061] and [FE-067] map to `lib/business-starter.ts`,
+`lib/category-starter.ts`, `lib/business-starter-postgres.ts`,
+`lib/publication-readiness.ts`, the owner/product forms, and the web/Expo
+showroom marker. `scripts/test-product-only-starters.ts` and
+`scripts/test-business-starters.ts` cover unlabeled new starter content and
+retained private starter publication blocking; localization/type checks and
+affected browser journeys qualify the copy. Source publication and any
+hosted legacy starter correction remain separate steps.
+
 ## S197 demo video quality — review and qualification in progress
 
 FE-057 portrait containment follow-up: PR68's actual Chrome phone product
