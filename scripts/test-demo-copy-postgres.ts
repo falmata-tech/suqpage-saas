@@ -121,6 +121,15 @@ async function main(){
   assert.ok(!String(after.page.at(-1).content_json).includes('example batch'));
   assert.equal(JSON.parse(String(after.enrollment.baseline_page_json)).about,
    'Woven home goods. For homes and shops.');
+  const selectedAudit=JSON.parse(String((await db.prepare(`SELECT detail FROM audit_logs
+   WHERE business_id=? AND action='demo.copy_corrected' ORDER BY id DESC LIMIT 1`).get(businessId)).detail));
+  assert.deepEqual(selectedAudit.afterPublic,{
+   businessDescription:after.business.description,
+   page:{about:JSON.parse(String(after.page.at(-1).content_json)).about,
+    introduction:JSON.parse(String(after.page.at(-1).content_json)).introduction},
+   products:after.products.map((p:{id:number;description:string;lead_time_summary:string})=>({
+    id:p.id,description:p.description,leadTimeSummary:p.lead_time_summary||''})).sort((a:{id:number},b:{id:number})=>a.id-b.id),
+  });
   assert.notEqual(after.enrollment.expected_hash,before.enrollment.expected_hash);
   for(const key of ['stage','cycle','due_at','status','reason','catalog_products_json'])
    assert.deepEqual(after.enrollment[key],before.enrollment[key],key);
