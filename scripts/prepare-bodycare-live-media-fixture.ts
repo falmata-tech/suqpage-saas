@@ -1,4 +1,4 @@
-// Two disposable public-demo product fixtures. Never reads a hosted target.
+// One disposable public-demo product fixture. Never reads a hosted target.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
@@ -12,8 +12,7 @@ import {productMedia} from '../lib/product-media';
 import {closePostgresRuntimeForTests} from '../lib/postgres-runtime-services';
 
 const cases = [
-  {handle:'afia-botanics', productName:'Mineral Clay Mask', videoRef:'tiktok:7407311566867025170'},
-  {handle:'demo-liya-soap-kitchen', productName:'Citrus Kitchen Bar', videoRef:'tiktok:7157563218557160705'},
+  {handle:'demo-sena-body-care', productName:'Whipped Body Butter', videoRef:'tiktok:7683170511496482061'},
 ];
 
 async function main(){
@@ -58,6 +57,6 @@ async function main(){
   }
   fs.mkdirSync('.local/bodycare-live-media-review',{recursive:true,mode:0o700});
   fs.writeFileSync('.local/bodycare-live-media-review/fixture.json',JSON.stringify({source,products})+'\n',{mode:0o600});
-  console.log('PASS two isolated body-care product fixtures prepared through ordinary commands.');
+  console.log('PASS isolated Sena body-care product fixture prepared through ordinary commands.');
 }
 void main().catch(()=>{console.error('Disposable body-care fixture failed.');process.exitCode=1;}).finally(closePostgresRuntimeForTests);
