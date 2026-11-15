@@ -5,6 +5,9 @@ import { useState, type CSSProperties, type ReactNode } from "react";
 import {
   privacyEnhancedYouTubeEmbedUrl,
 } from "@/lib/youtube-provider";
+import {productVideo} from "@/lib/video/product-video";
+import {approvedDemoVideo} from "@/lib/video/demo-video-catalog";
+import FirstPartyDemoVideo from "@/components/FirstPartyDemoVideo";
 import { LIVE_PLATFORM_LABELS } from "@/lib/live-showroom";
 import { heroMediaIntegrationForComponent } from "@/lib/showroom-guidance";
 import {
@@ -120,22 +123,27 @@ function blockItems(block: BankSectionRendererProps["contentBlock"]) {
 function ControlledVideoFrame({
   asset,
   title,
+  businessId,
 }: {
   asset: string;
   title: string;
+  businessId: number;
 }) {
   const t = useUiText();
   const [playing, setPlaying] = useState(false);
   if (!asset) return null;
   let src = "";
+  let demo = false;
   try {
-    src = privacyEnhancedYouTubeEmbedUrl(asset);
+    demo=productVideo(asset).provider==='demo';
+    if(demo&&!approvedDemoVideo(asset,businessId))return null;
+    if(!demo)src = privacyEnhancedYouTubeEmbedUrl(asset);
   } catch {
     return null;
   }
   return (
     <div className={styles.videoFrame} data-playing={playing ? "true" : "false"}>
-      {playing ? (
+      {playing ? demo ? <FirstPartyDemoVideo video={asset} title={title}/> : (
         <iframe
           src={src}
           title={title}
@@ -147,8 +155,7 @@ function ControlledVideoFrame({
         <button type="button" onClick={() => setPlaying(true)} aria-label={t("Play {value1}", { value1: title })}>
           <i aria-hidden="true" />
           <span>
-            <strong>{t("Watch the process")}</strong>
-            <small>{t("Play securely on this page")}</small>
+            <strong>{t(demo ? "Watch video" : "Watch the process")}</strong>
           </span>
         </button>
       )}
@@ -156,12 +163,13 @@ function ControlledVideoFrame({
   );
 }
 
-function VideoFrame({ block }: { block: BankSectionRendererProps["contentBlock"] }) {
+function VideoFrame({ block, businessId }: { block: BankSectionRendererProps["contentBlock"]; businessId:number }) {
   const t = useUiText();
   return (
     <ControlledVideoFrame
       asset={mediaAsset(block, "video")}
       title={block?.title || t("Page video")}
+      businessId={businessId}
     />
   );
 }
@@ -409,7 +417,7 @@ export function BankContentSection({
           <p>{contentBlock.body}</p>
         </div>
         <div className={styles.contentBody}>
-          <VideoFrame block={contentBlock} />
+          <VideoFrame block={contentBlock} businessId={context.business.id} />
           {contentBlock.transcript ? <p>{contentBlock.transcript}</p> : null}
         </div>
       </SectionRoot>
@@ -439,10 +447,11 @@ export function BankContentSection({
         <p>{contentBlock?.body || context.business.description}</p>
         {processVideoRef ? (
           <div className={styles.processVideo}>
-            <span>{t("Inside the process")}</span>
+            <span>{t(processVideoRef.startsWith('demo:') ? "Video" : "Inside the process")}</span>
             <ControlledVideoFrame
               asset={processVideoRef}
-              title={t("{value1} process video", { value1: context.business.name })}
+              title={t(processVideoRef.startsWith('demo:') ? "{value1} video" : "{value1} process video", { value1: context.business.name })}
+              businessId={context.business.id}
             />
           </div>
         ) : null}

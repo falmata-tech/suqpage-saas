@@ -1,4 +1,5 @@
 import { productVideo } from './video/product-video';
+import {approvedDemoVideo} from './video/demo-video-catalog';
 import { parseProductMedia, productMedia, type ProductMedia } from "./product-media";
 import {
   isLegacyShowroomDesignKey,
@@ -37,6 +38,7 @@ const imagePattern =
   /^(?:\/uploads\/seed\/[A-Za-z0-9._/-]+|\/media\/[A-Za-z0-9.-]+|request-attachment:\d+)?$/;
 const controlPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
 const youtubeRefPattern = /^(?:youtube:[A-Za-z0-9_-]{11})?$/;
+export type RevisionProcessVideoPolicy={businessId:number;isDemo:boolean;retainedProcessVideoRef?:string};
 
 export type RevisionBusiness = {
   name: string;
@@ -203,12 +205,15 @@ const image = (value: unknown) => {
   return result;
 };
 
-const youtubeRef = (value: unknown) => {
+const youtubeRef = (value: unknown,policy?:RevisionProcessVideoPolicy) => {
   const result = clean(value, 40);
-  if (!youtubeRefPattern.test(result)) {
-    throw new RevisionError("A managed YouTube reference is invalid.");
+  if(youtubeRefPattern.test(result))return result;
+  if(policy?.isDemo&&approvedDemoVideo(result,policy.businessId))return result;
+  if(policy?.isDemo&&(policy.businessId===50||policy.businessId===62)&&
+    result===policy.retainedProcessVideoRef){
+    try{if(productVideo(result).provider==='tiktok')return result;}catch{/* Invalid retained ref. */}
   }
-  return result;
+  throw new RevisionError("A managed YouTube reference is invalid.");
 };
 
 function onlyKeys(
@@ -224,6 +229,7 @@ function onlyKeys(
 export function parseRevisionContent(
   raw: Record<string, unknown>,
   schemaVersion: 1 | 2 | 3 | 4,
+  processVideoPolicy?:RevisionProcessVideoPolicy,
 ): RevisionContent {
   if (typeof raw.business !== "object" || !raw.business) {
     throw new RevisionError("The revision schema is invalid.");
@@ -290,7 +296,7 @@ export function parseRevisionContent(
     whatsapp: clean(sourceBusiness.whatsapp, 40).replace(/\D/g, ""),
     telegram: clean(sourceBusiness.telegram, 80).replace(/^@/, ""),
     tiktok: clean(sourceBusiness.tiktok, 80).replace(/^@/, ""),
-    processVideoRef: youtubeRef(sourceBusiness.processVideoRef),
+    processVideoRef: youtubeRef(sourceBusiness.processVideoRef,schemaVersion===4?processVideoPolicy:undefined),
     isLive: liveSettings.isLive,
     livePlatform: liveSettings.platform,
     liveUrl: liveSettings.url,

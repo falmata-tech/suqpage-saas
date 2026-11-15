@@ -3,22 +3,23 @@ import './test-demo-media-correction';
 import assert from 'node:assert/strict';
 import {demoScenario,demoScenarioStage,parseDemoScenarioParameters,nextDemoScenarioStage,demoScenarioCommandKey} from '../lib/demo-scenarios';
 import {demoCatalogPhaseOffsets,demoCatalogStage,parseDemoCatalogInputs,parseStoredDemoCatalog,type DemoCatalogProduct,type DemoCatalogProductInput} from '../lib/demo-catalog-scenarios';
-import {parseDemoCategoryCorrection} from '../lib/demo-category-correction';
-const base={productName:'Example harvest',productKind:'standard_product',businessCategories:['agriculture-growers'],unit:'kg',minimumOrder:10,normalCapacity:1000,limitedCapacity:200,basePriceMinor:10000};
+import {AGRICULTURE_CORRECTION_TARGETS,parseDemoCategoryCorrection} from '../lib/demo-category-correction';
+const base={productName:'Harvested greens',productKind:'standard_product',businessCategories:['agriculture-growers'],unit:'kg',minimumOrder:10,normalCapacity:1000,limitedCapacity:200,basePriceMinor:10000};
 
-test('BE-067 reviewed category batch binds six distinct exact demo identities and four products each',()=>{
- const members=Array.from({length:6},(_,index)=>({businessId:index+1,handle:`synthetic-farm-${index+1}`,ownerUserId:index+11,
-  providerUserId:`00000000-0000-4000-8000-${String(index+1).padStart(12,'0')}`,productIds:[1,2,3,4].map(id=>id+index*4),
+test('BE-067 reviewed category batch binds all eight exact public identities and four products each',()=>{
+ const members=AGRICULTURE_CORRECTION_TARGETS.map((target,index)=>({businessId:target.businessId,handle:target.handle,ownerUserId:index+11,
+  providerUserId:`00000000-0000-4000-8000-${String(index+1).padStart(12,'0')}`,productIds:[1,2,3,4].map(id=>id+(target.businessId-1)*4),
   expectedHash:'a'.repeat(64),expectedContentVersion:2,expectedDraftVersion:2,expectedPageRevision:2,
   stage:1,cycle:0,dueAt:1800000000000,proposalVersion:1,proposalUpdatedAt:1}));
  const input={kind:'category_correction_batch',operationKey:'synthetic_review_0001',members};
  assert.deepEqual(parseDemoCategoryCorrection(input),input);
  for(const candidate of [
-  {...input,members:members.slice(0,5)},
-  {...input,members:[...members.slice(0,5),members[4]]},
-  {...input,members:[...members.slice(0,5),{...members[5],productIds:[21,22,22,24]}]},
-  {...input,members:[...members.slice(0,5),{...members[5],proposalVersion:2}]},
-  {...input,members:[...members.slice(0,5),{...members[5],expectedHash:'not-a-hash'}]},
+  {...input,members:members.slice(0,7)},
+  {...input,members:[...members.slice(0,7),members[6]]},
+  {...input,members:[...members.slice(0,7),{...members[7],productIds:[129,130,130,132]}]},
+  {...input,members:[...members.slice(0,7),{...members[7],proposalVersion:2}]},
+  {...input,members:[...members.slice(0,7),{...members[7],expectedHash:'not-a-hash'}]},
+  {...input,members:[...members.slice(0,7),{...members[7],handle:'another-farm'}]},
   {...input,enabled:true},
  ])assert.throws(()=>parseDemoCategoryCorrection(candidate));
 });
@@ -61,8 +62,21 @@ test('BE-067 complete predefined harvest timeline keeps related facts and units 
  assert.equal(new Set(states.map(s=>s.productUpdate)).size,6,'Every stage has a distinct predefined listing summary.');
  const perUnit=demoScenarioStage('seasonal-harvest',1,0,{...base,unit:'per kg'});
  assert.equal(perUnit.product.quantityUnit,'per kg');assert.equal(perUnit.product.minimumOrderSummary,'10 kg');
- for(const state of states){assert.equal(state.product.minimumOrderSummary,'10 kg');assert.ok(state.businessUpdate.startsWith('Example harvest:'));assert.ok(state.durationMs>=60000);}
- assert.match(states[0].product.leadTimeSummary,/Next example harvest/);assert.match(states[2].product.leadTimeSummary,/Dispatch/);
+ for(const state of states){assert.equal(state.product.minimumOrderSummary,'10 kg');assert.ok(state.businessUpdate.startsWith('Harvested greens:'));assert.ok(state.durationMs>=60000);}
+ assert.match(states[0].product.leadTimeSummary,/Next harvest/);assert.match(states[2].product.leadTimeSummary,/Dispatch/);
+});
+test('FE-070/BE-067 scenario copy states supply facts without repeated demo disclaimers',()=>{
+ const plans=[
+  ['fresh-food-batch','standard_product'],['food-preparation','made_to_order'],
+  ['production-cycle','made_to_order'],['seasonal-harvest','standard_product'],
+  ['workshop-production','made_to_order'],['wholesale-replenishment','standard_product'],
+ ] as const;
+ for(const [scenario,productKind] of plans)for(let stage=0;stage<6;stage++){
+  const plan=demoScenarioStage(scenario,1,stage,{...base,productKind,businessCategories:['food-farming','home-living']});
+  assert.doesNotMatch([plan.stage.title,plan.stage.update,plan.productUpdate,plan.businessUpdate,
+   plan.product.leadTimeSummary].join(' '),/\b(?:example|fictional|illustrative|demo)\b/i);
+  assert.ok(plan.stage.update.length>20);
+ }
 });
 test('BE-067 workshop and replenishment timelines retain compatible product identity and dispatch promises',()=>{
  const workshop=Array.from({length:6},(_,i)=>demoScenarioStage('workshop-production',1,i,{...base,productName:'Workshop table',productKind:'made_to_order',businessCategories:['home-living'],unit:'tables',minimumOrder:1,normalCapacity:12,limitedCapacity:4,basePriceMinor:null}));

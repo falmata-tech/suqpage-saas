@@ -4,7 +4,7 @@ title: Scenario-driven demo marketplace simulation
 status: in_progress
 related: [BE-049, FE-061, BE-009, FE-079, DEP-054, ADR-0034, BE-055, BE-054, BE-035]
 owners: [backend, security, operations]
-last_updated: 2026-11-15
+last_updated: 2026-11-14
 change_level: L3
 ---
 
@@ -28,6 +28,32 @@ the original product description, so listing cards visibly change every tick.
 Enrollment reserves space within the ordinary text limits; no original story or
 description is truncated. No independent random fields, fabricated customer transactions,
 stock counts, certifications, transport activity or external media/message calls.
+Stage copy states the current product, capacity and timing directly. The page's
+single “Example business” badge identifies the fictional tenant, so simulator
+updates and lead-time summaries must not add “example”, “fictional” or similar
+disclaimers. Changing the wording leaves stage keys, durations, eligibility,
+availability, quantities and prices intact; prior published versions remain in
+immutable history. A finite guarded correction of already published copy is
+separate from deploying the recurring template fix.
+The one-time S200 copy operator accepts only the reviewed 64 public demo IDs
+that still have stale wording (the two already clean pages are excluded).
+It requires an explicit operator pause, exact business handle and current
+content/draft/publication versions; enrolled businesses also require their
+acknowledged state hash and stage/cycle/due time. An exact version-one
+old-to-new stage map and the business-name story pattern permit no free-form
+replacement. For enrolled pages, the operator updates only the already
+published simulator-managed draft mirror, appends a page publication, publishes
+changed product descriptions/lead times through ordinary upkeep, updates the
+public business summary and enrollment baseline, then acknowledges the new
+state hash without changing progress. The two ownerless portfolio demos use
+the existing exact admin authority path and do not gain enrollments. Current
+contacts, media, categories, selling facts, real tenants, private unpublished
+work and immutable prior publications remain unchanged.
+Each business is atomic, idempotent and audited with selected public before
+text for an exact guarded inverse. Any drift or late failure rolls back its
+whole transaction; the worker records a sanitized rejection and stops that
+business. The request is assembled inside the database while paused, so
+private simulator bindings and page/contact rows are not exported.
 
 ## Identity and authority
 
@@ -123,25 +149,31 @@ and atomically acknowledge only that change. It must preserve enrollment progres
 and all scenario baselines except the approved page video URL. Routine stage work
 continues to preserve media and fail closed on any unreviewed content drift.
 
-An operator may correct the reviewed six-demo agriculture cohort through one
-private, disabled-only `category_correction_batch` request. The request binds six
-sorted, distinct business/owner/provider identities, four sorted product IDs per
-business, current simulator hash and progress, and content/draft/publication
-versions. Before any write, each member must remain an active demo with a complete
-enrolled catalog, exactly the `food-farming` public membership, and a reviewed
-version-one `agriculture-growers` owner proposal whose update matches the
-approved discovery profile. The operation requires no existing agriculture
-membership and adds it while retaining food cross-listing. It acknowledges the
-new sorted category set in each primary and catalog scenario binding and
-recomputes the enrollment hash. One transaction covers all six or none. A
-single operation key and audit receipt make replay inert. Stage, cycle, due
-time, page, products, media, geography and all other tenants remain unchanged.
-An overlong transaction fails closed under the worker deadline. This finite
-operator path does not infer future category changes or enable the simulator.
+An operator may correct the eight current public agriculture examples through one
+private, disabled-only `category_correction_batch` request. The finite cohort
+binds business IDs 5, 6, 27, 28, 29, 31, 32 and 33 to their exact handles,
+owner/provider identities, four sorted product IDs per business, current
+simulator hash and progress, and content/draft/publication versions. Six growers
+(5, 6, 27, 29, 31, 33) must have reviewed version-one
+`agriculture-growers` owner proposals whose update matches approved discovery.
+Two mills (28 `demo-laga-grain-mill`, 32 `demo-wabi-flour-mill`) are explicitly
+cross-listed under agriculture by the seed source; their reviewed primary
+proposals must remain `food-farming` and match approved discovery. All eight
+must remain active demos with complete enrolled catalogs and exactly the
+`food-farming` public membership. The three seed handles absent from production
+and all real or draft businesses are excluded. The operation requires no
+existing agriculture membership and adds it while retaining food membership.
+It acknowledges the new sorted category set in each primary and catalog
+scenario binding and recomputes the enrollment hash. One transaction covers all
+eight or none. A single operation key and audit receipt make replay inert.
+Stage, cycle, due time, reviewed primary proposal, page, products, media,
+geography and all other tenants remain unchanged. An overlong transaction fails
+closed under the worker deadline. This finite operator path does not infer
+future category changes or enable the simulator.
 
 GIVEN a drifted member, changed review, foreign product, or late insert failure
 WHEN the batch runs THEN no membership or enrollment is partly corrected. GIVEN
-a valid reviewed batch WHEN it commits THEN all six remain active and their next
+a valid reviewed batch WHEN it commits THEN all eight remain active and their next
 scheduled stages advance without a `content_changed` pause. GIVEN replay before
 or after later stages THEN no second mutation or audit receipt is created.
 
@@ -159,8 +191,8 @@ and enforces explicit per-day mutation and database-size budgets. Budget pressur
 pauses demo work; it never deletes immutable history or blocks real users.
 
 Operator enrollment requests are private database records, never an HTTP/admin
-endpoint. The disabled worker admits at most eight explicit requests per tick,
-starting no new admission after its12-second work budget, using
+endpoint. The disabled ordinary worker admits at most eight explicit requests
+per tick, starting no new admission after its 12-second work budget, using
 the ordinary enrollment checks, reviewed content/draft/publication versions and
 exact demo owner/product bindings. It records accepted/rejected outcomes and never
 enables itself. When explicitly requested, an empty product unit is initialized
@@ -168,22 +200,6 @@ through ordinary upkeep before legacy enrollment or in the first full-catalog
 stage; an existing unit is preserved.
 A refused request rolls back all preparation. Active simulation does not consume
 requests. Migration creates no request or enrollment.
-
-For the finite DEP-054 maintenance schedule, the adapter admits ticks only in
-the fixed two-hour UTC window and requests a maintenance-only transaction.
-GIVEN the control is enabled or disabled for any reason other than `operator`
-WHEN that transaction runs THEN it does not process requests or stages and
-does not change `last_slot` or `used_today`. GIVEN the control is disabled with
-`pause_reason='operator'` WHEN pending requests exist THEN it first verifies
-that every selected request is valid JSON with kind `media_correction` or
-`unenrolled_media_correction`. Any other kind or invalid JSON fails the entire
-tick without processing or acknowledging a request. Only after that check does
-it apply the existing identity/version checks, at-most-eight selection,
-12-second admission limit and per-request rollback; accepted/rejected status
-remains authoritative. Normal three-time admission retains all request kinds.
-GIVEN the window ends WHEN Netlify invokes the old temporary schedule THEN no
-database connection opens. Resume stages only after the original three-time
-adapter is published and independently identified.
 
 The control, requests, enrollment and seven-day bounded operational run records are private
 PostgreSQL tables with RLS and no anon/authenticated/service-role access. Only the
@@ -222,10 +238,10 @@ partial preparation rolls back on refusal, and simulation stays disabled.
 
 | Acceptance | Evidence |
 |---|---|
-| Coherent full timelines and predefined values | `scripts/test-demo-scenarios.ts` |
+| Coherent full timelines, predefined values and direct visitor copy | `scripts/test-demo-scenarios.ts` |
 | Mixed tenants/new signup/drift/replay/concurrency/rollback | `scripts/test-demo-simulator-postgres.ts` |
 | Exact reviewed category batch request shape | `scripts/test-demo-scenarios.ts` synthetic parser case |
-| Six-member atomic category correction, late failure, drift, replay and later stage | Private disposable PostgreSQL fixture retained outside public source; publication qualification pending |
+| Eight-member atomic category correction, distinct mill/grower review guards, late failure, drift, replay and later stage | Private disposable PostgreSQL fixture retained outside public source; publication qualification pending |
 | Migration, private privileges and bounded controls | existing PostgreSQL/security/preflight gates plus simulator integration |
 | Actual write → public revision/API → UI | FE-079 browser/native journeys |
 

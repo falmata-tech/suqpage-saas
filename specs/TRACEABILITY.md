@@ -33,19 +33,6 @@ establish the published schedule or next hosted run. A 64-business rotation
 takes at least six days at maximum four-per-run throughput, or about 22 days
 at the previously observed one per run.
 
-The prepared finite maintenance variant for 2026-11-15 18:15–20:15 UTC remains
-local only. `scripts/test-demo-worker-boundary.ts` verifies the exact minute
-cron and cutoff with no outside-window database call.
-`scripts/test-demo-simulator-postgres.ts` verifies that enabled control or a
-non-operator pause performs no stage/request work and does not spend slot or
-daily budget, while the operator pause admits bounded private requests.
-`scripts/test-demo-catalog-postgres.ts` verifies media correction through that
-mode alongside 64/256 fairness and retained real/private data. Typecheck and
-spec validation pass; protected CI, Netlify publication and hosted request
-admission are not claimed by this local preparation. The dependent restore
-commit must return the adapter and tests to the three-time source before stages
-resume.
-
 ## S199 concise starter and demo copy — local verification
 
 [BE-039], [FE-046], [FE-061] and [FE-067] map to `lib/business-starter.ts`,
@@ -56,6 +43,37 @@ showroom marker. `scripts/test-product-only-starters.ts` and
 retained private starter publication blocking; localization/type checks and
 affected browser journeys qualify the copy. Source publication and any
 hosted legacy starter correction remain separate steps.
+
+## S200 one public demo marker — guarded hosted correction in progress
+
+[FE-070] owns the single “Example business” marker and direct storefront copy;
+[BE-067] owns the recurring simulator templates. A read-only crawl of all 66
+public demo showrooms on 2026-11-15 found exactly one badge per page, 45 pages
+with stale “fictional” story text and 56 with simulator-written “example”
+availability wording. `lib/demo-scenarios.ts` and
+`scripts/test-demo-scenarios.ts` remove those repeated words from future stage
+text while preserving all stage and selling facts. Current hosted text needs a
+separate selected-field backup, guarded ordinary correction, and readback after
+video maintenance; the template source patch alone does not clean existing pages.
+The deployed S200 operator holds an exact 64-ID request parser, version-one
+old/new stage map, application-side page/product writes, current baseline/hash
+acknowledgment and an inverse using only selected public text retained inside
+the audit. Synthetic PostgreSQL tests cover enrolled and ownerless paths,
+replay, late rollback, queue rejection and next-stage continuity. Before the
+background repair, twelve production corrections were accepted/read back and
+the fourth four-business batch remained pending because the former 23-second
+scheduled transaction rolled back over the hosted connection. The finite
+DEP-054 repair used a signed scheduled trigger and Netlify background function,
+a 180-second atomic transaction, at most four copy requests, and a database
+slot receipt.
+`scripts/test-demo-worker-boundary.ts` proves signed admission, the exact
+window, unsigned rejection before database access, and the fixed site URL.
+`scripts/test-demo-copy-postgres.ts` proves failed-slot rollback, repeat and
+out-of-order replay protection. Source tests do not establish deployment or
+the remaining hosted corrections. The separate restore source removes the
+temporary endpoint/helper and minute trigger after authoritative 64/64
+readback, then returns to the three daytime moments. No sensitive private
+projection export is permitted by the automatic approval review.
 
 ## S197 demo video quality — review and qualification in progress
 
@@ -80,6 +98,20 @@ product. The static allowlist now binds 270 exact files across the existing,
 Liya and new packages. No new public media refs are applied by this source
 change. The eventual 51-business correction splits into 49 enrolled BE-049
 requests and guarded ordinary catalog/page updates for non-enrolled IDs 50/62.
+
+The S197 separate process-video field has a reviewed 66-business inventory:
+53 enrolled process clips need replacement, two unenrolled legacy clips render
+blank, and 11 subject-fit clips stay. The finite enrolled operator maps
+`lib/demo-process-media-correction.ts` and `correctDemoProcessMedia` to
+BE-049/FE-061/DEP-054: exact ID/handle, enrollment fingerprint/progress,
+current ref/version, same-business approved asset, retained before/after V4
+and conditional exact-baseline reserve for stale immutable history,
+audit, idempotency and inverse. Parser negative checks are in
+`scripts/test-demo-media-correction.ts`; real isolated PostgreSQL apply,
+late rollback, sanitized rejected-request diagnostic, replay, inverse and
+next-stage checks are in `scripts/test-demo-process-media-postgres.ts`.
+Hosted readback remains a
+separate S197 checklist gate.
 
 FE-057 portrait containment follow-up: PR68's actual Chrome phone product
 capture crops a 9:16 TikTok frame inside the short gallery stage while its Expo
@@ -256,18 +288,21 @@ inside the same transaction before requalifying the corrected source.
 
 ## BE-067 reviewed agriculture membership correction — local qualification only
 
-Six current active demo farms have reviewed agriculture proposals but only
-food-farming public memberships. A locally qualified private correction path
-binds six exact identities, four products each, current hashes/versions and
-progress to one disabled-worker request. It adds agriculture cross-listing and
-acknowledges all simulator category bindings in one transaction. A synthetic
-public parser test and a private disposable-PostgreSQL case pass: late sixth
-insert rollback, proposal drift/foreign product refusal, guarded rearm of an
-existing accepted request row, replay before/after a later stage, real-tenant
-preservation and a 2,398-byte request. The successful local batch took under
-one second after fixture setup, within the 23-second bound. No hosted data was
-changed; source review, deployment, a fresh protected before-image and the
-separately guarded L4 admission precede production execution.
+Six active public demo growers have reviewed agriculture proposals but only
+food-farming memberships. Two active public food mills have explicit agriculture
+cross-listings in `scripts/setup.ts`; their reviewed primary proposals remain
+food-farming. A finite private correction path binds all eight exact IDs/handles,
+four products each, current hashes/versions and progress to one disabled-worker
+request. Distinct grower and mill proposal guards prevent converting a mill's
+primary category. The operator adds eight agriculture memberships and
+acknowledges all 32 simulator catalog bindings in one transaction. The public
+parser test and private disposable-PostgreSQL case pass: late eighth insert
+rollback, both proposal-drift cases, foreign product refusal, guarded rearm of an
+accepted request row, replay before/after a later stage and real-tenant
+preservation. The 3,213-byte request completed in 2.1 seconds after fixture
+setup, inside the 23-second bound. No hosted category data changed; source
+review, deployment, a fresh protected before-image and separately guarded L4
+admission precede production execution.
 
 ## S194 scenario-driven demo activity — qualified and deployed
 
@@ -1185,7 +1220,7 @@ related layers, test criteria and detailed completion evidence.
 | [BE-046] Reviewed TikTok and YouTube product references | in_progress | [ADR-0025], [BE-048], [FE-050], [FE-057], [BE-042], [BE-018], [BE-044], [DEP-039], [DEP-042], [ADR-0024] | [Contract and implementation scope][BE-046] | [Test plan][BE-046-tests]: `test-product-video.ts`, `test-video-requests.ts` |
 | [BE-047] Canonical business city in signup transaction | in_progress | [BE-049], [FE-059], [BE-031], [BE-038], [BE-041], [FE-051], [BE-044], [DEP-042], [FE-065], [BE-054] | [Contract and implementation scope][BE-047] | [Test plan][BE-047-tests]: `test-signup.ts`, `test-mobile-api.ts` |
 | [BE-048] Owner-controlled canonical video references | in_progress | [FE-061], [BE-049], [ADR-0025], [FE-060], [BE-046], [BE-032], [BE-041], [BE-042], [BE-044], [FE-050], [FE-019], [DEP-039], [DEP-042], [ADR-0024] | [Contract and implementation scope][BE-048] | [Test plan][BE-048-tests]: `test-product-video.ts`, `test-owner-page.ts` |
-| [BE-049] Persist category-specific example videos atomically | in_progress | [BE-047], [BE-041], [FE-061], [BE-039], [BE-031], [BE-042], [BE-048], [FE-046], [FE-050], [DEP-039], [DEP-042], [ADR-0035] | [Contract and implementation scope][BE-049]; first-party assets admitted only for exact reviewed fictional demos; legacy two-business private queue path locally qualified, hosted correction pending | [Test plan][BE-049-tests], `test-demo-first-party-video.ts`, `test-demo-media-correction.ts` |
+| [BE-049] Persist category-specific example videos atomically | in_progress | [BE-047], [BE-041], [FE-061], [BE-039], [BE-031], [BE-042], [BE-048], [FE-046], [FE-050], [DEP-039], [DEP-042], [ADR-0035] | [Contract and implementation scope][BE-049]; first-party assets admitted only for exact reviewed fictional demos; ownerless legacy path binds its current admin page actor; separate exact enrolled process-media operator preserves catalog history/progress; hosted correction pending | [Test plan][BE-049-tests], `test-demo-first-party-video.ts`, `test-demo-media-correction.ts`, `test-demo-process-media-postgres.ts` |
 | [BE-050] Scoped notification events and confirmed chat reads | in_progress | [BE-055], [FE-062], [DEP-043], [ADR-0026], [BE-001], [BE-018], [BE-044], [FE-019], [FE-053], [BE-057], [ADR-0031] | attention contracts/PostgreSQL events/receipts, web/native controls and scoped provider outbox | [Test plan][BE-050-tests]: `test-support-assignment-response-migration.ts`, `test-support-assignment-response.ts` |
 | [BE-051] Private listing reports and discovery exclusions | in_progress | [FE-063], [DEP-044], [BE-044] | Local pure catalog-safety/listing-report contracts, private PostgreSQL port/migration 63, scoped web Reports queue, web/native… | [Test plan][BE-051-tests]: `test-catalog-safety.ts` |
 | [BE-052] Server-bound reviewer authentication | in_progress | [FE-064], [DEP-044], [BE-044] | [reviewer-access.ts](../lib/reviewer-access.ts) | [Test plan][BE-052-tests] |

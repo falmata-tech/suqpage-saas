@@ -259,8 +259,10 @@ Details: FE-029/FE-036/FE-040/FE-053/FE-054/FE-056 and the relevant current spec
 Marked fictional demo businesses exercise varied product counts, industries,
 optional categories, media and supply types. They are fixtures, not real clients
 or authority for merchant facts, and intentionally demonstrate the range of
-businesses AfricMade serves to first-time visitors. Keep examples clearly marked;
-never present them as real merchants or as factual availability, capacity or
+businesses AfricMade serves to first-time visitors. Keep examples clearly marked
+with one “Example business” badge per page; the story, product description and
+simulated status text state useful facts directly instead of repeating that label.
+Never present them as real merchants or as factual availability, capacity or
 production evidence. Generated demo illustrations are illustrative, not
 documentary product photographs; use honest no-photo placeholders when genuine
 media is absent. Never fill a real business with unrelated demo logos or videos.
@@ -712,11 +714,6 @@ It advances predefined coherent scenarios through ordinary product and page
 publication commands. Foreground public screens check for changes every15 seconds,
 preserve inquiry drafts and read one consistent product/profile snapshot. This
 is bounded foreground polling, not a Supabase Realtime subscription.
-The 2026-11-15 18:15–20:15 UTC maintenance adapter runs every minute
-only within that finite window and admits only private video-correction
-requests while the control is operator-paused. Unexpected request kinds or
-invalid JSON fail the tick without acknowledgement. It cannot advance scenarios;
-ordinary stage service resumes only after the three-time adapter is restored.
 
 Use the pinned Node/Next.js web/API and Expo/React Native app with shared typed
 contracts. Runtime/dependency versions come from the lockfiles, package metadata
@@ -1003,6 +1000,9 @@ safeguards. FE-035/FE-053/FE-056/FE-065 and relevant task specs provide the deta
 BE-067's marked examples use predefined, unit-aware scenario facts and
 ordered stages. Random independent values and fabricated customer transactions,
 transport activity or certification claims are excluded.
+S200's one-time copy operator updates only exact reviewed demo wording through
+retained catalog and page publications under an explicit simulator pause, keeping
+original product detail, contacts, stage progress and real tenants intact.
 
 Do not invent product features, availability, models, prices, capacity or merchant
 history. Preserve merchant-entered data; verify current recognizable product facts
@@ -1017,9 +1017,16 @@ video examples after source and player review. It retains
 photos, identity, contacts and original stories. A finite paused operation through
 ordinary commands must preserve the BE-067 scenario progress and acknowledge only
 the admitted media change; an unreviewed edit still pauses rather than being erased.
+The separate process chapter uses a finite guarded demo-only correction that
+retains catalog history and leaves owner pages, products and scenario progress
+unchanged. Matching first-party demo clips can play in that chapter.
 For the two legacy public demos without enrollment, the finite paused private
 queue uses ordinary product/page publication and leaves the scenario cohort
-untouched. It admits only their exact reviewed media and never enrolls them.
+untouched. It binds their existing page author with current platform-admin
+authority, admits only their exact reviewed media and never enrolls them.
+Their legacy process video is replaced in the same guarded transaction and
+retained in catalog history for exact inverse rollback. The composed showroom
+plays an approved first-party process MP4 for the matching demo business.
 
 ## 21. Standard page operating workflow
 

@@ -59,6 +59,45 @@ partial media/baseline/progress/history change occurs. Test those boundaries on
 disposable PostgreSQL, retain protected before/after baselines and qualify source
 before hosted application. Do not pause the running service during curation.
 
+## S197 enrolled process-video correction
+
+The separate showroom process chapter needs a finite correction for 53 enrolled
+public examples whose existing footage was reviewed as unavailable, unrelated or
+poor quality. The two unenrolled legacy examples use their separate operator;
+11 reviewed subject-fit process clips remain. Admit only the exact reviewed
+business ID/handle cohort, current owner/provider binding, unchanged enrollment
+fingerprint and scenario progress, current catalog/draft/publication versions,
+and exact current managed process-video ref. An apply plan changes a managed
+YouTube process ref to the same business's approved first-party `demo:` asset.
+An inverse plan restores the exact reviewed YouTube ref with fresh guards.
+
+Under the existing operator pause, advisory lock and one transaction, retain
+the old V4 catalog version, update only the process ref and business content
+version with a current-value guard, retain the new V4 catalog version, then
+acknowledge the enrollment's new fingerprint and append a distinct audit
+receipt. Products, photos, owner page, draft/publication versions, business
+identity/contact/story, stage/cycle/due, and other tenants must not change.
+If the immutable current-version snapshot is stale, preserve it, reserve the
+next version for an exact current baseline, and publish the process ref one
+version later. A clean baseline needs only one version; a stale baseline needs
+two. Never overwrite old history or continue if the reserved version exists.
+One private request targets one business; a duplicate operation key with the
+same payload is inert, and a conflict or late snapshot/audit failure rolls
+back the whole write. A rejected, parsed request records only a fixed phase,
+error code and operation key after its media savepoint rolls back; it never
+logs raw external media refs or private identity. The minute worker may admit
+bounded private requests while explicitly operator-paused; normal scenario
+stages remain disabled.
+
+GIVEN a paused and unchanged enrolled example WHEN its guarded process plan
+commits THEN the process chapter plays the approved first-party business clip,
+the appropriate retained baseline/process versions and audit receipt exist,
+and the next scenario
+stage continues. GIVEN a forged tenant/ref, stale hash/version/progress,
+incomplete asset, enabled control, or late failure THEN the catalog,
+enrollment and history remain unchanged. Real PostgreSQL tests cover apply,
+replay, inverse, tenant exclusion, late rollback, and stage continuation.
+
 ## S197 finite correction for two unenrolled legacy demos
 
 Businesses 50 (`demo-dara-clay-works`, products 197–200) and 62
@@ -69,7 +108,7 @@ for these two may use the same disabled private request queue with a distinct
 scenario progress, or write directly to product/page columns.
 
 Before queueing, inspect a selected-field before-image: exact business ID and
-handle, owner user ID, content/draft/publication versions, cover URL, each
+handle, content/draft/publication versions, cover URL, each
 ordered gallery, current draft/publication coherence, and existing private-request
 status. Retain that image outside the public repository. A pending request cannot
 be overwritten; an existing accepted/rejected row may be rearmed only by a
@@ -77,7 +116,22 @@ separate guarded update after reviewing its status and the new input. The worker
 processes the plan only while explicitly paused for operator maintenance and
 keeps the normal accepted/rejected private receipt.
 
-GIVEN either exact demo with no enrollment, current owner authority, coherent
+These two legacy showrooms have no linked client users. The private queue plan
+derives one existing actor ID inside the database from the current draft updater
+and latest publication publisher for both businesses: all four attributions
+must name the same current `platform_admin` with legacy role `admin`. The
+command declares `actorRole='platform_admin'` and binds that `actorUserId`.
+Within the correction transaction, recheck zero linked users, the same page
+attributions, current administrator authority, and that the actor is not the
+configured private reviewer. Each ordinary product update carries a fixed
+service note; page publication and audit records retain that actor's ID.
+Ordinary upkeep preserves an existing non-service legacy offering kind while
+changing only reviewed video refs. A failed parsed request retains the normal
+private rejected status and appends one audit record with fixed phase/error-code
+values and operation key after the media savepoint rolls back. No raw error,
+product copy, contact, provider identity, or media payload enters that audit.
+
+GIVEN either exact demo with no enrollment, the bound current admin authority, coherent
 draft/publication, unchanged versions/before refs, and approved
 first-party assets WHEN its queued plan runs THEN all four product galleries and
 the page cover change in one transaction through ordinary product upkeep and
@@ -87,13 +141,37 @@ draft events, page revisions, product command receipts and a distinct media audi
 are appended. The distinct audit includes internal before/after state digests.
 An exact operation-key replay is inert.
 
-GIVEN another business, an enrollment, stale state, pending location, changed
+GIVEN another business, a linked user, an enrollment, changed page actor,
+revoked admin authority, private reviewer actor, stale state, pending location, changed
 gallery, unapproved asset, active simulator, or a late product/page failure WHEN
-the request runs THEN the correction is rejected without partial media/history
-change. A rollback uses a new, reviewed inverse request with fresh versions and
-before refs; it restores only the prior cover and four video
-refs through the same ordinary publication path. Neither direction runs
+the request runs THEN the correction is rejected without partial product, page,
+or catalog history change; the sanitized rejection audit is retained. A rollback
+uses a new, reviewed inverse request with fresh versions and
+before refs; it restores only the prior cover, process video, and four product video
+refs through the same ordinary publication path. The old TikTok process ref is
+retained in immutable catalog history and can be restored exactly, but its
+process player remains blank if restored. Neither direction runs
 automatically after an ambiguous hosted outcome.
+
+The finite plan also requires exact `processVideoBefore` and
+`processVideoAfter` refs. Apply accepts only the existing managed TikTok ref
+for these two demos and the approved first-party process ref for the matching
+business; inverse rollback swaps them. The worker checks the old ref and
+content version under the business lock and preserves any existing immutable
+catalog-version row. The apply path reserves the next content version with a
+compare-and-swap and appends an exact V4 snapshot of the current TikTok catalog
+there, even if an older retained row has a different generated design or content
+representation. It rejects an occupied next version. Within the same transaction,
+the worker changes the process ref before the first ordinary product upkeep.
+That first upkeep versions the process and product media together; the reserved
+baseline and four product updates advance content version by five overall.
+Inverse rollback from a matching current snapshot advances it by four.
+The final postcondition and a distinct process audit verify the new ref and
+hashes. Retained TikTok is accepted by V4 only for the exact trusted prior
+snapshot of demo 50 or 62. New revision authoring accepts only YouTube or an
+approved first-party ref bound to its demo business; foreign demos and newly
+authored TikTok refs are rejected. The storefront renders the approved process
+MP4 on visitor Play.
 
 ## S154 proposed selection correction — ready for root review
 
@@ -146,10 +224,11 @@ unchanged-progress and subsequent scheduled-stage cases to
 `scripts/test-demo-catalog-postgres.ts`. External content/inline playback remains
 the separate FE-061 review; test fixture provider IDs are not curated defaults.
 The unenrolled legacy path maps its synthetic parser and queue-binding cases
-to `scripts/test-demo-media-correction.ts`. A local synthetic disposable-
-PostgreSQL test in ignored `.local/s197-unenrolled-media/` covers exact targets,
-private queue admission, stale-version refusal, late publication rollback, replay,
-inverse rollback and cross-business isolation. No production payload or
+to `scripts/test-demo-media-correction.ts`. An ignored local disposable
+PostgreSQL test covers exact targets,
+current admin/page attribution, service note, foreign/linked-user refusal,
+private queue admission, stale-version refusal, late publication rollback,
+replay, inverse rollback and cross-business isolation. No production payload or
 database QA fixture is published with the operator source.
 
 Category table, starter/invitation/rollback/privacy and product/gallery tests;

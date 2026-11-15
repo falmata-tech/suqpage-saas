@@ -4,7 +4,7 @@ title: Dedicated recurring demo scenario service
 status: in_progress
 related: [BE-067, FE-079, ADR-0034, DEP-045, DEP-046, DEP-052, BE-065]
 owners: [operations, backend, security]
-last_updated: 2026-11-15
+last_updated: 2026-11-14
 change_level: L4
 ---
 
@@ -25,25 +25,27 @@ and existing server-only PostgreSQL application ports. A delayed invocation or
 manual Run now may enter only within 15 minutes of one of those times; the
 corresponding hourly slot admits at most one tick.
 Do not provision a VM, add production management tokens, share notification
-execution budgets, enable previews against production or invent an HTTP trigger.
+execution budgets, or enable previews against production.
 
-A separately reviewed, finite maintenance deployment may temporarily replace
-that schedule with one invocation per minute only from 18:15 inclusive to 20:15
-exclusive UTC on 2026-11-15 (21:15–23:15 Ethiopia time). Before or after those
-exact instants its adapter returns without opening the database. Within the
-window it may process only private video-correction requests while the control
-row is both disabled and operator-paused. An unexpected pending request kind or
-invalid JSON fails the entire tick, leaving all selected requests pending.
-The locked runtime must refuse all stage work if the control is enabled or has
-another pause reason; it must not change the stage slot or daily stage budget.
-Source qualification alone does not authorize request admission. A changed date
-or time needs fresh source qualification.
+S200 used a one-time signed scheduled trigger and Netlify background function
+from 22:30 UTC on 2026-11-15 through 01:30 UTC on 2026-11-16. The background
+transaction admitted only reviewed `copy_correction` requests under an explicit
+operator pause, at most four per minute, and never advanced a scenario stage.
+Its 180-second deadline, finite time gate, private slot receipt and signed
+request prevented an unsigned or replayed call from consuming another batch.
+Netlify's 202 admission was not completion evidence; request, audit and public
+readback remained authoritative. After 64/64 target readback and zero pending
+requests, the restore source removes the temporary endpoint, helper and minute
+trigger. The normal three-per-day schedule above is the only standing worker;
+this historical repair grants no ongoing HTTP trigger.
 
-Keep the control paused through the request readback and the protected restore
-of the three-times-daily adapter. Verify the exact restored Netlify source and
-schedule before enabling stages. A lagged or failed temporary deploy cannot
-extend the fixed UTC window. A lagged restore leaves the temporary adapter
-inert after cutoff but still scheduled every minute until replaced.
+The reviewed enrolled process-video operator uses the same paused private
+request queue, one exact business per request, and publishes one new process
+catalog version while preserving owner-page and scenario progress. If the
+immutable current-version baseline is stale, it first reserves an exact current
+baseline version, so the business content version advances by two instead of one.
+Read back accepted request/audit/version and the new enrollment fingerprint
+before resuming stages. No operator request becomes a stage.
 
 Control/enrollment starts disabled. Independently verify Supabase project
 `sjeiiqxgscuqajpgddcc` / AfricMade and Netlify site

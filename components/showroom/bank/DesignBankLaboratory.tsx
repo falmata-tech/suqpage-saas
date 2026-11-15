@@ -64,6 +64,7 @@ const laboratoryFixtureBase = {
     heroImageRef: "",
     contactLabel: "Choose products to prepare one structured inquiry",
     processVideoRef: "",
+    id: 0,
     isLive: false,
     livePlatform: "" as const,
     liveUrl: "",

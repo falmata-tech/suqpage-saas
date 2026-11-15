@@ -153,6 +153,14 @@ trigger is exposed in the hosted worker.
 
 ## Hosting choice
 
+S200 used a finite signed background worker to correct published demo wording
+from 22:30 UTC 15 November to 01:30 UTC 16 November 2026, with at most 180
+scheduled submissions. It admitted reviewed copy requests under the operator
+pause and advanced no scenario stage. After the 64-target receipt and
+pending-zero check, the restoration removes the temporary endpoint, helper and
+minute trigger. The published worker then runs only at 09:00, 13:00 and 17:00
+EAT, subject to the normal 15-minute delivery gate.
+
 A dedicated Netlify scheduled function runs separately from `attention-worker`,
 using existing server-only PostgreSQL application ports. Netlify scheduled work
 has a 30-second bound and runs only on published deployments. Keep each tick below

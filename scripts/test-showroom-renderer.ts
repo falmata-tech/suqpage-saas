@@ -72,6 +72,8 @@ assert.doesNotMatch(
 assert.match(sectionSource, /contentBlock\?\.type === "highlights"/);
 assert.match(sectionSource, /className=\{styles\.processVideo\}/);
 assert.match(sectionSource, /privacyEnhancedYouTubeEmbedUrl/);
+assert.match(sectionSource, /demo \? "Watch video" : "Watch the process"/);
+assert.doesNotMatch(sectionSource, /Play securely on this page/);
 assert.doesNotMatch(sectionSource, /Watch our process/);
 
 console.log(
