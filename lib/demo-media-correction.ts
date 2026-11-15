@@ -10,6 +10,20 @@ export type DemoMediaCorrection = {
  products:Array<{productId:number;beforeMedia:ProductMedia[];afterMedia:ProductMedia[]}>;
 };
 
+/** Finite media maintenance for the two legacy public demos outside the simulator. */
+export type UnenrolledDemoMediaCorrection = {
+ kind:'unenrolled_media_correction'; direction:'apply'|'rollback'; operationKey:string;
+ businessId:50|62; handle:string; ownerUserId:number;
+ expectedContentVersion:number; expectedDraftVersion:number; expectedPageRevision:number;
+ coverBefore:string; coverVideoRef:string;
+ products:Array<{productId:number;beforeMedia:ProductMedia[];afterMedia:ProductMedia[]}>;
+};
+
+const legacyTargets={
+ 50:{handle:'demo-dara-clay-works',productIds:[197,198,199,200]},
+ 62:{handle:'demo-wabi-bottled-water',productIds:[245,246,247,248]},
+} as const;
+
 const invalid=()=>{throw Error('Invalid reviewed demo media correction.');};
 function object(value:unknown,keys:readonly string[]):Record<string,unknown>{
  if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(k=>!keys.includes(k)))return invalid();
@@ -49,4 +63,52 @@ export function parseDemoMediaCorrection(raw:unknown):DemoMediaCorrection{
   providerUserId:text(v.providerUserId,/^[0-9a-f-]{32,64}$/i),expectedHash:text(v.expectedHash,/^[0-9a-f]{64}$/),
   expectedContentVersion:integer(v.expectedContentVersion,1),expectedDraftVersion:integer(v.expectedDraftVersion,1),
   expectedPageRevision:integer(v.expectedPageRevision,1),coverBefore:v.coverBefore,coverVideoRef:v.coverVideoRef,products};
+}
+
+/** No tenant, product, or media expansion is admitted by this one-time path. */
+export function parseUnenrolledDemoMediaCorrection(raw:unknown):UnenrolledDemoMediaCorrection{
+ const v=object(raw,['kind','direction','operationKey','businessId','handle','ownerUserId',
+  'expectedContentVersion','expectedDraftVersion','expectedPageRevision','coverBefore','coverVideoRef','products']);
+ const businessId=integer(v.businessId,1);
+ if(v.kind!=='unenrolled_media_correction'||(v.direction!=='apply'&&v.direction!=='rollback')||
+  (businessId!==50&&businessId!==62)||v.handle!==legacyTargets[businessId].handle||
+  typeof v.coverBefore!=='string'||v.coverBefore.length>500||!Array.isArray(v.products)||v.products.length!==4)return invalid();
+ if(v.coverBefore)normalizeProductVideoUrl(v.coverBefore);
+ if(typeof v.coverVideoRef!=='string')return invalid();
+ productVideo(v.coverVideoRef);
+ const direction=v.direction;
+ if(direction==='apply'&&(!v.coverVideoRef.startsWith('demo:')||!approvedDemoVideo(v.coverVideoRef,businessId)))return invalid();
+ if(direction==='rollback'&&(!v.coverBefore.startsWith('/videos/demo/')||v.coverVideoRef.startsWith('demo:')||
+  !approvedDemoVideo(normalizeProductVideoUrl(v.coverBefore).managedRef,businessId)))return invalid();
+ const products=v.products.map((raw,index)=>{
+  const p=object(raw,['productId','beforeMedia','afterMedia']);
+  const productId=integer(p.productId,1);
+  if(productId!==legacyTargets[businessId].productIds[index])return invalid();
+  const beforeMedia=parseProductMedia(p.beforeMedia),afterMedia=parseProductMedia(p.afterMedia);
+  if(beforeMedia.length!==afterMedia.length||beforeMedia.filter(m=>m.kind==='video').length!==1||
+   afterMedia.filter(m=>m.kind==='video').length!==1)return invalid();
+  for(let i=0;i<beforeMedia.length;i++){
+   const before=beforeMedia[i],after=afterMedia[i];
+   if(before.kind!==after.kind||(before.kind==='image'&&before.ref!==after.ref))return invalid();
+   if(before.kind==='video'&&before.ref===after.ref)return invalid();
+   if(after.kind==='video'&&direction==='apply'&&(!after.ref.startsWith('demo:')||!approvedDemoVideo(after.ref,businessId)))return invalid();
+   if(before.kind==='video'&&direction==='rollback'&&(!before.ref.startsWith('demo:')||!approvedDemoVideo(before.ref,businessId)))return invalid();
+  }
+  return {productId,beforeMedia,afterMedia};
+ });
+ if(v.coverBefore===productVideoWatchUrl(v.coverVideoRef))return invalid();
+ return {kind:'unenrolled_media_correction',direction,operationKey:text(v.operationKey,/^[a-zA-Z0-9_-]{12,64}$/),
+  businessId,handle:legacyTargets[businessId].handle,ownerUserId:integer(v.ownerUserId,1),
+  expectedContentVersion:integer(v.expectedContentVersion,1),expectedDraftVersion:integer(v.expectedDraftVersion,1),
+  expectedPageRevision:integer(v.expectedPageRevision,1),coverBefore:v.coverBefore,coverVideoRef:v.coverVideoRef,products};
+}
+
+/** Bind a private queue row to its parsed media target before dispatch. */
+export function parseQueuedDemoMediaCorrection(raw:unknown,businessId:number):DemoMediaCorrection|UnenrolledDemoMediaCorrection{
+ if(!Number.isSafeInteger(businessId)||businessId<1||!raw||typeof raw!=='object'||Array.isArray(raw))return invalid();
+ const kind=(raw as Record<string,unknown>).kind;
+ const correction=kind==='media_correction'?parseDemoMediaCorrection(raw):
+  kind==='unenrolled_media_correction'?parseUnenrolledDemoMediaCorrection(raw):invalid();
+ if(correction.businessId!==businessId)return invalid();
+ return correction;
 }

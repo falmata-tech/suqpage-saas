@@ -1016,6 +1016,9 @@ video examples after source and player review. It retains
 photos, identity, contacts and original stories. A finite paused operation through
 ordinary commands must preserve the BE-067 scenario progress and acknowledge only
 the admitted media change; an unreviewed edit still pauses rather than being erased.
+For the two legacy public demos without enrollment, the finite paused private
+queue uses ordinary product/page publication and leaves the scenario cohort
+untouched. It admits only their exact reviewed media and never enrolls them.
 
 ## 21. Standard page operating workflow
 

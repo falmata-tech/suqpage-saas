@@ -4,7 +4,7 @@ title: Persist category-specific example videos atomically
 status: in_progress
 related: [BE-067, BE-047, BE-041, FE-061, BE-039, BE-031, BE-042, BE-048, FE-046, FE-050, DEP-039, DEP-042, ADR-0035]
 owners: [backend, security, operations]
-last_updated: 2026-11-14
+last_updated: 2026-11-15
 change_level: L2
 ---
 
@@ -59,6 +59,42 @@ partial media/baseline/progress/history change occurs. Test those boundaries on
 disposable PostgreSQL, retain protected before/after baselines and qualify source
 before hosted application. Do not pause the running service during curation.
 
+## S197 finite correction for two unenrolled legacy demos
+
+Businesses 50 (`demo-dara-clay-works`, products 197–200) and 62
+(`demo-wabi-bottled-water`, products 245–248) are marked public fictional
+examples but have no simulator enrollment. A one-time first-party replacement
+for these two may use the same disabled private request queue with a distinct
+`unenrolled_media_correction` kind. It must not create an enrollment, change
+scenario progress, or write directly to product/page columns.
+
+Before queueing, inspect a selected-field before-image: exact business ID and
+handle, owner user ID, content/draft/publication versions, cover URL, each
+ordered gallery, current draft/publication coherence, and existing private-request
+status. Retain that image outside the public repository. A pending request cannot
+be overwritten; an existing accepted/rejected row may be rearmed only by a
+separate guarded update after reviewing its status and the new input. The worker
+processes the plan only while explicitly paused for operator maintenance and
+keeps the normal accepted/rejected private receipt.
+
+GIVEN either exact demo with no enrollment, current owner authority, coherent
+draft/publication, unchanged versions/before refs, and approved
+first-party assets WHEN its queued plan runs THEN all four product galleries and
+the page cover change in one transaction through ordinary product upkeep and
+page publication. Images, order, product facts, page copy, contact fields,
+discovery and category membership remain intact. Immutable catalog versions,
+draft events, page revisions, product command receipts and a distinct media audit
+are appended. The distinct audit includes internal before/after state digests.
+An exact operation-key replay is inert.
+
+GIVEN another business, an enrollment, stale state, pending location, changed
+gallery, unapproved asset, active simulator, or a late product/page failure WHEN
+the request runs THEN the correction is rejected without partial media/history
+change. A rollback uses a new, reviewed inverse request with fresh versions and
+before refs; it restores only the prior cover and four video
+refs through the same ordinary publication path. Neither direction runs
+automatically after an ambiguous hosted outcome.
+
 ## S154 proposed selection correction — ready for root review
 
 Use explicit product/category identity and known family context ahead of weak
@@ -109,6 +145,12 @@ the real disabled-request, normal-publication, late-failure rollback, replay,
 unchanged-progress and subsequent scheduled-stage cases to
 `scripts/test-demo-catalog-postgres.ts`. External content/inline playback remains
 the separate FE-061 review; test fixture provider IDs are not curated defaults.
+The unenrolled legacy path maps its synthetic parser and queue-binding cases
+to `scripts/test-demo-media-correction.ts`. A local synthetic disposable-
+PostgreSQL test in ignored `.local/s197-unenrolled-media/` covers exact targets,
+private queue admission, stale-version refusal, late publication rollback, replay,
+inverse rollback and cross-business isolation. No production payload or
+database QA fixture is published with the operator source.
 
 Category table, starter/invitation/rollback/privacy and product/gallery tests;
 local one-time correction plan validation and before/after content projection.

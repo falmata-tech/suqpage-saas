@@ -89,6 +89,22 @@ starter publication safety, and current web/Expo owner forms.
 
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 
+#### Legacy demos outside simulator enrollment
+
+- [ ] Publish the approved first-party MP4 assets for demo businesses 50 and 62
+  and verify exact files, source rights, phone web/Expo playback and deployed
+  byte-range responses before changing public media refs.
+- [ ] Capture the private selected-field before-image for those two businesses,
+  inspect existing request-row statuses, then queue exact
+  `unenrolled_media_correction` plans through the disabled simulator worker.
+  Rearm only a reviewed accepted/rejected row; never overwrite pending input.
+  The new operator path is limited to those IDs and their eight exact products.
+- [ ] Verify two accepted private requests, distinct media audit receipts,
+  ordinary catalog/page version increments, all two covers/eight galleries,
+  preserved nonmedia fields, no enrollments, and public web/Expo playback.
+  If reversal is required, use a separately reviewed inverse plan with fresh
+  versions and protected before/after evidence.
+
 #### Liya Soap Kitchen phone playback follow-up
 
 - [ ] Package five source-reviewed, first-party Liya soap clips from the approved
