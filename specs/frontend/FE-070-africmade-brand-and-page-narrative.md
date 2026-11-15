@@ -339,6 +339,12 @@ GIVEN a fictional example appears in Market, Featured, or a showroom WHEN its
 name or products render THEN the business has one “Example business” marker and
 its distinct story/catalog avoids repeated demo disclaimers and database-test wording.
 
+GIVEN an older marked demo has a published disclaimer WHEN S200 correction is
+run under the simulator's operator pause THEN the visible summary, page story,
+availability update and product lead time use the reviewed direct wording.
+The contact block, products' original descriptions, one badge and existing
+owner-authored details stay intact; an unexpected phrase aborts that business.
+
 GIVEN the public business directory has no eligible real showrooms WHEN its
 empty state renders THEN it says no public business showrooms are listed and
 offers a clearly labelled link to example showrooms in Market; examples remain

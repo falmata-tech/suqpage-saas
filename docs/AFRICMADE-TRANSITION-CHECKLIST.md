@@ -102,11 +102,18 @@ drafts and real tenants outside the automatic correction.
    timeline/facts; update FE-070/BE-067, focused tests and source-bound visual
    checks. Review and publish a separate protected source PR after media rollout
    source safety is clear.
-3. [ ] While media maintenance is stopped, protect exact selected-field before
-   images; prepare guarded ordinary page/product corrections and inverse. Do not
-   mutate real merchants, private drafts, contacts, media, scenario progress or
-   immutable history. Verify each public page after publication and ensure the
-   simulator does not reintroduce the removed words.
+3. [ ] After video maintenance and normal-schedule restoration, source-qualify
+   the S200 operator, bind the 64 reviewed current targets inside the database,
+   and protect only selected public text and hashes. The read-only aggregate
+   finds 50 business summaries, 49 published scenario introductions/About
+   prefixes, 162 product descriptions and 57 lead-time fields with the old
+   wording; IDs 10 and 41 are already clean. The operator must preserve real
+   merchants, unrelated private drafts, contacts, media, scenario progress and
+   immutable history. It may update only the current published demo draft mirror
+   together with the new publication and acknowledged baseline. A four-row
+   private projection export was rejected by automatic approval review; do
+   not retry it. Verify every public page after publication and ensure the next
+   simulator tick does not reintroduce the removed words.
 
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 

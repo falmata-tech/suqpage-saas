@@ -68,7 +68,14 @@ availability wording. `lib/demo-scenarios.ts` and
 `scripts/test-demo-scenarios.ts` remove those repeated words from future stage
 text while preserving all stage and selling facts. Current hosted text needs a
 separate selected-field backup, guarded ordinary correction, and readback after
-video maintenance; this source patch alone does not clean existing pages.
+video maintenance; the template source patch alone does not clean existing pages.
+The S200 operator branch holds an exact 64-ID request parser, version-one
+old/new stage map, application-side page/product writes, current baseline/hash
+acknowledgment and an inverse using only selected public text retained inside
+the audit. Synthetic PostgreSQL tests cover enrolled and ownerless paths,
+replay, late rollback, queue rejection and next-stage continuity. Its source
+and hosted rollout remain pending; no sensitive private projection export is
+permitted by the automatic approval review.
 
 ## S197 demo video quality — review and qualification in progress
 

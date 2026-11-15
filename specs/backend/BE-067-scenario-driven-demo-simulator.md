@@ -35,6 +35,25 @@ disclaimers. Changing the wording leaves stage keys, durations, eligibility,
 availability, quantities and prices intact; prior published versions remain in
 immutable history. A finite guarded correction of already published copy is
 separate from deploying the recurring template fix.
+The one-time S200 copy operator accepts only the reviewed 64 public demo IDs
+that still have stale wording (the two already clean pages are excluded).
+It requires an explicit operator pause, exact business handle and current
+content/draft/publication versions; enrolled businesses also require their
+acknowledged state hash and stage/cycle/due time. An exact version-one
+old-to-new stage map and the business-name story pattern permit no free-form
+replacement. For enrolled pages, the operator updates only the already
+published simulator-managed draft mirror, appends a page publication, publishes
+changed product descriptions/lead times through ordinary upkeep, updates the
+public business summary and enrollment baseline, then acknowledges the new
+state hash without changing progress. The two ownerless portfolio demos use
+the existing exact admin authority path and do not gain enrollments. Current
+contacts, media, categories, selling facts, real tenants, private unpublished
+work and immutable prior publications remain unchanged.
+Each business is atomic, idempotent and audited with selected public before
+text for an exact guarded inverse. Any drift or late failure rolls back its
+whole transaction; the worker records a sanitized rejection and stops that
+business. The request is assembled inside the database while paused, so
+private simulator bindings and page/contact rows are not exported.
 
 ## Identity and authority
 
