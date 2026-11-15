@@ -1012,6 +1012,9 @@ video examples after source and player review. It retains
 photos, identity, contacts and original stories. A finite paused operation through
 ordinary commands must preserve the BE-067 scenario progress and acknowledge only
 the admitted media change; an unreviewed edit still pauses rather than being erased.
+The separate process chapter uses a finite guarded demo-only correction that
+retains catalog history and leaves owner pages, products and scenario progress
+unchanged. Matching first-party demo clips can play in that chapter.
 For the two legacy public demos without enrollment, the finite paused private
 queue uses ordinary product/page publication and leaves the scenario cohort
 untouched. It binds their existing page author with current platform-admin

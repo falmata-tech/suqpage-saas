@@ -27,6 +27,14 @@ corresponding hourly slot admits at most one tick.
 Do not provision a VM, add production management tokens, share notification
 execution budgets, enable previews against production or invent an HTTP trigger.
 
+The reviewed enrolled process-video operator uses the same paused private
+request queue, one exact business per request, and publishes one new process
+catalog version while preserving owner-page and scenario progress. If the
+immutable current-version baseline is stale, it first reserves an exact current
+baseline version, so the business content version advances by two instead of one.
+Read back accepted request/audit/version and the new enrollment fingerprint
+before resuming stages. No operator request becomes a stage.
+
 Control/enrollment starts disabled. Independently verify Supabase project
 `sjeiiqxgscuqajpgddcc` / AfricMade and Netlify site
 `26c795eb-5560-4a88-b38d-3cc922c2a5e6` / africmade before hosted changes. Verify the

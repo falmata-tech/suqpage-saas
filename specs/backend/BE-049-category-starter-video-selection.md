@@ -59,6 +59,45 @@ partial media/baseline/progress/history change occurs. Test those boundaries on
 disposable PostgreSQL, retain protected before/after baselines and qualify source
 before hosted application. Do not pause the running service during curation.
 
+## S197 enrolled process-video correction
+
+The separate showroom process chapter needs a finite correction for 53 enrolled
+public examples whose existing footage was reviewed as unavailable, unrelated or
+poor quality. The two unenrolled legacy examples use their separate operator;
+11 reviewed subject-fit process clips remain. Admit only the exact reviewed
+business ID/handle cohort, current owner/provider binding, unchanged enrollment
+fingerprint and scenario progress, current catalog/draft/publication versions,
+and exact current managed process-video ref. An apply plan changes a managed
+YouTube process ref to the same business's approved first-party `demo:` asset.
+An inverse plan restores the exact reviewed YouTube ref with fresh guards.
+
+Under the existing operator pause, advisory lock and one transaction, retain
+the old V4 catalog version, update only the process ref and business content
+version with a current-value guard, retain the new V4 catalog version, then
+acknowledge the enrollment's new fingerprint and append a distinct audit
+receipt. Products, photos, owner page, draft/publication versions, business
+identity/contact/story, stage/cycle/due, and other tenants must not change.
+If the immutable current-version snapshot is stale, preserve it, reserve the
+next version for an exact current baseline, and publish the process ref one
+version later. A clean baseline needs only one version; a stale baseline needs
+two. Never overwrite old history or continue if the reserved version exists.
+One private request targets one business; a duplicate operation key with the
+same payload is inert, and a conflict or late snapshot/audit failure rolls
+back the whole write. A rejected, parsed request records only a fixed phase,
+error code and operation key after its media savepoint rolls back; it never
+logs raw external media refs or private identity. The minute worker may admit
+bounded private requests while explicitly operator-paused; normal scenario
+stages remain disabled.
+
+GIVEN a paused and unchanged enrolled example WHEN its guarded process plan
+commits THEN the process chapter plays the approved first-party business clip,
+the appropriate retained baseline/process versions and audit receipt exist,
+and the next scenario
+stage continues. GIVEN a forged tenant/ref, stale hash/version/progress,
+incomplete asset, enabled control, or late failure THEN the catalog,
+enrollment and history remain unchanged. Real PostgreSQL tests cover apply,
+replay, inverse, tenant exclusion, late rollback, and stage continuation.
+
 ## S197 finite correction for two unenrolled legacy demos
 
 Businesses 50 (`demo-dara-clay-works`, products 197–200) and 62
@@ -118,10 +157,15 @@ The finite plan also requires exact `processVideoBefore` and
 `processVideoAfter` refs. Apply accepts only the existing managed TikTok ref
 for these two demos and the approved first-party process ref for the matching
 business; inverse rollback swaps them. The worker checks the old ref and
-content version under the business lock, retains the old V4 catalog snapshot,
-and changes the process ref in the same transaction before the first ordinary
-product upkeep. That first upkeep versions the process and product media
-together; four product updates still advance content version by four overall.
+content version under the business lock and preserves any existing immutable
+catalog-version row. The apply path reserves the next content version with a
+compare-and-swap and appends an exact V4 snapshot of the current TikTok catalog
+there, even if an older retained row has a different generated design or content
+representation. It rejects an occupied next version. Within the same transaction,
+the worker changes the process ref before the first ordinary product upkeep.
+That first upkeep versions the process and product media together; the reserved
+baseline and four product updates advance content version by five overall.
+Inverse rollback from a matching current snapshot advances it by four.
 The final postcondition and a distinct process audit verify the new ref and
 hashes. Retained TikTok is accepted by V4 only for the exact trusted prior
 snapshot of demo 50 or 62. New revision authoring accepts only YouTube or an

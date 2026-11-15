@@ -89,6 +89,21 @@ starter publication safety, and current web/Expo owner forms.
 
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 
+#### Separate showroom process videos
+
+- [x] Review the full 66-business process-video field against actual prior
+  footage notes. Fifty-five need replacement: 53 enrolled, plus legacy IDs
+  50/62; preserve 11 subject-fit clips. The new approved first-party business
+  assets and exact public target list are available for a finite correction.
+- [ ] After the guarded legacy video rollout, deploy the exact enrolled
+  `process_media_correction` operator; qualify its PostgreSQL apply, replay,
+  inverse, late rollback, tenant exclusion and resumed-stage behavior.
+- [ ] Back up current process refs, versions and enrollment fingerprints outside
+  Git. Apply exact requests while control is operator-paused, then verify all
+  55 process players, immutable retained versions, audit receipts, untouched
+  products/pages/progress and preservation of the 11 reviewed clips before
+  restoring the normal simulator schedule.
+
 #### Legacy demos outside simulator enrollment
 
 - [ ] Publish the approved first-party MP4 assets for demo businesses 50 and 62
