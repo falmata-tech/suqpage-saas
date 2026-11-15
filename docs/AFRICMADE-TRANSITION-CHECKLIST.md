@@ -120,10 +120,10 @@ drafts and real tenants outside the automatic correction.
    UTC, at most 180 invocations) for batches of four, stopping at the exact
    cutoff even if delivery stalls. Route the short scheduled trigger through
    the signed background worker with a bounded transaction and replay receipt.
-   Restore the normal three-times-daily
-   schedule in a separate protected source change after 64/64 guarded
-   corrections and zero pending requests; then resume stages under exact
-   control state.
+   Remove the signed background endpoint/helper and restore the normal
+   three-times-daily schedule in a separate protected source change after
+   64/64 guarded corrections and zero pending requests; then resume stages
+   under exact control state.
 
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
 
