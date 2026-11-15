@@ -2,6 +2,7 @@
 import LoadingBar from "./LoadingBar";
 import {useRouter} from "next/navigation";
 import { publicationReadiness } from "@/lib/publication-readiness";
+import type {LegacyStarterReviewHold} from '@/lib/legacy-starter-review';
 import launchStyles from "./LaunchClarity.module.css";
 import { useUiText } from "@/lib/i18n/ui";
 
@@ -21,7 +22,7 @@ import {isStarterAbout} from '@/lib/category-starter';
 import {OWNER_PAGE_TASKS,ownerPageTask,ownerPageReturn,type OwnerPageTask} from '@/lib/owner-page-tasks';
 import {browserJson} from '@/lib/browser-json';
 
-export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner, initialPreview = false, locationConfirmed = false, returnToProfile = false, initialTask = 'about', returnTo }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean; initialPreview?: boolean; locationConfirmed?: boolean; handleEditor?: ReactNode; returnToProfile?: boolean; initialTask?: OwnerPageTask; returnTo?: 'profile'|'showroom' }) {
+export default function OwnerPageEditor({ catalog, initialDraft, initialPublication = null, owner, initialPreview = false, locationConfirmed = false, legacyHold, returnToProfile = false, initialTask = 'about', returnTo }: { catalog: Catalog; initialDraft: OwnerPageDraft | null; initialPublication?: PagePublication | null; owner: boolean; initialPreview?: boolean; locationConfirmed?: boolean; legacyHold?:LegacyStarterReviewHold; handleEditor?: ReactNode; returnToProfile?: boolean; initialTask?: OwnerPageTask; returnTo?: 'profile'|'showroom' }) {
   const t = useUiText(), router=useRouter();
   const scopedInitialTask=ownerPageTask(initialTask);
   const [draft, setDraft] = useState(initialDraft);
@@ -30,7 +31,9 @@ export default function OwnerPageEditor({ catalog, initialDraft, initialPublicat
   const confirmDialog = useRef<HTMLDialogElement>(null);
   const leaveDialog=useRef<HTMLDialogElement>(null);
   const [content, setContent] = useState<ShopPageContent>(initialDraft?.content || initialBusinessProfile(catalog));
-  const checks = publicationReadiness(content, catalog.products, locationConfirmed);
+  const checks = publicationReadiness(content, catalog.products, locationConfirmed,legacyHold?{
+    ...legacyHold,about:legacyHold.about&&content.about===initialDraft?.content.about,
+  }:undefined);
   const [colorOpen, setColorOpen] = useState(false);
   const [mode, setMode] = useState<"edit" | "preview">(initialPreview ? "preview" : "edit");
   const [task,setTask]=useState<OwnerPageTask>(scopedInitialTask);

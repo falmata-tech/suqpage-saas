@@ -1484,6 +1484,25 @@ stop remains a stop, not a fabricated successful apply result.
 
 ### R03 — Reconcile public and management workflows
 
+#### S198 — retained private starter wording and publication guard (CURRENT)
+
+FE-052 owns the exact three-draft correction. The prior protected 48-field diff
+is a proposal, not an admitted hosted write; its owner-edited About and products
+would lose their current publication guard if the old prefixes were stripped
+alone.
+
+1. [x] Inspect the protected before/after plan and current first-publication
+   paths without a hosted query or mutation.
+2. [x] Prepare a tenant-scoped, field-hash audit receipt and server/client
+   readiness guard in isolated source; test unchanged, edited, hidden, relisted,
+   malformed and other-tenant cases. No customer text or IDs belong in source.
+3. [ ] Run focused tests, typecheck and local owner web/Expo review for the
+   source guard; keep the public labels already removed by FE-067/PR103.
+4. [ ] After source qualification, rebuild the protected exact correction against
+   current production versions and owners. Test its compare-and-swap and inverse
+   rollback on disposable PostgreSQL; only then consider a separately admitted
+   hosted correction. Do not publish protected QA artifacts.
+
 #### S168 — timely staff reply must keep Transport live (release-blocking defect)
 
 The full support gate found that a later staff reply replaced the earlier

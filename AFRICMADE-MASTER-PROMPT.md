@@ -1030,6 +1030,10 @@ untouched. It admits only their exact reviewed media and never enrolls them.
    they are not required to create a showroom.
 3. They edit one page/product/details task at a time, preview and use the current
    server readiness result. Missing requirements link to their actual task.
+   Planned S198 preserves the first-publication hold for three retained private
+   starter drafts if their old wording is corrected: a tenant-scoped receipt
+   tracks corrected fields until the owner edits them. The exact hosted
+   correction remains separate and unadmitted.
 4. First Publish needs no staff approval. It atomically validates current content
    and an eligible listed product, activates the draft business and applies the
    pending canonical location/category with publication history. Location Save
