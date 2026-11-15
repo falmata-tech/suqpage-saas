@@ -58,7 +58,7 @@ export async function getFeaturedProgramDaySelection(dateIso: string, port: Feat
 }
 
 export async function listFeaturedProgramEligibleBusinesses(industryKey: string, port: FeaturedProgramReadPort = runtimeReadPort): Promise<FeaturedProgramEligibleBusiness[]> {
-  const sql = `
+  const sql = (reviewedFallback: boolean) => `
     SELECT b.id,b.name,b.handle,p.city,p.region
     FROM businesses b
     JOIN business_discovery_profiles p ON p.business_id=b.id
@@ -66,17 +66,27 @@ export async function listFeaturedProgramEligibleBusinesses(industryKey: string,
       AND p.is_excluded=0
       AND p.approved_at > 0
       AND b.hero_image_path LIKE '/%'
+      AND ${reviewedFallback ? `NOT EXISTS(SELECT 1 FROM business_industries i WHERE i.industry_key=?)
       AND EXISTS(
+        SELECT 1 FROM owner_location_proposals location
+        WHERE location.business_id=b.id AND location.category_key=?
+          AND location.version=location.reviewed_version
+          AND location.updated_at=p.updated_at
+      )` : `EXISTS(
         SELECT 1 FROM business_industries i
         WHERE i.business_id=b.id AND i.industry_key=?
-      )
+      )`}
       AND EXISTS(
         SELECT 1 FROM products product
-        WHERE product.business_id=b.id AND product.is_published=1
+        WHERE product.business_id=b.id AND product.is_published=1 AND product.offering_kind<>'service'
       )
     ORDER BY lower(b.name),b.id
   `;
-  return (await port.all<FeaturedProgramEligibleBusiness>(sql, [industryKey])).sort((a,b)=>a.name.localeCompare(b.name)||a.id-b.id);
+  let eligible = await port.all<FeaturedProgramEligibleBusiness>(sql(false), [industryKey]);
+  if (industryKey === "agriculture-growers" && eligible.length === 0) {
+    eligible = await port.all<FeaturedProgramEligibleBusiness>(sql(true), [industryKey, industryKey]);
+  }
+  return eligible.sort((a,b)=>a.name.localeCompare(b.name)||a.id-b.id);
 }
 
 export async function saveFeaturedProgramDay(input: {

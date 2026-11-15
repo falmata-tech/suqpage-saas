@@ -33,6 +33,12 @@ mentions. Staff can replace and order a date's lineup, then restore Automatic.
   public use the same eligibility/order/selection contract. Sponsor mentions use
   the ordered active placement pool, repeating when fewer than two are available;
   absent placements leave clearly unassigned inventory, never invented sponsors.
+- For an empty Sunday agriculture pool with no direct agriculture memberships in
+  the catalog, use currently reviewed agriculture location proposals as a narrow
+  continuity source for both public and admin Featured. Require the proposal and
+  approved discovery profile update times to agree; retain normal publication,
+  product, hero, approval, and exclusion checks. Return to direct memberships
+  when any exist. Other weekday assignments and Market filtering do not change.
 - Manual mode selects/reorders up to four for a date; save recalculates all times.
   Returning to Automatic removes only that date's override. Stale/ineligible
   candidates remain excluded; old oversized overrides expose at most four without
