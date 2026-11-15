@@ -17,6 +17,12 @@ const candidates = [
   {key:'merry-speaker-factory',provider:'tiktok',id:'7580286785029213454',creator:'https://www.tiktok.com/@merryaudio888/video/7580286785029213454'},
   {key:'electric-panel-factory',provider:'tiktok',id:'7522117073733012750',creator:'https://www.tiktok.com/@electric.control/video/7522117073733012750'},
   {key:'kabo-lighting-factory',provider:'tiktok',id:'7388823271690521874',creator:'https://www.tiktok.com/@kabolightingricky/video/7388823271690521874'},
+  {key:'cvr-pro-audio-production',provider:'tiktok',id:'7494829805028822280',creator:'https://www.tiktok.com/@cvraudio_china/video/7494829805028822280'},
+  {key:'merry-speaker-workshop',provider:'tiktok',id:'7657534434601700615',creator:'https://www.tiktok.com/@speakerfactory888/video/7657534434601700615'},
+  {key:'nhf-cable-production',provider:'tiktok',id:'7200198008225484033',creator:'https://www.tiktok.com/@nhf.frances/video/7200198008225484033'},
+  {key:'rattan-cafe-pendant',provider:'tiktok',id:'7625153258092350740',creator:'https://www.tiktok.com/@rattanstudio/video/7625153258092350740'},
+  {key:'jf-courtyard-solar',provider:'tiktok',id:'7705381006890503425',creator:'https://www.tiktok.com/@jd_solarlight/video/7705381006890503425'},
+  {key:'kinee-pv-combiner',provider:'tiktok',id:'7706559803509755144',creator:'https://www.tiktok.com/@kineeelectricals/video/7706559803509755144'},
 ];
 const browser = await chromium.launch({channel:'chrome'});
 const result = {source,browser:{name:'Google Chrome',version:browser.version(),mode:'headless-managed-runner'},candidates:[],visualVerdict:'pending-agent-review'};
