@@ -1,4 +1,5 @@
 import {createHash} from 'node:crypto';
+import {COPY_MAINTENANCE_END,isCopyMaintenanceWindow} from './demo-copy-background';
 import {runtimeAll,runtimeGet,runtimeRun,runtimeTransaction} from './runtime-sql';
 import {runtimeCatalogByBusinessId,runtimeUserById} from './catalog-runtime';
 import {currentBusinessAuthority} from './staff-business-authority';
@@ -809,9 +810,13 @@ export async function correctDemoPublicCopy(raw:unknown){
  }
 }
 
-async function processEnrollmentRequests(now:number,copyOnly=false){
+export function canStartBackgroundCopy(now:number,deadlineAt:number,previousMs:number|null){
+ return now+Math.max(40000,Math.ceil((previousMs??0)*1.5))+10000<deadlineAt;
+}
+
+async function processEnrollmentRequests(now:number,copyOnly=false,background=false,deadlineAt=Infinity){
  const started=Date.now();
- const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 8 FOR UPDATE");
+ const requests=await runtimeAll<{business_id:number;input_json:string}>(`SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT ${background?4:8} FOR UPDATE`);
  if(copyOnly)for(const request of requests){
   let raw:unknown;
   try{raw=JSON.parse(request.input_json);}catch{throw Error('Unexpected pending request during copy maintenance.');}
@@ -820,8 +825,11 @@ async function processEnrollmentRequests(now:number,copyOnly=false){
    throw Error('Unexpected pending request during copy maintenance.');
  }
  let enrolled=0,enrollmentRejected=0,mediaCorrected=0,categoryCorrected=0,copyCorrected=0;
+ let previousRequestMs:number|null=null;
  for(const request of requests){
-  if(Date.now()-started>=12000)break;
+  if(Date.now()-started>=(background?150000:12000)||
+   background&&!canStartBackgroundCopy(Date.now(),deadlineAt,previousRequestMs))break;
+  const requestStarted=Date.now();
   await runtimeRun('SAVEPOINT demo_enrollment');
   let accepted=false;
   let unenrolledCorrection:UnenrolledDemoMediaCorrection|null=null;
@@ -878,6 +886,7 @@ async function processEnrollmentRequests(now:number,copyOnly=false){
   await runtimeRun('RELEASE SAVEPOINT demo_enrollment');
   await runtimeRun('UPDATE demo_simulator_requests SET status=?,reason=?,processed_at=? WHERE business_id=?',
    [accepted?'accepted':'rejected',accepted?'':'enrollment_failed',now,request.business_id]);
+  if(background)previousRequestMs=Date.now()-requestStarted;
  }
  return {enrolled,enrollmentRejected,...(mediaCorrected?{mediaCorrected}:{}),
   ...(categoryCorrected?{categoryCorrected}:{}),...(copyCorrected?{copyCorrected}:{})};
@@ -895,24 +904,42 @@ export function canStartDemoStage(elapsedMs:number,previousStageMs:number|null){
 /** Normal calls use hourly slots. A finite minute maintenance call admits
  * copy requests only under an explicit operator pause and cannot run stages. */
 export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1,
- mode:'scheduled'|'maintenance'='scheduled'):Promise<DemoTickResult>{
+ mode:'scheduled'|'maintenance'|'copy_background'='scheduled',requestSlot?:number):Promise<DemoTickResult>{
  if(!Number.isSafeInteger(now)||now<0)throw new Error('Invalid demo tick clock.');
  if(!Number.isSafeInteger(slotMinutes)||slotMinutes<1||slotMinutes>60)throw new Error('Invalid demo tick slot.');
- if(mode!=='scheduled'&&mode!=='maintenance')throw new Error('Invalid demo tick mode.');
- const started=Date.now(),slot=Math.floor(now/(slotMinutes*60000))*slotMinutes,day=Math.floor(now/86400000);
+ if(mode!=='scheduled'&&mode!=='maintenance'&&mode!=='copy_background')throw new Error('Invalid demo tick mode.');
+ if(mode==='copy_background'&&(!isCopyMaintenanceWindow(now)||
+  !Number.isSafeInteger(requestSlot)||requestSlot===undefined||requestSlot<0||
+  requestSlot>Math.floor(now/60000)||Math.floor(now/60000)-requestSlot>10))
+  throw new Error('Invalid finite copy background slot.');
+ const started=Date.now(),slot=mode==='copy_background'?requestSlot!:
+  Math.floor(now/(slotMinutes*60000))*slotMinutes,day=Math.floor(now/86400000);
  const result=(status:DemoTickResult['status']):DemoTickResult=>({status,advanced:0,paused:0,failed:0});
  return runtimeTransaction(async()=>{
-  // PostgreSQL17 terminates an overlong transaction atomically. Leave time for
-  // connection setup and sanitized handling within the hosted 30-second limit.
-  await runtimeRun("SET LOCAL transaction_timeout='23s'");
+  // The finite background worker may need four copy operations, each with many
+  // ordinary application round trips. PostgreSQL aborts the whole transaction
+  // before either the 15-minute function limit or the finite cutoff.
+  const timeout=mode==='copy_background'?Math.min(180000,COPY_MAINTENANCE_END-Date.now()-5000):23000;
+  if(timeout<30000&&mode==='copy_background')return result('disabled');
+  const transactionDeadlineAt=Date.now()+timeout;
+  await runtimeRun(`SET LOCAL transaction_timeout='${timeout}ms'`);
   await runtimeRun("SET LOCAL lock_timeout='1500ms'");await runtimeRun("SET LOCAL statement_timeout='4000ms'");
   const lock=await runtimeGet<{locked:boolean}>('SELECT pg_try_advisory_xact_lock(6870619271382) locked');
   if(!lock?.locked)return result('busy');
   if(!await schemaReady())return result('schema');
   const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control)return result('disabled');
-  if(mode==='maintenance'&&(control.enabled!==0||control.pause_reason!=='operator'))return result('disabled');
-  if(!control.enabled){const admission=await processEnrollmentRequests(now,mode==='maintenance');return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected||admission.copyCorrected?{...result('disabled'),...admission}:result('disabled');}
+  if(mode!=='scheduled'&&(control.enabled!==0||control.pause_reason!=='operator'))return result('disabled');
+  if(mode==='copy_background'){
+   // A committed receipt makes a Netlify retry or manual replay of this minute
+   // inert even when fresh requests arrive before the next scheduled minute.
+   const detail=JSON.stringify({slot});
+   const previous=await runtimeGet<{detail:string}>(
+    "SELECT detail FROM audit_logs WHERE action='demo.copy_background_slot' ORDER BY id DESC LIMIT 1");
+   if(previous&&Number(JSON.parse(previous.detail).slot)>=slot)return result('duplicate');
+   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(NULL,NULL,'demo.copy_background_slot',?,'')",[detail]);
+  }
+  if(!control.enabled){const admission=await processEnrollmentRequests(now,mode!=='scheduled',mode==='copy_background',transactionDeadlineAt);return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected||admission.copyCorrected?{...result('disabled'),...admission}:result('disabled');}
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;

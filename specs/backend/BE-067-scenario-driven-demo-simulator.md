@@ -191,8 +191,8 @@ and enforces explicit per-day mutation and database-size budgets. Budget pressur
 pauses demo work; it never deletes immutable history or blocks real users.
 
 Operator enrollment requests are private database records, never an HTTP/admin
-endpoint. The disabled worker admits at most eight explicit requests per tick,
-starting no new admission after its12-second work budget, using
+endpoint. The disabled ordinary worker admits at most eight explicit requests
+per tick, starting no new admission after its 12-second work budget, using
 the ordinary enrollment checks, reviewed content/draft/publication versions and
 exact demo owner/product bindings. It records accepted/rejected outcomes and never
 enables itself. When explicitly requested, an empty product unit is initialized
@@ -200,6 +200,16 @@ through ordinary upkeep before legacy enrollment or in the first full-catalog
 stage; an existing unit is preserved.
 A refused request rolls back all preparation. Active simulation does not consume
 requests. Migration creates no request or enrollment.
+
+During the finite S200 copy window, a signed Netlify background adapter admits
+only `copy_correction` requests under the operator pause. It checks a recent
+minute slot and records a private receipt in the same transaction under the
+existing advisory lock; a successful replay is inert, while a rolled-back
+attempt can retry. It admits at most four requests within a 180-second
+transaction, and starts no new request after 150 seconds or near the exact
+window cutoff. It reserves the last observed request cost plus commit time
+against the current transaction deadline. It cannot advance ordinary stages or
+accept a public request.
 
 The control, requests, enrollment and seven-day bounded operational run records are private
 PostgreSQL tables with RLS and no anon/authenticated/service-role access. Only the
