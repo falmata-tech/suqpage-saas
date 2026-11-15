@@ -31,8 +31,9 @@ A separately reviewed, finite maintenance deployment may temporarily replace
 that schedule with one invocation per minute only from 19:00 inclusive to 21:00
 exclusive UTC on 2026-11-15 (22:00–00:00 Ethiopia time). Before or after those
 exact instants its adapter returns without opening the database. Within the
-window it may process only private requests while the control row is both
-disabled and operator-paused.
+window it may process only private video-correction requests while the control
+row is both disabled and operator-paused. An unexpected pending request kind or
+invalid JSON fails the entire tick, leaving all selected requests pending.
 The locked runtime must refuse all stage work if the control is enabled or has
 another pause reason; it must not change the stage slot or daily stage budget.
 Source qualification alone does not authorize request admission. A changed date

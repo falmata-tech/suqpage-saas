@@ -401,9 +401,16 @@ function parseEnrollmentRequest(raw:string,businessId:number):DemoEnrollmentInpu
   v.initializeUnit!==undefined&&typeof v.initializeUnit!=='boolean')throw Error('Invalid private enrollment request.');
  return {...v,parameters:parseDemoScenarioParameters(v.parameters),...(v.catalogProducts!==undefined?{catalogProducts:parseDemoCatalogInputs(v.catalogProducts)}:{})} as DemoEnrollmentInput;
 }
-async function processEnrollmentRequests(now:number){
+async function processEnrollmentRequests(now:number,mediaOnly=false){
  const started=Date.now();
  const requests=await runtimeAll<{business_id:number;input_json:string}>("SELECT business_id,input_json FROM demo_simulator_requests WHERE status='pending' ORDER BY requested_at,business_id LIMIT 8 FOR UPDATE");
+ if(mediaOnly)for(const request of requests){
+  let input:unknown;
+  try{input=JSON.parse(request.input_json);}catch{throw Error('Unexpected pending request during video maintenance.');}
+  if(!input||typeof input!=='object'||Array.isArray(input)||
+   !['media_correction','unenrolled_media_correction'].includes(String((input as Record<string,unknown>).kind)))
+   throw Error('Unexpected pending request during video maintenance.');
+ }
  let enrolled=0,enrollmentRejected=0,mediaCorrected=0,categoryCorrected=0;
  for(const request of requests){
   if(Date.now()-started>=12000)break;
@@ -464,7 +471,7 @@ export async function runDemoSimulatorTick(now=Date.now(),slotMinutes=1,mode:'sc
   // The finite minute schedule may admit private requests only during an
   // operator pause. An early resume or another pause reason cannot run stages.
   if(mode==='maintenance'&&(control.enabled!==0||control.pause_reason!=='operator'))return result('disabled');
-  if(!control.enabled){const admission=await processEnrollmentRequests(now);return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected?{...result('disabled'),...admission}:result('disabled');}
+  if(!control.enabled){const admission=await processEnrollmentRequests(now,mode==='maintenance');return admission.enrolled||admission.enrollmentRejected||admission.mediaCorrected||admission.categoryCorrected?{...result('disabled'),...admission}:result('disabled');}
   if(Number(control.last_slot)>=slot)return result('duplicate');
   const size=await runtimeGet<{bytes:string}>('SELECT pg_database_size(current_database()) bytes');
   const used=Number(control.budget_day)===day?control.used_today:0;

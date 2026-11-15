@@ -293,7 +293,8 @@ require new tests and CI.
    Retain selected-field before-images and rollback for each path; never use
    raw SQL media writes. Do not queue the agriculture membership batch. Inspect
    every accepted/rejected result, public media, and preserved real accounts.
-   Stop on drift, rejection, timeout or cutoff.
+   Any unexpected pending request kind or invalid JSON fails the whole tick
+   with no acknowledgement. Stop on drift, rejection, timeout or cutoff.
 5. [ ] Merge and verify the restore source through the same gates while control
    stays paused. Resume only after the restored Netlify schedule/source is
    independently confirmed and no requests remain pending. Observe the next

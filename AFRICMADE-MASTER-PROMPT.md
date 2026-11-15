@@ -713,9 +713,10 @@ publication commands. Foreground public screens check for changes every15 second
 preserve inquiry drafts and read one consistent product/profile snapshot. This
 is bounded foreground polling, not a Supabase Realtime subscription.
 The 2026-11-15 19:00–21:00 UTC maintenance adapter runs every minute
-only within that finite window and admits private requests only while the
-control is operator-paused. It cannot advance scenarios, and ordinary stage
-service resumes only after the three-time adapter is restored and verified.
+only within that finite window and admits only private video-correction
+requests while the control is operator-paused. Unexpected request kinds or
+invalid JSON fail the tick without acknowledgement. It cannot advance scenarios;
+ordinary stage service resumes only after the three-time adapter is restored.
 
 Use the pinned Node/Next.js web/API and Expo/React Native app with shared typed
 contracts. Runtime/dependency versions come from the lockfiles, package metadata

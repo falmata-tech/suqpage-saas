@@ -217,8 +217,23 @@ async function main(){
   assert.equal((await db.prepare("SELECT count(*) total FROM demo_simulator_requests WHERE status='pending'").get()).total,2);
   assert.deepEqual(await progress(),progressBefore);
   await db.exec("UPDATE demo_simulator_control SET pause_reason='operator' WHERE id=1");
-  const admission=await runDemoSimulatorTick(now,1,'maintenance');assert.equal(admission.status,'disabled');assert.equal(admission.enrolled,1);assert.equal(admission.enrollmentRejected,1);
-  assert.deepEqual(await progress(),progressBefore,'Request maintenance does not consume stage slot or daily budget.');
+  const requestStatuses=()=>db.prepare('SELECT business_id,status,reason,processed_at FROM demo_simulator_requests ORDER BY business_id').all();
+  const statusesBefore=await requestStatuses();
+  await assert.rejects(runDemoSimulatorTick(now,1,'maintenance'),/Unexpected pending request during video maintenance/);
+  assert.deepEqual(await requestStatuses(),statusesBefore,'An enrollment request cannot be acknowledged during video maintenance.');
+  assert.deepEqual(await progress(),progressBefore);assert.equal(await snapshot(queued.businessId),queuedBefore);
+  const queuedRequest=String((await db.prepare('SELECT input_json FROM demo_simulator_requests WHERE business_id=?').get(queued.businessId)).input_json);
+  const realRequest=String((await db.prepare('SELECT input_json FROM demo_simulator_requests WHERE business_id=?').get(real.businessId)).input_json);
+  await db.prepare('UPDATE demo_simulator_requests SET input_json=? WHERE business_id=?').run(JSON.stringify({kind:'media_correction'}),queued.businessId);
+  for(const unexpected of [JSON.stringify({kind:'category_correction_batch'}),'{invalid json']){
+   await db.prepare('UPDATE demo_simulator_requests SET input_json=? WHERE business_id=?').run(unexpected,real.businessId);
+   await assert.rejects(runDemoSimulatorTick(now,1,'maintenance'),/Unexpected pending request during video maintenance/);
+   assert.deepEqual(await requestStatuses(),statusesBefore,'Unexpected private request leaves the full selected queue pending.');
+  }
+  await db.prepare('UPDATE demo_simulator_requests SET input_json=? WHERE business_id=?').run(queuedRequest,queued.businessId);
+  await db.prepare('UPDATE demo_simulator_requests SET input_json=? WHERE business_id=?').run(realRequest,real.businessId);
+  const admission=await runDemoSimulatorTick(now);assert.equal(admission.status,'disabled');assert.equal(admission.enrolled,1);assert.equal(admission.enrollmentRejected,1);
+  assert.deepEqual(await progress(),progressBefore,'Paused request admission does not consume stage slot or daily budget.');
   assert.equal((await db.prepare('SELECT enabled FROM demo_simulator_control').get()).enabled,0);
   assert.equal((await db.prepare('SELECT quantity_unit FROM products WHERE id=?').get(queued.productId)).quantity_unit,'kg');
   assert.notEqual(await snapshot(queued.businessId),queuedBefore);assert.equal(await snapshot(real.businessId),realQueueBefore);
