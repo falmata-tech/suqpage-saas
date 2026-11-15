@@ -67,6 +67,7 @@ jobs:
         run: |
           mkdir -p .local/instagram-weave-review
           printf '{"result":"%s","source":"%s","run":"%s"}\n' '${{ job.status }}' '${{ github.event.pull_request.head.sha }}' '${{ github.run_id }}' > .local/instagram-weave-review/run-receipt.json
+          if test -f .local/instagram-weave-review/review.json; then cat .local/instagram-weave-review/review.json; fi
       - name: Retain synthetic public-screen evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
