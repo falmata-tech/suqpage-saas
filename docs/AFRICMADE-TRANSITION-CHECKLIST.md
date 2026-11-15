@@ -95,10 +95,13 @@ starter publication safety, and current web/Expo owner forms.
   and verify exact files, source rights, phone web/Expo playback and deployed
   byte-range responses before changing public media refs.
 - [ ] Capture the private selected-field before-image for those two businesses,
-  inspect existing request-row statuses, then queue exact
+  verify both remain ownerless and derive the same current platform admin from
+  both draft updaters and latest publication publishers inside the database.
+  Inspect existing request-row statuses, then queue exact
   `unenrolled_media_correction` plans through the disabled simulator worker.
   Rearm only a reviewed accepted/rejected row; never overwrite pending input.
-  The new operator path is limited to those IDs and their eight exact products.
+  The operator path is limited to those IDs and their eight exact products;
+  each ordinary product update records a service note and the admin actor.
 - [ ] Verify two accepted private requests, distinct media audit receipts,
   ordinary catalog/page version increments, all two covers/eight galleries,
   preserved nonmedia fields, no enrollments, and public web/Expo playback.

@@ -1014,7 +1014,8 @@ ordinary commands must preserve the BE-067 scenario progress and acknowledge onl
 the admitted media change; an unreviewed edit still pauses rather than being erased.
 For the two legacy public demos without enrollment, the finite paused private
 queue uses ordinary product/page publication and leaves the scenario cohort
-untouched. It admits only their exact reviewed media and never enrolls them.
+untouched. It binds their existing page author with current platform-admin
+authority, admits only their exact reviewed media and never enrolls them.
 
 ## 21. Standard page operating workflow
 

@@ -215,7 +215,7 @@ export async function correctDemoCategoryBatch(raw:unknown){
   if(!await schemaReady())throw Error('The demo schema is not ready.');
   const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before category maintenance.');
-  const receipt=await runtimeGet<{payload_hash:string}>("SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs WHERE action='demo.category_corrected' AND detail::jsonb->>'operationKey'=? ORDER BY id DESC LIMIT 1",[input.operationKey]);
+  const receipt=await runtimeGet<{payload_hash:string}>("SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs WHERE action='demo.category_corrected' AND CASE WHEN action='demo.category_corrected' THEN detail::jsonb->>'operationKey' END=? ORDER BY id DESC LIMIT 1",[input.operationKey]);
   if(receipt){if(receipt.payload_hash!==payloadHash)throw Error('This demo category operation has different reviewed content.');return {duplicate:true};}
   const agriculture=await runtimeGet<{total:number}>("SELECT COUNT(*) total FROM business_industries WHERE industry_key='agriculture-growers'");
   if(Number(agriculture?.total)!==0)throw new DemoDrift('content_changed');
@@ -267,22 +267,26 @@ export async function correctDemoCategoryBatch(raw:unknown){
 
 const unenrolledMediaTargets={50:'demo-dara-clay-works',62:'demo-wabi-bottled-water'} as const;
 
-async function unenrolledMediaState(businessId:50|62){
+async function unenrolledMediaState(businessId:50|62,actorUserId:number){
  const handle=unenrolledMediaTargets[businessId];
- const owners=await runtimeAll<{id:number}>(`SELECT u.id FROM users u JOIN user_access_profiles p ON p.user_id=u.id
-  WHERE u.business_id=? AND p.access_role='client' ORDER BY u.id`,[businessId]);
- if(owners.length!==1)throw new DemoDrift('eligibility_changed');
- const actor=await runtimeUserById(owners[0].id);
- if(!actor||actor.access_role!=='client'||actor.business_id!==businessId||
-   await currentBusinessAuthority(actor,businessId,true)!=='owner')throw new DemoDrift('eligibility_changed');
+ const actor=await runtimeUserById(actorUserId),reviewer=configuredReviewer();
+ if(!actor||actor.role!=='admin'||actor.access_role!=='platform_admin'||
+   await currentBusinessAuthority(actor,businessId,true)!=='administrator'||
+   reviewer?.email===actor.email.toLowerCase())throw new DemoDrift('eligibility_changed');
+ const link=await runtimeGet<{provider_user_id:string}>(
+  "SELECT provider_user_id FROM auth_identity_links WHERE user_id=? AND provider='supabase' FOR SHARE",[actor.id]);
+ if(reviewer?.providerId&&reviewer.providerId===link?.provider_user_id)throw new DemoDrift('eligibility_changed');
  await runtimeGet('SELECT business_id FROM owner_page_drafts WHERE business_id=? FOR UPDATE',[businessId]);
  const business=await runtimeGet<{id:number;is_demo:number;status:string;handle:string}>(
   'SELECT id,is_demo,status,handle FROM businesses WHERE id=? FOR UPDATE',[businessId]);
  if(!business||business.is_demo!==1||business.status!=='active'||business.handle!==handle||
    await runtimeGet('SELECT 1 FROM demo_simulator_enrollments WHERE business_id=?',[businessId]))throw new DemoDrift('eligibility_changed');
+ const linked=await runtimeGet<{total:number}>('SELECT COUNT(*) total FROM users WHERE business_id=?',[businessId]);
+ if(Number(linked?.total)!==0)throw new DemoDrift('eligibility_changed');
  await runtimeAll('SELECT id FROM products WHERE business_id=? ORDER BY id FOR UPDATE',[businessId]);
  const catalog=await runtimeCatalogByBusinessId(businessId,true),draft=await ownerPagePort.read(businessId),publication=await pagePublicationPort.latest(businessId);
  if(!catalog||!draft||!publication?.content||
+   draft.updatedBy!==actor.id||publication.publishedBy!==actor.id||
    digest(catalog.products.map(p=>p.id))!==digest(businessId===50?[197,198,199,200]:[245,246,247,248])||
    catalog.products.some(p=>!p.is_published||p.offering_kind==='service'||p.currency!=='ETB')||
    draft.version!==publication.draftVersion||digest(draft.content)!==digest(publication.content))throw new DemoDrift('eligibility_changed');
@@ -301,11 +305,10 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
   if(!await schemaReady())throw Error('The demo schema is not ready.');
   const control=await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
   if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before media maintenance.');
-  const state=await unenrolledMediaState(input.businessId);
-  if(state.actor.id!==input.ownerUserId)throw new DemoDrift('eligibility_changed');
+  const state=await unenrolledMediaState(input.businessId,input.actorUserId);
   const receipt=await runtimeGet<{payload_hash:string}>(`SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs
    WHERE business_id=? AND action='demo.unenrolled_media_corrected'
-   AND detail::jsonb->>'operationKey'=? ORDER BY id DESC LIMIT 1`,[input.businessId,input.operationKey]);
+   AND CASE WHEN action='demo.unenrolled_media_corrected' THEN detail::jsonb->>'operationKey' END=? ORDER BY id DESC LIMIT 1`,[input.businessId,input.operationKey]);
   if(receipt){
    if(receipt.payload_hash!==payloadHash)throw Error('This demo media operation has different reviewed content.');
    if(state.draft.content.videoUrl!==productVideoWatchUrl(input.coverVideoRef)||
@@ -330,19 +333,20 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
     minimumOrderSummary:p.minimum_order_summary,leadTimeSummary:p.lead_time_summary,
     media:item.afterMedia,videoRef:item.afterMedia.find(m=>m.kind==='video')!.ref,
     categoryId:p.category_id,imageAction:'keep',preserveMetadata:true,
+    serviceNote:'S197 reviewed fictional-demo video correction.',
    },null);
    version=result.contentVersion;
   }
   const videoUrl=productVideoWatchUrl(input.coverVideoRef);
   await saveOwnerPageAndPublication(state.actor,input.businessId,
    {action:'save',version:state.draft.version,content:{...state.draft.content,videoUrl}});
-  const after=await unenrolledMediaState(input.businessId);
+  const after=await unenrolledMediaState(input.businessId,input.actorUserId);
   if(after.catalog.business.content_version!==version||after.draft.version!==state.draft.version+1||
    after.publication.revision!==state.publication.revision+1||after.draft.content.videoUrl!==videoUrl||
    input.products.some(item=>digest(item.afterMedia)!==digest(productMedia(after.catalog.products.find(p=>p.id===item.productId)!))))throw new DemoDrift('content_changed');
   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.unenrolled_media_corrected',?,'')",
    [state.actor.id,input.businessId,JSON.stringify({automation:'demo-media-maintenance',direction:input.direction,
-    operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
+    actorRole:input.actorRole,operationKey:input.operationKey,payloadHash,beforeStateHash:state.hash,afterStateHash:after.hash,
     products:input.products.map(p=>p.productId)})]);
   return {duplicate:false};
  });
