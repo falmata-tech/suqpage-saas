@@ -162,6 +162,39 @@ async function main(){
   await db.exec("UPDATE demo_simulator_control SET enabled=0,pause_reason='operator' WHERE id=1");
   const afterMediaStage=await snapshot(mediaTarget.businessId);assert.deepEqual(await correctDemoMedia(correction),{duplicate:true});assert.equal(await snapshot(mediaTarget.businessId),afterMediaStage);
   await db.exec("UPDATE demo_simulator_control SET enabled=1,pause_reason='' WHERE id=1; UPDATE demo_simulator_enrollments SET status='active',reason=''");
+  // A reviewed showroom story can change while every bound product gallery is
+  // intentionally preserved. Reuse an accepted private request, as the hosted
+  // enrolled cohort does, and exercise the disabled-control admission tick.
+  const coverTarget=fixtures[1],coverCatalog=(await runtimeCatalogByHandle(coverTarget.handle))!;
+  const coverEnrollment=await db.prepare('SELECT * FROM demo_simulator_enrollments WHERE business_id=?').get(coverTarget.businessId);
+  const coverDraft=await db.prepare('SELECT * FROM owner_page_drafts WHERE business_id=?').get(coverTarget.businessId);
+  const coverRevision=Number((await db.prepare('SELECT MAX(revision) revision FROM owner_page_publications WHERE business_id=?').get(coverTarget.businessId)).revision);
+  const coverBefore=JSON.parse(String(coverDraft.content_json)).videoUrl;
+  const coverOnly:DemoMediaCorrection={kind:'media_correction',operationKey:'catalog_cover_only_test_01',businessId:coverTarget.businessId,handle:coverTarget.handle,
+   ownerUserId:coverTarget.ownerUserId,providerUserId:coverTarget.providerUserId,expectedHash:String(coverEnrollment.expected_hash),
+   expectedContentVersion:coverCatalog.business.content_version,expectedDraftVersion:Number(coverDraft.version),expectedPageRevision:coverRevision,
+   coverBefore,coverVideoRef:'youtube:NJMPGgcDylY',products:coverCatalog.products.map(p=>({productId:p.id,beforeMedia:productMedia(p),afterMedia:productMedia(p)})).sort((a,b)=>a.productId-b.productId)};
+  const coverProductsBefore=await db.prepare('SELECT * FROM products WHERE business_id=? ORDER BY id').all(coverTarget.businessId);
+  const coverCommandsBefore=await db.prepare('SELECT count(*) total FROM product_upkeep_commands WHERE business_id=?').get(coverTarget.businessId);
+  await db.exec("UPDATE demo_simulator_control SET enabled=0,pause_reason='operator' WHERE id=1");
+  await db.prepare("INSERT INTO demo_simulator_requests(business_id,input_json,requested_at,status,reason,processed_at) VALUES(?,'{}',1,'accepted','',1)").run(coverTarget.businessId);
+  const queued=await db.prepare("UPDATE demo_simulator_requests SET input_json=?,requested_at=?,status='pending',reason='',processed_at=0 WHERE business_id=? AND status='accepted' AND reason=''").run(JSON.stringify(coverOnly),now+=60000,coverTarget.businessId);
+  assert.equal(queued.changes,1);assert.equal((await runDemoSimulatorTick(now)).mediaCorrected,1);
+  assert.equal((await db.prepare('SELECT status FROM demo_simulator_requests WHERE business_id=?').get(coverTarget.businessId)).status,'accepted');
+  assert.deepEqual(await db.prepare('SELECT * FROM products WHERE business_id=? ORDER BY id').all(coverTarget.businessId),coverProductsBefore);
+  assert.deepEqual(await db.prepare('SELECT count(*) total FROM product_upkeep_commands WHERE business_id=?').get(coverTarget.businessId),coverCommandsBefore);
+  const coverAck=await db.prepare('SELECT * FROM demo_simulator_enrollments WHERE business_id=?').get(coverTarget.businessId);
+  assert.notEqual(coverAck.expected_hash,coverEnrollment.expected_hash);
+  for(const [key,value] of Object.entries(coverEnrollment))if(!['expected_hash','baseline_page_json'].includes(key))assert.deepEqual(coverAck[key],value,key);
+  assert.equal(JSON.parse(String(coverAck.baseline_page_json)).videoUrl,'https://www.youtube.com/watch?v=NJMPGgcDylY');
+  assert.equal((await db.prepare('SELECT MAX(revision) revision FROM owner_page_publications WHERE business_id=?').get(coverTarget.businessId)).revision,coverRevision+1);
+  await db.prepare("UPDATE demo_simulator_enrollments SET status='paused',reason='operator' WHERE business_id<>?").run(coverTarget.businessId);
+  await db.exec("UPDATE demo_simulator_control SET enabled=1,pause_reason='' WHERE id=1");now+=600000;
+  assert.equal((await runDemoSimulatorTick(now)).advanced,1);
+  assert.equal((await db.prepare('SELECT status FROM demo_simulator_enrollments WHERE business_id=?').get(coverTarget.businessId)).status,'active');
+  assert.deepEqual((await runtimeCatalogByHandle(coverTarget.handle))!.products.map(p=>productMedia(p)),coverCatalog.products.map(p=>productMedia(p)));
+  assert.equal(JSON.parse(String((await db.prepare('SELECT content_json FROM owner_page_drafts WHERE business_id=?').get(coverTarget.businessId)).content_json)).videoUrl,'https://www.youtube.com/watch?v=NJMPGgcDylY');
+  await db.exec("UPDATE demo_simulator_control SET enabled=1,pause_reason='' WHERE id=1; UPDATE demo_simulator_enrollments SET status='active',reason=''");
   const fault=fixtures.at(-1)!,faultProduct=fault.catalogProducts![3].productId;
   await db.prepare("UPDATE demo_simulator_enrollments SET status='paused',reason='operator' WHERE business_id<>?").run(fault.businessId);
   const faultBefore=await snapshot(fault.businessId);
