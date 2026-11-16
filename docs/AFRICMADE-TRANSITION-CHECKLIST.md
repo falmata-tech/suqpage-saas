@@ -1522,8 +1522,12 @@ alone.
 2. [x] Prepare a tenant-scoped, field-hash audit receipt and server/client
    readiness guard in isolated source; test unchanged, edited, hidden, relisted,
    malformed and other-tenant cases. No customer text or IDs belong in source.
-3. [ ] Run focused tests, typecheck and local owner web/Expo review for the
-   source guard; keep the public labels already removed by FE-067/PR103.
+3. [x] Focused PostgreSQL first-publication/tenant tests and typecheck pass.
+   Local Google Chrome at 1440/390 and Expo web preview at 390 show the
+   receipt holding About/products until owner edits them, with Publish disabled
+   and zero publications after Save/reload. No new public label appears.
+   Protected source-bound receipts and captures stay local; installed Android
+   is outside this source review.
 4. [ ] After source qualification, rebuild the protected exact correction against
    current production versions and owners. Test its compare-and-swap and inverse
    rollback on disposable PostgreSQL; only then consider a separately admitted
