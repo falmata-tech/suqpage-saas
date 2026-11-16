@@ -432,8 +432,6 @@ async function runPostgresFixture() {
         "fashion-textiles": "textile",
     };
     const discoveryCrossListings: Record<string, string[]> = {
-        "demo-laga-grain-mill": ["agriculture-growers"],
-        "demo-wabi-flour-mill": ["agriculture-growers"],
         "blue-nile-apiary": ["food-farming"],
         "green-terrace-farm": ["food-farming"],
     };

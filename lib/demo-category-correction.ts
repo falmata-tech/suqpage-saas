@@ -9,16 +9,14 @@ export type DemoCategoryCorrection = {
  members:DemoCategoryCorrectionMember[];
 };
 
-/** Exact current public examples. The two mills are agriculture cross-listings
- * in scripts/setup.ts; their reviewed primary category remains food-farming. */
+/** Exact current public growers with reviewed agriculture primary categories.
+ * Food mills remain outside this cohort to preserve their primary category. */
 export const AGRICULTURE_CORRECTION_TARGETS = [
  {businessId:5,handle:'green-terrace-farm',reviewedPrimary:'agriculture-growers'},
  {businessId:6,handle:'blue-nile-apiary',reviewedPrimary:'agriculture-growers'},
  {businessId:27,handle:'demo-bora-highland-farm',reviewedPrimary:'agriculture-growers'},
- {businessId:28,handle:'demo-laga-grain-mill',reviewedPrimary:'food-farming'},
  {businessId:29,handle:'demo-mulu-family-farm',reviewedPrimary:'agriculture-growers'},
  {businessId:31,handle:'demo-sofi-orchard',reviewedPrimary:'agriculture-growers'},
- {businessId:32,handle:'demo-wabi-flour-mill',reviewedPrimary:'food-farming'},
  {businessId:33,handle:'demo-rift-seed-growers',reviewedPrimary:'agriculture-growers'},
 ] as const;
 
