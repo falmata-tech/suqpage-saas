@@ -289,20 +289,21 @@ inside the same transaction before requalifying the corrected source.
 ## BE-067 reviewed agriculture membership correction — local qualification only
 
 Six active public demo growers have reviewed agriculture proposals but only
-food-farming memberships. Two active public food mills have explicit agriculture
-cross-listings in `scripts/setup.ts`; their reviewed primary proposals remain
-food-farming. A finite private correction path binds all eight exact IDs/handles,
-four products each, current hashes/versions and progress to one disabled-worker
-request. Distinct grower and mill proposal guards prevent converting a mill's
-primary category. The operator adds eight agriculture memberships and
-acknowledges all 32 simulator catalog bindings in one transaction. The public
-parser test and private disposable-PostgreSQL case pass: late eighth insert
-rollback, both proposal-drift cases, foreign product refusal, guarded rearm of an
-accepted request row, replay before/after a later stage and real-tenant
-preservation. The 3,213-byte request completed in 2.1 seconds after fixture
-setup, inside the 23-second bound. No hosted category data changed; source
-review, deployment, a fresh protected before-image and separately guarded L4
-admission precede production execution.
+food-farming memberships. The two reviewed-primary food mills retain Food &
+drink and are excluded: an agriculture cross-listing would otherwise change
+their primary visual category under BE-023. The finite private correction path
+binds only grower IDs 5, 6, 27, 29, 31 and 33, four products each, current
+hashes/versions and progress to one disabled-worker request. It adds six
+agriculture memberships and acknowledges all 24 simulator catalog bindings in
+one transaction. The public parser and private disposable-PostgreSQL fixture
+pass: late sixth insert rollback, grower proposal drift, excluded mill and real
+tenant preservation, foreign product refusal, guarded rearm of an accepted
+request, replay and a later stage. Public Market projection after the correction
+returns six Agriculture-primary growers while both excluded mills remain
+Food-primary. The 2,429-byte request completed in under one second after
+fixture setup, inside the 23-second bound. No hosted category data changed;
+source review, deployment, a fresh protected before-image and separately
+guarded L4 admission precede production execution.
 
 ## S194 scenario-driven demo activity — qualified and deployed
 

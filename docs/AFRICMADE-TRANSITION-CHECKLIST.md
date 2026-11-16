@@ -56,17 +56,19 @@ store screenshots and Play qualification remain separate unfinished work.
 
 ### Reviewed agriculture demo memberships (BE-067 / BE-029)
 
-- [x] Extend the private category correction from six growers to all eight
-  intended current agriculture listings, including the two reviewed-primary
-  food mills with explicit seed cross-listing. Bind exact identity, proposal,
-  catalog and simulator-hash guards. Keep food membership,
+- [x] Narrow the private category correction to the six reviewed growers;
+  leave the two food mills under Food & drink because an Agriculture cross-listing
+  would change their primary visual category under BE-023. Bind exact identity,
+  proposal, catalog and simulator-hash guards. Keep food membership,
   correct agriculture membership and scenario bindings atomically, and preserve
   progress and unrelated tenants. Verify late rollback, replay, subsequent tick
   and completion inside the 23-second transaction limit in disposable PostgreSQL.
-  The eight-business source and private disposable-PostgreSQL proof are complete;
-  source publication/deployment and the hosted category write remain separate.
+  The prior eight-business source and proof are superseded. The six-grower
+  parser and private disposable-PostgreSQL case pass with a late sixth insert
+  rollback, excluded mills unchanged, later stage and replay; source publication
+  and the separately guarded hosted correction remain open.
 - [ ] After source review and the separately guarded hosted-change admission,
-  protect a before-image, run the exact disabled-worker request, verify all eight
+  protect a before-image, run the exact disabled-worker request, verify all six
   memberships and active enrollments, then resume the worker and public reads.
 
 ### S199 — concise starter and demo copy (BE-039 / FE-067)
