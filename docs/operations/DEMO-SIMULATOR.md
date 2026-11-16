@@ -1,5 +1,20 @@
 # Recurring demo marketplace simulator — implementation inventory
 
+## Current hosted operating state
+
+The six reviewed growers (business IDs 5, 6, 27, 29, 31 and 33) now have
+Agriculture membership while retaining Food & drink. Both food mills remain
+Food-primary, and the seven category keys are unchanged. The public Agriculture
+Market filter returns six growers. The exact production correction atomically
+set simulator control to `enabled=0`, `pause_reason='operator'`. All 64
+enrollments remain active, none is paused, and no request is pending.
+
+The six growers' stored enrollment category bindings and expected hashes still
+describe their former classification. Keep the control disabled until an exact
+reconciliation of those six enrollments and subsequent-stage verification are
+complete. A scheduled Netlify invocation cannot advance stages while disabled.
+The protected before-image and operation SQL stay outside Git.
+
 ## Qualified full public-demo catalogs (S196)
 
 The admitted target is all64 public demo businesses and all256 current
