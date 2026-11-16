@@ -286,13 +286,21 @@ the same ordering defect. Preserve the FK and late-foreign rollback assertion;
 publish the shared final snapshot first, then record all member receipts/audits
 inside the same transaction before requalifying the corrected source.
 
-## BE-067 reviewed agriculture membership correction — local qualification only
+## BE-067 reviewed agriculture membership correction — hosted direct correction
 
-Six active public demo growers have reviewed agriculture proposals but only
-food-farming memberships. The two reviewed-primary food mills retain Food &
-drink and are excluded: an agriculture cross-listing would otherwise change
-their primary visual category under BE-023. The finite private correction path
-binds only grower IDs 5, 6, 27, 29, 31 and 33, four products each, current
+Production now has Agriculture and Food & drink memberships for grower IDs
+5, 6, 27, 29, 31 and 33. The two reviewed-primary food mills retain Food &
+drink as their primary category. No category key was added; the seven-category
+taxonomy is unchanged. The guarded direct operation used a protected private
+before-image and atomically disabled simulator control with
+`pause_reason='operator'`. Public Market API readback for Agriculture returns
+`total=6`. Hosted private readback found 64 active enrollments, zero paused
+enrollments and zero pending requests. Six grower enrollment category bindings
+and expected hashes are now stale; reconcile them before any simulator resume.
+The direct operation did not run the finite request source described below.
+
+The separate finite private correction path binds only grower IDs 5, 6, 27, 29,
+31 and 33, four products each, current
 hashes/versions and progress to one disabled-worker request. It adds six
 agriculture memberships and acknowledges all 24 simulator catalog bindings in
 one transaction. The public parser and private disposable-PostgreSQL fixture
@@ -302,9 +310,8 @@ request, replay and a later stage. Public Market projection after the correction
 returns six Agriculture-primary growers while both excluded mills remain
 Food-primary; `scripts/test-scale-fixtures.ts` confirms the local seven-category
 seed keeps those mills Food-primary. The 2,429-byte request completed in under
-one second after fixture setup, inside the 23-second bound. No hosted category
-data changed; source review, deployment, a fresh protected before-image and separately
-guarded L4 admission precede production execution.
+one second after fixture setup, inside the 23-second bound. This source and
+fixture remain local qualification only; they are not the hosted operation.
 
 ## S194 scenario-driven demo activity — qualified and deployed
 
