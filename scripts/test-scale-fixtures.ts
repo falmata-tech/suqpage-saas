@@ -74,7 +74,8 @@ async function main() {
         assert.notEqual(featuredDay, undefined, `${industry.label} has one stable weekday assignment`);
         const discovery = await getDiscoveryView({ industry: industry.key, featuredDay });
         industryCounts.push(discovery.total);
-        assert.ok(discovery.total >= 8, `${industry.label} has a useful active fixture cohort`);
+        const minimum = industry.key === 'agriculture-growers' ? 6 : 8;
+        assert.ok(discovery.total >= minimum, `${industry.label} has a useful active fixture cohort`);
         assert.equal(discovery.sponsoredShowrooms.length, 5, "the public projection exposes exactly five globally selected sponsors");
         const sponsorHandles = discovery.sponsoredShowrooms.map((showroom) => showroom.handle);
         if (globalSponsorHandles)
@@ -94,6 +95,14 @@ async function main() {
         assert.deepEqual(discovery.featured.booths.map((booth) => booth.slot), Array.from({ length: discovery.featured.boothCount }, (_, index) => index + 1), `${industry.label} uses one continuous sequence of floor slots`);
         assert.equal(new Set(discovery.featured.booths.map((booth) => booth.reference)).size, discovery.featured.boothCount, `${industry.label} floor references remain unique`);
         assert.equal((await getDiscoveryView({ industry: industry.key, scale: "growing_factory" })).total, 0, `${industry.label} demo data stays within the small-scale launch scope`);
+    }
+    const agriculture = await getDiscoveryView({ industry: 'agriculture-growers' });
+    const food = await getDiscoveryView({ industry: 'food-farming' });
+    for (const handle of ['demo-laga-grain-mill', 'demo-wabi-flour-mill']) {
+        assert.equal(agriculture.showrooms.some((showroom) => showroom.handle === handle), false,
+            `${handle} is not cross-listed under Agriculture`);
+        assert.equal(food.showrooms.find((showroom) => showroom.handle === handle)?.primaryIndustryKey,
+            'food-farming', `${handle} retains Food & drink as its primary category`);
     }
     const seededElectronics = SCALE_DEMO_BUSINESSES.filter((business) => business.industryKey === "electronics");
     assert.equal(seededElectronics[0]?.profile.latitude, seededElectronics[1]?.profile.latitude, "the scale demo retains one deliberate same-address workshop latitude");

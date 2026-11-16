@@ -300,9 +300,10 @@ pass: late sixth insert rollback, grower proposal drift, excluded mill and real
 tenant preservation, foreign product refusal, guarded rearm of an accepted
 request, replay and a later stage. Public Market projection after the correction
 returns six Agriculture-primary growers while both excluded mills remain
-Food-primary. The 2,429-byte request completed in under one second after
-fixture setup, inside the 23-second bound. No hosted category data changed;
-source review, deployment, a fresh protected before-image and separately
+Food-primary; `scripts/test-scale-fixtures.ts` confirms the local seven-category
+seed keeps those mills Food-primary. The 2,429-byte request completed in under
+one second after fixture setup, inside the 23-second bound. No hosted category
+data changed; source review, deployment, a fresh protected before-image and separately
 guarded L4 admission precede production execution.
 
 ## S194 scenario-driven demo activity — qualified and deployed

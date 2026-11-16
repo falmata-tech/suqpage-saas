@@ -242,6 +242,7 @@ partial preparation rolls back on refusal, and simulation stays disabled.
 | Mixed tenants/new signup/drift/replay/concurrency/rollback | `scripts/test-demo-simulator-postgres.ts` |
 | Exact reviewed category batch request shape | `scripts/test-demo-scenarios.ts` synthetic parser case |
 | Six-grower atomic category correction, excluded-mill refusal, late failure, drift, replay and later stage | Private disposable PostgreSQL fixture retained outside public source; publication qualification pending |
+| Local seed keeps the food mills outside Agriculture and Food-primary | `scripts/test-scale-fixtures.ts` |
 | Migration, private privileges and bounded controls | existing PostgreSQL/security/preflight gates plus simulator integration |
 | Actual write → public revision/API → UI | FE-079 browser/native journeys |
 
