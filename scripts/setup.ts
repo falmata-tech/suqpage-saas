@@ -557,11 +557,11 @@ async function runPostgresFixture() {
             "Image replacement request",
             "Monthly account question",
         ][index % 4], status, assigned, createdAt, closedAt || createdAt, closedAt || createdAt, closedAt)).insertedId);
-        const firstMessage = await addSupportMessage.run(conversationId, clientUsersByHandle.get(handle)!, `user:${clientUsersByHandle.get(handle)!}`, `Fictional support message from ${handle} used to exercise the customer support queue.`, `demo-support-client-${index + 1}`, createdAt);
-        await addSupportEvent.run(conversationId, clientUsersByHandle.get(handle)!, "created", "fictional seeded conversation", createdAt);
+        const firstMessage = await addSupportMessage.run(conversationId, clientUsersByHandle.get(handle)!, `user:${clientUsersByHandle.get(handle)!}`, `Please review the page details for ${handle}.`, `demo-support-client-${index + 1}`, createdAt);
+        await addSupportEvent.run(conversationId, clientUsersByHandle.get(handle)!, "created", "conversation created", createdAt);
         if (assigned) {
             const replyAt = createdAt + 15 * 60 * 1000;
-            const reply = await addSupportMessage.run(conversationId, assigned, `user:${assigned}`, "Thanks. The Suqpage team has reviewed this fictional demo request and will follow up here.", `demo-support-staff-${index + 1}`, replyAt);
+            const reply = await addSupportMessage.run(conversationId, assigned, `user:${assigned}`, "Thanks. We reviewed your request and will follow up here.", `demo-support-staff-${index + 1}`, replyAt);
             await db.prepare(`
       UPDATE support_conversations
       SET client_last_read_message_id=?,staff_last_read_message_id=?,
@@ -570,9 +570,9 @@ async function runPostgresFixture() {
     `).run(Number(firstMessage.insertedId), Number(reply.insertedId), replyAt, replyAt, conversationId);
             await addSupportAssignment.run(conversationId, assigned, createdAt, closedAt);
             await addSupportEvent.run(conversationId, null, "assigned", `agent:${assigned};reason:automatic`, createdAt);
-            await addSupportEvent.run(conversationId, assigned, "message", "fictional staff reply", replyAt);
+            await addSupportEvent.run(conversationId, assigned, "message", "staff reply", replyAt);
             if (closedAt)
-                await addSupportEvent.run(conversationId, assigned, "closed", "fictional seeded close", closedAt);
+                await addSupportEvent.run(conversationId, assigned, "closed", "conversation closed", closedAt);
         }
         else {
             await db.prepare(`
@@ -640,7 +640,7 @@ async function runPostgresFixture() {
         const assignedUserId = current ? teamStaff[index % teamStaff.length] : null;
         const age = `-${66 - index} hours`;
         const requestId = Number((await addServiceRequest.run(`DEMO-${String(index + 1).padStart(5, "0")}`, businessId, clientUserId, status, `${handle} client`, `${handle}@mirtpage.local`, businesses.find((business) => business.handle === handle)!.name, `Update the Suqpage page with current product, capability, and business information for review.`, clientUserId, assignedUserId, `demo-lifecycle-${index + 1}`, age, age)).insertedId);
-        await addRequestEvent.run(requestId, clientUserId, "submitted", "fictional demo request", age);
+        await addRequestEvent.run(requestId, clientUserId, "submitted", "request submitted", age);
         if (status !== "submitted") {
             await addRequestEvent.run(requestId, assignedUserId || operationsStaff[0], "status_changed", `submitted->${status}`, age);
         }
@@ -661,7 +661,7 @@ async function runPostgresFixture() {
             const decidedAt = ["client_approved", "published"].includes(status)
                 ? new Date().toISOString()
                 : null;
-            await addLifecycleRevision.run(requestId, businessId, revisionStatus, retained.snapshot_json, `Fictional ${revisionStatus.replaceAll("_", " ")} revision`, assignedUserId || teamStaff[index % teamStaff.length], submittedAt, ["client_approved", "published"].includes(status) ? clientUserId : null, ["client_approved", "published"].includes(status) ? "Approved in the fictional demo workflow." : "", decidedAt, status === "published" ? operationsStaff[index % operationsStaff.length] : null, status === "published" ? new Date().toISOString() : null, status === "published" ? 1 : null);
+            await addLifecycleRevision.run(requestId, businessId, revisionStatus, retained.snapshot_json, `Review revision: ${revisionStatus.replaceAll("_", " ")}`, assignedUserId || teamStaff[index % teamStaff.length], submittedAt, ["client_approved", "published"].includes(status) ? clientUserId : null, ["client_approved", "published"].includes(status) ? "Approved for publishing." : "", decidedAt, status === "published" ? operationsStaff[index % operationsStaff.length] : null, status === "published" ? new Date().toISOString() : null, status === "published" ? 1 : null);
         }
     }
     const inquiry = db.prepare("INSERT INTO inquiries(business_id,customer_name,contact,contact_method,note,status,idempotency_key) VALUES(?,?,?,?,?,?,?)");
@@ -684,13 +684,13 @@ async function runPostgresFixture() {
     };
     const inquiryStatuses = ["new", "contacted", "confirmed", "closed", "cancelled"] as const;
     for (let index = 1; index <= 36; index += 1) {
-        const inquiryId = Number((await inquiry.run(denseInquiryBusinessId, `Demo Buyer ${String(index).padStart(2, "0")}`, `demo-buyer-${index}@example.test`, "email", `Fictional inquiry ${index} used to exercise server pagination.`, inquiryStatuses[(index - 1) % inquiryStatuses.length], `scale-inquiry-${index}`)).insertedId);
+        const inquiryId = Number((await inquiry.run(denseInquiryBusinessId, `Demo Buyer ${String(index).padStart(2, "0")}`, `demo-buyer-${index}@example.test`, "email", "Please share availability, quantity options, and lead time.", inquiryStatuses[(index - 1) % inquiryStatuses.length], `scale-inquiry-${index}`)).insertedId);
         await inquiryItem.run(inquiryId, denseInquiryProduct.id, denseInquiryProduct.name, null, index % 3 === 0 ? "1 ton" : `${index} units`, denseInquiryProduct.offering_kind, denseInquiryProduct.quantity_mode, JSON.stringify({}));
     }
     // Every demo owner can inspect an inbox, including one grouped request.
     for (const [handle, businessId] of seeded) {
         if (await db.prepare("SELECT 1 FROM inquiries WHERE business_id=? LIMIT 1").get(businessId)) continue;
-        const iid = Number((await inquiry.run(businessId, "Sample customer", "sample-customer@example.test", "email", "Fictional example: please share details about these items.", "new", `demo-coverage-${handle}`)).insertedId);
+        const iid = Number((await inquiry.run(businessId, "Sample customer", "sample-customer@example.test", "email", "Please share details about these items.", "new", `demo-coverage-${handle}`)).insertedId);
         const items = await db.prepare("SELECT id,name,offering_kind,quantity_mode FROM products WHERE business_id=? ORDER BY id LIMIT 2").all(businessId);
         for (const item of items) await inquiryItem.run(iid, item.id, item.name, null, item.offering_kind === "service" ? "One appointment" : "2 pieces", item.offering_kind, item.quantity_mode, "{}");
     }

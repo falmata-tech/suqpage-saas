@@ -11,7 +11,7 @@ import { getDb, closeDbForTests } from './testing/postgres-fixture';
 import { postgresRuntimeServices } from '../lib/postgres-runtime-services';
 import { createPublicClientWorkspace } from '../lib/signup';
 import { publicContactFields } from '../lib/business-profile-contacts';
-import { STARTER_ABOUT } from '../lib/business-starter';
+import { STARTER_ABOUT, STARTER_NOTICE } from '../lib/business-starter';
 
 async function main() {
  const serve=process.argv.includes('--serve');
@@ -59,7 +59,7 @@ async function main() {
   for(const width of [1440,390,320]){
    await owner.setViewportSize({width,height:900});
    await owner.goto(base+'/dashboard/page-editor');
-   await expect(owner.getByText('Make this example page your own before publishing.',{exact:false})).toBeVisible();
+   await expect(owner.getByText(STARTER_NOTICE,{exact:true})).toBeVisible();
    await owner.locator('summary').filter({hasText:'Public contact details'}).click();
    await filled('#shop-about, #shop-video');for(const {key} of publicContactFields)await filled(`#public-${key}`);
    await capture(owner,'page-editor',width);
@@ -71,10 +71,10 @@ async function main() {
    assert.equal(await preview.locator('iframe').count(),0);
    await capture(owner,'page-preview',width);
    await owner.getByRole('button',{name:'Edit',exact:true}).click();
-   await owner.getByLabel('About the business',{exact:true}).fill(`Our saved example at ${width} pixels.`);
+   await owner.getByLabel('About the business',{exact:true}).fill(`Our saved details at ${width} pixels.`);
    await owner.getByRole('button',{name:'Save',exact:true}).click();
    await expect(owner.getByText('Private draft saved',{exact:true})).toBeVisible();await owner.reload();
-   await expect(owner.getByLabel('About the business',{exact:true})).toHaveValue(`Our saved example at ${width} pixels.`);
+   await expect(owner.getByLabel('About the business',{exact:true})).toHaveValue(`Our saved details at ${width} pixels.`);
    await owner.getByLabel('About the business',{exact:true}).fill(STARTER_ABOUT);
    await owner.getByRole('button',{name:'Save',exact:true}).click();
    await expect(owner.getByText('Private draft saved',{exact:true})).toBeVisible();
