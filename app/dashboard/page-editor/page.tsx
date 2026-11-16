@@ -1,4 +1,4 @@
-import { publicationLocationConfirmed } from "@/lib/publication-readiness-runtime";
+import { legacyStarterReviewHoldForBusiness,publicationLocationConfirmed } from "@/lib/publication-readiness-runtime";
 import { notFound } from "next/navigation";
 import DashboardShell from "@/components/DashboardShell";
 import OwnerPageEditor from "@/components/OwnerPageEditor";
@@ -32,6 +32,6 @@ export default async function PageEditor({ searchParams }: { searchParams: Promi
     {query.returnTo==='profile' && <a className="btn secondary" href="/dashboard/profile">{t("Back to account")}</a>}
     {query.error ? <p className="error" role="alert">{t(query.error)}</p> : null}
     {query.saved === 'handle' ? <p className="notice" role="status">{t('Business details saved.')}</p> : null}
-    <OwnerPageEditor key={business.id} returnTo={owner?(query.returnTo==='profile'?'profile':'showroom'):undefined} initialTask={ownerPageTask(query.task)} locationConfirmed={await publicationLocationConfirmed(business.id)} initialPreview={query.task==='color'||query.view === "preview" || (owner && business.status === 'draft' && query.view !== 'edit'&&!query.task)} catalog={catalog} initialDraft={draft} initialPublication={publication} owner={owner} />
+    <OwnerPageEditor key={business.id} returnTo={owner?(query.returnTo==='profile'?'profile':'showroom'):undefined} initialTask={ownerPageTask(query.task)} locationConfirmed={await publicationLocationConfirmed(business.id)} legacyHold={business.status==='draft'?await legacyStarterReviewHoldForBusiness(business.id,draft?.content.about||'',catalog.products):undefined} initialPreview={query.task==='color'||query.view === "preview" || (owner && business.status === 'draft' && query.view !== 'edit'&&!query.task)} catalog={catalog} initialDraft={draft} initialPublication={publication} owner={owner} />
   </DashboardShell>;
 }

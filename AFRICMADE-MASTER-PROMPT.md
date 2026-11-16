@@ -1037,6 +1037,10 @@ plays an approved first-party process MP4 for the matching demo business.
    they are not required to create a showroom.
 3. They edit one page/product/details task at a time, preview and use the current
    server readiness result. Missing requirements link to their actual task.
+   S198's receipt-gated readiness guard preserves the first-publication hold
+   if retained private starter wording is corrected: a tenant-scoped receipt
+   tracks corrected fields until the owner edits them. The exact hosted
+   correction remains separate and unadmitted.
 4. First Publish needs no staff approval. It atomically validates current content
    and an eligible listed product, activates the draft business and applies the
    pending canonical location/category with publication history. Location Save

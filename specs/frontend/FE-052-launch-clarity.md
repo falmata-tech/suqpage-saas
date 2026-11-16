@@ -120,6 +120,14 @@ No invented deadline, permanent free plan, paid booking or provider integration.
    The city explicitly selected during BE-047 signup already satisfies location
    confirmation. A legacy/default location without confirmed profile/proposal
    evidence still fails that check; tests cover both cases independently.
+   For retained private starter drafts, a future exact wording correction may
+   remove old labels only with a tenant-scoped audit receipt of the corrected
+   About and product field hashes in the same transaction. First publication
+   must continue to hold each corrected field while its hash still matches the
+   receipt; an owner edit to that field clears its hold. Hidden or deleted
+   products do not block publication, but relisting unchanged content does. A
+   missing receipt leaves current readiness unchanged. A malformed receipt
+   fails closed. No blanket existing-tenant backfill is authorized.
 5. GIVEN Featured without a configured broadcast WHEN rendered THEN the business
    gallery is primary; schedule details remain available but do not imply a live
    show. Demo live flags do not imply an actual live stream. Preview buttons
@@ -170,6 +178,9 @@ Focused inquiry authorization/persistence, first-publication checks including
 negative and legacy cases, localization coverage/interpolation, demo projection,
 search submit/collapse and desktop/320/390 captures across supported languages.
 Map to scripts/test-launch-clarity.ts and focused existing workflow scripts.
+`scripts/test-legacy-starter-review.ts` covers the retained private starter
+receipt, field edits, malformed evidence, tenant isolation and actual publish
+denial in disposable PostgreSQL. It uses synthetic content only.
 `scripts/capture-demo-notice.mjs` covers handle-based notice suppression,
 marked-demo retention and ordinary-business absence on web/Expo, with phone/
 desktop captures. No database mutation is needed for this presentation change.
