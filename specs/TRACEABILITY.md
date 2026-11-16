@@ -310,8 +310,9 @@ request, replay and a later stage. Public Market projection after the correction
 returns six Agriculture-primary growers while both excluded mills remain
 Food-primary; `scripts/test-scale-fixtures.ts` confirms the local seven-category
 seed keeps those mills Food-primary. The 2,429-byte request completed in under
-one second after fixture setup, inside the 23-second bound. This source and
-fixture remain local qualification only; they are not the hosted operation.
+one second after fixture setup, inside the 23-second bound. The disposable
+PostgreSQL fixture is local qualification only; the queued-worker path was not
+used for this hosted correction.
 
 ## S194 scenario-driven demo activity — qualified and deployed
 
