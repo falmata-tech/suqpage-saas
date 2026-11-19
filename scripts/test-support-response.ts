@@ -151,7 +151,18 @@ async function main() {
     assert.equal((await visitorAttentionFeed(stale.token)).items.length,0);
     assert.equal((await dispatchAttention({send:async()=>{throw Error('Legacy customer assignment/read-join must never dispatch');}})).ignored,3);
     await join(stale.id,t+1);assert.equal((await visitorAttentionFeed(stale.token)).items.filter(x=>x.kind==='joined').length,1);
-    let sent=0;await dispatchAttention({send:async()=>{sent++;return {state:'accepted'};}});assert.equal(sent,1,'Only explicit current Join dispatches');
+    let sent=0;
+    const countSend=async()=>{sent++;return {state:'accepted' as const};};
+    const retired=await dispatchAttention({send:countSend});
+    assert.equal(retired.ignored,1,'The retained guest transport join is suppressed');
+    assert.equal(sent,0,'A retired guest transport subscription never receives push');
+
+    const current=await support.createSupportConversation(owner,{subject:'Current owner request',message:'Support join notification',idempotencyKey:key()},t);
+    await db.prepare("INSERT INTO attention_subscriptions(recipient_key,kind,endpoint_hash,subscription_json,created_at) VALUES(?,'web',?,?,?)")
+      .run(`user:${owner.id}`,key(),JSON.stringify(subscription),t);
+    await join(current.id,t+1);
+    await dispatchAttention({send:countSend});
+    assert.equal(sent,1,'An explicit current Join dispatches for an eligible owner');
     const cycle=(await state(stale.id)).awaiting_staff_message_id;
     const staffSub=(await db.prepare("INSERT INTO attention_subscriptions(recipient_key,kind,endpoint_hash,subscription_json,created_at) VALUES(?,'web',?,?,?)").run(`user:${staleAgent.id}`,key(),JSON.stringify(subscription),t)).insertedId;
     void staffSub;await support.sweepSupportReplyOverdue(t+target);
