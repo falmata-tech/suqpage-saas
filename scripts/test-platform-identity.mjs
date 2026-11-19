@@ -52,9 +52,12 @@ assert.match(discoveryWorkspace, /<MarketSearchControls[^\n]+scope=\{panelOpen\?
 for (const publicRoute of ["app/(public)/page.tsx", "app/discover/page.tsx"]) {
   assert.doesNotMatch(fs.readFileSync(publicRoute, "utf8"), /query\.scale/);
 }
-for (const file of ["app/(public)/[handle]/page.tsx", "app/preview/[handle]/page.tsx"]) {
-  const source = fs.readFileSync(file, "utf8");
-  assert.match(source, /runtimePublishedPage\([^\n]+\|\| initialBusinessProfile\(catalog\)/);
-  assert.match(source, /businessProfile=\{profile\}/);
-}
+const publicShowroom = fs.readFileSync("app/(public)/[handle]/page.tsx", "utf8");
+const snapshot = fs.readFileSync("lib/public-showroom-runtime.ts", "utf8");
+const preview = fs.readFileSync("app/preview/[handle]/page.tsx", "utf8");
+assert.match(publicShowroom, /await runtimePublicShowroom\(handle\)/);
+assert.match(snapshot, /await runtimePublishedPageState\(catalog.business.id\)/);
+assert.match(snapshot, /profile:\s*published.content\s*\|\|\s*initialBusinessProfile\(catalog\)/);
+assert.match(preview, /runtimePublishedPage\([^\n]+\|\| initialBusinessProfile\(catalog\)/);
+for (const source of [publicShowroom, preview]) assert.match(source, /businessProfile=\{profile\}/);
 console.log("AfricMade identity and shared public/preview renderer contracts passed.");

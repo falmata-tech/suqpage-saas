@@ -11,7 +11,7 @@ not authorize a provider write or rerun an already completed migration/build.
 - [x] Broaden the seven public labels while preserving weekday keys and existing assignments.
 - [x] Connect published product groups to web and mobile Market filters and check exact and approximate searches.
 - [x] Assign a selected TikTok or YouTube clip to each of the 66 local demo identities. Verify that all 264 products and all 66 stories use their showroom’s reference in freshly seeded PostgreSQL. The [selection list](operations/handoff-2026-11-14/S197-CANDIDATE-SOURCES.md#current-local-selections-for-the-66-showroom-portfolio) records each showroom and creator link.
-- [x] Review the filtered local Market on web and Expo and the saved creator galleries on phone-width web. Build Android locally. The debug-signed `com.africmade.app.local` APK contains the JS bundle, arm64-v8a and x86_64 native libraries and the loopback API/Auth origins. Local artifact SHA-256 `56ba713368b60a58049b1ccb5b44843e16ff2a04c36226f9cecad02d5a0e278b`. Physical-device and emulator launch of this artifact remain unverified.
+- [x] Review the filtered local Market on web and Expo and the saved creator galleries on phone-width web. Build Android locally. The debug-signed `com.africmade.app.local` APK contains the JS bundle, arm64-v8a and x86_64 native libraries and the loopback API/Auth origins. Local artifact SHA-256 `56ba713368b60a58049b1ccb5b44843e16ff2a04c36226f9cecad02d5a0e278b`. The APK installed and cold-launched on the API 35 x86_64 emulator. Food → Honey returned both expected Blue Nile Apiary products, and Seasonal Raw Honey opened from the results. Its YouTube player showed “Video unavailable” on first play and on retry. Physical-device testing remains open.
 
 Local web (port 3127) at 1400px and 390px and Expo web (port 8082) at 390px showed
 Honey & Comb Gift Box and Seasonal Raw Honey after selecting Food, drink & fresh
@@ -74,6 +74,8 @@ saved gallery checks played both YouTube and TikTok. Web and mobile typechecks
 passed. The Expo zoom-navigation test passed in isolation after its initial
 timeout during compilation. The full browser acceptance build compiled but
 stopped twice at Next.js 16.4.2’s security advisory before browser scenarios ran.
+The historical Support migration fixture also stops at its schema 80 guard. The
+repository is on schema 83. The discovery, identity and product upkeep checks passed.
 
 ## Surface status
 

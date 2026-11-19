@@ -84,6 +84,8 @@ player before selection.
 
 These selections supersede the earlier leads above for the local demo seed. Each row links to an illustrative creator video. Each showroom uses the same reference for its story and its four products. The videos illustrate a craft or product family. The featured weekday and the merchant’s product group have no role in selection.
 
+Blue Nile Apiary’s honey video played in the local web gallery. In the locally built Android APK on an API 35 emulator, the Seasonal Raw Honey gallery showed “Video unavailable” on first play and again on retry. Physical-phone playback is unverified.
+
 | Local showrooms | Selected example |
 | --- | --- |
 | Selam Weave Studio, Sena Home Textiles, Liya Textile House, Kora Weaving Studio, Tana Cloth House | [Handwoven textiles at Sabahar](https://www.youtube.com/watch?v=22iNfILuO4U) |
