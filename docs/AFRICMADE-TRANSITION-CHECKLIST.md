@@ -6,6 +6,12 @@ Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 Updated 2026-11-18. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
+## Android honey playback and web delivery
+
+- [x] Diagnose the previous Seasonal Raw Honey failure (FE-053). On the same API 35 emulator the original APK played 583 frames over 19.7 seconds with internet access. Its referrer used the configured production package despite the installed local suffix. The 20-second startup deadline could discard an otherwise viable frame. The earlier run did not record which error fired.
+- [x] The rebuilt local APK installed and opened Seasonal Raw Honey on the API 35 emulator. After pressing the gallery and YouTube Play controls, the video advanced from 19 to 77 decoded frames and from 1.24 to 3.45 seconds. The WebView reported the installed package origin, `https://com.africmade.app.local`. APK SHA-256 `79dd368a0fe0776d8af18f590a4fdb10c298777f857d0b246417f5605b078072`.
+- [ ] Qualify the web candidate through PR 125 and the five protected checks. Verify the published production web routes after the Netlify build (DEP-052).
+
 ## Local seven-category update
 
 - [x] Broaden the seven public labels while preserving weekday keys and existing assignments.

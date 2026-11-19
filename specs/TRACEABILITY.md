@@ -1,5 +1,10 @@
 # AfricMade traceability matrix
 
+FE-053 Android YouTube playback uses the installed package identity in
+`YouTubeFrame.tsx`. The slow-load and provider-error transitions in
+`youtube-player.ts` are exercised by `scripts/test-mobile-video.ts`.
+[Device and web delivery evidence](../docs/AFRICMADE-TRANSITION-CHECKLIST.md#android-honey-playback-and-web-delivery).
+
 Local FE-042 / FE-061 update (2026-11-18): seven featured weekdays retain their
 industry keys. Market product-group filtering spans the web and Expo controls,
 `lib/market-search.ts`, discovery and spelling queries. PostgreSQL regression

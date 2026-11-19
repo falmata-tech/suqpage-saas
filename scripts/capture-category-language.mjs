@@ -26,7 +26,7 @@ try{
   await page.goto(`${base}/about`);const links=page.locator('section[aria-labelledby=about-categories-title]');await expect(links.getByRole('link')).toHaveCount(8);await expect(links.locator('[data-category-illustration]')).toHaveCount(8);await links.scrollIntoViewIfNeeded();await page.screenshot({path:`${out}/about-categories-${width}.png`});
   for(const link of await links.getByRole('link').all()){const href=await link.getAttribute('href');assert.ok(href.startsWith('/?industry=')&&href.endsWith('#discover'));}
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-  await links.getByRole('link',{name:'Food & drink',exact:true}).click();await expect(page).toHaveURL(/industry=food-farming/);await expect(page.getByLabel('Filter by category')).toContainText('Food & drink');
+  await links.getByRole('link',{name:'Food, drink & fresh produce',exact:true}).click();await expect(page).toHaveURL(/industry=food-farming/);await expect(page.getByLabel('Filter by category')).toContainText('Food, drink & fresh produce');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));assert.deepEqual(errors,[]);await context.close();
  }
  console.log('PASS category illustrations on Market/Featured/About, keyboard/Escape, selected labels, filter/all reset, working About links, accessibility and desktop/390/320 captures.');

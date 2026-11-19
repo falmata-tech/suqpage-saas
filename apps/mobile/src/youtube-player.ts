@@ -15,6 +15,16 @@ export function youtubeId(ref: string): string | null {
   }
 }
 export type PlayerEvent = "ready" | "error";
+export type PlayerState = PlayerEvent | "loading" | "slow";
+
+export function nextPlayerState(current: PlayerState, update: PlayerEvent | "deadline", retainSlowFrame: boolean): PlayerState {
+  if (update === "deadline") {
+    if (current !== "loading") return current;
+    return retainSlowFrame ? "slow" : "error";
+  }
+  return current === "error" ? current : update;
+}
+
 export function playerEvent(raw: unknown): PlayerEvent | null {
   if (typeof raw !== "string" || raw.length > 160) return null;
   try {

@@ -139,7 +139,7 @@ try{
   assert.ok(cityPosition&&businessPosition&&handlePosition&&businessPosition.y<cityPosition.y&&cityPosition.y<handlePosition.y);
   await mobile.getByRole('textbox',{name:'Your name',exact:true}).fill('Native Map Owner');await mobile.getByRole('textbox',{name:'Account phone',exact:true}).fill('+251911002255');
   await mobile.getByRole('textbox',{name:'Business name',exact:true}).fill('Native Map Workshop');await mobile.getByRole('textbox',{name:'Page handle',exact:true}).fill('native-map-'+crypto.randomUUID().slice(0,8));
-  await mobile.getByRole('button',{name:'Furniture, art & building',exact:true}).click();await mobile.getByRole('button',{name:'I agree to the Terms and Privacy Policy',exact:true}).click();
+  await mobile.getByRole('button',{name:'Home, construction & leisure',exact:true}).click();await mobile.getByRole('button',{name:'I agree to the Terms and Privacy Policy',exact:true}).click();
   await mobile.getByRole('button',{name:'Choose a country',exact:true}).click();await mobile.getByRole('button',{name:'Ethiopia',exact:true}).click();
   await expect(mobile.getByRole('button',{name:'Create your business page',exact:true})).toBeDisabled();
   let failCity=true;await mobile.route('**/api/mobile/v1/places**',route=>failCity?(failCity=false,route.fulfill({status:503,json:{error:'Please try again.'}})):route.continue());

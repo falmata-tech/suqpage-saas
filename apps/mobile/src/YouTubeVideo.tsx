@@ -15,7 +15,7 @@ import SocialVideoFrame from "./SocialVideoFrame";
 import DemoVideoFrame from "./DemoVideoFrame";
 import { productVideo,normalizeProductVideoUrl } from "../../../lib/video/product-video";
 import LoadingBar from "./LoadingBar";
-import { youtubeId, type PlayerEvent } from "./youtube-player";
+import { youtubeId, nextPlayerState, type PlayerState, type PlayerEvent } from "./youtube-player";
 export default function YouTubeVideo({
   video,
   posterTint,
@@ -42,7 +42,7 @@ export default function YouTubeVideo({
     Frame = demo ? DemoVideoFrame : social ? SocialVideoFrame : YouTubeFrame;
   const [focused, setFocused] = useState(true);
   const [playing, setPlaying] = useState(false),
-    [state, setState] = useState<"loading" | "ready" | "error">("loading"),
+    [state, setState] = useState<PlayerState>("loading"),
     [attempt, setAttempt] = useState(0);
   useFocusEffect(
     useCallback(() => {
@@ -70,13 +70,16 @@ export default function YouTubeVideo({
     });
     return () => sub.remove();
   }, []);
+  const retainSlowFrame = Platform.OS === "android" && !social;
   useEffect(() => {
     if (!playing || state !== "loading") return;
-    const timeout = setTimeout(() => setState("error"), 20000);
+    const timeout = setTimeout(() => {
+      setState(current => nextPlayerState(current, "deadline", retainSlowFrame));
+    }, 20000);
     return () => clearTimeout(timeout);
-  }, [playing, state, attempt]);
+  }, [playing, state, attempt, retainSlowFrame]);
   function event(value: PlayerEvent) {
-    setState(current=>value === "ready" && current === "error" ? current : value);
+    setState(current => nextPlayerState(current, value, retainSlowFrame));
   }
   function start() {
     setState("loading");
@@ -110,9 +113,10 @@ export default function YouTubeVideo({
           height={Math.max(200, height)}
           onEvent={event}
         /></View></View>
-        {state === "loading" && (
+        {(state === "loading" || state === "slow") && (
           <LoadingBar label={t("Loading video…")} />
         )}
+        {state === "slow" && <Button secondary label={t("Try again")} onPress={start} />}
       </View>
     );
   return (
