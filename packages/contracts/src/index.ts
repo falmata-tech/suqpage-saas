@@ -89,6 +89,7 @@ export type Market = {
   showrooms: MapShop[];
   nearbyGroups?: NearbyGroup[];
   categories: Array<{ key: string; label: string }>;
+  subcategories?: string[];
   places: Array<{ key: string; label: string; countryCode?:string }>;
   countries?:Array<{code:string;count:number}>;
   page: number;

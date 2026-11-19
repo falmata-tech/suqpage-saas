@@ -1,5 +1,6 @@
 import { productVideo } from './video/product-video';
 import {approvedDemoVideo} from './video/demo-video-catalog';
+import {approvedDemoSocialVideo} from './demo-social-videos';
 import { parseProductMedia, productMedia, type ProductMedia } from "./product-media";
 import {
   isLegacyShowroomDesignKey,
@@ -209,6 +210,7 @@ const youtubeRef = (value: unknown,policy?:RevisionProcessVideoPolicy) => {
   const result = clean(value, 40);
   if(youtubeRefPattern.test(result))return result;
   if(policy?.isDemo&&approvedDemoVideo(result,policy.businessId))return result;
+  if(policy?.isDemo&&approvedDemoSocialVideo(result,policy.businessId))return result;
   if(policy?.isDemo&&(policy.businessId===50||policy.businessId===62)&&
     result===policy.retainedProcessVideoRef){
     try{if(productVideo(result).provider==='tiktok')return result;}catch{/* Invalid retained ref. */}

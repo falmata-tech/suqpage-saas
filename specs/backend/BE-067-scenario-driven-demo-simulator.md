@@ -4,7 +4,7 @@ title: Scenario-driven demo marketplace simulation
 status: in_progress
 related: [BE-049, FE-061, BE-009, FE-079, DEP-054, ADR-0034, BE-055, BE-054, BE-035]
 owners: [backend, security, operations]
-last_updated: 2026-11-16
+last_updated: 2026-11-18
 change_level: L3
 ---
 
@@ -163,6 +163,16 @@ under BE-023. All six must remain active demos with complete enrolled catalogs
 and exactly the `food-farming` public membership. The three seed handles absent from production
 and all real or draft businesses are excluded. The operation requires no
 existing agriculture membership and adds it while retaining food membership.
+
+The reproducible local demo seed must reflect the already corrected public
+category outcome: the same six reviewed growers have both Agriculture and Food
+& drink memberships, with Agriculture as their reviewed primary; the two
+excluded food mills remain Food-primary. This seed parity is not authority to
+re-run a hosted category correction or resume the simulator.
+
+GIVEN a fresh local seed WHEN the six reviewed growers and two excluded mills
+are queried THEN the growers each have both category memberships, the mills
+have Food & drink only, and no other demo category is inferred from a name.
 It acknowledges the new sorted category set in each primary and catalog
 scenario binding and recomputes the enrollment hash. One transaction covers all
 six or none. A single operation key and audit receipt make replay inert.

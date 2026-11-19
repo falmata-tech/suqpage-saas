@@ -6,13 +6,13 @@ export const PRODUCTION_SCALES = [
 export type ProductionScale = (typeof PRODUCTION_SCALES)[number]["key"];
 
 export const DISCOVERY_INDUSTRIES = [
-  { key: "electronics", label: "Electronics & electrical", shortLabel: "Electronics & electrical", icon: "circuit", code: "ELC" },
-  { key: "beauty-wellness", label: "Personal care & household", shortLabel: "Personal & home care", icon: "leaf", code: "BEA" },
-  { key: "agriculture-growers", label: "Farms, livestock & feed", shortLabel: "Farms, livestock & feed", icon: "sprout", code: "AGR" },
-  { key: "food-farming", label: "Food & drink", shortLabel: "Food & drink", icon: "bowl", code: "FOD" },
-  { key: "machinery-tools", label: "Tools, machines & metalwork", shortLabel: "Tools & metalwork", icon: "tool", code: "MCH" },
-  { key: "home-living", label: "Furniture, art & building", shortLabel: "Furniture, art & building", icon: "frame", code: "HOM" },
-  { key: "fashion-textiles", label: "Clothes, fabrics & leather", shortLabel: "Clothes & fabrics", icon: "thread", code: "FSH" },
+  { key: "electronics", label: "Technology & energy", shortLabel: "Technology & energy", icon: "circuit", code: "ELC" },
+  { key: "beauty-wellness", label: "Health, beauty & household care", shortLabel: "Health, beauty & household care", icon: "leaf", code: "BEA" },
+  { key: "agriculture-growers", label: "Agriculture & natural resources", shortLabel: "Agriculture & natural resources", icon: "sprout", code: "AGR" },
+  { key: "food-farming", label: "Food, drink & fresh produce", shortLabel: "Food, drink & fresh produce", icon: "bowl", code: "FOD" },
+  { key: "machinery-tools", label: "Industry, tools & transport", shortLabel: "Industry, tools & transport", icon: "tool", code: "MCH" },
+  { key: "home-living", label: "Home, construction & leisure", shortLabel: "Home, construction & leisure", icon: "frame", code: "HOM" },
+  { key: "fashion-textiles", label: "Fashion, textiles & accessories", shortLabel: "Fashion, textiles & accessories", icon: "thread", code: "FSH" },
 ] as const;
 
 /** Public category scope: bounded, allowlisted, stable and safe for cache/SQL parameters. */

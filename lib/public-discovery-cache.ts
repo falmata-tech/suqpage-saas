@@ -62,13 +62,13 @@ export async function getPublicSponsors() {
 // personal exclusions never populate the shared application cache.
 const cachedIndependentBrowse = unstable_cache(
  async (scope:MarketScope) => getMarketplaceDiscoveryView({scope}),
- ['independent-browse-products-v2',String(ownerPageEditorEnabled())],
+ ['independent-browse-products-v3',String(ownerPageEditorEnabled())],
  {revalidate:PUBLIC_DISCOVERY_REVALIDATE_SECONDS,tags:['public-marketplace']},
 );
 export async function getCachedIndependentMarketplace(options:Parameters<typeof getMarketplaceDiscoveryView>[0]) {
  const scope=options?.scope;
  if(!scope)return getMarketplaceDiscoveryView(options);
- const search=normalizeMarketSearch({q:options.q,category:options.industry,country:options.country,city:options.city,place:options.place,offeringType:options.offeringType,madeToOrder:scope==='products'?options.madeToOrder:false,page:options.page});
+ const search=normalizeMarketSearch({q:options.q,category:options.industry,subcategory:options.subcategory,country:options.country,city:options.city,place:options.place,offeringType:options.offeringType,madeToOrder:scope==='products'?options.madeToOrder:false,page:options.page});
  if(!hasMarketCriteria(search)&&search.page===1&&!options.excludedBusinessIds?.length&&!options.readPort&&!options.now)return cachedIndependentBrowse(scope);
  return getMarketplaceDiscoveryView(options);
 }
@@ -76,7 +76,7 @@ export async function getCachedIndependentMarketplace(options:Parameters<typeof 
 /** Public adapter resolves personal exclusions before any shared cache use. */
 export async function getIndependentPublicMarketplace(scope:MarketScope,search:MarketSearch) {
   const excluded=await readExcludedBusinesses();
-  const view=await getCachedIndependentMarketplace({scope,q:search.query,industry:search.categories,country:search.countries,city:search.cities,place:search.legacyPlaces,madeToOrder:search.madeToOrder,page:search.page,excludedBusinessIds:excluded});
+  const view=await getCachedIndependentMarketplace({scope,q:search.query,industry:search.categories,subcategory:search.subcategory,country:search.countries,city:search.cities,place:search.legacyPlaces,madeToOrder:search.madeToOrder,page:search.page,excludedBusinessIds:excluded});
   if(!ownerPageEditorEnabled()||!view.showrooms.length)return view;
   const covers=await runtimeCurrentPageCovers(view.showrooms.map(s=>s.id));
   return {...view,showrooms:view.showrooms.map(s=>({...s,heroImagePath:covers.get(s.id)||s.heroImagePath}))};

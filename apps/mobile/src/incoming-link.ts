@@ -62,6 +62,12 @@ export function incomingAfricMadePath(input: string): string {
       const params = new URLSearchParams();
       if(state.query)params.set('q',state.query);
       state.categories.forEach(category=>params.append('category',category));
+      if(url.searchParams.has('subcategory')){
+        const filter=new URLSearchParams(params);
+        for(const value of url.searchParams.getAll('subcategory'))filter.append('subcategory',value);
+        const selected=readMarketSearch(filter).subcategory;
+        if(selected)params.set('subcategory',selected);
+      }
       if(state.place)params.set('place',state.place);
       if(state.page>1)params.set('page',String(state.page));
       if(state.open)params.set('view','search');else if(url.searchParams.get('view')==='map')params.set('view','map');

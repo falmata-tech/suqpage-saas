@@ -12,7 +12,7 @@ export default function CategorySelect({id,name,defaultValue='',required=false}:
   return <div className={styles.native}><CategoryIllustration name={value} size={32}/>
     <select id={id} name={name} value={value} required={required} onChange={event=>setValue(event.target.value)}>
       <option value="" disabled={required}>{t("Choose a category")}</option>
-      {BUSINESS_CATEGORY_OPTIONS.map(option=><option key={option.key} value={option.key}>{t(option.label)}</option>)}
+      {BUSINESS_CATEGORY_OPTIONS.filter(option=>option.key!=="other-manufacturing" || option.key===defaultValue).map(option=><option key={option.key} value={option.key}>{t(option.label)}</option>)}
     </select>
   </div>;
 }

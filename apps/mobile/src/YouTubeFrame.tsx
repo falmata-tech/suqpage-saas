@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Platform, View } from "react-native";
 import Constants from "expo-constants";
+import { applicationId } from "expo-application";
 import { WebView } from "react-native-webview";
 import {
   nativePlayerNavigation,
@@ -10,11 +11,11 @@ import {
 } from "./youtube-player";
 export default function YouTubeFrame({ id, height, onEvent }: PlayerProps) {
   const appId =
-    Constants.executionEnvironment === "storeClient"
+    applicationId || (Constants.executionEnvironment === "storeClient"
       ? "host.exp.exponent"
       : Platform.OS === "ios"
         ? Constants.expoConfig?.ios?.bundleIdentifier
-        : Constants.expoConfig?.android?.package;
+        : Constants.expoConfig?.android?.package);
   const origin = "https://" + (appId || "com.africmade.app").toLowerCase();
   const source = useMemo(
     () => ({ html: playerHtml(id, origin), baseUrl: origin + "/" }),

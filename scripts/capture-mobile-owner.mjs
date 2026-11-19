@@ -86,7 +86,7 @@ try {
   await page.getByLabel("Your name", { exact: true }).fill("Mobile Audit Owner");
   await page.getByLabel("Account phone", { exact: true }).fill("+251911000123");
   await page.getByLabel("Business name", { exact: true }).fill("Mobile Workflow Audit");
-  await page.getByRole("button", { name: "Farms, livestock & feed", exact: true }).click();
+  await page.getByRole("button", { name: "Agriculture & natural resources", exact: true }).click();
   await page.getByRole("button", { name: "I agree to the Terms and Privacy Policy", exact: true }).click();
   const address = page.getByLabel("Page handle", {exact: true});
   const create = page.getByRole("button", {name: "Create your business page", exact: true});

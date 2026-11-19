@@ -88,6 +88,13 @@ assert.equal(parsed.schemaVersion, 4);
 assert.equal(parsed.contentBlocks.blocks[0].type, "hero");
 const withProcess=(processVideoRef:string)=>({...input,business:{...input.business,processVideoRef}});
 const legacyProcess='tiktok:1234567890123456789';
+const reviewedSoapProcess='tiktok:7703762862484851981';
+assert.equal(parseRevisionSnapshotV4(withProcess(reviewedSoapProcess),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  {businessId:21,isDemo:true}).business.processVideoRef,reviewedSoapProcess);
+assert.throws(()=>parseRevisionSnapshotV4(withProcess(reviewedSoapProcess),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  {businessId:22,isDemo:true}),RevisionError);
+assert.throws(()=>parseRevisionSnapshotV4(withProcess(reviewedSoapProcess),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
+  {businessId:21,isDemo:false}),RevisionError);
 assert.throws(()=>parseRevisionSnapshotV4(withProcess(legacyProcess),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE),RevisionError);
 assert.throws(()=>parseRevisionSnapshotV4(withProcess(legacyProcess),SHOWROOM_COMPONENT_BANK_1_2_CANDIDATE,
   {businessId:50,isDemo:true}),RevisionError);

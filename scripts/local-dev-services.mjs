@@ -23,6 +23,7 @@ async function ready() {
 /** Narrow process/readiness port lets tests exercise startup without changing Docker. */
 export async function ensureLocalServices(port = {
   command, ready, platform: process.platform, now: Date.now,
+  dedicated: URL.canParse(process.env.SUQPAGE_POSTGRES_URL || '') && new URL(process.env.SUQPAGE_POSTGRES_URL).port === '57322',
   sleep: ms => new Promise(resolve => setTimeout(resolve, ms)), log: console.log,
 }) {
   if (await port.ready()) return;
@@ -43,7 +44,8 @@ export async function ensureLocalServices(port = {
   if (await port.ready()) return;
   if (!await port.command('supabase', ['--version'])) throw Error('Install the Supabase CLI, then run npm run dev again.');
   port.log('Starting this project’s local Supabase services (existing data is preserved)…');
-  if (!await port.command('supabase', ['start'], 180_000)) {
+  const args = port.dedicated ? ['start', '--workdir', '.local/africmade-dev-project'] : ['start'];
+  if (!await port.command('supabase', args, 180_000)) {
     throw Error('Local Supabase could not start. Run npm run local:supabase:start to inspect the error, then retry.');
   }
   const deadline = port.now() + 180_000;

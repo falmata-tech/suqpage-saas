@@ -4,13 +4,53 @@ title: Persist category-specific example videos atomically
 status: in_progress
 related: [BE-067, BE-047, BE-041, FE-061, BE-039, BE-031, BE-042, BE-048, FE-046, FE-050, DEP-039, DEP-042, ADR-0035]
 owners: [backend, security, operations]
-last_updated: 2026-11-15
+last_updated: 2026-11-18
 change_level: L2
 ---
 
 # BE-049 — Category example video selection
 
+## S197 owner correction — one social ref per public demo (2026-11-18)
+
+The owner's current requirement supersedes the planned first-party MP4 demo
+rollouts below. For each of the 66 active public demo showrooms, one reviewed
+TikTok or YouTube ref must be saved through the ordinary page, product and
+process-media contracts and reused across all four products. Do not run the
+old first-party cover/product/process correction requests. Real merchants,
+private drafts, photos, product facts, other tenant data and simulator progress
+remain outside the change.
+
+The finite plan binds exact business identity, owner/provider authority,
+current cover/process/product refs, published versions and enrollment hash. A
+candidate must have a primary creator URL and relevant moving-frame/playback
+evidence. Apply a showroom's page, process and four product changes atomically
+under the disabled simulator control, then acknowledge only the reviewed media
+change in its enrollment baseline. The two unenrolled legacy demos require the
+same exact media and identity guards without creating enrollments. A stale ref,
+version, identity, provider, gallery, or late write fails without partial media
+or history change. Exact replay is inert. An inverse plan needs fresh current
+guards and the protected before-image.
+
+GIVEN a valid exact public-demo plan WHEN applied THEN all effective video refs
+for its page, process chapter and products equal the one canonical selected
+social ref and each existing product photo remains in its original position.
+GIVEN a forged target, unsupported provider, drift, or mid-transaction failure
+WHEN applying THEN no page, product, process, enrollment or audit receipt is
+partially changed. Tests must cover both TikTok and YouTube targets, replay,
+rollback, the two unenrolled examples and real/private exclusion on disposable
+PostgreSQL before any hosted correction.
+
+The ordinary process snapshot accepts a TikTok ref only when it matches the
+exact reviewed demo business/video catalog entry. This first admits Liya Soap
+Kitchen's Bramble Berry soap clip in the fresh local seed. A different demo or
+real merchant cannot reuse that exception. Additional TikTok refs require
+individual reviewed entries; this admission alone does not authorize a hosted
+media write.
+
 ## S197 first-party demo admission
+
+Historical first-party MP4 plan, superseded by the 2026-11-18 owner direction
+above. Its correction steps are not current rollout instructions.
 
 The finite correction path may accept an internal `demo:<slug>` reference
 only for a reviewed `is_demo=1` business with a matching packaged asset and

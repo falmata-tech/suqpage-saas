@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
+import { installHistoricalSupportFixture } from './testing/tracking-migration-compat';
 import crypto from 'node:crypto';
-import { getDb, closeDbForTests } from './testing/postgres-fixture';
-import { migratePostgresDatabase } from '../lib/postgres-migrations';
-import { removeEmptyTrackingSchema } from './testing/tracking-migration-compat';
+import { getEmptyDb, closeDbForTests } from './testing/postgres-fixture';
+import { migrateHistoricalFixture } from '../lib/postgres-migrations';
 import { SUPPORT_STAFF_REPLY_TARGET_MS, SUPPORT_UNASSIGNED_QUEUE_TARGET_MS, SUPPORT_REPLY_SWEEP_LIMIT, supportReplyState } from '../lib/support-response-contract';
 
 function policy() {
@@ -31,28 +31,11 @@ function policy() {
 async function main() {
   policy();
   if (process.argv.includes("--pure")) return;
-  const db = await getDb(), t = 1_780_000_000_000;
+  const db = await getEmptyDb(), t = 1_780_000_000_000;
   try {
     const schema = (await db.prepare('SELECT current_schema() name').get()).name as string;
-    await removeEmptyTrackingSchema(db);
-    await db.exec(`DROP TABLE support_transport_plans;DROP INDEX support_transport_plan_events_latest;
-      DROP TABLE attention_email_deliveries;
-      ALTER TABLE support_conversations DROP COLUMN overdue_notified_assignment_id;
-      DROP INDEX support_staff_reply_pending;
-      DROP INDEX support_idle_end_evidence_latest;
-      ALTER TABLE support_conversations DROP COLUMN awaiting_staff_since,DROP COLUMN awaiting_staff_message_id,
-        DROP COLUMN overdue_notified_message_id,DROP COLUMN staff_joined_assignment_id;
-      ALTER TABLE attention_notifications DROP CONSTRAINT attention_notifications_kind_check;
-      ALTER TABLE attention_notifications ADD CONSTRAINT attention_notifications_kind_check
-        CHECK(kind IN ('inquiry','waiting_chat','assigned','reassigned','joined','message','closed','reopened'));
-      ALTER TABLE support_conversations DROP CONSTRAINT support_resolution_check;
-      ALTER TABLE support_conversations ADD CONSTRAINT support_resolution_check
-        CHECK(resolved_at IS NULL OR (status='closed' AND assistance_category IN ('buying_assistance','shipment_observation')));
-      ALTER TABLE support_events DROP CONSTRAINT ck_support_events_1;
-      ALTER TABLE support_events ADD CONSTRAINT ck_support_events_1 CHECK(event_type IN
-        ('created','assigned','reassigned','message','closed','reopened','transport_handoff','joined'));
-      DELETE FROM schema_migrations WHERE version IN (67,68,69,70)`);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version, 66);
+    await installHistoricalSupportFixture(db, schema, 66);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 66);
     const business = (await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('response-migration','Response migration','composition','active')").run()).insertedId;
     async function user(name: string, role: string) {
       const id = (await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES(?,'unused',?,'admin',?,0)").run(`${name}@example.test`, name, business)).insertedId;
@@ -117,13 +100,13 @@ async function main() {
     const before = await snapshot();
     const aborted = Error('Fixture migration rollback');
     await assert.rejects(() => db.runner.transaction(async () => {
-      assert.deepEqual((await migratePostgresDatabase(db.runner, schema)).applied, [67,68,69,70,71,72,73,74,75]);
+      assert.deepEqual((await migrateHistoricalFixture(db.runner, schema, 75)).applied, [67,68,69,70,71,72,73,74,75]);
       throw aborted;
     }), error => error === aborted);
     assert.equal((await db.prepare("SELECT COUNT(*) n FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='support_conversations' AND column_name='awaiting_staff_since'").get()).n, 0);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version, 66);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 66);
     assert.deepEqual(await snapshot(), before, 'Rollback preserves schema66 data and all history');
-    assert.deepEqual((await migratePostgresDatabase(db.runner, schema)).applied, [67,68,69,70,71,72,73,74,75]);
+    assert.deepEqual((await migrateHistoricalFixture(db.runner, schema, 75)).applied, [67,68,69,70,71,72,73,74,75]);
     assert.deepEqual(await snapshot(), before, 'Migration never rewrites retained transcript, events, identity, read or old idle state');
     for (const c of before.conversations) {
       const row = await db.prepare('SELECT awaiting_staff_since,awaiting_staff_message_id,overdue_notified_message_id,staff_joined_assignment_id FROM support_conversations WHERE id=?').get(c.id);
@@ -133,7 +116,7 @@ async function main() {
     }
     assert.equal((await db.prepare('SELECT COUNT(*) n FROM attention_notifications').get()).n, 0, 'Legacy cycles produce no catch-up notifications');
     const allAfter = await db.prepare('SELECT * FROM support_conversations ORDER BY id').all();
-    assert.deepEqual((await migratePostgresDatabase(db.runner, schema)).applied, []);
+    assert.deepEqual((await migrateHistoricalFixture(db.runner, schema, 75)).applied, []);
     assert.deepEqual(await db.prepare('SELECT * FROM support_conversations ORDER BY id').all(), allAfter, 'No-op replay cannot move anchors or accept historical implicit joins');
     await db.prepare("INSERT INTO attention_notifications(source_key,recipient_key,user_id,conversation_id,kind,created_at) VALUES(?,?,?,?,'reply_overdue',?)").run('fixture-overdue', `user:${staff}`, staff, guest, t);
     await assert.rejects(() => db.prepare("INSERT INTO attention_notifications(source_key,recipient_key,user_id,conversation_id,kind,created_at) VALUES(?,?,?,?,'unexpected-kind',?)").run('fixture-invalid', `user:${staff}`, staff, guest, t), /check constraint/);
@@ -142,7 +125,7 @@ async function main() {
     }
     const index = (await db.prepare("SELECT indexdef FROM pg_indexes WHERE schemaname=current_schema() AND indexname='support_staff_reply_pending'").get()).indexdef as string;
     for (const token of ['awaiting_staff_since, id', 'resolved_at IS NULL', 'overdue_notified_message_id IS DISTINCT FROM awaiting_staff_message_id']) assert.ok(index.includes(token), token);
-    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version, 75);
+    assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version, 75);
     console.log('PASS S162 pure assigned/unassigned response boundaries and isolated schema66→71 migration compatibility: conservative original-side/opener backfill, no legacy push, explicit-join reset, history/read/contact preservation, atomic rollback, CHECK/index and no-op replay.');
   } finally { await closeDbForTests(); }
 }

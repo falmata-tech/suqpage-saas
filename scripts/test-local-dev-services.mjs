@@ -20,6 +20,9 @@ function fixture({ healthy = false, resumed = false, failure = '', platform = 'd
 }
 let f = fixture({healthy:true}); await ensureLocalServices(f.port); assert.deepEqual(f.calls,[]);
 f = fixture(); await ensureLocalServices(f.port); assert.ok(f.calls.includes('open -a Docker')); assert.ok(f.calls.includes('supabase start'));
+f = fixture(); await ensureLocalServices({...f.port,dedicated:true});
+assert.ok(f.calls.includes('supabase start --workdir .local/africmade-dev-project'));
+assert.ok(!f.calls.includes('supabase start'));
 f = fixture({resumed:true}); await ensureLocalServices(f.port); assert.ok(!f.calls.includes('supabase start'));
 for (const failure of ['docker','open','daemon','cli','start','readiness']) {
   f = fixture({failure}); await assert.rejects(() => ensureLocalServices(f.port));

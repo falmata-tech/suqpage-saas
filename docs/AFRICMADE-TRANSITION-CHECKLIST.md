@@ -3,8 +3,29 @@
 Current product authority: [master brief](../AFRICMADE-MASTER-PROMPT.md).
 Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 [DEP-049](../specs/deployment/DEP-049-africmade-domain-and-app-cutover.md).
-Updated 2026-11-15. This working board replaces dated `CURRENT` labels; it does
+Updated 2026-11-18. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
+
+## Android honey playback and web delivery
+
+- [x] Diagnose the previous Seasonal Raw Honey failure (FE-053). On the same API 35 emulator the original APK played 583 frames over 19.7 seconds with internet access. Its referrer used the configured production package despite the installed local suffix. The 20-second startup deadline could discard an otherwise viable frame. The earlier run did not record which error fired.
+- [x] The rebuilt local APK installed and opened Seasonal Raw Honey on the API 35 emulator. After pressing the gallery and YouTube Play controls, the video advanced from 19 to 77 decoded frames and from 1.24 to 3.45 seconds. The WebView reported the installed package origin, `https://com.africmade.app.local`. APK SHA-256 `79dd368a0fe0776d8af18f590a4fdb10c298777f857d0b246417f5605b078072`.
+- [ ] Qualify the web candidate through PR 125 and the five protected checks. Verify the published production web routes after the Netlify build (DEP-052).
+
+## Local seven-category update
+
+- [x] Broaden the seven public labels while preserving weekday keys and existing assignments.
+- [x] Connect published product groups to web and mobile Market filters and check exact and approximate searches.
+- [x] Assign a selected TikTok or YouTube clip to each of the 66 local demo identities. Verify that all 264 products and all 66 stories use their showroom’s reference in freshly seeded PostgreSQL. The [selection list](operations/handoff-2026-11-14/S197-CANDIDATE-SOURCES.md#current-local-selections-for-the-66-showroom-portfolio) records each showroom and creator link.
+- [x] Review the filtered local Market on web and Expo and the saved creator galleries on phone-width web. Build Android locally. The debug-signed `com.africmade.app.local` APK contains the JS bundle, arm64-v8a and x86_64 native libraries and the loopback API/Auth origins. Local artifact SHA-256 `56ba713368b60a58049b1ccb5b44843e16ff2a04c36226f9cecad02d5a0e278b`. The APK installed and cold-launched on the API 35 x86_64 emulator. Food → Honey returned both expected Blue Nile Apiary products, and Seasonal Raw Honey opened from the results. Its YouTube player showed “Video unavailable” on first play and on retry. Physical-device testing remains open.
+
+Local web (port 3127) at 1400px and 390px and Expo web (port 8082) at 390px showed
+Honey & Comb Gift Box and Seasonal Raw Honey after selecting Food, drink & fresh
+produce → Honey. The web URL survived a reload. The same local map query returned
+Blue Nile Apiary only. A PostgreSQL fixture checked exact and typo product search,
+inactive groups and excluded businesses. The Featured layout checks passed in English,
+Amharic and Afaan Oromo. The S197 candidate-source notes track the remaining footage.
+
 
 ## Current position
 
@@ -44,6 +65,24 @@ and its independent admission remain open. Previous one-build exceptions are
 consumed. Physical Android, 16-KB runtime, FCM/EAS sending credentials, actual push,
 store screenshots and Play qualification remain separate unfinished work.
 
+### Local takeover setup
+
+The dedicated AfricMade Supabase instance on this Mac uses API port 57321 and
+PostgreSQL port 57322. The standard 54321/54322 pair belongs to another project
+on this machine. The local developer launcher accepts a matching loopback pair,
+uses the configured app port as its public origin and can start the dedicated
+stack from `.local/africmade-dev-project`. Its local Storage bucket
+`mirtpage-media` is private, limited to 10 MiB and accepts the media types in
+`supabase/config.toml`. The provider tests use the matching loopback API together
+with an isolated test schema. The category/media preview runs on port 3127.
+The local portfolio test creates new records in a disposable schema. The phone-width
+saved gallery checks played both YouTube and TikTok. Web and mobile typechecks
+passed. The Expo zoom-navigation test passed in isolation after its initial
+timeout during compilation. The full browser acceptance build compiled but
+stopped twice at Next.js 16.4.2’s security advisory before browser scenarios ran.
+The historical Support migration fixture also stops at its schema 80 guard. The
+repository is on schema 83. The discovery, identity and product upkeep checks passed.
+
 ## Surface status
 
 | Surface | Source / evidence | Remaining qualification |
@@ -58,6 +97,13 @@ store screenshots and Play qualification remain separate unfinished work.
 ## Ordered work
 
 ### Reviewed agriculture demo memberships (BE-067 / BE-029)
+
+- [x] Align the fresh local seed with the already corrected public outcome:
+  all six reviewed growers have Agriculture plus Food & drink, while food mills
+  28/32 remain Food-primary. Test the exact eight-business cohort and fresh
+  seed behavior. The 2026-11-18 deployed public Agriculture result still has
+  only the six intended growers; no hosted category write is planned. Keep the
+  simulator operator-paused and its separate stale-binding item below open.
 
 - [x] Correct production memberships for only grower IDs 5, 6, 27, 29, 31
   and 33 in one guarded transaction with a protected private before-image.
@@ -129,6 +175,40 @@ drafts and real tenants outside the automatic correction.
    under exact control state.
 
 ### S197 — relevant, working demo story and product videos (FE-061 / BE-049 / FE-057)
+
+#### Current owner direction — one social URL per showroom (2026-11-18)
+
+The owner wants one relevant TikTok or YouTube URL for each example showroom,
+reused as its story/process video and every product's only video. The first-party
+MP4 plan below is superseded; its open checkboxes are historical and must not
+be executed. The 2026-11-18 public readback at deployed main `00e92fca` found
+66 MP4 story covers, 264 MP4 product videos, and zero showrooms with one shared
+video. The local fixture uses older YouTube refs and is not a production
+before-image.
+
+1. [x] Verify current main/deployment and inventory public effective refs; do
+   not read private contacts or change hosted data.
+2. [ ] Curate one subject-fit primary creator URL for each of the 66 showrooms,
+   with both TikTok and YouTube represented; record actual moving-frame and
+   containing-page playback evidence and any provider limits.
+   The local seed now uses Bramble Berry's previously played soap-making TikTok
+   for Liya Soap Kitchen as the first exact demo-only TikTok admission. The
+   other family YouTube refs still need individual relevance/playback review;
+   this does not qualify a hosted correction.
+3. [ ] Implement and test an exact guarded correction for page, process and all
+   four product video refs together, including two unenrolled demos, rollback,
+   replay, drift, tenant exclusion, photos and simulator continuity.
+4. [ ] Review the affected desktop/phone web and Expo journeys locally, then
+   pass focused tests and the required full gates. Prepare exact hosted
+   before-images, current versions, target and rollback for review before
+   applying any public-data change. Keep the simulator paused.
+
+The fresh local seed and disposable PostgreSQL portfolio test now require one
+shared story/process/product ref per showroom and exact dual Agriculture/Food
+memberships for the six reviewed growers. Production remains at its prior media
+state until the finite guarded correction is qualified and explicitly reviewed.
+
+#### Historical first-party MP4 plan — superseded, do not execute
 
 #### Separate showroom process videos
 

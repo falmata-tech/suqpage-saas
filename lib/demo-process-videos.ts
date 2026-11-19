@@ -1,5 +1,7 @@
+import { demoSocialVideoForHandle } from './demo-social-videos';
+
 export type DemoProcessVideo = {
-  ref: `youtube:${string}` | "";
+  ref: `youtube:${string}` | `tiktok:${string}` | "";
   label: string;
   family: string;
 };
@@ -7,6 +9,13 @@ export type DemoProcessVideo = {
 const PROCESS_VIDEOS = {
   apparel: { ref: "youtube:vsO8bQ8e7x4", label: "Garment production process", family: "apparel" },
   art: { ref: "youtube:zDYlSLWAjQs", label: "Studio-art process", family: "art" },
+  basketWeaving: { ref: "youtube:_5kQaug4IwI", label: "Basket weaving with Azizi Life", family: "basket-weaving" },
+  aloeLotion: { ref: "youtube:xrmXnvIMU3s", label: "Mixing and filling aloe lotion", family: "lotion" },
+  handweaving: { ref: "youtube:22iNfILuO4U", label: "Handwoven textiles at Sabahar", family: "weaving" },
+  uniformSewing: { ref: "youtube:kuwfg34ZMyM", label: "Cutting and sewing a polo shirt", family: "garment-sewing" },
+  lathe: { ref: "youtube:cdwhD-0Uwps", label: "Machining a replacement shaft on a lathe", family: "machining" },
+  washablePad: { ref: "youtube:LVMQPqy_Ly8", label: "Sewing a layered reusable pad", family: "washable-textiles" },
+  carton: { ref: "youtube:oo4eoOh_Ex0", label: "Folding a fitted corrugated box", family: "box-making" },
   ceramics: { ref: "youtube:NJMPGgcDylY", label: "Ceramics production process", family: "ceramics" },
   concrete: { ref: "youtube:CPtmpcNJ6ec", label: "Concrete-product manufacturing", family: "concrete" },
   electronics: { ref: "youtube:rRbIS71ZVpU", label: "Electronics assembly process", family: "electronics" },
@@ -22,69 +31,108 @@ const PROCESS_VIDEOS = {
   soap: { ref: "youtube:WHyh9auBmA0", label: "Soap and personal-care production", family: "soap" },
   coffee: { ref: "youtube:Az0W61hotLM", label: "Coffee processing", family: "coffee" },
   water: { ref: "youtube:_ZybbjLgOuQ", label: "Bottled-water production", family: "water" },
+  cableHarness: { ref: "youtube:0HrpdHvXfyA", label: "Wire harness assembly at Scondar", family: "cableHarness" },
+  electricalPanel: { ref: "youtube:UhODRuL4XXE", label: "Assembling an electrical distribution enclosure", family: "electricalPanel" },
+  boardAssembly: { ref: "youtube:YWSPcY8DU0w", label: "Circuit board assembly at JLCPCB", family: "boardAssembly" },
+  sesamePress: { ref: "youtube:aqtJo6zbQLA", label: "Pressing sesame oil with Piteba", family: "sesamePress" },
+  leatherwork: { ref: "youtube:gos07cabE6w", label: "Cutting and stitching leather with Corter Leather", family: "leatherwork" },
+  worktable: { ref: "youtube:b6w3H4Rf62E", label: "Cutting steel for a workshop table frame", family: "worktable" },
+  stove: { ref: "youtube:lDsyioF3Qfs", label: "Ethiopian electric injera mitad and stove cabinet", family: "stove" },
+  bodyOil: { ref: "youtube:4eni7vRYWn8", label: "Blending and bottling body oil", family: "bodyOil" },
+  spiceBlending: { ref: "youtube:9npW0VKC1mw", label: "Preparing Ethiopian berbere spices", family: "spiceBlending" },
+  bakingInjera: { ref: "youtube:WRGv9eJaSDA", label: "Baking injera on a row of mitads", family: "bakingInjera" },
+  wovenLamp: { ref: "youtube:jBWMXF27_wE", label: "Making a woven wood pendant lamp", family: "wovenLamp" },
+  seedProcessing: { ref: "youtube:8idEg07ERIg", label: "Extracting vegetable seed at Johnny’s Selected Seeds", family: "seedProcessing" },
+  feedMill: { ref: "youtube:8pp0JqgQFbw", label: "Small animal feed milling line", family: "feedMill" },
+  mask: { ref: "youtube:es8NwRHdWFo", label: "Mixing a sea clay face mask", family: "mask" },
+  teaBlending: { ref: "youtube:5L744zdLaks", label: "Blending and packing loose-leaf herbs", family: "teaBlending" },
+  hairCare: { ref: "youtube:8ZLcs3Fax7Q", label: "Mixing shampoo and conditioner", family: "hairCare" },
+  orchardPacking: { ref: "youtube:fcHIOzV2Mig", label: "Harvesting and grading fruit at Hoch Orchard", family: "orchardPacking" },
+  forgedTools: { ref: "youtube:i9InlyDELr4", label: "Hand forging garden tools at Homestead Iron", family: "forgedTools" },
+  enclosureFabrication: { ref: "youtube:rm2fV4BrQ7k", label: "Welding and fabricating metal enclosures", family: "enclosureFabrication" },
+  loudspeakerCabinet: { ref: "youtube:R4e_N_F9vm0", label: "Building a wooden loudspeaker cabinet", family: "loudspeakerCabinet" },
+  solarLamp: { ref: "youtube:fRX8b-i6PSU", label: "Solar lantern assembly with Barefoot College", family: "solarLamp" },
+  woodTable: { ref: "youtube:hkfCZq425hY", label: "Choosing and shaping solid oak for a dining table", family: "woodTable" },
+  timber: { ref: "youtube:Wr351sG2V-Y", label: "Milling logs with Wood-Mizer", family: "timber" },
+  blockMaking: { ref: "youtube:5EUOdQE0LmU", label: "Concrete block production at Masa", family: "blockMaking" },
+  stitchedBag: { ref: "youtube:7FxPiriIcOg", label: "Sewing a custom messenger bag at Timbuk2", family: "stitchedBag" },
+  studioPainting: { ref: "youtube:Y4WSc9HwrDc", label: "Abel Beyene at work in his painting studio", family: "studioPainting" },
+  gateFabrication: { ref: "youtube:-7uibSJPZdU", label: "Fabricating a steel entrance gate", family: "gateFabrication" },
+  fittedShelving: { ref: "youtube:6UPvFb9s6vI", label: "Building fitted wall shelving with Peter Millard", family: "fittedShelving" },
+  dressmaking: { ref: "youtube:ZCApHhokDag", label: "Patterning and sewing a linen dress", family: "dressmaking" },
   unknown: { ref: "", label: "", family: "unknown" },
 } as const satisfies Record<string, DemoProcessVideo>;
 
-// Product/category identity is stronger than an incidental noun in its prose.
-// Keep these specific: coffee vessels, fruit bags and device pockets do not make
-// the product coffee, clothing or electronics respectively.
-const identityRules: Array<[RegExp, DemoProcessVideo]> = [
-  [/\b(ceramics?|clay|pottery)\b/i, PROCESS_VIDEOS.ceramics],
-  [/\b(soap|scrub bars?|cleansing bars?|body oils?)\b/i, PROCESS_VIDEOS.soap],
-  [/\b(feed|flour|grain|mill(?:ing)?)\b/i, PROCESS_VIDEOS.grain],
-  [/\b(stoves?|cooking equipment|metal(?:works?)?|rebar|weld(?:ing|ed)?|machin(?:e|ery|ing)|fabrication)\b/i, PROCESS_VIDEOS.metal],
-  [/\b(farms?|growers?|orchard|nursery|produce|harvest|fresh fruit|mixed fruit|bulk fruit|citrus|fresh greens|fresh herbs)\b/i, PROCESS_VIDEOS.farming],
-  [/\b(leather|wallet|satchel)\b/i, PROCESS_VIDEOS.leather],
-  [/\b(garments?|workwear|uniforms?|textiles?|weav(?:e|ing)|loom|cloth|fabric|backpacks?|totes?|crossbody|small bags)\b/i, PROCESS_VIDEOS.apparel],
-  [/\b(circuit boards?|pcb|charge controllers?|audio amplifiers?|radios?|electronics?)\b/i, PROCESS_VIDEOS.electronics],
-  [/\b(coffee beans?|ground coffee|roasted coffee|coffee roasting)\b/i, PROCESS_VIDEOS.coffee],
-  [/\b(pasta)\b/i, PROCESS_VIDEOS.pasta],
-  [/\b(bottled water|water bottling|water cases?|dispenser jars?)\b/i, PROCESS_VIDEOS.water],
-  [/\b(honey|apiary|beeswax)\b/i, PROCESS_VIDEOS.honey],
-  [/\b(concrete|pavers?|masonry blocks?|kerbs?|precast)\b/i, PROCESS_VIDEOS.concrete],
-  [/\b(paper|packaging)\b/i, PROCESS_VIDEOS.paper],
-  [/\b(furniture|timber|joinery|woodwork)\b/i, PROCESS_VIDEOS.furniture],
-  [/\b(art(?:ist|work)?|painting|canvas|sculpture|carv(?:e|ed|ing))\b/i, PROCESS_VIDEOS.art],
-];
-function identityVideo(value: string): DemoProcessVideo | undefined {
-  return identityRules.find(([pattern]) => pattern.test(value))?.[1];
-}
+// Keep specifically reviewed showroom choices stable when descriptions or department names change.
+const showroomVideos = new Map<string, DemoProcessVideo>([
+  ['addis-metalworks', PROCESS_VIDEOS.worktable],
+  ['afia-botanics', PROCESS_VIDEOS.mask],
+  ['blue-nile-apiary', PROCESS_VIDEOS.honey],
+  ['demo-abay-electrical-assembly', PROCESS_VIDEOS.electricalPanel],
+  ['demo-abay-machine-works', PROCESS_VIDEOS.enclosureFabrication],
+  ['demo-aloe-field-care', PROCESS_VIDEOS.aloeLotion],
+  ['demo-aster-device-workshop', PROCESS_VIDEOS.boardAssembly],
+  ['demo-aster-lighting-works', PROCESS_VIDEOS.wovenLamp],
+  ['demo-awash-garment-factory', PROCESS_VIDEOS.uniformSewing],
+  ['demo-ayni-garment-room', PROCESS_VIDEOS.dressmaking],
+  ['demo-bale-equipment-repair', PROCESS_VIDEOS.forgedTools],
+  ['demo-biftu-leather-goods', PROCESS_VIDEOS.leatherwork],
+  ['demo-biftu-natural-oils', PROCESS_VIDEOS.sesamePress],
+  ['demo-bora-highland-farm', PROCESS_VIDEOS.farming],
+  ['demo-buna-basket-house', PROCESS_VIDEOS.basketWeaving],
+  ['demo-dara-art-studio', PROCESS_VIDEOS.studioPainting],
+  ['demo-dawa-hand-tools', PROCESS_VIDEOS.forgedTools],
+  ['demo-desta-appliance-repair', PROCESS_VIDEOS.stove],
+  ['demo-hana-herbal-works', PROCESS_VIDEOS.teaBlending],
+  ['demo-kaffa-mill-workshop', PROCESS_VIDEOS.lathe],
+  ['demo-kaffa-spice-kitchen', PROCESS_VIDEOS.spiceBlending],
+  ['demo-kora-ceramic-house', PROCESS_VIDEOS.ceramics],
+  ['demo-kora-solar-lights', PROCESS_VIDEOS.solarLamp],
+  ['demo-kora-weaving-studio', PROCESS_VIDEOS.handweaving],
+  ['demo-laga-grain-mill', PROCESS_VIDEOS.grain],
+  ['demo-lemi-building-products', PROCESS_VIDEOS.blockMaking],
+  ['demo-liya-textile-house', PROCESS_VIDEOS.handweaving],
+  ['demo-lume-solar-repair', PROCESS_VIDEOS.solarLamp],
+  ['demo-meda-furniture-studio', PROCESS_VIDEOS.woodTable],
+  ['demo-meda-uniform-works', PROCESS_VIDEOS.uniformSewing],
+  ['demo-meriem-hair-care', PROCESS_VIDEOS.hairCare],
+  ['demo-mulu-family-farm', PROCESS_VIDEOS.farming],
+  ['demo-muna-botanical-studio', PROCESS_VIDEOS.bodyOil],
+  ['demo-netsa-hygiene-products', PROCESS_VIDEOS.washablePad],
+  ['demo-nile-sensor-studio', PROCESS_VIDEOS.boardAssembly],
+  ['demo-omo-packaging-factory', PROCESS_VIDEOS.carton],
+  ['demo-orbit-meter-workshop', PROCESS_VIDEOS.boardAssembly],
+  ['demo-rift-metal-studio', PROCESS_VIDEOS.worktable],
+  ['demo-rift-seed-growers', PROCESS_VIDEOS.seedProcessing],
+  ['demo-sena-home-textiles', PROCESS_VIDEOS.handweaving],
+  ['demo-sheger-rebar-works', PROCESS_VIDEOS.gateFabrication],
+  ['demo-shewa-cable-studio', PROCESS_VIDEOS.cableHarness],
+  ['demo-shewa-tool-workshop', PROCESS_VIDEOS.forgedTools],
+  ['demo-sidama-fabrication', PROCESS_VIDEOS.worktable],
+  ['demo-sofi-orchard', PROCESS_VIDEOS.orchardPacking],
+  ['demo-sora-workwear-studio', PROCESS_VIDEOS.uniformSewing],
+  ['demo-tana-cloth-house', PROCESS_VIDEOS.handweaving],
+  ['demo-tana-radio-works', PROCESS_VIDEOS.loudspeakerCabinet],
+  ['demo-tana-welding-shop', PROCESS_VIDEOS.worktable],
+  ['demo-tena-food-kitchen', PROCESS_VIDEOS.bakingInjera],
+  ['demo-tena-pasta-works', PROCESS_VIDEOS.pasta],
+  ['demo-tullu-timber-works', PROCESS_VIDEOS.timber],
+  ['demo-wabi-feed-mill', PROCESS_VIDEOS.feedMill],
+  ['demo-wabi-flour-mill', PROCESS_VIDEOS.grain],
+  ['demo-wabi-joinery-studio', PROCESS_VIDEOS.fittedShelving],
+  ['demo-zema-bag-studio', PROCESS_VIDEOS.stitchedBag],
+  ['entoto-ceramics', PROCESS_VIDEOS.ceramics],
+  ['green-terrace-farm', PROCESS_VIDEOS.farming],
+  ['koba-leather', PROCESS_VIDEOS.leatherwork],
+  ['nova-assembly', PROCESS_VIDEOS.boardAssembly],
+  ['rift-valley-mill', PROCESS_VIDEOS.grain],
+  ['selam-weave', PROCESS_VIDEOS.handweaving],
+  ['warka-furniture', PROCESS_VIDEOS.woodTable],
+]);
 
-const rules: Array<[RegExp, DemoProcessVideo]> = [
-  [/\b(pasta)\b/i, PROCESS_VIDEOS.pasta],
-  [/\b(bottled water|water bottling|water cases?|dispenser jars?|hospitality bottles?)\b/i, PROCESS_VIDEOS.water],
-  [/\b(coffee)\b/i, PROCESS_VIDEOS.coffee],
-  [/\b(honey|apiary|beeswax)\b/i, PROCESS_VIDEOS.honey],
-  [/\b(art(?:ist|work)?|painting|canvas|sculpture|sculpted|carv(?:e|ed|ing)|wall piece|wall panel)\b/i, PROCESS_VIDEOS.art],
-  [/\b(concrete|pavers?|masonry blocks?|kerbs?|precast)\b/i, PROCESS_VIDEOS.concrete],
-  [/\b(leather|wallet|satchel)\b/i, PROCESS_VIDEOS.leather],
-  [/\b(flour|grain|mill|spice)\b/i, PROCESS_VIDEOS.grain],
-  [/\b(soap|hygiene|botanics?|botanicals?|herbal|aloe|body care|hair care|skin care|natural oils?|balms?|diapers?|sanitary pads?|underpads?)\b/i, PROCESS_VIDEOS.soap],
-  [/\b(ceramics?|clay|pottery)\b/i, PROCESS_VIDEOS.ceramics],
-  [/\b(paper|packaging)\b/i, PROCESS_VIDEOS.paper],
-  [/\b(injera|prepared foods?|food kitchen|lunch|lentil|stew)\b/i, PROCESS_VIDEOS.food],
-  [/\b(electric(?:al)?|electronics?|circuit|device|solar|radio|cable|sensor|meter|lighting|appliance|control panels?|harnesses?)\b/i, PROCESS_VIDEOS.electronics],
-  [/\b(metal(?:works?)?|rebar|weld(?:ing|ed)?|machin(?:e|ery|ing)|fabrication|equipment|tools?|building products?)\b/i, PROCESS_VIDEOS.metal],
-  [/\b(garments?|workwear|uniforms?|textiles?|weav(?:e|ing)|loom|cloth|fabric|bags?)\b/i, PROCESS_VIDEOS.apparel],
-  [/\b(furniture|timber|joinery|wood|basket)\b/i, PROCESS_VIDEOS.furniture],
-  [/\b(farm|growers?|seed|orchard|nursery|produce|harvest|greens?|herbs?|fruit)\b/i, PROCESS_VIDEOS.farming],
-];
-
-export function demoProcessVideoFor(...values: string[]): DemoProcessVideo {
-  const identity = identityVideo(values.slice(0, 2).join(" "));
-  const description = values.join(" ");
-  return identity || rules.find(([pattern]) => pattern.test(description))?.[1] || PROCESS_VIDEOS.unknown;
-}
-
-export function demoOfferingVideoFor(
-  businessVideo: DemoProcessVideo,
-  ...values: string[]
-): DemoProcessVideo {
-  const [name = "", category = ""] = values;
-  const specificVideo = identityVideo(category) || identityVideo(name);
-  if (specificVideo) return specificVideo;
-  if (businessVideo.family !== "unknown" && businessVideo.ref) return businessVideo;
-  return demoProcessVideoFor(...values);
+export function demoProcessVideoFor(handle: string): DemoProcessVideo {
+  const social = demoSocialVideoForHandle(handle);
+  return social || showroomVideos.get(handle) || PROCESS_VIDEOS.unknown;
 }
 
 export const DEMO_PROCESS_VIDEOS = Object.freeze(PROCESS_VIDEOS);

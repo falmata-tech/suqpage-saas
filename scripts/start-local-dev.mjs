@@ -28,9 +28,11 @@ if (process.env.SUQPAGE_AUTH_DRIVER !== "supabase") {
 if (process.env.SUQPAGE_MEDIA_DRIVER !== "supabase") {
   throw new Error("Local development requires SUQPAGE_MEDIA_DRIVER=supabase.");
 }
-assertLoopback(process.env.SUQPAGE_POSTGRES_URL, "54322", "Local database URL");
-assertLoopback(process.env.SUQPAGE_SUPABASE_URL, "54321", "Local provider URL");
-assertLoopback(process.env.NEXT_PUBLIC_SUPABASE_URL, "54321", "Local browser provider URL");
+const dedicated = URL.canParse(process.env.SUQPAGE_POSTGRES_URL || '') &&
+  new URL(process.env.SUQPAGE_POSTGRES_URL).port === '57322';
+assertLoopback(process.env.SUQPAGE_POSTGRES_URL, dedicated ? "57322" : "54322", "Local database URL");
+assertLoopback(process.env.SUQPAGE_SUPABASE_URL, dedicated ? "57321" : "54321", "Local provider URL");
+assertLoopback(process.env.NEXT_PUBLIC_SUPABASE_URL, dedicated ? "57321" : "54321", "Local browser provider URL");
 
 let port = process.env.PORT || "3000";
 let hostname = '127.0.0.1';

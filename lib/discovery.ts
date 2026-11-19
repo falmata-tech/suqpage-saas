@@ -229,6 +229,7 @@ export type WeeklyFeaturedProgram = {
 };
 
 export type DiscoveryView = {
+  subcategories?:string[];
   countries?:{code:string;count:number}[];
   industry: DiscoveryIndustrySelection;
   industries: readonly DiscoveryIndustryOption[];
@@ -749,6 +750,7 @@ export function groupNearbyShowrooms(showrooms: DiscoveryShowroom[]): DiscoveryN
 
 type DiscoveryOptions = {
   scope?:MarketScope;
+  subcategory?:string;
   country?:string|readonly string[];
   city?:string|readonly string[];
   offeringType?:string;
@@ -777,7 +779,7 @@ function discoveryReadPort(port?: DiscoveryReadPort): DiscoveryReadPort {
 type MarketplaceBase = Omit<MarketplaceDiscoveryView, "featuredNowBusinessId">;
 
 async function buildIndependentMarketplace(options:DiscoveryOptions,port:DiscoveryReadPort):Promise<MarketplaceBase> {
- const search=normalizeMarketSearch({q:options.q,category:options.industry,country:options.country,city:options.city,place:options.place,offeringType:options.offeringType,madeToOrder:options.scope==='products'?options.madeToOrder:false,page:options.page});
+ const search=normalizeMarketSearch({q:options.q,category:options.industry,subcategory:options.subcategory,country:options.country,city:options.city,place:options.place,offeringType:options.offeringType,madeToOrder:options.scope==='products'?options.madeToOrder:false,page:options.page});
  const industry=normalizeIndustrySelection(search.categories),query=search.query;
  const excluded=excludedBusinessIds(options.excludedBusinessIds);
  const excludeWhere=excluded.length?' AND NOT b.id=ANY(ARRAY(SELECT jsonb_array_elements_text(?::jsonb)::bigint))':'';
@@ -794,6 +796,12 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
    WHERE country_code<>'' GROUP BY country_code,COALESCE(NULLIF(city_id,''),city) ORDER BY country_code,min(city)`,['all','all',...excludeParams]);
  const countries=[...new Set(locations.map(l=>l.country_code))].map(code=>({code,count:locations.filter(l=>l.country_code===code).reduce((sum,l)=>sum+Number(l.count),0)}));
  const places:DiscoveryPlaceOption[]=locations.map(l=>({key:`${l.country_code}:${l.city_key}`,label:l.city,kind:'city',countryCode:l.country_code,city:l.city,region:'',count:Number(l.count)}));
+ // Read only active groups with a visible product from an eligible showroom.
+ const subcategories=search.categories.length ? (await port.all<{name:string}>(`SELECT DISTINCT c.name
+   FROM (${selectSql(excludeWhere+mapPinWhere)}) listed
+   JOIN products item ON item.business_id=listed.id AND item.is_published=1 AND item.offering_kind<>'service'
+   JOIN categories c ON c.business_id=item.business_id AND c.id=item.category_id AND c.is_active=1
+   WHERE length(c.name) BETWEEN 1 AND 100 ORDER BY c.name`,[industry.key,industry.key,...excludeParams])).map(c=>c.name) : [];
  const locationsFilter=search.cities.map(cityLocation);
  const geography=` AND (?::jsonb='[]'::jsonb OR p.country_code IN(SELECT jsonb_array_elements_text(?::jsonb)))
    AND (?::jsonb='[]'::jsonb OR EXISTS(SELECT 1 FROM jsonb_to_recordset(?::jsonb) loc(country text,city text) WHERE p.country_code=loc.country AND (p.city_id=loc.city OR p.city=loc.city)))`;
@@ -801,7 +809,10 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
  const kindWhere=search.madeToOrder?" AND product.offering_kind='made_to_order'":'';
  const legacyLocations=(search.legacyPlaces||[]).map(key=>{const [kind,region,...city]=key.split(':');return {region,city:kind==='city'?city.join(':'):''};});
  const legacyWhere=legacyLocations.length?` AND p.country_code='ET' AND EXISTS(SELECT 1 FROM jsonb_to_recordset(?::jsonb) loc(region text,city text) WHERE lower(p.region)=lower(loc.region) AND (loc.city='' OR lower(p.city)=lower(loc.city)))`:'';
- const scopeWhere=geography+legacyWhere+excludeWhere+mapPinWhere,scopeParams=[...geoParams,...(legacyLocations.length?[JSON.stringify(legacyLocations)]:[]),...excludeParams];
+ const groupWhere=!search.subcategory ? '' : options.scope==='products' ? ' AND category.is_active=1 AND category.name=?' :
+   ` AND EXISTS(SELECT 1 FROM products item JOIN categories c ON c.id=item.category_id AND c.business_id=item.business_id
+      WHERE item.business_id=b.id AND item.is_published=1 AND item.offering_kind<>'service' AND c.is_active=1 AND c.name=?)`;
+ const scopeWhere=geography+legacyWhere+excludeWhere+mapPinWhere+groupWhere,scopeParams=[...geoParams,...(legacyLocations.length?[JSON.stringify(legacyLocations)]:[]),...excludeParams,...(search.subcategory?[search.subcategory]:[])];
  let rows:DiscoveryRow[]=[],products:DiscoveryProductResultRow[]=[];
  let total=0,searchOrder:{kind:'product'|'business';id:number}[]=[];
  const request=normalizePageRequest({page:search.page},MARKET_PRODUCT_BATCH_SIZE);
@@ -813,7 +824,7 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
   const productParams=[industry.key,industry.key,searchTerms(query),...scopeParams];
   const normalCount=options.scope==='businesses'?Number((await port.get<{total:number}>(`SELECT count(*) total FROM (${selectSql(queryWhere+scopeWhere)}) matches`,businessParams))?.total||0):Number((await port.get<{total:number}>(productSearchResultSql(productWhere,'',true),productParams))?.total||0);
   const spelling=options.scope==='businesses'&&normalCount>=MARKET_MAP_LIMIT?[]:await findSpellingMatches({query,industry:industry.key,city:'',region:'',locations:legacyLocations,scale:'',exactBusinessIds:rows.map(r=>r.id),excludedBusinessIds:excluded,
-   discovery:{scope:options.scope!,countries:search.countries,cities:locationsFilter.filter((l):l is {country:string;city:string}=>Boolean(l)),madeToOrder:search.madeToOrder,...(options.scope==='businesses'?{publicMapLocations:true}:{}),...(legacyLocations.length?{legacyCountry:'ET' as const}:{})}},port);
+   discovery:{scope:options.scope!,subcategory:search.subcategory,countries:search.countries,cities:locationsFilter.filter((l):l is {country:string;city:string}=>Boolean(l)),madeToOrder:search.madeToOrder,...(options.scope==='businesses'?{publicMapLocations:true}:{}),...(legacyLocations.length?{legacyCountry:'ET' as const}:{})}},port);
   const approximate=spelling.filter(m=>m.kind===(options.scope==='businesses'?'business':'product'));
   total=normalCount+approximate.length;
   const window=pageWindow(total,request);
@@ -830,7 +841,7 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
  }
  const showrooms=rows.map(toShowroom);
  const {items:_items,...resultPage}=pageResult(products,total,request);
- return {industry,industries:DISCOVERY_INDUSTRY_OPTIONS,query,suggestions:[],searchProducts:products.map(toProductResult),searchBusinesses:[],searchOrder,
+ return {industry,subcategories,industries:DISCOVERY_INDUSTRY_OPTIONS,query,suggestions:[],searchProducts:products.map(toProductResult),searchBusinesses:[],searchOrder,
   resultCounts:{products:options.scope==='products'?total:0,businesses:options.scope==='businesses'?total:0},resultPage,place:search.cities.join('|'),places,countries,
   productionScale:'',total:showrooms.length,sponsoredCount:showrooms.filter(s=>s.sponsored).length,
   locationCount:new Set(showrooms.map(s=>`${s.countryCode}:${s.city}`)).size,showrooms,nearbyGroups:groupNearbyShowrooms(showrooms)};

@@ -12,11 +12,12 @@
     "eas-build-post-install": "node ../../scripts/validate-mobile-build.cjs"
   },
   "dependencies": {
+    "@africmade/contracts": "0.1.0",
     "@maplibre/maplibre-react-native": "11.4.0",
     "@supabase/supabase-js": "^2.112.3",
-    "@africmade/contracts": "0.1.0",
     "@types/geojson": "7946.0.16",
     "expo": "~57.0.33",
+    "expo-application": "57.0.3",
     "expo-clipboard": "~57.0.2",
     "expo-constants": "~57.0.19",
     "expo-crypto": "~57.0.3",

@@ -58,7 +58,7 @@ async function main(){
   const unchanged=async()=>({cases:await db.prepare('SELECT * FROM support_conversations ORDER BY id').all(),messages:await db.prepare('SELECT * FROM support_messages ORDER BY id').all(),assignments:await db.prepare('SELECT * FROM support_assignments ORDER BY id').all(),events:await db.prepare("SELECT * FROM support_events WHERE event_type NOT IN ('transport_plan_updated','transport_plan_link_replaced') ORDER BY id").all(),attention:await db.prepare('SELECT * FROM attention_notifications ORDER BY id').all()});
   const protectedBefore=await unchanged();
   assert.deepEqual(await readStaffTransportPlan(staff,first.id),{plan:null,sharePath:null});assert.equal((await db.prepare('SELECT COUNT(*) n FROM support_transport_plans').get()).n,0,'GET never creates a plan/link');
-  assert.equal(Object.hasOwn(await getPublicSupportConversation(first.token,now),'transportPlan'),false,'Old guest DTOs omit plan fields before an explicit save');
+  await assert.rejects(()=>getPublicSupportConversation(first.token,now),error=>error instanceof SupportError&&error.code==='public_chat_retired');
   assert.equal(Object.hasOwn((await getSupportConversation(owner,second.id)).conversation,'transportPlan'),false,'Old owner DTOs omit plan fields before an explicit save');
   const input={conversationId:first.id,publicRef:first.publicRef,expectedVersion:0,legs:[leg('air'),leg('van'),leg('motorcycle')]};
   const created=await saveTransportPlan(staff,input,now);assert.equal(created.plan.version,1);assert.equal(created.plan.legs.length,3);assert.match(created.sharePath,/^\/transport-plan#[a-f0-9]{64}$/);
@@ -99,7 +99,7 @@ async function main(){
 
   const token=created.sharePath.split('#')[1],shared=await readSharedTransportPlan(token);assert.equal(shared.kind,'plan');assert.deepEqual(shared.kind==='plan'?shared.plan:null,winner);
   // BE-058 retires anonymous/participant publication; retained schema70 plans stay private.
-  const guestView=await getPublicSupportConversation(first.token,now);for(const key of['transportPlan','transportPlanLink'])assert.equal(Object.hasOwn(guestView,key),false);assert.ok(!JSON.stringify(guestView).includes('PRIVATE_NOTE'));
+  await assert.rejects(()=>getPublicSupportConversation(first.token,now),error=>error instanceof SupportError&&error.code==='public_chat_retired');
   const ownerView=await getSupportConversation(owner,second.id);for(const key of['transportPlan','transportPlanLink'])assert.equal(Object.hasOwn(ownerView.conversation,key),false);
   const ownerReceipt=await readOwnerTransport(owner,{conversation:second.id});assert.ok('conversation'in ownerReceipt);for(const key of['transportPlan','transportPlanLink'])assert.equal(Object.hasOwn(ownerReceipt.conversation||{},key),false);
   await assert.rejects(()=>getSupportConversation(foreign,second.id),error=>error instanceof SupportError&&error.code==='not_found');

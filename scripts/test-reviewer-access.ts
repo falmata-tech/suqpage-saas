@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
-import {getDb, closeDbForTests} from './testing/postgres-fixture';
+import {assertLocalFixtureProvider,getDb, closeDbForTests} from './testing/postgres-fixture';
 import {reviewerBinding, reviewerEmail, reviewerSignInMode, authenticateReviewer, ReviewerAccessError, type ReviewerAccount, type ReviewerIdentityPort} from '../lib/reviewer-access';
 import {reviewerAccounts, reviewerProvider} from '../lib/reviewer-access-runtime';
 import {createPublicClientWorkspace} from '../lib/signup';
@@ -48,7 +48,7 @@ async function main() {
   const db=await getDb(),providerIds:string[]=[];
   const previous={driver:process.env.SUQPAGE_AUTH_DRIVER,email:process.env.SUQPAGE_REVIEW_EMAIL,id:process.env.SUQPAGE_REVIEW_PROVIDER_ID};
   process.env.SUQPAGE_AUTH_DRIVER='supabase';
-  assert.equal(new URL(supabaseAuthConfig().url).origin,'http://127.0.0.1:54321','Real provider tests must be local only');
+  assertLocalFixtureProvider(supabaseAuthConfig().url);
   const admin=createAfricMadeSupabaseAdminClient();
   try {
     const email=`qa-review-${crypto.randomUUID()}@example.test`,password=crypto.randomBytes(32).toString('base64url');

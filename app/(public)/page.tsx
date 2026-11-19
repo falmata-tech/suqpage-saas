@@ -30,7 +30,7 @@ async function MarketWorkspace({ searchParams }: { searchParams: MarketSearchPar
   const params=new URLSearchParams();for(const [key,value] of Object.entries(query)){for(const item of Array.isArray(value)?value:value?[value]:[])params.append(key,item);}
   let initialBusiness:MarketSearch,initialProduct:MarketSearch;
   // Older shared-query links open their requested view without coupling scopes.
-  const legacy=!([...params.keys()].some(k=>k.startsWith('b.')||k.startsWith('p.')))&&Boolean(query.q||query.industry||query.category||query.place||query.offeringType||query.madeToOrder);
+  const legacy=!([...params.keys()].some(k=>k.startsWith('b.')||k.startsWith('p.')))&&Boolean(query.q||query.industry||query.category||query.subcategory||query.place||query.offeringType||query.madeToOrder);
   const selectedView=query.view==='search'||(legacy&&query.view!=='map')?'search':query.view==='map'?'map':undefined;
   try {
     initialBusiness=readMarketSearch(params,'b.');initialProduct=readMarketSearch(params,'p.');

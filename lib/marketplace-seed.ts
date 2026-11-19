@@ -93,7 +93,7 @@ export const SEEDED_MARKETPLACE_PROFILES: Record<string, SeededMarketplaceProfil
     longitude: 40.01,
   },
   "green-terrace-farm": {
-    industryKeys: ["agriculture-growers"],
+    industryKeys: ["agriculture-growers", "food-farming"],
     city: "Bishoftu",
     zone: "East Shewa",
     region: "Oromia",
@@ -109,7 +109,7 @@ export const SEEDED_MARKETPLACE_PROFILES: Record<string, SeededMarketplaceProfil
     longitude: 39.27,
   },
   "blue-nile-apiary": {
-    industryKeys: ["agriculture-growers"],
+    industryKeys: ["agriculture-growers", "food-farming"],
     city: "Bahir Dar",
     zone: "Bahir Dar",
     region: "Amhara",

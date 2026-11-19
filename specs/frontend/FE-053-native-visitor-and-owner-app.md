@@ -726,6 +726,11 @@ allowed provider URLs and API projections remain unchanged.
   Messages accept only bounded ready/error events from the expected frame, never
   application actions/private data. Block native top-level outbound navigation.
 
+On Android, reaching the loading deadline offers Retry while the active YouTube
+frame continues loading. A late ready event clears Retry. An explicit player or
+WebView error still shows the unavailable state. The HTTPS referrer identifies
+the installed application package, including local build suffixes.
+
 Tests: pure provider/HTML/navigation validation; browser poster → iframe → inactive
 cleanup; load/error retry; cover and gallery integration. Actual iOS/Android
 playback/fullscreen/back behavior remains a required device check before release.

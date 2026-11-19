@@ -12,7 +12,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { ensureRuntimeDirectories } from "../lib/config";
-import { demoOfferingVideoFor, demoProcessVideoFor, type DemoProcessVideo } from "../lib/demo-process-videos";
+import { demoProcessVideoFor, type DemoProcessVideo } from "../lib/demo-process-videos";
 import type { DenseDemoOfferingKind } from "../lib/dense-demo-seed";
 import { DISCOVERY_INDUSTRIES } from "../lib/discovery";
 import { isSeededFeatured, SEEDED_MARKETPLACE_PROFILES, seededMarketplaceBoothPath, } from "../lib/marketplace-seed";
@@ -44,7 +44,7 @@ async function runPostgresFixture() {
         await db.close();
         process.exit(0);
     }
-    const addBusiness = db.prepare(`INSERT INTO businesses(handle,name,design_key,design_manifest_json,tagline,description,logo_path,hero_title,hero_subtitle,hero_image_path,contact_email,whatsapp,telegram,tiktok,process_video_ref,is_live,live_platform,live_url,status) VALUES(@handle,@name,'composition',@design_manifest_json,@tagline,@description,@logo_path,@hero_title,@hero_subtitle,@hero_image_path,@contact_email,@whatsapp,@telegram,@tiktok,@process_video_ref,@is_live,@live_platform,@live_url,'active')`);
+    const addBusiness = db.prepare(`INSERT INTO businesses(handle,name,design_key,design_manifest_json,tagline,description,logo_path,hero_title,hero_subtitle,hero_image_path,contact_email,whatsapp,telegram,tiktok,process_video_ref,is_live,live_platform,live_url,status,is_demo) VALUES(@handle,@name,'composition',@design_manifest_json,@tagline,@description,@logo_path,@hero_title,@hero_subtitle,@hero_image_path,@contact_email,@whatsapp,@telegram,@tiktok,@process_video_ref,@is_live,@live_platform,@live_url,'active',1)`);
     const addCategory = db.prepare("INSERT INTO categories(business_id,collection_id,name,slug,sort_order) VALUES(?,?,?,?,?)");
     const addProduct = db.prepare(`INSERT INTO products(
   business_id,collection_id,category_id,name,slug,eyebrow,description,image_path,
@@ -175,7 +175,7 @@ async function runPostgresFixture() {
     const seeded = new Map<string, number>();
     const processVideoByBusiness = new Map<string, DemoProcessVideo>();
     for (const business of businesses) {
-        const processVideo = demoProcessVideoFor(business.handle, business.name, business.description);
+        const processVideo = demoProcessVideoFor(business.handle);
         processVideoByBusiness.set(business.handle, processVideo);
         seeded.set(business.handle, Number((await addBusiness.run({
             ...business,
@@ -193,7 +193,7 @@ async function runPostgresFixture() {
         await sequentialEach(products, async (p, i) => {
             const profile = seedOfferingProfile(handle, p);
             const simple = simplifyDemoOffering({description:p.description,kind:p.offeringKind || profile.offeringKind,unit:p.quantityUnit,highlights:p.highlights,options:p.options});
-            await addProduct.run(businessId, null, cats.get(p.category)!, p.name, p.slug, '', simple.description, p.image, p.availability || "available", simple.kind, "optional", '', '', '', i, p.videoRef || demoOfferingVideoFor(processVideoByBusiness.get(handle)!, p.name, p.category, p.description).ref, p.priceMinor ?? (profile.offeringKind === "manufacturing_capability" ? null : 35000 + i * 12500), '', '[]');
+            await addProduct.run(businessId, null, cats.get(p.category)!, p.name, p.slug, '', simple.description, p.image, p.availability || "available", simple.kind, "optional", '', '', '', i, processVideoByBusiness.get(handle)!.ref, p.priceMinor ?? (profile.offeringKind === "manufacturing_capability" ? null : 35000 + i * 12500), '', '[]');
         });
     }
     type BenchmarkProduct = {
@@ -431,13 +431,9 @@ async function runPostgresFixture() {
         "home-living": "home",
         "fashion-textiles": "textile",
     };
-    const discoveryCrossListings: Record<string, string[]> = {
-        "blue-nile-apiary": ["food-farming"],
-        "green-terrace-farm": ["food-farming"],
-    };
     for (const [handle, businessId] of seeded) {
         const profile = SEEDED_MARKETPLACE_PROFILES[handle];
-        const industryKeys = [...new Set([...(profile?.industryKeys || []), ...(discoveryCrossListings[handle] || [])])].filter((key) => key in fallbackByIndustry);
+        const industryKeys = [...new Set(profile?.industryKeys || [])].filter((key) => key in fallbackByIndustry);
         if (!profile || !industryKeys.length)
             continue;
         const industryKey = industryKeys[0];
@@ -693,7 +689,6 @@ async function runPostgresFixture() {
         for (const item of items) await inquiryItem.run(iid, item.id, item.name, null, item.offering_kind === "service" ? "One appointment" : "2 pieces", item.offering_kind, item.quantity_mode, "{}");
     }
     // These rows were created by this empty-target demo seed, never imported accounts.
-    await db.exec("UPDATE businesses SET is_demo=1");
     await db.exec("UPDATE businesses SET public_email='hello+' || handle || '@example.test', public_phone='+447700900' || lpad(id::text,3,'0')");
     await db.exec("UPDATE users SET account_phone='+447700900' || lpad((id+100)::text,3,'0') WHERE email LIKE '%@mirtpage.local' OR email LIKE '%@demo.mirtpage.local'");
     for (const [handle, businessId] of seeded) {

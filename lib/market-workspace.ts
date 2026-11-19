@@ -11,7 +11,7 @@ export type MarketWorkspaceState = {
 
 export const MARKET_WORKSPACE_SESSION_TTL_MS = 2 * 60 * 60 * 1000;
 const MAX_SNAPSHOT_LENGTH = 65_536;
-const LEGACY_KEYS = ['q', 'category', 'industry', 'place', 'country', 'city', 'offeringType', 'madeToOrder', 'page'];
+const LEGACY_KEYS = ['q', 'category', 'subcategory', 'industry', 'place', 'country', 'city', 'offeringType', 'madeToOrder', 'page'];
 
 export function emptyMarketWorkspace(): MarketWorkspaceState {
   return {mode: 'businesses', business: emptyMarketSearch(), product: emptyMarketSearch()};

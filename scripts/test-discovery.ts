@@ -34,7 +34,7 @@ async function runPostgresFixture() {
     assert.match(independentSearchSource, /fetch\('\/api\/discovery\?'\+params,\{signal\}\)/);
     assert.match(independentSearchSource, /initialExclusionKey===exclusionKey\?batch\(initial\):undefined/);
     assert.match(independentSearchSource, /scopeKey:'\/api\/discovery:public:'\+scope\+':excluded:'\+exclusionKey/);
-    assert.match(discoveryMapSource, /useIndependentSearch\('businesses',businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey\)/);
+    assert.match(discoveryMapSource, /useIndependentSearch\('businesses',businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey,!panelOpen\)/);
     assert.match(discoveryMapSource, /marketSearchParams\('products',productSearch\)/);
     assert.match(discoveryMapSource, /window\.history\.replaceState\(window\.history\.state/);
     assert.doesNotMatch(discoveryUiSource, /type="submit">Search/);
@@ -298,7 +298,7 @@ async function runPostgresFixture() {
             assert.deepEqual(crossListedShowroom && {
                 key: crossListedShowroom.primaryIndustryKey,
                 label: crossListedShowroom.primaryIndustryShortLabel,
-            }, { key: "electronics", label: "Electronics & electrical" }, "a cross-listed page receives its earliest canonical category as stable visual metadata");
+            }, { key: "electronics", label: "Technology & energy" }, "a cross-listed page receives its earliest canonical category as stable visual metadata");
             const allShowroomById = new Map(allIndustries.showrooms.map((showroom) => [showroom.id, showroom]));
             const allGroupMembers = (group: (typeof allIndustries.nearbyGroups)[number]) => group.showroomIds.map((id) => allShowroomById.get(id)).filter((showroom): showroom is DiscoveryShowroom => Boolean(showroom));
             const allIndustryAddis = allIndustries.nearbyGroups.filter((group) => group.city === "Addis Ababa");
@@ -415,7 +415,7 @@ async function runPostgresFixture() {
                 city: "Addis Ababa",
                 region: "Addis Ababa",
                 primaryIndustryKey: "electronics",
-                primaryIndustryLabel: "Electronics & electrical",
+                primaryIndustryLabel: "Technology & energy",
             }, "product search identifies its source and reviewed place without inventing catalog metadata");
             assert.ok(search.suggestions.some((suggestion) => suggestion.kind === "showroom" && suggestion.query === "addis device 1"), "a matching result also offers its public showroom name");
             const placeSuggestions = await getDiscoveryView({ q: "Addis", featuredDay: 1, now: monday });
@@ -449,7 +449,7 @@ async function runPostgresFixture() {
             const sunday = await getDiscoveryView({ industry: "electronics", featuredDay: 0, now: monday });
             assert.equal(sunday.featured.mode, "featured");
             assert.equal(sunday.featured.title, "Daily Featured");
-            assert.equal(sunday.featured.industryLabel, "Farms, livestock & feed");
+            assert.equal(sunday.featured.industryLabel, "Agriculture & natural resources");
             assert.equal(sunday.featured.boothCount, 3);
             assert.ok(sunday.featured.booths.every((booth) => !booth.revealed && booth.showroom === null), "the future Sunday Daily Featured is redacted like every other future date");
             assert.ok(sunday.featured.booths.every((booth) => /^AGR-B\d{2}$/.test(booth.reference)));

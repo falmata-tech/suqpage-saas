@@ -27,6 +27,27 @@ export async function migratePostgresDatabase(
   schema = "public",
   migrationRole = "",
 ) {
+  return runMigrations(runner, schema, migrationRole);
+}
+
+/** Rehearse supported historical upgrades only inside disposable fixture schemas. */
+export function migrateHistoricalFixture(
+  runner: PostgresTransactionRunner,
+  schema: string,
+  through: 66 | 67 | 68 | 69 | 75,
+) {
+  if (!/^suqpage_test_[a-f0-9]{32}$/.test(schema)) {
+    throw new Error("Historical migration targets require an isolated test schema.");
+  }
+  return runMigrations(runner, schema, "", through);
+}
+
+async function runMigrations(
+  runner: PostgresTransactionRunner,
+  schema: string,
+  migrationRole: string,
+  through?: number,
+) {
   return runner.transaction(async () => {
     if (migrationRole) await runner.query(`SET LOCAL ROLE ${quotedRole(migrationRole)}`);
     await runner.query(`SET LOCAL search_path TO ${quotedSchema(schema)}`);
@@ -828,6 +849,7 @@ export async function migratePostgresDatabase(
         INSERT INTO schema_migrations(version) VALUES(66)`);
       applied.push(66);
     }
+    if (through === 66) return { applied };
     const migration67 = await runner.query('SELECT version FROM schema_migrations WHERE version=67');
     if (!migration67.rows.length) {
       await runner.query(`ALTER TABLE support_conversations
@@ -883,6 +905,7 @@ export async function migratePostgresDatabase(
         INSERT INTO schema_migrations(version) VALUES(67)`);
       applied.push(67);
     }
+    if (through === 67) return { applied };
     const migration68 = await runner.query('SELECT version FROM schema_migrations WHERE version=68');
     if (!migration68.rows.length) {
       await runner.query(`ALTER TABLE support_conversations DROP CONSTRAINT support_resolution_check;
@@ -894,6 +917,7 @@ export async function migratePostgresDatabase(
         INSERT INTO schema_migrations(version) VALUES(68)`);
       applied.push(68);
     }
+    if (through === 68) return { applied };
     const migration69 = await runner.query('SELECT version FROM schema_migrations WHERE version=69');
     if (!migration69.rows.length) {
       await runner.query(`ALTER TABLE support_conversations ADD COLUMN overdue_notified_assignment_id BIGINT
@@ -934,6 +958,7 @@ export async function migratePostgresDatabase(
       await runner.query('INSERT INTO schema_migrations(version) VALUES(69)');
       applied.push(69);
     }
+    if (through === 69) return { applied };
     const migration70 = await runner.query('SELECT version FROM schema_migrations WHERE version=70');
     if (!migration70.rows.length) {
       await runner.query(`CREATE TABLE support_transport_plans (
@@ -1129,6 +1154,7 @@ export async function migratePostgresDatabase(
       if(!reviewed(after.rows,[expressions[0].replace('25000','65000'),expressions[1].replace('24000','64000')]))throw new Error('Migration 75 could not verify shipment tracking JSON bounds.');
       await runner.query('INSERT INTO schema_migrations(version) VALUES(75)');applied.push(75);
     }
+    if (through === 75) return { applied };
     const migration76=await runner.query('SELECT version FROM schema_migrations WHERE version=76');
     if(!migration76.rows.length){
       if(!(await runner.query('SELECT version FROM schema_migrations WHERE version=75')).rows.length){

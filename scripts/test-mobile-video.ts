@@ -7,6 +7,7 @@ import {
   playerEvent,
   playerHtml,
   nativePlayerNavigation,
+  nextPlayerState,
 } from "../apps/mobile/src/youtube-player";
 
 test("FE-053 S146: empty native product gallery shows a localized no-photo state without controls", async () => {
@@ -144,7 +145,7 @@ test("FE-070: native YouTube frame uses the AfricMade fallback and retains confi
       name: "youtube-frame-ports",
       setup(buildPort) {
         buildPort.onResolve(
-          { filter: /^(react(?:\/jsx-runtime)?|react-native|react-native-webview|expo-constants)$/ },
+          { filter: /^(react(?:\/jsx-runtime)?|react-native|react-native-webview|expo-constants|expo-application)$/ },
           (args) => ({ path: args.path, namespace: "ports" }),
         );
         buildPort.onLoad({ filter: /.*/, namespace: "ports" }, (args) => ({
@@ -157,13 +158,14 @@ test("FE-070: native YouTube frame uses the AfricMade fallback and retains confi
                 ? "export const View='View',Platform={get OS(){return fixture.platform;}};"
                 : args.path === "expo-constants"
                   ? "export default fixture.constants;"
-                  : "export const WebView='WebView';",
+                  : args.path === "expo-application" ? "export const applicationId=fixture.installedId;" : "export const WebView='WebView';",
         }));
       },
     }],
   });
   const fixture = {
     platform: "android",
+    installedId: undefined as string | undefined,
     constants: {
       executionEnvironment: "standalone",
       expoConfig: null as null | {
@@ -179,11 +181,9 @@ test("FE-070: native YouTube frame uses the AfricMade fallback and retains confi
       };
     },
   };
-  vm.runInNewContext(result.outputFiles[0].text, {
-    module, exports: module.exports, fixture, URL, URLSearchParams,
-  });
 
-  for (const { environment, platform, packageId, expected } of [
+  for (const { environment, platform, packageId, installedId, expected } of [
+    { environment: "standalone", platform: "android", packageId: "com.africmade.app", installedId: "com.africmade.app.local", expected: "https://com.africmade.app.local" },
     { environment: "standalone", platform: "android", packageId: undefined, expected: "https://com.africmade.app" },
     { environment: "standalone", platform: "android", packageId: "com.africmade.app", expected: "https://com.africmade.app" },
     { environment: "standalone", platform: "android", packageId: "com.suqpage.app", expected: "https://com.suqpage.app" },
@@ -191,12 +191,14 @@ test("FE-070: native YouTube frame uses the AfricMade fallback and retains confi
     { environment: "standalone", platform: "ios", packageId: undefined, expected: "https://com.africmade.app" },
   ]) {
     fixture.platform = platform;
+    fixture.installedId = installedId;
     fixture.constants.executionEnvironment = environment;
     fixture.constants.expoConfig = packageId
       ? platform === "ios"
         ? { ios: { bundleIdentifier: packageId } }
         : { android: { package: packageId } }
       : null;
+    vm.runInNewContext(result.outputFiles[0].text, { module, exports: module.exports, fixture, URL, URLSearchParams });
     const webView = module.exports.default({
       id: "dQw4w9WgXcQ", height: 240, onEvent: () => {},
     }).props.children.props;
@@ -215,4 +217,14 @@ test("FE-070: native YouTube frame uses the AfricMade fallback and retains confi
     assert.equal(webView.sharedCookiesEnabled, false);
     assert.equal(webView.thirdPartyCookiesEnabled, false);
   }
+});
+
+test("FE-053: Android YouTube recovers from a slow load and preserves a genuine error", () => {
+  const slow = nextPlayerState("loading", "deadline", true);
+  assert.equal(slow, "slow");
+  assert.equal(nextPlayerState(slow, "ready", true), "ready");
+  assert.equal(nextPlayerState("ready", "deadline", true), "ready");
+  assert.equal(nextPlayerState(slow, "error", true), "error");
+  assert.equal(nextPlayerState("error", "ready", true), "error");
+  assert.equal(nextPlayerState("loading", "deadline", false), "error");
 });

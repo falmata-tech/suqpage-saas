@@ -181,7 +181,7 @@ test('administrator and staff remain within workspace permissions',async({page,b
   const dateInput=page.getByLabel('Program date',{exact:true}),currentDate=await dateInput.inputValue(),monday=new Date(`${currentDate}T12:00:00Z`);
   monday.setUTCDate(monday.getUTCDate()-(monday.getUTCDay()+6)%7);const dateIso=monday.toISOString().slice(0,10);
   await dateInput.fill(dateIso);await page.getByRole('button',{name:'Open date',exact:true}).click();
-  await expect(page.locator('.featured-lineup-panel h2')).toContainText('Electronics');
+  await expect(page.locator('.featured-lineup-panel h2')).toHaveText('Technology & energy');
   await expect(readFeaturedOverride(target,dateIso)).resolves.toEqual({day:[],lineup:[]});
   await page.locator('.featured-lineup-panel').getByRole('link',{name:'Edit',exact:true}).click();
   await page.getByRole('radio',{name:/^Manual\b/}).check();

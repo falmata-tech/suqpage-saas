@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';import crypto from 'node:crypto';import fs from 'node:fs';
-import {getDb,closeDbForTests} from './testing/postgres-fixture';
+import {assertLocalFixtureProvider,getDb,closeDbForTests} from './testing/postgres-fixture';
 import {planOwnerErasure,replanOwnerErasureAfterIdentityRemoval,eraseOwnerRows} from './operations/account-erasure';
 import {createPublicClientWorkspace} from '../lib/signup';import {findPlaceSuggestions} from '../lib/place-catalog';
 import {createAfricMadeSupabaseAdminClient} from '../lib/supabase-auth';import {supabaseAuthConfig,supabaseMediaStorageConfig} from '../lib/config';
@@ -9,7 +9,7 @@ import {createSupportConversation} from '../lib/support';
 
 async function main(){
  const db=await getDb();process.env.SUQPAGE_AUTH_DRIVER='supabase';process.env.SUQPAGE_MEDIA_DRIVER='supabase';
- assert.equal(new URL(supabaseAuthConfig().url).origin,'http://127.0.0.1:54321');assert.equal(new URL(supabaseMediaStorageConfig().url).origin,'http://127.0.0.1:54321');
+ assertLocalFixtureProvider(supabaseAuthConfig().url);assertLocalFixtureProvider(supabaseMediaStorageConfig().url);
  const admin=createAfricMadeSupabaseAdminClient(),store=getMediaObjectStore(),providerIds:string[]=[],media:Array<{namespace:MediaNamespace;key:string}>=[];
  try{
   const email='qa-erasure-'+crypto.randomUUID()+'@example.test',password=crypto.randomBytes(32).toString('base64url');
