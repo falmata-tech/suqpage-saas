@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
-import {getDb,closeDbForTests} from './testing/postgres-fixture';
-import {migratePostgresDatabase} from '../lib/postgres-migrations';
+import {getEmptyDb,closeDbForTests} from './testing/postgres-fixture';
+import {migrateHistoricalFixture} from '../lib/postgres-migrations';
 
 async function main(){
- const db=await getDb();
+ const db=await getEmptyDb();
  try{
   const schema=String((await db.prepare('SELECT current_schema() value').get()).value);assert.match(schema,/^suqpage_test_[a-f0-9]{32}$/);
-  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,80);
+  await migrateHistoricalFixture(db.runner,schema,75);
+  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,75);
   const tracking=['tracking_recipients','tracking_challenges','tracking_sessions','tracking_shipments','tracking_events','tracking_email_deliveries'];
   for(const table of tracking)assert.equal((await db.prepare(`SELECT COUNT(*) n FROM ${table}`).get()).n,0,'Only an empty disposable fixture may reconstruct schema71');
   await db.exec('ALTER TABLE tracking_recipients ALTER COLUMN verified_at SET NOT NULL');await db.exec('DELETE FROM schema_migrations WHERE version IN (72,73,74,75)');
@@ -26,15 +27,15 @@ async function main(){
   const permissions=()=>db.prepare("SELECT c.relname,c.relrowsecurity,c.relacl::text FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname=current_schema() ORDER BY c.relname").all();
   const nullable=async()=>String((await db.prepare("SELECT is_nullable value FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='tracking_recipients' AND column_name='verified_at'").get()).value);
   const before=await snapshot(),beforeColumns=await columns(),beforePermissions=await permissions(),sentinel=Error('Rollback72');
-  await assert.rejects(()=>db.runner.transaction(async()=>{assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[72,73,74,75]);assert.equal(await nullable(),'YES');throw sentinel;}),error=>error===sentinel);
+  await assert.rejects(()=>db.runner.transaction(async()=>{assert.deepEqual((await migrateHistoricalFixture(db.runner,schema,75)).applied,[72,73,74,75]);assert.equal(await nullable(),'YES');throw sentinel;}),error=>error===sentinel);
   assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version,71);assert.equal(await nullable(),'NO');assert.deepEqual(await snapshot(),before);assert.deepEqual(await permissions(),beforePermissions);
-  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[72,73,74,75]);assert.equal(await nullable(),'YES');assert.deepEqual(await snapshot(),before);assert.deepEqual(await permissions(),beforePermissions);
+  assert.deepEqual((await migrateHistoricalFixture(db.runner,schema,75)).applied,[72,73,74,75]);assert.equal(await nullable(),'YES');assert.deepEqual(await snapshot(),before);assert.deepEqual(await permissions(),beforePermissions);
   assert.deepEqual(await columns(),beforeColumns.map(column=>column.table_name==='tracking_recipients'&&column.column_name==='verified_at'?{...column,is_nullable:'YES'}:column),'No other column metadata changes');
   const pending=(await db.prepare("INSERT INTO tracking_recipients(email,email_hash,verified_at) VALUES('pending@example.test',?,NULL)").run('f'.repeat(64))).insertedId;assert.equal((await db.prepare('SELECT verified_at FROM tracking_recipients WHERE id=?').get(pending)).verified_at,null);
   await assert.rejects(()=>db.prepare("INSERT INTO tracking_recipients(email,email_hash,verified_at) VALUES('negative@example.test',?,-1)").run('1'.repeat(64)),/check constraint/);
   await assert.rejects(()=>db.prepare("INSERT INTO tracking_recipients(email,email_hash,verified_at) VALUES('pending@example.test',?,NULL)").run('2'.repeat(64)),/unique constraint/);
   await assert.rejects(()=>db.prepare('INSERT INTO tracking_sessions(token_hash,recipient_id,created_at,expires_at) VALUES(?,999999,123,456)').run('3'.repeat(64)),/foreign key constraint/);
-  const afterPending=await snapshot();assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);assert.deepEqual(await snapshot(),afterPending);
+  const afterPending=await snapshot();assert.deepEqual((await migrateHistoricalFixture(db.runner,schema,75)).applied,[]);assert.deepEqual(await snapshot(),afterPending);
   await assert.rejects(()=>db.exec('ALTER TABLE tracking_recipients ALTER COLUMN verified_at SET NOT NULL'),/contains null values/);assert.deepEqual(await snapshot(),afterPending,'A rollback must never invent verification or destroy pending recipients');
   console.log('PASS S141 isolated71→72: only verified_at nullability changes; existing data/locale/identity/FKs/RLS/ACLs preserved, rollback/replay safe, pending NULL valid and negative timestamps rejected.');
  }finally{await closeDbForTests();}
