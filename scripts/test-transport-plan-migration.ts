@@ -1,18 +1,14 @@
 import assert from 'node:assert/strict';
+import { installHistoricalSupportFixture } from './testing/tracking-migration-compat';
 import crypto from 'node:crypto';
-import {getDb,closeDbForTests} from './testing/postgres-fixture';
-import {migratePostgresDatabase} from '../lib/postgres-migrations';
-import {removeEmptyTrackingSchema} from './testing/tracking-migration-compat';
+import {getEmptyDb,closeDbForTests} from './testing/postgres-fixture';
+import {migrateHistoricalFixture} from '../lib/postgres-migrations';
 
 async function main(){
- const db=await getDb();
+ const db=await getEmptyDb();
  try{
   const schema=(await db.prepare('SELECT current_schema() value').get()).value as string;assert.match(schema,/^suqpage_test_[a-f0-9]{32}$/);
-  await removeEmptyTrackingSchema(db);
-  await db.exec(`DROP TABLE support_transport_plans;DROP INDEX support_transport_plan_events_latest;
-   ALTER TABLE support_events DROP CONSTRAINT ck_support_events_1;
-   ALTER TABLE support_events ADD CONSTRAINT ck_support_events_1 CHECK(event_type IN ('created','assigned','reassigned','message','closed','reopened','transport_handoff','joined','idle_ended'));
-   DELETE FROM schema_migrations WHERE version=70`);
+  await installHistoricalSupportFixture(db, schema, 69);
   const user=(await db.prepare("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES('migration-plan@example.test','unused','Migration fixture','admin',0)").run()).insertedId;
   const request=async(ref:string)=>(await db.prepare(`INSERT INTO support_conversations(public_ref,participant_kind,visitor_token_hash,visitor_session_expires_at,assistance_category,requester_label,visitor_phone,subject,status,created_at,updated_at,last_message_at)
    VALUES(?,'visitor',?,1800000000000,'shipment_observation','Retained private requester','+447700900999','Retained private goods','closed',1,2,3)`).run(ref,crypto.randomUUID())).insertedId;
@@ -21,10 +17,10 @@ async function main(){
   await db.prepare("INSERT INTO support_messages(conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at,sender_side) VALUES(?,?,'user',?,'Retained private note',?,3,'staff')").run(conversation,user,'user:'+user,crypto.randomUUID());
   const snapshot=async()=>({cases:await db.prepare('SELECT * FROM support_conversations ORDER BY id').all(),messages:await db.prepare('SELECT * FROM support_messages ORDER BY id').all(),assignments:await db.prepare('SELECT * FROM support_assignments ORDER BY id').all(),events:await db.prepare('SELECT * FROM support_events ORDER BY id').all(),attention:await db.prepare('SELECT * FROM attention_notifications ORDER BY id').all(),users:await db.prepare('SELECT * FROM users ORDER BY id').all()});
   const before=await snapshot(),sentinel=Error('Fixture transport migration rollback');
-  await assert.rejects(()=>db.runner.transaction(async()=>{assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[70,71,72,73,74,75]);throw sentinel;}),error=>error===sentinel);
-  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations WHERE version<=75').get()).version,69);assert.equal((await db.prepare("SELECT to_regclass('support_transport_plans') value").get()).value,null);assert.deepEqual(await snapshot(),before);
-  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[70,71,72,73,74,75]);assert.deepEqual(await snapshot(),before);assert.equal((await db.prepare('SELECT COUNT(*) n FROM support_transport_plans').get()).n,0,'No private legacy plan is backfilled from private handoff/intake');
-  assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);assert.deepEqual(await snapshot(),before);
+  await assert.rejects(()=>db.runner.transaction(async()=>{assert.deepEqual((await migrateHistoricalFixture(db.runner, schema, 75)).applied,[70,71,72,73,74,75]);throw sentinel;}),error=>error===sentinel);
+  assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,69);assert.equal((await db.prepare("SELECT to_regclass('support_transport_plans') value").get()).value,null);assert.deepEqual(await snapshot(),before);
+  assert.deepEqual((await migrateHistoricalFixture(db.runner, schema, 75)).applied,[70,71,72,73,74,75]);assert.deepEqual(await snapshot(),before);assert.equal((await db.prepare('SELECT COUNT(*) n FROM support_transport_plans').get()).n,0,'No private legacy plan is backfilled from private handoff/intake');
+  assert.deepEqual((await migrateHistoricalFixture(db.runner, schema, 75)).applied,[]);assert.deepEqual(await snapshot(),before);
   const legs=[{id:crypto.randomUUID(),providerName:'Explicit public provider',origin:'Origin',destination:'Destination',method:'truck'}],nonce='a'.repeat(64),hash='b'.repeat(64);
   await db.prepare('INSERT INTO support_transport_plans(conversation_id,version,legs,share_nonce,share_token_hash,updated_by_user_id,updated_at) VALUES(?,1,?::jsonb,?,?,?,4)').run(conversation,JSON.stringify(legs),nonce,hash,user);
   for(const bad of[0,-1])await assert.rejects(()=>db.prepare('UPDATE support_transport_plans SET version=? WHERE conversation_id=?').run(bad,conversation),/check constraint/);
