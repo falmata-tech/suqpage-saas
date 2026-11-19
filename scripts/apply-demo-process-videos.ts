@@ -1,6 +1,6 @@
 import { runtimeAll, runtimeRun, runtimeTransaction } from "../lib/runtime-sql";
 import { closePostgresRuntimeForTests } from "../lib/postgres-runtime-services";
-import { demoOfferingVideoFor, demoProcessVideoFor } from "../lib/demo-process-videos";
+import { demoProcessVideoFor } from "../lib/demo-process-videos";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
 const benchmarkHandles = [
     "selam-weave",
@@ -21,15 +21,15 @@ const handles = new Set([
 async function main() {
   const target = new URL(process.env.SUQPAGE_POSTGRES_URL || "");
   if (!["127.0.0.1", "localhost"].includes(target.hostname)) throw new Error("Demo updates require a local PostgreSQL target.");
-  const businesses = await runtimeAll<{ id: number; handle: string; name: string; description: string }>("SELECT id,handle,name,description FROM businesses ORDER BY id");
+  const businesses = await runtimeAll<{ id: number; handle: string; name: string; description: string }>("SELECT id,handle,name,description FROM businesses WHERE is_demo=1 AND status='active' ORDER BY id");
   let updated = 0;
   await runtimeTransaction(async () => {
     for (const business of businesses) {
       if (!handles.has(business.handle)) continue;
-      const video = demoProcessVideoFor(business.handle, business.name, business.description);
-      await runtimeRun("UPDATE businesses SET process_video_ref=? WHERE id=?", [video.ref,business.id]);
-      const products = await runtimeAll<{ id:number; name:string; category:string; description:string }>("SELECT p.id,p.name,COALESCE(c.name,'') category,p.description FROM products p LEFT JOIN categories c ON c.id=p.category_id WHERE p.business_id=? ORDER BY p.id",[business.id]);
-      for (const product of products) await runtimeRun("UPDATE products SET video_ref=? WHERE id=?",[demoOfferingVideoFor(video,product.name,product.category,product.description).ref,product.id]);
+      const video = demoProcessVideoFor(business.handle);
+      if (!video.ref) continue;
+      await runtimeRun("UPDATE businesses SET process_video_ref=? WHERE id=? AND is_demo=1 AND status='active'", [video.ref,business.id]);
+      await runtimeRun("UPDATE products SET video_ref=? WHERE business_id=? AND is_published=1 AND EXISTS(SELECT 1 FROM businesses b WHERE b.id=products.business_id AND b.is_demo=1 AND b.status='active')", [video.ref, business.id]);
       updated++;
     }
   });

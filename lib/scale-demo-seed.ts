@@ -2,6 +2,7 @@ import type { DenseDemoOfferingKind } from "./dense-demo-seed";
 import type { SeededMarketplaceProfile } from "./marketplace-seed";
 import type { SeedShowroomBrief } from "./showroom-seed-briefs";
 import type { ShowroomColorPalette } from "./showroom-design-systems";
+import { AGRICULTURE_CORRECTION_TARGETS } from "./demo-category-correction";
 
 type StyleKey =
   | "circuit"
@@ -418,6 +419,7 @@ export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = [...clientGro
     const assignedIndustryKey = industryKey === "food-farming" && /(farm|orchard|seed-grower|feed-mill)/.test(handle)
       ? "agriculture-growers"
       : industryKey;
+    const reviewedGrower = AGRICULTURE_CORRECTION_TARGETS.some(target => target.handle === handle);
     const location = locations[locationPlans[industryKey][index]];
     const sharedWorkshopAddress = groupIndex === 0 && index < 2;
     const coordinates = sharedWorkshopAddress
@@ -443,7 +445,7 @@ export const SCALE_DEMO_BUSINESSES: readonly ScaleDemoBusiness[] = [...clientGro
       boothPath: `/landing/showroom-booths/${handle}.svg`,
       profile: {
         ...location,
-        industryKeys: [assignedIndustryKey],
+        industryKeys: reviewedGrower ? ["agriculture-growers", "food-farming"] : [assignedIndustryKey],
         ...coordinates,
       },
       brief: {

@@ -8,7 +8,7 @@ export interface SpellingSearchPort {
   all<T extends Record<string, unknown>>(sql: string, values?: Array<string | number>): Promise<T[]>;
 }
 export type SpellingScope = { query: string; industry: string; city: string; region: string; locations?: readonly { city: string; region: string }[]; scale: string; exactBusinessIds: readonly number[];excludedBusinessIds?:readonly number[];
- discovery?:{scope:'businesses'|'products';countries:readonly string[];cities:readonly {country:string;city:string}[];madeToOrder:boolean;publicMapLocations?:boolean;legacyCountry?:'ET'} };
+ discovery?:{subcategory?:string;scope:'businesses'|'products';countries:readonly string[];cities:readonly {country:string;city:string}[];madeToOrder:boolean;publicMapLocations?:boolean;legacyCountry?:'ET'} };
 const CANDIDATES_PER_FIELD = 32;
 export const MAX_SPELLING_MATCHES = 100;
 const MIN_SIMILARITY = 0.25;
@@ -60,7 +60,7 @@ export const SPELLING_SEARCH_SQL = `WITH scope AS MATERIALIZED (
   SELECT 'product' kind,product.id,b.id business_id,product.name,
     ${indexedSearchText(['product.name','product.description',...businessFields])} document
   FROM candidate_products candidate JOIN products product ON product.id=candidate.id
-  JOIN businesses b ON b.id=product.business_id ${businessJoin} ${publicationJoin} WHERE ${eligible}
+  JOIN businesses b ON b.id=product.business_id ${businessJoin} ${publicationJoin} WHERE ${eligible} /* product group */
   UNION ALL
   SELECT 'business',b.id,b.id,b.name,${indexedSearchText(businessFields)}
   FROM businesses b ${businessJoin} ${publicationJoin}
@@ -101,6 +101,11 @@ export async function findSpellingMatches(scope: SpellingScope, port: SpellingSe
    sql=sql.replace('SELECT ?::', 'SELECT ?::jsonb discovery,?::');
    sql=sql.replaceAll("b.status='active'",`(scope.discovery->>'legacyCountry' IS NULL OR p.country_code=scope.discovery->>'legacyCountry') AND (jsonb_array_length(scope.discovery->'countries')=0 OR p.country_code IN(SELECT jsonb_array_elements_text(scope.discovery->'countries')))
     AND (jsonb_array_length(scope.discovery->'cities')=0 OR EXISTS(SELECT 1 FROM jsonb_to_recordset(scope.discovery->'cities') loc(country text,city text) WHERE p.country_code=loc.country AND (p.city_id=loc.city OR p.city=loc.city))) AND b.status='active'`);
+   if(scope.discovery.subcategory){
+    const groupMatch="EXISTS(SELECT 1 FROM categories g WHERE g.business_id=product.business_id AND g.id=product.category_id AND g.is_active=1 AND g.name=scope.discovery->>'subcategory')";
+    sql=sql.replaceAll("b.status='active'",`EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1 AND product.offering_kind<>'service' AND ${groupMatch}) AND b.status='active'`);
+    sql=sql.replace('/* product group */',`AND ${groupMatch}`);
+   }
    if(scope.discovery.publicMapLocations)sql=sql.replaceAll("b.status='active'",`EXISTS(SELECT 1 FROM owner_location_proposals map_location WHERE map_location.business_id=b.id AND (
     (map_location.location_mode='storefront' AND p.latitude IS NOT NULL AND p.longitude IS NOT NULL) OR
     (map_location.location_mode='area' AND map_location.place_id IS NOT NULL AND map_location.place_latitude IS NOT NULL AND map_location.place_longitude IS NOT NULL AND p.country_code<>'' AND map_location.place_id=p.city_id)

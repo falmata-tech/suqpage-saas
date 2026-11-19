@@ -3,7 +3,7 @@ import {isCountryCode} from './countries';
 export const MARKET_MAP_LIMIT = 200;
 export const MARKET_PRODUCT_BATCH_SIZE = 12;
 export type MarketScope = 'businesses'|'products';
-export type MarketSearch = {query:string;categories:string[];countries:string[];cities:string[];madeToOrder:boolean;page:number;legacyPlaces?:string[]};
+export type MarketSearch = {query:string;subcategory?:string;categories:string[];countries:string[];cities:string[];madeToOrder:boolean;page:number;legacyPlaces?:string[]};
 export const emptyMarketSearch=():MarketSearch=>({query:'',categories:[],countries:[],cities:[],madeToOrder:false,page:1});
 export class MarketSearchError extends Error {
  constructor(){super('Check your search filters.');}
@@ -18,10 +18,12 @@ export function cityLocation(key:string):{country:string;city:string}|null {
  const colon=key.indexOf(':'),country=key.slice(0,colon),city=key.slice(colon+1).trim();
  return colon>0&&isCountryCode(country)&&city.length>0&&city.length<=100&&!/[\u0000-\u001f\u007f]/.test(city)?{country,city}:null;
 }
-export function normalizeMarketSearch(input:{q?:string;category?:string|readonly string[];country?:string|readonly string[];city?:string|readonly string[];place?:string|readonly string[];madeToOrder?:boolean|string;offeringType?:string;page?:string|number}):MarketSearch {
+export function normalizeMarketSearch(input:{q?:string;category?:string|readonly string[];subcategory?:string;country?:string|readonly string[];city?:string|readonly string[];place?:string|readonly string[];madeToOrder?:boolean|string;offeringType?:string;page?:string|number}):MarketSearch {
  if(input.offeringType!==undefined&&input.offeringType!==''&&input.offeringType!=='products')throw new MarketSearchError();
+ const categories=normalizeDiscoveryCategories(input.category);
+ if(input.subcategory && (!categories.length || input.subcategory.length>100 || /[\u0000-\u001f\u007f]/.test(input.subcategory)))throw new MarketSearchError();
  return {query:(input.q||'').normalize('NFKC').replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,80),
- categories:normalizeDiscoveryCategories(input.category),
+ categories,...(input.subcategory?{subcategory:input.subcategory}:{}),
  countries:[...new Set(values(input.country).filter(isCountryCode))].sort().slice(0,16),
  cities:[...new Set(values(input.city).filter(key=>Boolean(cityLocation(key))))].sort().slice(0,16),
  madeToOrder:productOrderFilter(input.madeToOrder),
@@ -31,6 +33,7 @@ export function hasMarketCriteria(search:MarketSearch):boolean {return Boolean(s
 export function marketSearchParams(scope:MarketScope,search:MarketSearch):URLSearchParams {
  const p=new URLSearchParams({scope});if(search.query)p.set('q',search.query);
  for(const c of search.categories)p.append('category',c);
+ if(search.subcategory)p.set('subcategory',search.subcategory);
  for(const c of search.countries)p.append('country',c);
  for(const c of search.cities)p.append('city',c);
  for(const c of search.legacyPlaces||[])p.append('place',c);
@@ -39,12 +42,12 @@ export function marketSearchParams(scope:MarketScope,search:MarketSearch):URLSea
 }
 export function readMarketSearch(p:URLSearchParams,prefix=''):MarketSearch {
  if(!validMarketFilterParams(p,prefix))throw new MarketSearchError();
- return normalizeMarketSearch({q:p.get(prefix+'q')||'',category:p.getAll(prefix+'category'),country:p.getAll(prefix+'country'),city:p.getAll(prefix+'city'),place:p.getAll(prefix+'place'),madeToOrder:p.get(prefix+'madeToOrder')??undefined,offeringType:p.get(prefix+'offeringType')||'',page:p.get(prefix+'page')||'1'});
+ return normalizeMarketSearch({q:p.get(prefix+'q')||'',category:p.getAll(prefix+'category'),subcategory:p.get(prefix+'subcategory')||undefined,country:p.getAll(prefix+'country'),city:p.getAll(prefix+'city'),place:p.getAll(prefix+'place'),madeToOrder:p.get(prefix+'madeToOrder')??undefined,offeringType:p.get(prefix+'offeringType')||'',page:p.get(prefix+'page')||'1'});
 }
 /** Retired or malformed explicit type criteria must never broaden a query. */
 export function validMarketFilterParams(p:URLSearchParams,prefix=''):boolean {
  const mode=p.getAll(prefix+'madeToOrder'),legacy=p.getAll(prefix+'offeringType');
- return mode.length<=1&&mode.every(value=>['true','false','1','0'].includes(value))
+ return p.getAll(prefix+'subcategory').length<=1 && mode.length<=1&&mode.every(value=>['true','false','1','0'].includes(value))
   &&legacy.length<=1&&legacy.every(value=>value===''||value==='products');
 }
 /** Reject malformed explicit geographic criteria instead of broadening a query. */

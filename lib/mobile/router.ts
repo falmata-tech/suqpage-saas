@@ -144,7 +144,7 @@ async function dispatch(
         scope:q.get("scope")==="businesses"?"businesses":q.get("scope")==="products"?"products":undefined,
         country:q.getAll("country"),city:q.getAll("city"),offeringType:q.get("offeringType")||"",
         madeToOrder:q.get('madeToOrder')??undefined,
-        industry: q.getAll("category"),
+        industry: q.getAll("category"),subcategory:q.get("subcategory")||undefined,
         q: q.get("q") || "",
         place: q.getAll("place"),
         page: q.get("page") || "1",
@@ -215,7 +215,7 @@ async function dispatch(
     return { places: findPlaceSuggestions(query,country) };
   }
   if (method === "GET" && key === "categories")
-    return { categories: BUSINESS_CATEGORY_OPTIONS };
+    return { categories: BUSINESS_CATEGORY_OPTIONS.filter(option=>option.key!=="other-manufacturing").map(({key,label})=>({key,label})) };
   if (method === "GET" && key === "handles")
     return getHandleAvailability(
       mobileParse(() => parseBusinessHandle(q.get("handle"))),

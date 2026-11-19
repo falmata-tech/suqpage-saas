@@ -80,6 +80,24 @@ export { runtimeBusinessByHandle as getBusinessByHandle, runtimeBusinessByHandle
 export async function getAllBusinesses() { return postgresRuntimeServices().catalog.getAllBusinesses(); }
 export { runtimeTransaction as inTransaction } from '../../lib/runtime-sql';
 
+// The dedicated AfricMade stack uses a different loopback port pair so it can
+// coexist with other projects. Never mix its database with another Auth/Storage API.
+export function assertLocalFixtureProvider(apiUrl: string) {
+  const api = new URL(apiUrl);
+  const database = new URL(process.env.SUQPAGE_POSTGRES_URL || '');
+  const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(database.hostname);
+  const dedicated = loopback && database.port === '57322';
+  const standard = loopback && database.port === '54322';
+  const ciDatabase = process.env.CI === 'true' &&
+    (loopback || ['postgres', 'db'].includes(database.hostname)) && ['', '5432'].includes(database.port);
+  const expected = dedicated ? 'http://127.0.0.1:57321'
+    : standard || ciDatabase ? 'http://127.0.0.1:54321' : undefined;
+  if (api.origin !== expected || api.username || api.password ||
+      !/^-csearch_path=suqpage_test_[a-f0-9]{32}$/.test(database.searchParams.get('options') || '')) {
+    throw new Error('Provider test requires the loopback API for its isolated PostgreSQL fixture.');
+  }
+}
+
 export async function seedFixture() {
   const db = await getDb();
   if (Number((await db.prepare('SELECT COUNT(*) total FROM businesses').get()).total)) return;

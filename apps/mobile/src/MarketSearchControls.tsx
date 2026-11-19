@@ -6,20 +6,21 @@ import {countryName} from '../../../lib/countries';
 import {useApp} from './runtime';
 import {Sheet,CategoryArt} from './chrome';
 import {Icon,Button,Field,Copy,colors} from './ui';
-type OptionPicker='category'|'country'|'city';
+type OptionPicker='category'|'subcategory'|'country'|'city';
 type Picker=''|'filters'|OptionPicker;
 const checkboxKeyboard=(toggle:()=>void)=>Platform.OS==='web'?{onKeyDown:(event:{key:string;repeat?:boolean;preventDefault:()=>void})=>{if(event.key===' '||event.key==='Spacebar'){event.preventDefault();if(!event.repeat)toggle();}}}:{};
-export default function MarketSearchControls({scope,value,onChange,metadata,active=true}:{scope:MarketScope;value:MarketSearch;onChange:(value:MarketSearch)=>void;metadata:Pick<Market,'categories'|'countries'|'places'>|null;active?:boolean}) {
+export default function MarketSearchControls({scope,value,onChange,metadata,active=true}:{scope:MarketScope;value:MarketSearch;onChange:(value:MarketSearch)=>void;metadata:Pick<Market,'categories'|'countries'|'places'|'subcategories'>|null;active?:boolean}) {
  const {t,locale}=useApp(),{width,fontScale}=useWindowDimensions();const [contentWidth,setContentWidth]=useState(Math.max(0,width-24)),[picker,setPicker]=useState<Picker>(''),[text,setText]=useState('');
  const trigger=useRef<View>(null),choiceTriggers=useRef<Partial<Record<OptionPicker,View|null>>>({}),returnTrigger=useRef<'filters'|OptionPicker>('filters'),restoreFocus=useRef(false),lastScope=useRef(scope);
  const enlarged=fontScale>1.3,wide=contentWidth>=760&&!enlarged,ready=metadata!==null;
- const count=value.categories.length+value.countries.length+value.cities.length+(scope==='products'&&value.madeToOrder?1:0);
+ const count=value.categories.length+Number(Boolean(value.subcategory))+value.countries.length+value.cities.length+(scope==='products'&&value.madeToOrder?1:0);
  const change=(patch:Partial<MarketSearch>)=>onChange({...value,...patch,page:1});
- const title=picker==='filters'?'Filters':picker==='category'?'Categories':picker==='country'?'Country':'City';
+ const title=picker==='filters'?'Filters':picker==='category'?'Categories':picker==='subcategory'?'Subcategory':picker==='country'?'Country':'City';
  const choices=picker==='category'?(metadata?.categories||[]).map(c=>({...c,label:t(c.label)}))
+  :picker==='subcategory'?(metadata?.subcategories||[]).map(name=>({key:name,label:name}))
   :picker==='country'?(metadata?.countries||[]).map(c=>({key:c.code,label:countryName(c.code,locale)}))
   :picker==='city'?(metadata?.places||[]).filter(c=>c.countryCode&&value.countries.includes(c.countryCode)).map(c=>({...c,label:`${c.label} · ${countryName(c.countryCode!,locale)}`})):[];
- const selected=picker==='category'?value.categories:picker==='country'?value.countries:value.cities;
+ const selected=picker==='category'?value.categories:picker==='subcategory'?(value.subcategory?[value.subcategory]:[]):picker==='country'?value.countries:value.cities;
  const visibleChoices=choices.filter(c=>c.label.toLocaleLowerCase().includes(text.toLocaleLowerCase()));
  useEffect(()=>{
   if(!picker&&restoreFocus.current){
@@ -32,11 +33,11 @@ export default function MarketSearchControls({scope,value,onChange,metadata,acti
  function close(){restoreFocus.current=true;setPicker('');}
  function openChoice(next:OptionPicker){if(!ready)return;if(!picker)returnTrigger.current=next;setText('');setPicker(next);}
  function choose(key:string){const next=selected.includes(key)?selected.filter(k=>k!==key):[...selected,key].slice(0,16);
-  if(picker==='category')change({categories:next});else if(picker==='country')change({countries:next,cities:value.cities.filter(c=>next.includes(c.split(':')[0]))});else if(picker==='city')change({cities:next});
+  if(picker==='category')change({categories:next,subcategory:undefined});else if(picker==='subcategory')change({subcategory:value.subcategory===key?undefined:key});else if(picker==='country')change({countries:next,cities:value.cities.filter(c=>next.includes(c.split(':')[0]))});else if(picker==='city')change({cities:next});
  }
  const overview=picker==='filters';
  function renderFilters(overview:boolean){return <View testID={`${scope}-filters`} style={[s.filters,wide&&s.wideFilters,wide&&!overview&&{minWidth:scope==='products'?398:264},overview&&s.overviewFilters]}>
-  {([{key:'category',label:'Category',count:value.categories.length,icon:'grid'},{key:'country',label:'Country',count:value.countries.length,icon:'globe'},{key:'city',label:'City',count:value.cities.length,icon:'pin'}] as const).map(f=><Pressable key={f.key} ref={node=>{if(!overview)choiceTriggers.current[f.key]=node;}} accessibilityRole="button" accessibilityLabel={t(f.label)+(f.count?` (${f.count})`:'')} accessibilityState={{disabled:!ready||f.key==='city'&&!value.countries.length,selected:f.count>0}} aria-expanded={picker===f.key} aria-disabled={!ready||f.key==='city'&&!value.countries.length} disabled={!ready||f.key==='city'&&!value.countries.length} onPress={()=>openChoice(f.key)} style={[s.filter,wide&&!overview&&s.wideGeo,overview&&s.overviewChoice,f.count>0&&s.active,(!ready||f.key==='city'&&!value.countries.length)&&{opacity:.65}]}>
+  {([{key:'category',label:'Category',count:value.categories.length,icon:'grid'},...(value.categories.length && (metadata?.subcategories?.length || value.subcategory)?[{key:'subcategory' as const,label:'Subcategory',count:Number(Boolean(value.subcategory)),icon:'grid' as const}]:[]),{key:'country',label:'Country',count:value.countries.length,icon:'globe'},{key:'city',label:'City',count:value.cities.length,icon:'pin'}] as const).map(f=><Pressable key={f.key} ref={node=>{if(!overview)choiceTriggers.current[f.key]=node;}} accessibilityRole="button" accessibilityLabel={t(f.label)+(f.count?` (${f.count})`:'')} accessibilityState={{disabled:!ready||f.key==='city'&&!value.countries.length,selected:f.count>0}} aria-expanded={picker===f.key} aria-disabled={!ready||f.key==='city'&&!value.countries.length} disabled={!ready||f.key==='city'&&!value.countries.length} onPress={()=>openChoice(f.key)} style={[s.filter,wide&&!overview&&s.wideGeo,overview&&s.overviewChoice,f.count>0&&s.active,(!ready||f.key==='city'&&!value.countries.length)&&{opacity:.65}]}>
    {(overview||wide)&&<Icon name={f.icon} size={overview?18:14}/>}<Text style={[s.filterText,overview&&s.overviewText]}>{t(f.label)}</Text>{f.count>0?<Text style={s.count} testID={`${scope}-${f.key}-count`}>{f.count}</Text>:<Icon name="down" size={11}/>}</Pressable>)}
   {scope==='products'&&<Pressable accessibilityRole="checkbox" accessibilityLabel={t('Made to order')} accessibilityState={{checked:value.madeToOrder}} aria-checked={value.madeToOrder} onPress={()=>change({madeToOrder:!value.madeToOrder})} {...checkboxKeyboard(()=>change({madeToOrder:!value.madeToOrder}))} style={[s.filter,s.customFilter,wide&&!overview&&s.wideCustom,overview&&s.overviewChoice,value.madeToOrder&&s.active]}><Icon name={value.madeToOrder?'check':'package'} size={overview?18:14}/><Text style={[s.filterText,overview&&s.overviewText]}>{t('Made to order')}</Text></Pressable>}
  </View>;}
@@ -52,7 +53,7 @@ export default function MarketSearchControls({scope,value,onChange,metadata,acti
     {choices.length>8&&<Field label={t('Filter options')} placeholder={t('Search')} value={text} onChangeText={setText}/>}
     {visibleChoices.map(c=><Pressable key={c.key} accessibilityRole="checkbox" accessibilityState={{checked:selected.includes(c.key)}} aria-checked={selected.includes(c.key)} onPress={()=>choose(c.key)} {...checkboxKeyboard(()=>choose(c.key))} style={s.option}>{picker==='category'&&<CategoryArt name={c.key} size={26}/>}<Text style={s.optionText}>{c.label}</Text>{selected.includes(c.key)&&<Icon name="check" color={colors.brand}/>}</Pressable>)}
     {!visibleChoices.length&&<Copy>{t('No matches found')}</Copy>}
-    <View style={s.actions}><Button secondary label={t('Clear')} onPress={()=>{if(picker==='category')change({categories:[]});else if(picker==='country')change({countries:[],cities:[]});else change({cities:[]});}}/><Button label={t('Done')} onPress={close}/></View>
+    <View style={s.actions}><Button secondary label={t('Clear')} onPress={()=>{if(picker==='category')change({categories:[],subcategory:undefined});else if(picker==='subcategory')change({subcategory:undefined});else if(picker==='country')change({countries:[],cities:[]});else change({cities:[]});}}/><Button label={t('Done')} onPress={close}/></View>
    </>}
   </Sheet>
  </View>;

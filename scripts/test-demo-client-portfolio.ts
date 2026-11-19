@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { getSeededBusinesses as getAllBusinesses, getCatalogByBusinessId, closeDbForTests } from "./testing/postgres-fixture";
-import { DEMO_PROCESS_VIDEOS, demoOfferingVideoFor, demoProcessVideoFor } from "../lib/demo-process-videos";
+import { getSeededBusinesses as getAllBusinesses, getCatalogByBusinessId, getDb, closeDbForTests } from "./testing/postgres-fixture";
+import { DEMO_PROCESS_VIDEOS, demoProcessVideoFor } from "../lib/demo-process-videos";
 import { seededMarketplaceBoothPath } from "../lib/marketplace-seed";
 import { catalogToRevisionSnapshotV4 } from "../lib/revision-v4-defaults";
 import { SCALE_DEMO_BUSINESSES } from "../lib/scale-demo-seed";
+import { AGRICULTURE_CORRECTION_TARGETS } from "../lib/demo-category-correction";
+import { DEMO_SOCIAL_VIDEOS } from "../lib/demo-social-videos";
+import { productVideoWatchUrl } from "../lib/video/product-video";
 import { evaluateCompositionFitness } from "../lib/showroom-guidance";
 async function runPostgresFixture() {
     const root = process.cwd();
@@ -28,10 +31,19 @@ async function runPostgresFixture() {
             ...(block.type === "call_to_action" ? [block.actionLabel] : []),
         ]).filter(Boolean).join("\n");
     }
-    const approvedProcessVideoRefs = new Set<string>(Object.values(DEMO_PROCESS_VIDEOS)
+    const mappedProcessVideoRefs = new Set<string>([...Object.values(DEMO_PROCESS_VIDEOS)
         .filter((video) => video.family !== "unknown")
-        .map((video) => video.ref));
+        .map((video) => video.ref), ...Object.values(DEMO_SOCIAL_VIDEOS).map(video => video.ref)]);
     assert.equal(active.length, 66, "portfolio contains 66 active fictional clients");
+    const db = await getDb();
+    for (const {handle} of AGRICULTURE_CORRECTION_TARGETS) {
+        const categories = await db.prepare("SELECT i.industry_key FROM business_industries i JOIN businesses b ON b.id=i.business_id WHERE b.handle=? ORDER BY i.industry_key").all(handle);
+        assert.deepEqual(categories.map(row => row.industry_key), ["agriculture-growers", "food-farming"], `${handle} retains both public categories in the fresh database`);
+    }
+    for (const handle of ["demo-laga-grain-mill", "demo-wabi-flour-mill"]) {
+        const categories = await db.prepare("SELECT i.industry_key FROM business_industries i JOIN businesses b ON b.id=i.business_id WHERE b.handle=? ORDER BY i.industry_key").all(handle);
+        assert.deepEqual(categories.map(row => row.industry_key), ["food-farming"], `${handle} stays Food-primary in the fresh database`);
+    }
     assert.equal(SCALE_DEMO_BUSINESSES.length, 56, "56 clients use complete explicit creative records");
     assert.equal(new Set(SCALE_DEMO_BUSINESSES.map((business) => business.creative.customerRequest)).size, 56, "scale clients have independent customer requests");
     assert.equal(new Set(SCALE_DEMO_BUSINESSES.map((business) => business.heroTitle)).size, 56, "scale clients have independent hero direction");
@@ -52,11 +64,14 @@ async function runPostgresFixture() {
         assert.ok(business.logo_path.startsWith("/"), `${business.handle} has a managed logo`);
         assert.ok(business.hero_image_path.startsWith("/"), `${business.handle} has managed hero media`);
         assert.doesNotMatch(business.description, publicFixtureLanguage, `${business.handle} public description does not expose fixture terminology`);
-        assert.match(business.process_video_ref, /^youtube:[A-Za-z0-9_-]{11}$/, `${business.handle} has a controlled process video`);
-        const expectedBusinessVideo = demoProcessVideoFor(business.handle, business.name, business.description);
-        assert.notEqual(expectedBusinessVideo.family, "unknown", `${business.handle} resolves to a reviewed production family`);
-        assert.equal(business.process_video_ref, expectedBusinessVideo.ref, `${business.handle} uses its reviewed process-video family`);
-        assert.ok(approvedProcessVideoRefs.has(business.process_video_ref), `${business.handle} uses an approved process video`);
+        assert.match(business.process_video_ref, /^(?:youtube:[A-Za-z0-9_-]{11}|tiktok:[1-9]\d{16,19})$/, `${business.handle} has a controlled process video`);
+        const expectedBusinessVideo = demoProcessVideoFor(business.handle);
+        assert.notEqual(expectedBusinessVideo.family, "unknown", `${business.handle} resolves to a mapped video family`);
+        assert.equal(business.process_video_ref, expectedBusinessVideo.ref, `${business.handle} uses its mapped showroom video`);
+        assert.ok(mappedProcessVideoRefs.has(business.process_video_ref), `${business.handle} uses a configured process video`);
+        const publication = await db.prepare("SELECT content_json FROM owner_page_publications WHERE business_id=? ORDER BY revision DESC LIMIT 1").get(business.id) as {content_json:string}|undefined;
+        assert.ok(publication, `${business.handle} has a published page`);
+        assert.equal(JSON.parse(publication.content_json).videoUrl, productVideoWatchUrl(expectedBusinessVideo.ref), `${business.handle} story video reuses its process video`);
         const boothPath = seededMarketplaceBoothPath(business.handle);
         for (const reference of [business.logo_path, business.hero_image_path, boothPath]) {
             const absolute = path.join(root, "public", reference);
@@ -86,10 +101,8 @@ async function runPostgresFixture() {
                 assert.ok(fs.statSync(absolute).size <= 150 * 1024, `${business.handle}/${product.slug} generated offering stays within 150 KiB`);
             }
             offeringRefs.add(product.image_path);
-            const expectedProductVideo = demoOfferingVideoFor(expectedBusinessVideo, product.name, product.category_name || "", product.description);
-            assert.notEqual(expectedProductVideo.family, "unknown", `${business.handle}/${product.slug} resolves to a reviewed production family`);
-            assert.equal(product.video_ref, expectedProductVideo.ref, `${business.handle}/${product.slug} has a relevant demo video`);
-            assert.ok(approvedProcessVideoRefs.has(product.video_ref), `${business.handle}/${product.slug} uses an approved process video`);
+            assert.equal(product.video_ref, expectedBusinessVideo.ref, `${business.handle}/${product.slug} reuses its showroom video`);
+            assert.ok(mappedProcessVideoRefs.has(product.video_ref), `${business.handle}/${product.slug} uses a configured process video`);
         }
         const snapshot = catalogToRevisionSnapshotV4(catalog);
         assert.doesNotMatch(publicBlockText(snapshot.contentBlocks), publicFixtureLanguage, `${business.handle} public content does not expose fixture terminology`);

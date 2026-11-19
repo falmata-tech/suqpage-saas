@@ -3,6 +3,7 @@ import type { Catalog } from "./types";
 import { ownerPageImageKey, type ShopPageContent } from "./owner-page-domain";
 import { controlledYouTubeWatchUrl } from "./youtube-provider";
 import { approvedDemoVideo } from "./video/demo-video-catalog";
+import { approvedDemoSocialVideo } from "./demo-social-videos";
 import { productVideoWatchUrl } from "./video/product-video";
 import { legacyPublicContacts, type PublicContacts } from "./business-profile-contacts";
 import { approvedDemoContactMethods } from "./demo-inquiry-policy";
@@ -17,7 +18,7 @@ export function initialBusinessProfile(catalog: Catalog): ShopPageContent {
   if (catalog.business.process_video_ref) {
     try {
       const ref=catalog.business.process_video_ref;
-      videoUrl=catalog.business.is_demo===1&&approvedDemoVideo(ref,catalog.business.id)
+      videoUrl=catalog.business.is_demo===1&&(approvedDemoVideo(ref,catalog.business.id)||approvedDemoSocialVideo(ref,catalog.business.id))
         ?productVideoWatchUrl(ref):controlledYouTubeWatchUrl(ref);
     } catch {}
   }

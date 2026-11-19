@@ -4,13 +4,56 @@ title: Category-relevant starter and multi-provider demo videos
 status: in_progress
 related: [BE-049, BE-067, FE-057, FE-046, BE-039, FE-060, BE-048, FE-050, FE-053, DEP-039, DEP-042, ADR-0035]
 owners: [product, frontend, backend, operations]
-last_updated: 2026-11-15
+last_updated: 2026-11-18
 change_level: L3
 ---
 
 # FE-061 — Category-relevant video examples
 
+## S197 owner correction — one social video per demo showroom (2026-11-18)
+
+The owner wants **one relevant public video URL per example showroom**. That
+same selected TikTok or YouTube video is the showroom's story/process video and
+the only video used by every product in that showroom. Different showrooms may
+select different providers; the public demo portfolio must include both TikTok
+and YouTube. The owner did not request recorded or hosted MP4s. The previously
+prepared first-party MP4 correction plans below are historical and must not be
+resumed or extended. Current public MP4 refs remain factual until an exact
+guarded correction is qualified and applied.
+
+Select each URL for the showroom's overall work and product range, not an
+incidental word in one product. Retain the creator's identity and the existing
+single `Example business` badge; do not present third-party footage as that
+fictional business's own process. Keep each product's photos, ordering, facts,
+contacts and history. An external player's blocked or unavailable state must
+keep the photos and a useful retry path; do not auto-open an external app.
+
+GIVEN an approved demo showroom video WHEN its page and four products load
+THEN the showroom story/process player and each product's sole video resolve to
+that same canonical social ref, while photos and other media order remain.
+GIVEN a real business or a private/unpublished demo WHEN this correction runs
+THEN its saved media is unchanged. GIVEN a missing, unrelated or unplayable
+candidate WHEN preparing the exact correction THEN no media write is admitted.
+
+Before a hosted write, record one reviewed primary creator URL and bounded
+moving-frame/playback verdict per showroom; verify representative desktop,
+phone web and Expo containing-page playback for both providers. Preserve an
+exact private before-image, current versions and simulator progress for each
+target; a failed or stale operation leaves all fields unchanged. Rollback uses
+fresh versions and the protected before-image, never a blind bulk replacement.
+
+The first local TikTok fixture is Bramble Berry's previously played soap-making
+clip for Liya Soap Kitchen. It represents that example showroom's handmade-soap
+work as a whole; it does not claim to show every product variant or the fictional
+business itself. Its exact demo-only process-ref admission has tenant-bound tests.
+The remaining seed family links are inherited placeholders pending individual
+source and containing-page review; a passing seed test does not qualify them.
+
 ## S197 remaining external demo video package
+
+Historical first-party MP4 plan, superseded by the 2026-11-18 owner direction
+above. The following rollout instructions are retained for traceability and
+must not be used as current work steps.
 
 The current 66 public fictional showrooms have 264 products. Fifteen business
 stories already use admitted first-party MP4s. Liya Soap Kitchen's separate

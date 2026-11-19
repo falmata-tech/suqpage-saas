@@ -97,7 +97,7 @@ function Form({ data, onSaved,onCancel }: { data: Details; onSaved?: () => void;
       <Copy>{t("Category")}</Copy>
       <Status {...categories} retry={categories.reload}/>
       <View style={s.wrap}>
-        {categories.data?.categories.map((c) => (
+        {categories.data && [...categories.data.categories,...(data.category==="other-manufacturing" && !categories.data.categories.some(c=>c.key===data.category)?[{key:data.category,label:"Other products"}]:[])].map((c) => (
           <Chip
             key={c.key}
             label={t(c.label)}

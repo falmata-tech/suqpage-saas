@@ -392,6 +392,10 @@ Details: FE-066/FE-053 and the existing contact/link adapters.
 
 ## 10. Market discovery behavior
 
+The seven Featured days cover physical goods across industries. Monday covers Technology & energy (including electronics and power equipment). Tuesday covers Health, beauty & household care (including medical supplies and cleaning products). Wednesday covers Food, drink & fresh produce. Thursday covers Industry, tools & transport (including machinery, vehicles, packaging and industrial supplies). Friday covers Home, construction & leisure (including furniture, building products, books, art and sporting goods). Saturday covers Fashion, textiles & accessories. Sunday covers Agriculture & natural resources (including farms, livestock, feed and raw materials). A grower can also appear on Wednesday when it supplies food. Market visitors can narrow a selected department to the active product groups offered by its public businesses. Products match their own group and the business map shows sellers of matching products. Demo videos follow the showroom’s actual work across category changes.
+
+
+
 Businesses searches public business identity/profile/location and controls map
 results. Products searches eligible physical products with source-business context.
 Each scope owns its query, optional category, country/city and other filters.
@@ -1017,6 +1021,12 @@ video examples after source and player review. It retains
 photos, identity, contacts and original stories. A finite paused operation through
 ordinary commands must preserve the BE-067 scenario progress and acknowledge only
 the admitted media change; an unreviewed edit still pauses rather than being erased.
+The owner's 2026-11-18 direction for the next correction is one relevant TikTok
+or YouTube URL per public example showroom, reused in its story/process chapter
+and every product. The existing published first-party MP4s remain the current
+state until a new guarded correction is reviewed and applied; no further MP4
+package is planned for this request. FE-061/BE-049 hold the acceptance and
+rollback requirements.
 The separate process chapter uses a finite guarded demo-only correction that
 retains catalog history and leaves owner pages, products and scenario progress
 unchanged. Matching first-party demo clips can play in that chapter.

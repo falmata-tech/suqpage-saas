@@ -1,3 +1,4 @@
+import { DISCOVERY_INDUSTRIES } from "./discovery-contract";
 import { runtimeAll, runtimeGet } from "./runtime-sql";
 import {
   likePattern,
@@ -83,7 +84,7 @@ export async function listPublicIndustries() {
   `);
   return rows.map(({ industry_key: key, label }) => ({
     key,
-    label,
+    label: DISCOVERY_INDUSTRIES.find(category => category.key === key)?.label ?? label,
   }));
 }
 
@@ -180,7 +181,7 @@ export async function listPublicShowrooms(input: PageInput & {
       tagline: item.tagline,
       imageUrl: item.image_url,
       industryKey: item.industry_key,
-      industry: item.industry_label,
+      industry: DISCOVERY_INDUSTRIES.find(category => category.key === item.industry_key)?.label ?? item.industry_label,
       featured: Boolean(item.featured),
     })),
     totalItems,

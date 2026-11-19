@@ -23,6 +23,24 @@ async function main() {
     const cross = await add('multi-cross', ['electronics', 'beauty-wellness']);
     const outside = await add('multi-outside', ['food-farming'], 'Woldia');
     for (const state of ['draft', 'excluded', 'unapproved', 'unpublished'] as const) await add(`multi-${state}`, ['electronics', 'beauty-wellness'], 'Addis Ababa', state);
+    const addGroup = async (businessId: number, name: string, active = 1) => {
+      const group = await db.prepare('INSERT INTO categories(business_id,name,slug,is_active) VALUES(?,?,?,?)').run(businessId,name,name.toLowerCase(),active);
+      await db.prepare('UPDATE products SET category_id=? WHERE id=(SELECT MIN(id) FROM products WHERE business_id=?)').run(group.insertedId,businessId);
+    };
+    await addGroup(a,'Oils');
+    await addGroup(b,'Retired',0);
+    await addGroup(outside,'Pantry');
+    for(const q of ['', 'Lotion', 'Lotoin']){
+      const filtered=await getMarketplaceDiscoveryView({scope:'products',industry:'beauty-wellness',subcategory:'Oils',q});
+      assert.deepEqual(filtered.subcategories,['Oils']);
+      assert.equal(filtered.resultPage.totalItems,1);
+      assert.deepEqual(filtered.searchProducts.map(p=>[p.categoryName,p.businessId]),[['Oils',a]]);
+    }
+    const excludedGroup=await getMarketplaceDiscoveryView({scope:'products',industry:'beauty-wellness',subcategory:'Oils',excludedBusinessIds:[a]});
+    assert.deepEqual(excludedGroup.subcategories,[]);
+    assert.equal(excludedGroup.resultPage.totalItems,0);
+    const inactiveGroup=await getMarketplaceDiscoveryView({scope:'products',industry:'electronics',subcategory:'Retired'});
+    assert.equal(inactiveGroup.resultPage.totalItems,0);
     const scope = 'electronics,beauty-wellness';
     const ids = (v: Awaited<ReturnType<typeof getMarketplaceDiscoveryView>>) => v.showrooms.map(b => b.id).sort((a,b) => a-b);
     for (const industry of [scope, 'beauty-wellness,electronics,electronics', ['electronics', 'beauty-wellness'], ['bad', scope]]) {

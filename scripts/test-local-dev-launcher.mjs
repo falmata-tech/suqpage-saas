@@ -27,6 +27,10 @@ try {
   assert.equal(JSON.parse(run([],base,{PORT:'3101'}).stdout).origin,'http://127.0.0.1:3101');
   assert.equal(JSON.parse(run().stdout).origin,'http://127.0.0.1:3000');
   assert.equal(JSON.parse(run(['--port=3102','--hostname=localhost']).stdout).origin,'http://localhost:3102');
+  const dedicated = {...base, SUQPAGE_POSTGRES_URL:'postgresql://localhost:57322/postgres',
+    SUQPAGE_SUPABASE_URL:'http://127.0.0.1:57321', NEXT_PUBLIC_SUPABASE_URL:'http://127.0.0.1:57321'};
+  assert.equal(run(['--port','3127'],dedicated).status,0);
+  assert.notEqual(run([],{...dedicated,NEXT_PUBLIC_SUPABASE_URL:base.NEXT_PUBLIC_SUPABASE_URL}).status,0);
   const mobile=run(['--port','3102','--hostname','0.0.0.0','--allow-lan']);
   assert.equal(mobile.status,0,mobile.stderr);
   assert.equal(JSON.parse(mobile.stdout).origin,'http://127.0.0.1:3102');

@@ -4,11 +4,15 @@ title: Paginated category results and standard page workspaces
 status: in_progress
 related: [FE-048, FE-030, FE-032, FE-040, FE-041, BE-033, DEP-030, FE-008, FE-043, FE-065, FE-072, BE-060]
 owners: [product, frontend, operations]
-last_updated: 2026-09-23
+last_updated: 2026-11-18
 change_level: L2
 ---
 
 # FE-042 — Category results and the standard page workflow
+
+## Seven featured departments and Market subcategories
+
+Given a visitor chooses a department, show the product groups actually offered by eligible businesses in that department. A selected group narrows Products to matching published physical products and Businesses to sellers of those products. Keep group names literal, scope them to the selected departments, and clear them when the parent selection changes. Preserve pagination, spelling, map eligibility, exclusions and independent web/native search state. Existing industry keys keep their weekday and memberships.
 
 ## Planned S146 — staff access across standard page tasks
 

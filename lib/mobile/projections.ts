@@ -113,6 +113,7 @@ export function marketDto(v: MarketplaceDiscoveryView): Market {
       : all,
     showrooms: v.showrooms.map(s => ({ ...mapShopDto(s), isFeatured: s.id === v.featuredNowBusinessId })),
     nearbyGroups: v.nearbyGroups.map(g => ({ key: g.key, city: g.city, latitude: g.latitude, longitude: g.longitude, showroomIds: g.showroomIds })),
+    subcategories:v.subcategories,
     categories: DISCOVERY_INDUSTRIES.map((c) => ({
       key: c.key,
       label: c.shortLabel,
