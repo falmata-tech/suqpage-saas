@@ -81,6 +81,21 @@ async function actualTikTok(page, label, stage) {
   await page.screenshot({path: out + '/' + label + '-progress.png'});
   return {start, progress, frameBox, stageBox};
 }
+async function expoTikTokWithRecovery(page, label) {
+  try {
+    return await actualTikTok(page, label);
+  } catch (error) {
+    // Preserve the first failure. Exercise the visible recovery only if the
+    // app reported that its first player became unavailable.
+    const unavailable = page.getByText('Video unavailable', {exact: true});
+    const retry = page.getByRole('button', {name: 'Try again', exact: true});
+    if (!(await unavailable.isVisible()) || !(await retry.isVisible())) throw error;
+    await page.screenshot({path: out + '/' + label + '-first-attempt.png'});
+    console.log(label + ' observed Video unavailable before one visible retry');
+    await retry.click();
+    return {...await actualTikTok(page, label), recoveredFromUnavailable: true};
+  }
+}
 try {
   for (const width of [1440, 390]) {
     const context = await browser.newContext({viewport: {width, height: 900}, serviceWorkers: 'block'});
@@ -115,13 +130,13 @@ try {
     await page.goto('http://localhost:8082/product?handle=' + fixture.handle + '&id=' + fixture.productId, {timeout: 120000});
     await page.getByRole('button', {name: 'Video ' + (mediaIndex + 1), exact: true}).click({timeout: 90000});
     await page.getByRole('button', {name: 'Watch video', exact: true}).click();
-    const playback = await actualTikTok(page, 'expo-390');
+    const playback = await expoTikTokWithRecovery(page, 'expo-390');
     await page.getByRole('button', {name: 'Photo 1', exact: true}).click();
     await expect(page.locator('iframe')).toHaveCount(0);
     assert.equal(context.pages().length, 1);
     await page.goto('http://localhost:8082/shop/' + fixture.handle, {timeout: 90000});
     await page.getByRole('button', {name: 'Watch video', exact: true}).first().click({timeout: 60000});
-    const cover = await actualTikTok(page, 'expo-cover-390');
+    const cover = await expoTikTokWithRecovery(page, 'expo-cover-390');
     results.app.push({surface: 'Expo web', width: 390, result: 'playback-and-unmount-observed', ...playback, cover});
   } catch (error) {
     await page.screenshot({path: out + '/expo-390-failure.png'}).catch(() => {});
