@@ -44,9 +44,8 @@ async function main(){
     const before=productMedia(product);
     assert.equal(before.filter(item=>item.kind==='video').length,1);
     assert.ok(before.some(item=>item.kind==='image'));
-    assert.ok(!before.some(item=>item.ref===videoRef));
     const media=before.map(item=>item.kind==='video'?{kind:'video' as const,ref:videoRef}:item);
-    await executeBasicProductUpkeep(postgresProductUpkeepPort,actor,{
+    if(!before.some(item=>item.kind==='video'&&item.ref===videoRef))await executeBasicProductUpkeep(postgresProductUpkeepPort,actor,{
       kind:'update',businessId:catalog.business.id,productId:product.id,
       expectedContentVersion:catalog.business.content_version,idempotencyKey:`live_media_fixture_${product.id}`,
       name:product.name,description:product.description,availability:product.availability,
@@ -57,7 +56,7 @@ async function main(){
       leadTimeSummary:product.lead_time_summary,media,videoRef,categoryId:product.category_id,
       imageAction:'keep',preserveMetadata:true,
     },null);
-    await saveOwnerPageAndPublication(actor,catalog.business.id,{action:'save',version:draft.version,
+    if(draft.content.videoUrl!==productVideoWatchUrl(videoRef))await saveOwnerPageAndPublication(actor,catalog.business.id,{action:'save',version:draft.version,
       content:{...draft.content,videoUrl:productVideoWatchUrl(videoRef)}});
     return {businessId:catalog.business.id,productId:product.id};
   });
