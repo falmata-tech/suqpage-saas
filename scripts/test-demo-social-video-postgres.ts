@@ -49,6 +49,8 @@ async function main() {
     products:await db.prepare('SELECT * FROM products WHERE business_id=? ORDER BY id').all(businessId),
     drafts:await db.prepare('SELECT * FROM owner_page_drafts WHERE business_id=?').all(businessId),
     published:await db.prepare('SELECT * FROM owner_page_publications WHERE business_id=? ORDER BY revision').all(businessId),
+    catalogs:await db.prepare('SELECT * FROM published_catalog_versions WHERE business_id=? ORDER BY content_version').all(businessId),
+    audit:await db.prepare('SELECT * FROM audit_logs WHERE business_id=? ORDER BY id').all(businessId),
     enrollment:await enrollment(),
    });
    async function request(direction: 'apply'|'rollback') {
@@ -81,6 +83,15 @@ async function main() {
    await db.prepare("UPDATE businesses SET is_demo=0 WHERE id=?").run(businessId);
    await assert.rejects(apply,/eligibility/);
    await db.prepare("UPDATE businesses SET is_demo=1 WHERE id=?").run(businessId);
+   if (businessId===1) {
+    await db.exec(`CREATE FUNCTION fail_demo_process_write() RETURNS trigger AS $$
+      BEGIN RAISE EXCEPTION 'controlled process write failure'; END $$ LANGUAGE plpgsql;
+      CREATE TRIGGER fail_demo_process_write BEFORE UPDATE OF process_video_ref ON businesses
+      FOR EACH ROW WHEN (OLD.id=1) EXECUTE FUNCTION fail_demo_process_write()`);
+    await assert.rejects(apply,/controlled process write failure/);
+    assert.deepEqual(await state(),initial,'A late process failure rolls back the story, photos, versions, products and receipt');
+    await db.exec('DROP TRIGGER fail_demo_process_write ON businesses');
+   }
    assert.deepEqual(await apply(),{duplicate:false});
    const applied=await state();
    const catalog=(await runtimeCatalogByHandle(handle))!;
