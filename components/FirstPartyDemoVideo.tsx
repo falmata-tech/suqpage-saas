@@ -6,7 +6,7 @@ import { productVideo, productVideoWatchUrl } from "@/lib/video/product-video";
 import LoadingBar from "./LoadingBar";
 
 /** Only render packaged fictional-demo footage after a visitor presses Play. */
-export default function FirstPartyDemoVideo({ video, title }: { video: string; title: string }) {
+export default function FirstPartyDemoVideo({ video, title, poster }: { video: string; title: string; poster?: string }) {
   const t = useUiText();
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [attempt, setAttempt] = useState(0);
@@ -28,7 +28,7 @@ export default function FirstPartyDemoVideo({ video, title }: { video: string; t
         ) : (
           <>
             <video key={video + attempt} src={productVideoWatchUrl(video)} title={title}
-              controls autoPlay playsInline preload="metadata"
+              poster={poster || undefined} controls autoPlay playsInline preload="metadata"
               onCanPlay={() => setState("ready")} onPlaying={() => setState("ready")}
               onError={() => setState("error")}
               style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} />

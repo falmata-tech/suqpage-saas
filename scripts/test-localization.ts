@@ -195,9 +195,9 @@ test('FE-052: shared starter and publication-checklist messages reach every clie
 });
 
 test('FE-052: both storefront audiences and Market use complete client-safe catalogs', async () => {
-  const { MARKET_STOREFRONT_COPY, MARKET_COMPACT_COPY, ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } = await import('../lib/storefront-copy');
+  const { MARKET_STOREFRONT_COPY, MARKET_COMPACT_COPY, ABOUT_INTRO, ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } = await import('../lib/storefront-copy');
   const { clientMessages } = await import('../lib/i18n/client-messages');
-  const values: string[] = [...Object.values(MARKET_STOREFRONT_COPY), ...Object.values(MARKET_COMPACT_COPY), ...Object.values(CUSTOMER_MAP_COPY)];
+  const values: string[] = [ABOUT_INTRO, ...Object.values(MARKET_STOREFRONT_COPY), ...Object.values(MARKET_COMPACT_COPY), ...Object.values(CUSTOMER_MAP_COPY)];
   for (const section of ABOUT_STOREFRONT_SECTIONS) {
     values.push(section.label, section.title, section.description, section.action);
     for (const benefit of section.benefits) values.push(benefit.title, benefit.description);
@@ -211,13 +211,12 @@ test('FE-052: both storefront audiences and Market use complete client-safe cata
   assert.match(MARKET_STOREFRONT_COPY.title,/African farmers, manufacturers, and artisans in one place/i);
   assert.match(MARKET_STOREFRONT_COPY.description,/production capacity for bulk purchase or small orders/i);
   assert.match(MARKET_STOREFRONT_COPY.description,/without getting lost searching through their social media posts/i);
-  assert.match(ABOUT_STOREFRONT_SECTIONS[0].description,/without piecing everything together from social posts/i);
+  assert.equal(ABOUT_STOREFRONT_SECTIONS[0].id,"businesses");
   for (const locale of ['am','om'] as const) {
     const t=createUiText(catalogs[locale]), title=t(MARKET_STOREFRONT_COPY.title);
     assert.doesNotMatch(title,/ኢንተርኔት|intarneet|interneet/i);
     assert.match(title,locale==='am'?/አፍሪካ.*ያግኙ/:/Afrikaa.*argadhaa/);
     assert.match(t(MARKET_STOREFRONT_COPY.description),locale==='am'?/ጅምላ.*ማኅበራዊ ሚዲያ/:/gurguddaa.*miidiyaa hawaasaa/);
-    assert.match(t(ABOUT_STOREFRONT_SECTIONS[0].description),locale==='am'?/ማኅበራዊ ሚዲያ/:/miidiyaa hawaasaa/);
     assert.notEqual(t(MARKET_STOREFRONT_COPY.description),MARKET_STOREFRONT_COPY.description);
     for(const section of ABOUT_STOREFRONT_SECTIONS){
       assert.notEqual(t(section.description),section.description);
@@ -389,8 +388,8 @@ test('FE-049/FE-052 S132/S133: active copy explains products, social inquiry and
   assert.match(om(MARKET_STOREFRONT_COPY.title),/Afrikaa.*argadhaa/);
   for(const term of ['ጅምላ','አነስተኛ','ማቅረብ','ማኅበራዊ ሚዲያ'])assert.ok(am(MARKET_STOREFRONT_COPY.description).includes(term),`am: ${term}`);
   for(const term of ['xixiqqaa','gurguddaa','dhiheessuu','miidiyaa hawaasaa'])assert.ok(om(MARKET_STOREFRONT_COPY.description).includes(term),`om: ${term}`);
-  assert.match(am(ABOUT_STOREFRONT_SECTIONS[0].description),/ማኅበራዊ ሚዲያ/);
-  assert.match(om(ABOUT_STOREFRONT_SECTIONS[0].description),/miidiyaa hawaasaa/);
+  assert.match(am(ABOUT_STOREFRONT_SECTIONS[0].description),/ምርቶችዎን/);
+  assert.match(om(ABOUT_STOREFRONT_SECTIONS[0].description),/Oomisha/);
   // About adds supplier context beyond the compact owner-approved Market sentence.
   const amAbout=ABOUT_STOREFRONT_SECTIONS.map(section=>[section.description,...section.benefits.map(benefit=>benefit.description)].map(text=>am(text)).join(' ')).join(' ');
   const omAbout=ABOUT_STOREFRONT_SECTIONS.map(section=>[section.description,...section.benefits.map(benefit=>benefit.description)].map(text=>om(text)).join(' ')).join(' ');
@@ -467,7 +466,7 @@ test('FE-066/FE-041 S118: inbox handoffs and device-storage failures have native
 test('FE-070: localized Market and About metadata retain the explicit AfricMade Open Graph identity', async()=>{
   const [{build},{createRequire},{default:vm}]=await Promise.all([import('esbuild'),import('node:module'),import('node:vm')]);
   const require=createRequire(import.meta.url);
-  const {MARKET_STOREFRONT_COPY}=await import('../lib/storefront-copy');
+  const {ABOUT_INTRO,MARKET_STOREFRONT_COPY}=await import('../lib/storefront-copy');
   for(const file of ['app/(public)/page.tsx','app/(public)/about/page.tsx']){
     const result=await build({entryPoints:[file],bundle:true,write:false,platform:'node',format:'cjs',packages:'external',jsx:'automatic',plugins:[{name:'metadata-localization-ports',setup(b){
       b.onResolve({filter:/^@\//},args=>['@/lib/storefront-copy','@/lib/public-seo'].includes(args.path)?{path:process.cwd()+args.path.slice(1)+'.ts'}:{path:args.path,namespace:'metadata-port'});
@@ -479,7 +478,7 @@ test('FE-070: localized Market and About metadata retain the explicit AfricMade 
     for(const locale of enabledLocales){
       const t=createUiText(catalogs[locale]),module={exports:{} as {generateMetadata:()=>Promise<{title:string|{absolute:string};description:string;alternates:{canonical:string};openGraph:{title:string;description:string;siteName:string;url:string;images:string[]};twitter:{title:string;description:string;card:string}}>}};
       vm.runInNewContext(result.outputFiles[0].text,{module,exports:module.exports,require,URL,__text:t,process:{env:{NEXT_PUBLIC_APP_URL:'https://mirtpage.test'}}});
-      const metadata=await module.exports.generateMetadata(),title=t(file.includes('/about/')?'About AfricMade':MARKET_STOREFRONT_COPY.title),description=t(MARKET_STOREFRONT_COPY.description);
+      const metadata=await module.exports.generateMetadata(),title=t(file.includes('/about/')?'About AfricMade':MARKET_STOREFRONT_COPY.title),description=t(file.includes("/about/") ? ABOUT_INTRO : MARKET_STOREFRONT_COPY.description);
       if(file.includes('/about/')){
         assert.equal(typeof metadata.title,'object');assert.equal((metadata.title as {absolute:string}).absolute,title);
       }else assert.equal(metadata.title,title);

@@ -112,10 +112,19 @@ export default function YouTubeVideo({
           videoRef={parsed?.managedRef}
           height={Math.max(200, height)}
           onEvent={event}
-        /></View></View>
-        {(state === "loading" || state === "slow") && (
-          <LoadingBar label={t("Loading video…")} />
-        )}
+        /></View>
+          {state === "loading" && (
+            <View pointerEvents="none" style={[StyleSheet.absoluteFill, {justifyContent: "center", alignItems: "center"}]}>
+              {(poster || !social) && <View style={StyleSheet.absoluteFill}>
+                <Photo refPath={poster || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
+                  height={Math.max(200, height)} privateImage={privateImage} />
+              </View>}
+              <View style={{width: "72%", maxWidth: 220, paddingHorizontal: 16, borderRadius: 12, backgroundColor: "white"}}>
+                <LoadingBar label={t("Loading video…")} />
+              </View>
+            </View>
+          )}
+        </View>
         {state === "slow" && <Button secondary label={t("Try again")} onPress={start} />}
       </View>
     );

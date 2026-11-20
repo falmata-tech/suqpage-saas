@@ -10,6 +10,17 @@ change_level: L3
 
 # FE-061 — Category-relevant video examples
 
+## Showroom cover while a video starts (2026-11-20)
+
+GIVEN a visitor activates a showroom cover video WHEN the provider is starting
+THEN the showroom photo stays visible with a localized loading indicator. The
+cover keeps its compact height before playback, during loading and while playing.
+Portrait footage fits inside the cover and retains full-screen playback. For
+YouTube, loading the iframe document alone does not establish playback. WHEN the
+player reports playback or needs a manual Play press THEN reveal its controls.
+A slow player remains available with a recovery action. A provider failure lets
+the visitor retry or open the same selected clip at its source.
+
 ## S197 owner correction — one social video per demo showroom (2026-11-18)
 
 The owner wants **one relevant public video URL per example showroom**. That

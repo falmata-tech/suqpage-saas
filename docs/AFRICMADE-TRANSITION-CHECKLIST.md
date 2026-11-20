@@ -6,6 +6,14 @@ Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 Updated 2026-11-18. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
+## Grouped storefront release
+
+- [x] Keep the cover and playback at 240 px on desktop, 210 px on phone web and 210 px in Expo. Chrome confirmed the image during a delayed load, real playback after loading and a retry after a failed request. Verify the player on the published host before reporting delivery.
+- [x] Classify all 264 demo products into reusable product groups. Local PostgreSQL proves exclusive department membership. Desktop, phone web and Expo confirmed Home, then Candles & decor, then Pure Beeswax Candles.
+- [x] Review the published demo roster against the creator footage and bind the exact before-images. Disposable PostgreSQL verified changing and rolling back both providers and both legacy examples. Apply the guarded plan only with the full release candidate qualified, then verify 66 showroom stories, 264 product videos and process chapters.
+- [x] Rewrite About and default to the seller section. Retire the logistics-company link, send old bookmarks to About and refuse new requests on both former endpoints.
+- [ ] Qualify the grouped candidate through protected main and Netlify. Build the fresh local Android APK after verifying production.
+
 ## Small map clusters and public catalog review
 
 - [x] Reproduce the production overview click. A four-business Dire Dawa marker opened a picker at zoom 5 with the same center.

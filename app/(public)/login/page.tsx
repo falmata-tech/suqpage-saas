@@ -32,7 +32,6 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
           <div className="platform-form-heading"><span>{t("Email sign-in")}</span><h2>{t("Continue to your account")}</h2><p>{t(accessMessage)}</p></div>
           <PasswordlessLoginForm emailEnabled={emailEnabled} initialError={p.error || ""} />
           {!emailEnabled?<p className="platform-form-note" role="status">{t("Please try again later or contact AfricMade support.")}</p>:null}
-          <Link className="platform-return-link" href="/transport-partners">{t("Logistics service providers: Ask to be listed")}</Link>
           <Link className="platform-return-link" href="/">{t("Return to Market")}</Link>
         </div>
       </section>

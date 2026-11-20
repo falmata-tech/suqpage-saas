@@ -157,7 +157,6 @@ export default function Account() {
               />
             )}
           </Card>}
-          <Button secondary label={t("Logistics service providers: Ask to be listed")} onPress={()=>router.push("/transport-partners")}/>
         </>
       ) : (
         <>

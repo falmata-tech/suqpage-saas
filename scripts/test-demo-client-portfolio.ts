@@ -1,3 +1,4 @@
+import {DISCOVERY_INDUSTRY_OPTIONS, getMarketplaceDiscoveryView} from "../lib/discovery";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
@@ -127,6 +128,23 @@ async function runPostgresFixture() {
     assert.equal(rationales.size, 66, "every design manifest retains a client-specific rationale");
     assert.ok(paletteSignatures.size >= 40, "the portfolio exercises broad client-specific color direction");
     assert.ok(processVideoRefs.size >= 10, "the portfolio uses varied production-relevant video references");
+    const listedProducts = new Map<number, { name: string; group: string; department: string }>();
+    for (const department of DISCOVERY_INDUSTRY_OPTIONS.filter(item => item.key !== "all")) {
+        for (let page = 1; ; page++) {
+            const market = await getMarketplaceDiscoveryView({scope: "products", industry: department.key, page});
+            for (const product of market.searchProducts) {
+                assert.equal(product.primaryIndustryKey, department.key);
+                assert.ok(market.subcategories?.includes(product.categoryName), `${product.name} has a reusable group`);
+                assert.ok(!listedProducts.has(product.id), `${product.name} has one marketplace department`);
+                listedProducts.set(product.id, {name: product.name, group: product.categoryName, department: department.key});
+            }
+            if (page >= market.resultPage.totalPages) break;
+        }
+    }
+    assert.equal(listedProducts.size, 264, "Every active local demo product is visible in its own department");
+    assert.deepEqual(listedProducts.get(23), {name: "Pure Beeswax Candles", group: "Candles & decor", department: "home-living"});
+    assert.deepEqual(listedProducts.get(21), {name: "Seasonal Raw Honey", group: "Honey", department: "food-farming"});
+    assert.equal(listedProducts.get(131)?.department, "agriculture-growers", "Herb seeds are growing supplies");
     console.log("Complete demo portfolio passed: 66 briefs, logos, heroes, booths, videos, admitted palettes, and 264 imaged offerings.");
     await closeDbForTests();
 }

@@ -1,6 +1,7 @@
 import {parseProductMedia,type ProductMedia} from './product-media';
 import {normalizeProductVideoUrl,productVideo,productVideoWatchUrl} from './video/product-video';
 import {approvedDemoVideo} from './video/demo-video-catalog';
+import {PUBLISHED_DEMO_VIDEO_TARGETS} from './published-demo-video-targets';
 
 export type DemoMediaCorrection = {
  kind:'media_correction'; operationKey:string; businessId:number; handle:string;
@@ -12,7 +13,7 @@ export type DemoMediaCorrection = {
 
 /** Finite media maintenance for the two legacy public demos outside the simulator. */
 export type UnenrolledDemoMediaCorrection = {
- kind:'unenrolled_media_correction'; direction:'apply'|'rollback'; operationKey:string;
+ kind:'unenrolled_media_correction'|'unenrolled_social_video_correction'; direction:'apply'|'rollback'; operationKey:string;
  businessId:50|62; handle:string; actorUserId:number; actorRole:'platform_admin';
  expectedContentVersion:number; expectedDraftVersion:number; expectedPageRevision:number;
  coverBefore:string; coverVideoRef:string; processVideoBefore:string; processVideoAfter:string;
@@ -71,7 +72,8 @@ export function parseUnenrolledDemoMediaCorrection(raw:unknown):UnenrolledDemoMe
   'expectedContentVersion','expectedDraftVersion','expectedPageRevision','coverBefore','coverVideoRef',
   'processVideoBefore','processVideoAfter','products']);
  const businessId=integer(v.businessId,1);
- if(v.kind!=='unenrolled_media_correction'||(v.direction!=='apply'&&v.direction!=='rollback')||
+ const social=v.kind==='unenrolled_social_video_correction';
+ if((!social&&v.kind!=='unenrolled_media_correction')||(v.direction!=='apply'&&v.direction!=='rollback')||
   v.actorRole!=='platform_admin'||
   (businessId!==50&&businessId!==62)||v.handle!==legacyTargets[businessId].handle||
   typeof v.coverBefore!=='string'||v.coverBefore.length>500||!Array.isArray(v.products)||v.products.length!==4)return invalid();
@@ -82,6 +84,14 @@ export function parseUnenrolledDemoMediaCorrection(raw:unknown):UnenrolledDemoMe
   v.processVideoBefore===v.processVideoAfter)return invalid();
  const processBefore=productVideo(v.processVideoBefore),processAfter=productVideo(v.processVideoAfter);
  const direction=v.direction;
+ if(social) {
+  const reviewed=PUBLISHED_DEMO_VIDEO_TARGETS.find(([id])=>id===businessId)?.[2];
+  const packaged=`demo:business-${businessId}`;
+  if(direction==='apply'&&(v.coverVideoRef!==reviewed||v.processVideoAfter!==reviewed||
+    v.processVideoBefore!==packaged||normalizeProductVideoUrl(v.coverBefore).managedRef!==packaged))return invalid();
+  if(direction==='rollback'&&(v.coverVideoRef!==packaged||v.processVideoAfter!==packaged||
+    v.processVideoBefore!==reviewed||normalizeProductVideoUrl(v.coverBefore).managedRef!==reviewed))return invalid();
+ } else {
  if(direction==='apply'&&(!v.coverVideoRef.startsWith('demo:')||!approvedDemoVideo(v.coverVideoRef,businessId)))return invalid();
  if(direction==='apply'&&(processBefore.provider!=='tiktok'||v.processVideoAfter!==v.coverVideoRef||
   !approvedDemoVideo(v.processVideoAfter,businessId)))return invalid();
@@ -89,6 +99,7 @@ export function parseUnenrolledDemoMediaCorrection(raw:unknown):UnenrolledDemoMe
   !approvedDemoVideo(normalizeProductVideoUrl(v.coverBefore).managedRef,businessId)))return invalid();
  if(direction==='rollback'&&(v.processVideoBefore!==normalizeProductVideoUrl(v.coverBefore).managedRef||
   !approvedDemoVideo(v.processVideoBefore,businessId)||processAfter.provider!=='tiktok'))return invalid();
+ }
  const products=v.products.map((raw,index)=>{
   const p=object(raw,['productId','beforeMedia','afterMedia']);
   const productId=integer(p.productId,1);
@@ -100,13 +111,14 @@ export function parseUnenrolledDemoMediaCorrection(raw:unknown):UnenrolledDemoMe
    const before=beforeMedia[i],after=afterMedia[i];
    if(before.kind!==after.kind||(before.kind==='image'&&before.ref!==after.ref))return invalid();
    if(before.kind==='video'&&before.ref===after.ref)return invalid();
-   if(after.kind==='video'&&direction==='apply'&&(!after.ref.startsWith('demo:')||!approvedDemoVideo(after.ref,businessId)))return invalid();
-   if(before.kind==='video'&&direction==='rollback'&&(!before.ref.startsWith('demo:')||!approvedDemoVideo(before.ref,businessId)))return invalid();
+   if(after.kind==='video'&&social&&(direction==='apply'?after.ref!==v.coverVideoRef||!approvedDemoVideo(before.ref,businessId):before.ref!==v.processVideoBefore||!approvedDemoVideo(after.ref,businessId)))return invalid();
+   if(after.kind==='video'&&!social&&direction==='apply'&&(!after.ref.startsWith('demo:')||!approvedDemoVideo(after.ref,businessId)))return invalid();
+   if(!social&&before.kind==='video'&&direction==='rollback'&&(!before.ref.startsWith('demo:')||!approvedDemoVideo(before.ref,businessId)))return invalid();
   }
   return {productId,beforeMedia,afterMedia};
  });
  if(v.coverBefore===productVideoWatchUrl(v.coverVideoRef))return invalid();
- return {kind:'unenrolled_media_correction',direction,operationKey:text(v.operationKey,/^[a-zA-Z0-9_-]{12,64}$/),
+ return {kind:social?'unenrolled_social_video_correction':'unenrolled_media_correction',direction,operationKey:text(v.operationKey,/^[a-zA-Z0-9_-]{12,64}$/),
   businessId,handle:legacyTargets[businessId].handle,actorUserId:integer(v.actorUserId,1),actorRole:'platform_admin',
   expectedContentVersion:integer(v.expectedContentVersion,1),expectedDraftVersion:integer(v.expectedDraftVersion,1),
   expectedPageRevision:integer(v.expectedPageRevision,1),coverBefore:v.coverBefore,coverVideoRef:v.coverVideoRef,
@@ -118,7 +130,7 @@ export function parseQueuedDemoMediaCorrection(raw:unknown,businessId:number):De
  if(!Number.isSafeInteger(businessId)||businessId<1||!raw||typeof raw!=='object'||Array.isArray(raw))return invalid();
  const kind=(raw as Record<string,unknown>).kind;
  const correction=kind==='media_correction'?parseDemoMediaCorrection(raw):
-  kind==='unenrolled_media_correction'?parseUnenrolledDemoMediaCorrection(raw):invalid();
+  (kind==='unenrolled_media_correction'||kind==='unenrolled_social_video_correction')?parseUnenrolledDemoMediaCorrection(raw):invalid();
  if(correction.businessId!==businessId)return invalid();
  return correction;
 }

@@ -1,3 +1,4 @@
+import { MARKET_SUBCATEGORY_SQL, MARKET_TAXONOMY_JOIN, PRIMARY_INDUSTRY_SQL } from './marketplace-product-taxonomy';
 import {normalizeMarketSearch,cityLocation,MARKET_MAP_LIMIT,MARKET_PRODUCT_BATCH_SIZE,type MarketScope} from './market-search';
 import { findSpellingMatches, type SpellingMatch } from './spelling-search';
 import {excludedBusinessIds} from './catalog-safety';
@@ -358,23 +359,6 @@ function toProductResult(row: DiscoveryProductResultRow): DiscoveryProductResult
   };
 }
 
-const PRIMARY_INDUSTRY_SQL = `COALESCE((
-  SELECT i.industry_key
-  FROM business_industries i
-  WHERE i.business_id=b.id
-  ORDER BY CASE i.industry_key
-    WHEN 'electronics' THEN 0
-    WHEN 'beauty-wellness' THEN 1
-    WHEN 'agriculture-growers' THEN 2
-    WHEN 'food-farming' THEN 3
-    WHEN 'machinery-tools' THEN 4
-    WHEN 'home-living' THEN 5
-    WHEN 'fashion-textiles' THEN 6
-    ELSE 999
-  END,i.industry_key
-  LIMIT 1
-),'all')`;
-
 function selectSql(extraWhere: string, suffix = "", order = "is_sponsored DESC,sponsor_position,lower(b.name),b.id") {
   // Latest public snapshot only; no draft join or per-card database requests.
   const profile = platformEnvironment().SUQPAGE_OWNER_EDITOR_ENABLED !== "0";
@@ -505,22 +489,23 @@ function productSuggestionSql(placeWhere: string) {
   `;
 }
 
-function productSearchResultSql(placeWhere: string, suffix = "", countOnly = false, byId = false) {
+function productSearchResultSql(placeWhere: string, suffix = "", countOnly = false, byId = false, market = false) {
   return `
     SELECT ${countOnly ? "COUNT(*) AS total" : `      product.id,product.name,product.description,product.image_path,product.offering_kind,product.availability,
-      COALESCE(category.name,'Product') AS category_name,
+      COALESCE(${market ? MARKET_SUBCATEGORY_SQL : 'category.name'},'Product') AS category_name,
       b.id AS business_id,b.is_demo,b.handle AS business_handle,b.name AS business_name,
-      p.city,p.region,${PRIMARY_INDUSTRY_SQL} AS primary_industry_key`}
+      p.city,p.region,${market ? "department.industry" : PRIMARY_INDUSTRY_SQL} AS primary_industry_key`}
     FROM products product
     JOIN businesses b ON b.id=product.business_id
     JOIN business_discovery_profiles p ON p.business_id=b.id
     LEFT JOIN owner_page_publications publication ON publication.business_id=b.id
       AND publication.revision=(SELECT MAX(revision) FROM owner_page_publications WHERE business_id=b.id)
     LEFT JOIN categories category ON category.id=product.category_id AND category.business_id=b.id
-    WHERE (?='all' OR EXISTS(
+    ${market ? MARKET_TAXONOMY_JOIN : ''}
+    WHERE (?='all' OR ${market ? "department.industry=ANY(string_to_array(?,','))" : `EXISTS(
         SELECT 1 FROM business_industries i
         WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(?,','))
-      ))
+      )`})
       AND b.status='active'
       AND p.is_excluded=0
       AND p.approved_at > 0
@@ -796,12 +781,14 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
    WHERE country_code<>'' GROUP BY country_code,COALESCE(NULLIF(city_id,''),city) ORDER BY country_code,min(city)`,['all','all',...excludeParams]);
  const countries=[...new Set(locations.map(l=>l.country_code))].map(code=>({code,count:locations.filter(l=>l.country_code===code).reduce((sum,l)=>sum+Number(l.count),0)}));
  const places:DiscoveryPlaceOption[]=locations.map(l=>({key:`${l.country_code}:${l.city_key}`,label:l.city,kind:'city',countryCode:l.country_code,city:l.city,region:'',count:Number(l.count)}));
- // Read only active groups with a visible product from an eligible showroom.
- const subcategories=search.categories.length ? (await port.all<{name:string}>(`SELECT DISTINCT c.name
+ // Metadata comes from the same classifications as the listing results.
+ const subcategories=search.categories.length ? (await port.all<{name:string}>(`SELECT DISTINCT ${MARKET_SUBCATEGORY_SQL} AS name
    FROM (${selectSql(excludeWhere+mapPinWhere)}) listed
-   JOIN products item ON item.business_id=listed.id AND item.is_published=1 AND item.offering_kind<>'service'
-   JOIN categories c ON c.business_id=item.business_id AND c.id=item.category_id AND c.is_active=1
-   WHERE length(c.name) BETWEEN 1 AND 100 ORDER BY c.name`,[industry.key,industry.key,...excludeParams])).map(c=>c.name) : [];
+   JOIN businesses b ON b.id=listed.id
+   JOIN products product ON product.business_id=b.id AND product.is_published=1 AND product.offering_kind<>'service'
+   ${MARKET_TAXONOMY_JOIN}
+   WHERE department.industry=ANY(string_to_array(?,',')) AND ${MARKET_SUBCATEGORY_SQL} IS NOT NULL
+   ORDER BY name`,[...(options.scope==='businesses'?[industry.key,industry.key]:['all','all']),...excludeParams,industry.key])).map(c=>c.name) : [];
  const locationsFilter=search.cities.map(cityLocation);
  const geography=` AND (?::jsonb='[]'::jsonb OR p.country_code IN(SELECT jsonb_array_elements_text(?::jsonb)))
    AND (?::jsonb='[]'::jsonb OR EXISTS(SELECT 1 FROM jsonb_to_recordset(?::jsonb) loc(country text,city text) WHERE p.country_code=loc.country AND (p.city_id=loc.city OR p.city=loc.city)))`;
@@ -809,9 +796,9 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
  const kindWhere=search.madeToOrder?" AND product.offering_kind='made_to_order'":'';
  const legacyLocations=(search.legacyPlaces||[]).map(key=>{const [kind,region,...city]=key.split(':');return {region,city:kind==='city'?city.join(':'):''};});
  const legacyWhere=legacyLocations.length?` AND p.country_code='ET' AND EXISTS(SELECT 1 FROM jsonb_to_recordset(?::jsonb) loc(region text,city text) WHERE lower(p.region)=lower(loc.region) AND (loc.city='' OR lower(p.city)=lower(loc.city)))`:'';
- const groupWhere=!search.subcategory ? '' : options.scope==='products' ? ' AND category.is_active=1 AND category.name=?' :
-   ` AND EXISTS(SELECT 1 FROM products item JOIN categories c ON c.id=item.category_id AND c.business_id=item.business_id
-      WHERE item.business_id=b.id AND item.is_published=1 AND item.offering_kind<>'service' AND c.is_active=1 AND c.name=?)`;
+ const groupWhere=!search.subcategory ? '' : options.scope==='products' ? ` AND ${MARKET_SUBCATEGORY_SQL}=?` :
+   ` AND EXISTS(SELECT 1 FROM products product ${MARKET_TAXONOMY_JOIN}
+      WHERE product.business_id=b.id AND product.is_published=1 AND product.offering_kind<>'service' AND ${MARKET_SUBCATEGORY_SQL}=?)`;
  const scopeWhere=geography+legacyWhere+excludeWhere+mapPinWhere+groupWhere,scopeParams=[...geoParams,...(legacyLocations.length?[JSON.stringify(legacyLocations)]:[]),...excludeParams,...(search.subcategory?[search.subcategory]:[])];
  let rows:DiscoveryRow[]=[],products:DiscoveryProductResultRow[]=[];
  let total=0,searchOrder:{kind:'product'|'business';id:number}[]=[];
@@ -822,7 +809,7 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
   if(options.scope==='businesses')rows=await port.all<DiscoveryRow>(selectSql(queryWhere+scopeWhere,'LIMIT ?'),[...businessParams,MARKET_MAP_LIMIT]);
   const productWhere=scopeWhere+kindWhere;
   const productParams=[industry.key,industry.key,searchTerms(query),...scopeParams];
-  const normalCount=options.scope==='businesses'?Number((await port.get<{total:number}>(`SELECT count(*) total FROM (${selectSql(queryWhere+scopeWhere)}) matches`,businessParams))?.total||0):Number((await port.get<{total:number}>(productSearchResultSql(productWhere,'',true),productParams))?.total||0);
+  const normalCount=options.scope==='businesses'?Number((await port.get<{total:number}>(`SELECT count(*) total FROM (${selectSql(queryWhere+scopeWhere)}) matches`,businessParams))?.total||0):Number((await port.get<{total:number}>(productSearchResultSql(productWhere,'',true,false,true),productParams))?.total||0);
   const spelling=options.scope==='businesses'&&normalCount>=MARKET_MAP_LIMIT?[]:await findSpellingMatches({query,industry:industry.key,city:'',region:'',locations:legacyLocations,scale:'',exactBusinessIds:rows.map(r=>r.id),excludedBusinessIds:excluded,
    discovery:{scope:options.scope!,subcategory:search.subcategory,countries:search.countries,cities:locationsFilter.filter((l):l is {country:string;city:string}=>Boolean(l)),madeToOrder:search.madeToOrder,...(options.scope==='businesses'?{publicMapLocations:true}:{}),...(legacyLocations.length?{legacyCountry:'ET' as const}:{})}},port);
   const approximate=spelling.filter(m=>m.kind===(options.scope==='businesses'?'business':'product'));
@@ -833,9 +820,9 @@ async function buildIndependentMarketplace(options:DiscoveryOptions,port:Discove
   } else {
    const rank=[query,`${escapeSearchPattern(query)}%`,searchTerms(query,true),query,searchTerms(query,true)];
    const limit=Math.max(0,Math.min(window.limit,normalCount-window.offset));
-   if(limit)products=await port.all<DiscoveryProductResultRow>(productSearchResultSql(productWhere,'LIMIT ? OFFSET ?'),[...productParams,...rank,limit,window.offset]);
+   if(limit)products=await port.all<DiscoveryProductResultRow>(productSearchResultSql(productWhere,'LIMIT ? OFFSET ?',false,false,true),[...productParams,...rank,limit,window.offset]);
    const fuzzy=approximate.slice(Math.max(0,window.offset-normalCount),Math.max(0,window.offset+window.limit-normalCount));
-   if(fuzzy.length)products.push(...await port.all<DiscoveryProductResultRow>(productSearchResultSql(productWhere,'',false,true),[industry.key,industry.key,JSON.stringify(fuzzy.map(m=>m.id)),...scopeParams,...rank]));
+   if(fuzzy.length)products.push(...await port.all<DiscoveryProductResultRow>(productSearchResultSql(productWhere,'',false,true,true),[industry.key,industry.key,JSON.stringify(fuzzy.map(m=>m.id)),...scopeParams,...rank]));
    searchOrder=products.map(p=>({kind:'product',id:p.id}));
   }
  }
