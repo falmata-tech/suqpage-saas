@@ -40,6 +40,14 @@ partially changed. Tests must cover both TikTok and YouTube targets, replay,
 rollback, the two unenrolled examples and real/private exclusion on disposable
 PostgreSQL before any hosted correction.
 
+The six already reviewed growers have an older simulator binding because the
+prior public correction added Agriculture to Food directly. On those six
+identities only, reconstruct the old digest using Food as the sole category. If
+that digest matches the locked enrollment and every bound product's category
+list matches, reconcile the category bindings inside the media transaction.
+Preserve stage, cycle and next-run time. Reject any other drift and keep the
+simulator operator-paused.
+
 The ordinary process snapshot accepts a TikTok ref only when it matches the
 exact reviewed demo business/video catalog entry. This first admits Liya Soap
 Kitchen's Bramble Berry soap clip in the fresh local seed. A different demo or

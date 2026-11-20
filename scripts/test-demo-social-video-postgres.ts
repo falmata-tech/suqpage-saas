@@ -13,7 +13,7 @@ async function main() {
  const db=await getDb();
  try {
   await db.exec("UPDATE demo_simulator_control SET enabled=0,pause_reason='operator' WHERE id=1");
-  for(const targetId of [1,21,50,62]) {
+  for(const targetId of [1,5,21,50,62]) {
    const [businessId,handle,selected,products]=PUBLISHED_DEMO_VIDEO_TARGETS.find(([id])=>id===targetId)!;
    const legacy=businessId===50||businessId===62;
    const beforeRef=`demo:business-${businessId}`;
@@ -74,6 +74,7 @@ async function main() {
     };
     return ()=>correctEnrolledDemoSocialVideo(input);
    }
+   if(businessId===5)await db.prepare("INSERT INTO business_industries(business_id,industry_key) VALUES(?,'agriculture-growers')").run(businessId);
    const initial=await state();
    const apply=await request('apply');
    await db.exec("UPDATE demo_simulator_control SET enabled=1 WHERE id=1");
@@ -92,13 +93,25 @@ async function main() {
     assert.deepEqual(await state(),initial,'A late process failure rolls back the story, photos, versions, products and receipt');
     await db.exec('DROP TRIGGER fail_demo_process_write ON businesses');
    }
+   if(businessId===5){
+    await db.prepare("INSERT INTO business_industries(business_id,industry_key) VALUES(?,'home-living')").run(businessId);
+    await assert.rejects(apply,/content_changed/);
+    await db.prepare("DELETE FROM business_industries WHERE business_id=? AND industry_key='home-living'").run(businessId);
+    assert.deepEqual(await state(),initial,'Unreviewed category drift cannot be silently repaired with the media update');
+   }
    assert.deepEqual(await apply(),{duplicate:false});
    const applied=await state();
    const catalog=(await runtimeCatalogByHandle(handle))!;
    assert.equal(catalog.business.process_video_ref,selected);
    assert.equal(JSON.parse(String(applied.drafts[0].content_json)).videoUrl,productVideoWatchUrl(selected));
    for(const item of catalog.products)assert.deepEqual(productMedia(item),gallery(selected));
-   for(const key of ['stage','cycle','due_at','catalog_products_json'])assert.equal(applied.enrollment?.[key],initial.enrollment?.[key]);
+   for(const key of ['stage','cycle','due_at'])assert.equal(applied.enrollment?.[key],initial.enrollment?.[key]);
+   if(businessId===5){
+    const parameters=JSON.parse(String(applied.enrollment?.parameters_json));
+    const bindings=JSON.parse(String(applied.enrollment?.catalog_products_json));
+    assert.deepEqual(parameters.businessCategories,['agriculture-growers','food-farming']);
+    assert.ok(bindings.every((binding:{parameters:{businessCategories:string[]}})=>JSON.stringify(binding.parameters.businessCategories)===JSON.stringify(parameters.businessCategories)));
+   }else assert.equal(applied.enrollment?.catalog_products_json,initial.enrollment?.catalog_products_json);
    assert.deepEqual(await apply(),{duplicate:true});
    assert.deepEqual(await state(),applied);
    const undo=await request('rollback');

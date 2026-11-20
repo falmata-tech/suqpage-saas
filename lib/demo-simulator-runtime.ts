@@ -214,6 +214,35 @@ export async function correctDemoMedia(raw:unknown){
  });
 }
 
+/**
+ * The earlier reviewed production category change added Agriculture to six
+ * demos but left their simulator bindings on Food. Derive the old digest from
+ * the locked live rows and accept only that exact category difference.
+ */
+async function reconcileReviewedGrowerForMedia(
+ enrollment: Enrollment, state: Awaited<ReturnType<typeof currentState>>, expectedHash: string,
+) {
+ const reviewed=AGRICULTURE_CORRECTION_TARGETS.some(target =>
+  target.businessId===enrollment.business_id&&target.handle===enrollment.handle);
+ const categories=['agriculture-growers','food-farming'], previous=['food-farming'];
+ if(!reviewed||expectedHash!==enrollment.expected_hash||digest(state.categories)!==digest(categories)||
+  digest({catalog:state.catalog,draft:state.draft,publication:state.publication,categories:previous,
+   location:state.location,discovery:state.discovery})!==enrollment.expected_hash)throw new DemoDrift('content_changed');
+ const parameters=parseDemoScenarioParameters(JSON.parse(enrollment.parameters_json));
+ const products=parseStoredDemoCatalog(enrollment.catalog_products_json);
+ if(products.length!==4||digest(parameters.businessCategories)!==digest(previous)||
+  products.some(binding=>digest(binding.parameters.businessCategories)!==digest(previous)))throw new DemoDrift('content_changed');
+ const update=await runtimeRun(`UPDATE demo_simulator_enrollments SET expected_hash=?,parameters_json=?,catalog_products_json=?
+   WHERE business_id=? AND expected_hash=? AND status='active' AND stage=? AND cycle=? AND due_at=?`,[
+  state.hash,JSON.stringify({...parameters,businessCategories:categories}),
+  JSON.stringify(products.map(binding=>({...binding,parameters:{...binding.parameters,businessCategories:categories}}))),
+  enrollment.business_id,expectedHash,enrollment.stage,enrollment.cycle,enrollment.due_at,
+ ]);
+ if(update.changes!==1)throw new DemoDrift('content_changed');
+ await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.category_binding_reconciled',?,'')",
+  [state.actor.id,enrollment.business_id,JSON.stringify({previous,categories,previousHash:expectedHash,currentHash:state.hash})]);
+}
+
 /** Apply one finite social-video replacement using the ordinary page and product
  * writers. The outer transaction also binds the process chapter and receipt. */
 export async function correctEnrolledDemoSocialVideo(raw: {
@@ -253,7 +282,7 @@ export async function correctEnrolledDemoSocialVideo(raw: {
     throw new DemoDrift('eligibility_changed');
   }
   const state = await currentState(enrollment, true);
-  if (state.hash !== enrollment.expected_hash || products.some(([id, name]) =>
+  if (products.some(([id, name]) =>
       !state.catalog.products.some(item => item.id === id && item.name === name && item.is_published && item.offering_kind !== 'service'))) {
     throw new DemoDrift('eligibility_changed');
   }
@@ -284,8 +313,12 @@ export async function correctEnrolledDemoSocialVideo(raw: {
     }
     nextProcess = productVideo(inverse.process).managedRef;
   }
-  // Both normal publication and this process update succeed or roll back.
-  await correctDemoMedia(input);
+  // The known grower repair, publication and process update share the transaction.
+  if(state.hash!==enrollment.expected_hash){
+   if(rollback)throw new DemoDrift('content_changed');
+   await reconcileReviewedGrowerForMedia(enrollment,state,input.expectedHash);
+   await correctDemoMedia({...input,expectedHash:state.hash});
+  } else await correctDemoMedia(input);
   const current = await currentState(enrollment, true);
   if (current.catalog.business.process_video_ref !== nextProcess) {
     const version = current.catalog.business.content_version;
