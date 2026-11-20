@@ -626,7 +626,9 @@ test('FE-052 S143 native About selects one audience and preserves its deliberate
  assert.deepEqual(tabs().map(node=>(node.props.accessibilityState as {selected:boolean}).selected),[false,true]);
  assert.ok(tree.some(node=>node.props.testID==='about-customers'));assert.ok(!tree.some(node=>node.props.testID==='about-businesses'));
  (tree.find(node=>node.type==='Button'&&node.props.label===ABOUT_STOREFRONT_SECTIONS[1].action)!.props.onPress as()=>void)();
- assert.match(state.routes.at(-1)!,/^\/\?view=search&_intent=\d+$/);
+ const route=state.routes.at(-1);
+ assert.equal(typeof route,'string');
+ assert.match(String(route),/^\/\?view=search&_intent=\d+$/);
  assert.ok(tree.some(node=>node.type==='Button'&&node.props.label==='Explore the map'));
 });
 
