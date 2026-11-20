@@ -1,5 +1,7 @@
 # AfricMade traceability matrix
 
+FE-021 overview group activation is covered by the shared clustering, native controller and web Leaflet lifecycle tests. FE-061 published demo video readback compares the selected references with the public shop API via `npm run verify:published-demo-videos`. [Local checks and production observations](../docs/AFRICMADE-TRANSITION-CHECKLIST.md#small-map-clusters-and-public-catalog-review).
+
 FE-053 Android YouTube playback uses the installed package identity in
 `YouTubeFrame.tsx`. The slow-load and provider-error transitions in
 `youtube-player.ts` are exercised by `scripts/test-mobile-video.ts`.

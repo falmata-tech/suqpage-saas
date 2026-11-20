@@ -291,15 +291,17 @@ const MarketplaceMap = forwardRef<MarketplaceMapController, MarketplaceMapProps>
 
         for (const item of mapClusterMarkers(clusterIndexRef.current,viewport,zoom)) {
           const [longitude,latitude]=item.center;
-          if(item.kind==='aggregate'){
+          if(item.expansionZoom!==undefined){
             const status=item.presence?`<span class="mp-map-status mp-map-status-${item.presence}">${escapeHtml(t(item.presence==='featured'?'Featured':'Live'))}</span>`:'';
-            const icon=L.divIcon({className:'mp-map-div-icon',html:`<span class="mp-map-cluster${item.presence?` is-${item.presence}`:''}" data-map-group-kind="aggregate" data-map-group-key="${escapeHtml(item.key)}" data-map-group-count="${item.count}" data-map-member-ids="${item.ids.join(',')}"><b>${item.count}</b>${status}</span>`,iconSize:[48,48],iconAnchor:[23,23]});
+            const icon=L.divIcon({className:'mp-map-div-icon',html:`<span class="mp-map-cluster${item.presence?` is-${item.presence}`:''}" data-map-group-kind="${item.kind}" data-map-group-key="${escapeHtml(item.key)}" data-map-group-count="${item.count}" data-map-member-ids="${item.ids.join(',')}"><b>${item.count}</b>${status}</span>`,iconSize:[48,48],iconAnchor:[23,23]});
             const label=t('{count} businesses. Zoom in.',{count:item.count});
             const marker=L.marker([latitude,longitude],{icon,keyboard:true,title:label,alt:label,riseOnHover:true,autoPanOnFocus:false});
             marker.on('click',()=>{
               if(!map||mapRef.current!==map)return;
               const nextZoom=clampMapZoom(Math.max(map.getZoom()+1,item.expansionZoom??map.getZoom()+1));
-              if(nextZoom>map.getZoom())map.setView(marker.getLatLng(),nextZoom,{animate:true});
+              const target=item.expansionCenter;
+              const center=target?L.latLng(target[1],wrappedMapLongitude(target[0],map.getCenter().lng)):marker.getLatLng();
+              if(nextZoom>map.getZoom())map.setView(center,nextZoom,{animate:true});
             });
             addMarker(marker,label);
             mountedGroupCount++;

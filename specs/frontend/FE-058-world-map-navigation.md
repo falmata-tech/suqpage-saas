@@ -54,7 +54,9 @@ The shared model, native controller and actual installed web/Expo Leaflet camera
 tests qualify the new bounds locally; FE-021 records their mapped contracts.
 Physical MapLibre and user visual review remain pending.
 
-S140 latest owner correction: FE-021 S140 supersedes the maximum-only preview
+The November 19 FE-021 correction makes overview groups zoom to their area before a second tap opens the picker. The historical rules below apply to groups already at city scale.
+
+S140 owner correction: FE-021 S140 supersedes the maximum-only preview
 guard below. Already-separated terminal groups open all admitted previews at
 their current camera. Only true outer aggregates click to zoom further. Saved
 keys must still be represented as terminal groups in the current hierarchy;

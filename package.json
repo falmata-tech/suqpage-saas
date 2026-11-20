@@ -98,6 +98,7 @@
     "test:benchmarks": "tsx scripts/test-showroom-benchmarks.ts",
     "test:demo-portfolio": "tsx scripts/test-demo-grower-seed.ts && tsx scripts/test-demo-client-portfolio.ts",
     "materialize:demo-portfolio": "tsx scripts/materialize-demo-client-portfolio.ts",
+    "verify:published-demo-videos": "tsx scripts/verify-published-demo-videos.ts",
     "sync:demo-videos": "tsx scripts/apply-demo-process-videos.ts",
     "test:visual-benchmarks": "node scripts/capture-showroom-benchmarks.mjs",
     "test:visual-demo-portfolio": "tsx scripts/capture-demo-client-portfolio.ts",

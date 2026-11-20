@@ -46,8 +46,10 @@ export type MapClusterMarker = {
   ids: number[];
   count: number;
   presence: 'featured' | 'live' | '';
-  /** Only outer aggregates zoom; currently exposed terminal groups open in place. */
+  /** Target for zooming into aggregate markers and distant groups. */
   expansionZoom?: number;
+  /** City layout can offset the target circle from its overview position. */
+  expansionCenter?: [longitude: number, latitude: number];
 };
 export type MapFixedGroup = Readonly<{
   key: string;
@@ -548,7 +550,16 @@ export function mapClusterMarkers(index: MapClusterIndex, bounds: MapClusterBoun
         const {expansionZoom: _expansionZoom, ...single} = item;
         return {...single, kind: 'shop' as const, ids: [...item.ids], anchor: [...item.anchor], center: [...item.center]};
       }
-      return {...item, ids: [...item.ids], anchor: [...item.anchor], center: [...item.center]};
+      const copy: MapClusterMarker = {...item, ids: [...item.ids], anchor: [...item.anchor], center: [...item.center]};
+      if (item.kind === 'cluster' && clampMapZoom(normalizedZoom) < MAP_CITY_ZOOM) {
+        const city = cityLayout(index);
+        const target = city.layout.markers.find(marker => marker.key === item.key);
+        if (target) {
+          copy.expansionZoom = city.zoom;
+          copy.expansionCenter = [...target.center];
+        }
+      }
+      return copy;
     });
 }
 

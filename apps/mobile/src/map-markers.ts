@@ -9,6 +9,7 @@ export type MarkerItem = {
   anchor: [number, number];
   kind: "shop" | "cluster" | "nearby" | "aggregate";
   expansionZoom?: number;
+  expansionCenter?: [number, number];
   count: number;
   presence: "featured" | "live" | "";
   shop?: MapShop;
@@ -27,7 +28,7 @@ export function visibleMarkers(index: ReturnType<typeof markerIndex>, shops: Map
     const members=marker.ids.flatMap(id=>byId.has(id)?[byId.get(id)!]:[]);
     if(!members.length)return [];
     const kind=marker.kind==='cluster'&&members.length===1?'shop':marker.kind;
-    return [{key:marker.key,kind,center:marker.center,anchor:marker.anchor,count:members.length,...(marker.expansionZoom===undefined?{}:{expansionZoom:marker.expansionZoom}),
+    return [{key:marker.key,kind,center:marker.center,anchor:marker.anchor,count:members.length,...(marker.expansionZoom===undefined?{}:{expansionZoom:marker.expansionZoom,expansionCenter:marker.expansionCenter}),
       presence:members.some(s=>s.isFeatured)?'featured' as const:members.some(s=>s.isLive)?'live' as const:'' as const,
       ...(kind==='shop'?{shop:members[0]}:{shops:members})}];
   });

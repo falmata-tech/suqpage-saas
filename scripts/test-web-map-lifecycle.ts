@@ -154,10 +154,13 @@ test('FE-021 S140 outer aggregates expand while exposed terminal circles open be
   await aggregate.click();await expandedWithoutOpening();
   await mountAtOverview();await page.waitForFunction(()=>document.querySelector('.discovery-map')?.getAttribute('data-map-zoom')==='5');
   await aggregate.press('Enter');await expandedWithoutOpening();
-  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,12,null,3),cohort.slice(0,2));
-  await page.waitForFunction(()=>{const map=(window as unknown as {fixture:Probe}).fixture.maps[0];return map.getZoom()===12&&!map._animatingZoom;});
+  await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,5,null,3),cohort.slice(0,2));
+  const farCircle=page.getByRole('button',{name:'2 businesses. Zoom in.',exact:true});
+  await farCircle.press('Enter');
+  await page.waitForFunction(()=>{const map=(window as unknown as {fixture:Probe}).fixture.maps[0];return map.getZoom()===10&&!map._animatingZoom;});
+  assert.equal((await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.openedGroups)).length,0,'First tap on the distant circle moves the camera only');
   const smallCircle=page.getByRole('button',{name:'2 businesses. View businesses.',exact:true});await smallCircle.waitFor();assert.equal(await smallCircle.locator('[data-map-group-kind="cluster"]').count(),1);
-  const oneGroupView=await view();assert.equal(oneGroupView.zoom,12);await smallCircle.press('Enter');assert.deepEqual(await view(),oneGroupView);assert.equal((await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.openedGroups)).length,1,'A final circle below max opens immediately');
+  const oneGroupView=await view();assert.equal(oneGroupView.zoom,10);await smallCircle.press('Enter');assert.deepEqual(await view(),oneGroupView);assert.equal((await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.openedGroups)).length,1,'A final circle below max opens immediately');
   await smallCircle.click();assert.deepEqual(await view(),oneGroupView);assert.equal((await page.evaluate(()=>(window as unknown as {fixture:Probe}).fixture.openedGroups)).length,2,'Pointer activation has the same in-place behavior');
   await page.evaluate(shops=>(window as unknown as {fixture:Probe}).fixture.mount(shops,false,13,null,3),cohort);
   await page.evaluate(()=>{const f=(window as unknown as {fixture:Probe}).fixture;f.maps[0].setView([9.03,39.7],13,{animate:false});});

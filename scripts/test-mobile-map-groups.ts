@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 import {build} from 'esbuild';
 import type {MapShop} from '../packages/contracts/src';
-import {mapGroupCapacity,mapGroupPickerLayout,MAP_NATIVE_MAX_ZOOM,MAP_MAX_ZOOM,MAP_GROUP_ROW_HEIGHT,MAP_GROUP_COMPACT_ROW_HEIGHT} from '../lib/map/map-clustering';
+import {mapGroupCapacity,mapGroupPickerLayout,MAP_CITY_ZOOM,MAP_NATIVE_MAX_ZOOM,MAP_MAX_ZOOM,MAP_GROUP_ROW_HEIGHT,MAP_GROUP_COMPACT_ROW_HEIGHT} from '../lib/map/map-clustering';
 import {markerIndex,visibleMarkers,currentGroupMembers} from '../apps/mobile/src/map-markers';
 import {shopCoordinate,nextMapZoom} from '../apps/mobile/src/native-map-model';
 
@@ -62,6 +62,32 @@ test('FE-021 S153 installed SDK consumes measured native marker hits through its
  settle(5);sdkPress('aggregate');assert.equal(cameraCalls.length,1);assert.equal(opened.length,0);settle(12);const before=cameraCalls.length;sdkPress('cluster');assert.equal(opened.length,1);assert.equal(cameraCalls.length,before,'Terminal SDK press opens in place');sdkPress('shop');assert.deepEqual(selected,[5]);assert.equal(opened.length,1);app.unmount();
 });
 
+test('native overview group zooms on the first press and opens the same businesses on the second',async()=>{
+ const app=await component('MarketMap');
+ const opened:number[][]=[],cameraViews:Array<{zoom:number;center:[number,number]}>=[];
+ const props={shops:[shop(1),shop(2)],onSelect(){throw Error('Expected a group');},onGroup:(rows:MapShop[])=>opened.push(Array.from(rows,s=>s.id))};
+ let tree=app.render(props);
+ (tree.find(n=>n.type==='Camera')!.props.ref as {current:unknown}).current={easeTo:(view:typeof cameraViews[number])=>cameraViews.push(view)};
+ function settle(zoom:number){
+  (tree.find(n=>n.type==='Map')!.props.onRegionDidChange as(e:unknown)=>void)({nativeEvent:{center:[38.75,9.03],zoom,bounds:[38,8,40,10]}});
+  tree=app.render(props);
+ }
+ settle(4);
+ const far=tree.find(n=>n.type==='MapMarker')!;
+ assert.equal(far.props.label,'2 businesses. Zoom in.');
+ press(far);
+ assert.equal(opened.length,0);
+ assert.equal(cameraViews.length,1);
+ assert.equal(cameraViews[0].zoom,MAP_CITY_ZOOM-1);
+ settle(cameraViews[0].zoom);
+ const near=tree.find(n=>n.type==='MapMarker')!;
+ assert.equal(near.props.label,'2 businesses. View businesses.');
+ press(near);
+ assert.deepEqual(opened,[[1,2]]);
+ assert.equal(cameraViews.length,1);
+ app.unmount();
+});
+
 test('FE-021 S153 iOS counted SDK host remains targetable for its own annotation recognizer',async()=>{
  const annotation=readFileSync('node_modules/@maplibre/maplibre-react-native/ios/components/annotations/point-annotation/MLRNPointAnnotation.m','utf8');assert.match(annotation,/\[self addGestureRecognizer:customViewTap\]/);assert.match(annotation,/_handleTap:[\s\S]*?self\.reactOnPress\(\[self makeEventPayload\]\)/);
  const app=await component('MarketMap');app.fixture.platform='ios';const shops=[shop(1),shop(2)],groups:number[][]=[];const props={shops,onSelect(){throw Error('No isolatedshop');},onGroup:(rows:MapShop[])=>groups.push(Array.from(rows,s=>s.id))};let tree=app.render(props);(tree.find(n=>n.type==='Map')!.props.onRegionDidChange as(e:unknown)=>void)({nativeEvent:{center:[38.75,9.03],zoom:12,bounds:[38,8,40,10]}});tree=app.render(props);const host=tree.find(n=>n.type==='Marker')!;assert.equal(host.props.pointerEvents,'box-only','The iOS recognizer belongs to the SDK host; a box-none host with noninteractive children is not sufficient');assert.equal((host.props.children as Element).props.nativeMarker,true);let stopped=0;(host.props.onPress as(e:{stopPropagation:()=>void})=>void)({stopPropagation:()=>stopped++});assert.equal(stopped,1);assert.deepEqual(groups,[[1,2]]);app.unmount();
@@ -82,7 +108,7 @@ test('FE-053 native group identities stay fixed across zoom for admitted screen 
  for(const zoom of [1,6,13,14,12,17.9,18,19,100]){
   const markers=visibleMarkers(index,shops,[{key:'legacy',city:'Fixture city',latitude:9.03,longitude:38.75,showroomIds:[1,2]}],bounds,zoom);
   if(zoom>=18){assert.equal(markers.length,8);assert.ok(markers.every(m=>m.kind==='cluster'&&m.count===3&&m.expansionZoom===undefined));assert.deepEqual(markers.map(m=>m.key),terminalKeys);}
-  else assert.ok(markers.every(m=>m.kind==='aggregate'?m.expansionZoom!==undefined&&m.expansionZoom>Math.floor(zoom)&&m.expansionZoom<=MAP_MAX_ZOOM:m.expansionZoom===undefined),'Only actual outer aggregates expose a zoom target');
+  else assert.ok(markers.every(m=>(m.kind==='aggregate'||(m.kind==='cluster'&&zoom<MAP_CITY_ZOOM))?m.expansionZoom!==undefined&&m.expansionZoom>Math.floor(zoom)&&m.expansionZoom<=MAP_MAX_ZOOM:m.expansionZoom===undefined),'Overview groups and outer aggregates expose a zoom target');
   assert.deepEqual(markers.flatMap(m=>m.shops?.map(s=>s.id)||[]).sort((a,b)=>a-b),shops.map(s=>s.id));
   for(const m of markers)assert.equal(m.presence,m.shops?.some(s=>s.isFeatured)?'featured':m.shops?.some(s=>s.isLive)?'live':'');
   assert.deepEqual(index.groups.map(group=>group.key),terminalKeys,'Outer clustering cannot change fixed terminal identities');
