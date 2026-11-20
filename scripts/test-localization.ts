@@ -393,8 +393,8 @@ test('FE-049/FE-052 S132/S133: active copy explains products, social inquiry and
   // About adds supplier context beyond the compact owner-approved Market sentence.
   const amAbout=ABOUT_STOREFRONT_SECTIONS.map(section=>[section.description,...section.benefits.map(benefit=>benefit.description)].map(text=>am(text)).join(' ')).join(' ');
   const omAbout=ABOUT_STOREFRONT_SECTIONS.map(section=>[section.description,...section.benefits.map(benefit=>benefit.description)].map(text=>om(text)).join(' ')).join(' ');
-  for(const term of ['እርሻ','ወርክሾፕ','ፋብሪካ','ቤት','ሱቅ','ገዢዎች'])assert.ok(amAbout.includes(term),`am About: ${term}`);
-  for(const term of ['qonna','mana hojii','warsha','mana keessaa','suuqii','bitattoota'])assert.match(omAbout,new RegExp(term,'i'),`om About: ${term}`);
+  for(const term of ['እርሻ','አውደ ጥበብ','ፋብሪካ','ሱቅ','ደንበኞች'])assert.ok(amAbout.includes(term),`am About: ${term}`);
+  for(const term of ['qonna','mana hojii','warsha','suuqii','maamiltoota'])assert.match(omAbout,new RegExp(term,'i'),`om About: ${term}`);
   assert.match(am(TRANSPORT_COPY.launcherTitle),/ማጓጓዣ/);
   assert.match(om(TRANSPORT_COPY.launcherTitle),/geejjiba/i);
   for(const locale of ['am','om'] as const){
