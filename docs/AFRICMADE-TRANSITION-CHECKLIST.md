@@ -6,6 +6,21 @@ Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 Updated 2026-11-18. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
+## Grouped storefront release
+
+- [x] Keep the cover and playback at 240 px on desktop, 210 px on phone web and 210 px in Expo. Chrome confirmed the image during a delayed load, real playback after loading and a retry after a failed request. Verify the player on the published host before reporting delivery.
+- [x] Classify all 264 demo products into reusable product groups. Local PostgreSQL proves exclusive department membership. Desktop, phone web and Expo confirmed Home, then Candles & decor, then Pure Beeswax Candles.
+- [x] Review the published demo roster against the creator footage and bind the exact before-images. Disposable PostgreSQL verified changing and rolling back both providers and both legacy examples. Apply the guarded plan only with the full release candidate qualified, then verify 66 showroom stories, 264 product videos and process chapters.
+- [x] Rewrite About and default to the seller section. Retire the logistics-company link, send old bookmarks to About and refuse new requests on both former endpoints.
+- [ ] Qualify the grouped candidate through protected main and Netlify. Build the fresh local Android APK after verifying production.
+
+## Small map clusters and public catalog review
+
+- [x] Reproduce the production overview click. A four-business Dire Dawa marker opened a picker at zoom 5 with the same center.
+- [x] Audit all seven public product filters and all 66 demo showrooms. All 264 products used managed MP4s. The same 24 product IDs appeared in both Agriculture and Food, including Pure Beeswax Candles. The subcategory menu exposes showroom shelf names.
+- [x] FE-021 area-first activation verified in local Chrome with synthetic tiles. Desktop focused the four Dire Dawa businesses from zoom 5 to 10. Phone web focused the two Arba Minch businesses from 5 to 11 and Expo from 6 to 11. Each first tap kept the list closed and each second tap opened the same members. Native camera dispatch passed a controlled test. The previously built APK predates this change.
+- [ ] Qualify any future production release separately.
+
 ## Android honey playback and web delivery
 
 - [x] Diagnose the previous Seasonal Raw Honey failure (FE-053). On the same API 35 emulator the original APK played 583 frames over 19.7 seconds with internet access. Its referrer used the configured production package despite the installed local suffix. The 20-second startup deadline could discard an otherwise viable frame. The earlier run did not record which error fired.
@@ -202,6 +217,8 @@ before-image.
    pass focused tests and the required full gates. Prepare exact hosted
    before-images, current versions, target and rollback for review before
    applying any public-data change. Keep the simulator paused.
+
+Before reporting demo videos delivered, run `npm run verify:published-demo-videos` against the public production origin and verify playback through the published showroom and product controls. Record the target, matched story/product counts, missing handles and player outcome. On November 19 the same command passed on the local preview (66/66 stories and 264/264 products) and failed on production (zero complete showrooms, the local Dara Art Studio and Wabi Feed Mill handles returned 404). The separate inventory of actual public handles found 66 MP4 stories and 264 MP4 products. Production has Dara Clay Works and Wabi Bottled Water. Sheger retains its rebar catalog while its local counterpart sells gates. Match footage against the live products before preparing any media correction.
 
 The fresh local seed and disposable PostgreSQL portfolio test now require one
 shared story/process/product ref per showroom and exact dual Agriculture/Food

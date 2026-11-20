@@ -49,7 +49,7 @@ async function runPostgresFixture() {
     assert.match(marketplaceMapSource, /showroom\.primaryIndustryLabel/);
     assert.doesNotMatch(discoveryUiSource, /DiscoveryList|discovery-list|selectDiscoveryView/);
     assert.match(discoveryUiSource, /showroom\.primaryIndustryShortLabel/);
-    assert.match(marketplaceMapSource, /item\.kind==='aggregate'[\s\S]*map\.setView/);
+    assert.match(marketplaceMapSource, /item\.expansionZoom!==undefined[\s\S]*map\.setView/, 'Markers with an expansion target zoom before selection');
     assert.match(marketplaceMapSource, /mapExposedGroup\(clusterIndexRef\.current,item\.ids,map\.getZoom\(\)\)/, 'Only the current separated terminal group can open its picker');
     assert.match(discoveryUiSource, /function NearbyShowroomsViewer/);
     assert.match(discoveryUiSource, /className=\{`nearby-showroom-viewer/);

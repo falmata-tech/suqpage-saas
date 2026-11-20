@@ -10,6 +10,19 @@ change_level: L2
 
 # FE-065 — Independent business and product discovery
 
+
+## Stable marketplace product categories (2026-11-20)
+
+GIVEN a visitor filters Product listings WHEN a business has multiple industries
+THEN each product appears in its own marketplace category. Reviewed demo items
+use their actual product type. Other listings use the seller's primary category
+until a product classification is available. Marketplace subcategories use
+reusable product types. Merchant shelf names stay in the showroom. A
+recognized active shelf may map to a standard subcategory in its own category.
+Products outside known subcategories remain discoverable through the parent.
+Exact search, typo correction, pagination, and filter counts use the same
+classification. The map and the seven featured weekdays use showroom industries.
+
 ## S181 — map-first discovery and visitor workflow review (ready)
 
 L1 interface/interaction refinement on desktop web, phone web and Expo/native.

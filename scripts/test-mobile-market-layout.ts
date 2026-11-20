@@ -424,6 +424,9 @@ test('FE-065 S117 each explicit About map action overrides Products while return
     state.focused=true;tree=render();tree=render();
     assert.equal(marketControls(tree).props.scope,'products','Detail Back with unchanged explicit parameters preserves the later manual choice');
     state.focused=false;tree=render();
+    const defaultAbout=renderAbout();
+    const buyerTab=defaultAbout.filter(node=>node.props.accessibilityRole==='tab')[1];
+    (buyerTab.props.onPress as ()=>void)();
     const about=renderAbout();
     (about.find(node=>node.type==='Button'&&node.props.label==='Explore the map')!.props.onPress as ()=>void)();
     const path=aboutState.routes.at(-1) as string,params=new URL(path,'https://suqpage.com').searchParams;
@@ -616,10 +619,17 @@ test('FE-052 S143 native About selects one audience and preserves its deliberate
  const state=fixture(),render=await component('about',state);let tree=render();
  const tabs=()=>tree.filter(node=>node.props.accessibilityRole==='tab');
  assert.equal(tabs().length,2);assert.deepEqual(tabs().map(node=>(node.props.accessibilityState as {selected:boolean}).selected),[true,false]);assert.ok(tabs().every(node=>Number(style(node).minHeight)>=48));
+ assert.ok(tree.some(node=>node.props.testID==='about-businesses'));assert.ok(!tree.some(node=>node.props.testID==='about-customers'));
+ (tree.find(node=>node.type==='Button'&&node.props.label===ABOUT_STOREFRONT_SECTIONS[0].action)!.props.onPress as()=>void)();
+ assert.equal(state.routes.at(-1),'/account');
+ (tabs()[1].props.onPress as()=>void)();tree=render();
+ assert.deepEqual(tabs().map(node=>(node.props.accessibilityState as {selected:boolean}).selected),[false,true]);
  assert.ok(tree.some(node=>node.props.testID==='about-customers'));assert.ok(!tree.some(node=>node.props.testID==='about-businesses'));
- (tabs()[1].props.onPress as()=>void)();tree=render();assert.deepEqual(tabs().map(node=>(node.props.accessibilityState as {selected:boolean}).selected),[false,true]);assert.ok(!tree.some(node=>node.props.testID==='about-customers'));assert.ok(tree.some(node=>node.props.testID==='about-businesses'));
- (tree.find(node=>node.type==='Button'&&node.props.label===ABOUT_STOREFRONT_SECTIONS[1].action)!.props.onPress as()=>void)();assert.equal(state.routes.at(-1),'/account');
- (tabs()[0].props.onPress as()=>void)();tree=render();(tree.find(node=>node.type==='Button'&&node.props.label===ABOUT_STOREFRONT_SECTIONS[0].action)!.props.onPress as()=>void)();assert.equal(state.routes.at(-1),'/');assert.ok(tree.some(node=>node.type==='Button'&&node.props.label==='Explore the map'));
+ (tree.find(node=>node.type==='Button'&&node.props.label===ABOUT_STOREFRONT_SECTIONS[1].action)!.props.onPress as()=>void)();
+ const route=state.routes.at(-1);
+ assert.equal(typeof route,'string');
+ assert.match(String(route),/^\/\?view=search&_intent=\d+$/);
+ assert.ok(tree.some(node=>node.type==='Button'&&node.props.label==='Explore the map'));
 });
 
 test('FE-065 S181 native controls retain direct wide filters and a single labelled compact row at phone or enlarged sizes',async()=>{

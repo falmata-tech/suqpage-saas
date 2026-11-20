@@ -44,20 +44,30 @@ async function bundle(native:boolean){
 
 async function mount(page:Page,kind:'about'|'market'){await page.evaluate(kind=>(window as unknown as{qa:QA}).qa.mount(kind),kind);}
 async function assertAbout(page:Page,fixture:Fixture,native:boolean){
- const t=createUiText(fixture.messages),customers=page.getByRole('tab',{name:t(ABOUT_STOREFRONT_SECTIONS[0].label),exact:true}),businesses=page.getByRole('tab',{name:t(ABOUT_STOREFRONT_SECTIONS[1].label),exact:true});
- await customers.waitFor();assert.equal(await page.getByRole('tab').count(),2);assert.equal(await customers.getAttribute('aria-selected'),'true');
- const customerTitle=page.getByRole('heading',{name:t(ABOUT_STOREFRONT_SECTIONS[0].title),exact:true}),businessTitle=page.getByRole('heading',{name:t(ABOUT_STOREFRONT_SECTIONS[1].title),exact:true});
+ const t=createUiText(fixture.messages),[seller,buyer]=ABOUT_STOREFRONT_SECTIONS;
+ const businesses=page.getByRole('tab',{name:t(seller.label),exact:true}),customers=page.getByRole('tab',{name:t(buyer.label),exact:true});
+ await businesses.waitFor();assert.equal(await page.getByRole('tab').count(),2);
+ assert.equal(await page.getByRole('tab').first().getAttribute('aria-selected'),'true');
+ const customerTitle=page.getByRole('heading',{name:t(buyer.title),exact:true}),businessTitle=page.getByRole('heading',{name:t(seller.title),exact:true});
+ assert.equal(await businessTitle.isVisible(),true);assert.equal(await customerTitle.isVisible(),false);
+ const businessAction=page.getByRole(native?'button':'link',{name:t(seller.action),exact:native});
+ await businessAction.click();assert.equal((await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.routes)).at(-1),native?'/account':'/login');
+ await businesses.focus();await businesses.press('ArrowRight');
+ await page.getByRole('tab',{name:t(buyer.label),exact:true,selected:true}).waitFor();
+ assert.equal(await customers.evaluate(element=>document.activeElement===element),true);
  assert.equal(await customerTitle.isVisible(),true);assert.equal(await businessTitle.isVisible(),false);
- await customers.focus();await customers.press('ArrowRight');await page.getByRole('tab',{name:t(ABOUT_STOREFRONT_SECTIONS[1].label),exact:true,selected:true}).waitFor();assert.equal(await businesses.evaluate(element=>document.activeElement===element),true);assert.equal(await businessTitle.isVisible(),true);assert.equal(await customerTitle.isVisible(),false);
- const businessAction=page.getByRole(native?'button':'link',{name:t(ABOUT_STOREFRONT_SECTIONS[1].action),exact:native});await businessAction.click();assert.equal((await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.routes)).at(-1),native?'/account':'/login');
- await businesses.press('Home');await page.getByRole('tab',{name:t(ABOUT_STOREFRONT_SECTIONS[0].label),exact:true,selected:true}).waitFor();await customers.press('End');await page.getByRole('tab',{name:t(ABOUT_STOREFRONT_SECTIONS[1].label),exact:true,selected:true}).waitFor();await businesses.press('ArrowRight');await page.getByRole('tab',{name:t(ABOUT_STOREFRONT_SECTIONS[0].label),exact:true,selected:true}).waitFor();
+ const customerAction=page.getByRole(native?'button':'link',{name:t(buyer.action),exact:native});
+ await customerAction.click();assert.match((await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.routes)).at(-1)!,/^\/\?view=search(?:&|$)/);
+ await customers.press('Home');await page.getByRole('tab',{name:t(seller.label),exact:true,selected:true}).waitFor();
+ await businesses.press('End');await page.getByRole('tab',{name:t(buyer.label),exact:true,selected:true}).waitFor();
+ await customers.press('ArrowRight');await page.getByRole('tab',{name:t(seller.label),exact:true,selected:true}).waitFor();
  const geometry=await page.getByRole('tablist').evaluate(root=>{const r=root.getBoundingClientRect();return{left:r.left,right:r.right,controls:[...root.querySelectorAll('[role="tab"]')].map(element=>{const box=element.getBoundingClientRect();return{width:box.width,height:box.height,scroll:element.scrollWidth,client:element.clientWidth};})};});
  assert.ok(geometry.left>=0&&geometry.right<=fixture.dimensions.width+1,JSON.stringify(geometry));for(const control of geometry.controls)assert.ok(control.width>=48&&control.height>=48&&control.scroll<=control.client+1,JSON.stringify({fixture,geometry}));
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'About has no horizontal overflow');
  const footer=native?page.getByTestId('public-site-footer'):page.locator('[data-public-site-footer]');assert.equal(await footer.count(),1);
  const utilities=native?footer.getByTestId('public-footer-utilities'):footer.getByRole('navigation',{name:t('Explore AfricMade'),exact:true});
  const legal=native?footer.getByTestId('public-footer-legal'):footer.getByRole('navigation',{name:t('Information'),exact:true});
- assert.equal(await utilities.getByRole('link').count(),2);assert.equal(await legal.getByRole('link').count(),3);assert.equal(await footer.getByRole('link').count(),5);assert.equal(await footer.getByText(t(TRANSPORT_COPY.launcherTitle),{exact:true}).count(),0,'Public transport is retired');
+ assert.equal(await utilities.getByRole('link').count(),1);assert.equal(await legal.getByRole('link').count(),3);assert.equal(await footer.getByRole('link').count(),4);assert.equal(await footer.getByText(t(TRANSPORT_COPY.launcherTitle),{exact:true}).count(),0,'Public transport is retired');
  assert.equal(await page.getByRole('link',{name:t(TRANSPORT_COPY.launcherTitle),exact:native}).count(),0,'Visitors cannot enter transport chat from About');
  for(const link of [...PUBLIC_SITE_FOOTER.utilities,...PUBLIC_SITE_FOOTER.legal]){const action=footer.getByRole('link',{name:t(link.label),exact:true});await action.scrollIntoViewIfNeeded();const box=await action.boundingBox();assert.ok(box&&box.width>=44&&box.height>=44,JSON.stringify({locale:fixture.locale,native,label:link.label,box}));assert.ok(box.x>=0&&box.x+box.width<=fixture.dimensions.width+1,'Footer link stays inside the phone');await action.click();const expected=native&&['/showrooms','/privacy','/terms'].includes(link.href)?'https://mirtpage.com'+link.href:link.href;assert.equal((await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.routes)).at(-1),expected);}
  const geometryFooter=await footer.evaluate(root=>{const links=[...root.querySelectorAll('a,[role="link"]')].map(el=>{const box=el.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,height:box.height,scroll:el.scrollWidth,client:el.clientWidth};});return{links,text:root.textContent};});
@@ -67,8 +77,8 @@ async function assertAbout(page:Page,fixture:Fixture,native:boolean){
 }
 
 test('FE-070 quiet footer is limited to public information routes, never the map, chat or merchant task',()=>{
- for(const path of ['/about','/showrooms','/transport-partners','/privacy','/terms','/account-deletion'])assert.ok(showPublicSiteFooter(path)&&showPublicSiteFooter(path+'/'),path);
- for(const path of ['/','/featured','/discover','/buying','/tracking','/tracking/record','/inquiry','/product','/@merchant','/shop/merchant','/dashboard','/account','/owner/page','/login','/request','/about-other','/showrooms/merchant'])assert.equal(showPublicSiteFooter(path),false,path);
+ for(const path of ['/about','/showrooms','/privacy','/terms','/account-deletion'])assert.ok(showPublicSiteFooter(path)&&showPublicSiteFooter(path+'/'),path);
+ for(const path of ['/','/transport-partners','/featured','/discover','/buying','/tracking','/tracking/record','/inquiry','/product','/@merchant','/shop/merchant','/dashboard','/account','/owner/page','/login','/request','/about-other','/showrooms/merchant'])assert.equal(showPublicSiteFooter(path),false,path);
 });
 
 test('FE-052/065 S143 actual About tabs and RNWeb Market row stay compact, localized and keyboard accessible',{timeout:180000},async()=>{

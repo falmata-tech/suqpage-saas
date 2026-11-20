@@ -263,7 +263,8 @@ test('terminal membership stays fixed while outer hierarchy merges whole groups 
         assert.equal(mapFixedGroup(index,item.ids),null,'Outer aggregates cannot authorize a modal');
       }else {
         assert.equal(mapFixedGroup(index,item.ids)?.key,item.key);
-        assert.equal(item.expansionZoom,undefined,'Exposed terminal groups open without another zoom');
+        if(item.kind==='cluster'&&zoom<MAP_CITY_ZOOM)assert.ok(item.expansionZoom!>=MAP_CITY_ZOOM);
+        else assert.equal(item.expansionZoom,undefined);
       }
     }
     assert.deepEqual(index.groups.map(group => ({key:group.key,ids:[...group.ids],count:group.count,presence:group.presence})),expected);
@@ -618,7 +619,14 @@ test('outer counts sum real shops and expansion progresses to exact all-fit term
   assert.equal(leaves.find(item=>item.count===1)?.kind,'shop');
   const singleTerminal=mapClusterIndex(Array.from({length:6},(_,item)=>point(item+1,38.75,9.03)),6);
   assert.equal(mapClusterMarkers(singleTerminal,world,1)[0].kind,'cluster','One terminal group never becomes a fake outer aggregate');
-  for(const zoom of [1,6,14,17,17.999,MAP_MAX_ZOOM]){assert.equal(mapClusterMarkers(singleTerminal,world,zoom)[0].expansionZoom,undefined,'A current final circle needs no extra camera movement');assert.ok(mapExposedGroup(singleTerminal,[1,2,3,4,5,6],zoom),'Exact current terminal membership is exposed at its existing camera');}
+  for(const zoom of [1,5,9.75]){
+    const overview=mapClusterMarkers(singleTerminal,world,zoom)[0];
+    assert.equal(overview.expansionZoom,MAP_CITY_ZOOM);
+    const city=mapClusterMarkers(singleTerminal,world,overview.expansionZoom)[0];
+    assert.deepEqual(overview.expansionCenter,city.center);
+    assert.deepEqual(city.ids,overview.ids);
+    assert.equal(city.expansionZoom,undefined,'The second tap opens the exact group');
+  }
   assert.equal(mapFixedGroup(singleTerminal,[1,2,3,4,5,6])?.expansionZoom,undefined,'Exact membership lookup does not invent a camera action');
   assert.equal(mapClusterMarkers(mapClusterIndex([point(99)]),world,1)[0].expansionZoom,undefined,'Genuinely isolated shop preview remains direct');
   const filtered=mapClusterIndex(source.filter(item=>item.id!==6));

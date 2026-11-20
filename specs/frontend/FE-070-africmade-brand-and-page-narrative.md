@@ -10,6 +10,15 @@ change_level: L2
 
 # FE-070 — AfricMade identity and digital showrooms
 
+## About and the former listing form (2026-11-20)
+
+The About page introduces the marketplace and opens on For sellers. For buyers
+describes how to browse, check details and contact the seller about an order.
+Web and Expo share the copy and ordering. Remove the old logistics-company
+listing promotion from public navigation and sign-in. Its old page opens About.
+Both former submission endpoints refuse new applications. Existing private
+records retain their access and retention rules.
+
 ## S188 — complete current AfricMade presentation before Play (ready)
 
 The owner requests an audit of all code, files and assets for former platform

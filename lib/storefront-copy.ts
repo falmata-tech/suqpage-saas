@@ -9,30 +9,32 @@ export const MARKET_COMPACT_COPY = {
   title: MARKET_STOREFRONT_COPY.title,
 } as const;
 
+export const ABOUT_INTRO = "AfricMade brings together businesses that grow, make and supply goods in Africa. Here you can see what they offer, learn about their work and get in touch with them directly.";
+
 export const ABOUT_STOREFRONT_SECTIONS = [
   {
-    id: "customers", label: "For buyers", title: "See the business before you ask to buy.",
-    description: "Each supplier's page brings its story, products and any listed supply details together. Browse first, then ask about one item or a larger order without piecing everything together from social posts.",
-    action: "Explore products",
+    id: "businesses", label: "For sellers", title: "A showroom for your business",
+    description: "Create a page for your farm, workshop, factory or shop. Put your products, photos and contact details in one place so customers know what they can order and how to reach you.",
+    action: "Create your page",
     benefits: [
-      { icon: "shop", title: "Discover the source.", description: "See who grows, makes or supplies the product and where the business works." },
-      { icon: "search", title: "Understand the offer.", description: "Review product options, listed availability and capacity when the supplier provides them." },
-      { icon: "chat", title: "Start a conversation.", description: "Send one product or a list to the supplier's AfricMade Inbox, or use its published contact details." },
+      { icon: "shop", title: "Show what you make", description: "Tell customers who you are, where you work and what goes into your products." },
+      { icon: "search", title: "Share your order details", description: "List what is available, what you make to order and the quantities you can supply." },
+      { icon: "chat", title: "Talk to customers directly", description: "Answer questions in your AfricMade inbox or through the contact details on your page." },
     ],
   },
   {
-    id: "businesses", label: "For suppliers", title: "Make your business easier to discover.",
-    description: "Give buyers one dependable page for your story, products and the quantities you can offer. Whether you run a farm, workshop, factory, home business or shop, your work stays visible beyond the next social post.",
-    action: "Create your page",
+    id: "customers", label: "For buyers", title: "Find the people behind the products",
+    description: "Browse products from farms, workshops and other suppliers. When you find something you need, ask the seller about price, quantity and delivery, then work out the order with them.",
+    action: "Browse products",
     benefits: [
-      { icon: "shop", title: "Tell your story.", description: "Show what you make, grow or supply and the people and work behind it." },
-      { icon: "map", title: "Present your range.", description: "Add product photos, options, availability and any capacity details you choose to share." },
-      { icon: "chat", title: "Hear from buyers.", description: "Receive questions in AfricMade Inbox or through your listed contact methods, then agree on an order directly." },
+      { icon: "search", title: "Compare products", description: "Look through photos, sizes, materials and availability where sellers have listed them." },
+      { icon: "shop", title: "Get to know a supplier", description: "Visit their showroom to see their range and learn how they work." },
+      { icon: "chat", title: "Ask about an order", description: "Send an inquiry for one product or several items from the same seller." },
     ],
   },
 ] as const;
 
 export const CUSTOMER_MAP_COPY = {
-  title: "Explore the map.",
-  description: "Find businesses near and far. Open their pages to see their stories and products.",
+  title: "Explore the map",
+  description: "Find suppliers by location and visit their showrooms.",
 } as const;

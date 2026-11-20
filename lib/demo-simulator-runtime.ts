@@ -22,7 +22,9 @@ import {RevisionError} from './revision-domain';
 import {catalogToRevisionSnapshotV4,processVideoPolicyForCatalog} from './revision-v4-defaults';
 import {requireRevisionSnapshotV4} from './revision-v4-domain';
 import {SHOWROOM_COMPONENT_BANK_LATEST} from './showroom-bank-release';
-import {productVideoWatchUrl} from './video/product-video';
+import {normalizeProductVideoUrl, productVideo, productVideoWatchUrl} from './video/product-video';
+import {approvedDemoVideo} from './video/demo-video-catalog';
+import {PUBLISHED_DEMO_VIDEO_TARGETS} from './published-demo-video-targets';
 import type {SessionUser} from './types';
 import {isSupportedPostgresMigrationLedger,LATEST_POSTGRES_MIGRATION_VERSION} from './postgres-schema-version';
 import {parseDemoCatalogInputs,parseStoredDemoCatalog,demoCatalogPhaseOffsets,demoCatalogStage,MAX_DEMO_CATALOG_BUSINESSES,type DemoCatalogProductInput,type DemoCatalogProduct} from './demo-catalog-scenarios';
@@ -209,6 +211,138 @@ export async function correctDemoMedia(raw:unknown){
   await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.media_corrected',?,'')",
    [state.actor.id,e.business_id,JSON.stringify({automation:'demo-media-maintenance',operationKey:input.operationKey,payloadHash,products:input.products.map(p=>p.productId)})]);
   return {duplicate:false};
+ });
+}
+
+/**
+ * The earlier reviewed production category change added Agriculture to six
+ * demos but left their simulator bindings on Food. Derive the old digest from
+ * the locked live rows and accept only that exact category difference.
+ */
+async function reconcileReviewedGrowerForMedia(
+ enrollment: Enrollment, state: Awaited<ReturnType<typeof currentState>>, expectedHash: string,
+) {
+ const reviewed=AGRICULTURE_CORRECTION_TARGETS.some(target =>
+  target.businessId===enrollment.business_id&&target.handle===enrollment.handle);
+ const categories=['agriculture-growers','food-farming'], previous=['food-farming'];
+ if(!reviewed||expectedHash!==enrollment.expected_hash||digest(state.categories)!==digest(categories)||
+  digest({catalog:state.catalog,draft:state.draft,publication:state.publication,categories:previous,
+   location:state.location,discovery:state.discovery})!==enrollment.expected_hash)throw new DemoDrift('content_changed');
+ const parameters=parseDemoScenarioParameters(JSON.parse(enrollment.parameters_json));
+ const products=parseStoredDemoCatalog(enrollment.catalog_products_json);
+ if(products.length!==4||digest(parameters.businessCategories)!==digest(previous)||
+  products.some(binding=>digest(binding.parameters.businessCategories)!==digest(previous)))throw new DemoDrift('content_changed');
+ const update=await runtimeRun(`UPDATE demo_simulator_enrollments SET expected_hash=?,parameters_json=?,catalog_products_json=?
+   WHERE business_id=? AND expected_hash=? AND status='active' AND stage=? AND cycle=? AND due_at=?`,[
+  state.hash,JSON.stringify({...parameters,businessCategories:categories}),
+  JSON.stringify(products.map(binding=>({...binding,parameters:{...binding.parameters,businessCategories:categories}}))),
+  enrollment.business_id,expectedHash,enrollment.stage,enrollment.cycle,enrollment.due_at,
+ ]);
+ if(update.changes!==1)throw new DemoDrift('content_changed');
+ await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.category_binding_reconciled',?,'')",
+  [state.actor.id,enrollment.business_id,JSON.stringify({previous,categories,previousHash:expectedHash,currentHash:state.hash})]);
+}
+
+/** Apply one finite social-video replacement using the ordinary page and product
+ * writers. The outer transaction also binds the process chapter and receipt. */
+export async function correctEnrolledDemoSocialVideo(raw: {
+ media: unknown;
+ expectedProcess: string;
+ expectedStage: number;
+ expectedCycle: number;
+ expectedDueAt: number;
+ rollbackOf?: string;
+}) {
+ const input = parseDemoMediaCorrection(raw.media);
+ const target = PUBLISHED_DEMO_VIDEO_TARGETS.find(([id, handle]) => id === input.businessId && handle === input.handle);
+ const selected = target?.[2];
+ if (!target || !selected || target[0] === 50 || target[0] === 62) throw new DemoDrift('eligibility_changed');
+ const [,,,products] = target;
+ if (input.products.length !== 4 || products.some(([id], index) => id !== input.products[index]?.productId))
+   throw new DemoDrift('eligibility_changed');
+ if (raw.rollbackOf && !/^[a-zA-Z0-9_-]{12,64}$/.test(raw.rollbackOf)) throw new DemoDrift('content_changed');
+ const rollback = Boolean(raw.rollbackOf);
+ if (!rollback && (input.coverVideoRef !== selected || !approvedDemoVideo(normalizeProductVideoUrl(input.coverBefore).managedRef, input.businessId) ||
+     input.products.some(item => item.beforeMedia.filter(entry => entry.kind === 'video').length !== 1 ||
+       item.beforeMedia.some(entry => entry.kind === 'video' && !approvedDemoVideo(entry.ref, input.businessId)) ||
+       item.afterMedia.filter(entry => entry.kind === 'video' && entry.ref === selected).length !== 1))) {
+   throw new DemoDrift('content_changed');
+ }
+ productVideo(raw.expectedProcess);
+ const payloadHash = digest({input, expectedProcess: raw.expectedProcess, expectedStage: raw.expectedStage,
+   expectedCycle: raw.expectedCycle, expectedDueAt: raw.expectedDueAt, rollbackOf: raw.rollbackOf || null});
+ return runtimeTransaction(async () => {
+  await runtimeRun('SELECT pg_advisory_xact_lock(6870619271382)');
+  if (!await schemaReady()) throw Error('The demo schema is not ready.');
+  const control = await runtimeGet<Control & {pause_reason: string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
+  if (!control || control.enabled || control.pause_reason !== 'operator') throw Error('Pause the demo service before media maintenance.');
+  const enrollment = await runtimeGet<Enrollment>('SELECT * FROM demo_simulator_enrollments WHERE business_id=? FOR UPDATE',[input.businessId]);
+  if (!enrollment || enrollment.status !== 'active' || enrollment.reason || enrollment.handle !== input.handle ||
+      enrollment.owner_user_id !== input.ownerUserId || enrollment.provider_user_id !== input.providerUserId) {
+    throw new DemoDrift('eligibility_changed');
+  }
+  const state = await currentState(enrollment, true);
+  if (products.some(([id, name]) =>
+      !state.catalog.products.some(item => item.id === id && item.name === name && item.is_published && item.offering_kind !== 'service'))) {
+    throw new DemoDrift('eligibility_changed');
+  }
+  const prior = async (key: string) => runtimeGet<{detail: string}>(
+   `SELECT detail FROM audit_logs WHERE business_id=? AND action='demo.social_video_corrected'
+      AND CASE WHEN action='demo.social_video_corrected' THEN detail::jsonb->>'operationKey' END=?
+      ORDER BY id DESC LIMIT 1`, [input.businessId, key]);
+  const receipt = await prior(input.operationKey);
+  if (receipt) {
+    const details = JSON.parse(receipt.detail);
+    if (details.payloadHash !== payloadHash || details.afterHash !== state.hash) throw new DemoDrift('content_changed');
+    return {duplicate: true};
+  }
+  if (enrollment.stage !== raw.expectedStage || enrollment.cycle !== raw.expectedCycle ||
+      Number(enrollment.due_at) !== raw.expectedDueAt || state.catalog.business.process_video_ref !== raw.expectedProcess) {
+    throw new DemoDrift('content_changed');
+  }
+  const original = {process: raw.expectedProcess, cover: input.coverBefore, media: input.products.map(item => item.beforeMedia)};
+  let nextProcess: string = selected;
+  if (rollback) {
+    const applied = await prior(raw.rollbackOf!);
+    const details = applied && JSON.parse(applied.detail);
+    const inverse = details?.before;
+    if (!details || details.rollbackOf || details.afterHash !== state.hash || !inverse ||
+        normalizeProductVideoUrl(inverse.cover).managedRef !== input.coverVideoRef ||
+        digest(inverse.media) !== digest(input.products.map(item => item.afterMedia))) {
+      throw new DemoDrift('content_changed');
+    }
+    nextProcess = productVideo(inverse.process).managedRef;
+  }
+  // The known grower repair, publication and process update share the transaction.
+  if(state.hash!==enrollment.expected_hash){
+   if(rollback)throw new DemoDrift('content_changed');
+   await reconcileReviewedGrowerForMedia(enrollment,state,input.expectedHash);
+   await correctDemoMedia({...input,expectedHash:state.hash});
+  } else await correctDemoMedia(input);
+  const current = await currentState(enrollment, true);
+  if (current.catalog.business.process_video_ref !== nextProcess) {
+    const version = current.catalog.business.content_version;
+    const changed = await runtimeRun(`UPDATE businesses SET process_video_ref=?,content_version=?
+      WHERE id=? AND handle=? AND content_version=? AND process_video_ref=? AND is_demo=1 AND status='active'`,
+     [nextProcess,version+1,input.businessId,input.handle,version,raw.expectedProcess]);
+    if (changed.changes !== 1) throw new DemoDrift('content_changed');
+    const updated = await currentState(enrollment, true);
+    await runtimeRun(`INSERT INTO published_catalog_versions(business_id,content_version,snapshot_json,change_kind,actor_user_id)
+      VALUES(?,?,?,'publication',?)`,[input.businessId,version+1,JSON.stringify(catalogToRevisionSnapshotV4(updated.catalog)),state.actor.id]);
+  }
+  const after = await currentState(enrollment, true);
+  if (after.catalog.business.process_video_ref !== nextProcess || after.draft.content.videoUrl !== productVideoWatchUrl(input.coverVideoRef) ||
+      input.products.some(item => digest(item.afterMedia) !== digest(productMedia(after.catalog.products.find(product => product.id === item.productId)!)))) {
+    throw new DemoDrift('content_changed');
+  }
+  const acknowledged = await runtimeRun(`UPDATE demo_simulator_enrollments SET expected_hash=?
+     WHERE business_id=? AND status='active' AND stage=? AND cycle=? AND due_at=?`,
+    [after.hash,input.businessId,raw.expectedStage,raw.expectedCycle,raw.expectedDueAt]);
+  if (acknowledged.changes !== 1) throw new DemoDrift('content_changed');
+  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.social_video_corrected',?,'')",
+    [state.actor.id,input.businessId,JSON.stringify({operationKey:input.operationKey, payloadHash, before:original,
+      afterHash:after.hash, rollbackOf:raw.rollbackOf || null})]);
+  return {duplicate: false};
  });
 }
 
@@ -428,7 +562,7 @@ async function unenrolledMediaState(businessId:50|62,actorUserId:number){
  const catalog=await runtimeCatalogByBusinessId(businessId,true),draft=await ownerPagePort.read(businessId),publication=await pagePublicationPort.latest(businessId);
  if(!catalog||!draft||!publication?.content||
    draft.updatedBy!==actor.id||publication.publishedBy!==actor.id||
-   digest(catalog.products.map(p=>p.id))!==digest(businessId===50?[197,198,199,200]:[245,246,247,248])||
+   digest(catalog.products.map(p=>p.id).sort((a,b)=>a-b))!==digest(businessId===50?[197,198,199,200]:[245,246,247,248])||
    catalog.products.some(p=>!p.is_published||p.offering_kind==='service'||p.currency!=='ETB')||
    draft.version!==publication.draftVersion||digest(draft.content)!==digest(publication.content))throw new DemoDrift('eligibility_changed');
  const categories=(await runtimeAll<{industry_key:string}>('SELECT industry_key FROM business_industries WHERE business_id=? ORDER BY industry_key',[businessId])).map(row=>row.industry_key);
@@ -450,6 +584,11 @@ export async function correctUnenrolledDemoMedia(raw:unknown){
   if(!control||control.enabled||control.pause_reason!=='operator')throw Error('Pause the demo service explicitly before media maintenance.');
   phase='eligibility';
   const state=await unenrolledMediaState(input.businessId,input.actorUserId);
+  if(input.kind==='unenrolled_social_video_correction'){
+   const selected=PUBLISHED_DEMO_VIDEO_TARGETS.find(([id,handle])=>id===input.businessId&&handle===input.handle);
+   if(!selected||selected[3].some(([id,name])=>!state.catalog.products.some(product=>product.id===id&&product.name===name)))throw new DemoDrift('eligibility_changed');
+  }
+
   phase='receipt';
   const receipt=await runtimeGet<{payload_hash:string}>(`SELECT detail::jsonb->>'payloadHash' payload_hash FROM audit_logs
    WHERE business_id=? AND action='demo.unenrolled_media_corrected'

@@ -438,7 +438,7 @@ identity fences late responses and map callbacks; stale results cannot claim the
 new query or overwrite the current saved camera. Keep the map mounted, resize from
 valid measured dimensions and ignore hidden zero-size/disposed work.
 
-Outer numbered clusters zoom into smaller groups. An exposed final group opens
+Outer numbered clusters zoom into smaller groups. Tapping a small group from the overview centers its city area. A second tap opens its businesses. A small group already at city scale opens
 its exact viewport-admitted business preview at the current camera, without forcing
 maximum zoom or spreading icons/connector lines. Group size adapts to fit admitted
 previews without paging. Short or enlarged layouts retain two businesses in one

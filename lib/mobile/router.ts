@@ -1,7 +1,6 @@
 import {currentBusinessAuthority} from "../staff-business-authority";
 import {readPublicShopRevision} from '../public-shop-revision';
 import {runtimePublicShowroom} from '../public-showroom-runtime';
-import {handlePartnerInterest,partnerInterestHttpPort,type PartnerInterestHttpPort} from '../transport-partner-http';
 import {trackingHttpHandler} from '../tracking-http-runtime';
 import {createTrackingHttpHandler,type TrackingHttpPorts} from '../tracking-http';
 import {isCountryCode} from '../countries';
@@ -625,7 +624,7 @@ async function dispatch(
 export async function handleMobileRequest(
   request: Request,
   path: string[],
-  dependencies?: { identity?: NativeIdentityPort; invalidate?: () => void; market?: typeof getMarketplaceDiscoveryView; transportPlan?:TransportPlanHttpPorts; tracking?:TrackingHttpPorts; inquiry?:PublicInquiryHttpPort; partnerInterest?:PartnerInterestHttpPort },
+  dependencies?: { identity?: NativeIdentityPort; invalidate?: () => void; market?: typeof getMarketplaceDiscoveryView; transportPlan?:TransportPlanHttpPorts; tracking?:TrackingHttpPorts; inquiry?:PublicInquiryHttpPort },
 ) {
   let response: Response;
   const planRoute=path.length===1&&path[0]==='transport-plan';
@@ -639,9 +638,9 @@ export async function handleMobileRequest(
       if (!cors) throw new MobileError("Origin not allowed.", 403);
       response = new Response(null, { status: 204 });
     } else {
-      const value = path.length===1&&path[0]==='transport-partners'
-        ? await handlePartnerInterest(request,hashPrivateValue(requestIpFromHeaders(request.headers)),dependencies?.partnerInterest||partnerInterestHttpPort)
-        : request.method==='POST'&&path.length===1&&path[0]==='inquiries'
+      if (path.length === 1 && path[0] === 'transport-partners')
+        throw new MobileError("This service is no longer available.", 410);
+      const value = request.method==='POST'&&path.length===1&&path[0]==='inquiries'
         ? await handlePublicInquiry(request,hashPrivateValue(requestIpFromHeaders(request.headers)),dependencies?.inquiry||publicInquiryHttpPort)
         : trackingRoute
         ? await (dependencies?.tracking?createTrackingHttpHandler(dependencies.tracking,'native'):trackingHttpHandler('native'))(request,path.slice(1))

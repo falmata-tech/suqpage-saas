@@ -123,7 +123,10 @@ export default forwardRef<MapControls, MapProps>(function MarketMap(props, ref) 
             badge={item.presence ? t(item.presence === "featured" ? "Featured" : "Live") : ""} nearby={t("Nearby")}
             onPress={() => {
               if (!live || map.current !== m) return;
-              if(item.expansionZoom!==undefined)m.setView([item.center[1],wrappedMapLongitude(item.center[0],m.getCenter().lng)],Math.min(MAP_MAX_ZOOM,Math.max(Math.floor(m.getZoom())+1,item.expansionZoom)));
+              if(item.expansionZoom!==undefined){
+                const [lng,lat]=item.expansionCenter ?? item.center;
+                m.setView([lat,wrappedMapLongitude(lng,m.getCenter().lng)],Math.min(MAP_MAX_ZOOM,Math.max(Math.floor(m.getZoom())+1,item.expansionZoom)));
+              }
               else if (item.kind !== "shop") latest.current.onGroup?.(item.shops || []);
               else if (item.shop) latest.current.onSelect(item.shop);
             }}/>);
