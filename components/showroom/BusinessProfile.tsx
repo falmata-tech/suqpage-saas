@@ -31,7 +31,9 @@ function ProfileDescription({ text }: { text: string }) {
   const long = text.length > 190;
   const excerpt = text.slice(0, 190).replace(/\s+\S*$/, "");
   return <div className={styles.description}>
-    <p id={id} className={expanded ? styles.expandedDescription : undefined} tabIndex={expanded ? 0 : undefined}>{long && !expanded ? t("{value1}…", { value1: excerpt }) : text}</p>
+    <p id={id} tabIndex={expanded ? 0 : undefined} data-scrollable-description={expanded && text.length > 1200 || undefined}>
+      {long && !expanded ? t("{value1}…", { value1: excerpt }) : text}
+    </p>
     {long ? <button type="button" aria-expanded={expanded} aria-controls={id} onClick={() => setExpanded(!expanded)}>{expanded ? t("Read less") : t("Read more")}</button> : null}
   </div>;
 }

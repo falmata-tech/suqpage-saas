@@ -6,6 +6,27 @@ Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 Updated 2026-11-18. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
+## Example business About stories (FE-023 / FE-040 / BE-022)
+
+1. [x] Compare the 66 local profiles with the 66 entries in the published demo
+   inventory. The rosters differ by two businesses, and Sheger has different
+   work on each roster.
+2. [x] Write two paragraphs per business from its actual example catalog.
+   Verify the fresh seed and refresh the 66 already published local profiles
+   through ordinary page saves. Include separate copy for the two
+   production-only businesses and the published Sheger catalog.
+3. [x] Verify all 66 local pages and the exact stories in the public API. In
+   Chrome at 1440px, 390px and 320px, expand a story, read it without a nested
+   scrollbar, collapse it and go to Products. In 390px Expo web, verify both
+   paragraphs and the Products section for Tana and Zema.
+4. [ ] Apply the reviewed copy to the hosted profiles only through the
+   demo-only publication and simulator safeguards.
+
+Local review passed on the existing preview at port 3127 and Expo web at 8082.
+The operational readback confirmed the edits were About-only and preserved
+prior page revisions. The focused 320px acceptance test and full
+`npm run check` passed. The browser evidence is in `.local/nov21-story-review/`.
+
 ## Grouped storefront release
 
 - [x] Keep the cover and playback at 240 px on desktop, 210 px on phone web and 210 px in Expo. Chrome confirmed the image during a delayed load, real playback after loading and a retry after a failed request. Verify the player on the published host before reporting delivery.

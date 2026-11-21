@@ -4,6 +4,9 @@ import { inquiryHandoffs } from '../lib/product-inquiry';
 import assert from 'node:assert/strict';
 import { getDb, seedFixture, closeDbForTests } from './testing/postgres-fixture';
 import { SEEDED_MARKETPLACE_PROFILES } from '../lib/marketplace-seed';
+import { demoShowroomAbout } from '../lib/demo-showroom-stories';
+import { parseShopPageContent } from '../lib/owner-page-domain';
+import { PUBLISHED_DEMO_VIDEO_TARGETS } from '../lib/published-demo-video-targets';
 
 async function main() {
   const db = await getDb();
@@ -41,10 +44,20 @@ async function main() {
     assert.ok(addis.length >= 20);
     assert.ok(new Set(addis.map(location => `${location.latitude},${location.longitude}`)).size >= 20,
       'Addis demo showrooms keep the distinct approximate map positions supplied by their fixtures instead of one city-center stack');
-    const pages = await db.prepare('SELECT content_json FROM owner_page_publications').all();
+    const pages = await db.prepare(`
+      SELECT b.handle, b.is_demo, p.content_json, d.content_json AS draft_json
+      FROM owner_page_publications p
+      JOIN businesses b ON b.id = p.business_id
+      JOIN owner_page_drafts d ON d.business_id = b.id
+    `).all();
     assert.equal(pages.length,66);
+    assert.equal(new Set(pages.map(page => JSON.parse(page.content_json).about)).size, 66);
     for (const page of pages) {
-      const contacts=JSON.parse(page.content_json).contacts;
+      assert.equal(page.is_demo, 1);
+      const profile = parseShopPageContent(JSON.parse(page.content_json));
+      assert.equal(profile.about, demoShowroomAbout(page.handle));
+      assert.equal(parseShopPageContent(JSON.parse(page.draft_json)).about, profile.about);
+      const contacts = JSON.parse(page.content_json).contacts;
       assert.deepEqual(publicContactLinks(contacts).map(link=>link.kind),['phone','email','website','whatsapp']);
       assert.match(contacts.email,/@example\.invalid$/);
       assert.match(contacts.phone,/^\+447700900\d{3}$/);
@@ -53,6 +66,18 @@ async function main() {
       for(const key of ['telegram','tiktok','instagram','facebook']) assert.equal(contacts[key],'','Fake demo handles must not point at real social accounts');
       assert.deepEqual(inquiryHandoffs(contacts,'Demo inquiry').map(link=>link.kind),['whatsapp','phone']);
     }
+    const publishedStories = PUBLISHED_DEMO_VIDEO_TARGETS.map(([, handle]) => demoShowroomAbout(handle, 'published'));
+    assert.equal(new Set(publishedStories).size, 66);
+    for (const story of [...publishedStories, ...pages.map(page => demoShowroomAbout(page.handle))]) {
+      const paragraphs = story.split('\n\n');
+      assert.equal(paragraphs.length, 2);
+      assert.ok(paragraphs.every(paragraph => paragraph.split(/\s+/).length >= 30));
+      assert.ok(story.length <= 2500, 'Leaves room for the simulator update');
+      assert.doesNotMatch(story, /\b(?:test fixture|seed data|fictional)\b/i);
+    }
+    assert.match(demoShowroomAbout('demo-sheger-rebar-works'), /\bgate\b/);
+    assert.match(demoShowroomAbout('demo-sheger-rebar-works', 'published'), /\bstirrups\b/);
+    assert.throws(() => demoShowroomAbout('constructor'), /Missing About story/);
     const coverage = await db.prepare(`SELECT b.id,
       EXISTS(SELECT 1 FROM users u JOIN user_access_profiles a ON a.user_id=u.id WHERE u.business_id=b.id AND a.access_role='client') owner,
       EXISTS(SELECT 1 FROM inquiries i JOIN inquiry_items item ON item.inquiry_id=i.id WHERE i.business_id=b.id) inquiry,
@@ -61,7 +86,7 @@ async function main() {
       FROM businesses b WHERE b.handle=ANY(?::text[])`).all(Object.keys(SEEDED_MARKETPLACE_PROFILES));
     assert.equal(coverage.length,66);
     assert.ok(coverage.every(row=>row.owner && row.inquiry && row.support && row.insights), 'Every demo demonstrates its owner dashboard');
-    console.log('PASS 66 demos: simple offerings, area locations, owner accounts, inquiry items, support history and insights.');
+    console.log('PASS 66 demos: About stories, simple offerings, area locations, owner accounts, inquiry items, support history and insights.');
   } finally { await closeDbForTests(); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

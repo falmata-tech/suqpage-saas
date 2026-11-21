@@ -22,8 +22,8 @@
 .description { max-width: 780px; margin-top: 16px; }
 .description p { font-size: 15px; line-height: 1.65; white-space: pre-line; color: #515b61; }
 .description button { min-height: 44px; border: 0; padding: 4px 0; background: transparent; color: #a43107; font-size: 13px; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
-.expandedDescription { max-height: 220px; overflow-y: auto; overscroll-behavior: contain; padding-right: 8px; }
-.expandedDescription:focus-visible { outline: 3px solid #c23806; outline-offset: 3px; }
+.description p[data-scrollable-description] { max-height: 220px; overflow-y: auto; overscroll-behavior: contain; padding-right: 8px; }
+.description p:focus-visible { outline: 3px solid #c23806; outline-offset: 3px; }
 .contacts { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); gap: 24px; padding: 36px 36px 80px; background: #202428; color: #fff; }
 .contactHeading { min-width: 0; }
 .contactHeading h2 { display: flex; align-items: center; gap: 12px; }
