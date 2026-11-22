@@ -10,6 +10,15 @@ change_level: L3
 
 # DEP-025 - PWA cache and standalone-shell rollout
 
+## AfricMade install and navigation cache (2026-11-21)
+
+The installation entry uses the existing manifest, root worker and icons.
+Worker v5 removes legacy page caches. Only the generic offline document,
+reviewed identity assets and content-hashed Next static assets can be cached.
+Public, account, protected, API and mutation responses never enter a page cache.
+The offline screen gives a normal retry path. A loopback-only development opt-in
+supports browser review. The existing production disable flag remains available.
+
 ## Problem
 
 Deploy Suqpage as an installable PWA without allowing cached private responses,

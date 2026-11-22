@@ -1,13 +1,10 @@
+import {isRetiredMobileTransport} from '../retired-transport';
 import {currentBusinessAuthority} from "../staff-business-authority";
 import {readPublicShopRevision} from '../public-shop-revision';
 import {runtimePublicShowroom} from '../public-showroom-runtime';
-import {handlePartnerInterest,partnerInterestHttpPort,type PartnerInterestHttpPort} from '../transport-partner-http';
-import {trackingHttpHandler} from '../tracking-http-runtime';
-import {createTrackingHttpHandler,type TrackingHttpPorts} from '../tracking-http';
+import type {TrackingHttpPorts} from '../tracking-http';
 import {isCountryCode} from '../countries';
-import {readOwnerTransport,commandOwnerTransport} from '../owner-transport';
-import {TransportPlanError} from '../transport-plan-contract';
-import {createTransportPlanHttpHandler,type TransportPlanHttpPorts} from '../transport-plan-http';
+import type {TransportPlanHttpPorts} from '../transport-plan-http';
 import {validMarketLocationParams,validMarketFilterParams} from '../market-search';
 import {resolveProductVideoUrl} from '../tiktok-short-link';
 import {CatalogSafetyError,excludedBusinessIds} from '../catalog-safety';
@@ -68,14 +65,9 @@ import { saveAccountPhone } from "../account-contacts";
 import { listInquiriesPage } from "../scalable-queries";
 import {updateInquiryStatus,markInquiryRead} from "../inquiry-status-runtime";
 import { createVideoRequest } from "../support-video-requests";
-import { channelConversation } from "../public-support-channel";
 import {scheduleAttentionDelivery} from '../attention-after';
-import { AttentionError, userAttentionFeed, visitorAttentionFeed, readUserAttention, readVisitorAttention, readAllUserAttention, readAllVisitorAttention, userAttentionPreferences, visitorAttentionPreferences, subscribeUserAttention,subscribeVisitorAttention,revokeUserAttention,revokeVisitorAttention,pushCapabilities,assertVisitorAttentionChannel } from '../attention-postgres';
+import {AttentionError,userAttentionFeed,readUserAttention,readAllUserAttention,userAttentionPreferences,subscribeUserAttention,revokeUserAttention,pushCapabilities} from '../attention-postgres';
 import {
-  createPublicSupportConversation,
-  postPublicSupportMessage,
-  closePublicSupportConversation,
-  resumePublicSupportConversation,
   listSupportConversations,
   getSupportConversation,
   postSupportMessage,
@@ -83,9 +75,7 @@ import {
   closeSupportConversation,
   reopenSupportConversation,
   SupportError,
-  acknowledgePublicRead,
   acknowledgeSupportRead,
-  submitPublicTransportCallback,
 } from "../support";
 import {
   readCoverUpload,
@@ -221,86 +211,6 @@ async function dispatch(
       mobileParse(() => parseBusinessHandle(q.get("handle"))),
     );
   if(method==='POST'&&key==='reports')return submitListingReport(listingReportPort,await jsonBody(request),ip);
-  if (['transport','buying'].includes(path[0]) && (path.length === 1 || (path.length === 2 && path[1] === 'attention'))) {
-    throw new MobileError('Transport chat is available from your business dashboard.', 410, 'public_chat_retired');
-  }
-  if ((path[0]==='transport'||path[0]==='buying') && path.length===2 && path[1]==='attention') {
-    const token=request.headers.get('X-Suqpage-Buying-Session')||'';
-    await assertVisitorAttentionChannel(token,path[0]==='transport'?'transport':'buying');
-    if(method==='GET')return {...await visitorAttentionFeed(token),push:pushCapabilities()};
-    if(method==='POST'){
-      const b=await jsonBody(request);allowFields(b,['action','id','soundEnabled','language','device']);
-      if(b.action==='read')await readVisitorAttention(token,b.id);
-      else if(b.action==='read_all')await readAllVisitorAttention(token,b.id);
-      else if(b.action==='preferences')await visitorAttentionPreferences(token,b);
-      else if(b.action==='subscribe')await subscribeVisitorAttention(token,b.device);
-      else if(b.action==='unsubscribe')await revokeVisitorAttention(token);
-      else throw new MobileError('Choose an alert action.');
-      return {...await visitorAttentionFeed(token),push:pushCapabilities()};
-    }
-  }
-  if ((path[0] === "buying" || path[0] === "transport") && path.length === 1) {
-    const channel = path[0] === "transport" ? "transport" : "buying";
-    const token = request.headers.get("X-Suqpage-Buying-Session") || "";
-    if (token && !/^[A-Za-z0-9_-]{32,200}$/.test(token))
-      throw new MobileError("Chat session expired.", 401);
-    if (method === "GET")
-      return {
-        conversation: token ? await channelConversation(token, channel) : null,
-      };
-    if (method === "POST") {
-      const b = await jsonBody(request);
-      allowFields(b, [
-        "action",
-        "name",
-        "phone",
-        "origin",
-        "destination",
-        "message",
-        "idempotencyKey",
-        "publicRef",
-        "messageId",
-        "coordinatorId",
-        "email",
-      ]);
-      if (b.action === "start") {
-        const created = await createPublicSupportConversation(
-          {
-            category: channel === "transport" ? "shipment_observation" : "buying_assistance",
-            coordinatorId:b.coordinatorId,
-            origin: b.origin,
-            destination: b.destination,
-            name: b.name,
-            phone: b.phone,
-            message: b.message,
-            idempotencyKey: b.idempotencyKey,
-          },
-          ip,
-          Date.now(),
-          token || undefined,
-        );
-        return {
-          token: created.token,
-          conversation: await channelConversation(created.token, channel),
-        };
-      }
-      const current = await channelConversation(token, channel);
-      if (b.publicRef !== current.publicRef)
-        throw new MobileError("This chat changed. Please refresh.", 409);
-      if (b.action === 'read') await acknowledgePublicRead(token, { messageId: b.messageId, publicRef: b.publicRef });
-      else if (b.action === "close") await closePublicSupportConversation(token);
-      else if (b.action === 'resume') await resumePublicSupportConversation(token,b.publicRef);
-      else if (b.action === 'callback') {await submitPublicTransportCallback(token,{phone:b.phone,email:b.email,idempotencyKey:b.idempotencyKey},ip);scheduleAttentionDelivery();}
-      else if (b.action === "message")
-        await postPublicSupportMessage(
-          token,
-          { message: b.message, idempotencyKey: b.idempotencyKey },
-          ip,
-        );
-      else throw new MobileError("Invalid chat action.");
-      return { conversation: await channelConversation(token, channel) };
-    }
-  }
   if (key === "session" && method === "GET") {
     const { identity, user } = await nativeIdentity(request, identityPort);
     if (user && user.access_role !== "client")
@@ -345,18 +255,6 @@ async function dispatch(
   const actor = await nativeOwner(request, identityPort),
     bid = actor.business_id,
     route = path.slice(1).join("/");
-  if(route==='transport'){
-    if(method==='GET'){
-      const query:Record<string,unknown>={};for(const[key,value]of q){if(key in query)throw new MobileError('Request could not be accepted.');query[key]=value;}
-      return readOwnerTransport(actor,query);
-    }
-    if(method==='POST'){
-      const body=await jsonBody(request),state=await commandOwnerTransport(actor,body);
-      if(body.action==='callback')scheduleAttentionDelivery();
-      return state;
-    }
-    throw new MobileError('Method not allowed.',405);
-  }
   if (method === "GET" && route === "home") return ownerHome(actor);
   if (method === "GET" && route === "business")
     return readOwnerBusiness(actor, bid);
@@ -435,7 +333,6 @@ async function dispatch(
         idleWarningAt:c.conversation.idleWarningAt??null,
         idleEndsAt:c.conversation.idleEndsAt??null,
         idleEndedAt:c.conversation.idleEndedAt??null,
-        ...(c.conversation.transportPlan?{transportPlan:c.conversation.transportPlan,transportPlanLink:c.conversation.transportPlanLink}:{}),
       },
       messages: c.messages.map((m) => ({
         id: m.id,
@@ -625,7 +522,7 @@ async function dispatch(
 export async function handleMobileRequest(
   request: Request,
   path: string[],
-  dependencies?: { identity?: NativeIdentityPort; invalidate?: () => void; market?: typeof getMarketplaceDiscoveryView; transportPlan?:TransportPlanHttpPorts; tracking?:TrackingHttpPorts; inquiry?:PublicInquiryHttpPort; partnerInterest?:PartnerInterestHttpPort },
+  dependencies?: { identity?: NativeIdentityPort; invalidate?: () => void; market?: typeof getMarketplaceDiscoveryView; transportPlan?:TransportPlanHttpPorts; tracking?:TrackingHttpPorts; inquiry?:PublicInquiryHttpPort },
 ) {
   let response: Response;
   const planRoute=path.length===1&&path[0]==='transport-plan';
@@ -639,21 +536,16 @@ export async function handleMobileRequest(
       if (!cors) throw new MobileError("Origin not allowed.", 403);
       response = new Response(null, { status: 204 });
     } else {
-      const value = path.length===1&&path[0]==='transport-partners'
-        ? await handlePartnerInterest(request,hashPrivateValue(requestIpFromHeaders(request.headers)),dependencies?.partnerInterest||partnerInterestHttpPort)
-        : request.method==='POST'&&path.length===1&&path[0]==='inquiries'
+      if (isRetiredMobileTransport(path)) {
+        const code = ['buying', 'transport'].includes(path[0]) ? 'public_chat_retired' : 'transport_retired';
+        throw new MobileError("This service is no longer available.", 410, code);
+      }
+      const value = request.method==='POST'&&path.length===1&&path[0]==='inquiries'
         ? await handlePublicInquiry(request,hashPrivateValue(requestIpFromHeaders(request.headers)),dependencies?.inquiry||publicInquiryHttpPort)
-        : trackingRoute
-        ? await (dependencies?.tracking?createTrackingHttpHandler(dependencies.tracking,'native'):trackingHttpHandler('native'))(request,path.slice(1))
-        : planRoute
-        ? await createTransportPlanHttpHandler(dependencies?.transportPlan||{
-          read:async()=>{throw new TransportPlanError('Transport plan was not found.','not_found');},
-          allow:async source=>(await consumeRuntimeRateLimit('transport-plan:'+hashPrivateValue(requestIpFromHeaders(source.headers)),600,60_000)).allowed,
-        })(request)
         : await dispatch(request, path, dependencies?.identity, dependencies?.market);
       response =
         value instanceof Response ? value : json(value ?? { saved: true });
-      if(request.method==='POST' && (path[0]==='inquiries'||path[0]==='transport'||path[0]==='buying'||path[0]==='owner'&&['support','transport'].includes(path[1]))){
+      if(request.method==='POST' && (path[0]==='inquiries'||path[0]==='owner'&&path[1]==='support')){
         try{scheduleAttentionDelivery();}catch{/* Direct adapter tests have no Next request lifecycle; scheduled delivery remains durable. */}
       }
       if (

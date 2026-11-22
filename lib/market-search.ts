@@ -37,7 +37,7 @@ export function marketSearchParams(scope:MarketScope,search:MarketSearch):URLSea
  for(const c of search.countries)p.append('country',c);
  for(const c of search.cities)p.append('city',c);
  for(const c of search.legacyPlaces||[])p.append('place',c);
- if(scope==='products'&&search.madeToOrder)p.set('madeToOrder','true');
+ if(search.madeToOrder)p.set('madeToOrder','true');
  if(search.page>1)p.set('page',String(search.page));return p;
 }
 export function readMarketSearch(p:URLSearchParams,prefix=''):MarketSearch {
@@ -60,4 +60,11 @@ export function marketWorkspaceParams(mode:MarketScope,business:MarketSearch,pro
  for(const [prefix,scope,search] of [['b.','businesses',business],['p.','products',product]] as const)
   marketSearchParams(scope,search).forEach((value,key)=>{if(key!=='scope')p.append(prefix+key,value);});
  return p;
+}
+
+/** The active view owns the criteria until the visitor switches views. */
+export function carryMarketSearch(source: MarketSearch, destination: MarketSearch): MarketSearch {
+ const next = {...source, page:1};
+ return marketSearchParams('products', next).toString() === marketSearchParams('products', {...destination,page:1}).toString()
+  ? destination : next;
 }

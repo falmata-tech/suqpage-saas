@@ -2,7 +2,7 @@ import {usePublicScrollInset} from '../../src/public-scroll-inset';
 import React, { useRef,useState,type KeyboardEvent } from "react";
 import { View, Text, Pressable,ScrollView, StyleSheet,Platform } from "react-native";
 import { router } from "expo-router";
-import { ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } from "../../../../lib/storefront-copy";
+import { ABOUT_INTRO, ABOUT_STOREFRONT_SECTIONS, CUSTOMER_MAP_COPY } from "../../../../lib/storefront-copy";
 import { Screen, Button, Icon, colors } from "../../src/ui";
 import { useApp } from "../../src/runtime";
 import { createMarketNavigationIntent } from "../../src/incoming-link";
@@ -12,17 +12,18 @@ export default function About() {
   const { t } = useApp();
   const bottomInset=usePublicScrollInset();
   const scroll = useRef<ScrollView>(null);
-  const tabs=useRef<Array<View|null>>([]),[audience,setAudience]=useState<typeof ABOUT_STOREFRONT_SECTIONS[number]['id']>('customers');
+  const tabs=useRef<Array<View|null>>([]),[audience,setAudience]=useState<typeof ABOUT_STOREFRONT_SECTIONS[number]['id']>(ABOUT_STOREFRONT_SECTIONS[0].id);
   const section=ABOUT_STOREFRONT_SECTIONS.find(item=>item.id===audience)!;
   function select(index:number,focus=false){setAudience(ABOUT_STOREFRONT_SECTIONS[index].id);scroll.current?.scrollTo({y:0,animated:false});if(focus)tabs.current[index]?.focus();}
   function navigate(event:KeyboardEvent<HTMLElement>,index:number){const next=event.key==='Home'?0:event.key==='End'?ABOUT_STOREFRONT_SECTIONS.length-1:event.key==='ArrowRight'?(index+1)%ABOUT_STOREFRONT_SECTIONS.length:event.key==='ArrowLeft'?(index+ABOUT_STOREFRONT_SECTIONS.length-1)%ABOUT_STOREFRONT_SECTIONS.length:null;if(next!==null){event.preventDefault();select(next,true);}}
   return <Screen scroll={false}><ScrollView ref={scroll} contentContainerStyle={[s.page,{paddingBottom:Math.max(30,bottomInset)}]}>
     <Text accessibilityRole="header" style={s.heading}>{t("About AfricMade")}</Text>
+    <Text style={s.intro}>{t(ABOUT_INTRO)}</Text>
     <View style={s.tabs} accessibilityRole="tablist" accessibilityLabel={t('About AfricMade')}>{ABOUT_STOREFRONT_SECTIONS.map((item,index)=><Pressable key={item.id} ref={node=>{tabs.current[index]=node;}} nativeID={`about-tab-${item.id}`} accessibilityRole="tab" accessibilityState={{selected:audience===item.id}} aria-selected={audience===item.id} {...(Platform.OS==='web'?{tabIndex:audience===item.id?0:-1,'aria-controls':`about-panel-${item.id}`,onKeyDown:(event:KeyboardEvent<HTMLElement>)=>navigate(event,index)}:{})} onPress={()=>select(index)} style={[s.tab,audience===item.id&&s.selectedTab]}><Text style={s.tabText}>{t(item.label)}</Text></Pressable>)}</View>
     <View key={section.id} nativeID={`about-panel-${section.id}`} testID={`about-${section.id}`} role="tabpanel" aria-labelledby={`about-tab-${section.id}`} style={[s.section, section.id === "businesses" && s.business]}>
       <Text accessibilityRole="header" style={s.title}>{t(section.title)}</Text>
       <Text style={s.intro}>{t(section.description)}</Text>
-      <Button label={t(section.action)} icon="arrow" onPress={() => router.navigate(section.id === "customers" ? "/" : "/account")} />
+      <Button label={t(section.action)} icon="arrow" onPress={() => router.navigate(section.id === "customers" ? `/?view=search&_intent=${createMarketNavigationIntent()}` : "/account")} />
       <View style={s.benefits}>{section.benefits.map(benefit => <View key={benefit.title} style={s.benefit}>
         <View style={s.icon}><Icon name={benefit.icon} size={21} color={colors.brand}/></View>
         <View style={{flex:1,gap:6}}><Text accessibilityRole="header" style={s.benefitTitle}>{t(benefit.title)}</Text><Text style={s.body}>{t(benefit.description)}</Text></View>
@@ -49,6 +50,4 @@ const s = StyleSheet.create({
   benefitTitle:{fontSize:16,lineHeight:22,fontWeight:"700",color:colors.ink},
   body:{fontSize:14,lineHeight:22,color:colors.muted},
   mapNote:{gap:8,borderTopWidth:1,borderColor:colors.line,paddingTop:16},
-  transportLink:{minHeight:44,minWidth:44,maxWidth:'100%',paddingVertical:8,justifyContent:'center',alignSelf:'flex-start'},
-  transportText:{fontSize:14,lineHeight:20,color:colors.brand},
 });

@@ -59,7 +59,7 @@ async function main(){
   const protectedBefore=await unchanged();
   assert.deepEqual(await readStaffTransportPlan(staff,first.id),{plan:null,sharePath:null});assert.equal((await db.prepare('SELECT COUNT(*) n FROM support_transport_plans').get()).n,0,'GET never creates a plan/link');
   await assert.rejects(()=>getPublicSupportConversation(first.token,now),error=>error instanceof SupportError&&error.code==='public_chat_retired');
-  assert.equal(Object.hasOwn((await getSupportConversation(owner,second.id)).conversation,'transportPlan'),false,'Old owner DTOs omit plan fields before an explicit save');
+  await assert.rejects(()=>getSupportConversation(owner,second.id),{code:'not_found'});
   const input={conversationId:first.id,publicRef:first.publicRef,expectedVersion:0,legs:[leg('air'),leg('van'),leg('motorcycle')]};
   const created=await saveTransportPlan(staff,input,now);assert.equal(created.plan.version,1);assert.equal(created.plan.legs.length,3);assert.match(created.sharePath,/^\/transport-plan#[a-f0-9]{64}$/);
   assert.equal(new Set(created.plan.legs.map(value=>value.id)).size,3);assert.deepEqual(await saveTransportPlan(staff,input,now+1),created,'Semantic retry creates no additional identities/link/version');
@@ -100,8 +100,8 @@ async function main(){
   const token=created.sharePath.split('#')[1],shared=await readSharedTransportPlan(token);assert.equal(shared.kind,'plan');assert.deepEqual(shared.kind==='plan'?shared.plan:null,winner);
   // BE-058 retires anonymous/participant publication; retained schema70 plans stay private.
   await assert.rejects(()=>getPublicSupportConversation(first.token,now),error=>error instanceof SupportError&&error.code==='public_chat_retired');
-  const ownerView=await getSupportConversation(owner,second.id);for(const key of['transportPlan','transportPlanLink'])assert.equal(Object.hasOwn(ownerView.conversation,key),false);
-  const ownerReceipt=await readOwnerTransport(owner,{conversation:second.id});assert.ok('conversation'in ownerReceipt);for(const key of['transportPlan','transportPlanLink'])assert.equal(Object.hasOwn(ownerReceipt.conversation||{},key),false);
+  await assert.rejects(()=>getSupportConversation(owner,second.id),{code:'not_found'});
+  await assert.rejects(()=>readOwnerTransport(owner,{conversation:second.id}),{code:'not_found'});
   await assert.rejects(()=>getSupportConversation(foreign,second.id),error=>error instanceof SupportError&&error.code==='not_found');
   await denied(()=>readSharedTransportPlan(first.token),'not_found');await assert.rejects(()=>getPublicSupportConversation(token,now),error=>error instanceof SupportError&&error.code==='not_found');
   assert.ok(!JSON.stringify(shared).includes('PRIVATE_'));assert.deepEqual(Object.keys(shared).sort(),['etag','kind','plan']);if(shared.kind==='plan')assert.deepEqual(Object.keys(shared.plan).sort(),['legs','version']);

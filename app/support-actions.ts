@@ -48,7 +48,7 @@ export async function createVideoRequestAction(formData: FormData) {
 export async function reviewVideoRequestAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
-  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const origin=supportFormState(formData,isQueueAgent(user)?'support':undefined);
   const returnPath=supportThreadHref(id,origin);
   try {
     const result = await reviewVideoRequest(user,id,{decision:formData.get("decision"),youtubeUrl:formData.get("youtubeUrl"),videoUrl:formData.get("videoUrl"),reply:formData.get("reply")});
@@ -75,7 +75,7 @@ export async function assignWaitingSupportConversationsAction(formData: FormData
   try {
     if (!hasCapability(user, "operations:manage")) throw new SupportError("Operations access is required.", "forbidden");
     const queue = formData.get("nav_queue");
-    if (queue !== "support" && queue !== "transport") throw new SupportError("Choose a support queue.", "invalid_setting");
+    if (queue !== "support") throw new SupportError("Choose a support queue.", "invalid_setting");
     result = await routeWaitingSupportConversations(user, Date.now(), { queue });
     await audit("support.waiting_recovered", { userId: user.id, detail: { queue, routed: result.routed, remaining: result.remaining } });
   } catch (error) { failure(returnPath, error); }
@@ -112,7 +112,7 @@ export async function createSupportConversationAction(formData: FormData) {
 export async function postSupportMessageAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
-  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const origin=supportFormState(formData,isQueueAgent(user)?'support':undefined);
   const returnPath=supportThreadHref(id,origin);
   let staged: StagedSupportAttachment | null = null;
   try {
@@ -138,7 +138,7 @@ export async function postSupportMessageAction(formData: FormData) {
 export async function claimSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
-  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const origin=supportFormState(formData,isQueueAgent(user)?'support':undefined);
   const returnPath=supportThreadHref(id,origin);
   try {
     await claimSupportConversation(user, id);
@@ -154,7 +154,7 @@ export async function claimSupportConversationAction(formData: FormData) {
 export async function joinSupportConversationAction(formData:FormData){
   const user=await requireUser();
   const id=conversationId(formData);
-  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const origin=supportFormState(formData,isQueueAgent(user)?'support':undefined);
   const returnPath=supportThreadHref(id,origin);
   try{
     await joinSupportConversation(user,id,{publicRef:formData.get('publicRef'),assignmentEpoch:formData.get('assignmentEpoch')});
@@ -168,7 +168,7 @@ export async function joinSupportConversationAction(formData:FormData){
 export async function closeSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
-  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const origin=supportFormState(formData,isQueueAgent(user)?'support':undefined);
   const returnPath=supportThreadHref(id,origin);
   try {
     await closeSupportConversation(user, id);
@@ -184,7 +184,7 @@ export async function closeSupportConversationAction(formData: FormData) {
 export async function reopenSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
-  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const origin=supportFormState(formData,isQueueAgent(user)?'support':undefined);
   const returnPath=supportThreadHref(id,origin);
   try {
     await reopenSupportConversation(user, id);
@@ -231,7 +231,7 @@ export async function updateSupportAgentSettingEditAction(formData: FormData): P
 export async function reassignSupportConversationAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
-  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const origin=supportFormState(formData,isQueueAgent(user)?'support':undefined);
   const returnPath=supportThreadHref(id,origin);
   const raw = String(formData.get("assignedUserId") || "");
   const assignedUserId = raw ? Number.parseInt(raw, 10) : null;
@@ -249,7 +249,7 @@ export async function reassignSupportConversationAction(formData: FormData) {
 export async function saveTransportHandoffAction(formData: FormData) {
   const user = await requireUser();
   const id = conversationId(formData);
-  const origin=supportFormState(formData,isQueueAgent(user)?(user.staff_queue_scope==='transport'?'transport':'support'):undefined);
+  const origin=supportFormState(formData,isQueueAgent(user)?'support':undefined);
   // Retained clients cannot append company records through a retired action.
-  redirect(supportThreadHref(id,origin,{error:'Manage shipment records in the Shipment records workspace.'}),RedirectType.replace);
+  redirect(supportThreadHref(id,origin,{error:'This service is no longer available.'}),RedirectType.replace);
 }

@@ -1,10 +1,5 @@
-import type {Metadata} from 'next';
-import {getUiText} from '@/lib/i18n/server';
-import SharedTransportPlan from '@/components/SharedTransportPlan';
+import { notFound } from 'next/navigation';
 
-export const dynamic='force-dynamic';
-export async function generateMetadata():Promise<Metadata>{
- const t=await getUiText();
- return{title:t('Shipment record'),description:t('Providers in travel order'),robots:{index:false,follow:false,nocache:true,noarchive:true},referrer:'no-referrer',openGraph:{title:t('Shipment record'),description:t('Providers in travel order')},twitter:{title:t('Shipment record'),description:t('Providers in travel order')}};
+export default function RetiredTransportPage() {
+  notFound();
 }
-export default function TransportPlanPage(){return <SharedTransportPlan/>;}

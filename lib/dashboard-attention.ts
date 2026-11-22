@@ -1,3 +1,4 @@
+import {BUSINESS_SUPPORT_SQL} from './retired-transport';
 import { SUPPORT_WAITING_SCOPE_SQL } from "./support";
 import { hasCapability } from "./capabilities";
 import { runtimeGet } from "./runtime-sql";
@@ -34,7 +35,7 @@ export async function getDashboardAttention(
       pageReviews: 0,
       supportReplies: await count(`
         SELECT COUNT(*) total FROM support_conversations c
-        WHERE c.status='waiting'
+        WHERE ${BUSINESS_SUPPORT_SQL} AND (c.status='waiting'
           OR (c.status='open' AND EXISTS(
             SELECT 1 FROM support_messages m
             LEFT JOIN users u ON u.id=m.sender_user_id
@@ -42,17 +43,18 @@ export async function getDashboardAttention(
             WHERE m.conversation_id=c.id
               AND m.id>c.staff_confirmed_read_message_id
               AND (m.sender_kind='visitor' OR p.access_role='client')
-          ))
+          )))
       `),
     };
   }
 
   if (user.access_role === "team_member") {
+    if (user.staff_queue_scope==='transport') return {pageReviews:0,supportReplies:0};
     return {
       pageReviews: 0,
       supportReplies: await count(`
         SELECT COUNT(*) total FROM support_conversations c
-        WHERE (c.status='waiting' AND ${SUPPORT_WAITING_SCOPE_SQL})
+        WHERE ${BUSINESS_SUPPORT_SQL} AND ((c.status='waiting' AND ${SUPPORT_WAITING_SCOPE_SQL})
           OR (c.assigned_user_id=? AND c.status='open' AND EXISTS(
             SELECT 1 FROM support_messages m
             LEFT JOIN users u ON u.id=m.sender_user_id
@@ -60,7 +62,7 @@ export async function getDashboardAttention(
             WHERE m.conversation_id=c.id
               AND m.id>c.staff_confirmed_read_message_id
               AND (m.sender_kind='visitor' OR p.access_role='client')
-          ))
+          )))
       `, user.id, user.id),
     };
   }
@@ -76,8 +78,7 @@ export async function getDashboardAttention(
     ),
     supportReplies: await count(`
       SELECT COUNT(*) total FROM support_conversations c
-      WHERE c.business_id=? AND c.status!='closed'
-        ${client?"AND c.assistance_category NOT IN ('shipment_observation','buying_assistance')":''}
+      WHERE c.business_id=? AND c.status!='closed' AND ${BUSINESS_SUPPORT_SQL}
         AND EXISTS(
           SELECT 1 FROM support_messages m
           WHERE m.conversation_id=c.id

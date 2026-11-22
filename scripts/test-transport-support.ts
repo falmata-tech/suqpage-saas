@@ -54,7 +54,8 @@ async function main(){
   await assert.rejects(()=>subscribeVisitorAttention(old.token,{kind:'expo',token:'ExponentPushToken[abcdefghijklmnopqrstuv]',deviceId:'legacy-fixture'}));
   await enqueueChatAttention({conversationId:old.id,source:'retired-participant-notification',kind:'message',direction:'participant',now:Date.now()});
   assert.equal(await snapshot(),before,'Retired access changes no case, message, event, alert or subscription');
-  assert.equal((await support.getSupportConversation(admin,old.id)).messages[0].body,'Retained historical initial message','Authorized staff retain historical records');
+  await assert.rejects(()=>support.getSupportConversation(admin,old.id),{code:'not_found'});
+  assert.equal((await db.prepare('SELECT body FROM support_messages WHERE conversation_id=?').get(old.id)).body,'Retained historical initial message');
   // Retained queued deliveries must not reach the former visitor after retirement.
   const subscription=(await db.prepare("INSERT INTO attention_subscriptions(recipient_key,kind,endpoint_hash,subscription_json,created_at) VALUES(?,'expo','historical-device',?,0)").run('visitor:'+old.id,JSON.stringify({token:'ExponentPushToken[abcdefghijklmnopqrstuv]'}))).insertedId;
   const notification=(await db.prepare("INSERT INTO attention_notifications(source_key,recipient_key,visitor_conversation_id,conversation_id,kind,created_at) VALUES('historical-message',?,?,?,'message',?)").run('visitor:'+old.id,old.id,old.id,Date.now())).insertedId;
@@ -63,7 +64,7 @@ async function main(){
   await db.prepare("UPDATE support_conversations SET assistance_category='buying_assistance',transport_origin=NULL,transport_destination=NULL WHERE id=?").run(old.id);
   await db.prepare("UPDATE attention_deliveries SET state='pending',next_attempt_at=0,attempts=0 WHERE notification_id=?").run(notification);
   const aliasDelivery=await dispatchAttention({send:async()=>{sent++;return {state:'accepted'};}});assert.equal(aliasDelivery.ignored,1);assert.equal(sent,0,'Legacy buying-route pushes cannot revive transport chat');
-  console.log('PASS BE-066 public web/native410, malformed-body early denial, old-token domain/alias/attention denial, unchanged history and suppressed queued delivery. Business and tenant flows: test-owner-transport.ts.');
+  console.log('PASS BE-066 public web/native410, malformed-body early denial, old-token domain/alias/attention denial, unchanged history and suppressed queued delivery. Owner Support and tenant flows: test-live-transport.ts.');
  }finally{await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

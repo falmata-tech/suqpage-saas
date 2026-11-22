@@ -17,7 +17,9 @@ async function removeDevelopmentWorkers() {
 export default function PwaRegistration() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    if (process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_SUQPAGE_PWA_ENABLED === "false") {
+    const allowLoopback = process.env.NEXT_PUBLIC_SUQPAGE_PWA_DEV_PREVIEW === "1" &&
+      ["127.0.0.1", "localhost", "[::1]"].includes(window.location.hostname);
+    if ((process.env.NODE_ENV !== "production" && !allowLoopback) || process.env.NEXT_PUBLIC_SUQPAGE_PWA_ENABLED === "false") {
       void removeDevelopmentWorkers();
       return;
     }

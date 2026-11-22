@@ -7,7 +7,7 @@ import {runtimeBusinessById} from '@/lib/catalog-runtime';
 import {ownerHome} from '@/lib/mobile/owner';
 import {getUiText} from '@/lib/i18n/server';
 import styles from './profile.module.css';
-import {Store,Package,Headphones,ArrowRight,Building2,Settings,Truck} from 'lucide-react';
+import {Store,Package,Inbox,Headphones,ArrowRight,Building2,Settings} from 'lucide-react';
 import {storefrontAccentVariables} from '@/lib/storefront-accent';
 
 export const dynamic='force-dynamic';
@@ -25,7 +25,7 @@ export default async function ProfilePage({searchParams}:{searchParams:Promise<{
     </section>
     {activity && <dl className={styles.metrics}>{OWNER_ACTIVITY_METRICS.map(({field,label})=><div key={field}><dt>{t(label)}</dt><dd>{activity[field]}</dd></div>)}</dl>}
     <section className={styles.management} aria-label={t('Manage your business')}>
-      {[{href:'/dashboard/profile/showroom',label:'Your page',description:'Preview and edit your page.',icon:Store},{href:'/dashboard/products',label:'Products',description:'Add and update your products.',icon:Package},{href:'/dashboard/transport',label:'Transport chat',description:'Discuss transport options in live chat.',icon:Truck},{href:'/dashboard/business',label:'Business details',description:'Name, category and business location.',icon:Building2},{href:'/dashboard/account',label:'Account settings',description:'Private details and sign-in.',icon:Settings},{href:'/dashboard/support',label:'Support',description:'Chat with the AfricMade support team.',icon:Headphones}].map(({href,label,description,icon:Icon})=><Link href={href} key={href}><Icon aria-hidden="true"/><span><strong>{t(label)}</strong><small>{t(description)}</small></span><ArrowRight aria-hidden="true"/></Link>)}
+      {[{href:'/dashboard/profile/showroom',label:'Your page',description:'Preview and edit your page.',icon:Store},{href:'/dashboard/products',label:'Products',description:'Add and update your products.',icon:Package},{href:'/dashboard/inquiries',label:'Inbox',description:'Read customer inquiries and follow up.',icon:Inbox},{href:'/dashboard/business',label:'Business details',description:'Name, category and business location.',icon:Building2},{href:'/dashboard/account',label:'Account settings',description:'Private details and sign-in.',icon:Settings},{href:'/dashboard/support',label:'Support',description:'Chat with the AfricMade support team.',icon:Headphones}].map(({href,label,description,icon:Icon})=><Link href={href} key={href}><Icon aria-hidden="true"/><span><strong>{t(label)}</strong><small>{t(description)}</small></span><ArrowRight aria-hidden="true"/></Link>)}
     </section>
   </DashboardShell>;
 }

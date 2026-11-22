@@ -108,7 +108,7 @@ test('FE-067 retained production products stay neutral until an explicit owner s
   }
 });
 
-test('FE-067 native Made to order toggle combines criteria, exposes state and clears without map controls',async()=>{
+test('FE-067 native Made to order toggle combines criteria, exposes state in both views and clears',async()=>{
   const {state,render}=await fixture('MarketSearchControls');state.platform='web';let value={...originalSearch},changes=0;
   const props={scope:'products',value,onChange:(next:typeof value)=>{value=JSON.parse(JSON.stringify(next));props.value=value;changes++;},metadata:{categories:[],countries:[],places:[]}};
   let tree=render('default',props);
@@ -124,7 +124,8 @@ test('FE-067 native Made to order toggle combines criteria, exposes state and cl
   press(button(nodes(overview()),'Clear all'));tree=render('default',props);
   assert.deepEqual(value,{query:'',categories:[],countries:[],cities:[],madeToOrder:false,page:1});assert.equal(toggle()!.props['aria-checked'],false);assert.equal(button(nodes(overview()),'Clear all').props.disabled,true);
   press(button(nodes(overview()),'Done'));tree=render('default',props);assert.equal(overview(),undefined);assert.equal(toggle(),undefined);
-  const priorChanges=changes;props.scope='businesses';tree=render('default',props);openFilters('businesses');assert.ok(!toggle());assert.equal(changes,priorChanges);
+  const priorChanges=changes;props.scope='businesses';tree=render('default',props);openFilters('businesses');assert.ok(toggle());assert.equal(changes,priorChanges);
+  press(toggle()!);tree=render('default',props);assert.equal(value.madeToOrder,true);
   assert.equal(tree.find(node=>node.type==='TextInput')!.props.accessibilityLabel,'Search businesses');
 });
 

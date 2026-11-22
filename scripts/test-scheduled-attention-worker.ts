@@ -4,7 +4,7 @@ import {build} from 'esbuild';
 import vm from 'node:vm';
 
 test('DEP-043 S121 scheduled worker independently attempts automatic routing and inactivity within the existing budget',async()=>{
-  const fixture={calls:[] as string[],logs:[] as unknown[],failure:'',time:0,busy:false,trackingReady:false};
+  const fixture={calls:[] as string[],logs:[] as unknown[],failure:'',time:0,busy:false,trackingReady:false,partnerReady:false};
   const compiled=await build({entryPoints:['netlify/functions/attention-worker.mts'],bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'worker-ports',setup(b){
     b.onResolve({filter:/lib\/(attention-delivery|support|support-escalation-email-delivery|tracking|tracking-email-delivery|transport-partner-email-delivery|transport-partner-interest)\.ts$/},a=>({path:a.path,namespace:'ports'}));
     b.onLoad({filter:/.*/,namespace:'ports'},a=>({contents:a.path.includes('attention-delivery')?`
@@ -42,10 +42,13 @@ test('DEP-043 S121 scheduled worker independently attempts automatic routing and
   fixture.calls=[];fixture.logs=[];fixture.time=0;fixture.failure='';fixture.busy=true;await module.exports.default();
   assert.deepEqual(fixture.calls,['dispatch','receipts','routing','maintenance','overdue','email']);assert.match(JSON.stringify(fixture.logs),/"routed":0,"skippedBusy":true/,'A busy routing lock is observable without skipping other maintenance');
   fixture.trackingReady=true;
-  for(const failure of['','tracking-email','tracking-cleanup','tracking-readiness','email-budget','tracking-budget']){
+  fixture.partnerReady=true;
+  for(const failure of['','tracking-cleanup','tracking-readiness','email-budget']){
     fixture.calls=[];fixture.logs=[];fixture.time=0;fixture.failure=failure;await module.exports.default();
     const base=['dispatch','receipts','routing','maintenance','overdue','email'];
-    assert.deepEqual(fixture.calls,['email-budget','tracking-readiness'].includes(failure)?base:failure==='tracking-budget'?[...base,'tracking-email']:[...base,'tracking-email','tracking-cleanup']);
-    assert.doesNotMatch(JSON.stringify(fixture.logs),/private token|customer body/);if(failure.startsWith('tracking-')&&failure!=='tracking-budget')assert.match(JSON.stringify(fixture.logs),/tracking_.*_failure/);if(failure.endsWith('budget'))assert.match(JSON.stringify(fixture.logs),/worker_time_budget/);
+    assert.deepEqual(fixture.calls,failure==='email-budget'?base:failure==='tracking-readiness'?[...base,'partner-cleanup']:[...base,'partner-cleanup','tracking-cleanup']);
+    assert.doesNotMatch(JSON.stringify(fixture.logs),/private token|customer body/);
+    assert.ok(!fixture.calls.includes('tracking-email')&&!fixture.calls.includes('partner-email'));
+    if(failure.startsWith('tracking-'))assert.match(JSON.stringify(fixture.logs),/tracking_cleanup_failure/);
   }
 });

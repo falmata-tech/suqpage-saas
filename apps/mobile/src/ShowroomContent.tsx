@@ -132,7 +132,7 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
               <YouTubeVideo
                 video={shop.videoUrl}
                 allowSocial
-                height={/tiktok.com|instagram.com|\/videos\/demo\//.test(shop.videoUrl)?420:210}
+                height={210}
                 poster={shop.cover}
                 posterTint={accent?.accent}
                 privateImage={preview}

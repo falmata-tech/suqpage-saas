@@ -1,3 +1,4 @@
+import {emptyMarketSearch} from '../lib/market-search';
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import fs from 'node:fs';
@@ -16,7 +17,7 @@ const click=(node:Node|undefined)=>{assert.ok(node);(node.props.onClick as()=>vo
 const bundled=build({entryPoints:['components/DiscoveryWorkspace.tsx'],bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'controlled-renderer-ports',setup(b){
  b.onLoad({filter:/components\/DiscoveryWorkspace\.tsx$/},async a=>({loader:'tsx',contents:fs.readFileSync(a.path,'utf8')+'\nexport {MapPreviewDialog};'}));
  b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({contents:'export default new Proxy({}, {get:(_,key)=>key});'}));
- b.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|next\/(?:image|link|navigation)|lucide-react|@\/lib\/(?:i18n\/ui|use-market-feed|market-search|market-workspace|platform-state|product-inquiry|live-showroom|offerings)|\.\/(?:MarketSearchControls|LoadingBar|CategoryChooser|useBlockedBusinesses)|@\/components\/MarketplaceMap)$/},a=>({path:a.path,namespace:'ports'}));
+ b.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|next\/(?:image|link|navigation)|lucide-react|@\/lib\/(?:i18n\/ui|use-market-feed|market-workspace|platform-state|product-inquiry|live-showroom|offerings)|\.\/(?:MarketSearchControls|LoadingBar|CategoryChooser|useBlockedBusinesses)|@\/components\/MarketplaceMap)$/},a=>({path:a.path,namespace:'ports'}));
  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'js',contents:
  a.path==='react'?`const slot=initial=>{const index=fixture.cursor++;if(!(index in fixture.slots))fixture.slots[index]=typeof initial==='function'?initial():initial;return index;};export const useState=initial=>{const index=slot(initial);return[fixture.slots[index],value=>{fixture.slots[index]=typeof value==='function'?value(fixture.slots[index]):value;}];};export const useRef=initial=>fixture.slots[slot(()=>({current:initial}))];export const useEffect=(fn,deps)=>{const index=fixture.cursor++,prior=fixture.dependencies[index];if(!prior||!deps||deps.some((value,i)=>!Object.is(value,prior[i]))){fixture.dependencies[index]=deps;fixture.effects.push(fn);}};export const useLayoutEffect=()=>{},useMemo=fn=>fn(),useTransition=()=>[false,fn=>fn()];`
  :a.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
@@ -24,7 +25,6 @@ const bundled=build({entryPoints:['components/DiscoveryWorkspace.tsx'],bundle:tr
  :a.path==='@/lib/i18n/ui'?`export const useUiText=()=>((key,values={})=>key.replace(/\\{([^}]+)\\}/g,(_,name)=>String(values[name]??name)));`
  :a.path==='lucide-react'?`export const Info='Info',ArrowLeft='ArrowLeft',ArrowRight='ArrowRight',ChevronLeft='ChevronLeft',ChevronRight='ChevronRight',Crosshair='Crosshair',LocateFixed='LocateFixed',Map='Map',Minus='Minus',Package='Package',Plus='Plus',Search='Search',X='X',MapPin='MapPin',PanelLeftOpen='PanelLeftOpen',PanelLeftClose='PanelLeftClose';`
  :a.path==='@/lib/live-showroom'?`export const LIVE_PLATFORM_LABELS={};`
- :a.path==='@/lib/market-search'?`export const emptyMarketSearch=()=>({}),marketSearchParams=()=>new URLSearchParams(),marketWorkspaceParams=()=>new URLSearchParams(),MarketSearchError=Error;`
  :a.path==='@/lib/market-workspace'?`export const hasExplicitMarketIntent=()=>false,marketWorkspaceFromParams=()=>({}),parseMarketWorkspaceSnapshot=()=>null,serializeMarketWorkspaceSnapshot=()=>'';`
  :a.path==='@/lib/platform-state'?`export const readPlatformState=()=>null;`
  :a.path==='./useBlockedBusinesses'?`export const useBlockedBusinesses=()=>({list:[],save:async()=>{throw new Error('Preference writes are outside the helper renderer scope');}});`
@@ -166,7 +166,7 @@ test('FE-021 S127 actual modal restores a recreated current group trigger, falli
 });
 
 test('FE-058 S127 actual outer map controls visibly disable futile zoom at each supported bound',async()=>{
- const c=await component(),discovery={showrooms:[],searchProducts:[],searchOrder:[],searchBusinesses:[],nearbyGroups:[],featuredNowBusinessId:null,resultCounts:{businesses:0,products:0},resultPage:{page:1,totalPages:1,totalItems:0}},search={countries:[],cities:[],query:''};
+ const c=await component(),discovery={showrooms:[],searchProducts:[],searchOrder:[],searchBusinesses:[],nearbyGroups:[],featuredNowBusinessId:null,resultCounts:{businesses:0,products:0},resultPage:{page:1,totalPages:1,totalItems:0}},search=emptyMarketSearch();
  const render=()=>c.render('default',{discovery,initialBusiness:search,initialProduct:search});
  let nodes=render();assert.equal(nodes.find(node=>node.props['aria-label']==='Zoom in')?.props.disabled,false);assert.equal(nodes.find(node=>node.props['aria-label']==='Zoom out')?.props.disabled,false);
  const zoomSlot=c.fixture.slots.findIndex(value=>value===5);assert.ok(zoomSlot>=0);c.fixture.slots[zoomSlot]=18;nodes=render();assert.equal(nodes.find(node=>node.props['aria-label']==='Zoom in')?.props.disabled,true);assert.equal(nodes.find(node=>node.props['aria-label']==='Zoom out')?.props.disabled,false);

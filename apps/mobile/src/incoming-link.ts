@@ -1,7 +1,7 @@
 import { parseBusinessHandle } from '../../../lib/business-handle';
 import { normalizeDiscoveryCategories, discoveryPlaceKey } from '../../../lib/discovery-contract';
 import {readMarketSearch,marketWorkspaceParams} from '../../../lib/market-search';
-import {isTrackingReference} from '../../../lib/tracking-contract';
+import {isRetiredTransportPath} from '../../../lib/retired-transport';
 
 type Param = string | string[] | undefined;
 export type MarketLinkInput = { q?: Param; category?: Param; industry?: Param; place?: Param; page?: Param; view?: Param; _intent?: Param };
@@ -31,15 +31,7 @@ export function incomingAfricMadePath(input: string): string {
       url = new URL(path + url.search, 'https://africmade.com');
     } else if (!canonicalSource) return '/';
     const path = decodeURIComponent(url.pathname).replace(/\/$/, '') || '/';
-    if(path==='/transport-plan'){
-      return canonicalSource&&url.pathname==='/transport-plan'&&!url.search?'/tracking':'/';
-    }
-    if(path==='/tracking'||path.startsWith('/tracking/')){
-      if(!canonicalSource||url.search||url.hash||url.pathname!==path)return '/';
-      if(path==='/tracking')return '/tracking';
-      const reference=path.slice('/tracking/'.length);
-      return isTrackingReference(reference)?'/tracking?'+new URLSearchParams({reference}):'/';
-    }
+    if (isRetiredTransportPath(path)) return '/';
     if (path.startsWith('/@') || path.startsWith('/shop/')) {
       const handle = parseBusinessHandle(path.startsWith('/@') ? path.slice(2) : path.slice(6));
       const id = url.searchParams.get('product');

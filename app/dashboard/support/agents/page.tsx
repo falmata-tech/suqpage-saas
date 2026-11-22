@@ -62,7 +62,7 @@ export default async function SupportAgents({ searchParams }: {
       <div className="field full support-agent-load"><span>{t("Open conversations")}</span><strong>{selected.openConversations}</strong></div>
       <label className="field full check-field"><input type="checkbox" name="enabled" defaultChecked={selected.enabled}/><span>{t("Receives new chats")}</span></label>
       <p className="field full muted">{t("Pausing new chats keeps existing conversations assigned.")}</p>
-      <label className="field full"><span>{t(selected.accessRole === "team_member" && selected.queueScope !== "all" ? "Role" : "Queue")}</span><select name="queueScope" defaultValue={selected.queueScope}>{(selected.queueScope === "all" || selected.accessRole === "operations_manager") && <option value="all">{t("All requests")}</option>}<option value="support">{t(selected.accessRole === "operations_manager" ? "Business support" : "Support agent")}</option><option value="transport">{t(selected.accessRole === "operations_manager" ? "Transport dispatch" : "Transport agent")}</option></select></label>
+      <label className="field full"><span>{t(selected.accessRole === "team_member" && selected.queueScope !== "all" ? "Role" : "Queue")}</span><select name="queueScope" defaultValue={selected.queueScope==='transport'?'support':selected.queueScope}>{(selected.queueScope === "all" || selected.accessRole === "operations_manager") && <option value="all">{t("All requests")}</option>}<option value="support">{t(selected.accessRole === "operations_manager" ? "Business support" : "Support agent")}</option></select></label>
     </FocusedEditForm> : <>
     <section className="support-capacity-summary" aria-label={t("Staff workload summary")}>
       <span><small>{t("Waiting")}</small><strong>{summary.waitingConversations}</strong></span>
@@ -77,7 +77,7 @@ export default async function SupportAgents({ searchParams }: {
       {result.items.length ? <table className="data-table"><thead><tr><th>{t("Name")}</th><th>{t("Queue")}</th><th>{t("Open conversations")}</th><th>{t("Availability")}</th><th>{t("Edit")}</th></tr></thead><tbody>
         {result.items.map(agent=><tr key={agent.userId}>
           <td data-label={t("Name")}><div className="support-agent-identity"><strong>{agent.name}</strong><small>{agent.email}</small></div></td>
-          <td data-label={t("Queue")}>{t(agent.queueScope==='all'?"All requests":agent.queueScope==='transport'?"Transport dispatch":"Business support")}</td>
+          <td data-label={t("Queue")}>{t(agent.queueScope==='all'?"All requests":agent.queueScope==='transport'?"Paused":"Business support")}</td>
           <td data-label={t("Open conversations")}><strong>{agent.openConversations}</strong></td>
           <td data-label={t("Availability")}><span className={'badge '+(agent.enabled?'active':'draft')}>{t(agent.enabled?"Receives new chats":"Paused")}</span></td>
           <td data-label={t("Edit")}><Link className="small-btn" href={editHref(agent.userId,agent.email)}>{t("Edit")}</Link></td>

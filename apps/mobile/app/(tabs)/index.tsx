@@ -1,6 +1,6 @@
 import MarketSearchControls from '../../src/MarketSearchControls';
 import ProductSupply from '../../src/ProductSupply';
-import {marketSearchParams,marketWorkspaceParams,type MarketScope,type MarketSearch} from '../../../../lib/market-search';
+import {carryMarketSearch,marketSearchParams,marketWorkspaceParams,type MarketScope,type MarketSearch} from '../../../../lib/market-search';
 import {emptyMarketWorkspace,hasExplicitMarketIntent,marketWorkspaceFromParams} from '../../../../lib/market-workspace';
 import {useMarketFeed,type MarketBatch} from '../../../../lib/use-market-feed';
 import {useAppForeground} from '../../src/use-app-foreground';
@@ -57,7 +57,15 @@ export default function MarketScreen() {
  const panelState=useRef(panel),progressValue=useRef(panel?1:0),dragStart=useRef(0),dragOrigin=useRef(panel),dragged=useRef(false),animation=useRef<Animated.CompositeAnimation|null>(null);
  panelState.current=panel;
  const animatePanel=useCallback((next:boolean)=>{animation.current?.stop();animation.current=Animated.timing(progress,{toValue:next?1:0,duration:reduced?0:240,useNativeDriver:Platform.OS!=='web'});animation.current.start();},[progress,reduced]);
- const settlePanel=useCallback((next:boolean)=>{Keyboard.dismiss();setPanel(next);if(next===panelState.current)animatePanel(next);},[animatePanel]);
+ const criteria = useRef({businessSearch, productSearch});
+ criteria.current = {businessSearch, productSearch};
+ const settlePanel=useCallback((next:boolean)=>{
+  Keyboard.dismiss();
+  if(next===panelState.current){animatePanel(next);return;}
+  if(next) setProductSearch(previous=>carryMarketSearch(criteria.current.businessSearch,previous));
+  else setBusinessSearch(previous=>carryMarketSearch(criteria.current.productSearch,previous));
+  setPanel(next);
+ },[animatePanel]);
  const handleGesture=useMemo(()=>PanResponder.create({
   onMoveShouldSetPanResponder:(_,g)=>horizontalHandleMove(g),
   onMoveShouldSetPanResponderCapture:(_,g)=>horizontalHandleMove(g),
@@ -100,7 +108,7 @@ export default function MarketScreen() {
  useEffect(()=>{void AccessibilityInfo.isReduceMotionEnabled().then(setReduced);const sub=AccessibilityInfo.addEventListener('reduceMotionChanged',setReduced);return()=>sub.remove();},[]);
  useEffect(()=>{const id=progress.addListener(({value})=>{progressValue.current=value;});return()=>progress.removeListener(id);},[progress]);
  useEffect(()=>{animatePanel(panel);return()=>animation.current?.stop();},[panel,animatePanel]);
- useFocusEffect(useCallback(()=>{if(Platform.OS==='web')return;const sub=BackHandler.addEventListener('hardwareBackPress',()=>{if(panel){setPanel(false);Keyboard.dismiss();return true;}return false;});return()=>sub.remove();},[panel]));
+ useFocusEffect(useCallback(()=>{if(Platform.OS==='web')return;const sub=BackHandler.addEventListener('hardwareBackPress',()=>{if(panel){settlePanel(false);return true;}return false;});return()=>sub.remove();},[panel,settlePanel]));
  function chooseBusiness(shop:MapShop){if(!mapReady)return;map.current?.focus(shop);setSelected(shop);}
  function saveReturn(ids=nearbyIds,position=pickerPosition){const [longitude,latitude]=camera.current.center;rememberMapReturnSession(API,businessScope,{ids,page:position.page,anchor:position.anchor,camera:{center:[((longitude+180)%360+360)%360-180,latitude],zoom:Math.max(1,Math.min(MAP_MAX_ZOOM,camera.current.zoom+(Platform.OS==='web'?0:1)))}});}
  function rememberView(view:MapViewpoint){if(!mapRouteFocused.current)return;camera.current=view;if(mapReady)saveReturn(previousBusinessScope.current===businessScope?nearbyIds:[],previousBusinessScope.current===businessScope?pickerPosition:{page:0,anchor:null});}

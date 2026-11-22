@@ -22,6 +22,7 @@ import {runtimeTransaction} from '@/lib/runtime-sql';
 export async function createStaffAccountAction(formData: FormData): Promise<import("@/lib/owner-edit-contract").OwnerEditResult> {
   const user = await requireUser();
   if (!hasCapability(user, "platform:admin")) throw new Error("Platform administrator access required.");
+  if (formData.get('accessRole') !== 'support_agent') return {error:'Choose Support agent.'};
   try {
     await createStaffAccount({ name:formData.get("name"), email:formData.get("email"), password:formData.get("temporaryPassword"), accessRole:formData.get("accessRole") },user);
   } catch (error) {

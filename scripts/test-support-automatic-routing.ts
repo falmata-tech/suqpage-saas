@@ -30,13 +30,17 @@ async function main(){
   const requeueAssignments=await assignments(first.id);assert.equal(requeueAssignments.length,2);assert.equal(requeueAssignments[1].assigned_by_user_id,null,'Scheduled work does not manufacture an administrator');assert.equal(requeueAssignments[1].reason,'automatic');
   const firstBefore=await state(first.id),historyBefore=await assignments(first.id);assert.deepEqual(await sweepWaitingSupportAssignments(clock,()=>0),{routed:0,skippedBusy:false});assert.deepEqual(await state(first.id),firstBefore);assert.deepEqual(await assignments(first.id),historyBefore);assert.deepEqual(await state(closed.id),closedBefore);assert.deepEqual(await messages(),messagesBefore);
 
-  // More than100 older requests from an unavailable queue cannot hide eligible transport work.
+  // Old transport rows must be excluded before the bounded business queue scan.
+  const retired=await waiting(105,'shipment_observation',clock-10000);
+  const eligible=await waiting(3);
+  const actualCandidates=await db.prepare(SUPPORT_WAITING_CANDIDATES_QUERY).all(0);
+  assert.deepEqual(actualCandidates.map(row=>row.id),eligible);
+  assert.deepEqual(await sweepWaitingSupportAssignments(clock,()=>0),{routed:3,skippedBusy:false});
+  for(const id of eligible)assert.ok([a.id,b.id].includes((await state(id)).assigned_user_id));
+  for(const id of retired)assert.equal((await state(id)).status,'waiting');
   await db.prepare('UPDATE support_agent_settings SET enabled=0 WHERE user_id IN (?,?)').run(a.id,b.id);
-  const older=await waiting(105,'general',clock-10000),eligible=await waiting(3,'shipment_observation',clock);
-  const actualCandidates=await db.prepare(SUPPORT_WAITING_CANDIDATES_QUERY).all(0);assert.deepEqual(actualCandidates.map(row=>row.id),eligible);
-  assert.deepEqual(await sweepWaitingSupportAssignments(clock,()=>0),{routed:3,skippedBusy:false});for(const id of eligible)assert.equal((await state(id)).assigned_user_id,transport.id);for(const id of older)assert.equal((await state(id)).status,'waiting');
-  await db.prepare('UPDATE support_agent_settings SET enabled=0 WHERE user_id=?').run(transport.id);assert.deepEqual(await sweepWaitingSupportAssignments(clock,()=>0),{routed:0,skippedBusy:false},'Wrong-role and paused settings cannot admit waiting work');
-
+  const older=await waiting(105);
+  assert.deepEqual(await sweepWaitingSupportAssignments(clock,()=>0),{routed:0,skippedBusy:false});
   await db.prepare('UPDATE support_agent_settings SET enabled=1 WHERE user_id IN (?,?)').run(a.id,b.id);
   assert.equal((await db.prepare(SUPPORT_WAITING_CANDIDATES_QUERY).all(0)).length,100,'Candidate discovery is bounded before transitions');
   const firstBatch=await sweepWaitingSupportAssignments(clock,()=>0);assert.deepEqual(firstBatch,{routed:25,skippedBusy:false});
@@ -48,7 +52,7 @@ async function main(){
    assert.equal((await db.prepare("SELECT COUNT(*)::int count FROM support_events WHERE conversation_id=? AND event_type='assigned'").get(id)).count,1);
    const current=await state(id),assignedUserId=history[0].assigned_user_id;
    assert.equal(current.assigned_user_id,assignedUserId);assert.equal(history[0].released_at,null);
-   assert.ok((eligible.includes(id)?[transport.id]:[a.id,b.id]).includes(assignedUserId),'Only the saved eligible agent in this queue receives internal assignment attention');
+   assert.ok([a.id,b.id].includes(assignedUserId),'Only the saved eligible agent in this queue receives internal assignment attention');
    const event=await db.prepare("SELECT id FROM support_events WHERE conversation_id=? AND event_type='assigned'").get(id);
    assert.deepEqual(await db.prepare("SELECT source_key,kind,recipient_key,user_id,visitor_conversation_id FROM attention_notifications WHERE conversation_id=? AND kind='assigned' ORDER BY id").all(id),
     [{source_key:'support-assignment:'+event.id,kind:'assigned',recipient_key:'user:'+assignedUserId,user_id:assignedUserId,visitor_conversation_id:null}],

@@ -27,7 +27,6 @@ export function OwnerProfile({home}: {home: OwnerHome}) {
       {label:'Your page',section:'showroom',icon:'shop',description:'Preview and edit your page.'},
       {label:'Products',section:'products',icon:'package',description:'Add and update your products.'},
       {label:'Inbox',section:'inquiries',icon:'chat',description:'Read customer inquiries and follow up.'},
-      {label:'Transport chat',section:'transport',icon:'chat',description:'Discuss transport options in live chat.'},
       {label:'Business details',section:'business',icon:'shop',description:'Name, category and business location.'},
       {label:'Account settings',section:'settings',icon:'user',description:'Private details and sign-in.'},
       {label:'Support',section:'support',icon:'headphones',description:'Chat with the AfricMade support team.'},

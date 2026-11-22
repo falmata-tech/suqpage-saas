@@ -56,24 +56,23 @@ test('BE-057 public HTTP rejects mutation methods, isolates rate failures and re
  const extraField=createTransportPlanHttpHandler({read:async()=>({kind:'plan',etag,plan:{...plan,legs:[{...plan.legs[0],privateContact:'never share'}]}}as unknown as SharedTransportPlan)});const rejected=await extraField(request());assert.equal(rejected.status,400);assert.ok(!(await rejected.text()).includes('never share'),'Private leg additions fail closed');
 });
 
-test('BE-058 S144 retired case-plan route returns private404 without reading legacy data, retains600/min private-IP limit and denies mutations',async()=>{
- const state={allows:[] as Array<unknown[]>,hashes:[] as string[],reads:[] as Array<unknown[]>,allowed:true};
- const require=createRequire(import.meta.url);
- const output=await build({entryPoints:['app/api/transport-plan/route.ts'],bundle:true,write:false,format:'cjs',platform:'node',packages:'external',plugins:[{name:'plan-http-route-ports',setup(b){
-  b.onResolve({filter:/^@\/lib\/(?:transport-plan|rate-limit-runtime|security)$/},a=>({path:a.path,external:true}));
- }}]});
- const ports:Record<string,unknown>={
-  '@/lib/transport-plan':{readSharedTransportPlan:async(...input:unknown[])=>{state.reads.push(input);return{kind:'plan',etag,plan};}},
-  '@/lib/rate-limit-runtime':{consumeRuntimeRateLimit:async(...input:unknown[])=>{state.allows.push(input);return{allowed:state.allowed};}},
-  '@/lib/security':{requestIpFromHeaders:(headers:Headers)=>headers.get('x-test-client')||'unknown',hashPrivateValue:(input:string)=>{state.hashes.push(input);return'private-ip-hash';}},
- };
- type Handler=(request:Request)=>Promise<Response>;
- const module={exports:{}as Record<'GET'|'HEAD'|'POST'|'PUT'|'PATCH'|'DELETE'|'OPTIONS',Handler>};
- vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,require:(name:string)=>ports[name]||require(name),Request,Response,Headers,URL,JSON,Number,Set});
- for(const method of['GET','HEAD']as const){const response=await module.exports[method](request(method,'Bearer '+token,'',{'X-Test-Client':'203.0.113.42'}));assert.equal(response.status,404);privateResponse(response);assert.equal(response.headers.get('etag'),null);if(method==='HEAD')assert.equal(await response.text(),'');}
- assert.deepEqual(JSON.parse(JSON.stringify(state.allows)),[['transport-plan:private-ip-hash',600,60000],['transport-plan:private-ip-hash',600,60000]]);assert.deepEqual(state.hashes,['203.0.113.42','203.0.113.42']);assert.equal(state.reads.length,0);assert.ok(!JSON.stringify(state.allows).includes(token)&&!JSON.stringify(state.allows).includes('203.0.113.42'));
- state.allowed=false;const denied=await module.exports.GET(request());assert.equal(denied.status,429);assert.equal(state.reads.length,0);
- for(const method of['POST','PUT','PATCH','DELETE','OPTIONS']as const){const response=await module.exports[method](request(method));assert.equal(response.status,405);privateResponse(response);}assert.equal(state.allows.length,3);
+test('FE-078 retired web case-plan route returns private 410 without data access',async()=>{
+ const output=await build({
+  entryPoints:['app/api/transport-plan/route.ts'],bundle:true,write:false,format:'cjs',platform:'node',metafile:true,
+ });
+ assert.deepEqual(Object.keys(output.metafile.inputs).sort(),['app/api/transport-plan/route.ts','lib/retired-transport.ts']);
+ type Handler=()=>Response;
+ const module={exports:{} as Record<string,Handler>};
+ vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,Response,Headers});
+ for(const method of ['GET','HEAD','POST','PUT','PATCH','DELETE','OPTIONS']){
+  const response=module.exports[method]();
+  assert.equal(response.status,410);
+  assert.equal(response.headers.get('cache-control'),'private, no-store');
+  assert.match(response.headers.get('x-robots-tag')??'',/noindex/);
+  assert.equal(response.headers.has('etag'),false);
+  assert.equal(response.headers.has('set-cookie'),false);
+  assert.equal((await response.json()).code,'transport_retired');
+ }
 });
 
 test('DEP-047 configured page and both plan APIs override global privacy headers before the installed Next response adapter can shadow route headers',async()=>{

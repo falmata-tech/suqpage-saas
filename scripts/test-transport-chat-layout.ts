@@ -30,7 +30,7 @@ test('FE-076/S162: transport copy is professional and distinguishes general help
   }
 });
 
-test('FE-076: provider-listing promotion stays outside the transport chat and is linked from About',async()=>{
+test('FE-076: retired provider listing has no entry point in transport, About or login',async()=>{
   const [webIntake,mobileChat,webAbout,mobileAbout,login]=await Promise.all([
     readFile('components/TransportIntake.tsx','utf8'),
     readFile('apps/mobile/src/BusinessTransportWorkspace.tsx','utf8'),
@@ -41,9 +41,9 @@ test('FE-076: provider-listing promotion stays outside the transport chat and is
   assert.doesNotMatch(webIntake,/transport-partners|Ask to be listed/i);
   assert.doesNotMatch(mobileChat,/transport-partners|Ask to be listed/i);
   assert.doesNotMatch(webAbout,/chat=transport/);
-  const footer=await readFile('lib/public-site-footer.ts','utf8');assert.match(footer,/href: '\/transport-partners'/);
+  const footer=await readFile('lib/public-site-footer.ts','utf8');assert.doesNotMatch(footer,/transport-partners/);
   assert.doesNotMatch(mobileAbout,/navigate\('\/buying'\)/);
-  assert.match(login,/href="\/transport-partners"/);
+  assert.doesNotMatch(login,/transport-partners/);
 });
 
 test('FE-076: phone layouts reserve the viewport for the chat and keep scrolling inside the relevant region',async()=>{

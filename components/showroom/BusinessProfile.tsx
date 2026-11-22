@@ -12,9 +12,10 @@ import { ArrowUpRight, Globe, Mail, MessageCircle, Music2, PackageOpen, Phone, P
 import { useId, useState } from "react";
 import type { ShopPageContent } from "@/lib/owner-page-domain";
 import { formatEtbPrice } from "@/lib/offering-presentation";
-import {normalizeProductVideoUrl,productVideoEmbedUrl} from "@/lib/video/product-video";
+import {normalizeProductVideoUrl} from "@/lib/video/product-video";
 import SocialVideoFrame from "../SocialVideoFrame";
 import FirstPartyDemoVideo from "../FirstPartyDemoVideo";
+import YouTubeCoverVideo from "./YouTubeCoverVideo";
 import type { DesignProps } from "./designs";
 import { businessProfileDescription } from "@/lib/business-profile";
 import { legacyPublicContacts, publicContactLinks, type PublicContactKind, type PublicContactLink } from "@/lib/business-profile-contacts";
@@ -30,7 +31,9 @@ function ProfileDescription({ text }: { text: string }) {
   const long = text.length > 190;
   const excerpt = text.slice(0, 190).replace(/\s+\S*$/, "");
   return <div className={styles.description}>
-    <p id={id} className={expanded ? styles.expandedDescription : undefined} tabIndex={expanded ? 0 : undefined}>{long && !expanded ? t("{value1}…", { value1: excerpt }) : text}</p>
+    <p id={id} tabIndex={expanded ? 0 : undefined} data-scrollable-description={expanded && text.length > 1200 || undefined}>
+      {long && !expanded ? t("{value1}…", { value1: excerpt }) : text}
+    </p>
     {long ? <button type="button" aria-expanded={expanded} aria-controls={id} onClick={() => setExpanded(!expanded)}>{expanded ? t("Read less") : t("Read more")}</button> : null}
   </div>;
 }
@@ -40,9 +43,11 @@ function CoverMedia({ image, video, name }: { image: string; video: string; name
   const [playing, setPlaying] = useState(false);
   if (!image && !video) return null;
   const parsed = video ? normalizeProductVideoUrl(video) : null;
-  return <div className={styles.coverMedia} style={playing&&parsed&&['tiktok','instagram','demo'].includes(parsed.provider)?{height:'min(70vh,560px)',minHeight:320}:undefined}>
-    {playing && parsed ? parsed.provider === "demo" ? <FirstPartyDemoVideo video={parsed.managedRef} title={t("Video about {value1}",{value1:name})}/> : parsed.provider !== "youtube" ? <SocialVideoFrame video={parsed.managedRef} poster={image} title={t("Video about {value1}",{value1:name})}/> : <iframe src={`${productVideoEmbedUrl(parsed.managedRef)}?autoplay=1`}
-      title={t("Video about {value1}", { value1: name })} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /> : <>
+  const title = t("Video about {value1}", {value1: name});
+  return <div className={styles.coverMedia} data-video-cover={Boolean(parsed) || undefined}>
+    {playing && parsed ? parsed.provider === "demo" ? <FirstPartyDemoVideo video={parsed.managedRef} title={title} poster={image} />
+      : parsed.provider === "youtube" ? <YouTubeCoverVideo video={parsed.managedRef} title={title} image={image} />
+      : <SocialVideoFrame video={parsed.managedRef} poster={image} title={title} /> : <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {image ? <><img src={image} alt="" fetchPriority="high" /><span className={styles.coverTint} aria-hidden="true" /></> : null}
       {video ? <button type="button" className={styles.playCover} aria-label={t("Play business video about {value1}", { value1: name })} onClick={() => setPlaying(true)}>

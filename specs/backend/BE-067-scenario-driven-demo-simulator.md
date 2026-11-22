@@ -55,6 +55,17 @@ whole transaction; the worker records a sanitized rejection and stops that
 business. The request is assembled inside the database while paused, so
 private simulator bindings and page/contact rows are not exported.
 
+### Reviewed showroom About stories
+
+Given a reviewed public demo identity, its four catalog products, the original
+About text and the expected draft and publication versions, when an operator
+publishes its authored story while the simulator is explicitly paused, the
+ordinary page writer creates one revision. Only the About field and the enrolled
+demo's About baseline and expected hash change. The operator verifies the public
+result before continuing. A changed page, catalog, enrollment or simulator state
+refuses the write. A duplicate preserves the revision. Retained page history
+and the prior simulator baseline support a version-fenced reversal.
+
 ## Identity and authority
 
 - Only explicitly enrolled, currently marked `is_demo=1`, active published

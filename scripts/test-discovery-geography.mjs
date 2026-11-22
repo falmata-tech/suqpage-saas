@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import vm from "node:vm";
 
 const read = (file) => fs.readFileSync(file, "utf8");
 const provider = read("lib/map-provider.ts");
@@ -45,7 +46,16 @@ assert.match(read('app/layout.tsx'), /referrer:'strict-origin-when-cross-origin'
 for (const route of ['app/(public)/tracking/page.tsx','app/(public)/tracking/[reference]/page.tsx']) {
   assert.match(read(route), /referrer:\s*['"]no-referrer['"]/, 'Tracking retains its private policy');
 }
-assert.match(serviceWorker, /if \(url\.origin !== self\.location\.origin \|\| url\.pathname\.startsWith\("\/api"\)\) return;/);
+const handlers = new Map();
+const origin = "https://africmade.com";
+vm.runInNewContext(serviceWorker, {
+  self: { location: { origin }, addEventListener: (event, fn) => handlers.set(event, fn) },
+  importScripts() {}, URL,
+});
+for (const url of ["https://tile.openstreetmap.org/0/0/0.png", origin + "/api", origin + "/api/discovery"]) {
+  handlers.get("fetch")({ request: { method: "GET", url, mode: "navigate" },
+    respondWith() { assert.fail("The service worker must ignore " + url); } });
+}
 assert.match(privacy, /The web and Android maps request map tiles from OpenStreetMap/);
 assert.match(privacy, /Android uses MapLibre and caches map tiles on your device/);
 assert.match(privacy, /Tile requests do not include your account details or search text/);

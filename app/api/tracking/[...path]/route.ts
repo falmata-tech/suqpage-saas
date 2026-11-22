@@ -1,10 +1,9 @@
-import {trackingHttpHandler} from '@/lib/tracking-http-runtime';
-export const runtime='nodejs';
-export const dynamic='force-dynamic';
-const handler=trackingHttpHandler('web');
-export async function GET(request:Request,context:{params:Promise<{path:string[]}>}){return handler(request,(await context.params).path);}
-export const POST=GET;
-export const HEAD=GET;
-export const PUT=GET;
-export const PATCH=GET;
-export const DELETE=GET;
+import { retiredTransportResponse } from '@/lib/retired-transport';
+
+export const GET = retiredTransportResponse;
+export const HEAD = retiredTransportResponse;
+export const POST = retiredTransportResponse;
+export const PUT = retiredTransportResponse;
+export const PATCH = retiredTransportResponse;
+export const DELETE = retiredTransportResponse;
+export const OPTIONS = retiredTransportResponse;

@@ -28,7 +28,7 @@ async function shell(entry: string) {
     b.onResolve({filter: /^@\/components\/PublicActionDock$/}, args => ({path: args.path, namespace: "ports"}));
     b.onResolve({filter: /^(react(?:\/jsx-runtime)?|react-native|react-native-safe-area-context|expo-router|expo-status-bar|react-native-svg|next\/navigation|next\/link|lucide-react)$/}, args => ({path: args.path, namespace: "ports"}));
     // Footer presentation/navigation is exercised with real RNWeb in test-about-audiences.
-    b.onResolve({filter: /(?:^|\/)(?:runtime|ui|main-navigation|AttentionAlerts|blocked-businesses|use-business-inquiry|use-transport-unread|overlay-visibility|LanguageSelector|AfricMadeBrand|NavigationPendingIndicator|PublicMobileNavigation|PublicSupportChat|PublicSiteFooter|i18n\/ui|owner-edit-navigation)$/}, args => ({path: args.path.endsWith('/i18n/ui')?'uiText':args.path.split("/").at(-1)!, namespace: "ports"}));
+    b.onResolve({filter: /(?:^|\/)(?:runtime|ui|main-navigation|AttentionAlerts|blocked-businesses|use-business-inquiry|use-transport-unread|overlay-visibility|LanguageSelector|AfricMadeBrand|NavigationPendingIndicator|PublicMobileNavigation|PwaInstall|PublicSupportChat|PublicSiteFooter|i18n\/ui|owner-edit-navigation)$/}, args => ({path: args.path.endsWith('/i18n/ui')?'uiText':args.path.split("/").at(-1)!, namespace: "ports"}));
     b.onLoad({filter: /.*/,namespace: "ports"}, args => ({loader: "jsx",contents:
       args.path === "react" ? "export const useState=value=>[value,()=>{}],useEffect=()=>{},createContext=initial=>({Provider:props=>({type:'ScrollInsetProvider',props}),initial}),useContext=context=>context.initial;export default {};"
       : args.path === "react/jsx-runtime" ? "export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';"
@@ -49,6 +49,7 @@ async function shell(entry: string) {
       : args.path === "owner-edit-navigation" ? "export const OwnerEditNavigationProvider=props=>props.children,useOwnerNavigation=()=>leave=>leave();"
       : args.path === "blocked-businesses" ? "export const BlockedBusinessProvider=props=>props.children,useBlockedBusinesses=()=>({ready:true,list:[]});"
       : args.path === "NavigationPendingIndicator" ? "export const NavigationPendingProvider=props=>props.children,NavigationPendingMain=props=>({type:'main',props});export default 'Pending';"
+      : args.path === "PwaInstall" ? "export const PwaInstallButton=()=>null;"
       : args.path === "PublicSupportChat" ? "export default 'PublicTransportChat';"
       : args.path === "@/components/PublicActionDock" ? "export const PublicActionDockProvider=props=>[props.children,props.enabled?props.transport:null];"
       : args.path === "uiText" ? "export const useUiText=()=>value=>value;"

@@ -15,26 +15,23 @@ const fixture=()=>{
  const request=(method='GET',headers:Record<string,string>={},suffix='',origin='http://localhost:8082',path=['transport-plan'])=>handleMobileRequest(new Request('http://127.0.0.1:3102/api/mobile/v1/'+path.join('/')+suffix,{method,headers:{origin,authorization:'Bearer '+token,...headers}}),path,deps);
  return{calls,get identityCalls(){return identityCalls;},setAllowed(value:boolean){allowed=value;},setMode(value:typeof mode){mode=value;},request};
 };
-test('BE-057 mobile shared plan bypasses JWT identity with exact conditional capability reads and private CORS',async()=>{
+test('FE-078 retired mobile plan returns 410 without consulting auth or loading a plan',async()=>{
  const previous=env.NODE_ENV;env.NODE_ENV='development';
  try{
-  const f=fixture();let response=await f.request();assert.equal(response.status,200);assert.deepEqual(await response.json(),plan);assert.equal(response.headers.get('etag'),etag);
-  assert.equal(response.headers.get('access-control-allow-origin'),'http://localhost:8082');assert.equal(response.headers.get('access-control-allow-methods'),'GET, HEAD, OPTIONS');assert.match(response.headers.get('access-control-allow-headers')||'',/If-None-Match/);assert.equal(response.headers.get('access-control-expose-headers'),'ETag');assert.match(response.headers.get('vary')||'',/Authorization/);assert.match(response.headers.get('vary')||'',/Origin/);assert.match(response.headers.get('cache-control')||'',/private.*no-store/);assert.equal(response.headers.get('referrer-policy'),'no-referrer');assert.match(response.headers.get('x-robots-tag')||'',/noindex/);
-  response=await f.request('GET',{'if-none-match':etag});assert.equal(response.status,304);assert.equal(await response.text(),'');assert.deepEqual(f.calls.at(-1),{token,etag});
-  response=await f.request('HEAD');assert.equal(response.status,200);assert.equal(await response.text(),'');response=await f.request('HEAD',{'if-none-match':etag});assert.equal(response.status,304);assert.equal(await response.text(),'');
-  assert.equal(f.identityCalls,0);assert.equal(response.headers.has('set-cookie'),false);
- }finally{if(previous===undefined)delete env.NODE_ENV;else env.NODE_ENV=previous;}
-});
-test('BE-057 mobile shared plan rejects guest/JWT/query fallback, revoked links and public writes without side effects',async()=>{
- const previous=env.NODE_ENV;env.NODE_ENV='development';
- try{
-  const f=fixture();const invalidHeaders:Array<Record<string,string>>=[{authorization:''},{authorization:'Bearer jwt.payload.signature'},{authorization:'',cookie:'suqpage_public_transport='+token,'X-Suqpage-Buying-Session':token}];for(const headers of invalidHeaders)assert.equal((await f.request('GET',headers)).status,404);
-  assert.equal((await f.request('GET',{},'?token='+token)).status,404);assert.equal(f.calls.length,0);
-  for(const method of['POST','PATCH','PUT','DELETE']){const response=await f.request(method);assert.equal(response.status,405);assert.equal(response.headers.get('allow'),'GET, HEAD');}assert.equal(f.calls.length,0);
-  f.setMode('missing');let response=await f.request('GET',{'if-none-match':etag});assert.equal(response.status,404);assert.match(await response.text(),/not_found/);
-  response=await f.request('HEAD');assert.equal(response.status,404);assert.equal(await response.text(),'');
-  f.setMode('failure');response=await f.request();assert.equal(response.status,503);assert.ok(!(await response.text()).includes('PRIVATE'));
-  f.setAllowed(false);response=await f.request();assert.equal(response.status,429);assert.equal(response.headers.get('retry-after'),'60');assert.equal(f.identityCalls,0);
+  const f=fixture();
+  for(const method of ['GET','HEAD','POST','PUT','PATCH','DELETE']){
+   const response=await f.request(method,{'if-none-match':etag},'?token='+token);
+   assert.equal(response.status,410,method);
+   assert.equal(response.headers.get('cache-control'),'private, no-store');
+   assert.equal(response.headers.get('referrer-policy'),'no-referrer');
+   assert.equal(response.headers.get('access-control-allow-origin'),'http://localhost:8082');
+   assert.equal(response.headers.has('set-cookie'),false);
+   assert.equal(response.headers.has('etag'),false);
+   if(method==='HEAD')assert.equal(await response.text(),'');
+   else assert.equal((await response.json()).code,'transport_retired');
+  }
+  assert.equal(f.identityCalls,0);
+  assert.deepEqual(f.calls,[]);
  }finally{if(previous===undefined)delete env.NODE_ENV;else env.NODE_ENV=previous;}
 });
 test('BE-044 mobile conditional CORS admits only the selected exact development origin',async()=>{
@@ -44,7 +41,7 @@ test('BE-044 mobile conditional CORS admits only the selected exact development 
   response=await f.request('OPTIONS',{},'','http://localhost:8082',['health']);assert.equal(response.status,204);assert.equal(response.headers.has('access-control-expose-headers'),false);assert.ok(!(response.headers.get('access-control-allow-headers')||'').includes('If-None-Match'));assert.equal(response.headers.get('access-control-allow-methods'),'GET, POST, OPTIONS');
   for(const origin of['https://foreign.example','http://localhost:8083']){response=await f.request('GET',{},'',origin);assert.equal(response.status,403);assert.equal(response.headers.has('access-control-allow-origin'),false);assert.equal(response.headers.get('cache-control'),'private, no-store');assert.equal(response.headers.get('referrer-policy'),'no-referrer');}
   response=await f.request('HEAD',{},'','https://foreign.example');assert.equal(response.status,403);assert.equal(await response.text(),'');assert.equal(response.headers.get('cache-control'),'private, no-store');
-  env.SUQPAGE_LOCAL_EXPO_PORT='8083';response=await f.request('GET',{},'','http://localhost:8083');assert.equal(response.status,200);assert.equal(response.headers.get('access-control-allow-origin'),'http://localhost:8083');
+  env.SUQPAGE_LOCAL_EXPO_PORT='8083';response=await f.request('GET',{},'','http://localhost:8083');assert.equal(response.status,410);assert.equal(response.headers.get('access-control-allow-origin'),'http://localhost:8083');
   response=await f.request('OPTIONS',{},'','http://127.0.0.1:8083');assert.equal(response.status,204);assert.equal(response.headers.get('access-control-allow-origin'),'http://127.0.0.1:8083');
   for(const origin of['http://localhost:8082','http://foreign.example:8083','https://localhost:8083','http://localhost:80830','http://localhost:8083.evil.test']){response=await f.request('GET',{},'',origin);assert.equal(response.status,403,origin);assert.equal(response.headers.has('access-control-allow-origin'),false,origin);}
   for(const invalidPort of['','8083/evil']){env.SUQPAGE_LOCAL_EXPO_PORT=invalidPort;for(const origin of['http://localhost:8082','http://localhost:8083']){response=await f.request('GET',{},'',origin);assert.equal(response.status,403);assert.equal(response.headers.has('access-control-allow-origin'),false);}}

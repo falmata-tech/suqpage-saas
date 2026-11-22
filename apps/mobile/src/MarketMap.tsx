@@ -25,7 +25,7 @@ export default forwardRef<MapControls, MapProps>(function MarketMap({shops,group
   function select(item: MarkerItem) {
     if(item.expansionZoom!==undefined){
       const zoom=Math.min(MAP_NATIVE_MAX_ZOOM,Math.max(Math.floor(viewport.current.zoom)+1,(item.expansionZoom??viewport.current.zoom+2)-1));
-      viewport.current={center:item.center,zoom};camera.current?.easeTo({...viewport.current,duration:300});
+      viewport.current={center:item.expansionCenter ?? item.center,zoom};camera.current?.easeTo({...viewport.current,duration:300});
     }
     else if (item.kind !== 'shop') onGroup?.(item.shops || []);
     else if (item.shop) onSelect(item.shop);

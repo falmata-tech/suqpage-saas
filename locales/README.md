@@ -19,10 +19,8 @@ the stored Locale union describe retained identifiers.
 - Business workspace means business management, not an office building. Cover
   image means the main page photo, not a book cover. Public contacts are the
   details customers can use to reach the business.
-- Live support is for signed-in business owners. Public visitors can chat with
-  the transport team about moving their purchases; general guest support stays
-  closed. Starting a transport chat is not a confirmed booking. Keep the native
-  explanation and the recognizable `(Live Chat)` label together.
+- Business Support is for signed-in business owners and is reached from their
+  workspace. Public business inquiries go to the business for follow-up.
 - Keep AfricMade and merchant names unchanged. Never translate merchant content,
   handles, phone numbers, URLs, prices or saved status/role values.
 - Preserve useful English terms when an unfamiliar coined translation would

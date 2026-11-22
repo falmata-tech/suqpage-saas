@@ -4,7 +4,7 @@ import independentStyles from './IndependentMarket.module.css';
 import {useMarketFeed,type MarketBatch} from '@/lib/use-market-feed';
 import {useBlockedBusinesses} from './useBlockedBusinesses';
 import {excludedBusinessIds} from '@/lib/catalog-safety';
-import {emptyMarketSearch,marketSearchParams,marketWorkspaceParams,MarketSearchError,type MarketSearch,type MarketScope} from '@/lib/market-search';
+import {emptyMarketSearch,carryMarketSearch,marketSearchParams,marketWorkspaceParams,MarketSearchError,type MarketSearch,type MarketScope} from '@/lib/market-search';
 import {hasExplicitMarketIntent,marketWorkspaceFromParams,parseMarketWorkspaceSnapshot,serializeMarketWorkspaceSnapshot,type MarketWorkspaceState} from '@/lib/market-workspace';
 import { normalizeDiscoveryPlaces, discoveryPlaceKey, discoveryLocationLabel } from "@/lib/discovery-contract";
 import previewStyles from "./MapPreviewDialog.module.css";
@@ -209,6 +209,14 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
  const readyRef=useRef(false),writtenParams=useRef<string|null>(null),pendingRestore=useRef<string|null>(null);
  const currentWorkspace=useRef<MarketWorkspaceState>({mode:panelOpen?'products':'businesses',business:businessSearch,product:productSearch});
  currentWorkspace.current={mode:panelOpen?'products':'businesses',business:businessSearch,product:productSearch};
+ function switchPanel(next: boolean) {
+  const current = currentWorkspace.current;
+  if (next === (current.mode === 'products')) return;
+  if (next) setProductSearch(previous => carryMarketSearch(current.business, previous));
+  else setBusinessSearch(previous => carryMarketSearch(current.product, previous));
+  setPanelOpen(next);
+ }
+
  const businesses=useIndependentSearch('businesses',businessSearch,discovery,initialBusiness,exclusionKey,initialExclusionKey,!panelOpen);
  const productKey=marketSearchParams('products',productSearch).toString();
  const products=useMarketFeed(productKey,loadProductBatch,initialExclusionKey===exclusionKey?productBatch(productDiscovery||discovery):undefined,{scopeKey:'/api/discovery:public:products:excluded:'+exclusionKey,initialSnapshotKey:marketSearchParams('products',initialProduct).toString(),refreshMs:15000,active:panelOpen});
@@ -237,7 +245,7 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
  }
  function panelDragEnd(event:React.PointerEvent<HTMLButtonElement>){
   const start=dragStart.current;if(!start)return;const dx=event.clientX-start.x;
-  if(dragged.current){const progress=Math.max(0,Math.min(1,start.progress-dx/start.width));setPanelOpen(Math.abs(dx)>48?dx<0:progress>=.5);}
+  if(dragged.current){const progress=Math.max(0,Math.min(1,start.progress-dx/start.width));switchPanel(Math.abs(dx)>48?dx<0:progress>=.5);}
   dragStart.current=null;setDragProgress(null);
  }
  function cancelPanelDrag(){dragStart.current=null;setDragProgress(null);dragged.current=true;}
@@ -317,8 +325,8 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
   <div className={'discovery-workbench discovery-workbench-map discovery-drawer-workbench '+independentStyles.stage} data-panel-open={panelOpen}>
    <div className={independentStyles.modeBar}>
    <nav className={independentStyles.switch} aria-label={t('Search for')}>
-    <button ref={businessButton} type="button" disabled={!ready} aria-pressed={!panelOpen} onClick={()=>setPanelOpen(false)}><MapIcon size={17}/><span>{t('Business locations')}</span></button>
-    <button type="button" disabled={!ready} aria-pressed={panelOpen} onClick={()=>setPanelOpen(true)}><Package size={17}/><span>{t('Product listings')}</span></button>
+    <button ref={businessButton} type="button" disabled={!ready} aria-pressed={!panelOpen} onClick={()=>switchPanel(false)}><MapIcon size={17}/><span>{t('Business locations')}</span></button>
+    <button type="button" disabled={!ready} aria-pressed={panelOpen} onClick={()=>switchPanel(true)}><Package size={17}/><span>{t('Product listings')}</span></button>
    </nav>
    </div>
    <div className={independentStyles.activeControls}>
@@ -326,16 +334,16 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
     {!panelOpen&&businesses.error&&<div className={independentStyles.error} role="alert">{t(businesses.error)} <button type="button" onClick={businesses.retry}>{t('Try again')}</button></div>}
    </div>
    <div ref={viewport} className={independentStyles.viewport} data-dragging={moving}>
-   <aside id="discovery-search-panel" className={independentStyles.panel} data-open={panelOpen} style={moving?{transform:`translateX(${(1-progress)*paneTravel}px)`,transition:'none'}:undefined} aria-label={t('Products')} aria-hidden={!panelOpen} inert={!panelOpen} onKeyDown={event=>{if(event.key==='Escape'&&!event.defaultPrevented){setPanelOpen(false);requestAnimationFrame(()=>businessButton.current?.focus());}}}>
+   <aside id="discovery-search-panel" className={independentStyles.panel} data-open={panelOpen} style={moving?{transform:`translateX(${(1-progress)*paneTravel}px)`,transition:'none'}:undefined} aria-label={t('Products')} aria-hidden={!panelOpen} inert={!panelOpen} onKeyDown={event=>{if(event.key==='Escape'&&!event.defaultPrevented){switchPanel(false);requestAnimationFrame(()=>businessButton.current?.focus());}}}>
     {products.error&&<div className={independentStyles.error} role="alert">{t(products.error)} <button type="button" onClick={products.retry}>{t('Try again')}</button></div>}
     {products.updatesAvailable&&<button type="button" className={independentStyles.refresh} onClick={products.retry}>{t('Refresh')}</button>}
     <div className={independentStyles.panelBody}><MarketplaceSearchResults discovery={productData} items={products.batch?.items||[]} loading={products.loading} failed={Boolean(products.error)} hasMore={products.hasMore} loadingMore={products.loadingMore} moreError={products.moreError} onMore={products.loadMore} enabled={panelOpen} resetKey={products.displayedSnapshotKey} snapshotCurrent={products.snapshotCurrent}/></div>
    </aside>
-   <button type="button" className={independentStyles.peek} data-side={panelOpen?'map':'products'} style={moving?{left:Math.max(16,(viewport.current?.clientWidth||320)-64)-progress*Math.max(0,(viewport.current?.clientWidth||320)-80),right:'auto'}:undefined} aria-label={t(panelOpen?'Map only':'View products')} title={t(panelOpen?'Map only':'View products')} onClick={event=>{if(event.detail===0||!dragged.current)setPanelOpen(!panelOpen);dragged.current=false;}} onPointerDown={panelDragStart} onPointerMove={panelDragMove} onPointerUp={panelDragEnd} onPointerCancel={cancelPanelDrag} onLostPointerCapture={()=>{if(dragStart.current)cancelPanelDrag();}}><i aria-hidden="true"/>{panelOpen?<ChevronRight size={18}/>:<ChevronLeft size={18}/>}</button>
+   <button type="button" className={independentStyles.peek} data-side={panelOpen?'map':'products'} style={moving?{left:Math.max(16,(viewport.current?.clientWidth||320)-64)-progress*Math.max(0,(viewport.current?.clientWidth||320)-80),right:'auto'}:undefined} aria-label={t(panelOpen?'Map only':'View products')} title={t(panelOpen?'Map only':'View products')} onClick={event=>{if(event.detail===0||!dragged.current)switchPanel(!panelOpen);dragged.current=false;}} onPointerDown={panelDragStart} onPointerMove={panelDragMove} onPointerUp={panelDragEnd} onPointerCancel={cancelPanelDrag} onLostPointerCapture={()=>{if(dragStart.current)cancelPanelDrag();}}><i aria-hidden="true"/>{panelOpen?<ChevronRight size={18}/>:<ChevronLeft size={18}/>}</button>
    <span className="sr-only" aria-live="polite">{t(nearMeStatus)}</span>
    <div className={'discovery-map-shell '+independentStyles.mapPanel} data-open={!panelOpen} data-snapshot-current={businesses.snapshotCurrent} aria-busy={businesses.pending} style={moving?{transform:`translateX(${-progress*paneTravel}px)`,transition:'none'}:undefined} aria-hidden={panelOpen} inert={panelOpen}><div className="discovery-map-stage">
    {!panelOpen&&businesses.pending&&<div className={independentStyles.mapUpdating}><MarketUpdating/></div>}
-   {!businesses.pending&&!businesses.error&&mapData.showrooms.length===0&&<div className={independentStyles.emptyMap} role="status"><p>{t('No businesses with public map locations match these filters.')}</p><button type="button" onClick={()=>setPanelOpen(true)}>{t('Browse product listings')}</button></div>}
+   {!businesses.pending&&!businesses.error&&mapData.showrooms.length===0&&<div className={independentStyles.emptyMap} role="status"><p>{t('No businesses with public map locations match these filters.')}</p><button type="button" onClick={()=>switchPanel(true)}>{t('Browse product listings')}</button></div>}
    {mapData.resultCounts.businesses>mapData.showrooms.length&&<p className={independentStyles.mapLimit}>{t('Showing {count} businesses. Search or filter to see more.',{count:mapData.showrooms.length})}</p>}
     <div className="discovery-floating-tools"><div className="discovery-floating-buttons" aria-label={t('Map controls')}>
      <button type="button" onClick={nearMe} aria-label={t('Center the map near me')}><LocateFixed/></button>

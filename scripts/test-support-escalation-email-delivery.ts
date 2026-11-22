@@ -10,20 +10,22 @@ test('BE-050/DEP-043 S126 private escalation outbox uses isolated PostgreSQL lea
  const db=await getDb(),now=Date.now(),anchor=now-20*60_000,previousApiKey=process.env.RESEND_API_KEY;
  delete process.env.RESEND_API_KEY; // No real provider can be selected by this suite.
  try{
+  const business=(await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('escalation-mail-business','Escalation mail fixture','composition','active')").run()).insertedId;
   const addUser=async(name:string,role:string)=>{
-   const id=(await db.prepare("INSERT INTO users(email,password_hash,name,role,must_change_password) VALUES(?,'unused',?,'admin',0)").run(`${name}@example.test`,name)).insertedId;
+   const id=(await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES(?,'unused',?,?,?,0)").run(`${name}@example.test`,name,role==='client'?'owner':'admin',role==='client'?business:null)).insertedId;
    await db.prepare('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)').run(id,role);return id;
   };
   const admin=await addUser('email-admin','platform_admin'),ops=await addUser('email-ops','operations_manager'),agent=await addUser('email-agent','team_member');
-  await db.prepare("INSERT INTO support_agent_settings(user_id,enabled,queue_scope,updated_at) VALUES(?,1,'transport',?)").run(agent,now);
+  const owner=await addUser('email-owner','client');
+  await db.prepare("INSERT INTO support_agent_settings(user_id,enabled,queue_scope,updated_at) VALUES(?,1,'support',?)").run(agent,now);
   await db.prepare("INSERT INTO attention_preferences(recipient_key,language,updated_at) VALUES(?,'so',?)").run(`user:${admin}`,now);
   let ordinal=0;
   const seed=async(recipient=admin)=>{
-   const id=(await db.prepare(`INSERT INTO support_conversations(public_ref,participant_kind,visitor_token_hash,visitor_session_expires_at,assistance_category,
-    requester_label,subject,status,assigned_user_id,visitor_phone,transport_origin,transport_destination,created_at,updated_at,last_message_at)
-    VALUES(?,'visitor',?,?,'shipment_observation','PRIVATE REQUESTER CANARY','PRIVATE SUBJECT CANARY','open',?,'+447700900119','PRIVATE ORIGIN CANARY','PRIVATE DESTINATION CANARY',?,?,?)`).run(`SUP-MAIL${++ordinal}`,crypto.randomUUID(),now+7*24*60*60_000,agent,anchor,anchor,anchor)).insertedId;
-   const message=(await db.prepare(`INSERT INTO support_messages(conversation_id,sender_kind,sender_key,body,idempotency_key,created_at,sender_side)
-    VALUES(?,'visitor',?,'PRIVATE MESSAGE CANARY',?,?,'participant')`).run(id,`visitor:${id}`,crypto.randomUUID(),anchor)).insertedId;
+   const id=(await db.prepare(`INSERT INTO support_conversations(public_ref,participant_kind,business_id,opened_by_user_id,assistance_category,
+    requester_label,subject,status,assigned_user_id,created_at,updated_at,last_message_at)
+    VALUES(?,'client',?,?,'general','PRIVATE REQUESTER CANARY','PRIVATE SUBJECT CANARY','open',?,?,?,?)`).run(`SUP-MAIL${++ordinal}`,business,owner,agent,anchor,anchor,anchor)).insertedId;
+   const message=(await db.prepare(`INSERT INTO support_messages(conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at,sender_side)
+    VALUES(?,?,'user',?,'PRIVATE MESSAGE CANARY',?,?,'participant')`).run(id,owner,`user:${owner}`,crypto.randomUUID(),anchor)).insertedId;
    await db.prepare('UPDATE support_conversations SET awaiting_staff_since=?,awaiting_staff_message_id=? WHERE id=?').run(anchor,message,id);
    const assignment=(await db.prepare("INSERT INTO support_assignments(conversation_id,assigned_user_id,reason,assigned_at) VALUES(?,?,'automatic',?)").run(id,agent,anchor)).insertedId;
    const notification=(await db.prepare(`INSERT INTO attention_notifications(source_key,recipient_key,user_id,conversation_id,kind,created_at)
@@ -35,7 +37,7 @@ test('BE-050/DEP-043 S126 private escalation outbox uses isolated PostgreSQL lea
    await db.prepare('DELETE FROM support_conversations').run();
    await db.prepare("UPDATE user_access_profiles SET access_role='platform_admin' WHERE user_id=?").run(admin);
    await db.prepare("UPDATE user_access_profiles SET access_role='team_member' WHERE user_id=?").run(agent);
-   await db.prepare("UPDATE support_agent_settings SET queue_scope='transport',enabled=1 WHERE user_id=?").run(agent);
+   await db.prepare("UPDATE support_agent_settings SET queue_scope='support',enabled=1 WHERE user_id=?").run(agent);
   };
   const state=(id:number)=>db.prepare('SELECT state,attempts,lease_until,accepted_at,error_category,next_attempt_at FROM attention_email_deliveries WHERE id=?').get(id);
   const run=(send:SupportEscalationEmailPort,at=now,limit=2)=>dispatchSupportEscalationEmails({send,now:at,limit,context:{origin:'https://suqpage.example'}});
@@ -63,7 +65,8 @@ test('BE-050/DEP-043 S126 private escalation outbox uses isolated PostgreSQL lea
     async item=>{await db.prepare('UPDATE support_assignments SET released_at=? WHERE id=?').run(now,item.assignment);await db.prepare("INSERT INTO support_assignments(conversation_id,assigned_user_id,reason,assigned_at) VALUES(?,?,'reassigned',?)").run(item.id,agent,now);},
     ()=>db.prepare("UPDATE user_access_profiles SET access_role='client' WHERE user_id=?").run(admin),
     ()=>db.prepare("UPDATE user_access_profiles SET access_role='client' WHERE user_id=?").run(agent),
-    ()=>db.prepare("UPDATE support_agent_settings SET queue_scope='support' WHERE user_id=?").run(agent),
+    item=>db.prepare("UPDATE support_conversations SET assistance_category='shipment_observation' WHERE id=?").run(item.id),
+    ()=>db.prepare("UPDATE support_agent_settings SET queue_scope='transport' WHERE user_id=?").run(agent),
    ];
    for(const change of cases){const item=await seed();await change(item);let sends=0;const result=await run(async()=>{sends++;return {state:'accepted'};});assert.equal(sends,0);assert.equal(result.ignored,1);assert.equal((await state(item.delivery)).error_category,'no_longer_actionable');await reset();}
    const scoped=await seed(agent);const result=await run(async()=>{throw Error('A scoped agent must not receive escalation email');});assert.equal(result.ignored,1);assert.equal((await state(scoped.delivery)).state,'ignored');await reset();

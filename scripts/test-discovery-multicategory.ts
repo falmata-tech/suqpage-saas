@@ -31,12 +31,12 @@ async function main() {
     await addGroup(b,'Retired',0);
     await addGroup(outside,'Pantry');
     for(const q of ['', 'Lotion', 'Lotoin']){
-      const filtered=await getMarketplaceDiscoveryView({scope:'products',industry:'beauty-wellness',subcategory:'Oils',q});
-      assert.deepEqual(filtered.subcategories,['Oils']);
+      const filtered=await getMarketplaceDiscoveryView({scope:'products',industry:'beauty-wellness',subcategory:'Skin & body care',q});
+      assert.deepEqual(filtered.subcategories,['Skin & body care']);
       assert.equal(filtered.resultPage.totalItems,1);
-      assert.deepEqual(filtered.searchProducts.map(p=>[p.categoryName,p.businessId]),[['Oils',a]]);
+      assert.deepEqual(filtered.searchProducts.map(p=>[p.categoryName,p.businessId]),[['Skin & body care',a]]);
     }
-    const excludedGroup=await getMarketplaceDiscoveryView({scope:'products',industry:'beauty-wellness',subcategory:'Oils',excludedBusinessIds:[a]});
+    const excludedGroup=await getMarketplaceDiscoveryView({scope:'products',industry:'beauty-wellness',subcategory:'Skin & body care',excludedBusinessIds:[a]});
     assert.deepEqual(excludedGroup.subcategories,[]);
     assert.equal(excludedGroup.resultPage.totalItems,0);
     const inactiveGroup=await getMarketplaceDiscoveryView({scope:'products',industry:'electronics',subcategory:'Retired'});

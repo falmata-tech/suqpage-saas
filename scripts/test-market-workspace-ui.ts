@@ -159,7 +159,7 @@ for(const locale of['en','am','om'] as const)for(const width of[320,390])test(`F
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);assert.deepEqual(errors,[]);
 });
 
-for(const width of[320,390])test(`FE-065 S181 compact filters keep one dialog, country prerequisites, scope and focus at ${width}px`,async t=>{
+for(const width of[320,390])test(`FE-065 S181 compact filters keep one dialog, country prerequisites, shared criteria and focus at ${width}px`,async t=>{
  const {page,errors}=await boot(t,{url:'/?view=map&b.q=Wood&p.q=Cup',realStyles:true,width,filterChoices:true});
  const trigger=(scope:string)=>page.locator(`[data-search-scope="${scope}"]>button`),dialog=page.getByRole('dialog');
  await expect(trigger('businesses')).toHaveAttribute('aria-label','Filters, 0 selected');
@@ -167,7 +167,7 @@ for(const width of[320,390])test(`FE-065 S181 compact filters keep one dialog, c
  await trigger('businesses').click();await expect(dialog).toHaveCount(1);
  await dialog.evaluate(element=>element.addEventListener('close',()=>element.setAttribute('data-observed-close','true')));
  await expect(dialog.getByRole('button',{name:'City',exact:true})).toBeDisabled();
- await expect(dialog.getByRole('button',{name:'Made to order',exact:true})).toHaveCount(0);
+ await expect(dialog.getByRole('button',{name:'Made to order',exact:true})).toHaveAttribute('aria-pressed','false');
  await dialog.getByRole('button',{name:'Category',exact:true}).click();
  await expect(dialog.getByRole('heading',{name:'Categories',exact:true})).toBeVisible();
  await dialog.getByRole('checkbox',{name:'Textiles',exact:true}).check();
@@ -186,18 +186,18 @@ for(const width of[320,390])test(`FE-065 S181 compact filters keep one dialog, c
  await expect(trigger('businesses')).toHaveAttribute('aria-label','Filters, 2 selected');
  await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);await expect(trigger('businesses')).toBeFocused();
  await page.getByRole('button',{name:'Product listings',exact:true}).click();
- await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
- await expect(trigger('products')).toHaveAttribute('aria-label','Filters, 0 selected');
+ await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Wood');
+ await expect(trigger('products')).toHaveAttribute('aria-label','Filters, 2 selected');
  await trigger('products').click();await dialog.getByRole('button',{name:'Made to order',exact:true}).click();
- await expect(trigger('products')).toHaveAttribute('aria-label','Filters, 1 selected');
+ await expect(trigger('products')).toHaveAttribute('aria-label','Filters, 3 selected');
  await dialog.getByRole('button',{name:'Clear all',exact:true}).click();
  await expect(trigger('products')).toHaveAttribute('aria-label','Filters, 0 selected');
  await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('');
  await expect(page).toHaveURL(url=>url.searchParams.get('b.q')==='Wood'&&url.searchParams.get('b.category')==='textiles'&&url.searchParams.get('b.country')==='KE'&&!url.searchParams.has('p.q')&&!url.searchParams.has('p.madeToOrder'));
  await dialog.getByRole('button',{name:'Done',exact:true}).click();await expect(trigger('products')).toBeFocused();
  await page.getByRole('button',{name:'Business locations',exact:true}).click();
- await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Wood');
- await expect(trigger('businesses')).toHaveAttribute('aria-label','Filters, 2 selected');
+ await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('');
+ await expect(trigger('businesses')).toHaveAttribute('aria-label','Filters, 0 selected');
  assert.deepEqual(errors,[]);
 });
 
@@ -278,7 +278,7 @@ test('FE-065 S157 empty exact-pin map offers a one-tap path to product listings 
  assert.ok(bounds.height>=44,JSON.stringify(bounds));assert.ok(bounds.right<=bounds.viewport,JSON.stringify(bounds));
  await next.click();
  await expect(page.getByRole('button',{name:'Product listings',exact:true})).toHaveAttribute('aria-pressed','true');
- await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
+ await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('No mapped shops');
  assert.deepEqual(errors,[]);
 });
 
@@ -287,8 +287,13 @@ test('FE-065 actual web workspace restores before its first write and keeps map/
  await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
  await expect(page.getByRole('button',{name:'Made to order',exact:true})).toHaveAttribute('aria-pressed','true');
  const writes=await savedWrites(page);assert.ok(writes.length);assert.ok(writes.every(params=>new URLSearchParams(params).get('view')==='search'),'No default-map write precedes restoration');
- await page.getByRole('button',{name:'Business locations',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');
- await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.requests.some(url=>new URL(url,location.href).searchParams.get('q')==='Workshop'))).toBe(true);await expect(page.locator('.africmade-loading')).toHaveCount(0);
+ await page.getByRole('button',{name:'Business locations',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Cup');
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.requests.some(url=>{
+  const params=new URL(url,location.href).searchParams;
+  return params.get('scope')==='businesses'&&params.get('q')==='Cup';
+ }))).toBe(true);
+ await expect(page.locator('.discovery-map-shell')).toHaveAttribute('data-snapshot-current','true');
+ await expect(page.locator('.africmade-loading')).toHaveCount(0);
  await page.getByRole('button',{name:'Move fixture map',exact:true}).click();
  await page.getByRole('button',{name:'Product listings',exact:true}).click();await page.getByRole('button',{name:'Open Featured',exact:true}).click();
  await page.getByRole('button',{name:'Open Featured showroom',exact:true}).click();
@@ -307,9 +312,9 @@ test('FE-065 actual web Products survives detail Back and About to bare Market',
  await page.getByRole('button',{name:'Browser Back',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
  await page.getByRole('button',{name:'Open About',exact:true}).click();await page.getByRole('button',{name:'Return Market',exact:true}).click();
  await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');
- await page.getByRole('button',{name:'Business locations',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');
+ await page.getByRole('button',{name:'Business locations',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Cup');
  await page.getByRole('button',{name:'Open About',exact:true}).click();await page.getByRole('button',{name:'Return Market',exact:true}).click();
- await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');assert.deepEqual(errors,[]);
+ await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Cup');assert.deepEqual(errors,[]);
 });
 
 test('FE-065 reused web route honors explicit URL/history and retains router metadata',async t=>{
@@ -318,9 +323,9 @@ test('FE-065 reused web route honors explicit URL/history and retains router met
  await go(page,'/?view=map&b.q=Explicit+shop&p.q=Explicit+item');
  await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Explicit shop');
  assert.equal(await page.evaluate(()=>history.state.framework),'fixture-router');
- await page.getByRole('button',{name:'Product listings',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Explicit item');
+ await page.getByRole('button',{name:'Product listings',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Explicit shop');
  await go(page,'/?view=map');await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('');
- await page.getByRole('button',{name:'Browser Back',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Explicit item');
+ await page.getByRole('button',{name:'Browser Back',exact:true}).click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Explicit shop');
  await go(page,'/?q=Legacy');await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Legacy');
  assert.deepEqual(errors,[]);
 });
@@ -342,18 +347,18 @@ test('FE-065 queued router state cannot let local persistence overwrite incoming
  await page.evaluate(()=>(window as unknown as {fixture:Fixture}).fixture.flush());
  await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('External');
  await page.getByRole('button',{name:'Product listings',exact:true}).click();
- await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Preserved');
+ await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('External');
  assert.ok((await savedWrites(page)).every(params=>!params.includes('Pending')));assert.deepEqual(errors,[]);
 });
 
-test('FE-065 S143 no information overlay and ordinary About return preserve both unsent queries',async t=>{
+test('FE-065 S143 no information overlay and About return preserves criteria and switching carries them',async t=>{
  const {page,errors}=await boot(t,{url:'/?view=map&b.q=Workshop&p.q=Cup'});
  await expect(page.getByRole('heading',{name:'AfricMade Market',exact:true})).toHaveClass('sr-only');
  const businesses=page.getByRole('button',{name:'Business locations',exact:true}),products=page.getByRole('button',{name:'Product listings',exact:true});
  await expect(businesses).toHaveAttribute('aria-pressed','true');await expect(products).toBeVisible();
  await expect(page.getByRole('button',{name:'About AfricMade',exact:true})).toHaveCount(0);await expect(page.locator('dialog')).toHaveCount(0);
  await page.getByRole('button',{name:'Open About',exact:true}).click();await expect(page.getByRole('heading',{name:'/about',exact:true})).toBeVisible();await page.getByRole('button',{name:'Return Market',exact:true}).click();
- await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');await products.click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Cup');await businesses.click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');assert.deepEqual(errors,[]);
+ await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');await products.click();await expect(page.getByRole('searchbox',{name:'Search products',exact:true})).toHaveValue('Workshop');await businesses.click();await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('Workshop');assert.deepEqual(errors,[]);
 });
 
 const DISCOVERY_KEY='suqpage:discovery-navigation:v2';
@@ -513,7 +518,7 @@ test('FE-065 web exclusions reject old query/page responses and queued map/group
  await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.holdBusiness=false;f.holdProducts=false;f.pendingReads.splice(0).forEach(release=>release());f.pendingProductReads.splice(0).forEach(release=>release());});
  await expect(page.locator('[data-fixture-map]')).toHaveAttribute('data-fixture-shops','1');await expect(page.locator('.discovery-product-card')).toHaveCount(0);
  await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.staleSelect();f.staleOpenGroup();});await expect(page.getByRole('dialog')).toHaveCount(0);
- assert.deepEqual((await fixtureReads(page)).filter(read=>read.scope==='products').map(read=>[read.page,read.excluded]),[[2,[]],[1,[1]]],'An old product page cannot become the new exclusion scope cursor');
+ assert.deepEqual((await fixtureReads(page)).filter(read=>read.scope==='products').map(read=>[read.page,read.excluded]),[[1,[]],[1,[1]]],'A pending shared-query response cannot enter the new exclusion scope');
  assert.deepEqual(errors,[]);
 });
 

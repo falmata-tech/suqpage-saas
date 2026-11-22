@@ -35,10 +35,10 @@ export default function MarketSearchControls({scope,value,onChange,metadata,read
   else change({cities:next});
  }
  function openPicker(key:string,viaOverview=false){if(ready){setFilterText('');setFromOverview(viaOverview);setPicker(key);}}
- const activeCount=value.categories.length+Number(Boolean(value.subcategory))+value.countries.length+value.cities.length+(scope==='products'&&value.madeToOrder?1:0);
+ const activeCount=value.categories.length+Number(Boolean(value.subcategory))+value.countries.length+value.cities.length+Number(value.madeToOrder);
  const filterButtons=(inOverview=false)=><>
    {[{key:'category',label:'Category',count:value.categories.length,Icon:Grid2X2},...(value.categories.length && (metadata?.subcategories?.length || value.subcategory)?[{key:'subcategory' as const,label:'Subcategory',count:Number(Boolean(value.subcategory)),Icon:Grid2X2}]:[]),{key:'country',label:'Country',count:value.countries.length,Icon:Globe},{key:'city',label:'City',count:value.cities.length,Icon:MapPin}].map(f=><button key={f.key} type="button" disabled={!ready||f.key==='city'&&!value.countries.length} aria-haspopup="dialog" data-active={f.count>0} onClick={()=>openPicker(f.key,inOverview)}><f.Icon size={15} aria-hidden="true"/><span>{t(f.label)}</span>{f.count>0?<b>{f.count}</b>:<ChevronDown size={12} aria-hidden="true"/>}</button>)}
-   {scope==='products'&&<button type="button" disabled={!ready} aria-pressed={value.madeToOrder} data-active={value.madeToOrder} onClick={()=>change({madeToOrder:!value.madeToOrder})}>{value.madeToOrder&&<Check size={15} aria-hidden="true"/>}<span>{t('Made to order')}</span></button>}
+   <button type="button" disabled={!ready} aria-pressed={value.madeToOrder} data-active={value.madeToOrder} onClick={()=>change({madeToOrder:!value.madeToOrder})}>{value.madeToOrder&&<Check size={15} aria-hidden="true"/>}<span>{t('Made to order')}</span></button>
   </>;
  return <div className={styles.controls} data-search-scope={scope}>
   <form role="search" aria-label={t(scope==='businesses'?'Search businesses':'Search products')} className={styles.search} onSubmit={event=>event.preventDefault()}>

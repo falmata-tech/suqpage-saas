@@ -17,12 +17,13 @@ test('conflict/rate/unavailable map to explicit safe failures and never leak thr
  }
 });
 
-test('web and native request adapters deny foreign origins before application persistence',async()=>{
+test('old web and app endpoints decline new partner applications',async()=>{
  const {POST}=await import('../app/api/transport-partners/route');
  const {handleMobileRequest}=await import('../lib/mobile/router');
- const foreign=request('{}',{Origin:'https://foreign.example.test'});
- assert.equal((await POST(foreign)).status,403);
- const mobile=new Request('http://127.0.0.1:3102/api/mobile/v1/transport-partners',{method:'POST',headers:{Origin:'https://foreign.example.test','Content-Type':'application/json'},body:'{}'});
- let submitted=false;const result=await handleMobileRequest(mobile,['transport-partners'],{partnerInterest:{submit:async()=>{submitted=true;return{reference:'PI-0123456789AB'};}}});
- assert.equal(result.status,403);assert.equal(submitted,false);
+ assert.equal(POST().status,410);
+ const url='http://127.0.0.1:3102/api/mobile/v1/transport-partners';
+ const body={method:'POST',headers:{'Content-Type':'application/json'},body:'{}'};
+ assert.equal((await handleMobileRequest(new Request(url,body),['transport-partners'])).status,410);
+ const foreign=new Request(url,{...body,headers:{...body.headers,Origin:'https://foreign.example.test'}});
+ assert.equal((await handleMobileRequest(foreign,['transport-partners'])).status,403);
 });

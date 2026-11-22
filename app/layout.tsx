@@ -1,3 +1,4 @@
+import { PwaInstallProvider } from "@/components/PwaInstall";
 import { getUiText } from "@/lib/i18n/server";
 import { MARKET_STOREFRONT_COPY } from "@/lib/storefront-copy";
 import { NextIntlClientProvider } from "next-intl";
@@ -21,4 +22,4 @@ export async function generateMetadata():Promise<Metadata> {
   return { ...metadata, referrer:'strict-origin-when-cross-origin', description, openGraph:{title,description,siteName:"AfricMade"},twitter:{card:"summary_large_image",title,description} };
 }
 export const viewport:Viewport={width:"device-width",initialScale:1,viewportFit:"cover",themeColor:[{media:"(prefers-color-scheme: light)",color:"#ffffff"},{media:"(prefers-color-scheme: dark)",color:"#202428"}]};
-export default async function RootLayout({children}:Readonly<{children:React.ReactNode}>){const locale = await getLocale(); const messages = clientMessages(await getMessages() as UiMessages); return <html lang={locale} data-scroll-behavior="smooth"><body><NextIntlClientProvider messages={messages}><PwaRegistration />{children}</NextIntlClientProvider></body></html>}
+export default async function RootLayout({children}:Readonly<{children:React.ReactNode}>){const locale = await getLocale(); const messages = clientMessages(await getMessages() as UiMessages); return <html lang={locale} data-scroll-behavior="smooth"><body><NextIntlClientProvider messages={messages}><PwaInstallProvider><PwaRegistration />{children}</PwaInstallProvider></NextIntlClientProvider></body></html>}

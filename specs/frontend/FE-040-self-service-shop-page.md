@@ -63,8 +63,10 @@ implementation is enabled by default; visual approval and rollout remain pending
   browsing rather than placing the catalog below an oversized introductory area.
 - Products and inquiry cart use compact sticky navigation below business
   identity. The default description is a short excerpt; Read more reveals full
-  text in place, with bounded scrolling for long content. Expansion may move
-  products; starting video must not. Sponsor names remain readable.
+  text in place. Ordinary stories use the page's normal scroll, with bounded
+  scrolling reserved for descriptions longer than 1,200 characters. Expanding the
+  description may move the products section. Starting video keeps it in place.
+  Sponsor names remain readable.
 - Preview reuses the existing product/inquiry behavior but not the generated
   design-manifest pipeline. No made-by-the-seller claim is inferred from category.
 - The profile preview can open product details, select options and try the cart.
@@ -195,6 +197,7 @@ Scenario: Optional media and long descriptions
   THEN absent media creates no empty cover section
   AND a compact description precedes products, with Read more only when needed
   AND full text is reachable by keyboard without horizontal overflow
+  AND stories up to 1,200 characters fit in their expanded block using the page scroll
 ```
 
 ### S2f public contact area
@@ -239,6 +242,8 @@ Preview loads one renderer and uses deferred values for expensive updates.
 - Focused domain/service tests cover ownership, scope, consent, stale saves and
   absence of live/catalog writes.
 - Desktop, 390px and 320px browser tests cover editing, preview and overflow.
+- `tests/acceptance/demo-about-stories.spec.ts` checks that the full story
+  fits after expanding on a 320px phone and that Products remains reachable.
 - Owner visual approval precedes full release gates; see checklist S2a/S2b.
 
 ## Local checkpoint evidence

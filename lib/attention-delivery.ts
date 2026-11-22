@@ -1,3 +1,4 @@
+import {activeBusinessSupport} from './retired-transport';
 import {postgresRuntimeServices} from './postgres-runtime-services';
 import {createUiText,parseLocale} from './i18n/core';
 import {attentionLabel} from './i18n/attention-copy';
@@ -7,10 +8,11 @@ import {supportAssignmentReplyDueAt,supportReplyOverdueSource} from './support-a
 import {SUPPORT_ACTIVE_ASSIGNMENT_JOIN} from './support-response-sql';
 import am from './i18n/messages/am.json';import om from './i18n/messages/om.json';import so from './i18n/messages/so.json';import ti from './i18n/messages/ti.json';
 type DeliveryRow={id:number;notification_id:number;subscription_id:number;attempts:number};
-type PayloadRow={id:number;kind:AttentionKind;source_key:string;user_id:number|null;visitor_conversation_id:number|null;conversation_id:number|null;inquiry_id:number|null;created_at:number;read_at:number|null;recipient_key:string;subscription_json:string;subscription_kind:string;revoked_at:number|null;expires_at:number|null;access_role:string|null;business_id:number|null;enabled:number|null;queue_scope:string|null;case_business_id:number|null;assigned_user_id:number|null;case_status:string|null;assistance_category:string|null;visitor_session_expires_at:number|null;inquiry_business_id:number|null;sound_enabled:boolean|null;language:'en'|'am'|'om'|'so'|'ti'|null;resolved_at:number|null;awaiting_staff_since:number|null;awaiting_staff_message_id:number|null;staff_joined_assignment_id:number|null;staff_joined_user_id:number|null;current_assignment_id:number|null;current_assigned_at:number|null};
+type PayloadRow={participant_kind:string|null;id:number;kind:AttentionKind;source_key:string;user_id:number|null;visitor_conversation_id:number|null;conversation_id:number|null;inquiry_id:number|null;created_at:number;read_at:number|null;recipient_key:string;subscription_json:string;subscription_kind:string;revoked_at:number|null;expires_at:number|null;access_role:string|null;business_id:number|null;enabled:number|null;queue_scope:string|null;case_business_id:number|null;assigned_user_id:number|null;case_status:string|null;assistance_category:string|null;visitor_session_expires_at:number|null;inquiry_business_id:number|null;sound_enabled:boolean|null;language:'en'|'am'|'om'|'so'|'ti'|null;resolved_at:number|null;awaiting_staff_since:number|null;awaiting_staff_message_id:number|null;staff_joined_assignment_id:number|null;staff_joined_user_id:number|null;current_assignment_id:number|null;current_assigned_at:number|null};
 const catalogs={en:{},am,om,so,ti};
 
 function permitted(r:PayloadRow,now:number){
+  if (r.visitor_conversation_id !== null || (r.conversation_id !== null && !activeBusinessSupport(r.participant_kind, r.assistance_category))) return false;
   if(r.revoked_at!==null||r.read_at!==null||r.created_at<now-30*60*1000||(r.expires_at!==null&&r.expires_at<now))return false;
   if((r.visitor_conversation_id!==null||r.access_role==='client')&&['assigned','reassigned','reply_overdue'].includes(r.kind))return false;
   if(r.kind==='joined'&&(!r.staff_joined_assignment_id||r.staff_joined_assignment_id!==r.current_assignment_id||
@@ -56,7 +58,7 @@ export async function dispatchAttention({send=sendAttentionPush,now=Date.now(),l
   // Small batches bound provider fan-out and connection use.
   for(let at=0;at<leased.length;at+=4)await Promise.all(leased.slice(at,at+4).map(async d=>{
     const r=(await runner.query<PayloadRow>(`SELECT n.*,s.kind subscription_kind,s.subscription_json,s.revoked_at,s.expires_at,p.access_role,u.business_id,a.enabled,a.queue_scope,
-      c.business_id case_business_id,c.assigned_user_id,c.status case_status,c.assistance_category,c.visitor_session_expires_at,i.business_id inquiry_business_id,f.sound_enabled,f.language,
+      c.business_id case_business_id,c.assigned_user_id,c.status case_status,c.participant_kind,c.assistance_category,c.visitor_session_expires_at,i.business_id inquiry_business_id,f.sound_enabled,f.language,
       c.resolved_at,c.awaiting_staff_since,c.awaiting_staff_message_id,c.staff_joined_assignment_id,c.staff_joined_user_id,
       current_assignment.id current_assignment_id,current_assignment.assigned_at current_assigned_at
       FROM attention_notifications n JOIN attention_subscriptions s ON s.id=? AND s.recipient_key=n.recipient_key

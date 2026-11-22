@@ -1,2 +1,5 @@
-// The locator is navigation only. Tracking performs the same recipient verification.
-export {default} from '../tracking';
+import { Redirect } from "expo-router";
+
+export default function RetiredTransportRoute() {
+  return <Redirect href="/" />;
+}

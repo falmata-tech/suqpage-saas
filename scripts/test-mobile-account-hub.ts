@@ -10,7 +10,7 @@ const bundled=build({entryPoints:['apps/mobile/src/owner-profile.tsx','apps/mobi
   a.path==='react'?`export const useState=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return[fixture.states[i],v=>fixture.states[i]=typeof v==='function'?v(fixture.states[i]):v];};export const useEffect=()=>{},useRef=initial=>({current:initial}),createContext=()=>({}),useContext=()=>fixture.attention;export default {};`
   :a.path==='jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
   :a.path==='react-native'?`export const View='View',Text='Text',Pressable='Pressable',Platform={OS:'android'},AppState={currentState:'active'},StyleSheet={create:value=>value},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`
-  :a.path==='expo-router'?`export const useLocalSearchParams=()=>fixture.params,useGlobalSearchParams=()=>fixture.params,usePathname=()=>fixture.path,router={push:route=>fixture.routes.push({kind:'push',route}),replace:route=>fixture.routes.push({kind:'replace',route}),navigate:route=>fixture.routes.push({kind:'navigate',route})};`
+  :a.path==='expo-router'?`export const Redirect='Redirect',useLocalSearchParams=()=>fixture.params,useGlobalSearchParams=()=>fixture.params,usePathname=()=>fixture.path,router={push:route=>fixture.routes.push({kind:'push',route}),replace:route=>fixture.routes.push({kind:'replace',route}),navigate:route=>fixture.routes.push({kind:'navigate',route})};`
   :a.path==='react-native-safe-area-context'?`export const useSafeAreaInsets=()=>({bottom:0});`
   :a.path==='runtime'?`export const useApp=()=>fixture.app,useLoad=fn=>{fixture.loads.push(fn);return{data:fixture.app.session?fixture.home:null,loading:false,error:'',reload(){}};},request=async()=>{throw Error('Unexpected public request');},API='https://suqpage.com';`
   :a.path==='ui'?`export const Copy='Copy',Button='Button',Card='Card',Photo='Photo',Field='Field',Chip='Chip',Status='Status',Icon='Icon',Screen='Screen',colors={},s={},useOpenLink=()=>()=>{};`
@@ -35,9 +35,9 @@ function text(value:unknown):string {if(Array.isArray(value))return value.map(te
 const button=(tree:Node[],label:string)=>tree.find(n=>(name(n)==='Button'&&n.props.label===label)||(name(n)==='Pressable'&&n.props.accessibilityLabel===label));
 const press=(node:Node)=>{assert.ok(node);(node.props.onPress as()=>void)();};
 
-test('FE-056 actual native Account hub exposes seven scoped destinations and only authoritative compact metrics',async()=>{
+test('FE-056 actual native Account hub exposes six scoped destinations and only authoritative compact metrics',async()=>{
  for(const messages of [{},am,om,so,ti]){const{fixture,render}=await component('owner-profile');fixture.app.t=createUiText(messages);const t=fixture.app.t,tree=render('OwnerProfile',{home});
-  const destinations=[['Your page','showroom'],['Products','products'],['Inbox','inquiries'],['Transport chat','transport'],['Business details','business'],['Account settings','settings'],['Support','support']];
+  const destinations=[['Your page','showroom'],['Products','products'],['Inbox','inquiries'],['Business details','business'],['Account settings','settings'],['Support','support']];
   for(const[label,section]of destinations){const node=button(tree,t(label))!;assert.ok(node);assert.ok(Number((node.props.style as Record<string,unknown>).minHeight)>=48);press(node);assert.deepEqual(JSON.parse(JSON.stringify(fixture.routes.at(-1))),{kind:'push',route:{pathname:'/owner/[section]',params:{section,returnTo:'profile'}}});}
   const rendered=JSON.stringify(tree),visible=tree.map(node=>text(node.props.children)).join('\n');assert.ok(visible.includes(home.shop.name)&&visible.includes('@'+home.shop.handle));for(const value of ['137','19','7'])assert.ok(visible.includes(value));for(const value of ['PRIVATE_NAME','PRIVATE_EMAIL','PRIVATE_PHONE','PUBLIC_PHONE','999'])assert.ok(!rendered.includes(value),'Hub must not dump private/public contact fields or retired inquiry metrics');
   assert.ok(!button(tree,t('Preview page'))&&!button(tree,t('Edit page'))&&!button(tree,t('Edit account details')));
@@ -105,9 +105,17 @@ test('FE-056 native notification preferences reuse explicit opt-in and leave the
 });
 
 
-test('FE-053 authenticated transport route has one screen root, no owner-home read and preserves setup/login guards',async()=>{
- const{fixture,render}=await component('[section]');fixture.params={section:'transport',returnTo:'profile'};let tree=render('default');assert.equal(tree.length,1);assert.equal(tree[0].type,'BuyingScreen');assert.equal(tree[0].props.owner,true);assert.equal(await fixture.loads.at(-1)!(),null,'Transport uses its scoped API, not a duplicate owner/home dependency');
- fixture.params={section:'transport',id:'71',returnTo:'profile'};tree=render('default');assert.equal(tree[0].props.conversationId,'71');fixture.params={section:'transport',view:'new',returnTo:'profile'};tree=render('default');assert.equal(tree[0].props.newIntake,true);
- fixture.params={section:'transport-history'};tree=render('default');assert.equal(tree[0].type,'OwnerTransportHistory');assert.equal(await fixture.loads.at(-1)!(),null);
- fixture.app.session=null as never;tree=render('default');assert.ok(button(tree,'Sign in'));assert.ok(!tree.some(node=>node.type==='BuyingScreen'||node.type==='OwnerTransportHistory'));assert.equal(await fixture.loads.at(-1)!(),null);
+test('FE-078 authenticated legacy transport pages return to Account without loading private data',async()=>{
+ const {fixture,render}=await component('[section]');
+ for(const section of ['transport','transport-history']){
+  fixture.params={section,id:'71',returnTo:'profile'};
+  const tree=render('default');
+  assert.equal(tree.length,1);
+  assert.equal(tree[0].type,'Redirect');
+  assert.equal(tree[0].props.href,'/account');
+  assert.equal(await fixture.loads.at(-1)!(),null);
+ }
+ fixture.app.session=null as never;
+ assert.ok(button(render('default'),'Sign in'));
+ assert.equal(await fixture.loads.at(-1)!(),null);
 });

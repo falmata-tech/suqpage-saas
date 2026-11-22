@@ -3,6 +3,7 @@ import {test} from 'node:test';
 import {createRequire} from 'node:module';
 import {build} from 'esbuild';
 import {chromium,type Page} from 'playwright';
+import {expect} from '@playwright/test';
 
 const require=createRequire(import.meta.url);
 const bundle=build({stdin:{resolveDir:process.cwd(),loader:'tsx',contents:`
@@ -45,7 +46,7 @@ test('FE-067 web product editor preserves Made to order and requires explicit co
  }finally{await browser.close();}assert.deepEqual(errors,[]);
 });
 
-test('FE-067 made-to-order control toggles product scope, preserves other criteria and clears through the existing reset',{timeout:60000},async()=>{
+test('FE-067 made-to-order control toggles both Market scopes, preserves other criteria and clears through the existing reset',{timeout:60000},async()=>{
  const browser=await chromium.launch({timeout:20000});const errors:string[]=[];
  try{const page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));await boot(page,'search');
   const toggle=page.getByRole('button',{name:'Made to order',exact:true});assert.equal(await toggle.getAttribute('aria-pressed'),'false');
@@ -58,6 +59,8 @@ test('FE-067 made-to-order control toggles product scope, preserves other criter
   last=await page.evaluate(()=>(window as unknown as{fixture:Fixture}).fixture.changes.at(-1)!);
   assert.deepEqual(last,{query:'',categories:[],countries:[],cities:[],madeToOrder:false,page:1});
   await page.evaluate(()=>{const f=(window as unknown as{fixture:Fixture}).fixture;f.scope='businesses';f.mount('search');});
-  assert.equal(await page.getByRole('button',{name:'Made to order',exact:true}).count(),0,'Product supply filter is absent from business map controls');
+  await expect(toggle).toHaveAttribute('aria-pressed','false');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed','true');
  }finally{await browser.close();}assert.deepEqual(errors,[]);
 });

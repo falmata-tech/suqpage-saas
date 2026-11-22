@@ -1,6 +1,7 @@
 import { demoPublicContacts } from './demo-public-contacts';
 import {findPlaceSuggestions} from '../lib/place-catalog';
 import { initialBusinessProfile } from '../lib/business-profile';
+import { demoShowroomAbout } from '../lib/demo-showroom-stories';
 import { parseShopPageContent } from '../lib/owner-page-domain';
 import { findKnownPlaceByName } from "../lib/place-catalog";
 import { simplifyDemoOffering } from "../lib/simple-demo-offering";
@@ -703,7 +704,12 @@ async function runPostgresFixture() {
         }
         const catalog: Catalog = { business, collections: [], categories: [], products: [] };
         const contacts = demoPublicContacts(business.public_email || `hello+${handle}@example.test`, business.public_phone || '+447700900123', process.env.SUQPAGE_DEMO_INQUIRY_PHONE);
-        const content = JSON.stringify(parseShopPageContent({...initialBusinessProfile(catalog), introduction:'', contacts}));
+        const content = JSON.stringify(parseShopPageContent({
+            ...initialBusinessProfile(catalog),
+            introduction: "",
+            about: demoShowroomAbout(handle),
+            contacts,
+        }));
         const ownerId = clientUsersByHandle.get(handle)!;
         await db.prepare("UPDATE businesses SET public_email=?,public_phone=?,whatsapp=?,telegram=?,tiktok=? WHERE id=?").run(contacts.email,contacts.phone,contacts.whatsapp!.replace(/^\+/,''),contacts.telegram,contacts.tiktok,businessId);
         await db.prepare("INSERT INTO owner_page_drafts(business_id,version,content_json,assistance_enabled,updated_by,updated_at) VALUES(?,1,?,0,?,?)").run(businessId,content,ownerId,seededAt);

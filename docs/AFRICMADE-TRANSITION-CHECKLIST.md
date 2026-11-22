@@ -6,6 +6,90 @@ Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 Updated 2026-11-18. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
+## Launch workspace audit and Market filters (FE-065 / FE-078 / BE-066)
+
+1. [x] Inventory web, mobile, direct APIs, staff roles, Support cases and
+   notification delivery.
+2. [x] Carry query, department, subcategory, geography and Made to order between
+   Market views. Verify the applied results in desktop and phone Chrome and
+   Expo, plus isolated PostgreSQL exact/fuzzy discovery and geography.
+3. [x] Retire AfricMade transport chat, plans and shipment tracking on web and
+   native. The focused acceptance test reads HTTP 410 from the old surfaces,
+   including mutation URLs. Retained transport cases are excluded from the
+   active Support queue and are denied through Support reads/replies.
+4. [x] Review the owner Account, page, products, business details, Inbox and
+   Support, the business editor's workspace, and the admin and operations
+   surfaces. Send one local owner message, Join and reply as the assigned
+   Support agent, verify SQL persistence and owner readback, and verify
+   cross-tenant denial. Restore phone-web Inbox access from Account.
+5. [ ] Qualify the current candidate for protected CI and production. The
+   production health response before publication identifies source `bc30ab37`.
+   The production build and complete release gate passed. The latest isolated
+   browser acceptance run passed all 22 journeys on the standard provider
+   ports. The separate UI workflow suite passed 484 tests. Require current
+   protected checks and verify the deployed revision and workflows.
+
+Browser and API evidence is in `.local/launch-workspace-review/`. One staff
+Inbox navigation recovered from an interrupted development Suspense stream.
+The targeted owner and staff Inbox retest completed without browser errors.
+The walkthrough sampled real workspaces and core tasks. It did not execute
+every admin mutation or use real customer accounts.
+
+## PWA installation (FE-034 / DEP-025)
+
+1. [x] Add the install action below the desktop navigation links and in the
+   compact phone header for visitors and business owners.
+2. [x] Exercise the real Chrome installability signal, 320px phone help,
+   offline retry and reconnect. Chrome reports zero installability errors.
+   The worker caches only the generic offline page and selected static assets.
+   The protected browser job also runs the PWA shell checks.
+3. [ ] Qualify installation from deployed HTTPS on physical Android and iPhone.
+   The local rehearsal enables the worker at port 3132 with
+   `NEXT_PUBLIC_SUQPAGE_PWA_DEV_PREVIEW=1` on loopback.
+
+## Example business About stories (FE-023 / FE-040 / BE-022)
+
+1. [x] Compare the 66 local profiles with the 66 entries in the published demo
+   inventory. The rosters differ by two businesses, and Sheger has different
+   work on each roster.
+2. [x] Write two paragraphs per business from its actual example catalog.
+   Verify the fresh seed and refresh the 66 already published local profiles
+   through ordinary page saves. Include separate copy for the two
+   production-only businesses and the published Sheger catalog.
+3. [x] Verify all 66 local pages and the exact stories in the public API. In
+   Chrome at 1440px, 390px and 320px, expand a story, read it without a nested
+   scrollbar, collapse it and go to Products. In 390px Expo web, verify both
+   paragraphs and the Products section for Tana and Zema.
+4. [ ] Apply the reviewed copy to the hosted profiles only through the
+   demo-only publication and simulator safeguards.
+
+Local review passed on the existing preview at port 3127 and Expo web at 8082.
+The operational readback confirmed the edits were About-only and preserved
+prior page revisions. The focused 320px acceptance test and full
+`npm run check` passed. The browser evidence is in `.local/nov21-story-review/`.
+
+## Grouped storefront release
+
+- [x] Keep the cover and playback at 240 px on desktop, 210 px on phone web and 210 px in Expo. Chrome confirmed the image during a delayed load, real playback after loading and a retry after a failed request. Verify the player on the published host before reporting delivery.
+- [x] Classify all 264 demo products into reusable product groups. Local PostgreSQL proves exclusive department membership. Desktop, phone web and Expo confirmed Home, then Candles & decor, then Pure Beeswax Candles.
+- [x] Review the published demo roster against the creator footage and bind the exact before-images. Disposable PostgreSQL verified changing and rolling back both providers and both legacy examples. Apply the guarded plan only with the full release candidate qualified, then verify 66 showroom stories, 264 product videos and process chapters.
+- [x] Rewrite About and default to the seller section. Retire the logistics-company link, send old bookmarks to About and refuse new requests on both former endpoints.
+- [ ] Finish the approved one-showroom transactions and public readbacks.
+  The prior three-showroom and singleton timeouts were reconciled through the
+  live API. Nova Assembly then committed, and the public API returned the
+  reviewed cover and four product videos. Continue in roster order and keep
+  protected receipts outside Git. Require a final independent read of all 66
+  covers and 264 product videos before reporting the catalog complete.
+- [ ] Qualify the grouped candidate through protected main and Netlify. Build
+  the fresh local Android APK after verifying production. Complete and verify the hosted media rollout before publishing.
+
+## Small map clusters and public catalog review
+
+- [x] Reproduce the production overview click. A four-business Dire Dawa marker opened a picker at zoom 5 with the same center.
+- [x] Audit all seven public product filters and all 66 demo showrooms. All 264 products used managed MP4s. The same 24 product IDs appeared in both Agriculture and Food, including Pure Beeswax Candles. The subcategory menu exposes showroom shelf names.
+- [x] FE-021 area-first activation verified in local Chrome with synthetic tiles. Desktop focused the four Dire Dawa businesses from zoom 5 to 10. Phone web focused the two Arba Minch businesses from 5 to 11 and Expo from 6 to 11. Each first tap kept the list closed and each second tap opened the same members. Native camera dispatch passed a controlled test. The previously built APK predates this change.
+- [ ] Qualify any future production release separately.
+
 ## Android honey playback and web delivery
 
 - [x] Diagnose the previous Seasonal Raw Honey failure (FE-053). On the same API 35 emulator the original APK played 583 frames over 19.7 seconds with internet access. Its referrer used the configured production package despite the installed local suffix. The 20-second startup deadline could discard an otherwise viable frame. The earlier run did not record which error fired.
@@ -202,6 +286,8 @@ before-image.
    pass focused tests and the required full gates. Prepare exact hosted
    before-images, current versions, target and rollback for review before
    applying any public-data change. Keep the simulator paused.
+
+Before reporting demo videos delivered, run `npm run verify:published-demo-videos` against the public production origin and verify playback through the published showroom and product controls. Record the target, matched story/product counts, missing handles and player outcome. On November 19 the same command passed on the local preview (66/66 stories and 264/264 products) and failed on production (zero complete showrooms, the local Dara Art Studio and Wabi Feed Mill handles returned 404). The separate inventory of actual public handles found 66 MP4 stories and 264 MP4 products. Production has Dara Clay Works and Wabi Bottled Water. Sheger retains its rebar catalog while its local counterpart sells gates. Match footage against the live products before preparing any media correction.
 
 The fresh local seed and disposable PostgreSQL portfolio test now require one
 shared story/process/product ref per showroom and exact dual Agriculture/Food

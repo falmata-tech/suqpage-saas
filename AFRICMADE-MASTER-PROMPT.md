@@ -60,8 +60,7 @@ usability, security and reliability.
 
 AfricMade provides one consistent showroom experience. Businesses organize what
 they sell, make or grow; customers browse clear product choices and ask through
-that business's configured external channels. Transport arrangements and private
-business-owner support are separate first-party conversations.
+that business's configured external channels. Signed-in business owners can contact AfricMade staff through private business Support.
 
 Follow the newest user instruction within the security, tenant, privacy and
 data-integrity boundaries in AGENTS.md. Do not turn a requested improvement into
@@ -135,16 +134,6 @@ destination, and the inquiry does not become a purchase or a transport booking.
 Desktop visitors can copy the public messaging contact and prepared text; phone
 and native actions may open the configured app. SMS remains secondary.
 
-Transport is a private business-dashboard conversation with a selected
-independent logistics service provider. SharedTrucks Logistics is the current freight-brokerage choice;
-its navy/blue identity appears in the provider choice and shipment records,
-while general site copy remains provider-neutral. Its stable internal ID remains
-`shared-trucks-logistics`. AfricMade staff currently operate that provider's
-queue on its behalf; provider-owned accounts and direct routing are future work.
-After a business owner starts or resumes dashboard transport, the provider
-profile links to the independent provider's website without closing the chat.
-The visible live-wait countdown and callback handoff are defined in §12.
-
 Market groups map markers at city scale without changing saved locations. An
 eligible business with only a city location appears at its validated city anchor;
 a single business uses a named shop marker, while close groups use a count.
@@ -157,8 +146,7 @@ show business names and cities, not internal location-mode terms.
 - A dynamic **physical-product** catalog, including ready-made and made-to-order goods.
 - A per-business inquiry list and localized message preparer for external contacts.
 - A self-service owner workspace with administrator-authorized staff assistance.
-- Human transport-arrangement chat, private owner support and separate
-  email-verified shipment tracking.
+- Private business Support handled by AfricMade staff.
 
 ### AfricMade is not
 
@@ -398,8 +386,10 @@ The seven Featured days cover physical goods across industries. Monday covers Te
 
 Businesses searches public business identity/profile/location and controls map
 results. Products searches eligible physical products with source-business context.
-Each scope owns its query, optional category, country/city and other filters.
-Made to order belongs only to product search; there is no Product/Service filter.
+Switching views carries the active query, department, subcategory, country, city
+and Made to order selection. The map uses published matching product facts for
+subcategory and Made to order. Each view retains its own search matching and
+result position until criteria change.
 Search updates while typing, with debounce/cancellation and no Enter requirement.
 The local FE-021 S160 implementation includes businesses with an owner-selected
 exact public pin and businesses with a valid city-only anchor. A city-only
@@ -428,7 +418,7 @@ visibility/type/geographic filters; product matches do not impersonate business
 identity matches. No cross-language semantic search is claimed.
 Compact views keep one readable search field and labelled Filters button. The
 filter overview opens one group at a time, with Back, Clear all and Done; it
-retains the same independent query/filter contracts as the wide controls.
+uses the same criteria as the wide controls.
 
 Preserve the selected scope and each scope's criteria/position through details,
 Back and Market return. Memory is bounded public tab/app state scoped to API origin
@@ -438,7 +428,7 @@ identity fences late responses and map callbacks; stale results cannot claim the
 new query or overwrite the current saved camera. Keep the map mounted, resize from
 valid measured dimensions and ignore hidden zero-size/disposed work.
 
-Outer numbered clusters zoom into smaller groups. An exposed final group opens
+Outer numbered clusters zoom into smaller groups. Tapping a small group from the overview centers its city area. A second tap opens its businesses. A small group already at city scale opens
 its exact viewport-admitted business preview at the current camera, without forcing
 maximum zoom or spreading icons/connector lines. Group size adapts to fit admitted
 previews without paging. Short or enlarged layouts retain two businesses in one
@@ -528,60 +518,12 @@ Details: BE-030/BE-031/BE-038/BE-039/BE-043/BE-045/BE-047/BE-052/BE-053/BE-061.
 
 ## 12. Fulfillment boundary
 
-Customers and businesses agree purchases/payment directly. Only current authenticated
-business clients can share an origin and destination through their dashboard
-to arrange transport with SharedTrucks Logistics. A live transport agent helps with the request; AfricMade
-staff currently operate the internal queue on the provider's behalf, and
-provider-owned routing is future work. If no agent joins or replies, a visible
-countdown runs during the live wait. Staff are alerted after two minutes; after
-three minutes thirty seconds the provider-named busy state offers a short callback
-form or a way to try again later. Submitting the form leaves one
-follow-up on the existing staff case and shows a static receipt; it does not
-keep a public chat or message portal open. The business owner can cancel a
-timed-out request and start a separate one. Owner transport is bound to the current business;
-it does not adopt a guest browser token or merge with private owner Support.
-The first public staff reply before that cutoff keeps the case live even after
-later replies or reassignment; a first reply after the cutoff cannot reopen it.
-The countdown follows the server's original wait timestamp and never moves
-backward within one conversation. Web and native transport windows carry a quiet
-CargoChatter presentation credit; AfricMade still stores and routes these chats
-until a separate managed-service integration is implemented and verified.
-
-Shipment records are an **independent organizer of an arranged journey**, not live
-carrier tracking. The customer-facing list is **Shipment records**; one arranged
-journey is a **Shipment record**. Authorized transport staff may create a record
-for a valid requested email before that recipient verifies access. No chat ID,
-assignment, active case or prior recipient verification is required. One
-recipient may own several records across different or absent conversations.
-
-A shipment record contains 1–12 ordered stable-ID legs with provider name, From/To and
-one admitted transport method: air, truck, van, car or motorcycle. Each leg may
-have a validated public HTTPS tracking URL and literal provider code. Opening/copying
-those external details is explicit; never fetch, embed or scrape them server-side,
-append a recipient code/credential, or infer a status from clicks or leg order.
-BE-058 validates public-hostname HTTPS URL syntax without credentials, explicit ports,
-IP literals or local/private-host syntax; it does not resolve DNS or certify the
-external site's safety. Code/text/URL bounds remain canonical.
-A provider code is not the recipient email-verification code.
-Staff can edit/reorder with version guards; ordinary edits do not send new email.
-There are no dates/ETA, scan events, bookings, current-custody or completion claims.
-
-The selected arranging company and its brand are shown on the shipment record;
-each leg's carrier remains separately identified. The recipient verifies their
-email themselves in the separate Shipment records portal and sees only records
-for that email. A locator, account JWT or chat credential grants no access.
-The former company-handoff form and conversation-bound plan workflow stay retired;
-new provider details belong to independent shipments. BE-058/FE-069/DEP-048 own this
-contract; external scan integration remains future work.
-
-Planned FE-077/BE-064 adds a named shipper and receiver to a shipment record, each
-optionally linked to a published AfricMade
-business or entered as a custom party. Both selected emails will require separate
-verification and receive read access only to that shipment. A business's published
-contact email may be the default; private sign-in/notification email is never
-inferred. This plan does not change today's recipient-only access or internal chat
-routing. Any repeat-business discount must be a logistics provider's explicit offer;
-AfricMade does not calculate or promise one.
+Customers and businesses arrange payments and delivery directly. AfricMade
+provides product inquiries and private business Support. Shipping requests,
+dispatch and shipment tracking belong to the separate CargoChatter product.
+AfricMade has no CargoChatter integration. Former transport and tracking
+entry points and delivery workers are retired. Historical data remains subject
+to its existing privacy and retention controls.
 
 ## 13. User roles and standard page workspaces
 
@@ -608,7 +550,7 @@ privacy-salted daily deduplication, not raw IPs/contact data; analytics access r
 scoped under BE-017/FE-018 and never follows queue membership alone.
 Save/Cancel, preview and publication show truthful pending/error states and preserve
 unsaved inputs according to the focused editor contract. Incoming product inquiries
-are a primary private business task; they do not grant transport or Support access.
+are a primary private business task with independent Support authorization.
 
 Planned FE-056 native correction: product management uses compact private rows,
 while a product editor keeps one reachable Save/Cancel bar outside its scrolling
@@ -652,9 +594,9 @@ Only visible incoming-message acknowledgement establishes Read; fetching, openin
 or inspecting another assignee's case does not. Retain original author side and
 assignment epoch so later role changes cannot recast history.
 
-Customer-idle warning/end clocks start after a public staff reply: owner
-Support/Transport warns/ends at 23/24 hours. Retained guest history keeps its
-original lifecycle evidence, but visitor transport cannot be started or resumed.
+Business Support inactivity clocks start after a staff reply. The warning is
+at 23 hours and inactivity closes the case at 24 hours. Historical conversations
+keep their lifecycle evidence.
 An unanswered
 customer request does not start this clock. Automatic or participant End leaves
 an unresolved case with factual reason/timestamps/read-at-ending evidence; only
@@ -673,13 +615,7 @@ feedback; an inquiry alert remains informational and never grants a new permissi
 ### Public customer
 
 Visitors need no business account to browse or prepare/send product inquiries.
-Transport chat is available only to current business clients through their
-dashboard on web or native. Public launchers, About transport links and the old
-native chat route and legacy buying-chat API aliases are retired; old guest
-tokens and transport notifications do
-not grant access. Staff retain authorized historical records (FE-078/BE-066).
-Tracking verification creates a separate recipient session, not a
-business account. Public reports accept canonical targets and bounded reasons;
+Public reports accept canonical targets and bounded reasons;
 listing exclusions, where offered, are browser/installation browsing preferences,
 not confidentiality or identity authority. Staff report handling requires scoped
 roles, version fences and actual removal/unpublication before “resolved”; dismissal
@@ -701,6 +637,11 @@ When asked to design or review a client showroom/booth, still follow
 [showroom-projects/WORKFLOW.md](showroom-projects/WORKFLOW.md), its brief and approved
 assets. This asset/design workflow does not reactivate a retired runtime product.
 Preserve each merchant's identity within the current shared showroom contract.
+
+AfricMade offers an installable web app from the left navigation and the phone
+header. Installed windows open Market and keep the existing role-aware shell.
+The worker uses an offline retry screen and public static assets only. See
+FE-034 and DEP-025.
 
 ## 15. Current technical architecture
 
@@ -986,10 +927,8 @@ Staff chat puts transcript/reply first with adjacent desktop management and an
 explicit phone Details/Back view that retains the reply draft. Separate reply
 priority from assignment/join/end/resolution state. Read receipts require actual
 visible/focused incoming content, not a fetch or a synthetic successful response.
-Business clients reach Support and Transport only through their own workspace,
-without duplicate launchers or
-conflicting floating cart actions. Tracking has one purposeful entry, not duplicated
-conversation-bound plan controls.
+Business clients reach Support from their own workspace. The inquiry list uses
+its own showroom and product controls.
 
 Product/Featured rows use actual available container width, resilient wrap and
 full-width fallback for narrow/enlarged text, not stale measured percentages.
@@ -1159,5 +1098,5 @@ A business can present its identity and products without learning a site builder
 keep drafts private, and publish safely. Administrator-authorized staff can help
 manage its showroom without taking over its account. Customers discover clear
 choices, prepare a specific message and continue the conversation through the
-business's channels. Human transport help and private shipment information remain
-clear, useful and separate. Protect that experience.
+business's channels. Business owners can ask AfricMade staff for help from their
+private workspace. Protect that experience.

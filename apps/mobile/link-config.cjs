@@ -2,7 +2,7 @@ const associations = require('../../public/.well-known/assetlinks.json');
 const policy = require('./release-policy.json');
 const publicPaths = [
   { path: '/' }, { path: '/market' }, { path: '/featured' }, { path: '/about' },
-  { path: '/login' }, { path: '/account' }, { path: '/transport-plan' }, { path: '/tracking' }, { pathPrefix: '/tracking/' }, { pathPrefix: '/@' },
+  { path: '/login' }, { path: '/account' }, { pathPrefix: '/@' },
 ];
 function androidAppLinks(packageName) {
   if(packageName!=='com.africmade.app'||packageName!==policy.packageName)return [];

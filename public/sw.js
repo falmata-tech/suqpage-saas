@@ -1,8 +1,8 @@
-const VERSION = "v4";
+const VERSION = "v5";
 importScripts('/attention-push.js');
+
 const CACHE_PREFIX = "africmade-pwa-";
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${VERSION}`;
-const PAGE_CACHE = `${CACHE_PREFIX}pages-${VERSION}`;
 const ASSET_CACHE = `${CACHE_PREFIX}assets-${VERSION}`;
 const OFFLINE_URL = "/offline";
 const APP_SHELL = [
@@ -13,32 +13,23 @@ const APP_SHELL = [
   "/pwa/africmade-icon-v4-512.png",
   "/pwa/africmade-maskable-v4-512.png"
 ];
+const STATIC_DESTINATIONS = new Set(["style", "script", "font"]);
 
-const PRIVATE_PATHS = ["/api", "/dashboard", "/preview", "/login", "/request"];
-const PUBLIC_PATHS = new Set(["/", "/about", "/featured", "/discover", OFFLINE_URL, "/privacy", "/terms"]);
-
-function isPrivatePath(pathname) {
-  return PRIVATE_PATHS.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
-}
-
-function isPublicNavigation(pathname) {
-  return PUBLIC_PATHS.has(pathname) || /^\/@[^/]+$/.test(pathname);
-}
-
-async function putBounded(cacheName, request, response, limit) {
-  const cache = await caches.open(cacheName);
+async function putBounded(cache, request, response, limit) {
   await cache.put(request, response);
   const keys = await cache.keys();
   await Promise.all(keys.slice(0, Math.max(0, keys.length - limit)).map((key) => cache.delete(key)));
 }
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(SHELL_CACHE).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(SHELL_CACHE)
+    .then((cache) => cache.addAll(APP_SHELL.map((path) => new Request(new URL(path, self.location.origin), {credentials:"omit"}))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(caches.keys()
-    .then((names) => Promise.all(names.filter((name) => [CACHE_PREFIX, "suqpage-pwa-", "mirtpage-pwa-"].some((prefix) => name.startsWith(prefix)) && ![SHELL_CACHE, PAGE_CACHE, ASSET_CACHE].includes(name)).map((name) => caches.delete(name))))
+    .then((names) => Promise.all(names.filter((name) => [CACHE_PREFIX, "suqpage-pwa-", "mirtpage-pwa-"].some((prefix) => name.startsWith(prefix)) && ![SHELL_CACHE, ASSET_CACHE].includes(name)).map((name) => caches.delete(name))))
     .then(() => self.clients.claim()));
 });
 
@@ -46,27 +37,25 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin || url.pathname.startsWith("/api")) return;
+  if (url.origin !== self.location.origin || /^\/api(?:\/|$)/.test(url.pathname)) return;
 
+  // Market and showroom HTML can contain session-aware navigation.
   if (request.mode === "navigate") {
-    if (isPrivatePath(url.pathname) || !isPublicNavigation(url.pathname)) {
-      event.respondWith(fetch(request).catch(() => caches.match(OFFLINE_URL)));
-      return;
-    }
-    event.respondWith(fetch(request)
-      .then((response) => {
-        if (response.ok && response.type === "basic") event.waitUntil(putBounded(PAGE_CACHE, request, response.clone(), 20));
-        return response;
-      })
-      .catch(async () => (await caches.match(request)) || (await caches.match(OFFLINE_URL))));
+    event.respondWith(fetch(request).catch(async () => {
+      const shell = await caches.open(SHELL_CACHE);
+      return (await shell.match(OFFLINE_URL)) || Response.error();
+    }));
     return;
   }
 
-  const staticAsset = url.pathname.startsWith("/_next/static/")
-    || ["style", "script", "image", "font"].includes(request.destination);
-  if (!staticAsset || isPrivatePath(url.pathname)) return;
-  event.respondWith(caches.match(request).then((cached) => cached || fetch(request).then((response) => {
-    if (response.ok && response.type === "basic") event.waitUntil(putBounded(ASSET_CACHE, request, response.clone(), 80));
+  if (!url.pathname.startsWith("/_next/static/") || !STATIC_DESTINATIONS.has(request.destination)) return;
+  event.respondWith(caches.open(ASSET_CACHE).then(async (cache) => {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    const response = await fetch(request);
+    if (response.ok && response.type === "basic" && !response.redirected && !/private|no-store/i.test(response.headers.get("cache-control") || "")) {
+      await putBounded(cache, request, response.clone(), 80).catch(() => {});
+    }
     return response;
-  })));
+  }));
 });

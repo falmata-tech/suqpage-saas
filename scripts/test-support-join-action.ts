@@ -8,7 +8,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {isQueueAgent} from '../lib/capabilities';
 
 test('FE-019 S125 Join action forwards exact assignment fences and preserves the scoped reply-filter origin',async()=>{
- const fixture={actor:{id:8,access_role:'team_member',staff_queue_scope:'transport'},calls:[] as unknown[],revalidated:[] as string[],scheduled:0,failure:''};
+ const fixture={actor:{id:8,access_role:'team_member',staff_queue_scope:'support'},calls:[] as unknown[],revalidated:[] as string[],scheduled:0,failure:''};
  const bundle=await build({entryPoints:['app/support-actions.ts'],bundle:true,write:false,format:'cjs',platform:'node',plugins:[{name:'join-action-ports',setup(b){
   b.onResolve({filter:/^(next\/|@\/lib\/)/},a=>a.path==='@/lib/support-navigation'?undefined:({path:a.path,namespace:'ports'}));
   b.onLoad({filter:/.*/,namespace:'ports'},a=>({contents:
@@ -26,7 +26,7 @@ test('FE-019 S125 Join action forwards exact assignment fences and preserves the
  const module={exports:{} as {joinSupportConversationAction:(form:FormData)=>Promise<void>}};
  vm.runInNewContext(bundle.outputFiles[0].text,{module,exports:module.exports,fixture,queueAgent:isQueueAgent,FormData,URLSearchParams,Date});
  const form=new FormData();for(const[key,value]of Object.entries({conversationId:'42',publicRef:'SUP-QA',assignmentEpoch:'29',nav_queue:'support',nav_status:'overdue',nav_q:'QA request',nav_page:'2',returnTo:'https://forbidden.invalid'}))form.set(key,value);
- const target='/dashboard/support/42?queue=transport&status=overdue&q=QA+request&page=2';
+ const target='/dashboard/support/42?queue=support&status=overdue&q=QA+request&page=2';
  await assert.rejects(module.exports.joinSupportConversationAction(form),error=>(error as {url?:string;type?:string}).url===target&&(error as {type?:string}).type==='replace');
  assert.deepEqual(JSON.parse(JSON.stringify(fixture.calls)),[{userId:8,id:42,input:{publicRef:'SUP-QA',assignmentEpoch:'29'}}]);assert.deepEqual(fixture.revalidated,['/dashboard/support','/dashboard/support/42']);assert.equal(fixture.scheduled,1);
  fixture.failure='known';await assert.rejects(module.exports.joinSupportConversationAction(form),error=>String((error as{url?:string}).url).startsWith(target+'&error=This%20assignment%20changed.'));assert.equal(fixture.scheduled,1);

@@ -7,7 +7,7 @@ import type {OwnerEditResult} from "@/lib/owner-edit-contract";
 // Authenticate stale callers, then leave historical chat plans unchanged.
 async function retiredPlanAction():Promise<OwnerEditResult>{
   await requireUser();
-  return {error:'Manage shipment records in the Shipment records workspace.'};
+  return {error:'This service is no longer available.'};
 }
 
 export async function saveTransportPlanAction(_form:FormData):Promise<OwnerEditResult>{

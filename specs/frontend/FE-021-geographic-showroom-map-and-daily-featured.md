@@ -69,7 +69,13 @@ regional markers that already fit separately merely to simplify the view.
 
 GIVEN an overview aggregate below its safe city layout WHEN activated THEN zoom
 toward its expansion level using that earlier safe level where applicable.
-GIVEN an exposed terminal group WHEN activated THEN open its exact current,
+GIVEN an exposed group of two to six businesses below city scale WHEN activated
+THEN center on its marker in a readable city layout and leave the picker closed.
+A second activation there opens those same businesses. A visitor already at city
+scale can open a visible group in one activation. This November 19 correction
+supersedes the overview portion of S140 for web, Expo and native.
+
+GIVEN an exposed terminal group at city scale WHEN activated THEN open its exact current,
 capacity-bounded business picker without changing the camera. Do not force
 street-level/max zoom when a readable city layout already fits, open an oversized
 aggregate as a terminal, or admit stale/excluded membership. Web, Expo and native

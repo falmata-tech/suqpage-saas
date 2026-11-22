@@ -36,3 +36,11 @@
 
 .transportLink { display:inline-flex;align-items:center;gap:8px;min-height:44px;max-width:100%;margin-top:8px;color:#a63400;font-size:.875rem;text-decoration:none;overflow-wrap:anywhere; }
 .transportLink svg { flex:none; }
+
+.aboutIntro {
+  max-width: 62ch;
+  margin: 0 0 12px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #515b61;
+}

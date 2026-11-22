@@ -100,9 +100,12 @@ async function serverPage(entry:string){
  const module={exports:{} as{default:(props:{searchParams:Promise<Record<string,string>>})=>Promise<ReactElement>}};vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,fixture,require});return{fixture,render:async(query:Record<string,string>={})=>renderToStaticMarkup(await module.exports.default({searchParams:Promise.resolve(query)}))};
 }
 
-test('FE-019 owner server pages guard staff/unlinked accounts before reads and history links carry only canonical IDs',async()=>{
- for(const entry of ['app/dashboard/transport/page.tsx','app/dashboard/transport/history/page.tsx']){const{fixture,render}=await serverPage(entry);for(const role of ['team_member','platform_admin','operations_manager']){fixture.actor.access_role=role;await assert.rejects(render(),error=>(error as{url?:string}).url==='/dashboard');}fixture.actor.access_role='client';fixture.actor.business_id=null;await assert.rejects(render(),error=>(error as{url?:string}).url==='/dashboard');assert.deepEqual(fixture.reads,[]);assert.deepEqual(fixture.businessReads,[]);}
- const{fixture,render}=await serverPage('app/dashboard/transport/history/page.tsx');fixture.result={items:[{id:71,publicRef:'SUP-OWNER-71',subject:'Town A → Town B',status:'closed',resolvedAt:null,unread:true}],page:2,pages:3,total:31,firstItem:11,lastItem:20};const html=await render({page:'2'});assert.match(html,/href="\/dashboard\/transport\?conversation=71"/);assert.match(html,/SUP-OWNER-71/);assert.match(html,/Chat ended/);assert.doesNotMatch(html,/Private owner name|12025550123|guest|token/);assert.deepEqual(fixture.businessReads,[18]);assert.deepEqual(JSON.parse(JSON.stringify(fixture.reads[0].query)),{page:'2',history:'1'});
+test('FE-078 retired owner transport pages stop before loading any case or business',async()=>{
+ for(const entry of ['app/dashboard/transport/page.tsx','app/dashboard/transport/history/page.tsx']){
+  const {fixture,render}=await serverPage(entry);
+  await assert.rejects(async()=>render({conversation:'71'}),/not found/);
+  assert.deepEqual(fixture.reads,[]);
+ }
 });
 
 test('FE-019 retained support route redirects only authorized owner transport and preserves staff callback summary',async()=>{

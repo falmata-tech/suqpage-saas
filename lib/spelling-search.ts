@@ -1,3 +1,4 @@
+import { MARKET_SUBCATEGORY_SQL, MARKET_TAXONOMY_JOIN } from './marketplace-product-taxonomy';
 import { discoveryCategoryKey } from "./discovery-contract";
 import {excludedBusinessIds} from './catalog-safety';
 import { indexedSearchText } from './search-index';
@@ -20,8 +21,9 @@ export function spellingTerms(query: string) {
     fuzzy: index < 8 && /^[\p{L}\p{N}]{3,}$/u.test(variants[0]),
   }));
 }
+const businessCategory = "(scope.industry='all' OR EXISTS(SELECT 1 FROM business_industries i WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(scope.industry,','))))";
 const eligible = `b.status='active' AND p.is_excluded=0 AND p.approved_at>0
-  AND (scope.industry='all' OR EXISTS(SELECT 1 FROM business_industries i WHERE i.business_id=b.id AND i.industry_key=ANY(string_to_array(scope.industry,','))))
+  AND ${businessCategory}
   AND (jsonb_array_length(scope.locations)=0 OR EXISTS(SELECT 1 FROM jsonb_to_recordset(scope.locations) AS location(city text,region text) WHERE (location.city='' OR lower(p.city)=lower(location.city)) AND (location.region='' OR lower(p.region)=lower(location.region))))
   AND (scope.scale='' OR p.production_scale=scope.scale)
   AND EXISTS(SELECT 1 FROM products listed WHERE listed.business_id=b.id AND listed.is_published=1 AND listed.offering_kind<>'service')`;
@@ -101,10 +103,22 @@ export async function findSpellingMatches(scope: SpellingScope, port: SpellingSe
    sql=sql.replace('SELECT ?::', 'SELECT ?::jsonb discovery,?::');
    sql=sql.replaceAll("b.status='active'",`(scope.discovery->>'legacyCountry' IS NULL OR p.country_code=scope.discovery->>'legacyCountry') AND (jsonb_array_length(scope.discovery->'countries')=0 OR p.country_code IN(SELECT jsonb_array_elements_text(scope.discovery->'countries')))
     AND (jsonb_array_length(scope.discovery->'cities')=0 OR EXISTS(SELECT 1 FROM jsonb_to_recordset(scope.discovery->'cities') loc(country text,city text) WHERE p.country_code=loc.country AND (p.city_id=loc.city OR p.city=loc.city))) AND b.status='active'`);
-   if(scope.discovery.subcategory){
-    const groupMatch="EXISTS(SELECT 1 FROM categories g WHERE g.business_id=product.business_id AND g.id=product.category_id AND g.is_active=1 AND g.name=scope.discovery->>'subcategory')";
-    sql=sql.replaceAll("b.status='active'",`EXISTS(SELECT 1 FROM products product WHERE product.business_id=b.id AND product.is_published=1 AND product.offering_kind<>'service' AND ${groupMatch}) AND b.status='active'`);
-    sql=sql.replace('/* product group */',`AND ${groupMatch}`);
+   if(scope.discovery.scope==='products') {
+    const productScope=`(scope.industry='all' OR department.industry=ANY(string_to_array(scope.industry,',')))
+      AND (scope.discovery->>'subcategory' IS NULL OR ${MARKET_SUBCATEGORY_SQL}=scope.discovery->>'subcategory')`;
+    sql=sql.replaceAll(businessCategory,'TRUE')
+     .replace(`products product JOIN businesses b ON b.id=product.business_id ${businessJoin}`,
+      `products product JOIN businesses b ON b.id=product.business_id ${businessJoin} ${MARKET_TAXONOMY_JOIN}`)
+     .replace("AND product.is_published=1 AND product.offering_kind<>'service'", `AND product.is_published=1 AND product.offering_kind<>'service' AND ${productScope}`)
+     .replace('/* product group */', `AND ${productScope}`)
+     .replace(`JOIN businesses b ON b.id=product.business_id ${businessJoin} ${publicationJoin}`,
+      `JOIN businesses b ON b.id=product.business_id ${businessJoin} ${publicationJoin} ${MARKET_TAXONOMY_JOIN}`);
+   } else if(scope.discovery.subcategory||scope.discovery.madeToOrder) {
+    sql=sql.replaceAll(businessCategory,'TRUE').replaceAll("b.status='active'",`EXISTS(SELECT 1 FROM products product ${MARKET_TAXONOMY_JOIN}
+      WHERE product.business_id=b.id AND product.is_published=1 AND product.offering_kind<>'service'
+      AND (scope.industry='all' OR department.industry=ANY(string_to_array(scope.industry,',')))
+      AND (scope.discovery->>'subcategory' IS NULL OR ${MARKET_SUBCATEGORY_SQL}=scope.discovery->>'subcategory')
+      AND (NOT COALESCE((scope.discovery->>'madeToOrder')::boolean,FALSE) OR product.offering_kind='made_to_order')) AND b.status='active'`);
    }
    if(scope.discovery.publicMapLocations)sql=sql.replaceAll("b.status='active'",`EXISTS(SELECT 1 FROM owner_location_proposals map_location WHERE map_location.business_id=b.id AND (
     (map_location.location_mode='storefront' AND p.latitude IS NOT NULL AND p.longitude IS NOT NULL) OR

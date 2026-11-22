@@ -22,7 +22,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{bu
   const t=await getUiText(),user=await requireUser();
   const staff=user.access_role==='team_member'||user.access_role==='operations_manager';
   const staffGrant=staff?await currentStaffBusinessGrant(user):false;
-  if(isQueueAgent(user)&&!staffGrant)redirect(`/dashboard/support?queue=${user.staff_queue_scope}`);
+  if(isQueueAgent(user)&&!staffGrant)redirect("/dashboard/support?queue=support");
   if(user.access_role==='client'&&user.business_id)redirect('/dashboard/profile');
   const params=await searchParams,business=await resolveBusiness(user,params.business);
   const admin=hasCapability(user,'platform:admin'),operations=hasCapability(user,'operations:manage');
