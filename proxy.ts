@@ -5,7 +5,10 @@ import { showroomNotFoundHtml } from "./lib/showroom-not-found";
 import { NextResponse, type NextRequest } from "next/server";
 import { refreshSupabaseAuth } from "./lib/supabase-auth-proxy";
 
+import {isRetiredTransportPath, retiredTransportResponse} from './lib/retired-transport';
+
 export async function proxy(request: NextRequest) {
+  if (isRetiredTransportPath(request.nextUrl.pathname)) return retiredTransportResponse();
   if (["/bazaar", "/expo"].includes(request.nextUrl.pathname) || ["/dashboard/requests", "/dashboard/design-bank", "/dashboard/design-sdk", "/api/requests", "/api/client/requests", "/api/operations/requests"].some(path => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`))) {
     return new Response("Not found", {
       status: 404,

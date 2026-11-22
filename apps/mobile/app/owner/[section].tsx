@@ -1,3 +1,4 @@
+import {Redirect} from 'expo-router';
 import {CoverEditor,ShowroomMenu} from "../../src/owner-profile";
 import ProductSupply from '../../src/ProductSupply';
 import {HandleEditor} from "../../src/owner-handle";
@@ -10,8 +11,6 @@ import { Screen, Copy, Button, Card, Photo, Status } from "../../src/ui";
 import { Setup, PageEditor, ProductEditor } from "../../src/owner-forms";
 import { BusinessForm, BusinessSummary, Settings } from "../../src/owner-business";
 import { Inquiries, SupportList, OwnerChat } from "../../src/owner-inbox";
-import BuyingScreen from '../../src/BusinessTransportWorkspace';
-import OwnerTransportHistory from '../../src/OwnerTransportHistory';
 import {ownerPageTask} from '../../../../lib/owner-page-tasks';
 import {useOwnerNavigation} from '../../src/owner-edit-navigation';
 import ResourceLoading from '../../src/ResourceLoading';
@@ -42,14 +41,13 @@ export default function OwnerScreen() {
         />
       </Screen>
     );
+  if (screen === 'transport' || screen === 'transport-history') return <Redirect href="/account"/>;
   if (screen === "setup")
     return (
       <Screen>
         <Setup />
       </Screen>
     );
-  if(screen==='transport')return <BuyingScreen key={`${session.user.id}:${id||'active'}:${view||''}`} owner conversationId={id} newIntake={view==='new'}/>;
-  if(screen==='transport-history')return <OwnerTransportHistory key={session.user.id}/>;
   const backToProfile=()=>router.replace("/account");
   const backToShowroom=()=>router.replace({pathname:'/owner/[section]',params:{section:'showroom',returnTo:'profile'}});
   const backToBusiness=()=>router.replace({pathname:'/owner/[section]',params:{section:'business',returnTo:'profile'}});

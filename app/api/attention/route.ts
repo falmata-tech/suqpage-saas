@@ -18,7 +18,7 @@ function error(error:unknown) {
 export async function GET(request:NextRequest){try{const s=await scope(request);return json({...(s.user?await userAttentionFeed(s.user):await visitorAttentionFeed(s.token)),push:pushCapabilities()});}catch(e){return error(e);}}
 export async function POST(request:NextRequest){
   try{
-    if(request.nextUrl.searchParams.has('channel'))throw new SupportError('Transport chat is available from your business dashboard.','public_chat_retired');
+    if(request.nextUrl.searchParams.has('channel'))throw new SupportError('This service is no longer available.','public_chat_retired');
     try{assertSameOrigin(request);}catch{return json({error:'Request could not be accepted.'},403);}
     if(request.headers.get('content-type')?.split(';')[0]!=='application/json')return json({error:'Send a JSON request.'},415);
     const reader=request.body?.getReader(),parts:Uint8Array[]=[];let length=0;

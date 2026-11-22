@@ -44,7 +44,7 @@ async function main(){
   assert.throws(()=>normalizeMarketSearch({offeringType:'services'}),MarketSearchError);
   const search=normalizeMarketSearch({q:'basket',madeToOrder:true,country:'ET',city:'ET:Town A'});
   assert.deepEqual(readMarketSearch(marketSearchParams('products',search)),search);
-  assert.equal(marketSearchParams('businesses',search).has('madeToOrder'),false,'Product order filters never serialize into map criteria');
+  assert.equal(marketSearchParams('businesses',search).has('madeToOrder'),true,'Made to order remains in the shared map criteria');
   for(const query of ['madeToOrder=yes','madeToOrder=true&madeToOrder=false','offeringType=services']){
    assert.equal(validMarketFilterParams(new URLSearchParams(query)),false);
    assert.equal((await discoveryGET(new Request('http://localhost/api/discovery?scope=products&'+query))).status,400);

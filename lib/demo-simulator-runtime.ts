@@ -25,6 +25,7 @@ import {SHOWROOM_COMPONENT_BANK_LATEST} from './showroom-bank-release';
 import {normalizeProductVideoUrl, productVideo, productVideoWatchUrl} from './video/product-video';
 import {approvedDemoVideo} from './video/demo-video-catalog';
 import {PUBLISHED_DEMO_VIDEO_TARGETS} from './published-demo-video-targets';
+import {demoShowroomAbout} from './demo-showroom-stories';
 import type {SessionUser} from './types';
 import {isSupportedPostgresMigrationLedger,LATEST_POSTGRES_MIGRATION_VERSION} from './postgres-schema-version';
 import {parseDemoCatalogInputs,parseStoredDemoCatalog,demoCatalogPhaseOffsets,demoCatalogStage,MAX_DEMO_CATALOG_BUSINESSES,type DemoCatalogProductInput,type DemoCatalogProduct} from './demo-catalog-scenarios';
@@ -571,6 +572,70 @@ async function unenrolledMediaState(businessId:50|62,actorUserId:number){
  if(location&&location.version!==location.reviewed_version||ownerPageImageKey(businessId,draft.content.heroImage))throw new DemoDrift('eligibility_changed');
  return {actor,catalog,draft,publication,categories,location,discovery,
   hash:digest({catalog,draft,publication,categories,location,discovery})};
+}
+
+/** Operator-only, finite publication of the authored About profiles. */
+export async function publishReviewedDemoStory(input: {
+ businessId: number; handle: string; expectedAbout: string; draftVersion: number; revision: number;
+ direction: 'apply' | 'rollback';
+}) {
+ const {businessId, handle, expectedAbout, draftVersion, revision, direction} = input;
+ const target = PUBLISHED_DEMO_VIDEO_TARGETS.find(([id, slug]) => id === businessId && slug === handle);
+ if (!target || !['apply','rollback'].includes(direction) || typeof expectedAbout !== 'string' ||
+     ![draftVersion, revision].every(value => Number.isSafeInteger(value) && value > 0))
+  throw new DemoDrift('eligibility_changed');
+ const story = demoShowroomAbout(handle, 'published');
+ return runtimeTransaction(async () => {
+  await runtimeRun('SELECT pg_advisory_xact_lock(6870619271382)');
+  if (!await schemaReady()) throw Error('The demo schema is not ready.');
+  const control = await runtimeGet<Control & {pause_reason:string}>('SELECT * FROM demo_simulator_control WHERE id=1 FOR UPDATE');
+  if (!control || control.enabled || control.pause_reason !== 'operator') throw Error('Pause the demo service before story publication.');
+  const enrollment = await runtimeGet<Enrollment>('SELECT * FROM demo_simulator_enrollments WHERE business_id=? FOR UPDATE',[businessId]);
+  const legacy = businessId === 50 || businessId === 62;
+  if (legacy ? Boolean(enrollment) : !enrollment || enrollment.status !== 'active' || enrollment.reason || enrollment.handle !== handle)
+   throw new DemoDrift('eligibility_changed');
+  const actor = legacy ? await runtimeGet<{updated_by:number}>('SELECT updated_by FROM owner_page_drafts WHERE business_id=?',[businessId]) : undefined;
+  const read = () => enrollment ? currentState(enrollment, true, true) : unenrolledMediaState(businessId as 50|62, Number(actor?.updated_by));
+  const before = await read();
+  if ((enrollment && before.hash !== enrollment.expected_hash) ||
+      before.draft.version !== before.publication.draftVersion || digest(before.draft.content) !== digest(before.publication.content) ||
+      before.catalog.business.process_video_ref !== target[2] || before.draft.content.videoUrl !== productVideoWatchUrl(target[2]) ||
+      before.catalog.products.length !== 4 || target[3].some(([id,name]) => !before.catalog.products.some(p =>
+       p.id === id && p.name === name && p.is_published && productMedia(p).some(m => m.kind === 'video' && m.ref === target[2]))))
+   throw new DemoDrift('content_changed');
+  const payload = digest({businessId,handle,expectedAbout,draftVersion,revision,story});
+  const receipt = await runtimeGet<{detail:string}>(
+   "SELECT detail FROM audit_logs WHERE business_id=? AND action='demo.about_published' ORDER BY id DESC LIMIT 1",[businessId]);
+  const prior = receipt && JSON.parse(receipt.detail) as {payload:string;direction:string;state:string;baselineAbout?:string};
+  if (prior?.payload === payload && prior.direction === direction && prior.state === before.hash)
+   return {duplicate:true,revision:before.publication.revision};
+  const undo = direction === 'rollback';
+  if ((undo && (!prior || prior.direction !== 'apply' || prior.payload !== payload || prior.state !== before.hash)) ||
+      before.draft.content.about !== (undo ? story : expectedAbout) ||
+      before.draft.version !== draftVersion + Number(undo) || before.publication.revision !== revision + Number(undo))
+   throw new DemoDrift('content_changed');
+  const size = await runtimeGet<{bytes:number}>('SELECT pg_database_size(current_database()) bytes');
+  if (!size || Number(size.bytes) >= Number(control.database_limit_bytes)) throw Error('Demo story storage budget reached.');
+  const desired = {...before.draft.content, about:undo ? expectedAbout : story};
+  const baseline = enrollment ? parseShopPageContent(JSON.parse(enrollment.baseline_page_json)) : undefined;
+  if (undo && baseline && typeof prior?.baselineAbout !== 'string') throw new DemoDrift('content_changed');
+  await saveOwnerPageAndPublication(before.actor, businessId, {action:'save',version:before.draft.version,content:desired});
+  const after = await read();
+  if (digest(after.draft.content) !== digest(desired) || digest(after.publication.content) !== digest(desired) ||
+      after.draft.version !== before.draft.version + 1 || after.publication.revision !== before.publication.revision + 1 ||
+      digest([after.catalog,after.categories,after.location,after.discovery]) !== digest([before.catalog,before.categories,before.location,before.discovery]))
+   throw new DemoDrift('content_changed');
+  if (enrollment && baseline) {
+   const updated = await runtimeRun(`UPDATE demo_simulator_enrollments SET expected_hash=?,baseline_page_json=?
+    WHERE business_id=? AND expected_hash=? AND status='active' AND stage=? AND cycle=? AND due_at=?`,
+    [after.hash,JSON.stringify({...baseline,about:undo ? prior!.baselineAbout! : story}),businessId,
+     before.hash,enrollment.stage,enrollment.cycle,enrollment.due_at]);
+   if (updated.changes !== 1) throw new DemoDrift('content_changed');
+  }
+  await runtimeRun("INSERT INTO audit_logs(user_id,business_id,action,detail,ip_hash) VALUES(?,?,'demo.about_published',?,'')",
+   [before.actor.id,businessId,JSON.stringify({payload,direction,state:after.hash,baselineAbout:baseline?.about})]);
+  return {duplicate:false,revision:after.publication.revision};
+ });
 }
 
 /** One-time ordinary publication for two unenrolled legacy demos; inverse plans roll back. */

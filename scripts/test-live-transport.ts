@@ -23,14 +23,35 @@ async function main(){
   const owner=await client('live-business-a'),foreign=await client('live-business-b');let actor:SessionUser=owner;
   const identity:NativeIdentityPort={verify:async()=>({id:'fixture-owner',email:actor.email}),linked:async()=>actor.id,user:runtimeUserById};
   const mobile=(route:string,body?:unknown,signedIn=true)=>handleMobileRequest(new Request('https://africmade.com/api/mobile/v1/'+route,{method:body?'POST':'GET',headers:{...(signedIn?{authorization:'Bearer '+'t'.repeat(24)}:{}),'content-type':'application/json','X-Suqpage-Buying-Session':'g'.repeat(64)},...(body?{body:JSON.stringify(body)}:{})}),route.split('?')[0].split('/'),{identity});
-  assert.equal((await mobile('owner/transport',undefined,false)).status,401,'A guest token never becomes a business session');
-  const first=await mobile('owner/transport',{action:'start',name:'Business contact',phone:'+251911223344',origin:'Addis Ababa',destination:'Adama',message:'Two chairs',idempotencyKey:crypto.randomUUID()});assert.equal(first.status,200);
-  const {conversation}=await first.json();assert.ok(conversation);
-  const stored=await db.prepare('SELECT participant_kind,business_id,visitor_token_hash FROM support_conversations WHERE id=?').get(conversation.id);assert.deepEqual(stored,{participant_kind:'client',business_id:owner.business_id,visitor_token_hash:null});
-  assert.equal((await mobile('owner/transport?conversation='+conversation.id)).status,200);
-  actor=foreign;assert.equal((await mobile('owner/transport?conversation='+conversation.id)).status,404);actor=owner;
-  const reply=await mobile('owner/transport',{action:'message',conversationId:conversation.id,publicRef:conversation.publicRef,message:'Business follow-up',idempotencyKey:crypto.randomUUID()});assert.equal(reply.status,200);assert.equal((await reply.json()).conversation.messages.length,2);
-  console.log('PASS actual native adapter: both public aliases retired, no guest-session promotion, business intake/read/reply preserved and foreign business denied. Full staff/privacy/lifecycle: test-owner-transport.ts.');
+  for(const signedIn of [false,true]){
+   for(const route of ['owner/transport','transport','tracking/records','transport-plan']){
+    for(const body of [undefined,{action:'start',idempotencyKey:crypto.randomUUID()}]){
+     const response=await mobile(route,body,signedIn);
+     assert.equal(response.status,410,route);
+     assert.match(response.headers.get('cache-control')??'',/no-store/);
+     assert.equal(response.headers.get('set-cookie'),null);
+    }
+   }
+  }
+  assert.equal((await db.prepare('SELECT COUNT(*) n FROM support_conversations').get()).n,0);
+  const draft={subject:'Shop account help',message:'Please help with my business profile.',idempotencyKey:crypto.randomUUID()};
+  assert.equal((await mobile('owner/support',draft,false)).status,401);
+  const first=await mobile('owner/support',draft);
+  assert.equal(first.status,200);
+  const {id}=await first.json();
+  assert.ok(id);
+  const stored=await db.prepare('SELECT participant_kind,business_id,visitor_token_hash FROM support_conversations WHERE id=?').get(id);
+  assert.deepEqual(stored,{participant_kind:'client',business_id:owner.business_id,visitor_token_hash:null});
+  assert.equal((await mobile('owner/support/'+id)).status,200);
+  actor=foreign;
+  assert.equal((await mobile('owner/support/'+id)).status,404);
+  assert.equal((await mobile('owner/support/'+id,{action:'message',message:'Foreign reply',idempotencyKey:crypto.randomUUID()})).status,404);
+  actor=owner;
+  const reply=await mobile('owner/support/'+id,{action:'message',message:'A business follow-up.',idempotencyKey:crypto.randomUUID()});
+  assert.equal(reply.status,200);
+  const thread=await (await mobile('owner/support/'+id)).json();
+  assert.equal(thread.messages.length,2);
+  console.log('PASS retired transport HTTP routes reject anonymous and authenticated reads and writes. Owner Support persists messages and denies foreign businesses.');
  }finally{await closeDbForTests();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

@@ -4,9 +4,9 @@ import { getDb, closeDbForTests } from './testing/postgres-fixture';
 import type { SessionUser } from '../lib/types';
 import {
   createSupportConversation, createPublicSupportConversation, getSupportConversation,
-  getPublicSupportConversation, postSupportMessage, postPublicSupportMessage,
-  acknowledgeSupportRead, acknowledgePublicRead, reassignSupportConversation,
-  updateSupportAgentSetting, closePublicSupportConversation, reopenSupportConversation, SupportError,
+  postSupportMessage,
+  acknowledgeSupportRead, reassignSupportConversation,
+  updateSupportAgentSetting, SupportError,
 } from '../lib/support';
 import { migratePostgresDatabase } from '../lib/postgres-migrations';
 import { confirmedMessageId } from '../lib/chat-read-contract';
@@ -78,35 +78,18 @@ async function main() {
     await joinAssignedSupportConversation(manager,c.id);
     assert.notEqual((await getSupportConversation(owner,c.id)).conversation.readEpoch,previousEpoch,'Assignment identity changes independently of message IDs');
     assert.equal((await db.prepare("SELECT COUNT(*) total FROM support_events WHERE conversation_id=? AND event_type='joined'").get(c.id)).total,2);
-    // Guest receipts use the same explicit contract and cannot see private notes.
+    const later=await postSupportMessage(owner,c.id,{message:'Later participant message',idempotencyKey:crypto.randomUUID()});
+    await acknowledgeSupportRead(replacement,c.id,{messageId:later.id});
+    await acknowledgeSupportRead(replacement,c.id,{messageId:opening});
+    assert.equal((await db.prepare('SELECT staff_confirmed_read_message_id value FROM support_conversations WHERE id=?').get(c.id)).value,later.id,'A stale acknowledgement cannot move the cursor back');
+
+    // Retained guest receipts cannot be projected or acknowledged through business Support.
     const guest = await createPublicSupportConversation({category:'buying_assistance',email:'fixture-buyer@example.test',message:'Fixture buying question',origin:'Addis Ababa',destination:'Adama',name:'LOCAL QA receipt',phone:'+251911112233',idempotencyKey:crypto.randomUUID()},'receipt-fixture');
-    const thread = await getSupportConversation(manager,guest.id), guestAgent = thread.conversation.assignedUserId===agent.id?agent:alternate;
-    const guestInitial = thread.messages[0].id;
-    await getPublicSupportConversation(guest.token); await getSupportConversation(guestAgent,guest.id);
-    assert.equal((await getPublicSupportConversation(guest.token)).messages[0].read,false);
-    await acknowledgeSupportRead(guestAgent,guest.id,{messageId:guestInitial});
-    assert.equal((await getPublicSupportConversation(guest.token)).agentJoined,false);
-    await joinAssignedSupportConversation(manager,guest.id);
-    assert.equal((await getPublicSupportConversation(guest.token)).agentJoined,true);
-    const privateNote = await postSupportMessage(guestAgent,guest.id,{audience:'note',message:'Private carrier details',idempotencyKey:crypto.randomUUID()});
-    const publicReply = await postSupportMessage(guestAgent,guest.id,{audience:'reply',message:'Public reply',idempotencyKey:crypto.randomUUID()});
-    await getPublicSupportConversation(guest.token);
-    assert.equal((await getSupportConversation(guestAgent,guest.id)).messages.find(m=>m.id===publicReply.id)?.read,false);
-    await assert.rejects(()=>acknowledgePublicRead(guest.token,{messageId:privateNote.id,publicRef:guest.publicRef}),SupportError);
-    await assert.rejects(()=>acknowledgePublicRead(guest.token,{messageId:reply.id,publicRef:guest.publicRef}),SupportError);
-    await assert.rejects(()=>acknowledgePublicRead(guest.token,{messageId:publicReply.id,publicRef:'wrong'}),SupportError);
-    await assert.rejects(()=>acknowledgePublicRead(guest.token,{messageId:publicReply.id,publicRef:guest.publicRef},guest.expiresAt+1),SupportError);
-    await acknowledgePublicRead(guest.token,{messageId:publicReply.id,publicRef:guest.publicRef});
-    assert.equal((await getSupportConversation(guestAgent,guest.id)).messages.find(m=>m.id===publicReply.id)?.read,true);
-    assert.equal((await getSupportConversation(guestAgent,guest.id)).messages.find(m=>m.id===privateNote.id)?.read,false);
-    const guestMessage = await postPublicSupportMessage(guest.token,{message:'Unread guest reply',idempotencyKey:crypto.randomUUID()},'receipt-fixture');
-    await getSupportConversation(guestAgent,guest.id);
-    assert.equal((await getPublicSupportConversation(guest.token)).messages.at(-1)?.read,false);
-    await acknowledgeSupportRead(guestAgent,guest.id,{messageId:guestMessage.id});
-    await acknowledgeSupportRead(guestAgent,guest.id,{messageId:guestInitial});
-    assert.equal((await db.prepare('SELECT staff_confirmed_read_message_id value FROM support_conversations WHERE id=?').get(guest.id)).value,guestMessage.id,'Stale ack cannot move the cursor back');
-    await closePublicSupportConversation(guest.token); await reopenSupportConversation(manager,guest.id);
-    assert.equal((await getPublicSupportConversation(guest.token)).agentJoined,false);
+    const historicalMessage=await db.prepare('SELECT id FROM support_messages WHERE conversation_id=? ORDER BY id LIMIT 1').get(guest.id);
+    for(const actor of [manager,owner,replacement]){
+      await assert.rejects(()=>getSupportConversation(actor,guest.id),{code:'not_found'});
+      await assert.rejects(()=>acknowledgeSupportRead(actor,guest.id,{messageId:historicalMessage.id,publicRef:guest.publicRef}),SupportError);
+    }
     const stable = await db.prepare('SELECT * FROM support_conversations WHERE id=?').get(guest.id);
     const schema = (await db.prepare('SELECT current_schema() name').get()).name as string;
     const historicalMessages=await db.prepare('SELECT id,conversation_id,sender_user_id,sender_kind,sender_key,body,idempotency_key,created_at,visitor_visible FROM support_messages ORDER BY id').all();
@@ -119,7 +102,7 @@ async function main() {
     assert.deepEqual((await migratePostgresDatabase(db.runner,schema)).applied,[]);
     assert.deepEqual(await db.prepare('SELECT * FROM support_conversations WHERE id=?').get(guest.id),stable);
     assert.equal((await db.prepare('SELECT MAX(version) version FROM schema_migrations').get()).version,83);
-    console.log('PASS real PostgreSQL confirmed reads/joins, read-only GET, owner/guest privacy, stale/foreign/self/private/expired denial, reassignment/reopen, monotonic and migration preservation.');
+    console.log('PASS real PostgreSQL confirmed reads/joins, read-only GET, business Support and retained guest privacy, stale/foreign/self denial, reassignment and monotonic and migration preservation.');
   } finally { await closeDbForTests(); }
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

@@ -37,7 +37,7 @@ test('FE-056 Account hub is a compact linked-owner identity with real activity a
  assert.deepEqual(Array.from(fixture.homeReads),[18]);assert.deepEqual(Array.from(fixture.businessReads),[18],'Caller query cannot choose another tenant');
  assert.deepEqual(Array.from(html.matchAll(/<dd>(\d+)<\/dd>/g),match=>Number(match[1])),[111,22,3],'Only authoritative owner activity values are shown');
  const links=Array.from(html.matchAll(/<a\b[^>]*href="([^"]+)"/g),match=>match[1]);
- assert.deepEqual(links,['/dashboard/profile/showroom','/dashboard/products','/dashboard/transport','/dashboard/business','/dashboard/account','/dashboard/support']);
+ assert.deepEqual(links,['/dashboard/profile/showroom','/dashboard/products','/dashboard/inquiries','/dashboard/business','/dashboard/account','/dashboard/support']);
  assert.doesNotMatch(html,/PRIVATE OWNER NAME|private-owner@|12025550199|private-contact@|PRIVATE UNUSED PRODUCT|merchant-cover\.jpg/);
  assert.doesNotMatch(html,/<form|<input|<details|Sign out|Public contact details|href="\/(?:privacy|terms)"/);
  html=await render({saved:'cover'});assert.match(html,/role="status">Changes saved\./);

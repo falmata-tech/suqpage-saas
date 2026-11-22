@@ -183,7 +183,7 @@ test("FE-053 actual Market component preserves the mounted panes and follows onl
   tree = render();
   assert.equal(controls()[0].props.scope, "products");
   assert.equal(style(tree.find(node=>node.props.testID==='search-drawer')!).pointerEvents,'auto');assert.equal(style(tree.find(node=>node.type==='AnimatedView'&&style(node).left===0)!).pointerEvents,'none');
-  assert.equal((controls()[0].props.value as { query: string }).query, "", "Product criteria remain independent");
+  assert.equal((controls()[0].props.value as { query: string }).query, "Local workshop", "Products use the last map criteria");
   (controls()[0].props.onChange as (value: Record<string, unknown>) => void)({ ...(controls()[0].props.value as Record<string, unknown>), query: "Chair" });
   tree = render();
   assert.equal(tree.filter(node => node.type === "MarketMap").length, 1, "Switching does not conditionally remove the map");
@@ -199,10 +199,10 @@ test("FE-053 actual Market component preserves the mounted panes and follows onl
   assert.equal(state.values[0].value, 1);
   assert.equal(state.back!(), true, "Android Back closes the product pane before leaving Market");
   tree = render();
-  assert.equal((controls()[0].props.value as { query: string }).query, "Local workshop");
+  assert.equal((controls()[0].props.value as { query: string }).query, "Chair");
   (tree.filter(node => node.props.accessibilityRole === "tab")[1].props.onPress as () => void)();
   tree = render();
-  assert.equal((controls()[0].props.value as { query: string }).query, "Chair", "Switching restores the product criteria");
+  assert.equal((controls()[0].props.value as { query: string }).query, "Chair", "A switch with the same criteria preserves the product search");
   state.reduce!(true); tree = render();
   (handle().props.onPressIn as () => void)();
   (handle().props.onPress as () => void)();
@@ -389,12 +389,12 @@ test('FE-065 S117 native detail Back and bare Market return retain both searches
   assert.equal(state.back,undefined,'Business-source navigation also leaves Back to the active screen');
   assert.equal((state.routes[1] as {pathname:string}).pathname,'/shop/[handle]');
   state.focused=true;tree=render();selectMode(tree,false);tree=render();
-  assert.equal((marketControls(tree).props.value as {query:string}).query,'Wood workshop');
+  assert.equal((marketControls(tree).props.value as {query:string}).query,'Oak chair');
   selectMode(tree,true);tree=render();resetHooks(state);tree=render();
   assert.equal(marketControls(tree).props.scope,'products','An app-session remount restores the selected panel');
   const restored=marketControls(tree).props.value as {query:string;countries:string[];cities:string[];madeToOrder:boolean};
   assert.equal(restored.query,'Oak chair');assert.deepEqual(Array.from(restored.countries),['KE']);assert.deepEqual(Array.from(restored.cities),['KE:Nairobi']);assert.equal(restored.madeToOrder,true);
-  selectMode(tree,false);tree=render();assert.equal((marketControls(tree).props.value as {query:string}).query,'Wood workshop');
+  selectMode(tree,false);tree=render();assert.equal((marketControls(tree).props.value as {query:string}).query,'Oak chair');
 });
 
 test('FE-065 S117 explicit native links take precedence on focus and active Market Back keeps its original behavior',async()=>{
@@ -405,7 +405,7 @@ test('FE-065 S117 explicit native links take precedence on focus and active Mark
   assert.equal(state.back,undefined);
   state.focused=true;tree=render();tree=render();
   assert.equal(marketControls(tree).props.scope,'businesses');assert.equal((marketControls(tree).props.value as {query:string}).query,'New business');
-  selectMode(tree,true);tree=render();assert.equal((marketControls(tree).props.value as {query:string}).query,'Linked product');
+  selectMode(tree,true);tree=render();assert.equal((marketControls(tree).props.value as {query:string}).query,'New business');
   state.params={};tree=render();tree=render();assert.equal(marketControls(tree).props.scope,'products','Removing explicit URL criteria for ordinary Market navigation does not clear the selection');
   resetHooks(state);tree=render();assert.equal(marketControls(tree).props.scope,'products','Explicit navigation was persisted after restoration');
   assert.equal(pressAndroidBack(state),true,'Android Back closes Products only when Market is focused');tree=render();
@@ -454,7 +454,7 @@ test('FE-065 S117 Expo browser session and history restore the panel without ove
   assert.equal(state.storageWrites.length,beforeHistoryWrites,'Incoming history restoration runs before any default persistence');tree=render();
   assert.equal(marketControls(tree).props.scope,'businesses','An explicit history entry wins over remembered Products');
   assert.equal((marketControls(tree).props.value as {query:string}).query,'History workshop');
-  selectMode(tree,true);tree=render();tree=render();assert.equal(marketControls(tree).props.scope,'products','The already-applied history parameters do not undo a later user switch');assert.equal((marketControls(tree).props.value as {query:string}).query,'Saved table');
+  selectMode(tree,true);tree=render();tree=render();assert.equal(marketControls(tree).props.scope,'products','The already-applied history parameters do not undo a later user switch');assert.equal((marketControls(tree).props.value as {query:string}).query,'History workshop');
 });
 
 test('FE-065 S117 Expo focus can precede its history transition without replaying an old Products entry',async()=>{
@@ -649,10 +649,10 @@ test('FE-065 S181 native controls retain direct wide filters and a single labell
        (trigger.props.onPress as()=>void)();tree=render(props);
       }else assert.ok(!tree.some(node=>node.props.testID===scope+'-filter-trigger'));
       const filters=tree.find(n=>n.props.testID===scope+'-filters')!;
-      assert.equal(style(filters).minWidth,wide?(scope==='products'?398:264):undefined);
+      assert.equal(style(filters).minWidth,wide?398:undefined);
       assert.equal(style(filters).flexDirection,wide?'row':'column');
-      const choices=nodes(filters).filter(n=>n.type==='Pressable');assert.equal(choices.length,scope==='products'?4:3);
-      for(const label of ['Category (1)','Country (1)','City (1)',...(scope==='products'?['Made to order']:[])])assert.ok(choices.some(n=>n.props.accessibilityLabel===label),'Every labelled choice remains reachable: '+label);
+      const choices=nodes(filters).filter(n=>n.type==='Pressable');assert.equal(choices.length,4);
+      for(const label of ['Category (1)','Country (1)','City (1)','Made to order'])assert.ok(choices.some(n=>n.props.accessibilityLabel===label),'Every labelled choice remains reachable: '+label);
       assert.ok(choices.every(n=>Number(style(n).minHeight)>=44&&Number(style(n).minWidth)>=44));assert.ok(!tree.some(n=>n.type==='ScrollView'),'The toolbar adds no horizontal scroller; its existing Sheet owns option scrolling');
       if(dimensions.fontScale>1.3)assert.ok(choices.every(n=>style(n).flexBasis==='auto'&&style(n).flexShrink===0&&nodes(n).filter(c=>c.type==='Text').every(c=>c.props.numberOfLines===undefined)),'Enlarged text keeps intrinsic wrapping rows in the existing vertical sheet');
       if(wide){
@@ -734,7 +734,7 @@ test('FE-065 S181 installed RNWeb filter overview keeps intrinsic rows above act
   await page.setContent('<style>html,body,#root{margin:0;width:100%;height:100%}</style><div id="root"></div>');await page.evaluate(value=>{(window as unknown as{filterFixture:unknown}).filterFixture=value;},{locale,messages,scope,dimensions:{width,height:width===320?568:844,fontScale}});await page.addScriptTag({content:code});
   await page.getByTestId(scope+'-filter-trigger').click();const sheet=page.getByRole('dialog');await sheet.waitFor();const overview=sheet.getByTestId(scope+'-filters');
   const geometry=await overview.evaluate(element=>{const box=element.getBoundingClientRect(),rows=[...element.querySelectorAll('[role="button"],[role="checkbox"]')].map(row=>{const r=row.getBoundingClientRect();return{top:r.top,bottom:r.bottom,height:r.height};}),actions=element.nextElementSibling!.getBoundingClientRect();return{top:box.top,bottom:box.bottom,height:box.height,rows,actions:{top:actions.top,bottom:actions.bottom,height:actions.height}};});
-  const details=JSON.stringify({locale,width,fontScale,scope,geometry});assert.equal(geometry.rows.length,scope==='products'?4:3,details);assert.ok(geometry.height>=geometry.rows.reduce((sum,row)=>sum+row.height,0)+(geometry.rows.length-1)*8-1,'Overview reserves intrinsic height for every complete row '+details);assert.ok(geometry.rows.every(row=>row.height>=48&&row.top>=geometry.top-.5&&row.bottom<=geometry.bottom+.5),'Rows stay inside the intrinsic overview '+details);assert.ok(geometry.actions.top>=geometry.rows.at(-1)!.bottom+7,'Actions cannot overlay any filter choice '+details);
+  const details=JSON.stringify({locale,width,fontScale,scope,geometry});assert.equal(geometry.rows.length,4,details);assert.ok(geometry.height>=geometry.rows.reduce((sum,row)=>sum+row.height,0)+(geometry.rows.length-1)*8-1,'Overview reserves intrinsic height for every complete row '+details);assert.ok(geometry.rows.every(row=>row.height>=48&&row.top>=geometry.top-.5&&row.bottom<=geometry.bottom+.5),'Rows stay inside the intrinsic overview '+details);assert.ok(geometry.actions.top>=geometry.rows.at(-1)!.bottom+7,'Actions cannot overlay any filter choice '+details);
   await sheet.getByRole('button',{name:t('Category'),exact:true}).click();await sheet.getByText(t('Categories'),{exact:true}).waitFor();await sheet.getByRole('button',{name:t('Back to filters'),exact:true}).click();await sheet.getByRole('button',{name:t('Done'),exact:true}).click();await page.getByTestId(scope+'-filter-trigger').waitFor();assert.equal(await sheet.count(),0);assert.deepEqual(errors,[]);await page.close();
  }}finally{await browser.close();}
 });

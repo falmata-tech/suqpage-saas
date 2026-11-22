@@ -4,7 +4,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   Building2,
-  Truck,
   ArrowRight,
   Headphones,
   UserCog,
@@ -52,13 +51,6 @@ export default async function AdminOverview({
       value: null,
       detail: t("Questions from business owners"),
       icon: Headphones,
-    },
-    {
-      href: "/dashboard/support?queue=transport",
-      label: t("Transport"),
-      value: null,
-      detail: t("Transport requests from customers"),
-      icon: Truck,
     },
     {
       href: "/dashboard/admin/staff",

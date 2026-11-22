@@ -1,4 +1,5 @@
 "use client";
+import { PwaInstallButton } from "@/components/PwaInstall";
 import { useUiText } from "@/lib/i18n/ui";
 
 
@@ -260,10 +261,12 @@ export default function WorkspaceNavigation({
       <LanguageSelector />
         <div className="sidebar-identity"><strong>{identity}</strong><span>{context}</span></div>
         <NavigationGroups groups={groups} clientNavigation={clientNavigation} supportQueue={supportQueue}/>
-      </aside>
+        <PwaInstallButton />
+    </aside>
       <header className="workspace-mobile-header">
         <AfricMadeBrand href={dashboardHref} className="workspace-brand" />
         <LanguageSelector />
+        <PwaInstallButton compact />
       </header>
       {!clientNavigation && <nav className="workspace-mobile-tabs" style={{gridTemplateColumns:`repeat(${primaryItems.length+1}, minmax(0, 1fr))`}} aria-label={t("Workspace application navigation")}>
         {primaryItems.map((item) => {

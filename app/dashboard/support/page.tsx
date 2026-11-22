@@ -32,8 +32,7 @@ export default async function SupportInbox({
   const scopedAgent = isQueueAgent(user);
   const business = user.business_id ? (await runtimeBusinessById(user.business_id)) || null : null;
   const client = user.access_role === "client";
-  const queue = client ? undefined : scopedAgent ? user.staff_queue_scope==='transport'?'transport':'support' : query.queue === "transport" ? "transport" : "support";
-  const transport = queue === "transport";
+  const queue = client ? undefined : 'support';
   const status = client ? ["active","waiting","open","closed","history","resolved"].includes(query.status||'')?query.status:undefined : ["active","needs_reply","overdue","waiting_customer","waiting","open","history","resolved"].includes(query.status||"") ? query.status! : query.status==='closed'?'history':'active';
   const activeView=!client&&['active','needs_reply','overdue','waiting_customer'].includes(status||'');
   const result = await listSupportConversations(user, { ...query, queue, status });
@@ -51,7 +50,7 @@ export default async function SupportInbox({
       <div className="dashboard-head">
         <div>
           <span className="eyebrow">{client ? t("AfricMade support") : t("Chats")}</span>
-          <h1>{client ? t("How can we help?") : t(transport ? "Transport" : "Business support")}</h1>
+          <h1>{client ? t("How can we help?") : t("Business support")}</h1>
           {client ? <p>{t("Keep questions and replies together with your AfricMade account.")}</p> : null}
         </div>
         {client && emergencyWhatsApp ? <a className="btn secondary" href={emergencyWhatsApp} target="_blank" rel="noreferrer">{t("Emergency WhatsApp")}</a> : operations ? <Link className="small-btn" href="/dashboard/support/agents">{t("Workload & availability")}</Link> : null}

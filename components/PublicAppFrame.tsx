@@ -1,4 +1,5 @@
 "use client";
+import { PwaInstallButton } from "@/components/PwaInstall";
 import { useUiText } from "@/lib/i18n/ui";
 
 
@@ -33,6 +34,7 @@ function PublicAppFrameContent({ children, signedIn, dashboardHref="/dashboard" 
     <header className="public-app-header">
       <AfricMadeBrand className="public-app-brand" />
       <LanguageSelector />
+      <PwaInstallButton compact />
     </header>
     <aside className="public-app-rail">
       <section className="public-app-rail-group">
@@ -58,6 +60,7 @@ function PublicAppFrameContent({ children, signedIn, dashboardHref="/dashboard" 
           {[{href:'/about',label:'About',icon:Info},{href:'/privacy',label:'Privacy',icon:Shield},{href:'/terms',label:'Terms',icon:FileText}].map(({href,label,icon:Icon})=><Link key={href} href={href} aria-current={isCurrent(pathname,href)?'page':undefined}><Icon aria-hidden="true"/><span>{t(label)}</span><NavigationPendingIndicator label={t(label)}/></Link>)}
         </nav>
       </section>
+      <PwaInstallButton />
     </aside>
     <NavigationPendingMain className={`public-app-main${showroomOpen ? " public-app-showroom-main" : ""}`}>{children}{showPublicSiteFooter(pathname)&&<PublicSiteFooter/>}</NavigationPendingMain>
     {showroomOpen ? null : <PublicMobileNavigation signedIn={signedIn} dashboardHref={dashboardHref} />}

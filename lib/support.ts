@@ -1,3 +1,4 @@
+import {activeBusinessSupport, BUSINESS_SUPPORT_SQL} from './retired-transport';
 import {selectTransportCoordinator} from './transport-coordinator';
 import { buyingService, isCallbackRequest, type BuyingService } from "./buying-assistance";
 import { platformCookies } from "./platform-state";
@@ -278,6 +279,7 @@ async function canRead(user: SessionUser, row: Pick<ConversationRow, "business_i
   if (user.access_role === "client") return Boolean(row.business_id) && user.business_id === row.business_id && Boolean(await currentSupportClient(user));
   if (hasCapability(user, "operations:manage")) return true;
   if (user.access_role === "team_member") {
+    if (user.staff_queue_scope === "transport") return false;
     if (row.assigned_user_id === user.id) return true;
     const workload = await supportAgentWorkload(user.id);
     return row.status === "waiting" && Boolean(workload?.enabled && acceptsQueue(workload.queue_scope, row.assistance_category));
@@ -302,7 +304,7 @@ export async function assertOwnerTransport(user:SessionUser,conversationId?:numb
 
 async function requireConversation(user: SessionUser, conversationId: number) {
   const row = await runtimeGet<ConversationRow>(`${baseSelect()} WHERE c.id=?`, [conversationId]);
-  if (!row || !(await canRead(user, row))) {
+  if (!row || !activeBusinessSupport(row.participant_kind, row.assistance_category) || !(await canRead(user, row))) {
     throw new SupportError("Support conversation was not found.", "not_found");
   }
   return row;
@@ -497,7 +499,7 @@ const SUPPORT_IDLE_RESUME_DETAIL='visitor resumed automatically ended conversati
 export const SUPPORT_REPLY_OVERDUE_QUERY=`SELECT c.id,c.awaiting_staff_message_id,${SUPPORT_RESPONSE_EPOCH_SQL} assignment_id
  FROM support_conversations c
  ${SUPPORT_ACTIVE_ASSIGNMENT_JOIN}
- WHERE c.status IN ('waiting','open') AND c.resolved_at IS NULL
+ WHERE ${BUSINESS_SUPPORT_SQL} AND c.status IN ('waiting','open') AND c.resolved_at IS NULL
    AND c.awaiting_staff_since IS NOT NULL AND ${SUPPORT_RESPONSE_DEADLINE_SQL}<=?
    AND c.awaiting_staff_message_id IS NOT NULL
    AND (c.overdue_notified_message_id IS DISTINCT FROM c.awaiting_staff_message_id
@@ -538,21 +540,11 @@ export async function sweepSupportReplyOverdue(now=Date.now(),monotonicNow:()=>n
  });
 }
 export const SUPPORT_IDLE_DUE_QUERY=`SELECT c.id,c.participant_kind,c.awaiting_participant_since
- FROM support_conversations c JOIN (
-  (SELECT id,awaiting_participant_since FROM support_conversations
-   WHERE participant_kind='visitor' AND status='open' AND assigned_user_id IS NOT NULL
-    AND resolved_at IS NULL AND awaiting_participant_since IS NOT NULL AND awaiting_participant_since<=?
-    AND assistance_category IN ('buying_assistance','shipment_observation')
-   ORDER BY awaiting_participant_since,id LIMIT ${SUPPORT_IDLE_SWEEP_LIMIT})
-  UNION ALL
-  (SELECT id,awaiting_participant_since FROM support_conversations
-   WHERE participant_kind='client' AND status='open' AND assigned_user_id IS NOT NULL
-    AND resolved_at IS NULL AND awaiting_participant_since IS NOT NULL AND awaiting_participant_since<=?
-   ORDER BY awaiting_participant_since,id LIMIT ${SUPPORT_IDLE_SWEEP_LIMIT})
- ) due ON due.id=c.id
- WHERE c.status='open' AND c.assigned_user_id IS NOT NULL AND c.resolved_at IS NULL
- ORDER BY due.awaiting_participant_since+CASE c.participant_kind
-  WHEN 'visitor' THEN ${SUPPORT_IDLE_WINDOWS.guest.endMs} ELSE ${SUPPORT_IDLE_WINDOWS.owner.endMs} END,c.id
+ FROM support_conversations c
+ WHERE ${BUSINESS_SUPPORT_SQL}
+ AND c.status='open' AND c.assigned_user_id IS NOT NULL AND c.resolved_at IS NULL
+ AND c.awaiting_participant_since<=?
+ ORDER BY c.awaiting_participant_since,c.id
  LIMIT ${SUPPORT_IDLE_SWEEP_LIMIT} FOR UPDATE OF c SKIP LOCKED`;
 
 /** Internal scheduled command; never called by a read or a shared-preview timer. */
@@ -566,7 +558,7 @@ export async function sweepSupportInactivity(now=Date.now(),monotonicNow:()=>num
   const locked=await runtimeGet<{locked:boolean}>("SELECT pg_try_advisory_xact_lock(hashtextextended(current_schema() || ':support-work',0)) locked");
   if(!locked?.locked)return {ended:0,skippedBusy:true};
   if(monotonicNow()-started>=2500)return {ended:0,skippedBusy:false};
-  const due=await runtimeAll<{id:number;participant_kind:SupportParticipantKind;awaiting_participant_since:number}>(SUPPORT_IDLE_DUE_QUERY,[now-SUPPORT_IDLE_WINDOWS.guest.endMs,now-SUPPORT_IDLE_WINDOWS.owner.endMs]);
+  const due=await runtimeAll<{id:number;participant_kind:SupportParticipantKind;awaiting_participant_since:number}>(SUPPORT_IDLE_DUE_QUERY,[now-SUPPORT_IDLE_WINDOWS.owner.endMs]);
   let ended=0;
   for(const candidate of due){
    const remaining=3000-(monotonicNow()-started);
@@ -644,7 +636,7 @@ async function leastLoadedAgent(category: SupportAssistanceCategory = "general")
     JOIN users u ON u.id=s.user_id
     JOIN user_access_profiles p ON p.user_id=u.id
     LEFT JOIN support_conversations c
-      ON c.assigned_user_id=u.id AND c.status='open'
+      ON c.assigned_user_id=u.id AND c.status='open' AND ${BUSINESS_SUPPORT_SQL}
     WHERE s.enabled=1 AND p.access_role IN ('team_member','operations_manager')
       AND ${SUPPORT_AGENT_IDENTITY_SQL}
       AND (s.queue_scope='all' OR s.queue_scope=?)
@@ -690,7 +682,7 @@ export const SUPPORT_WAITING_CANDIDATE_LIMIT = 100;
 export const SUPPORT_WAITING_TRANSITION_LIMIT = 25;
 export const SUPPORT_WAITING_CANDIDATES_QUERY = `
   SELECT c.id,c.assistance_category FROM support_conversations c
-  WHERE c.status='waiting' AND c.assigned_user_id IS NULL AND EXISTS(
+  WHERE ${BUSINESS_SUPPORT_SQL} AND c.status='waiting' AND c.assigned_user_id IS NULL AND EXISTS(
     SELECT 1 FROM support_agent_settings s JOIN user_access_profiles p ON p.user_id=s.user_id
     WHERE s.enabled=1 AND p.access_role IN ('team_member','operations_manager')
       AND ${SUPPORT_AGENT_IDENTITY_SQL}
@@ -741,7 +733,7 @@ export async function routeWaitingSupportConversations(
   if (!hasCapability(user, "operations:manage")) {
     throw new SupportError("Operations access is required.", "forbidden");
   }
-  if (options.queue !== undefined && options.queue !== "support" && options.queue !== "transport") {
+  if (options.queue !== undefined && options.queue !== "support") {
     throw new SupportError("Choose a support queue.", "invalid_setting");
   }
   return runtimeTransaction(async () => {
@@ -749,9 +741,7 @@ export async function routeWaitingSupportConversations(
     if (!await runtimeGet("SELECT 1 FROM user_access_profiles WHERE user_id=? AND access_role IN ('platform_admin','operations_manager') FOR SHARE", [user.id])) {
       throw new SupportError("Operations access is required.", "forbidden");
     }
-    const queueWhere = options.queue === "transport"
-      ? " AND c.assistance_category IN ('shipment_observation','buying_assistance')"
-      : options.queue === "support" ? " AND c.assistance_category NOT IN ('shipment_observation','buying_assistance')" : "";
+    const queueWhere = ` AND ${BUSINESS_SUPPORT_SQL}`;
     const waiting = await runtimeAll<{id:number;assistance_category:SupportAssistanceCategory}>(`
       SELECT c.id,c.assistance_category FROM support_conversations c
       WHERE c.status='waiting' AND c.assigned_user_id IS NULL${queueWhere} AND EXISTS(
@@ -1264,22 +1254,19 @@ export async function listSupportConversations(
     ? String(input.status) as SupportStatus
     : "";
   const params: Array<string | number> = [];
-  let where = " WHERE 1=1";
+  let where = ` WHERE ${BUSINESS_SUPPORT_SQL}`;
   if (user.access_role === "client") {
     if (!user.business_id || !await currentSupportClient(user)) throw new SupportError("Client business is missing.", "forbidden");
     where += " AND c.business_id=?";
     params.push(user.business_id);
   } else if (user.access_role === "team_member") {
+    if (user.staff_queue_scope === "transport") return pageResult([],0,request);
     where += ` AND ((c.status='waiting' AND ${SUPPORT_WAITING_SCOPE_SQL}) OR c.assigned_user_id=?)`;
     params.push(user.id, user.id);
   } else if (!hasCapability(user, "operations:manage")) {
     throw new SupportError("Support access is required.", "forbidden");
   }
-  if (input.queue === "transport") {
-    if (user.access_role !== 'client' && user.access_role !== "team_member" && !hasCapability(user, "operations:manage")) throw new SupportError("Transport queue access is required.", "forbidden");
-    where += user.access_role==='client'?" AND c.participant_kind='client' AND c.assistance_category='shipment_observation'":" AND c.assistance_category IN ('shipment_observation','buying_assistance')";
-  }
-  if (input.queue === "support" || user.access_role==='client'&&input.queue!=='transport') where += " AND c.assistance_category NOT IN ('shipment_observation','buying_assistance')";
+  if (input.queue === "transport") throw new SupportError("Support queue was not found.", "not_found");
   if (input.status === "active") where += " AND c.status IN ('waiting','open')";
   else if(input.status==='needs_reply'||input.status==='overdue'){
     where+=" AND c.status IN ('waiting','open') AND c.resolved_at IS NULL AND c.awaiting_staff_since IS NOT NULL AND "+SUPPORT_RESPONSE_DEADLINE_SQL+(input.status==='overdue'?'<=?':'>?');
@@ -1570,12 +1557,12 @@ export async function listSupportAgentWorkloads(user: SessionUser): Promise<Supp
     queue_scope: SupportQueueScope;
     open_count: number;
   }>(`
-    SELECT u.id user_id,u.name,u.email,p.access_role,COALESCE(s.enabled,0) enabled,COALESCE(s.queue_scope,'all') queue_scope,
+    SELECT u.id user_id,u.name,u.email,p.access_role,CASE WHEN s.queue_scope='transport' THEN 0 ELSE COALESCE(s.enabled,0) END enabled,COALESCE(s.queue_scope,'all') queue_scope,
       COUNT(c.id) open_count
     FROM users u JOIN user_access_profiles p ON p.user_id=u.id
     LEFT JOIN support_agent_settings s ON s.user_id=u.id
     LEFT JOIN support_conversations c
-      ON c.assigned_user_id=u.id AND c.status='open'
+      ON c.assigned_user_id=u.id AND c.status='open' AND ${BUSINESS_SUPPORT_SQL}
     WHERE p.access_role IN ('team_member','operations_manager')
     GROUP BY u.id,u.name,u.email,p.access_role,s.enabled,s.queue_scope
     ORDER BY COALESCE(s.enabled,0) DESC,COUNT(c.id),lower(u.name)
@@ -1594,12 +1581,12 @@ export async function listSupportAgentWorkloads(user: SessionUser): Promise<Supp
 
 function supportAgentRows() {
   return `
-    SELECT u.id user_id,u.name,u.email,p.access_role,COALESCE(s.enabled,0) enabled,COALESCE(s.queue_scope,'all') queue_scope,
+    SELECT u.id user_id,u.name,u.email,p.access_role,CASE WHEN s.queue_scope='transport' THEN 0 ELSE COALESCE(s.enabled,0) END enabled,COALESCE(s.queue_scope,'all') queue_scope,
       COUNT(c.id) open_count
     FROM users u JOIN user_access_profiles p ON p.user_id=u.id
     LEFT JOIN support_agent_settings s ON s.user_id=u.id
     LEFT JOIN support_conversations c
-      ON c.assigned_user_id=u.id AND c.status='open'
+      ON c.assigned_user_id=u.id AND c.status='open' AND ${BUSINESS_SUPPORT_SQL}
     WHERE p.access_role IN ('team_member','operations_manager')
     GROUP BY u.id,u.name,u.email,p.access_role,s.enabled,s.queue_scope
   `;
@@ -1684,7 +1671,7 @@ export async function getSupportAgentSummary(user: SessionUser): Promise<Support
       SUM(CASE WHEN enabled=1 THEN 1 ELSE 0 END) enabled_agents,
       SUM(CASE WHEN enabled=1 THEN 1 ELSE 0 END) available_agents,
       SUM(open_count) open_assignments,
-      (SELECT COUNT(*) FROM support_conversations WHERE status='waiting') waiting_conversations
+      (SELECT COUNT(*) FROM support_conversations c WHERE status='waiting' AND ${BUSINESS_SUPPORT_SQL}) waiting_conversations
     FROM workloads
   `))!;
   return {
@@ -1719,14 +1706,13 @@ export async function updateSupportAgentSetting(
     if (!staff) throw new SupportError("Support agent was not found.", "invalid_agent");
     const currentWorkload = await supportAgentWorkload(userId);
     const scope = input.queueScope === undefined ? currentWorkload?.queue_scope || "all" : input.queueScope;
-    if (scope !== "all" && scope !== "support" && scope !== "transport") throw new SupportError("Choose a support queue.", "invalid_setting");
+    if (scope !== "all" && scope !== "support") throw new SupportError("Choose a support queue.", "invalid_setting");
     const targetRole = await runtimeGet<{access_role:string}>("SELECT access_role FROM user_access_profiles WHERE user_id=?",[userId]);
     if(targetRole?.access_role === "team_member" && scope === "all" &&
       (currentWorkload?.queue_scope === "support" || currentWorkload?.queue_scope === "transport"))
-      throw new SupportError("Choose Support agent or Transport agent.","invalid_setting");
-    const incompatible = await runtimeGet<{count:number}>(`SELECT COUNT(*) count FROM support_conversations
-      WHERE assigned_user_id=? AND status='open' AND ?<>'all' AND
-      (CASE WHEN assistance_category IN ('shipment_observation','buying_assistance') THEN 'transport' ELSE 'support' END)<>?`, [userId,scope,scope]);
+      throw new SupportError("Choose Support agent.","invalid_setting");
+    const incompatible = await runtimeGet<{count:number}>(`SELECT COUNT(*) count FROM support_conversations c
+      WHERE assigned_user_id=? AND status='open' AND ?<>'all' AND ${BUSINESS_SUPPORT_SQL} AND 'support'<>?`, [userId,scope,scope]);
     if (Number(incompatible?.count)) throw new SupportError("Reassign open conversations before changing this queue.", "queue_conflict");
     await runtimeRun(`
       INSERT INTO support_agent_settings(
@@ -1740,7 +1726,7 @@ export async function updateSupportAgentSetting(
     `, [userId, enabled ? 1 : 0, user.id, now, scope]);
     if (enabled) return routeWaitingSupportConversations(user, now);
     return { routed: 0, remaining: Number((await runtimeGet<{count:number}>(
-      "SELECT COUNT(*) count FROM support_conversations WHERE status='waiting' AND assigned_user_id IS NULL",
+      `SELECT COUNT(*) count FROM support_conversations c WHERE status='waiting' AND assigned_user_id IS NULL AND ${BUSINESS_SUPPORT_SQL}`,
     ))?.count || 0) };
   });
 }

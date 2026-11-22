@@ -17,7 +17,7 @@ export default async function StaffAccountPage({params,searchParams}:{params:Pro
   try{[account,grant]=await Promise.all([getStaffAccount(actor,id),getStaffBusinessGrant(actor,id)]);}
   catch(error){if(error instanceof StaffOperationError&&error.status===404)notFound();throw error;}
   const t=await getUiText(),query=await searchParams;
-  const role=account.access_role==='operations_manager'?'Operations manager':account.queue_scope==='transport'?'Transport agent':account.queue_scope==='support'?'Support agent':'Team member';
+  const role=account.access_role==='operations_manager'?'Operations manager':account.queue_scope==='transport'?'Paused':account.queue_scope==='support'?'Support agent':'Team member';
   return <DashboardShell user={actor} business={null}>
     <nav className="workspace-breadcrumbs" aria-label={t('Breadcrumb')}><Link href="/dashboard/admin/staff">{t('Staff')}</Link><span aria-hidden="true">/</span><strong aria-current="page">{account.name}</strong></nav>
     <div className="dashboard-head"><div><h1>{account.name}</h1><p>{account.email}</p></div><Link className="small-btn" href="/dashboard/admin/staff">{t('Back to staff')}</Link></div>

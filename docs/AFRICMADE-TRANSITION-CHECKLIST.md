@@ -6,6 +6,47 @@ Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 Updated 2026-11-18. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
+## Launch workspace audit and Market filters (FE-065 / FE-078 / BE-066)
+
+1. [x] Inventory web, mobile, direct APIs, staff roles, Support cases and
+   notification delivery.
+2. [x] Carry query, department, subcategory, geography and Made to order between
+   Market views. Verify the applied results in desktop and phone Chrome and
+   Expo, plus isolated PostgreSQL exact/fuzzy discovery and geography.
+3. [x] Retire AfricMade transport chat, plans and shipment tracking on web and
+   native. The focused acceptance test reads HTTP 410 from the old surfaces,
+   including mutation URLs. Retained transport cases are excluded from the
+   active Support queue and are denied through Support reads/replies.
+4. [x] Review the owner Account, page, products, business details, Inbox and
+   Support, the business editor's workspace, and the admin and operations
+   surfaces. Send one local owner message, Join and reply as the assigned
+   Support agent, verify SQL persistence and owner readback, and verify
+   cross-tenant denial. Restore phone-web Inbox access from Account.
+5. [ ] Qualify the current candidate for protected CI and production. The
+   production health response before publication identifies source `bc30ab37`.
+   The production build and complete release gate passed. The latest isolated
+   browser acceptance run passed all 22 journeys on the standard provider
+   ports. The separate UI workflow suite passed 484 tests. Require current
+   protected checks and verify the deployed revision and workflows.
+
+Browser and API evidence is in `.local/launch-workspace-review/`. One staff
+Inbox navigation recovered from an interrupted development Suspense stream.
+The targeted owner and staff Inbox retest completed without browser errors.
+The walkthrough sampled real workspaces and core tasks. It did not execute
+every admin mutation or use real customer accounts.
+
+## PWA installation (FE-034 / DEP-025)
+
+1. [x] Add the install action below the desktop navigation links and in the
+   compact phone header for visitors and business owners.
+2. [x] Exercise the real Chrome installability signal, 320px phone help,
+   offline retry and reconnect. Chrome reports zero installability errors.
+   The worker caches only the generic offline page and selected static assets.
+   The protected browser job also runs the PWA shell checks.
+3. [ ] Qualify installation from deployed HTTPS on physical Android and iPhone.
+   The local rehearsal enables the worker at port 3132 with
+   `NEXT_PUBLIC_SUQPAGE_PWA_DEV_PREVIEW=1` on loopback.
+
 ## Example business About stories (FE-023 / FE-040 / BE-022)
 
 1. [x] Compare the 66 local profiles with the 66 entries in the published demo
@@ -33,7 +74,14 @@ prior page revisions. The focused 320px acceptance test and full
 - [x] Classify all 264 demo products into reusable product groups. Local PostgreSQL proves exclusive department membership. Desktop, phone web and Expo confirmed Home, then Candles & decor, then Pure Beeswax Candles.
 - [x] Review the published demo roster against the creator footage and bind the exact before-images. Disposable PostgreSQL verified changing and rolling back both providers and both legacy examples. Apply the guarded plan only with the full release candidate qualified, then verify 66 showroom stories, 264 product videos and process chapters.
 - [x] Rewrite About and default to the seller section. Retire the logistics-company link, send old bookmarks to About and refuse new requests on both former endpoints.
-- [ ] Qualify the grouped candidate through protected main and Netlify. Build the fresh local Android APK after verifying production.
+- [ ] Finish the approved one-showroom transactions and public readbacks.
+  The prior three-showroom and singleton timeouts were reconciled through the
+  live API. Nova Assembly then committed, and the public API returned the
+  reviewed cover and four product videos. Continue in roster order and keep
+  protected receipts outside Git. Require a final independent read of all 66
+  covers and 264 product videos before reporting the catalog complete.
+- [ ] Qualify the grouped candidate through protected main and Netlify. Build
+  the fresh local Android APK after verifying production. Complete and verify the hosted media rollout before publishing.
 
 ## Small map clusters and public catalog review
 

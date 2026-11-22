@@ -59,6 +59,19 @@ async function main() {
         message: `Support message ${index}`,
         idempotencyKey: `support-create-${String(index).padStart(4, "0")}`,
     }, Date.now() + index);
+    const archivedId = Number((await db.prepare(`
+      INSERT INTO support_conversations(public_ref,participant_kind,business_id,opened_by_user_id,
+        assistance_category,subject,status,created_at,updated_at,last_message_at)
+      VALUES('SUP-ARCHIVED-01','client',?,?,'shipment_observation','Retained transport','waiting',?,?,?)
+    `).run(businessA,clientAId,1,1,1)).insertedId);
+    for (const actor of [clientA,agentOne,operations]) {
+      await assert.rejects(() => getSupportConversation(actor,archivedId),e=>e instanceof SupportError&&e.code==='not_found');
+      await assert.rejects(() => postSupportMessage(actor,archivedId,{
+        message:'Archived case must remain read-only.',idempotencyKey:'archived-reply-0001',
+      }),e=>e instanceof SupportError&&e.code==='not_found');
+    }
+    assert.equal((await db.prepare('SELECT status FROM support_conversations WHERE id=?').get(archivedId)).status,'waiting');
+    assert.equal(Number((await db.prepare('SELECT count(*) n FROM support_messages WHERE conversation_id=?').get(archivedId)).n),0);
     const first = await create(clientA, 1);
     const second = await create(clientB, 2);
     const third = await create(clientA, 3);
@@ -165,11 +178,7 @@ async function main() {
     assert.equal(storedVisitorContact.visitor_phone, "+251911223344", "visitor phone is normalized before persistence");
     await assert.rejects(() => getPublicSupportConversation(`${visitor.token}x`, visitorNow + 1), SupportError);
     await assert.rejects(() => getSupportConversation(clientA, visitor.id), SupportError);
-    const staffVisitorView = await getSupportConversation(operations, visitor.id);
-    assert.equal(staffVisitorView.conversation.participantKind, "visitor");
-    assert.equal(staffVisitorView.conversation.businessId, null);
-    assert.equal(staffVisitorView.conversation.visitorEmail, "visitor@example.test");
-    assert.equal(staffVisitorView.conversation.visitorPhone, "+251911223344");
+    await assert.rejects(() => getSupportConversation(operations, visitor.id),e=>e instanceof SupportError&&e.code==='not_found');
     const stagedPdf = await stageSupportAttachment(new File(["%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF"], "production requirements.pdf", { type: "application/pdf" }));
     assert.ok(stagedPdf, "a valid PDF stages in private support storage");
     const visitorReply = await postPublicSupportMessage(visitor.token, {
@@ -184,7 +193,7 @@ async function main() {
     const publicAttachment = await getPublicSupportAttachment(visitor.token, attachmentRow.id, visitorNow + 2);
     assert.equal(publicAttachment.original_name, "production requirements.pdf");
     assert.equal((await readSupportAttachment(publicAttachment.storage_key, publicAttachment.mime_type))?.contentType, "application/pdf");
-    assert.equal((await getSupportAttachment(operations, visitor.id, attachmentRow.id)).original_name, "production requirements.pdf");
+    await assert.rejects(() => getSupportAttachment(operations, visitor.id, attachmentRow.id),SupportError);
     await assert.rejects(() => getSupportAttachment(clientA, visitor.id, attachmentRow.id), SupportError);
     await assert.rejects(() => getPublicSupportAttachment(`${visitor.token}x`, attachmentRow.id, visitorNow + 2), SupportError);
     assert.equal((await getPublicSupportConversation(visitor.token, visitorNow + 2)).messages.at(-1)?.attachment?.id, attachmentRow.id);
@@ -201,11 +210,11 @@ async function main() {
         total: number;
     }).total), 1, "an idempotent retry does not create a second attachment row");
     await assert.rejects(() => stageSupportAttachment(new File(["not a real file"], "deceptive.pdf", { type: "application/pdf" })), /Only valid JPEG, PNG, WebP, and PDF/);
-    await postAssignedSupportReply(operations, visitor.id, {
+    await assert.rejects(() => postAssignedSupportReply(operations, visitor.id, {
         message: "A team member will review the request.",
         idempotencyKey: "public-support-staff-0001",
-    }, visitorNow + 4);
-    assert.equal((await getPublicSupportConversation(visitor.token, visitorNow + 5)).messages.at(-1)?.sender, "staff");
+    }, visitorNow + 4),SupportError);
+    assert.equal((await getPublicSupportConversation(visitor.token, visitorNow + 5)).messages.at(-1)?.sender, "visitor");
     await assert.rejects(() => closePublicSupportConversation(`${visitor.token}x`, visitorNow + 6), SupportError);
     assert.equal((await closePublicSupportConversation(visitor.token, visitorNow + 6)).duplicate, false, "visitor can end the owned active chat");
     assert.equal((await closePublicSupportConversation(visitor.token, visitorNow + 7)).duplicate, true, "visitor close is idempotent");

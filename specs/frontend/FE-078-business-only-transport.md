@@ -10,6 +10,29 @@ change_level: L2
 
 # FE-078 — Business dashboard transport entry only
 
+## Launch scope update (2026-11-21)
+
+The owner moves all transport, shipping and shipment tracking out of AfricMade.
+CargoChatter remains a separate product. AfricMade does not link, redirect or
+transfer data into it. The only platform chat is account-bound business
+Support handled by AfricMade staff. Ordinary product inquiries remain.
+
+GIVEN a visitor, owner, old client or staff member requests an old transport,
+plan or tracking surface WHEN the request reaches AfricMade THEN it cannot open
+a live chat, read a shipment or submit a shipping action. A historical transport
+case cannot be opened or modified through the business Support endpoints,
+and retired work is excluded from active routing, reminders and notification
+delivery. No database history is deleted. Support keeps tenant and role checks.
+
+The release checks exercise retired web and native paths and legacy caller
+credentials against isolated fixtures, and check that old cases and queued
+alerts cannot enter the active Support workflow. Role and tenant checks for
+business Support still run independently.
+
+The sections below document the prior business-only transport implementation
+and the retained history it created. The launch scope above governs current
+desktop, phone and API behavior.
+
 ## Problem and outcome
 
 The owner restricts transport chat to businesses using their dashboard. This

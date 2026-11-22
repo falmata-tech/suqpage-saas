@@ -62,7 +62,8 @@ jobs:
       - name: Native dependency compatibility
         run: node scripts/test-mobile-dependencies.cjs
       - run: npx playwright install --with-deps chromium
-      - name: Business transport UI regression
+      - run: npm run test:pwa
+      - name: Market, Support and shell regressions
         run: >-
           node --import tsx --test --test-concurrency=1
           scripts/test-browser-clipboard.ts

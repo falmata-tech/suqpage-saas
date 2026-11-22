@@ -1,3 +1,4 @@
+import {BUSINESS_SUPPORT_SQL} from './retired-transport';
 import { hashPrivateValue } from './security-core';
 import { PostgresTransactionRunner } from './postgres-runtime';
 import { postgresRuntimeServices } from './postgres-runtime-services';
@@ -103,7 +104,7 @@ function allowedRows(a: Actor): {where:string;values:Array<string|number|null>} 
   return {where:`(n.kind='reassigned' AND n.conversation_id IS NULL) OR c.assigned_user_id=? OR (c.status='waiting' AND ?=1 AND ? IN ('all',CASE WHEN c.assistance_category IN ('buying_assistance','shipment_observation') THEN 'transport' ELSE 'support' END))`,values:[a.id,Number(Boolean(a.enabled)),a.queue_scope]};
 }
 function currentAttentionSql(participant:boolean){
-  return `${participant?"n.kind NOT IN ('assigned','reassigned','reply_overdue') AND ":''}
+  return `(n.conversation_id IS NULL OR (${BUSINESS_SUPPORT_SQL})) AND ${participant?"n.kind NOT IN ('assigned','reassigned','reply_overdue') AND ":''}
     (n.kind<>'joined' OR (c.staff_joined_assignment_id IS NOT NULL
       AND c.staff_joined_assignment_id=(SELECT MAX(a.id) FROM support_assignments a WHERE a.conversation_id=c.id)
       AND c.staff_joined_user_id=c.assigned_user_id

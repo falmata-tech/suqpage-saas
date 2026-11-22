@@ -59,7 +59,7 @@ test('FE-019/FE-026 actual staff queue exposes Waiting and accurate lifecycle wi
  fixture.conversation.resolvedAt=11;html=await render({queue:'transport',status:'resolved'});assert.match(html,/data-assignment-state=\"true\">Resolved/);
  html=await render({queue:'transport',routed:'3',remaining:'1'});assert.match(html,/Assigned 3 waiting conversations\. Still waiting: 1\./);
  for(const routed of ['-1','NaN','1e2','9007199254740992']){html=await render({queue:'transport',routed,remaining:'1'});assert.doesNotMatch(html,/Still waiting:/);}
- fixture.actor.access_role='team_member';fixture.actor.staff_queue_scope='transport';html=await render({queue:'support',status:'waiting'});assert.equal(fixture.query.queue,'transport');assert.doesNotMatch(html,/Assign waiting chats/);
+ fixture.actor.access_role='team_member';fixture.actor.staff_queue_scope='transport';html=await render({queue:'support',status:'waiting'});assert.equal(fixture.query.queue,'support');assert.doesNotMatch(html,/Assign waiting chats/);
  fixture.actor.access_role='client';fixture.actor.staff_queue_scope=null;html=await render({queue:'transport'});assert.doesNotMatch(html,/Assign waiting chats/);
  assert.ok(fixture.reads>0,'Actual route performs list reads rather than hidden routing commands');
 });
@@ -102,8 +102,8 @@ test('FE-019 S125 actual staff queue keeps compact authoritative reply filtering
  assert.equal(fixture.query.status,'overdue');assert.match(html,/aria-current="page">All active/);assert.match(html,/Reply status/);
  assert.equal((html.match(/name="status"/g)||[]).length,1,'A select and hidden status must not compete');assert.match(html,/<option value="overdue" selected="">Overdue/);
  assert.match(html,/Needs staff reply/);assert.match(html,/Assigned to Agent A/);assert.ok(html.indexOf('data-support-work')<html.indexOf('data-assignment-state'));
- assert.match(html,/href="\/dashboard\/support\/42\?queue=transport&amp;status=overdue&amp;q=QA\+request/);
- assert.match(html,/href="\/dashboard\/support\?queue=transport&amp;status=overdue">Clear/);
+ assert.match(html,/href="\/dashboard\/support\/42\?queue=support&amp;status=overdue&amp;q=QA\+request/);
+ assert.match(html,/href="\/dashboard\/support\?queue=support&amp;status=overdue">Clear/);
  for(const queue of ['support','transport']){html=await render({queue,status:'resolved'});assert.match(html,/aria-current="page">Resolved/);assert.match(html,/>Chat history<\/a>/);assert.doesNotMatch(html,/<select name="status"/);}
  fixture.actor.access_role='team_member';fixture.actor.staff_queue_scope='support';html=await render({queue:'transport',status:'needs_reply'});assert.equal(fixture.query.queue,'support');assert.equal(fixture.query.status,'needs_reply');
  fixture.actor.access_role='client';fixture.actor.staff_queue_scope=null;fixture.conversation.agentJoined=false;html=await render({queue:'transport',status:'overdue'});assert.equal(fixture.query.status,undefined,'A customer URL cannot activate an internal staff response filter');assert.match(html,/Waiting for our team/);assert.doesNotMatch(html,/Reply status|Needs staff reply|Overdue|Assigned to Agent A|Reply due/);
@@ -201,8 +201,8 @@ test('FE-019 retained queue recovery action enforces role and queue without a hi
  }}]});
  const module={exports:{} as {assignWaitingSupportConversationsAction:(form:FormData)=>Promise<void>}};
  vm.runInNewContext(bundle.outputFiles[0].text,{module,exports:module.exports,fixture,capability:hasCapability,queueAgent:isQueueAgent,FormData,URLSearchParams,Date});
- const form=()=>{const value=new FormData();for(const[key,text]of Object.entries({nav_queue:'transport',nav_status:'waiting',nav_q:'chairs',nav_page:'2',returnTo:'https://foreign.invalid'}))value.set(key,text);return value;};
- await assert.rejects(()=>module.exports.assignWaitingSupportConversationsAction(form()),error=>(error as {url?:string}).url==='/dashboard/support?queue=transport&status=waiting&q=chairs&page=2&routed=3&remaining=1');assert.deepEqual(JSON.parse(JSON.stringify(fixture.calls)),[{options:{queue:'transport'}}]);assert.equal(fixture.scheduled,1);assert.deepEqual(fixture.revalidated,['/dashboard/support','/dashboard/support/agents']);
+ const form=()=>{const value=new FormData();for(const[key,text]of Object.entries({nav_queue:'support',nav_status:'waiting',nav_q:'chairs',nav_page:'2',returnTo:'https://foreign.invalid'}))value.set(key,text);return value;};
+ await assert.rejects(()=>module.exports.assignWaitingSupportConversationsAction(form()),error=>(error as {url?:string}).url==='/dashboard/support?queue=support&status=waiting&q=chairs&page=2&routed=3&remaining=1');assert.deepEqual(JSON.parse(JSON.stringify(fixture.calls)),[{options:{queue:'support'}}]);assert.equal(fixture.scheduled,1);assert.deepEqual(fixture.revalidated,['/dashboard/support','/dashboard/support/agents']);
  for(const access_role of ['client','team_member']){fixture.actor.access_role=access_role;const count=fixture.calls.length;await assert.rejects(()=>module.exports.assignWaitingSupportConversationsAction(form()),error=>String((error as {url?:string}).url).includes('Operations%20access%20is%20required.'));assert.equal(fixture.calls.length,count);}
  fixture.actor.access_role='platform_admin';const invalid=form();invalid.set('nav_queue','foreign');await assert.rejects(()=>module.exports.assignWaitingSupportConversationsAction(invalid),error=>String((error as {url?:string}).url).includes('Choose%20a%20support%20queue.'));
  fixture.failure=true;await assert.rejects(()=>module.exports.assignWaitingSupportConversationsAction(form()),error=>{const url=String((error as {url?:string}).url);assert.ok(!url.includes('private'));return url.includes('Support%20could%20not%20be%20updated.');});

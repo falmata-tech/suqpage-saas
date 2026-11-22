@@ -59,7 +59,7 @@ export function isClient(user: SessionUser) {
 
 /** Navigation hint only; each workspace still enforces its own authorization. */
 export function workspaceHomeHref(user:SessionUser):string {
-  if(isQueueAgent(user))return `/dashboard/support?queue=${user.staff_queue_scope}`;
+  if(isQueueAgent(user))return "/dashboard/support?queue=support";
   if(hasCapability(user,'platform:admin'))return '/dashboard/admin';
   if(user.access_role==='client'&&user.business_id)return '/dashboard/profile';
   return '/dashboard';

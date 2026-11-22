@@ -65,7 +65,9 @@ try {
       await expect(page.locator('.discovery-pagination,.discovery-business-results')).toHaveCount(0);
 
       await page.getByRole('button', {name: 'Business locations', exact: true}).click();
-      await expect(page.getByRole('searchbox', {name: 'Search businesses', exact: true})).toHaveValue('Studio');
+      await expect(page.getByRole('searchbox', {name: 'Search businesses', exact: true})).toHaveValue('');
+      await expectCategoryCount(page, 1);
+      assert.equal(new URL(page.url()).searchParams.get('b.category'), 'electronics');
       const map = page.locator('.leaflet-container');
       await expect(map).toBeVisible();
       await expect.poll(() => tiles.servedCount()).toBeGreaterThan(0);
@@ -83,7 +85,9 @@ try {
       await page.getByRole('button', {name: 'Business locations', exact: true}).click();
       await expect(map).toBeVisible();
       await expect(map).toHaveAttribute('data-category-retained', retained);
-      await expect(page.getByRole('searchbox', {name: 'Search businesses', exact: true})).toHaveValue('Studio');
+      await expect(page.getByRole('searchbox', {name: 'Search businesses', exact: true})).toHaveValue('');
+      await expectCategoryCount(page, 1);
+      assert.equal(new URL(page.url()).searchParams.get('b.category'), 'electronics');
       await page.getByRole('button', {name: 'Product listings', exact: true}).click();
       await expect.poll(() => productIds(page)).toEqual(twoPageIds);
       await expect.poll(() => list.evaluate(element => element.scrollTop)).toBe(scrollTop);
@@ -94,7 +98,9 @@ try {
       await expectCategoryCount(page, 1);
       assert.equal(new URL(page.url()).searchParams.get('p.category'), 'electronics');
       await page.getByRole('button', {name: 'Business locations', exact: true}).click();
-      await expect(page.getByRole('searchbox', {name: 'Search businesses', exact: true})).toHaveValue('Studio');
+      await expect(page.getByRole('searchbox', {name: 'Search businesses', exact: true})).toHaveValue('');
+      await expectCategoryCount(page, 1);
+      assert.equal(new URL(page.url()).searchParams.get('b.category'), 'electronics');
 
       // A retired type hint cannot reintroduce the old mixed-result list.
       await page.goto(`${base}/?view=search&industry=electronics&type=businesses`);
@@ -106,8 +112,8 @@ try {
       assert.deepEqual(audit.violations, []);
       assert.deepEqual(errors, []);
       await page.screenshot({path: `${out}/category-${width}.png`, caret: 'initial'});
-      evidence.push({width, firstPageCount: firstIds.length, appendedCount: twoPageIds.length, total: first.resultPage.totalItems, mapRetained: true, independentFilters: true, scrollRetained: true, legacyUrl: true, tileFixture: {id: MAP_TILE_FIXTURE_ID, fulfilled: tiles.servedCount(), uncontrolledRequests: tiles.externalCount(), providerAvailabilityTested: false}});
-      console.log(`PASS category API batches, automatic append, independent filters, retained map/list and legacy URL ${width}px`);
+      evidence.push({width, firstPageCount: firstIds.length, appendedCount: twoPageIds.length, total: first.resultPage.totalItems, mapRetained: true, sharedFilters: true, scrollRetained: true, legacyUrl: true, tileFixture: {id: MAP_TILE_FIXTURE_ID, fulfilled: tiles.servedCount(), uncontrolledRequests: tiles.externalCount(), providerAvailabilityTested: false}});
+      console.log(`PASS category API batches, automatic append, shared filters, retained map/list and legacy URL ${width}px`);
     } finally {
       await context.close();
     }

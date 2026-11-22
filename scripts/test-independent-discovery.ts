@@ -73,6 +73,11 @@ async function main() {
    assert.equal(one.resultPage.totalItems,1);assert.equal(one.searchProducts[0].businessId,ke);assert.equal(one.searchProducts[0].name,'Grass');
   }
   const union=await get('products',{country:['ET','KE'],madeToOrder:true});assert.equal(union.resultPage.totalItems,4);assert.ok(union.searchProducts.every(x=>x.name==='Woven basket'));
+  const madeToOrderMap=await get('businesses',{country:'KE',city:'KE:Shared City',madeToOrder:true});
+  assert.deepEqual(madeToOrderMap.showrooms.map(shop=>shop.id),[ke]);
+  const fuzzyMadeToOrder=await get('businesses',{q:'busines-b',country:'KE',madeToOrder:true});
+  assert.deepEqual(fuzzyMadeToOrder.showrooms.map(shop=>shop.id),[ke]);
+  assert.equal((await get('businesses',{country:'KE',madeToOrder:true,industry:'food-farming'})).showrooms.length,0);
   await assert.rejects(()=>get('products',{offeringType:'services'}),/Check your search filters/);
   const api=async(path:string)=>handleMobileRequest(new Request('https://suqpage.com/api/mobile/v1/'+path),path.split('?')[0].split('/'));
   assert.equal((await api('market?scope=products&offeringType=services')).status,400);

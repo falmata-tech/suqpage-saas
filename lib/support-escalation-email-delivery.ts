@@ -1,3 +1,4 @@
+import {activeBusinessSupport} from './retired-transport';
 import {postgresRuntimeServices} from './postgres-runtime-services';
 import {parseLocale} from './i18n/core';
 import {supportAssignmentReplyDueAt,supportReplyOverdueSource} from './support-assignment-response';
@@ -9,7 +10,7 @@ import {
 
 type Lease={id:number;notification_id:number;attempts:number;lease_until:number;expires_at:number};
 type EmailRow={
-  id:number;source_key:string;kind:string;user_id:number|null;recipient_key:string;conversation_id:number|null;
+  participant_kind:string|null;id:number;source_key:string;kind:string;user_id:number|null;recipient_key:string;conversation_id:number|null;
   email:string|null;access_role:string|null;language:string|null;public_ref:string|null;case_status:string|null;
   resolved_at:number|null;assigned_user_id:number|null;assistance_category:string|null;awaiting_staff_since:number|null;
   awaiting_staff_message_id:number|null;assignment_id:number|null;assignment_user_id:number|null;assigned_at:number|null;
@@ -19,6 +20,7 @@ const positive=(value:number|null):value is number=>value!==null&&Number.isSafeI
 
 /** A fresh private projection, never a notification snapshot or customer payload. */
 export function supportEscalationEmailPayload(row:EmailRow,now:number,origin:string):SupportEscalationEmail|null {
+  if(!activeBusinessSupport(row.participant_kind,row.assistance_category))return null;
   if(!positive(row.id)||row.kind!=='reply_overdue'||!positive(row.user_id)||row.recipient_key!==`user:${row.user_id}`||
     !['platform_admin','operations_manager'].includes(row.access_role||'')||!row.email||
     !['waiting','open'].includes(row.case_status||'')||row.resolved_at!==null||
@@ -78,7 +80,7 @@ export async function dispatchSupportEscalationEmails({now=Date.now(),send,limit
   for(const lease of leased){
     const row=(await query<EmailRow>(`SELECT n.id,n.source_key,n.kind,n.user_id,n.recipient_key,n.conversation_id,
       u.email,p.access_role,f.language,c.public_ref,c.status case_status,c.resolved_at,c.assigned_user_id,
-      c.assistance_category,c.awaiting_staff_since,c.awaiting_staff_message_id,
+      c.participant_kind,c.assistance_category,c.awaiting_staff_since,c.awaiting_staff_message_id,
       a.id assignment_id,a.assigned_user_id assignment_user_id,a.assigned_at,a.released_at,
       agent.name assigned_staff_name,ap.access_role assigned_staff_role,s.queue_scope assigned_staff_scope
       FROM attention_notifications n JOIN users u ON u.id=n.user_id JOIN user_access_profiles p ON p.user_id=u.id

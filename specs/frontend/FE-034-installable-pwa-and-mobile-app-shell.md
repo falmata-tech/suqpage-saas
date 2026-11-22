@@ -15,6 +15,21 @@ typecheck, PWA shell contract and all required release gates pass. The approved
 change is deployed and verified live; see docs/SUQPAGE-S30-RELEASE-2026-09-23.md.
 Existing worker/cache policy is unchanged.
 
+## AfricMade install entry (2026-11-21)
+
+GIVEN a buyer or business opens AfricMade in a browser WHEN they choose Install
+AfricMade at the bottom of the desktop sidebar or in the phone header THEN the
+browser's installation prompt opens if available, or a dismissible panel
+explains installation from the browser. An installed standalone window hides
+the install action. The Android/iOS Home Screen shortcut opens Market in the
+standalone shell. Account and catalog operations keep their normal online flow.
+
+GIVEN the service worker controls navigation WHEN a request is made online or
+offline THEN it never stores HTML from Market, shop or authenticated routes.
+It can reuse the generic offline document and public static assets. This
+supersedes the earlier public-navigation cache contract because the shared
+shell can include sign-in and account state.
+
 ## Problem and outcome
 
 Suqpage is responsive but still presents desktop website chrome on phones and

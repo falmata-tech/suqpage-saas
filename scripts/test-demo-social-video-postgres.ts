@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
 import {getDb, closeDbForTests} from './testing/postgres-fixture';
 import {runtimeCatalogByHandle} from '../lib/catalog-runtime';
-import {correctEnrolledDemoSocialVideo, correctUnenrolledDemoMedia, enrollDemoScenario} from '../lib/demo-simulator-runtime';
+import {correctEnrolledDemoSocialVideo, correctUnenrolledDemoMedia, publishReviewedDemoStory, enrollDemoScenario} from '../lib/demo-simulator-runtime';
 import {PUBLISHED_DEMO_VIDEO_TARGETS} from '../lib/published-demo-video-targets';
 import {curatedManifestForLegacyDesign} from '../lib/showroom-manifests';
+import {demoShowroomAbout} from '../lib/demo-showroom-stories';
 import {productMedia} from '../lib/product-media';
 import {productVideoWatchUrl} from '../lib/video/product-video';
 import type {DemoCatalogProductInput} from '../lib/demo-catalog-scenarios';
@@ -114,6 +115,29 @@ async function main() {
    }else assert.equal(applied.enrollment?.catalog_products_json,initial.enrollment?.catalog_products_json);
    assert.deepEqual(await apply(),{duplicate:true});
    assert.deepEqual(await state(),applied);
+   const rehearsal = new Error('story rehearsal complete');
+   await assert.rejects(db.runner.transaction(async () => {
+    const storyRequest = {businessId,handle,expectedAbout:JSON.parse(applied.drafts[0].content_json).about,
+     draftVersion:applied.drafts[0].version,revision:applied.published.at(-1).revision,direction:'apply' as const};
+    await assert.rejects(publishReviewedDemoStory({...storyRequest,expectedAbout:'Unreviewed story'}),/content_changed/);
+    assert.equal((await publishReviewedDemoStory(storyRequest)).duplicate,false);
+    assert.equal((await publishReviewedDemoStory(storyRequest)).duplicate,true);
+    const storyState=await state();
+    const authored=demoShowroomAbout(handle,'published');
+    assert.equal(JSON.parse(storyState.published.at(-1).content_json).about,authored);
+    assert.deepEqual(storyState.products,applied.products);
+    if (!legacy) {
+     assert.equal(JSON.parse(storyState.enrollment.baseline_page_json).about,authored);
+     for(const key of ['stage','cycle','due_at'])assert.equal(storyState.enrollment[key],applied.enrollment[key]);
+    }
+    const storyRollback={...storyRequest,direction:'rollback' as const};
+    assert.equal((await publishReviewedDemoStory(storyRollback)).duplicate,false);
+    assert.equal((await publishReviewedDemoStory(storyRollback)).duplicate,true);
+    const storyRestored=await state();
+    assert.equal(JSON.parse(storyRestored.drafts[0].content_json).about,storyRequest.expectedAbout);
+    assert.equal(storyRestored.enrollment?.baseline_page_json,applied.enrollment?.baseline_page_json);
+    throw rehearsal;
+   }), error => error === rehearsal);
    const undo=await request('rollback');
    assert.deepEqual(await undo(),{duplicate:false});
    const restored=await state(),restoredCatalog=(await runtimeCatalogByHandle(handle))!;

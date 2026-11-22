@@ -2,6 +2,11 @@
 
 FE-021 overview group activation is covered by the shared clustering, native controller and web Leaflet lifecycle tests. FE-061 published demo video readback compares the selected references with the public shop API via `npm run verify:published-demo-videos`. [Local checks and production observations](../docs/AFRICMADE-TRANSITION-CHECKLIST.md#small-map-clusters-and-public-catalog-review).
 
+FE-023 / FE-040 / BE-067 demo About publication is covered by
+`scripts/test-demo-social-video-postgres.ts`. It exercises page publication,
+stale copy rejection, exact replay and reversal for enrolled and legacy demos.
+The checks retain products, the reviewed video, scenario timing and page history.
+
 FE-053 Android YouTube playback uses the installed package identity in
 `YouTubeFrame.tsx`. The slow-load and provider-error transitions in
 `youtube-player.ts` are exercised by `scripts/test-mobile-video.ts`.
@@ -189,8 +194,8 @@ inline social playback and BE-067 protects scenario continuity. Read-only browse
 inspection confirms the widely reused`wJV9EDe_sFc` is no longer available, and
 the Muna Botanical Studio face-oil story instead plays industrial bar-soap footage.
 Those are demonstrated content defects, not a reason to infer real-account scope.
-Primary-creator replacements remain under actual visual/playback review; none
-has been applied to production or admitted from its title/thumbnail alone.
+The reviewed replacements for the current 66-business roster and its public
+verification are tracked in the [grouped release checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md#grouped-storefront-release).
 
 The finite maintenance path is deployed through PR66, main
 `b5486408ec4200e0e53af3b46ba28f9a95c5075e`, tree

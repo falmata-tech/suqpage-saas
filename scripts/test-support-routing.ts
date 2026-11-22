@@ -8,7 +8,7 @@ import {joinAssignedSupportConversation} from './testing/support-join';
 import {userAttentionFeed} from '../lib/attention-postgres';
 import {
   claimSupportConversation,closeSupportConversation,createPublicSupportConversation,createSupportConversation,
-  getPublicSupportConversation,getSupportConversation,listSupportAgentWorkloads,listSupportConversations,
+  getSupportConversation,listSupportAgentWorkloads,listSupportConversations,
   joinSupportConversation,postSupportMessage,reassignSupportConversation,reopenSupportConversation,
   routeWaitingSupportConversations,updateSupportAgentSetting,
 } from '../lib/support';
@@ -31,7 +31,7 @@ async function main() {
     const transport=await user('routing-transport','team_member'),paused=await user('routing-paused','team_member');
     const impostor=await user('routing-impostor','client',null);
     for(const agent of [a,b])await updateSupportAgentSetting(admin,{userId:agent.id,enabled:true,queueScope:'support',maxOpenConversations:1});
-    await updateSupportAgentSetting(admin,{userId:transport.id,enabled:true,queueScope:'transport'});
+    await db.prepare("INSERT INTO support_agent_settings(user_id,enabled,queue_scope,updated_at) VALUES(?,1,'transport',0)").run(transport.id);
     await updateSupportAgentSetting(admin,{userId:paused.id,enabled:false,queueScope:'support'});
     // A stale/forged settings row must not make a nonstaff identity eligible.
     await db.prepare("INSERT INTO support_agent_settings(user_id,enabled,queue_scope,updated_at) VALUES(?,1,'support',0)").run(impostor.id);
@@ -58,12 +58,12 @@ async function main() {
       SELECT 'TRANSPORT-BULK-'||n,'client',${businessId},${owner.id},'shipment_observation','Fixture','Existing transport','open',${transport.id},${sameTime},${sameTime},${sameTime}
       FROM generate_series(1,101) n`);
     const visitor=await createPublicSupportConversation({category:'buying_assistance',email:'fixture-buyer@example.test',message:'Fixture buying question',origin:'Addis Ababa',destination:'Hawassa',name:'Disposable routing visitor',phone:'+447700900999',idempotencyKey:crypto.randomUUID()},'routing-visitor');
-    const visitorView=await getPublicSupportConversation(visitor.token);
-    const staffView=(await getSupportConversation(admin,visitor.id)).conversation;
-    assert.equal(visitorView.status,'open');assert.equal(staffView.assignedUserId,transport.id);
-    assert.equal(visitorView.publicRef,staffView.publicRef);assert.equal(visitorView.assignedUserName,null,'Internal assignment above 100 is not announced before Join');
-    await joinAssignedSupportConversation(admin,visitor.id);
-    assert.equal((await getPublicSupportConversation(visitor.token)).assignedUserName,staffView.assignedUserName,'After explicit Join the visitor sees the same saved agent as staff');
+    await assert.rejects(()=>getSupportConversation(admin,visitor.id),{code:'not_found'});
+    assert.equal((await db.prepare('SELECT assigned_user_id FROM support_conversations WHERE id=?').get(visitor.id)).assigned_user_id,transport.id,'Retained fixture assignments remain stored');
+    const ownerPending=(await getSupportConversation(owner,over100.id)).conversation;
+    assert.equal(ownerPending.assignedUserName,null,'Internal assignment above 100 is hidden before Join');
+    await joinAssignedSupportConversation(admin,over100.id);
+    assert.equal((await getSupportConversation(owner,over100.id)).conversation.assignedUserName,b.name);
     await reassignSupportConversation(admin,over100.id,a.id);
     assert.equal((await getSupportConversation(admin,over100.id)).conversation.assignedUserId,a.id,'Manual assignment above 100 has no cap');
     await reassignSupportConversation(admin,over100.id,null);
@@ -79,7 +79,7 @@ async function main() {
     await assert.rejects(()=>reassignSupportConversation(admin,over100.id,paused.id),/unavailable/);
     await assert.rejects(()=>reassignSupportConversation(admin,over100.id,impostor.id),/unavailable/);
     await assert.rejects(()=>reassignSupportConversation(owner,over100.id,b.id),/Operations access/);
-    await assert.rejects(()=>updateSupportAgentSetting(admin,{userId:a.id,enabled:true,queueScope:'transport'}),/Reassign open conversations/);
+    await assert.rejects(()=>updateSupportAgentSetting(admin,{userId:a.id,enabled:true,queueScope:'transport'}),/Choose a support queue/);
     await updateSupportAgentSetting(admin,{userId:a.id,enabled:false,queueScope:'support'});
     await joinAssignedSupportConversation(admin,over100.id);
     await postSupportMessage(a,over100.id,{message:'Paused agents retain replies to owned cases',idempotencyKey:crypto.randomUUID()});

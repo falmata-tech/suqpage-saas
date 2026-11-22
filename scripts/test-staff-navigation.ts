@@ -37,5 +37,5 @@ const principal=(access_role:SessionUser['access_role'],business_id:number|null=
 assert.equal(workspaceHomeHref(principal('platform_admin')),'/dashboard/admin');
 assert.equal(workspaceHomeHref(principal('client',1)),'/dashboard/profile');
 assert.equal(workspaceHomeHref(principal('team_member',null,'support')),'/dashboard/support?queue=support');
-assert.equal(workspaceHomeHref(principal('team_member',null,'transport')),'/dashboard/support?queue=transport');
+assert.equal(workspaceHomeHref(principal('team_member',null,'transport')),'/dashboard/support?queue=support');
 assert.equal(workspaceHomeHref(principal('team_member')),'/dashboard');

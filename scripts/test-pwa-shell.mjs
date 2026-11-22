@@ -34,18 +34,21 @@ for (const [file, size] of [
 const worker = read("public/sw.js");
 assert.doesNotThrow(() => new Function(worker), "service worker source parses");
 assert.match(worker, /const CACHE_PREFIX = "africmade-pwa-"/);
-assert.match(worker, /const VERSION = "v4"/);
+assert.match(worker, /const VERSION = "v5"/);
 assert.match(worker, /\[CACHE_PREFIX, "suqpage-pwa-", "mirtpage-pwa-"\]\.some/);
-assert.match(worker, /const PUBLIC_PATHS = new Set\(\["\/", "\/about", "\/featured", "\/discover"/);
-assert.match(worker, /const PRIVATE_PATHS = \["\/api", "\/dashboard", "\/preview", "\/login", "\/request"\]/);
 assert.match(worker, /if \(request\.method !== "GET"\) return/);
 assert.match(worker, /url\.origin !== self\.location\.origin/);
-assert.match(worker, /putBounded\(PAGE_CACHE, request, response\.clone\(\), 20\)/);
-assert.match(worker, /putBounded\(ASSET_CACHE, request, response\.clone\(\), 80\)/);
-assert.match(worker, /caches\.match\(OFFLINE_URL\)/);
+assert.doesNotMatch(worker, /PAGE_CACHE/);
+assert.match(worker, /putBounded\(cache, request, response\.clone\(\), 80\)/);
+assert.match(worker, /shell\.match\(OFFLINE_URL\)/);
+assert.match(worker, /!STATIC_DESTINATIONS\.has\(request\.destination\)/);
 assert.doesNotMatch(worker, /POST|backgroundSync|pushManager/i);
 
 const layout = read("app/layout.tsx");
+assert.match(layout, /<PwaInstallProvider>/);
+assert.match(read("components/PwaInstall.tsx"), /beforeinstallprompt/);
+assert.match(read("components/PublicAppFrame.tsx"), /<PwaInstallButton \/>/);
+assert.match(read("components/WorkspaceNavigation.tsx"), /<PwaInstallButton compact \/>/);
 assert.match(layout, /manifest:"\/manifest\.webmanifest"/);
 assert.match(layout, /appleWebApp:\{capable:true/);
 assert.match(layout, /viewportFit:"cover"/);

@@ -11,18 +11,20 @@ async function main(){
   const business=Number((await db.prepare("INSERT INTO businesses(handle,name,design_key,status) VALUES('recovery-fixture','Recovery fixture','composition','active')").run()).insertedId);
   async function actor(name:string,accessRole:SessionUser['access_role'],businessId:number|null=null){const id=Number((await db.prepare("INSERT INTO users(email,password_hash,name,role,business_id,must_change_password) VALUES(?,'unused',?,'admin',?,0)").run(name+'@example.test',name,businessId)).insertedId);await db.prepare('INSERT INTO user_access_profiles(user_id,access_role) VALUES(?,?)').run(id,accessRole);return (await runtimeUserById(id))!;}
   const admin=await actor('Recovery manager','platform_admin'),owner=await actor('Recovery owner','client',business),agent=await actor('Recovery support agent','team_member'),dispatcher=await actor('Recovery transport agent','team_member');
-  await updateSupportAgentSetting(admin,{userId:agent.id,enabled:true,queueScope:'support'});await updateSupportAgentSetting(admin,{userId:dispatcher.id,enabled:false,queueScope:'transport'});
+  await updateSupportAgentSetting(admin,{userId:agent.id,enabled:true,queueScope:'support'});await db.prepare("INSERT INTO support_agent_settings(user_id,enabled,queue_scope,updated_at) VALUES(?,0,'transport',0)").run(dispatcher.id);
   const held=await createSupportConversation(owner,{subject:'Manual hold',message:'Keep waiting deliberately',idempotencyKey:crypto.randomUUID()});await reassignSupportConversation(admin,held.id,null);
   await postSupportMessage(owner,held.id,{message:'Participant follow-up does not clear a manager hold',idempotencyKey:crypto.randomUUID()});
   await updateSupportAgentSetting(admin,{userId:agent.id,enabled:false,queueScope:'support'});
   const createdAt=Date.now();const waiting=[];for(const offset of [30,10,20])waiting.push(await createSupportConversation(owner,{subject:'Waiting '+offset,message:'Recover this unassigned case',idempotencyKey:crypto.randomUUID()},createdAt+offset));
   const transport=await createPublicSupportConversation({category:'buying_assistance',email:'fixture-buyer@example.test',message:'Fixture buying question',name:'Recovery visitor',phone:'+447700900119',origin:'Local pickup',destination:'Local destination',idempotencyKey:crypto.randomUUID()},'recovery-fixture');
-  assert.equal((await getSupportConversation(admin,transport.id)).conversation.assignedUserId,null);
+  const retired=()=>db.prepare('SELECT * FROM support_conversations WHERE id=?').get(transport.id);
+  const retiredBefore=await retired();
+  await assert.rejects(()=>getSupportConversation(admin,transport.id),{code:'not_found'});
   await db.prepare('UPDATE support_agent_settings SET enabled=1 WHERE user_id IN (?,?)').run(agent.id,dispatcher.id);
   const decision={queue:'support' as const};
   const recovered=await Promise.all([routeWaitingSupportConversations(admin,Date.now(),decision),routeWaitingSupportConversations(admin,Date.now(),decision)]);
   assert.equal(recovered.reduce((sum,value)=>sum+value.routed,0),4);assert.ok(recovered.every(value=>value.remaining===0));
-  assert.equal((await getSupportConversation(admin,held.id)).conversation.status,'open');assert.equal((await getSupportConversation(admin,held.id)).conversation.assignedUserId,agent.id,'S121 manual unassignment rejoins the ordinary automatic queue');assert.equal((await getSupportConversation(admin,transport.id)).conversation.status,'waiting','Support recovery never routes transport work');
+  assert.equal((await getSupportConversation(admin,held.id)).conversation.status,'open');assert.equal((await getSupportConversation(admin,held.id)).conversation.assignedUserId,agent.id,'S121 manual unassignment rejoins the ordinary automatic queue');assert.equal((await retired()).status,'waiting','Support recovery never routes transport work');
   const order=await db.prepare('SELECT conversation_id FROM support_assignments WHERE conversation_id IN (?,?,?) ORDER BY id').all(...waiting.map(value=>value.id));assert.deepEqual(order.map(row=>row.conversation_id),[waiting[1].id,waiting[2].id,waiting[0].id]);
   for(const item of waiting){
    assert.equal((await db.prepare("SELECT COUNT(*)::int count FROM support_events WHERE conversation_id=? AND event_type='assigned'").get(item.id)).count,1);
@@ -42,7 +44,8 @@ async function main(){
   const beforeRepeatedRecovery=await recoveredAlerts();
   assert.deepEqual(await routeWaitingSupportConversations(admin,Date.now(),decision),{routed:0,remaining:0},'Repeat cannot duplicate assignments');
   assert.deepEqual(await recoveredAlerts(),beforeRepeatedRecovery,'Repeat recovery preserves every existing alert without duplication or participant disclosure');
-  assert.deepEqual(await routeWaitingSupportConversations(admin,Date.now(),{queue:'transport'}),{routed:1,remaining:0});
+  await assert.rejects(()=>routeWaitingSupportConversations(admin,Date.now(),{queue:'transport'}),{code:'invalid_setting'});
+  assert.deepEqual(await retired(),retiredBefore);
   await assert.rejects(()=>routeWaitingSupportConversations(owner,Date.now(),decision),/Operations access/);await assert.rejects(()=>routeWaitingSupportConversations(agent,Date.now(),decision),/Operations access/);await assert.rejects(()=>routeWaitingSupportConversations(admin,Date.now(),{queue:'foreign' as never}),/Choose a support queue/);
   await db.prepare("UPDATE user_access_profiles SET access_role='team_member' WHERE user_id=?").run(admin.id);await assert.rejects(()=>routeWaitingSupportConversations(admin,Date.now(),decision),/Operations access/);await db.prepare("UPDATE user_access_profiles SET access_role='platform_admin' WHERE user_id=?").run(admin.id);
   // Availability save remains an immediate command; recovered work is already assigned.

@@ -34,7 +34,8 @@ try {
   assert.ok(!(await listTeamMembers()).some(u=>u.id===staff.userId));
   assert.ok(!(await listTeamMemberChoices('',staff.userId)).some(u=>u.id===staff.userId));
   const page=await listStaffPage({role});assert.equal(page.items.length,1);assert.equal(page.items[0].id,staff.userId);
-  await assert.rejects(()=>updateSupportAgentSetting(admin,{userId:staff.userId,enabled:true,maxOpenConversations:3,queueScope:'all'}),/Choose Support agent or Transport agent/);
+  await assert.rejects(()=>updateSupportAgentSetting(admin,{userId:staff.userId,enabled:true,maxOpenConversations:3,queueScope:'all'}),/Choose Support agent/);
+  await assert.rejects(()=>updateSupportAgentSetting(admin,{userId:staff.userId,enabled:true,queueScope:'transport'}),/Choose a support queue/);
   created.push(principal);
  }
  const content={template:'profile-v1' as const,coverStyle:'overlay' as const,introduction:'Initial',about:'Initial',heroImage:'',videoUrl:''};

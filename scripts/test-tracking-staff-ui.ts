@@ -43,22 +43,21 @@ async function actionFixture(){
  return{state,actions:module.exports,form};
 }
 
-test('BE-058 actual staff actions preserve drafts and idempotency, enforce immutable recipient input and redact unknown errors',async()=>{
- const{state,actions,form}=await actionFixture();const data=form(),before=[...data.entries()];state.error=new contract.TrackingError('Transport access is required.','forbidden');
- assert.deepEqual(JSON.parse(JSON.stringify(await actions.submitShipmentAction(data))),{error:state.error.message});assert.deepEqual([...data.entries()],before);assert.deepEqual(state.revalidated,[]);assert.equal(state.scheduled,0);
- state.error=Error('private database credentials');assert.deepEqual(JSON.parse(JSON.stringify(await actions.submitShipmentAction(data))),{error:'Unable to connect. Please try again.'});state.error=null;
- await assert.rejects(actions.submitShipmentAction(data),error=>(error as{url?:string}).url===back+'&created=1');
- const created=state.calls.at(-1)!;assert.equal(created.kind,'create');assert.equal(created.actor,state.actor);const input=created.input as contract.TrackingSubmit;assert.equal(input.recipientEmail,'recipient+test@example.test');assert.equal(input.idempotencyKey,'tracking-staff-fixture-key');assert.equal(input.legs[0].id,null);assert.ok(!('conversationId'in input));
- await assert.rejects(actions.updateShipmentAction(form('update')),error=>(error as{url?:string}).url===back+'&saved=1');await assert.rejects(actions.revokeShipmentAction(form('revoke')),error=>(error as{url?:string}).url===back+'&revoked=1');
- assert.equal(state.scheduled,1,'Only a successful explicit Submit schedules the queued initial email; ordinary Edit/Revoke do not send');
- const count=state.calls.length;for(const invalid of[()=>{const f=form('update');f.set('recipientEmail','other@example.test');return f;},()=>{const f=form('update');f.append('shipmentId','22');return f;},()=>{const f=form('update');f.set('legs','{');return f;},()=>{const f=form('update');f.set('returnTo','https://foreign.invalid');return f;}])assert.ok((await actions.updateShipmentAction(invalid()))?.error);assert.equal(state.calls.length,count);
- const submitted=state.calls.length;for(const [key,value] of [['recipientEmail','invalid'],['conversationId','71'],['publicRef','SUP-PRIVATE'],['code','123456']]){const invalid=form();invalid.set(key,value);assert.ok((await actions.submitShipmentAction(invalid))?.error);}assert.equal(state.calls.length,submitted,'Invalid email and chat/OTP fields never reach Submit');
- assert.ok(state.calls.every(call=>call.kind!=='check'&&!JSON.stringify(call.input).includes('nav_')));
-});
-
-test('BE-058 staff action accepts bounded provider details beyond the retired24k form bound and rejects hostile input before writer',async()=>{
- const{state,actions,form}=await actionFixture();const data=form();const legs=Array.from({length:12},(_,i)=>({...shipment.legs[0],id:null,trackingUrl:'https://carrier.example.test/'+String(i)+'?ref='+('x'.repeat(1950)),trackingCode:'Code-'+i}));data.set('legs',JSON.stringify(legs));assert.ok(String(data.get('legs')).length>24_000);await assert.rejects(actions.submitShipmentAction(data),e=>(e as{url?:string}).url===back+'&created=1');const received=state.calls.at(-1)!.input as contract.TrackingSubmit;assert.equal(received.legs.length,12);assert.equal(received.legs[0].trackingCode,'Code-0');
- const before=state.calls.length;for(const trackingUrl of['http://carrier.example.test','javascript:alert(1)','https://127.0.0.1/track','https://carrier.example.test:443/track','https://user:pass@carrier.example.test/track']){const invalid=form();invalid.set('legs',JSON.stringify([{...legs[0],trackingUrl}]));assert.ok((await actions.submitShipmentAction(invalid))?.error);}const tooLarge=form();tooLarge.set('legs',' '.repeat(60_001));assert.ok((await actions.submitShipmentAction(tooLarge))?.error);assert.equal(state.calls.length,before);
+test('FE-078 retired tracking actions reject old forms without writes or notifications',async()=>{
+ const {state,actions,form}=await actionFixture();
+ const cases=[
+  [actions.submitShipmentAction,form('create')],
+  [actions.updateShipmentAction,form('update')],
+  [actions.revokeShipmentAction,form('revoke')],
+ ] as const;
+ for(const [action,data] of cases){
+  const before=[...data.entries()];
+  assert.deepEqual(JSON.parse(JSON.stringify(await action(data))),{error:'This service is no longer available.'});
+  assert.deepEqual([...data.entries()],before);
+ }
+ assert.deepEqual(state.calls,[]);
+ assert.deepEqual(state.revalidated,[]);
+ assert.equal(state.scheduled,0);
 });
 
 async function routeFixture(entry:string){
@@ -74,28 +73,34 @@ async function routeFixture(entry:string){
  return{state,render:async(query:Record<string,string>={},id='21')=>renderToStaticMarkup(await module.exports.default({params:Promise.resolve({id}),searchParams:Promise.resolve({...view,...query})}))};
 }
 
-test('FE-069 actual staff pages are read-first, reject support/owner before reads and preserve canonical delivery/revocation state',async()=>{
- for(const entry of['app/dashboard/tracking/page.tsx','app/dashboard/tracking/new/page.tsx','app/dashboard/tracking/[id]/page.tsx']){
-  const{state,render}=await routeFixture(entry);for(const role of['client','team_member']){state.actor.access_role=role;state.actor.staff_queue_scope='support';await assert.rejects(render(),error=>(error as{url?:string}).url==='/dashboard');}assert.deepEqual(state.reads,[]);
-  state.actor.access_role='team_member';state.actor.staff_queue_scope='transport';let html=await render();assert.ok(!html.includes('Six-digit code'),'Staff never see or enter recipient codes');
-  state.error=Error('read failed');await assert.rejects(render(),/read failed/,'Infrastructure failure must not become an empty successful list');state.error=null;
-  if(entry==='app/dashboard/tracking/page.tsx'){assert.match(html,/Create and manage shipment records/);assert.match(html,/href="\/dashboard\/tracking\/new\?q=saved\+search&amp;cursor=123"/);assert.doesNotMatch(html,/verify.*before you submit|Check email verification|conversationId/);}
-  if(entry.endsWith('[id]/page.tsx')){assert.match(html,/data-read/);assert.doesNotMatch(html,/data-editor/);assert.match(html,/Email accepted for sending/);html=await render({edit:'1'});assert.match(html,/data-editor/);assert.doesNotMatch(html,/data-read/);state.shipment.revokedAt=5;state.shipment.deliveryState='cancelled';html=await render({edit:'1'});assert.doesNotMatch(html,/data-editor/);assert.match(html,/Shipment access revoked/);assert.match(html,/Email cancelled/);}
+test('FE-078 staff tracking routes stop before any private reads',async()=>{
+ for(const entry of ['app/dashboard/tracking/page.tsx','app/dashboard/tracking/new/page.tsx','app/dashboard/tracking/[id]/page.tsx']){
+  const {state,render}=await routeFixture(entry);
+  for(const role of ['client','team_member','operations_manager','platform_admin']){
+   state.actor.access_role=role;
+   await assert.rejects(render({edit:'1'}),/not found/);
+  }
+  assert.deepEqual(state.reads,[]);
  }
 });
 
-test('FE-069 actual dashboard navigation exposes Tracking only to transport/all staff and managers, including existing phone navigation',async()=>{
+test('FE-078 desktop and phone navigation hides retired tracking for every role',async()=>{
  const output=await build({entryPoints:['components/DashboardShell.tsx'],bundle:true,write:false,format:'cjs',platform:'node',jsx:'automatic',external:['react','react/jsx-runtime','lucide-react'],plugins:[{name:'tracking-navigation-ports',setup(b){
   b.onResolve({filter:/^@\/components\/WorkspaceNavigation$/},()=>({path:process.cwd()+'/components/WorkspaceNavigation.tsx'}));
   b.onResolve({filter:/\.module\.css$/},a=>({path:a.path,namespace:'css'}));b.onLoad({filter:/.*/,namespace:'css'},()=>({contents:'export default {};'}));
   b.onResolve({filter:/^(?:next\/(?:link|navigation)$|@\/app\/actions$|@\/lib\/(?:i18n\/(?:ui|server)|config|owner-page-runtime|owner-page-service|owner-page-domain|staff-business-authority)$|@\/components\/|\.\/(?:AttentionAlerts|BusinessWorkspaceNavigation)$)/},a=>({path:a.path,namespace:'ports'}));
-  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:a.path==='next/link'?`import React from'react';export default props=><a {...props}/>;`:a.path==='next/navigation'?`export const usePathname=()=>'/dashboard/tracking',useSearchParams=()=>new URLSearchParams();`:a.path==='@/app/actions'?`export const logoutAction=async()=>{};`:a.path==='@/lib/i18n/ui'?`export const useUiText=()=>key=>key;`:a.path==='@/lib/i18n/server'?`export const getUiText=async()=>key=>key;`:a.path==='@/lib/config'?`export const authDriver=()=> 'supabase';`:a.path==='@/lib/staff-business-authority'?`export const currentStaffBusinessGrant=async()=>false,currentBusinessAuthority=async()=>null;`:a.path==='@/lib/owner-page-runtime'?`export const ownerPageEditorEnabled=()=>false,ownerPagePort={};`:a.path==='@/lib/owner-page-service'?`export const readOwnerPage=async()=>{};`:a.path==='@/lib/owner-page-domain'?`export class OwnerPageError extends Error{}`:a.path.endsWith('NavigationPendingIndicator')?`import React from'react';export default()=>null;export const NavigationPendingProvider=props=><>{props.children}</>,NavigationPendingMain=props=><main>{props.children}</main>;`:`export default()=>null;`}));
+  b.onLoad({filter:/.*/,namespace:'ports'},a=>({loader:'jsx',contents:a.path==='@/components/PwaInstall'?`export const PwaInstallButton=()=>null;`:a.path==='next/link'?`import React from'react';export default props=><a {...props}/>;`:a.path==='next/navigation'?`export const usePathname=()=>'/dashboard/tracking',useSearchParams=()=>new URLSearchParams();`:a.path==='@/app/actions'?`export const logoutAction=async()=>{};`:a.path==='@/lib/i18n/ui'?`export const useUiText=()=>key=>key;`:a.path==='@/lib/i18n/server'?`export const getUiText=async()=>key=>key;`:a.path==='@/lib/config'?`export const authDriver=()=> 'supabase';`:a.path==='@/lib/staff-business-authority'?`export const currentStaffBusinessGrant=async()=>false,currentBusinessAuthority=async()=>null;`:a.path==='@/lib/owner-page-runtime'?`export const ownerPageEditorEnabled=()=>false,ownerPagePort={};`:a.path==='@/lib/owner-page-service'?`export const readOwnerPage=async()=>{};`:a.path==='@/lib/owner-page-domain'?`export class OwnerPageError extends Error{}`:a.path.endsWith('NavigationPendingIndicator')?`import React from'react';export default()=>null;export const NavigationPendingProvider=props=><>{props.children}</>,NavigationPendingMain=props=><main>{props.children}</main>;`:`export default()=>null;`}));
  }}]});
  const module={exports:{}as{default:(props:{user:import('../lib/types').SessionUser;business:null;children:ReactElement|null})=>Promise<ReactElement>}};vm.runInNewContext(output.outputFiles[0].text,{module,exports:module.exports,require,URLSearchParams});
- const assertStandalone=(html:string)=>{const menus=html.match(/<nav class="workspace-nav"[^>]*>[\s\S]*?<\/nav>/g)||[];assert.ok(menus.length>0);for(const menu of menus){assert.equal((menu.match(/href="\/dashboard\/tracking"/g)||[]).length,1,'Tracking has one dedicated desktop/full-menu entry');for(const group of menu.match(/<div class="workspace-nav-group">[\s\S]*?<\/div>/g)||[])if(group.includes('>Chats</span>'))assert.doesNotMatch(group,/\/dashboard\/tracking/,'Tracking is separate from chat navigation');}assert.doesNotMatch(html,/\/dashboard\/tracking\?[^"]*(?:conversationId|publicRef)/);};
- const actor={id:9,email:'fixture@example.test',name:'Fixture',role:'admin' as const,access_role:'team_member' as const,business_id:null,must_change_password:0};
- for(const role of['transport','all','support']as const){const html=renderToStaticMarkup(await module.exports.default({user:{...actor,staff_queue_scope:role},business:null,children:null}));if(role==='support')assert.doesNotMatch(html,/href="\/dashboard\/tracking"/);else{assertStandalone(html);assert.match(html,/workspace-mobile-tabs[\s\S]*href="\/dashboard\/tracking"/);}}
- for(const access_role of['platform_admin','operations_manager','client']as const){const html=renderToStaticMarkup(await module.exports.default({user:{...actor,access_role},business:null,children:null}));if(access_role==='client')assert.doesNotMatch(html,/href="\/dashboard\/tracking"/);else assertStandalone(html);}
+ const base={id:9,email:'fixture@example.test',name:'Fixture',role:'admin' as const,business_id:null,must_change_password:0};
+ for(const staff_queue_scope of ['transport','all','support'] as const){
+  const html=renderToStaticMarkup(await module.exports.default({user:{...base,access_role:'team_member',staff_queue_scope},business:null,children:null}));
+  assert.doesNotMatch(html,/href="\/dashboard\/tracking/);
+ }
+ for(const access_role of ['platform_admin','operations_manager','client'] as const){
+  const html=renderToStaticMarkup(await module.exports.default({user:{...base,access_role},business:null,children:null}));
+  assert.doesNotMatch(html,/href="\/dashboard\/tracking/);
+ }
 });
 
 type Fixture={calls:Array<{kind:string;data:Record<string,string>|string}>;routes:string[];copied:string[];mount:(kind:'create'|'edit'|'actions',manager?:boolean)=>void;rerender:(kind:'create'|'edit'|'actions',value:StaffTrackingShipment|null,nonce?:string)=>void;settle:(index:number,result:unknown)=>void};

@@ -72,8 +72,9 @@ try {
   await expect(market(page).locator('.discovery-business-results')).toHaveCount(0);
   await expect(page.getByRole('heading',{name:'Products',exact:true,level:2})).toBeVisible();
   await page.getByRole('button',{name:'Business locations',exact:true}).click();
-  await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('');
-  await expectCategoryCount(page,0);
+  await expect(page.getByRole('searchbox',{name:'Search businesses',exact:true})).toHaveValue('lotion');
+  await expectCategoryCount(page,1);
+  await expect(page).toHaveURL(url=>url.searchParams.get('b.q')==='lotion'&&url.searchParams.get('b.category')==='beauty-wellness');
   await expect(market(page).locator('.leaflet-container')).toBeVisible();
   await expect.poll(()=>tileFixture.servedCount()).toBeGreaterThan(0);
   await page.getByRole('button',{name:'Product listings',exact:true}).click();

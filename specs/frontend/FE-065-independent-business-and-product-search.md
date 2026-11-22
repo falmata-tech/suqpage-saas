@@ -11,6 +11,17 @@ change_level: L2
 # FE-065 — Independent business and product discovery
 
 
+## Carry filters between Market views (2026-11-21)
+
+GIVEN a visitor enters search text or sets department, subcategory, country,
+city or Made to order in either view WHEN they switch to the other view THEN
+the destination uses and displays those criteria. Switching resets destination
+pagination when criteria change. A map subcategory or Made to order filter
+requires a matching published physical product, with both filters applying to
+the same product. Business identity search and product search retain their
+respective matching behavior. Explicit links and browser history restore their
+saved scope and criteria. This supersedes earlier independent-switch behavior.
+
 ## Stable marketplace product categories (2026-11-20)
 
 GIVEN a visitor filters Product listings WHEN a business has multiple industries

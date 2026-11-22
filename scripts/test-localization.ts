@@ -175,7 +175,7 @@ test('FE-049: server-only copy is excluded from client messages', async()=>{
   const {clientMessages}=await import('../lib/i18n/client-messages');
   const selected=clientMessages(catalogs.am);
   assert.equal(selected[messageKey('Save')],catalogs.am[messageKey('Save')]);
-  const privacy='AfricMade stores account details, business page content, support and transport conversations, and shipment-record information to operate the service.';
+  const privacy='AfricMade stores account details, business page content, inquiries, and business support conversations to operate the service.';
   assert.ok(catalogs.am[messageKey(privacy)]);
   assert.equal(selected[messageKey(privacy)],undefined);
   assert.ok(Object.keys(selected).length<Object.keys(catalogs.am).length);

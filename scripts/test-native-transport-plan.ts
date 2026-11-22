@@ -56,7 +56,7 @@ test('FE-068 native renderer shows every ordered literal stage and all five meth
 });
 
 test('FE-069 native legacy plan route drops all capability input without making a read',async()=>{
- const h=await harness('transport-plan'),tree=h.render();assert.equal(tree.length,1);assert.equal(tree[0].type,'Redirect');assert.equal(tree[0].props.href,'/tracking');assert.equal(h.fixture.requests.length,0);assert.equal(h.fixture.ownerCalls.length,0);h.unmount();
+ const h=await harness('transport-plan'),tree=h.render();assert.equal(tree.length,1);assert.equal(tree[0].type,'Redirect');assert.equal(tree[0].props.href,'/');assert.equal(h.fixture.requests.length,0);assert.equal(h.fixture.ownerCalls.length,0);h.unmount();
 });
 
 test('FE-069 native participant exposes independent Tracking and ignores legacy plan authority',async()=>{

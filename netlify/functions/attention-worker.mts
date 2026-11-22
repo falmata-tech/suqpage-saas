@@ -1,10 +1,9 @@
-import {dispatchPartnerInterestEmails,partnerInterestSchemaReady} from '../../lib/transport-partner-email-delivery.ts';
+import {partnerInterestSchemaReady} from '../../lib/transport-partner-email-delivery.ts';
 import {cleanupPartnerInterests} from '../../lib/transport-partner-interest.ts';
+import {isTrackingSchemaReady,cleanupTrackingIdentity} from '../../lib/tracking.ts';
 import {dispatchSupportEscalationEmails} from '../../lib/support-escalation-email-delivery.ts';
 import {dispatchAttention,checkExpoAttentionReceipts} from '../../lib/attention-delivery.ts';
 import {sweepSupportInactivity,sweepWaitingSupportAssignments,sweepSupportReplyOverdue} from '../../lib/support.ts';
-import {dispatchTrackingEmails} from '../../lib/tracking-email-delivery.ts';
-import {isTrackingSchemaReady,cleanupTrackingIdentity} from '../../lib/tracking.ts';
 export const config={schedule:'* * * * *'};
 export default async()=>{
   const started=Date.now();
@@ -52,21 +51,13 @@ export default async()=>{
     const {processed,accepted,ignored,failed,pending,configured}=await dispatchSupportEscalationEmails({limit:2});
     console.log('Admin email escalation',{processed,accepted,ignored,failed,pending,configured});
   }catch{console.error('Admin email escalation failed',{category:'email_escalation_failure'});}
-  if(Date.now()-started>=20_000){console.log('Tracking email deferred',{category:'worker_time_budget'});return;}
-  try{
-    if(await partnerInterestSchemaReady()){
-      const{processed,accepted,ignored,failed,pending,configured}=await dispatchPartnerInterestEmails({limit:2});
-      console.log('Logistics partner email',{processed,accepted,ignored,failed,pending,configured});
-      if(Date.now()-started<20_000)await cleanupPartnerInterests();
-    }
-  }catch{console.error('Logistics partner email failed',{category:'partner_email_failure'});}
-  if(Date.now()-started>=20_000){console.log('Tracking email deferred',{category:'worker_time_budget'});return;}
-  let trackingReady=false;
-  try{trackingReady=await isTrackingSchemaReady();}catch{console.error('Tracking readiness failed',{category:'tracking_readiness_failure'});}
-  if(!trackingReady)return;
-  try{const{processed,accepted,ignored,failed,pending,configured}=await dispatchTrackingEmails({limit:1});console.log('Tracking email',{processed,accepted,ignored,failed,pending,configured});}
-  catch{console.error('Tracking email failed',{category:'tracking_email_failure'});}
-  if(Date.now()-started>=20_000){console.log('Tracking cleanup deferred',{category:'worker_time_budget'});return;}
-  try{const{sessions,challenges}=await cleanupTrackingIdentity();console.log('Tracking identity cleanup',{sessions,challenges});}
-  catch{console.error('Tracking identity cleanup failed',{category:'tracking_cleanup_failure'});}
+
+  // Expire retained private tokens and old intake data on the existing
+  // schedule. Neither cleanup sends email or activates a transport workflow.
+  if(Date.now()-started>=20_000)return;
+  try{if(await partnerInterestSchemaReady())await cleanupPartnerInterests();}
+  catch{console.error('Historical intake cleanup failed',{category:'partner_cleanup_failure'});}
+  if(Date.now()-started>=20_000)return;
+  try{if(await isTrackingSchemaReady())await cleanupTrackingIdentity();}
+  catch{console.error('Historical tracking cleanup failed',{category:'tracking_cleanup_failure'});}
 };

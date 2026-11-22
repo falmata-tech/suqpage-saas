@@ -51,7 +51,7 @@ async function actionFixture(){
 
 test('FE-069 S141 stale chat-plan save/replace actions authenticate but never mutate or redirect historical plans',async()=>{
  const{state,actions,form}=await actionFixture();
- const expected={error:'Manage shipment records in the Shipment records workspace.'};
+ const expected={error:'This service is no longer available.'};
  for(const action of[actions.saveTransportPlanAction,actions.replaceTransportPlanLinkAction]){
   for(const data of[form(),new FormData(),(()=>{const value=form();value.set('legs','{');value.append('conversationId','72');return value;})()]){
    const before=[...data.entries()];assert.deepEqual(JSON.parse(JSON.stringify(await action(data))),expected);assert.deepEqual([...data.entries()],before);
@@ -86,13 +86,12 @@ async function pageFixture(){
  return{state,render:async(query:Record<string,string>={},id='71')=>renderToStaticMarkup(await module.exports.default({params:Promise.resolve({id}),searchParams:Promise.resolve({...origin,...query})}))};
 }
 
-test('FE-069 S142 obsolete case-plan route redirects eligible staff uniformly without loading historical data',async()=>{
- const{state,render}=await pageFixture();
- const queries:Record<string,string>[]=[{},{edit:'1'}];
- for(const id of ['71','bad','0'])for(const query of queries)await assert.rejects(render(query,id),error=>(error as{url?:string}).url==='/dashboard/tracking');
- assert.deepEqual(state.reads,[],'No conversation, plan or capability is read by the obsolete route');
- for(const role of ['client','team_member']){state.actor.access_role=role;state.actor.staff_queue_scope='support';await assert.rejects(render(),error=>(error as{url?:string}).url==='/dashboard');}
- for(const role of ['platform_admin','operations_manager']){state.actor.access_role=role;await assert.rejects(render(),error=>(error as{url?:string}).url==='/dashboard/tracking');}
+test('FE-078 obsolete case-plan page stops before loading historical data',async()=>{
+ const {state,render}=await pageFixture();
+ for(const role of ['client','team_member','platform_admin','operations_manager']){
+  state.actor.access_role=role;
+  await assert.rejects(render({edit:'1'},'71'),/not found/);
+ }
  assert.deepEqual(state.reads,[]);
 });
 

@@ -21,7 +21,7 @@ export default async function NewStaffPage() {
     <FocusedEditForm action={createStaffAccountAction} cancelHref="/dashboard/admin/staff" submitLabel="Create staff account">
       <div className="field"><label htmlFor="staff-name">{t("Name")}</label><input id="staff-name" name="name" required maxLength={100}/></div>
       <div className="field"><label htmlFor="staff-email">{t("Email")}</label><input id="staff-email" name="email" type="email" required maxLength={160}/></div>
-      <div className="field"><label htmlFor="staff-role">{t("Access role")}</label><select id="staff-role" name="accessRole"><option value="support_agent">{t("Support agent")}</option><option value="transport_agent">{t("Transport agent")}</option></select></div>
+      <div className="field"><label htmlFor="staff-role">{t("Access role")}</label><select id="staff-role" name="accessRole"><option value="support_agent">{t("Support agent")}</option></select></div>
       {!managed&&<div className="field"><label htmlFor="staff-password">{t("Temporary password")}</label><input id="staff-password" name="temporaryPassword" type="password" minLength={12} required/></div>}
     </FocusedEditForm>
   </DashboardShell>;

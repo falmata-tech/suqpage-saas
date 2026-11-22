@@ -113,10 +113,12 @@ export async function findSpellingMatches(scope: SpellingScope, port: SpellingSe
      .replace('/* product group */', `AND ${productScope}`)
      .replace(`JOIN businesses b ON b.id=product.business_id ${businessJoin} ${publicationJoin}`,
       `JOIN businesses b ON b.id=product.business_id ${businessJoin} ${publicationJoin} ${MARKET_TAXONOMY_JOIN}`);
-   } else if(scope.discovery.subcategory) {
-    sql=sql.replaceAll("b.status='active'",`EXISTS(SELECT 1 FROM products product ${MARKET_TAXONOMY_JOIN}
+   } else if(scope.discovery.subcategory||scope.discovery.madeToOrder) {
+    sql=sql.replaceAll(businessCategory,'TRUE').replaceAll("b.status='active'",`EXISTS(SELECT 1 FROM products product ${MARKET_TAXONOMY_JOIN}
       WHERE product.business_id=b.id AND product.is_published=1 AND product.offering_kind<>'service'
-      AND ${MARKET_SUBCATEGORY_SQL}=scope.discovery->>'subcategory') AND b.status='active'`);
+      AND (scope.industry='all' OR department.industry=ANY(string_to_array(scope.industry,',')))
+      AND (scope.discovery->>'subcategory' IS NULL OR ${MARKET_SUBCATEGORY_SQL}=scope.discovery->>'subcategory')
+      AND (NOT COALESCE((scope.discovery->>'madeToOrder')::boolean,FALSE) OR product.offering_kind='made_to_order')) AND b.status='active'`);
    }
    if(scope.discovery.publicMapLocations)sql=sql.replaceAll("b.status='active'",`EXISTS(SELECT 1 FROM owner_location_proposals map_location WHERE map_location.business_id=b.id AND (
     (map_location.location_mode='storefront' AND p.latitude IS NOT NULL AND p.longitude IS NOT NULL) OR

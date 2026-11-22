@@ -141,7 +141,7 @@ test('self-service owner, staff product controls and inquiry lifecycle',async({}
   });
 });
 
-test('category product batches retain the independent map on desktop and phones',async({},testInfo)=>{
+test('category product batches retain the map and shared filters on desktop and phones',async({},testInfo)=>{
   test.setTimeout(180_000);
   execFileSync(process.execPath,[path.join(process.cwd(),'scripts/capture-category-pagination.mjs')],{
     env:{...process.env,SUQPAGE_TEST_SCREENSHOT_DIR:testInfo.outputPath('category')},stdio:'pipe',timeout:150_000,maxBuffer:2*1024*1024,
@@ -264,7 +264,6 @@ test('human searches preserve latest typing, filters and product navigation',asy
 
 // FE-019/BE-018: real production-mode staff actions, not canned API successes.
 for (const [name, script] of [
-  ['transport replies, private notes and ended/resolved history', 'capture-live-buying-staff.ts'],
   ['video request approval and public gallery update', 'capture-video-requests.ts'],
 ]) test(name, async ({}, testInfo) => {
   test.setTimeout(180_000);

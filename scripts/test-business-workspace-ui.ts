@@ -44,7 +44,7 @@ test('FE-026 business context keeps one global menu and permission-filtered loca
   const transportAgent={...principal,access_role:'team_member',staff_queue_scope:'transport'};
   html=renderToStaticMarkup(await module.exports.default({user:transportAgent,business:null,children:'Queue'}));
   assert.ok(!html.includes('Business details')&&!html.includes('qa-showroom'),'Queue agents have no business context/editor sections.');
-  assert.deepEqual(Array.from(fixture.groups).flatMap(group=>Array.from(group.items,item=>item.href)),['/dashboard/support?queue=transport','/dashboard','/dashboard/tracking'],'Granted Transport staff have a separate Businesses destination alongside chat and Tracking');
+  assert.deepEqual(Array.from(fixture.groups).flatMap(group=>Array.from(group.items,item=>item.href)),['/dashboard/support?queue=support','/dashboard'],'Legacy transport staff with a grant retain their Businesses destination');
   html=renderToStaticMarkup(await module.exports.default({user:{...principal,access_role:'team_member',staff_queue_scope:'support'},business:null,children:'Queue'}));
   assert.deepEqual(Array.from(fixture.groups).flatMap(group=>Array.from(group.items,item=>item.href)),['/dashboard/support?queue=support','/dashboard/reports','/dashboard'],'Granted Support staff gain Businesses but neither Transport nor Tracking');
   assert.ok(!html.includes('Business details')&&!html.includes('qa-showroom'),'Support-only staff also have no business editor context');
@@ -54,7 +54,7 @@ test('FE-026 business context keeps one global menu and permission-filtered loca
   assert.doesNotMatch(html,/href="\/dashboard\/access\?business=18"/,'Staff business authority does not grant owner account access');
   fixture.staffGrant=false;fixture.pageAccess=false;
   html=renderToStaticMarkup(await module.exports.default({user:transportAgent,business:null,children:'Queue'}));
-  assert.deepEqual(Array.from(fixture.groups).flatMap(group=>Array.from(group.items,item=>item.href)),['/dashboard/support?queue=transport','/dashboard/tracking'],'Revoking business management removes Businesses without changing Transport or Tracking');
+  assert.deepEqual(Array.from(fixture.groups).flatMap(group=>Array.from(group.items,item=>item.href)),['/dashboard/support?queue=support'],'Revoking business management removes the Businesses destination');
   html=renderToStaticMarkup(await module.exports.default({user:transportAgent,business,children:'Record'}));
   assert.doesNotMatch(html,/Location &amp; visibility|href="\/dashboard\/products\?business=18"/,'Revoked staff see no business task navigation');
 });

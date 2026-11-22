@@ -15,7 +15,6 @@ import AttentionAlerts from './AttentionAlerts';
 import attentionStyles from './AttentionAlerts.module.css';
 import type { SupportQueue } from '@/lib/support-navigation';
 import BusinessWorkspaceNavigation, {type BusinessWorkspaceLink} from './BusinessWorkspaceNavigation';
-import {canUseStaffTracking} from '@/app/dashboard/tracking/navigation';
 
 const group = (label: string, items: Array<WorkspaceNavItem | null>): WorkspaceNavGroup | null => {
   const visible = items.filter((item): item is WorkspaceNavItem => Boolean(item));
@@ -32,17 +31,16 @@ export default async function DashboardShell({ user, business, children, support
   const queueAgent = isQueueAgent(user);
   const staffGrant=teamMember||user.access_role==='operations_manager'?await currentStaffBusinessGrant(user):false;
   const businessAuthority=business?await currentBusinessAuthority(user,business.id):null;
-  const tracking=canUseStaffTracking(user);
   const canMaintainProducts = Boolean(business&&businessAuthority&&canMaintainBasicProducts(user,business.id,businessAuthority==='staff'));
   let pageEditor = false;
   if (business && ownerPageEditorEnabled()) {
     try { await readOwnerPage(ownerPagePort, user, business.id); pageEditor = true; }
     catch (error) { if (!(error instanceof OwnerPageError && error.status === 403)) throw error; }
   }
-  const dashboardHref = client ? "/dashboard/profile" : queueAgent ? `/dashboard/support?queue=${user.staff_queue_scope}` : platformAdmin ? "/dashboard/admin" : `/dashboard${query}`;
+  const dashboardHref = client ? "/dashboard/profile" : queueAgent ? "/dashboard/support?queue=support" : platformAdmin ? "/dashboard/admin" : `/dashboard${query}`;
   const identityContext = business
     ? business.name
-    : queueAgent ? user.staff_queue_scope === "transport" ? "Transport agent" : "Support agent"
+    : queueAgent ? "Support agent"
     : platformAdmin
       ? "Platform administration"
       : operations
@@ -54,12 +52,10 @@ export default async function DashboardShell({ user, business, children, support
   const globalGroups = platformAdmin ? [
     group("Chats", [
       { href: "/dashboard/support?queue=support", label: "Business support", icon: "support" },
-      { href: "/dashboard/support?queue=transport", label: "Transport", icon: "transport" },
     ]),
     group("Administration", [
       { href: "/dashboard/admin", label: "Overview", icon: "overview" },
       { href: "/dashboard/admin/businesses", label: "Businesses", icon: "businesses", activePaths:['/dashboard','/dashboard/products','/dashboard/settings','/dashboard/access','/dashboard/page-editor','/dashboard/catalog','/dashboard/admin/discovery',...(business?['/dashboard/admin/sponsors']:[])] },
-      { href: "/dashboard/tracking", label: "Shipment records", icon: "tracking" },
       { href: "/dashboard/admin/staff", label: "Staff", icon: "staff", activePaths:["/dashboard/support/agents"] },
       { href: "/dashboard/reports", label: "Listing reports", icon: "reports" },
     ]),
@@ -74,7 +70,6 @@ export default async function DashboardShell({ user, business, children, support
       {href:'/dashboard/profile/showroom',label:'Your page',icon:'pageEditor',activePaths:['/dashboard/page-editor','/dashboard/profile/cover','/dashboard/profile/handle']},
       {href:'/dashboard/products',label:'Products',icon:'offerings',activePaths:['/dashboard/catalog']},
       {href:'/dashboard/inquiries',label:'Inbox',icon:'support'},
-      {href:'/dashboard/transport',label:'Transport chat',icon:'transport'},
       {href:'/dashboard/support',label:'Support',icon:'support'},
     ]),
     group('Settings',[
@@ -87,16 +82,18 @@ export default async function DashboardShell({ user, business, children, support
       {href:'/about',label:'About',icon:'library'},
     ]),
   ].filter((item):item is WorkspaceNavGroup=>Boolean(item));
-  const agentGroups = [group("Chats",[{href:dashboardHref,label:user.staff_queue_scope === "transport" ? "Transport" : "Business support",icon:user.staff_queue_scope === "transport" ? "transport" : "support"},...(user.staff_queue_scope==='support'?[{href:'/dashboard/reports',label:'Listing reports',icon:'reports' as const}]:[])]),group('Workspace',[staffGrant?{href:'/dashboard',label:'Business workspaces',icon:'businesses'}:null,tracking?{href:'/dashboard/tracking',label:'Shipment records',icon:'tracking'}:null])].filter((item): item is WorkspaceNavGroup => Boolean(item));
+  const agentGroups = [
+    group("Chats", [{href:dashboardHref,label:"Business support",icon:"support"},
+      ...(user.staff_queue_scope==='support'?[{href:'/dashboard/reports',label:'Listing reports',icon:'reports' as const}]:[])]),
+    group('Workspace',[staffGrant?{href:'/dashboard',label:'Business workspaces',icon:'businesses'}:null]),
+  ].filter((item): item is WorkspaceNavGroup => Boolean(item));
   const operationsGroups = operations && !platformAdmin ? [group("Chats",[
     {href:"/dashboard/support?queue=support",label:"Business support",icon:"support"},
     {href:'/dashboard/reports',label:'Listing reports',icon:'reports'},
-    {href:"/dashboard/support?queue=transport",label:"Transport",icon:"transport"},
     {href:"/dashboard/support/agents",label:"Workload & availability",icon:"staff"},
   ])].filter((item): item is WorkspaceNavGroup => Boolean(item)) : [];
   const staffHomeGroups=[group("Workspace",[
     staffGrant?{href:'/dashboard',label:'Business workspaces',icon:'businesses'}:null,
-    tracking?{href:'/dashboard/tracking',label:'Shipment records',icon:'tracking'}:null,
     !operations?{href:'/dashboard/support',label:'Support inbox',icon:'support'}:null,
   ])].filter((entry):entry is WorkspaceNavGroup=>Boolean(entry));
   const groups = client ? clientGroups : queueAgent ? agentGroups : globalGroups || [...operationsGroups,...staffHomeGroups];

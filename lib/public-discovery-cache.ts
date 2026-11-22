@@ -68,7 +68,7 @@ const cachedIndependentBrowse = unstable_cache(
 export async function getCachedIndependentMarketplace(options:Parameters<typeof getMarketplaceDiscoveryView>[0]) {
  const scope=options?.scope;
  if(!scope)return getMarketplaceDiscoveryView(options);
- const search=normalizeMarketSearch({q:options.q,category:options.industry,subcategory:options.subcategory,country:options.country,city:options.city,place:options.place,offeringType:options.offeringType,madeToOrder:scope==='products'?options.madeToOrder:false,page:options.page});
+ const search=normalizeMarketSearch({q:options.q,category:options.industry,subcategory:options.subcategory,country:options.country,city:options.city,place:options.place,offeringType:options.offeringType,madeToOrder:options.madeToOrder,page:options.page});
  if(!hasMarketCriteria(search)&&search.page===1&&!options.excludedBusinessIds?.length&&!options.readPort&&!options.now)return cachedIndependentBrowse(scope);
  return getMarketplaceDiscoveryView(options);
 }
