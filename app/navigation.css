@@ -11,7 +11,17 @@
 @media(max-width:720px){.public-app-shell,.dashboard{display:block}.public-app-rail,.dashboard .sidebar{display:none}.public-app-main .platform-task-main{padding:14px 10px}.public-document{margin:12px 10px;padding:22px 18px;border-radius:12px}.public-mobile-tabs>a{font-size:10px;line-height:1.2;text-align:center;padding:4px;overflow-wrap:anywhere}.public-app-main{background:#f4f7f6}.dashboard .main{padding:18px 12px 80px}}
 @media(prefers-reduced-motion:reduce){.public-app-rail nav a{transition:none}}
 
+@media(max-width:720px){
+  .public-app-header > .language-selector{flex:none}
+  .public-app-header .language-selector select{padding-inline:6px 0}
+}
+@media(max-width:420px){
+  .public-app-header .language-selector > svg{display:none}
+}
 @media(max-width:360px){
   .public-app-header .africmade-brand,.workspace-mobile-header .workspace-brand{--africmade-wordmark-size:19px;--africmade-mark-width:29px}
-  .public-app-header .language-selector select,.workspace-mobile-header .language-selector select{min-width:80px;padding-inline:6px 0}
+  .workspace-mobile-header .language-selector select{min-width:80px;padding-inline:6px 0}
+}
+@media(max-width:340px){
+  .public-app-header{padding-inline:max(8px,env(safe-area-inset-left)) max(8px,env(safe-area-inset-right));gap:4px}
 }
