@@ -2,13 +2,11 @@
 
 Read this current product brief with [AGENTS.md](AGENTS.md) and
 [specs/README.md](specs/README.md). It records product boundaries, not a release
-transcript. Existing numbered headings retain their identities for spec references;
-older “Suqpage” heading names are compatibility anchors, not the public brand.
+transcript. Existing numbered headings retain their identities for spec references.
 
-AfricMade is the public brand. **https://africmade.com** serves the website and
-the current source uses it for public canonical/SEO links. The existing
-application API and managed Auth primary still use **https://mirtpage.com**
-until DEP-029/DEP-049's reviewed callback and runtime cutover. The Android target
+AfricMade uses **https://africmade.com** for the website, application API,
+canonical links and managed Auth primary. DEP-029 and DEP-049 govern changes
+to hosted mail presentation, callback allowlists and domain aliases. The Android target
 is **com.africmade.app**, using the verified standalone Firebase project
 **africmade-de81a** and pinned public client under
 [DEP-044](specs/deployment/DEP-044-google-play-testing-rollout.md).

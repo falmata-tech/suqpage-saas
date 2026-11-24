@@ -10,6 +10,21 @@ change_level: L4
 
 # DEP-049 — AfricMade cutover
 
+## Retiring the former domains
+
+GIVEN the current release serves AfricMade and both its public URL and Auth
+primary point to africmade.com WHEN a showroom is opened THEN the hosted status
+lookup uses the AfricMade origin. The shared configuration reader prefers an explicit
+AfricMade setting, including an empty value. Existing deployments keep their
+previous setting precedence when the new name is absent. Current SDK titles, instructions and sample
+copy identify AfricMade while existing versioned recipe values remain readable.
+
+GIVEN all three domains are attached to the same verified site WHEN promoting
+AfricMade THEN keep the same deploy, TLS, repository, database and storage.
+Disassociate only the approved aliases after verifying application links,
+the Auth callback policy and the impact on clients built for the old hosts.
+Keep recoverable field before-images and read back each separate provider change.
+
 ## S188 — final identity audit before new Play upload (ready)
 
 The owner has paused Play submission to remove former platform names from all
@@ -24,9 +39,8 @@ verify current canonical metadata, managed environment, asset aliases and links
 against `africmade.com`, then pass the applicable local, Chrome, PR/main and
 publication gates. A local origin string change does not itself rename hosted
 Auth email, Firebase, DNS, Netlify settings, SMTP or existing customer data.
-The public status lookup accepts only the reviewed AfricMade and old MirtPage
-origins while the hosted primary changes; arbitrary request Hosts cannot select
-its target. The old landing, brand and PWA paths resolve to current AfricMade
+The transitional lookup accepted both domain generations. The retirement policy
+above requires the configured AfricMade origin for current hosted requests. The old landing, brand and PWA paths resolve to current AfricMade
 art, with the live compatibility inventory in
 [AFRICMADE-LEGACY-IDENTIFIERS](../../docs/operations/AFRICMADE-LEGACY-IDENTIFIERS.md).
 GIVEN any hosted identity field must change WHEN planning it THEN name the exact

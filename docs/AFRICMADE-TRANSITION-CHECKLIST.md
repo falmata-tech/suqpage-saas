@@ -6,6 +6,26 @@ Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 Updated 2026-11-18. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
+## Retire former public domains (DEP-049 / DEP-029)
+
+1. [x] Match the served release to protected main. Read the actual Netlify site
+   bindings, runtime URLs and Supabase Auth primary, callbacks and email branding.
+2. [x] Correct current showroom design materials, the hosted status target and
+   the finite callback-retirement policy. Verify exported content and retained
+   data-format compatibility. The identity check and 62 Auth guard cases passed.
+3. [x] Inspect all 17 present worktrees against published `5fbcdf98`. Ten
+   older checkouts contain 215 uncommitted paths. Of these, 99 require
+   individual review. The 116 others match deployed content, its history or a
+   deletion already in main. Preserve that work separately from this release.
+4. [ ] Qualify the scoped source through protected GitHub checks and verify
+   the deployed version.
+5. [x] Promote africmade.com as the primary Netlify domain with all aliases
+   preserved. Verified the site/account, current deployment and domain readback.
+   Live phone and desktop Chrome reached login, About and a public showroom.
+6. [ ] Retire the former managed Auth callbacks and then the former hosting
+   aliases. Read back both providers and recheck public HTTPS, login and the
+   showroom after removal. An older client bound to a retired host needs an update.
+
 ## Somali interface (FE-049)
 
 1. [x] Define selection, restoration, plain-language wording and fallback in FE-049.

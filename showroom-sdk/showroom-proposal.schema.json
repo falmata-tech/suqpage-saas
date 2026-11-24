@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mirtpage.com/schemas/showroom-proposal.schema.json",
-  "title": "Suqpage non-executable showroom design proposal",
-  "description": "Syntactic guidance only. Suqpage server-side bank, compatibility, tenant, revision, and publication validation remains authoritative.",
+  "$id": "https://africmade.com/schemas/showroom-proposal.schema.json",
+  "title": "AfricMade non-executable showroom design proposal",
+  "description": "Syntactic guidance only. AfricMade server-side bank, compatibility, tenant, revision, and publication validation remains authoritative.",
   "type": "object",
   "additionalProperties": false,
   "required": [

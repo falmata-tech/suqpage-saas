@@ -10,6 +10,24 @@ change_level: L3
 
 # DEP-029 - Guarded production Auth configuration changes
 
+## Callback retirement
+
+GIVEN AfricMade is already the managed Auth primary with the three exact
+callbacks WHEN the owner approves retiring both previous origins THEN only the
+AfricMade callback is allowed. A separately approved reverse transition can
+restore the original set while both former domains are still controlled.
+Neither transition can change a credential, template, provider or site URL.
+Exact before-state, single use, expiry and unchanged-field verification apply.
+
+The November 24 email-branding readback matched the 27 requested values.
+One additional field differed. The custom OAuth provider limit read 3 before
+and 32,767 afterward. Custom OAuth remained off. Supabase's published Auth
+update request omits the limit, and its hosted documentation describes it as
+plan-dependent. Preserve the mismatch as an incident and the original attempt
+as unverified. A new operation needs its own fresh protected before-image.
+See [Supabase's hosted provider limits](https://supabase.com/docs/guides/auth/custom-oauth-providers)
+and the [Auth update contract](https://supabase.com/docs/reference/api/v1-update-auth-service-config).
+
 ## S188 — AfricMade callback and mail presentation cutover (ready for local guard work)
 
 The current website is served at `africmade.com`, but the managed Auth primary

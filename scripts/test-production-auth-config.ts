@@ -365,6 +365,7 @@ const transitions: readonly [AuthOriginPhase, AuthOriginPhase][] = [
   ["dual-new-primary", "africmade-callback-old-primary"],
   ["africmade-callback-old-primary", "africmade-primary"],
   ["africmade-primary", "africmade-callback-old-primary"],
+  ["africmade-primary", "africmade-only"], ["africmade-only", "africmade-primary"],
 ];
 function originFixture(sourcePhase: AuthOriginPhase = "legacy") {
   const f = fixture();
@@ -404,18 +405,20 @@ for (const [sourcePhase, targetPhase] of transitions) {
   });
 }
 
-test("origin policy tuples are exact and no phase can retire the legacy callback", () => {
+test("only the final reviewed origin policy retires both former callbacks", () => {
   assert.deepEqual(AUTH_ORIGIN_POLICIES, {
     legacy: { site_url: "https://suqpage.com", uri_allow_list: "https://suqpage.com/auth/callback" },
     "dual-old-primary": { site_url: "https://suqpage.com", uri_allow_list: "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback" },
     "dual-new-primary": { site_url: "https://mirtpage.com", uri_allow_list: "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback" },
     "africmade-callback-old-primary": { site_url: "https://mirtpage.com", uri_allow_list: "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback,https://africmade.com/auth/callback" },
     "africmade-primary": { site_url: "https://africmade.com", uri_allow_list: "https://suqpage.com/auth/callback,https://mirtpage.com/auth/callback,https://africmade.com/auth/callback" },
+    "africmade-only": { site_url: "https://africmade.com", uri_allow_list: "https://africmade.com/auth/callback" },
   });
   assert.ok(Object.isFrozen(AUTH_ORIGIN_POLICIES));
   for (const policy of Object.values(AUTH_ORIGIN_POLICIES)) {
     assert.ok(Object.isFrozen(policy));
-    assert.ok(policy.uri_allow_list.split(",").includes("https://suqpage.com/auth/callback"));
+    assert.equal(policy.uri_allow_list.split(",").includes("https://suqpage.com/auth/callback"),
+      policy !== AUTH_ORIGIN_POLICIES["africmade-only"]);
     for (const patch of [policy, { site_url: policy.site_url }, { uri_allow_list: policy.uri_allow_list },
       { ...policy, mailer_otp_length: 6 }]) {
       assert.throws(() => validatePatch(project, patch, template), /forbidden/);
@@ -427,7 +430,7 @@ test("origin policy tuples are exact and no phase can retire the legacy callback
   }
 });
 
-test("unsupported origin phases, skipped steps, no-ops and callback retirement reject before any provider call", async () => {
+test("unsupported origin phases, skipped steps, no-ops and unreviewed callback changes reject before any provider call", async () => {
   const f = fixture();
   try {
     let calls = 0;
