@@ -6,8 +6,7 @@ const escapeHtml = (value: string) => value.replace(/&/g, "&amp;").replace(/</g,
 /** A self-contained HTTP 404 document; it never interpolates a requested handle. */
 export async function showroomNotFoundHtml(locale: EnabledLocale): Promise<string> {
   // Most requests never need a 404 document; load a language catalog only then.
-  const messages: UiMessages = locale === "am" ? (await import("./i18n/messages/am.json")).default
-    : locale === "om" ? (await import("./i18n/messages/om.json")).default : {};
+  const messages: UiMessages = locale === "en" ? {} : (await import(`./i18n/messages/${locale}.json`)).default;
   const text = createUiText(messages);
   const title = escapeHtml(text("Page not found."));
   const back = escapeHtml(text("Back to Market"));

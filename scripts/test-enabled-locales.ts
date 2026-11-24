@@ -10,13 +10,13 @@ import type {AttentionPushPort,PushPayload} from '../lib/attention-push';
 
 type Element={type:string;props:Record<string,unknown>&{children?:unknown}};
 type App={locale:Locale;setLocale:(value:Locale)=>void;t:(source:string)=>string;basket:unknown;setBasket:(value:unknown)=>void};
-type Fixture={states:unknown[];refs:{current:unknown}[];effects:{deps:unknown[];cleanup?:()=>void}[];pending:(()=>void)[];cursor:number;refCursor:number;effectCursor:number;stored:string|null;writes:[string,string][];locale:Locale;refreshes:number;t:(source:string)=>string};
+type Fixture={platform?:'web'|'android';states:unknown[];refs:{current:unknown}[];effects:{deps:unknown[];cleanup?:()=>void}[];pending:(()=>void)[];cursor:number;refCursor:number;effectCursor:number;stored:string|null;writes:[string,string][];locale:Locale;refreshes:number;t:(source:string)=>string};
 const bundle=build({entryPoints:['apps/mobile/src/runtime.tsx','components/LanguageSelector.tsx'],outdir:'/tmp/suqpage-enabled-languages',write:false,bundle:true,platform:'node',format:'cjs',define:{'process.env.EXPO_PUBLIC_SUPABASE_URL':'""','process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY':'""','process.env.EXPO_PUBLIC_API_ORIGIN':'"https://suqpage.com"'},plugins:[{name:'language-platform-ports',setup(builder){
   builder.onResolve({filter:/^(react(?:\/jsx-runtime)?|react-native|expo-router|expo-secure-store|@supabase\/supabase-js|next-intl|next\/navigation|lucide-react|@\/lib\/i18n\/ui)$/},args=>({path:args.path,namespace:'ports'}));
   builder.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'js',contents:
     args.path==='react'?`export const useState=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return[fixture.states[i],value=>{fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value;}];};export const useRef=initial=>{const i=fixture.refCursor++;return fixture.refs[i]||(fixture.refs[i]={current:initial});};export const useEffect=(create,deps)=>{const i=fixture.effectCursor++,old=fixture.effects[i];if(!old||deps.some((value,j)=>value!==old.deps[j]))fixture.pending.push(()=>{old?.cleanup?.();fixture.effects[i]={deps,cleanup:create()};});};export const useCallback=fn=>fn,createContext=()=>({Provider:'Provider'}),useContext=()=>null,useTransition=()=>[false,fn=>fn()];export default {};`
     :args.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
-    :args.path==='react-native'?`export const Platform={OS:'android'},AppState={addEventListener:()=>({remove(){}})};`
+    :args.path==='react-native'?`export const Platform={OS:fixture.platform??'android'},AppState={addEventListener:()=>({remove(){}})};`
     :args.path==='expo-router'?`export const useFocusEffect=()=>{};`
     :args.path==='expo-secure-store'?`export const getItemAsync=async key=>key==='suqpage-language'?fixture.stored:null,setItemAsync=async(key,value)=>fixture.writes.push([key,value]),deleteItemAsync=async()=>{throw Error('Unexpected deletion');};`
     :args.path==='@supabase/supabase-js'?`export const createClient=()=>{throw Error('Unexpected Auth construction');};`
@@ -31,7 +31,7 @@ async function component(name:'runtime'|'LanguageSelector',state:Fixture){
   const output=(await bundle).outputFiles.find(file=>file.path.endsWith('/'+name+'.js'))!;
   const module={exports:{} as {RuntimeProvider:(props:{children:string})=>Element;default:()=>Element}};
   const document={cookie:''},location={protocol:'http:'};
-  vm.runInNewContext(output.text,{module,exports:module.exports,fixture:state,URL,URLSearchParams,Request,Response,AbortController,setTimeout,clearTimeout,document,location,fetch:()=>{throw Error('Unexpected network call');}});
+  vm.runInNewContext(output.text,{module,exports:module.exports,fixture:state,URL,URLSearchParams,Request,Response,AbortController,setTimeout,clearTimeout,document,location,window:{localStorage:{getItem:()=>state.stored,setItem:(key:string,value:string)=>{state.writes.push([key,value]);state.stored=value;}}},fetch:()=>{throw Error('Unexpected network call');}});
   const commit=()=>state.pending.splice(0).forEach(run=>run());
   const render=(commitEffects=true)=>{state.cursor=0;state.refCursor=0;state.effectCursor=0;const tree=name==='runtime'?module.exports.RuntimeProvider({children:'screen'}):module.exports.default();if(commitEffects)commit();return tree;};
   return{render,commit,document,unmount:()=>state.effects.forEach(effect=>effect.cleanup?.())};
@@ -45,6 +45,16 @@ test('FE-049 S132 actual native Runtime restores only enabled languages without 
     assert.equal(app.locale,parseLocale(stored));assert.deepEqual(state.writes,[],'Restoration never rewrites stored language or Auth');
     mounted.unmount();
   }
+});
+test('FE-049 Expo web reopens with the last selected language',async()=>{
+  const state=fixture('am');state.platform='web';
+  const first=await component('runtime',state);first.render();await settle();
+  (first.render().props.value as App).setLocale('so');
+  assert.deepEqual(state.writes,[['suqpage-language','so']]);
+  first.unmount();
+  const reopened=fixture(state.stored);reopened.platform='web';
+  const second=await component('runtime',reopened);second.render();await settle();
+  assert.equal((second.render().props.value as App).locale,'so');second.unmount();
 });
 test('FE-049 S132 actual native Runtime normalizes changes while preserving inquiry state',async()=>{
   const state=fixture('am'),mounted=await component('runtime',state);mounted.render();await settle();let app=mounted.render().props.value as App;

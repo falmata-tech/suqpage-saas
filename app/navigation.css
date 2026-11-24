@@ -13,5 +13,5 @@
 
 @media(max-width:360px){
   .public-app-header .africmade-brand,.workspace-mobile-header .workspace-brand{--africmade-wordmark-size:19px;--africmade-mark-width:29px}
-  .public-app-header .language-selector select,.workspace-mobile-header .language-selector select{min-width:80px;padding-inline:7px 16px}
+  .public-app-header .language-selector select,.workspace-mobile-header .language-selector select{min-width:80px;padding-inline:6px 0}
 }

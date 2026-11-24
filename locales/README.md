@@ -1,12 +1,16 @@
 # AfricMade interface writing
 
-Write for the action on screen, not the English sentence structure. English,
-Amharic and Afaan Oromo are the active interface languages across public pages
-and the owner/admin workspace (FE-049 / FE-052). Somali and Tigrinya catalogs are
-retained for compatibility and rollback, but are not selectable. Afar was never
-enabled. Restored inactive or unknown preferences render English without
-rewriting saved records. `enabledLocales` controls presentation; `locales` and
-the stored Locale union describe retained identifiers.
+English, Amharic, Afaan Oromo and Somali are active on web and Expo. The language
+menu lists Somali as **Soomaali**. A person returning with a saved Somali choice
+gets Somali immediately. Tigrinya is retained for compatibility. Inactive and
+unknown choices render English without changing the saved preference.
+
+For Somali, write what happens in the person's own task. For example,
+*Inta ganacsigu keeni karo* tells a buyer how much the business can supply.
+*Inta dalabku caadi ahaan ku diyaar noqdo* describes the usual wait before
+the order is ready. Use *goobta aad alaabta ku farsamayso* for a workshop
+where goods are made. Keep the names of browser commands visible in install
+instructions so people can match them to their browser.
 
 - Write public positioning as finished customer-facing copy. Describe the benefit
   directly; do not reproduce planning discussions or turn audience segments into
@@ -49,7 +53,7 @@ Availability, capacity and timing remain the business's declarations, not
 verified inventory or delivery promises. Preserve existing audience tabs,
 short actions and literal merchant content.
 
-New local narrative is authored for active en/am/om. Inactive so/ti retain their
+At S145, local narrative was authored for active en/am/om. Inactive so/ti retain their
 catalogs and may use explicit English compatibility entries for new paragraphs;
 they are not enabled or presented as newly reviewed translations. Existing
 technical identifiers, historical copy rows, provider settings and published

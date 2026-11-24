@@ -17,7 +17,7 @@ export default function MarketSearchControls({scope,value,onChange,metadata,acti
  const change=(patch:Partial<MarketSearch>)=>onChange({...value,...patch,page:1});
  const title=picker==='filters'?'Filters':picker==='category'?'Categories':picker==='subcategory'?'Subcategory':picker==='country'?'Country':'City';
  const choices=picker==='category'?(metadata?.categories||[]).map(c=>({...c,label:t(c.label)}))
-  :picker==='subcategory'?(metadata?.subcategories||[]).map(name=>({key:name,label:name}))
+  :picker==='subcategory'?(metadata?.subcategories||[]).map(name=>({key:name,label:t(name)}))
   :picker==='country'?(metadata?.countries||[]).map(c=>({key:c.code,label:countryName(c.code,locale)}))
   :picker==='city'?(metadata?.places||[]).filter(c=>c.countryCode&&value.countries.includes(c.countryCode)).map(c=>({...c,label:`${c.label} · ${countryName(c.countryCode!,locale)}`})):[];
  const selected=picker==='category'?value.categories:picker==='subcategory'?(value.subcategory?[value.subcategory]:[]):picker==='country'?value.countries:value.cities;

@@ -85,7 +85,7 @@ mask-safe padding. Android's system splash uses a dedicated padded symbol,
 while app/web headers retain the full wordmark. The browser favicon remains
 transparent orange; typography and source artwork are unchanged (FE-070 S183).
 
-Enabled interface languages are English, Amharic and Afaan Oromo. Native means
+Enabled interface languages are English, Amharic, Afaan Oromo and Somali. Native means
 the Expo visitor/owner application, with its own navigation and platform behavior;
 it is not a web wrapper. Staff/admin workspaces are web-only. Android configuration
 and admitted runtime targets come from the current mobile release policy, not an
@@ -854,9 +854,9 @@ ADR-0031 for provider activation and mail-boundary evidence.
 
 ## 18. Language and localization rules
 
-English, Amharic and Afaan Oromo are active. Somali/Tigrinya catalogs and stored
-identifiers remain for compatibility but are not selectable; inactive choices
-fall back safely to English. Afar/Arabic/RTL are not implemented public options.
+English, Amharic, Afaan Oromo and Somali are active. Soomaali is available in the
+web and mobile language menus. A saved Somali preference applies on return.
+Tigrinya remains a retained catalog. Inactive choices fall back safely to English. Afar/Arabic/RTL are not implemented public options.
 Do not delete retained catalogs or translate existing merchant/customer data.
 
 Author the meaning naturally for local visitors instead of following English
@@ -910,7 +910,7 @@ event path separately from the web map-click path; no typed coordinate field is
 the only way to choose a location.
 
 The planned native product-action layout keeps 48dp controls, keyboard/safe-area
-clearance and wrapping en/am/om labels in phone and landscape views (FE-056).
+clearance and wrapping en/am/om/so labels in phone and landscape views (FE-056).
 
 Keep useful same-resource content visible during refresh, focus return and safe
 filter transitions with quiet local status. Initial/new-resource loading uses

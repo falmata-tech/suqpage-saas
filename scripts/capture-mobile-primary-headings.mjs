@@ -18,9 +18,9 @@ try{
  await context.route('https://tile.openstreetmap.org/**',route=>route.abort());
  const page=await context.newPage();
  page.on('pageerror',error=>errors.push(error.message));
+ let current='en';
  for(const [screen,route,title] of screens){
   await page.goto(base+route,{waitUntil:'domcontentloaded',timeout:60000});
-  let current='en';
   for(const locale of enabledLocales){
    if(locale!==current){
     await page.getByRole('button',{name:text[current]('Language'),exact:true}).click();

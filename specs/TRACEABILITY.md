@@ -1,5 +1,11 @@
 # AfricMade traceability matrix
 
+FE-049 Somali selection and persistence are covered by `test-enabled-locales.ts`,
+`test-localization.ts` and the browser navigation and demo-activity journeys.
+The registry retains Tigrinya as inactive. Standard marketplace subcategories
+use translated labels and their original query values. See the [Somali interface
+review](../docs/AFRICMADE-TRANSITION-CHECKLIST.md#somali-interface-fe-049).
+
 FE-021 overview group activation is covered by the shared clustering, native controller and web Leaflet lifecycle tests. FE-061 published demo video readback compares the selected references with the public shop API via `npm run verify:published-demo-videos`. [Local checks and production observations](../docs/AFRICMADE-TRANSITION-CHECKLIST.md#small-map-clusters-and-public-catalog-review).
 
 FE-023 / FE-040 / BE-067 demo About publication is covered by
@@ -1110,7 +1116,7 @@ belong in engineering readiness; no source merge or production change is claimed
 - Shipment tracking is independent of conversation IDs, with recipient email
   verification and multiple editable shipments: [FE-069]/[BE-058]/[DEP-048].
   Provider links/codes are organized per leg; no scan integration/date promise.
-- Current source identity is AfricMade with en/am/om enabled.
+- At the FE-070 identity cutover, en/am/om were enabled. FE-049 now includes Somali.
   [FE-070]/[BE-059]/[DEP-049] override obsolete brand/domain/package/copy readings
   while preserving versioned compatibility. Main is published through the Git
   pipeline; S189's source patch merged in PR #58 as recorded above. Former
@@ -1173,7 +1179,7 @@ related layers, test criteria and detailed completion evidence.
 | [FE-046] Complete new business starter pages | done | [FE-061], [BE-049], [FE-052], [FE-051], [FE-038], [BE-039], [DEP-036], [FE-040] | [Contract and implementation scope][FE-046] | [Test plan][FE-046-tests]: `test-business-starters.ts`, `capture-business-starters.ts` |
 | [FE-047] Five-field offering editor | in_progress | [FE-050], [FE-048], [FE-041], [BE-040], [DEP-037], [FE-067], [FE-026], [FE-053], [FE-056], [BE-032] | [actions.ts](../app/actions.ts) | [Test plan][FE-047-tests]: `test-product-edit-action.ts`, `test-product-editor-workflow.ts` |
 | [FE-048] Self-service owner workspace | in_progress | [BE-041], [DEP-038], [FE-047], [FE-042], [FE-021] | owner-page-save/publication, owner-business-runtime, ProductForm, dashboard/admin, discovery, map-display-location, setup | [Test plan][FE-048-tests]: `test-self-service-publication.ts` |
-| [FE-049] Five-language interface | in_progress; active en/am/om; FE-070 | [BE-058], [DEP-048], [FE-069], [FE-066], [FE-019], [FE-055], [FE-053], [FE-052], [FE-051], [FE_BASE], [BE_BASE], [DEP_BASE], [ADR-0022], [FE-041], [FE-062], [DEP-044], [FE-065], [FE-067], [FE-063], [FE-068] | Owner inquiries, discovery, demo labels, first publication, locale catalogs | [Test plan][FE-049-tests]: `capture-product-ready.mjs`, `test-launch-materials.mjs` |
+| [FE-049] Five-language interface | in_progress; active en/am/om/so; FE-070 | [BE-058], [DEP-048], [FE-069], [FE-066], [FE-019], [FE-055], [FE-053], [FE-052], [FE-051], [FE_BASE], [BE_BASE], [DEP_BASE], [ADR-0022], [FE-041], [FE-062], [DEP-044], [FE-065], [FE-067], [FE-063], [FE-068] | Owner inquiries, discovery, demo labels, first publication, locale catalogs | [Test plan][FE-049-tests]: `capture-product-ready.mjs`, `test-launch-materials.mjs` |
 | [FE-050] Product media gallery | in_progress | [FE-061], [BE-049], [FE-060], [BE-048], [FE-041], [FE-047], [BE-042], [DEP-039], [FE-057], [BE-046] | [Contract and implementation scope][FE-050] | [Test plan][FE-050-tests]: `capture-launch-wiring.mjs` |
 | [FE-051] Automatic starter and editable address | done | [FE-059], [BE-047], [FE-056], [FE-053], [FE-038], [FE-046], [FE-049], [BE-043], [DEP-040] | Public/account/workspace headers and shop return row | [Test plan][FE-051-tests] |
 | [FE-052] Clear launch journeys and natural interface language | in_progress | [FE-066], [BE-001], [BE-032], [FE-049], [FE-030], [FE-033], [FE-046], [DEP-030], [FE-036], [FE-053], [DEP-044], [FE-067], [FE-065] | Owner inquiries, discovery, demo labels, first publication, locale catalogs; S198 retained-starter hold is receipt gated | S198 synthetic field and isolated PostgreSQL first-publish/tenant tests pass. Local Google Chrome owner desktop/phone and Expo web preview confirm held About/products, field-edit release, disabled Publish and zero publications; protected source-bound receipts stay local. Hosted private correction remains pending. [Test plan][FE-052-tests]: `test-about-audiences.ts`, `test-mobile-market-layout.ts`, `test-legacy-starter-review.ts` |

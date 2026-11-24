@@ -24,7 +24,7 @@ export default function MarketSearchControls({scope,value,onChange,metadata,read
  },[picker,overview]);
  function change(patch:Partial<MarketSearch>){if(ready)onChange({...value,...patch,page:1});}
  const choices=picker==='category'?metadata.industries.filter(c=>c.key!=='all').map(c=>({key:c.key,label:t(c.shortLabel)}))
-  :picker==='subcategory'?(metadata?.subcategories||[]).map(name=>({key:name,label:name}))
+  :picker==='subcategory'?(metadata?.subcategories||[]).map(name=>({key:name,label:t(name)}))
   :picker==='country'?(metadata.countries||[]).map(c=>({key:c.code,label:countryName(c.code,locale)}))
   :metadata.places.filter(p=>p.countryCode&&value.countries.includes(p.countryCode)).map(p=>({key:p.key,label:`${p.city} · ${countryName(p.countryCode!,locale)}`}));
  const selected=picker==='category'?value.categories:picker==='subcategory'?(value.subcategory?[value.subcategory]:[]):picker==='country'?value.countries:value.cities;

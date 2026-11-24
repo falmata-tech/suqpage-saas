@@ -6,6 +6,26 @@ Requirements and evidence: [traceability](../specs/TRACEABILITY.md),
 Updated 2026-11-18. This working board replaces dated `CURRENT` labels; it does
 not authorize a provider write or rerun an already completed migration/build.
 
+## Somali interface (FE-049)
+
+1. [x] Define selection, restoration, plain-language wording and fallback in FE-049.
+2. [x] Review the Somali catalog, inquiry framing, notifications, missing showroom and web/Expo selection paths.
+3. [x] Focused catalog, runtime, selector and alert tests passed. Chrome 158 passed
+   the seller/buyer About tabs, product search and literal product names, the
+   translated Honey subcategory, 404 page and reload at 320/390/1440px. The
+   320px selector has a 44px target and enough room for Soomaali. Expo web at
+   390px retained Somali on reload, showed the localized Account screen, and
+   returned all three local honey products when the buyer selected Malab. The
+   web and mobile public endpoints returned the same three names.
+   Owner Inbox, staff Support history and admin Businesses each passed at 390
+   and 1440px. Agent visual review passed. Local screenshots are in
+   `.local/somali-review/`. Independent first-language review is outstanding.
+4. [x] The production build and release gate passed, as did web and Expo
+   typechecks, the complete check sequence (including 485 UI cases), and all
+   23 browser acceptance journeys in a fresh provider stack. The Somali buyer
+   journey compares the full displayed list with the original API product names.
+5. [ ] Integrate through protected GitHub checks and verify the deployed language.
+
 ## Launch workspace audit and Market filters (FE-065 / FE-078 / BE-066)
 
 1. [x] Inventory web, mobile, direct APIs, staff roles, Support cases and

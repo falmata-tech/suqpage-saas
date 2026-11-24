@@ -8,7 +8,10 @@ import SignupForm from "@/components/SignupForm";
 import { supabaseAuthEnabled } from "@/lib/config";
 import { currentSupabaseProviderIdentity } from "@/lib/supabase-auth";
 
-export const metadata = { title: "Set up your business", description: "Add your business and contact details to AfricMade." };
+export async function generateMetadata() {
+  const t = await getUiText();
+  return { title: t("Set up your business."), description: t("Start with a name, category, and contact number.") };
+}
 
 export default async function RequestPage() {
   const t = await getUiText();
