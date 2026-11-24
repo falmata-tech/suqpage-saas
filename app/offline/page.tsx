@@ -1,10 +1,14 @@
 import LanguageSelector from "@/components/LanguageSelector";
 
+import { getUiText } from "@/lib/i18n/server";
 import { useUiText } from "@/lib/i18n/ui";
 import Link from "next/link";
 import AfricMadeBrand from "@/components/AfricMadeBrand";
 
-export const metadata = { title: "Offline" };
+export async function generateMetadata() {
+  const t = await getUiText();
+  return { title: t("You are offline") };
+}
 
 export default function OfflinePage() {
   const t = useUiText();

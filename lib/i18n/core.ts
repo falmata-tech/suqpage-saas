@@ -2,7 +2,7 @@
 export const locales = ["en", "am", "om", "so", "ti"] as const;
 export type Locale = typeof locales[number];
 /** Retained catalogs above are compatibility data; only these languages are offered. */
-export const enabledLocales = ["en", "am", "om"] as const satisfies readonly Locale[];
+export const enabledLocales = ["en", "am", "om", "so"] as const satisfies readonly Locale[];
 export type EnabledLocale = typeof enabledLocales[number];
 export const languageNames: Record<Locale, string> = {
   en: "English", am: "አማርኛ", om: "Afaan Oromo", so: "Soomaali", ti: "ትግርኛ",

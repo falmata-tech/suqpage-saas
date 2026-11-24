@@ -19,7 +19,7 @@ import {
 import { PUBLIC_ORIGIN } from "./public-origin";
 import { credentialStorageKeys } from "./credential-storage-keys";
 import {useResourceLoad} from './use-resource-load';
-import { createUiText, languageNames, locales, enabledLocales, parseLocale } from "../../../lib/i18n/core";
+import { createUiText, languageNames, locales, enabledLocales, localeCookie, parseLocale } from "../../../lib/i18n/core";
 import am from "../../../lib/i18n/messages/am.json";
 import om from "../../../lib/i18n/messages/om.json";
 import so from "../../../lib/i18n/messages/so.json";
@@ -41,6 +41,14 @@ export const secure = {
     else await SecureStore.deleteItemAsync(key);
   },
 };
+// Only the display preference persists in a web browser. Auth retains its own storage.
+async function readLanguage() {
+  return Platform.OS === "web" ? window.localStorage.getItem(localeCookie) : secure.getItem(localeCookie);
+}
+async function rememberLanguage(language: Locale) {
+  if (Platform.OS === "web") window.localStorage.setItem(localeCookie, language);
+  else await secure.setItem(localeCookie, language);
+}
 const authUrl = process.env.EXPO_PUBLIC_SUPABASE_URL,
   authKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const credentialKeys = credentialStorageKeys(typeof __DEV__ !== "undefined" && __DEV__, API, authUrl);
@@ -156,14 +164,15 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
     [locale, setLanguage] = useState<Locale>("en"),
     [basket, setBasket] = useState<Runtime["basket"]>(null);
   const logoutFence = useRef(false), logoutTask = useRef<Promise<void> | null>(null);
+  const languageWasChosen = useRef(false);
   const accountEntryRequested = useRef(false);
   const requestAccountEntry = useCallback(() => {accountEntryRequested.current = true;}, []);
   const cancelAccountEntry = useCallback(() => {accountEntryRequested.current = false;}, []);
   const consumeAccountEntry = useCallback(() => setAccountEntryActor(null), []);
   useEffect(() => {
     let active = true;
-    secure.getItem("suqpage-language").then((v) => {
-      if (active) setLanguage(parseLocale(v));
+    readLanguage().then((v) => {
+      if (active && !languageWasChosen.current) setLanguage(parseLocale(v));
     }).catch(() => {});
     auth?.auth.getSession().then(({ data }) => {
       if (active && !logoutFence.current) {
@@ -290,8 +299,9 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
         locale,
         setLocale: (v) => {
           const next = parseLocale(v);
+          languageWasChosen.current = true;
           setLanguage(next);
-          void secure.setItem("suqpage-language", next).catch(() => {});
+          void rememberLanguage(next).catch(() => {});
         },
         t: createUiText({ en: {}, am, om, so, ti }[locale]),
         basket,

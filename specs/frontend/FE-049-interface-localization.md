@@ -4,11 +4,31 @@ title: Five-language interface
 status: in_progress
 related: [FE-078, BE-058, DEP-048, FE-069, FE-066, FE-019, FE-055, FE-053, FE-052, FE-051, FE_BASE, BE_BASE, DEP_BASE, ADR-0022, FE-041, FE-062, DEP-044, FE-065, FE-067, FE-063, FE-068, FE-076, FE-075, FE-070, DEP-051]
 owners: [product, frontend]
-last_updated: 2026-10-23
+last_updated: 2026-11-24
 change_level: L2
 ---
 
 # FE-049 — Five-language interface
+
+## Somali as the fourth interface language
+
+GIVEN a visitor, business owner or platform worker selects Soomaali WHEN they
+navigate or reopen the app THEN web and Expo retain Somali alongside English,
+Amharic and Afaan Oromo. A saved Somali preference works immediately. Tigrinya
+and unknown values still fall back to English without changing stored records.
+
+GIVEN a buyer browses, filters, selects items or asks about them WHEN they read
+Somali THEN the interface explains what the seller can supply, who receives
+the question and what to do next. The market shows translated standard
+subcategory names and submits their original filter values. The owner's private Support
+conversation is distinct. Translate platform copy, including accessible labels,
+metadata, errors and installation help. Preserve names, entered text, quantities,
+URLs and tokens. Show no new transport service or promise of a sale.
+
+Verify generated catalog parity, language persistence, notification and inquiry
+framing, and reachable controls at 320px, 390px and desktop widths in Chrome
+and the Expo preview. Roll out through DEP-052. Removing Somali from the enabled
+list restores the fallback without migrating data.
 
 ## S173 — finish a native language selection (ready)
 
@@ -90,9 +110,9 @@ held mail terminology build before catalog parity is rechecked. New mail termino
 the fresh stopped/zero-queue boundary; actual en/am/om role reviews and new
 visual approval are pending, not inherited from earlier MirtPage screenshots.
 
-## S132 — three active languages and clearer meaning (ready; supersedes selection)
+## S132 — three active languages and clearer meaning (historical selection)
 
-Newest owner direction enables only English, Amharic and Afaan Oromo for now.
+At S132 the owner enabled English, Amharic and Afaan Oromo. The Somali section above supersedes that selection.
 Somali/Tigrinya catalogs and stored language identifiers remain compatibility
 data, not selectable languages; Afar was never enabled. No catalog or persisted
 customer value is deleted. FE-052 controls the revised inclusive showroom story;

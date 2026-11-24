@@ -18,10 +18,28 @@ test('FE-063: dynamic report reasons have native labels in every non-English cat
 });
 test('FE-049 S132: enabled preferences are distinct from retained compatibility catalogs', () => {
   for (const locale of enabledLocales) assert.equal(parseLocale(locale), locale);
-  for (const input of ['so','ti','aa','afar',null, undefined, {}, 'AM', 'ar', '../secrets', 'am; Path=/', '', '<script>']) assert.equal(parseLocale(input), 'en');
+  for (const input of ['ti','aa','afar',null, undefined, {}, 'AM', 'ar', '../secrets', 'am; Path=/', '', '<script>']) assert.equal(parseLocale(input), 'en');
   assert.deepEqual(locales, ['en', 'am', 'om', 'so', 'ti']);
-  assert.deepEqual(enabledLocales, ['en','am','om']);
+  assert.deepEqual(enabledLocales, ['en','am','om','so']);
+  assert.equal(languageNames.so, 'Soomaali');
   assert.equal(languageNames.om, 'Afaan Oromo');
+});
+test('FE-049: Somali explains buyer and seller choices and preserves literal business data', async () => {
+  const t = createUiText(catalogs.so);
+  assert.match(t('Supply capacity'), /inta ganacsigu keeni karo/i);
+  assert.match(t('Typical lead time'), /dalabku.*diyaar/i);
+  assert.match(t('Made to order'), /marka la dalbado/i);
+  assert.match(t('Send to AfricMade Inbox'), /ganacsiga/);
+  assert.match(t('Send to AfricMade support'), /taageerada/);
+  assert.equal(t('Hello {value1},', {value1: 'Tana {value1}'}), 'Salaan Tana {value1},');
+  const {DEMO_MARKET_ASSIGNMENTS} = await import('../lib/demo-market-assignments');
+  for (const [, , subcategory] of DEMO_MARKET_ASSIGNMENTS) assert.notEqual(t(subcategory), subcategory);
+  assert.equal(t('Honey'), 'Malab');
+  assert.ok(t('Filters, {count} selected', {count: 1}).startsWith(t('Filters')));
+  const {showroomNotFoundHtml} = await import('../lib/showroom-not-found');
+  const html = await showroomNotFoundHtml('so');
+  assert.ok(html.includes('lang="so"') && html.includes(t('Page not found.')) && html.includes(t('Back to Market')));
+  assert.notEqual(t('Page not found.'), 'Page not found.');
 });
 test('FE-070: active AfricMade labels preserve the literal brand and compatibility identifiers', () => {
   for(const locale of enabledLocales){
@@ -244,7 +262,7 @@ test('FE-065 S181: compact discovery and filter navigation have authored active-
         assert.ok(client[messageKey(message)], `${locale}: ${message} reaches the interactive client`);
         assert.notEqual(t(message), message, `${locale}: authored active-language discovery copy`);
       }
-      assert.match(title, locale === 'am' ? /አፍሪካ.*አርሶ አደሮችን.*አምራቾችን.*የእጅ ጥበበኞችን/ : /Qonnaan bultoota.*oomishtoota.*ogeeyyii hojii harkaa Afrikaa/);
+      assert.match(title, locale === 'am' ? /አፍሪካ.*አርሶ አደሮችን.*አምራቾችን.*የእጅ ጥበበኞችን/ : locale === 'so' ? /beeraleyda.*warshadaha.*farsamayaqaannada Afrika/ : /Qonnaan bultoota.*oomishtoota.*ogeeyyii hojii harkaa Afrikaa/);
     }
   }
 });

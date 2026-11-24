@@ -16,3 +16,36 @@ test('FE-036 phone has one bottom navigation with About and reachable legal page
  await page.getByRole('link',{name:'Privacy',exact:true}).filter({visible:true}).click();await expect(page).toHaveURL(/\/privacy$/);await expect(tabs).toHaveCount(1);await expect(page.getByRole('heading',{name:'Privacy notice',exact:true})).toBeVisible();await expect(page.getByRole('main')).toHaveCount(1);
  await tabs.getByRole('link',{name:'Login',exact:true}).click();await expect(page.getByRole('textbox',{name:'Email',exact:true})).toBeVisible();await expect(tabs).toHaveCount(1);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
 });
+
+test('FE-049 Somali selection survives public navigation and reopening the page', async ({page, request}) => {
+  await page.setViewportSize({width: 320, height: 740});
+  await page.goto('/about');
+  const menu = page.locator('.language-selector select:visible');
+  await menu.selectOption({label: 'Soomaali'});
+  await expect(page.locator('html')).toHaveAttribute('lang', 'so');
+  await expect(page).toHaveTitle('Ku saabsan AfricMade');
+  await page.getByRole('tab', {name: 'Iibsadayaasha'}).click();
+  await page.getByRole('link', {name: 'Eeg alaabta', exact: true}).click();
+  await expect(page).toHaveURL(/view=search/);
+  await page.reload();
+  await expect(menu).toHaveValue('so');
+
+  const filters = page.getByRole('button', {name: /^Kala xulo,/});
+  const dialog = page.getByRole('dialog');
+  await filters.click();
+  await dialog.getByRole('button', {name: 'Qayb', exact: true}).click();
+  await dialog.getByRole('checkbox', {name: 'Cunto, cabbitaan, khudrad iyo miro'}).check();
+  await dialog.getByRole('button', {name: 'Dhammaystay'}).click();
+  await filters.click();
+  await dialog.getByRole('button', {name: 'Qaybta sii gaarka ah'}).click();
+  await dialog.getByRole('checkbox', {name: 'Malab', exact: true}).check();
+  await dialog.getByRole('button', {name: 'Dhammaystay'}).click();
+
+  const response = await request.get('/api/discovery?scope=products&category=food-farming&subcategory=Honey');
+  expect(response.ok()).toBeTruthy();
+  const {searchProducts} = await response.json();
+  const originalNames = searchProducts.map((item: {name: string}) => item.name);
+  expect(originalNames).toContain('Seasonal Raw Honey');
+  await expect(page.locator('.discovery-product-card strong')).toHaveText(originalNames);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+});

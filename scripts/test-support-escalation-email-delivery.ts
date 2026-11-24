@@ -18,7 +18,7 @@ test('BE-050/DEP-043 S126 private escalation outbox uses isolated PostgreSQL lea
   const admin=await addUser('email-admin','platform_admin'),ops=await addUser('email-ops','operations_manager'),agent=await addUser('email-agent','team_member');
   const owner=await addUser('email-owner','client');
   await db.prepare("INSERT INTO support_agent_settings(user_id,enabled,queue_scope,updated_at) VALUES(?,1,'support',?)").run(agent,now);
-  await db.prepare("INSERT INTO attention_preferences(recipient_key,language,updated_at) VALUES(?,'so',?)").run(`user:${admin}`,now);
+  await db.prepare("INSERT INTO attention_preferences(recipient_key,language,updated_at) VALUES(?,'ti',?)").run(`user:${admin}`,now);
   let ordinal=0;
   const seed=async(recipient=admin)=>{
    const id=(await db.prepare(`INSERT INTO support_conversations(public_ref,participant_kind,business_id,opened_by_user_id,assistance_category,
@@ -52,7 +52,7 @@ test('BE-050/DEP-043 S126 private escalation outbox uses isolated PostgreSQL lea
    await db.prepare('UPDATE attention_notifications SET read_at=? WHERE id=?').run(now,first.notification);
    await db.prepare('UPDATE support_agent_settings SET enabled=0 WHERE user_id=?').run(agent);
    const sent:SupportEscalationEmail[]=[];const result=await run(async email=>{sent.push(email);return {state:'accepted'};},now,999);
-   assert.equal(result.accepted,2);assert.equal(sent.length,2);assert.equal(sent[0].recipientEmail,'updated-email-admin@example.test');assert.equal(sent[0].language,'en','Inactive stored preference renders English');assert.equal((await db.prepare('SELECT language FROM attention_preferences WHERE recipient_key=?').get(`user:${admin}`))?.language,'so','No stored preference rewrite');assert.equal(sent[1].language,'en');
+   assert.equal(result.accepted,2);assert.equal(sent.length,2);assert.equal(sent[0].recipientEmail,'updated-email-admin@example.test');assert.equal(sent[0].language,'en','Inactive stored preference renders English');assert.equal((await db.prepare('SELECT language FROM attention_preferences WHERE recipient_key=?').get(`user:${admin}`))?.language,'ti','No stored preference rewrite');assert.equal(sent[1].language,'en');
    assert.equal((await state(first.delivery)).state,'accepted');assert.equal((await state(second.delivery)).state,'accepted');assert.equal((await state(third.delivery)).state,'pending');
    assert.doesNotMatch(JSON.stringify(sent),/PRIVATE|447700900119|sender|token|origin|destination/,'The provider payload must contain no customer content');
    assert.equal((await state(first.delivery)).attempts,1);assert.ok((await state(first.delivery)).accepted_at>=now);await reset();
