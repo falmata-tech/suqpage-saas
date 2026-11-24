@@ -24,7 +24,15 @@ not authorize a provider write or rerun an already completed migration/build.
    typechecks, the complete check sequence (including 485 UI cases), and all
    23 browser acceptance journeys in a fresh provider stack. The Somali buyer
    journey compares the full displayed list with the original API product names.
-5. [ ] Integrate through protected GitHub checks and verify the deployed language.
+5. [x] PR #127 merged as `7e188ecc`. A production Chrome session selected
+   Soomaali, reloaded, and matched all three visible Malab results to the API.
+6. [x] Fix the selected name clipped at 390px in production. Local Chrome
+   showed the complete Soomaali label at 390px and Afaan Oromo at 320px.
+   All four choices fit with a 44px touch target and no page overflow at
+   14 viewport widths from 320px to 1440px. Browser acceptance now checks
+   the selected label against the intrinsic native control width.
+7. [ ] Publish the header adjustment through protected main and recheck the
+   names, saved preference and honey results on the deployed site.
 
 ## Launch workspace audit and Market filters (FE-065 / FE-078 / BE-066)
 

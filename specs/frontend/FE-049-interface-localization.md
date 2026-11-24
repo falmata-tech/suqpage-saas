@@ -25,6 +25,11 @@ conversation is distinct. Translate platform copy, including accessible labels,
 metadata, errors and installation help. Preserve names, entered text, quantities,
 URLs and tokens. Show no new transport service or promise of a sale.
 
+GIVEN the language menu shares a phone header with the installation action WHEN
+any active language is selected THEN its full name fits beside the native arrow.
+Check both sides of the 360px breakpoint and common 375px and 390px widths.
+Page overflow alone cannot detect a clipped native select label.
+
 Verify generated catalog parity, language persistence, notification and inquiry
 framing, and reachable controls at 320px, 390px and desktop widths in Chrome
 and the Expo preview. Roll out through DEP-052. Removing Somali from the enabled

@@ -2,6 +2,8 @@
 
 FE-049 Somali selection and persistence are covered by `test-enabled-locales.ts`,
 `test-localization.ts` and the browser navigation and demo-activity journeys.
+The phone navigation test also measures the selected name against its intrinsic
+width, including the browser’s own arrow, around each compact header breakpoint.
 The registry retains Tigrinya as inactive. Standard marketplace subcategories
 use translated labels and their original query values. See the [Somali interface
 review](../docs/AFRICMADE-TRANSITION-CHECKLIST.md#somali-interface-fe-049).

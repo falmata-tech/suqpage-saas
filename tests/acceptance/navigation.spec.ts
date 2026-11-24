@@ -49,3 +49,33 @@ test('FE-049 Somali selection survives public navigation and reopening the page'
   await expect(page.locator('.discovery-product-card strong')).toHaveText(originalNames);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 });
+
+test('FE-049 phone header fits every selected language beside the installation button', async ({page}) => {
+  await page.goto('/about');
+  const menu = page.locator('.public-app-header select');
+  for (const language of ['en', 'am', 'om', 'so']) {
+    await menu.selectOption(language);
+    await expect(page.locator('html')).toHaveAttribute('lang', language);
+    await page.evaluate(() => document.fonts.ready);
+    for (const width of [320, 360, 361, 375, 380, 381, 390, 414, 420, 421, 430]) {
+      await page.setViewportSize({width, height: 740});
+      const fit = await menu.evaluate((element: HTMLSelectElement) => {
+        // Let this browser size its own native arrow and the selected label together.
+        const reference = element.cloneNode(false) as HTMLSelectElement;
+        reference.add(element.selectedOptions[0].cloneNode(true) as HTMLOptionElement);
+        Object.assign(reference.style, {
+          position: 'fixed', visibility: 'hidden', width: 'max-content',
+          minWidth: '0', maxWidth: 'none', flex: 'none',
+        });
+        element.after(reference);
+        const needed = reference.getBoundingClientRect().width;
+        reference.remove();
+        const actual = element.getBoundingClientRect();
+        return {width: actual.width, height: actual.height, needed, pageWidth: document.documentElement.scrollWidth};
+      });
+      expect(fit.width + 0.5, language + ' at ' + width + 'px').toBeGreaterThanOrEqual(fit.needed);
+      expect(fit.height).toBeGreaterThanOrEqual(44);
+      expect(fit.pageWidth).toBeLessThanOrEqual(width + 1);
+    }
+  }
+});
