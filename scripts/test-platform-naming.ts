@@ -20,6 +20,19 @@ async function main() {
 assert.equal(PLATFORM_BRAND.name, "AfricMade", "The current public platform identity is AfricMade");
 assert.equal(PLATFORM_BRAND.wordmark.leading + PLATFORM_BRAND.wordmark.trailing, PLATFORM_BRAND.name, "The visible wordmark retains the canonical name and case");
 const legacyEnvironment = { MIRTPAGE_DATABASE_DRIVER:"postgres", MIRTPAGE_POSTGRES_URL:"postgresql://fixture:fixture@127.0.0.1:54322/postgres", MIRTPAGE_AUTH_DRIVER:"supabase", MIRTPAGE_EMAIL_OTP_ENABLED:"1", NEXT_PUBLIC_MIRTPAGE_PWA_ENABLED:"false", MIRTPAGE_SERVER_ACTION_ORIGINS:"old-proxy.example.test" };
+for (const prefix of ["", "NEXT_PUBLIC_"]) {
+  const current = prefix + "AFRICMADE_CANONICAL_URL";
+  const old = prefix + "SUQPAGE_CANONICAL_URL";
+  const first = prefix + "MIRTPAGE_CANONICAL_URL";
+  for (const input of [{[first]: "first", [old]: "old", [current]: "current"},
+    {[current]: "current", [old]: "old", [first]: "first"}]) {
+    assert.equal(platformEnvironment(input)[old], "current");
+    assert.equal(platformEnvironment(input)[current], "current");
+  }
+  assert.equal(platformEnvironment({[first]: "first", [old]: "old"})[current], "old");
+  assert.equal(platformEnvironment({[first]: "first"})[current], "first");
+  assert.equal(platformEnvironment({[old]: "old", [current]: ""})[old], "");
+}
 const normalized = platformEnvironment(legacyEnvironment);
 assert.equal(normalized.SUQPAGE_POSTGRES_URL,legacyEnvironment.MIRTPAGE_POSTGRES_URL);
 assert.equal(normalized.NEXT_PUBLIC_SUQPAGE_PWA_ENABLED,"false");

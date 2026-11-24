@@ -7,9 +7,11 @@ assert.equal(showroomStatusLookupUrl("http://127.0.0.1:3102/@sample", { NODE_ENV
   "http://127.0.0.1:3102/api/public/showroom-status");
 assert.equal(showroomStatusLookupUrl("http://192.168.1.9:3102/@sample", { NODE_ENV: "development" }).href,
   "http://192.168.1.9:3102/api/public/showroom-status");
-assert.equal(showroomStatusLookupUrl("https://untrusted.example/@sample?token=private", {
-  NODE_ENV: "production", NETLIFY: "true", NEXT_PUBLIC_APP_URL: "https://mirtpage.com",
-}).href, "https://mirtpage.com/api/public/showroom-status");
+for (const retired of ["mirtpage.com", "suqpage.com"]) {
+  assert.throws(() => showroomStatusLookupUrl("https://africmade.com/@sample", {
+    NODE_ENV: "production", NETLIFY: "true", NEXT_PUBLIC_APP_URL: "https://" + retired,
+  }));
+}
 assert.equal(showroomStatusLookupUrl("https://untrusted.example/@sample?token=private", {
   NODE_ENV: "production", NETLIFY: "true", NEXT_PUBLIC_APP_URL: "https://africmade.com",
 }).href, "https://africmade.com/api/public/showroom-status");

@@ -36,6 +36,11 @@ contains the full acceptance mapping; short filenames are navigation hints.
 Historical outcomes remain in the existing release records and Git, not copied
 run logs. [Active delivery checklist](../docs/AFRICMADE-TRANSITION-CHECKLIST.md).
 
+DEP-049 showroom SDK presentation and the production Edge lookup are covered
+by `test-platform-identity.mjs` and `test-showroom-status-origin.ts`. DEP-029
+callback retirement, reverse transitions and exact readback are covered by
+`test-production-auth-config.ts`.
+
 ## S198 limited hosted demo simulation — source qualification in progress
 
 BE-067 / DEP-054 / ADR-0034 map the owner's selected 09:00, 13:00 and 17:00

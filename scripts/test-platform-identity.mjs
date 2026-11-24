@@ -3,6 +3,16 @@ import fs from "node:fs";
 // Persisted protocol identities are separate from repository and display names.
 const activeFiles = ["app", "components"].flatMap((root) => fs.readdirSync(root, { recursive: true })
   .filter((file) => /\.(tsx?|css)$/.test(file)).map((file) => `${root}/${file}`));
+const sdk = "showroom-sdk";
+for (const name of fs.readdirSync(sdk).filter(name => name.endsWith(".schema.json"))) {
+  const schema = JSON.parse(fs.readFileSync(sdk + "/" + name, "utf8"));
+  assert.equal(schema.$id, "https://africmade.com/schemas/" + name);
+  assert.match(schema.title, /^AfricMade /);
+  assert.doesNotMatch(schema.description ?? "", /mirtpage|suqpage/i);
+}
+for (const name of ["README-AI-INTEGRATION.md", "sample-catalog.json"]) {
+  assert.doesNotMatch(fs.readFileSync(sdk + "/" + name, "utf8"), /mirtpage|suqpage/i);
+}
 const visibleOldBrand=[];
 for(const file of activeFiles){
  const source=fs.readFileSync(file,"utf8");

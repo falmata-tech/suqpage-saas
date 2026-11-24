@@ -1,6 +1,6 @@
-# Suqpage AI Showroom Integration Contract
+# AfricMade AI Showroom Integration Contract
 
-Suqpage accepts a bounded, declarative showroom recipe. The AI chooses reviewed
+AfricMade accepts a bounded, declarative showroom recipe. The AI chooses reviewed
 components, writes provisional content, selects media behavior, and supplies a
 semantic color palette. It never returns executable code or publishes a site.
 

@@ -18,6 +18,7 @@ export const AUTH_ORIGIN_POLICIES = Object.freeze({
   "dual-new-primary": Object.freeze({ site_url: "https://mirtpage.com", uri_allow_list: callbacks }),
   "africmade-callback-old-primary": Object.freeze({ site_url: "https://mirtpage.com", uri_allow_list: africMadeCallbacks }),
   "africmade-primary": Object.freeze({ site_url: "https://africmade.com", uri_allow_list: africMadeCallbacks }),
+  "africmade-only": Object.freeze({ site_url: "https://africmade.com", uri_allow_list: "https://africmade.com/auth/callback" }),
 });
 export type AuthOriginPhase = keyof typeof AUTH_ORIGIN_POLICIES;
 const MAX_BYTES = 512 * 1024;
@@ -92,7 +93,9 @@ function originTransition(project: string, source: unknown, target: unknown): Au
     || (source === "dual-new-primary" && target === "dual-old-primary")
     || (source === "dual-new-primary" && target === "africmade-callback-old-primary")
     || (source === "africmade-callback-old-primary" && target === "africmade-primary")
-    || (source === "africmade-primary" && target === "africmade-callback-old-primary"), "Origin phase transition is not permitted.");
+    || (source === "africmade-primary" && target === "africmade-callback-old-primary")
+    || (source === "africmade-primary" && target === "africmade-only")
+    || (source === "africmade-only" && target === "africmade-primary"), "Origin phase transition is not permitted.");
   return { ...AUTH_ORIGIN_POLICIES[target] };
 }
 function matchesOrigin(config: AuthConfig, phase: AuthOriginPhase): boolean {

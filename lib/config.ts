@@ -160,7 +160,7 @@ export function assertProductionConfiguration() {
   if (identity !== "supabase") {
     throw new Error("SUQPAGE_AUTH_DRIVER must be supabase in production and deploy previews.");
   }
-  const url = platformEnvironment().SUQPAGE_CANONICAL_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+  const url = platformEnvironment().AFRICMADE_CANONICAL_URL || process.env.NEXT_PUBLIC_APP_URL || "";
   const localBrowserTestUrl = browserTestRuntime && (() => {
     try {
       const parsed = new URL(url);
@@ -169,7 +169,7 @@ export function assertProductionConfiguration() {
   })();
   if (!/^https:\/\//i.test(url) && !localBrowserTestUrl) {
     throw new Error(
-      "SUQPAGE_CANONICAL_URL must be an HTTPS URL in production.",
+      "AFRICMADE_CANONICAL_URL must be an HTTPS URL in production.",
     );
   }
   if (!process.env.PRIVACY_SALT || process.env.PRIVACY_SALT.length < 24) {
