@@ -9,11 +9,12 @@ import {Icon,Button,Field,Copy,colors} from './ui';
 type OptionPicker='category'|'subcategory'|'country'|'city';
 type Picker=''|'filters'|OptionPicker;
 const checkboxKeyboard=(toggle:()=>void)=>Platform.OS==='web'?{onKeyDown:(event:{key:string;repeat?:boolean;preventDefault:()=>void})=>{if(event.key===' '||event.key==='Spacebar'){event.preventDefault();if(!event.repeat)toggle();}}}:{};
-export default function MarketSearchControls({scope,value,onChange,metadata,active=true}:{scope:MarketScope;value:MarketSearch;onChange:(value:MarketSearch)=>void;metadata:Pick<Market,'categories'|'countries'|'places'|'subcategories'>|null;active?:boolean}) {
+export default function MarketSearchControls({scope,value,onChange,metadata,active=true,optionsCurrent=true}:{scope:MarketScope;value:MarketSearch;onChange:(value:MarketSearch)=>void;metadata:Pick<Market,'categories'|'countries'|'places'|'subcategories'|'hasMadeToOrder'>|null;active?:boolean;optionsCurrent?:boolean}) {
  const {t,locale}=useApp(),{width,fontScale}=useWindowDimensions();const [contentWidth,setContentWidth]=useState(Math.max(0,width-24)),[picker,setPicker]=useState<Picker>(''),[text,setText]=useState('');
  const trigger=useRef<View>(null),choiceTriggers=useRef<Partial<Record<OptionPicker,View|null>>>({}),returnTrigger=useRef<'filters'|OptionPicker>('filters'),restoreFocus=useRef(false),lastScope=useRef(scope);
  const enlarged=fontScale>1.3,wide=contentWidth>=760&&!enlarged,ready=metadata!==null;
  const count=value.categories.length+Number(Boolean(value.subcategory))+value.countries.length+value.cities.length+Number(value.madeToOrder);
+ const customDisabled=!value.madeToOrder&&(!optionsCurrent||metadata?.hasMadeToOrder===false);
  const change=(patch:Partial<MarketSearch>)=>onChange({...value,...patch,page:1});
  const title=picker==='filters'?'Filters':picker==='category'?'Categories':picker==='subcategory'?'Subcategory':picker==='country'?'Country':'City';
  const choices=picker==='category'?(metadata?.categories||[]).map(c=>({...c,label:t(c.label)}))
@@ -21,6 +22,7 @@ export default function MarketSearchControls({scope,value,onChange,metadata,acti
   :picker==='country'?(metadata?.countries||[]).map(c=>({key:c.code,label:countryName(c.code,locale)}))
   :picker==='city'?(metadata?.places||[]).filter(c=>c.countryCode&&value.countries.includes(c.countryCode)).map(c=>({...c,label:`${c.label} · ${countryName(c.countryCode!,locale)}`})):[];
  const selected=picker==='category'?value.categories:picker==='subcategory'?(value.subcategory?[value.subcategory]:[]):picker==='country'?value.countries:value.cities;
+ for(const key of selected)if(!choices.some(choice=>choice.key===key))choices.push({key,label:picker==='country'?countryName(key,locale):picker==='city'?key.split(':').slice(1).join(':'):t(key)});
  const visibleChoices=choices.filter(c=>c.label.toLocaleLowerCase().includes(text.toLocaleLowerCase()));
  useEffect(()=>{
   if(!picker&&restoreFocus.current){
@@ -32,14 +34,14 @@ export default function MarketSearchControls({scope,value,onChange,metadata,acti
  useEffect(()=>{if(lastScope.current!==scope||!active||!ready){lastScope.current=scope;setPicker('');setText('');restoreFocus.current=false;}},[scope,active,ready]);
  function close(){restoreFocus.current=true;setPicker('');}
  function openChoice(next:OptionPicker){if(!ready)return;if(!picker)returnTrigger.current=next;setText('');setPicker(next);}
- function choose(key:string){const next=selected.includes(key)?selected.filter(k=>k!==key):[...selected,key].slice(0,16);
+ function choose(key:string){if(!optionsCurrent&&!selected.includes(key))return;const next=selected.includes(key)?selected.filter(k=>k!==key):[...selected,key].slice(0,16);
   if(picker==='category')change({categories:next,subcategory:undefined});else if(picker==='subcategory')change({subcategory:value.subcategory===key?undefined:key});else if(picker==='country')change({countries:next,cities:value.cities.filter(c=>next.includes(c.split(':')[0]))});else if(picker==='city')change({cities:next});
  }
  const overview=picker==='filters';
  function renderFilters(overview:boolean){return <View testID={`${scope}-filters`} style={[s.filters,wide&&s.wideFilters,wide&&!overview&&{minWidth:398},overview&&s.overviewFilters]}>
   {([{key:'category',label:'Category',count:value.categories.length,icon:'grid'},...(value.categories.length && (metadata?.subcategories?.length || value.subcategory)?[{key:'subcategory' as const,label:'Subcategory',count:Number(Boolean(value.subcategory)),icon:'grid' as const}]:[]),{key:'country',label:'Country',count:value.countries.length,icon:'globe'},{key:'city',label:'City',count:value.cities.length,icon:'pin'}] as const).map(f=><Pressable key={f.key} ref={node=>{if(!overview)choiceTriggers.current[f.key]=node;}} accessibilityRole="button" accessibilityLabel={t(f.label)+(f.count?` (${f.count})`:'')} accessibilityState={{disabled:!ready||f.key==='city'&&!value.countries.length,selected:f.count>0}} aria-expanded={picker===f.key} aria-disabled={!ready||f.key==='city'&&!value.countries.length} disabled={!ready||f.key==='city'&&!value.countries.length} onPress={()=>openChoice(f.key)} style={[s.filter,wide&&!overview&&s.wideGeo,overview&&s.overviewChoice,f.count>0&&s.active,(!ready||f.key==='city'&&!value.countries.length)&&{opacity:.65}]}>
    {(overview||wide)&&<Icon name={f.icon} size={overview?18:14}/>}<Text style={[s.filterText,overview&&s.overviewText]}>{t(f.label)}</Text>{f.count>0?<Text style={s.count} testID={`${scope}-${f.key}-count`}>{f.count}</Text>:<Icon name="down" size={11}/>}</Pressable>)}
-  <Pressable accessibilityRole="checkbox" accessibilityLabel={t('Made to order')} accessibilityState={{checked:value.madeToOrder}} aria-checked={value.madeToOrder} onPress={()=>change({madeToOrder:!value.madeToOrder})} {...checkboxKeyboard(()=>change({madeToOrder:!value.madeToOrder}))} style={[s.filter,s.customFilter,wide&&!overview&&s.wideCustom,overview&&s.overviewChoice,value.madeToOrder&&s.active]}><Icon name={value.madeToOrder?'check':'package'} size={overview?18:14}/><Text style={[s.filterText,overview&&s.overviewText]}>{t('Made to order')}</Text></Pressable>
+  <Pressable accessibilityRole="checkbox" disabled={customDisabled} accessibilityLabel={t('Made to order')} accessibilityState={{checked:value.madeToOrder,disabled:customDisabled}} aria-checked={value.madeToOrder} onPress={()=>change({madeToOrder:!value.madeToOrder})} {...checkboxKeyboard(()=>{if(!customDisabled)change({madeToOrder:!value.madeToOrder});})} style={[s.filter,s.customFilter,customDisabled&&{opacity:.45},wide&&!overview&&s.wideCustom,overview&&s.overviewChoice,value.madeToOrder&&s.active]}><Icon name={value.madeToOrder?'check':'package'} size={overview?18:14}/><Text style={[s.filterText,overview&&s.overviewText]}>{t('Made to order')}</Text></Pressable>
  </View>;}
  return <View testID={`${scope}-controls`} onLayout={event=>setContentWidth(event.nativeEvent.layout.width)} style={[s.controls,wide&&s.wideControls]}>
   <View testID={`${scope}-search`} style={[s.search,wide&&s.wideSearch]}><Icon name="search" size={18}/><TextInput accessibilityLabel={t(scope==='businesses'?'Search businesses':'Search products')} placeholder={t(scope==='businesses'?'Search businesses':'Search products')} placeholderTextColor={colors.muted} value={value.query} maxLength={80} onChangeText={query=>change({query})} style={s.input} returnKeyType="search"/>
@@ -51,7 +53,7 @@ export default function MarketSearchControls({scope,value,onChange,metadata,acti
    {overview?<>{renderFilters(true)}<View style={s.actions}><Button secondary label={t('Clear all')} disabled={!hasMarketCriteria(value)} onPress={()=>onChange(emptyMarketSearch())}/><Button label={t('Done')} onPress={close}/></View></>:<>
     <Button secondary label={t('Back to filters')} onPress={()=>{setText('');setPicker('filters');}}/>
     {choices.length>8&&<Field label={t('Filter options')} placeholder={t('Search')} value={text} onChangeText={setText}/>}
-    {visibleChoices.map(c=><Pressable key={c.key} accessibilityRole="checkbox" accessibilityState={{checked:selected.includes(c.key)}} aria-checked={selected.includes(c.key)} onPress={()=>choose(c.key)} {...checkboxKeyboard(()=>choose(c.key))} style={s.option}>{picker==='category'&&<CategoryArt name={c.key} size={26}/>}<Text style={s.optionText}>{c.label}</Text>{selected.includes(c.key)&&<Icon name="check" color={colors.brand}/>}</Pressable>)}
+    {visibleChoices.map(c=><Pressable key={c.key} accessibilityRole="checkbox" disabled={!optionsCurrent&&!selected.includes(c.key)} accessibilityState={{checked:selected.includes(c.key),disabled:!optionsCurrent&&!selected.includes(c.key)}} aria-checked={selected.includes(c.key)} onPress={()=>choose(c.key)} {...checkboxKeyboard(()=>choose(c.key))} style={[s.option,!optionsCurrent&&!selected.includes(c.key)&&{opacity:.5}]}>{picker==='category'&&<CategoryArt name={c.key} size={26}/>}<Text style={s.optionText}>{c.label}</Text>{selected.includes(c.key)&&<Icon name="check" color={colors.brand}/>}</Pressable>)}
     {!visibleChoices.length&&<Copy>{t('No matches found')}</Copy>}
     <View style={s.actions}><Button secondary label={t('Clear')} onPress={()=>{if(picker==='category')change({categories:[],subcategory:undefined});else if(picker==='subcategory')change({subcategory:undefined});else if(picker==='country')change({countries:[],cities:[]});else change({cities:[]});}}/><Button label={t('Done')} onPress={close}/></View>
    </>}

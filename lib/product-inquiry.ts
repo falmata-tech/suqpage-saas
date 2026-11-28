@@ -61,7 +61,7 @@ export type SocialInquiryItem = {
 /** Language applies to our words only. Business/product/option text stays literal. */
 export function buildSocialInquiryMessage(
   business: Pick<Business, "name" | "handle">,
-  items: SocialInquiryItem[], origin: string, t: UiText = createUiText({}),
+  items: SocialInquiryItem[], origin: string, t: UiText = createUiText({}), closing = "Are these available?",
 ): string {
   const products=items.filter(item=>!item.service);
   if(products.length===0)return [t("Hello {value1},",{value1:business.name}),"",t("I'd like to ask about your products."),"",`${origin.replace(/\/$/,"")}/@${encodeURIComponent(business.handle)}`].join("\n");
@@ -71,7 +71,7 @@ export function buildSocialInquiryMessage(
       ...Object.entries(item.options).map(([name, value]) => `   ${name}: ${value}`),
       ...(item.quantity.trim() ? [`   ${t(item.service ? "Request" : "Quantity")}: ${item.quantity.trim()}`] : []),
       `   ${origin.replace(/\/$/, "")}${productHref(business.handle, item.id)}`,
-    ]), "", t("Are these available?")].join("\n");
+     ]), "", t(closing)].join("\n");
 }
 export function buildInquiryMessage(business: Pick<Business, "name" | "handle">, selections: InquirySelection[], origin: string, t?: UiText): string {
   return buildSocialInquiryMessage(business, selections.filter(line => isPublicProduct(line.product)).map(line => ({

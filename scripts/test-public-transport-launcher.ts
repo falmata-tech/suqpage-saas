@@ -13,7 +13,8 @@ const nativePublic = ["/featured", "/shop/merchant", "/shop/missing-showroom", "
 const excluded = ["/account", "/account-deletion", "/login", "/request", "/setup", "/owner/setup", "/owner/page", "/owner/support", "/owner/settings", "/owner/chat", "/dashboard", "/dashboard/profile", "/dashboard/support", "/dashboard/admin/staff", "/buying", "/blocked-businesses", "/invite/token", "/api/public-support", "/unknown-private-screen"];
 
 test("FE-078 public dock policy exposes saved inquiry actions only", () => {
-  for(const path of ["/", "/about", "/featured", "/tracking", ...excluded]) for(const platform of ["web","native"] as const) assert.equal(publicInquiryPlacement(path,platform),null,path);
+  for(const path of ["/about", "/tracking", ...excluded]) for(const platform of ["web","native"] as const) assert.equal(publicInquiryPlacement(path,platform),null,path);
+  for(const path of ['/','/featured'])for(const platform of ['web','native'] as const)assert.equal(publicInquiryPlacement(path,platform),'shell');
   assert.equal(publicInquiryPlacement('/@merchant','web'),'shell');
   assert.equal(publicInquiryPlacement('/shop/merchant','native'),'shell');
   assert.equal(publicInquiryPlacement('/product','native'),'shell');
@@ -41,7 +42,7 @@ async function shell(entry: string) {
       : args.path === "next/link" ? "export default props=>({type:'a',props});"
       : args.path === "lucide-react" ? "export const FileText='Icon',Info='Icon',LayoutDashboard='Icon',LogIn='Icon',Map='Icon',Menu='Icon',Shield='Icon',Star='Icon',Store='Icon';"
       : args.path === "runtime" ? "export const useApp=()=>({t:value=>value,session:fixture.signedIn?{user:{id:'owner'}}:null,basket:fixture.basket}),useLoad=()=>({data:fixture.basket?.shop||null,loading:false,error:''}),request=async()=>{throw Error('Unexpected API read');},RuntimeProvider=props=>props.children,languageNames={en:'English'},locales=['en'],enabledLocales=['en'],API='http://127.0.0.1:3102';"
-      : args.path === "use-business-inquiry" ? "export const useBusinessInquiry=shop=>({items:shop&&fixture.basket?.shop.id===shop.id?fixture.basket.items:[]});"
+      : args.path === "use-business-inquiry" ? "export const useInquiryAccent=()=>undefined,useQuoteInventory=()=>({groups:fixture.basket?[{id:fixture.basket.shop.id,lines:fixture.basket.items}]:[]});"
       : args.path === "ui" ? "export const Brand='Brand',Icon='NativeIcon',colors={ink:'#222',line:'#ddd',brand:'#c43a00',background:'#f6f8f7'},useOpenLink=()=>()=>{};"
       : args.path === "use-transport-unread" ? "export const useTransportUnread=()=>0;"
       : args.path === "overlay-visibility" ? "export const registerOverlay=()=>()=>{},overlayIsOpen=()=>false;"
@@ -83,8 +84,8 @@ test("FE-078 native showroom/product retains its current saved inquiry list",asy
   const product:Offering={id:1,name:'Test item',description:'Catalog detail',kind:'standard_product',availability:'available',priceMinor:null,media:[],published:true,quantityMode:'optional',options:[]};
   const shop:Shop={id:7,handle:'demo-saved-business',name:'Saved business',about:'Catalog',cover:'',videoUrl:'',contacts:{},products:[product],version:1,status:'active',isDemo:true};
   fixture.basket={shop,items:[{product,quantity:'',options:{}}]};
-  for(const path of ['/shop/'+shop.handle,'/product']){fixture.path=path;fixture.params={handle:shop.handle,id:'1'};assert.equal(render().filter(node=>node.props.testID==='public-inquiry-list').length,1,path);}
-  for(const path of ['/','/featured','/inquiry',...excluded]){fixture.path=path;assert.equal(render().filter(node=>node.props.testID==='public-inquiry-list').length,0,path);}
+  for(const path of ['/shop/'+shop.handle,'/product','/','/featured']){fixture.path=path;fixture.params={handle:shop.handle,id:'1'};assert.equal(render().filter(node=>node.props.testID==='public-inquiry-list').length,1,path);}
+  for(const path of ['/inquiry',...excluded]){fixture.path=path;assert.equal(render().filter(node=>node.props.testID==='public-inquiry-list').length,0,path);}
 });
 
 test("FE-078 retired native transport deep link redirects before any chat or credential hook",async()=>{

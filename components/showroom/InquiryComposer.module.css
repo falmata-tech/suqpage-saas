@@ -76,3 +76,33 @@
 .channelChoices+.platform{padding:18px;border:1px solid #efd1c1;border-radius:12px;background:#fffaf7}
 .error{color:#b22210}
 @media(max-width:420px){.channelChoices{gap:8px}.channelCard{grid-template-columns:34px minmax(0,1fr);gap:8px;padding:10px;min-height:84px}.channelIcon{width:34px;height:34px;border-radius:11px}.channelIdentity strong{font-size:13px}.channelIdentity small{font-size:11px}.channelAction,.copyContact{font-size:11px;padding-inline:8px}.channelChoices .inboxChoice{grid-template-columns:34px minmax(0,1fr) 20px}}
+
+.multiDialog { padding:0; width:min(560px,calc(100% - 32px)); max-height:min(85dvh,820px); border:0; border-radius:16px; color:#252a2d; background:white; box-shadow:0 20px 80px #0003; }
+.multiDialog[open] { display:flex; flex-direction:column; }
+.multiDialog::backdrop { background:#14202780; }
+.multiScroll { min-height:0; overflow:auto; overscroll-behavior:contain; padding:0 20px 12px; }
+.shopGroup { padding:18px 0; border-bottom:1px solid #e2e6e4; }
+.shopGroup h3 { display:flex; align-items:center; gap:8px; margin:0 0 12px; font:700 16px/1.4 var(--font-body),sans-serif; }
+.quoteLine { display:grid; grid-template-columns:44px minmax(0,1fr) 44px; align-items:start; gap:10px; padding:8px 0; }
+.quoteLine img {width:44px;height:44px;object-fit:cover;border-radius:7px;}
+.quoteLine strong,.quoteLine small { display:block;overflow-wrap:anywhere; }
+.quoteLine label { display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px; }
+.quoteLine input { width:8em;min-height:44px;max-width:100%;border:1px solid #bbc6c1;border-radius:6px;padding:4px 8px;font-size:16px; }
+.quoteLine button,.shopGroup button {min-height:44px;min-width:44px;background:white;border:1px solid #d7ded9;border-radius:8px;}
+.shopChannels { display:flex;flex-wrap:wrap;gap:8px;margin-top:8px; }
+.shopChannels a { min-height:44px;display:inline-flex;align-items:center;gap:6px;color:#284c3e;border:1px solid #bdcfc5;border-radius:8px;padding:6px 10px;text-decoration:none;font-size:14px; }
+.quoteFooter {border-top:1px solid #e2e6e4;padding:12px 20px max(12px,env(safe-area-inset-bottom));}
+.multiDialog button:disabled {opacity:.5;}
+.multiScroll form {padding:18px 0;}
+@media(max-width:600px){.multiDialog{width:100%;max-width:100%;max-height:92dvh;margin:auto 0 0;border-radius:18px 18px 0 0;}.multiScroll{padding-inline:16px;}.multiScroll input,.multiScroll textarea{font-size:16px;}}
+
+.multiDialog .head > button { display:grid;place-items:center;width:44px;height:44px;flex:none;border:1px solid #d7ded9;border-radius:10px;background:#fff;color:#252a2d; }
+.multiDialog .head h2 {margin:0;}
+.multiDialog .head small {display:block;margin-top:3px;color:#59676b;}
+
+.quoteOptions { margin-top:6px;font-size:14px; }
+.quoteOptions summary { width:fit-content;min-height:44px;padding:12px 0;cursor:pointer;color:#485b54; }
+.quoteOptions[open] { display:block; }
+.quoteOptions button,.quoteOptions a { margin:3px 6px 3px 0;padding:7px 10px; }
+.quoteOptions div { overflow-wrap:anywhere; }
+.shopGroup .list { margin-bottom:4px; }

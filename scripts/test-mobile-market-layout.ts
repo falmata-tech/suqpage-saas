@@ -28,7 +28,7 @@ const bundled = build({ entryPoints: ["apps/mobile/app/(tabs)/index.tsx", "apps/
   name: "market-component-ports",
   setup(b) {
     b.onResolve({ filter: /^(react(?:\/jsx-runtime)?|react-native|react-native-safe-area-context|expo-router)$/ }, args => ({ path: args.path, namespace: "ports" }));
-    b.onResolve({ filter: /(?:^|\/)(runtime|ui|chrome|blocked-businesses|MarketMap|MapGroupPicker|use-market-feed|use-app-foreground|PublicActionDock)$/ }, args => ({ path: args.path.split("/").at(-1)!, namespace: "ports" }));
+    b.onResolve({ filter: /(?:^|\/)(runtime|ui|chrome|blocked-businesses|MarketMap|MapGroupPicker|use-market-feed|use-app-foreground|PublicActionDock|use-business-inquiry)$/ }, args => ({ path: args.path.split("/").at(-1)!, namespace: "ports" }));
     b.onLoad({ filter: /.*/, namespace: "ports" }, args => ({ loader: "js", contents:
       args.path === "react" ? `
         export const createContext=initial=>({Provider:'ContextProvider',initial}),useContext=context=>context.initial;export const useState=initial=>{const i=fixture.stateCursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return [fixture.states[i],value=>{fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value;}];};
@@ -50,6 +50,7 @@ const bundled = build({ entryPoints: ["apps/mobile/app/(tabs)/index.tsx", "apps/
         : args.path === "blocked-businesses" ? `export const useBlockedBusinesses=()=>({ready:true,list:[]});`
         : args.path === "MarketMap" ? `export default 'MarketMap';`
         : args.path === "MapGroupPicker" ? `export default 'MapGroupPicker';`
+        : args.path === "use-business-inquiry" ? "export const businessInquiries={};"
         : args.path === "PublicActionDock" ? `export default 'PublicActionDock';`
         : args.path === "chrome" ? `export const BuyingLauncher='BuyingLauncher',IconButton='IconButton',Sheet='Sheet',CategoryArt='CategoryArt';`
         : `export const Screen='Screen',Copy='Copy',Photo='Photo',Status='Status',Icon='Icon',Button='Button',Field='Field',colors={ink:'#222',line:'#ddd',brand:'#c43a00',soft:'#fff1e9'},useOpenLink=()=>async url=>{fixture.openedLinks.push(url);};`,

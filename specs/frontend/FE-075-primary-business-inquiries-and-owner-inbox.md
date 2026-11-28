@@ -167,3 +167,15 @@ private-detail read acknowledgement. These are focused component regressions,
 not actual deployed-app workflow or visual approval evidence. The accepted local
 visitor→owner workflow still requires Chrome/Expo and authoritative records after
 the separately reviewed local schema update.
+
+## Multi-business quote requests (November 28)
+
+A visiting buyer can build one inquiry list across public showrooms, review the selected options and desired quantities under each business name, then enter contact details once. The shared list supersedes the former showroom-only launcher. Direct inquiries and private previews keep their existing scope.
+
+- Given two shops, when the buyer leaves a showroom, reloads the market or returns from a messaging app, the list retains each shop's own product selections. Each configured and approved WhatsApp or Telegram action opens only that shop's prepared draft. Opening it leaves the list available.
+- When the buyer submits to the business inboxes, use the existing BE-062 endpoint once per selected business with its own idempotency key and only its canonical products. A durable receipt clears only the accepted selections. Show the business name on a failure and allow retry. Buyer contact details stay in memory.
+- When a public product, option or shop becomes unavailable, require resolution before sending an incomplete selection. Preserve the 20-selection limit per shop.
+- When the visitor changes a Market filter, choices reflect eligible matches across the full scope and active search, including other filter groups. Keep selected values removable. Preserve the existing URL and map/products handoff.
+- Verify with two distinct local sellers, per-shop draft links, database readback, partial failure, refresh and narrow/desktop layouts. Existing query, inbox, visibility, and demo-contact rules remain authoritative. Roll back by restoring the previous client and discovery projection. No schema migration.
+
+The shared list is the sole public saved-list editor on each platform. Preserve copying a prepared message or contact, approved SMS on phones, clearing one shop, and sending an edited inbox message to one recipient while the other shops stay saved. Direct product and general business inquiries stay separate from saved selections.

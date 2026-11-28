@@ -238,7 +238,7 @@ export function ShowroomContent({ shop, preview = false, catalogReady = true }: 
               <Text style={[v.title, { color: accent ? colors.ink : "white" }]}>
                 {t("Stay in touch")}
               </Text>
-              {!preview&&<Button accentColor={shop.accentColor} wrapLabel disabled={!catalogReady||!inquiry.ready} label={t("Contact this business")} onPress={()=>router.push({pathname:"/inquiry",params:{handle:shop.handle}})}/>}
+              {!preview&&<Button accentColor={shop.accentColor} wrapLabel disabled={!catalogReady||!inquiry.ready} label={t("Contact this business")} onPress={()=>router.push({pathname:"/inquiry",params:{handle:shop.handle,mode:"contact"}})}/>}
               {publicContactLinks(shop.contacts).filter(c=>["website","tiktok","instagram","facebook"].includes(c.kind)).map((c) => (
                 <Pressable
                   key={c.kind}

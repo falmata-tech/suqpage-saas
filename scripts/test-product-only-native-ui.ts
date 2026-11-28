@@ -14,19 +14,24 @@ const originalSearch={query:'door',categories:['furniture'],countries:['ET'],cit
 // Controlled native, navigation and I/O ports prove state/save intent, not API,
 // PostgreSQL, Android rendering, image upload or remote persistence behavior.
 const bundled=build({entryPoints:['apps/mobile/src/owner-forms.tsx','apps/mobile/src/ProductSupply.tsx','apps/mobile/src/MarketSearchControls.tsx','apps/mobile/app/inquiry.tsx','apps/mobile/src/ShowroomContent.tsx','apps/mobile/app/product.tsx'],outdir:'/tmp/suqpage-product-only-native-ui',bundle:true,write:false,platform:'node',format:'cjs',plugins:[{name:'native-product-ui-ports',setup(builder){
+  builder.onResolve({filter:/\/use-quote-catalogs$/},()=>({path:'quote-catalogs',namespace:'ports'}));
   builder.onResolve({filter:/^(?:react(?:\/jsx-runtime)?|react-native|expo-router|expo-file-system|expo-crypto|expo-image-picker|expo-clipboard|(?:\.\/|\.\.\/src\/)(?:runtime|ui|chrome|image-upload|CitySelector|CountrySelector|OwnerLocationPicker|LocationVisibilityChoices|owner-handle|StorefrontAccentPicker|ShowroomContent|blocked-businesses|CatalogSafety|Gallery|YouTubeVideo|use-business-inquiry|use-public-shop|owner-edit-navigation|OwnerEditConfirmation))$/},args=>({path:args.path.startsWith('../src/')?'./'+args.path.split('/').at(-1):args.path,namespace:'ports'}));
   builder.onLoad({filter:/.*/,namespace:'ports'},args=>({loader:'js',resolveDir:process.cwd(),contents:
-    args.path==='react'?`export const useState=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return[fixture.states[i],value=>fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value];};export const useMemo=fn=>fn(),useEffect=()=>{},useRef=initial=>({current:initial});export default {};`
+    args.path==='quote-catalogs'?`export const useQuoteCatalogs=(keys,load)=>{fixture.loads.push(()=>Promise.all(keys.map(load)));return {shops:Object.fromEntries(keys.map(id=>[id,fixture.loadError?null:fixture.loading?undefined:fixture.shop])),retry(){}};};`
+    :args.path==='react'?`export const useState=initial=>{const i=fixture.cursor++;if(!(i in fixture.states))fixture.states[i]=typeof initial==='function'?initial():initial;return[fixture.states[i],value=>fixture.states[i]=typeof value==='function'?value(fixture.states[i]):value];};export const useMemo=fn=>fn(),useEffect=()=>{},useRef=initial=>({current:initial});export default {};`
     :args.path==='react/jsx-runtime'?`export const jsx=(type,props)=>({type,props}),jsxs=jsx,Fragment='Fragment';`
-    :args.path==='react-native'?`export const View='View',Text='Text',TextInput='TextInput',Pressable='Pressable',ScrollView='ScrollView',Platform={get OS(){return fixture.platform;}},Alert={alert(){throw Error('Unexpected alert');}},StyleSheet={create:styles=>styles,absoluteFill:{}},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`
+    :args.path==='react-native'?`export const FlatList='FlatList',KeyboardAvoidingView='KeyboardAvoidingView',View='View',Text='Text',TextInput='TextInput',Pressable='Pressable',ScrollView='ScrollView',Platform={get OS(){return fixture.platform;}},Alert={alert(){throw Error('Unexpected alert');}},StyleSheet={create:styles=>styles,absoluteFill:{}},useWindowDimensions=()=>({width:390,height:844,fontScale:1});`
     :args.path==='expo-router'?`export const useLocalSearchParams=()=>fixture.params,router={push(){throw Error('Unexpected navigation');}};`
-    :args.path==='expo-crypto'?`export const randomUUID=()=> 'fixture-idempotency-'+fixture.keys++;`
+    :args.path==='expo-crypto'?`export const CryptoDigestAlgorithm={},digestStringAsync=async()=>{throw Error('Unexpected hashing')},randomUUID=()=> 'fixture-idempotency-'+fixture.keys++;`
     :args.path==='expo-file-system'?`export class File {constructor(){throw Error('Unexpected file access');}}`
     :args.path==='expo-image-picker'?`export const launchImageLibraryAsync=async()=>{throw Error('Unexpected image picker');};`
     :args.path==='expo-clipboard'?`export const setStringAsync=async message=>{fixture.copied.push(message);return true;};`
-    :args.path==='./runtime'?`export const useApp=()=>({t:value=>value,locale:'en',ownerRequest:async(path,body,form)=>{if(!form)throw Error('Unexpected non-product request');fixture.writes.push({path,details:JSON.parse(form.get('details')),fields:[...form.keys()]});if(fixture.failSave)throw Error('This page changed. Reload before saving.');},basket:fixture.basket,setBasket:value=>{fixture.basket=typeof value==='function'?value(fixture.basket):value;}}),useLoad=fn=>{fixture.loads.push(fn);return {data:fixture.shop,loading:fixture.loading,error:fixture.loadError,reload(){}};},request=async path=>{fixture.reads.push(path);return fixture.shop;},auth={},API='http://127.0.0.1:3102';`
+    :args.path==='./runtime'?`export const useApp=()=>({t:value=>value,locale:'en',ownerRequest:async(path,body,form)=>{if(!form)throw Error('Unexpected non-product request');fixture.writes.push({path,details:JSON.parse(form.get('details')),fields:[...form.keys()]});if(fixture.failSave)throw Error('This page changed. Reload before saving.');},basket:fixture.basket,setBasket:value=>{fixture.basket=typeof value==='function'?value(fixture.basket):value;}}),useLoad=fn=>{fixture.loads.push(fn);return {data:fixture.shop,loading:fixture.loading,error:fixture.loadError,reload(){}};},request=async path=>{fixture.reads.push(path);return fixture.shop;},auth={},secure={},API='http://127.0.0.1:3102';`
     :args.path==='./use-public-shop'?`import{useLoad,request}from'./runtime';export const usePublicShop=handle=>useLoad(()=>handle?request('shops/'+encodeURIComponent(handle)):Promise.resolve(null),[handle]);`
-    :args.path==='./use-business-inquiry'?`import {restoreBusinessInquiry} from ${JSON.stringify(process.cwd()+'/apps/mobile/src/inquiry-baskets.ts')};const restored=shop=>shop&&fixture.basket?.shop.id===shop.id?restoreBusinessInquiry(shop,fixture.basket.items.map(item=>({productId:item.product.id,quantity:item.quantity,options:item.options}))):[];export const useBusinessInquiry=shop=>({items:restored(shop),ready:true,error:'',retry(){},setItems:change=>{fixture.basket={shop,items:change(restored(shop))};}});`
+    :args.path==='./use-business-inquiry'?`import {restoreBusinessInquiry} from ${JSON.stringify(process.cwd()+'/apps/mobile/src/inquiry-baskets.ts')};const restored=shop=>shop&&fixture.basket?.shop.id===shop.id?restoreBusinessInquiry(shop,fixture.basket.items.map(item=>({productId:item.product.id,quantity:item.quantity,options:item.options}))):[];const refs=()=>fixture.basket?.items.map(l=>({productId:l.product.id,options:l.options,quantity:l.quantity}))||[];
+    export const useQuoteInventory=()=>({ready:true,groups:refs().length?[{id:fixture.shop.id,lines:refs()}]:[],error:''});
+    export const businessInquiries={replaceLines:async(id,change)=>{fixture.basket.items=change(refs()).map(l=>({product:fixture.shop.products.find(p=>p.id===l.productId),quantity:l.quantity,options:l.options}));}};
+    export const useBusinessInquiry=shop=>({items:restored(shop),ready:true,error:'',retry(){},setItems:change=>{fixture.basket={shop,items:change(restored(shop))};}});`
     :args.path==='./ui'?`export const Screen='Screen',LinkedText='LinkedText',Copy='Copy',Card='Card',Field='Field',Button='Button',Chip='Chip',Photo='Photo',Status='Status',Icon='Icon',s={wrap:{flexDirection:'row'}},useOpenLink=()=>()=>{},openLink=async()=>{throw Error('Unexpected external navigation');},colors={ink:'#222',muted:'#667',line:'#ddd',brand:'#c43a00',soft:'#fff1e9'};`
     :args.path==='./chrome'?`export const Sheet='Sheet',CategoryArt='CategoryArt';`
     :args.path==='./image-upload'?`export const appendPickedImage=async()=>{throw Error('Unexpected upload');};`
@@ -40,6 +45,17 @@ const bundled=build({entryPoints:['apps/mobile/src/owner-forms.tsx','apps/mobile
   }));
 }}]});
 function nodes(value:unknown):Element[]{if(!value||typeof value!=='object')return[];const node=value as Element;return[node,...[node.props.children].flat(Infinity).flatMap(nodes)];}
+function inquiryNodes(value:unknown):Element[]{
+ if(Array.isArray(value))return value.flatMap(inquiryNodes);
+ if(!value||typeof value!=='object')return [];
+ const n=value as Element;
+ if(typeof n.type==='function'&&['LegacyBusinessInquiry','SingleBusinessInquiry','MultiBusinessInquiry','ShopOptions'].includes(n.type.name))return inquiryNodes(n.type(n.props));
+ if(n.type==='FlatList'){
+   const render=n.props.renderItem as (args:{item:unknown})=>unknown;
+   return [n,...inquiryNodes(n.props.ListHeaderComponent),...(n.props.data as unknown[]).flatMap(item=>inquiryNodes(render({item}))),...inquiryNodes(n.props.ListFooterComponent)];
+ }
+ return [n,...inquiryNodes(n.props.children)];
+}
 function name(node:Element){return typeof node.type==='function'?node.type.name:node.type;}
 function button(tree:Element[],label:string){const result=tree.find(node=>name(node)==='Button'&&node.props.label===label);assert.ok(result,label);return result;}
 function chip(tree:Element[],label:string){const result=tree.find(node=>name(node)==='Chip'&&node.props.label===label);assert.ok(result,label);return result;}
@@ -51,7 +67,7 @@ async function fixture(entry:'owner-forms'|'ProductSupply'|'MarketSearchControls
   const output=(await bundled).outputFiles.find(file=>file.path.endsWith('/'+entry+'.js'))!;assert.ok(output);
   const module={exports:{} as Record<string,(props:Record<string,unknown>)=>Element|null>};
   vm.runInNewContext(output.text,{module,exports:module.exports,fixture:state,FormData,Error,URLSearchParams,URL});
-  return{state,render:(exportName:string,props:Record<string,unknown>)=>{state.cursor=0;return nodes(module.exports[exportName](props));}};
+  return{state,render:(exportName:string,props:Record<string,unknown>)=>{state.cursor=0;return (entry==='inquiry'?inquiryNodes:nodes)(module.exports[exportName](props));}};
 }
 function productProps(kind:string|undefined){const product={...originalProduct,...(kind?{kind}:{})};return{home:{shop:{version:8,products:kind?[product]:[]}},id:kind?'21':undefined,onSaved:()=>{},onCancel:()=>{}};}
 async function flush(){await new Promise<void>(resolve=>setImmediate(resolve));}
@@ -162,13 +178,27 @@ test('FE-067 native inquiry rehydrates stale selections from current public good
   const selections:Array<{product:Offering;quantity:string;options:Record<string,string>}>=[{product:retired,quantity:'',options:{}},{product:{...custom,name:'Outdated table name'},quantity:'2',options:{Color:'Blue'}},{product:unavailable,quantity:'',options:{}},{product:draft,quantity:'',options:{}},{product:custom,quantity:'',options:{Color:'Purple'}}];
   const restored=restoreCatalogSelections(shop,selections);assert.equal(restored.length,1);assert.equal(restored[0].product,custom);assert.equal(restored[0].quantity,'2');
   const inquiry=await fixture('inquiry');inquiry.state.shop=shop;inquiry.state.params={handle:shop.handle};inquiry.state.basket={shop:{...shop,products:selections.map(item=>item.product)},items:selections};
-  let tree=inquiry.render('default',{});await inquiry.state.loads.at(-1)!();assert.deepEqual(inquiry.state.reads,['shops/demo-fixture-shop'],'An explicitly scoped list fetches the latest public shop rather than trusting its stored references');
-  let visible=tree.map(node=>text(node.props.children)).join('\n');assert.ok(visible.includes('Current custom table'));assert.ok(!visible.includes('Retired repair')&&!visible.includes('Outdated table name'));
-  (field(tree,'Add quantity (optional)').props.onChangeText as(value:string)=>void)('7');
-  assert.equal(inquiry.state.basket.items.length,1);assert.equal(inquiry.state.basket.items[0].product.id,custom.id);assert.equal(inquiry.state.basket.items[0].quantity,'7','Filtering retired rows cannot shift quantity edits onto another product; saved updates retain only canonical eligible references');
-  tree=inquiry.render('default',{});press(button(tree,'Copy message'));await flush();assert.equal(inquiry.state.copied.length,1);assert.ok(inquiry.state.copied[0].includes('Current custom table'));assert.ok(!inquiry.state.copied[0].includes('Retired repair')&&!inquiry.state.copied[0].includes('Outdated table name'));
-  press(button(tree,'Remove'));tree=inquiry.render('default',{});assert.equal(inquiry.state.basket.items.length,0);assert.equal(button(tree,'Copy message').props.disabled,false,'A general business inquiry remains available without selected products');
-  press(button(tree,'Copy message'));await flush();assert.ok(!inquiry.state.copied.at(-1)?.includes('Current custom table')&&!inquiry.state.copied.at(-1)?.includes('Retired repair'),'Empty selections cannot copy an old product');
+  let tree=inquiry.render('default',{});await inquiry.state.loads.at(-1)!();assert.deepEqual(inquiry.state.reads,['shops/by-id/'+shop.id]);
+  const visible=tree.map(node=>text(node.props.children)).join('\n');
+  assert.ok(visible.includes('Current custom table')&&!visible.includes('Retired repair')&&!visible.includes('Outdated table name'));
+  assert.equal(button(tree,'Send to business inboxes').props.disabled,true,'A stale selection cannot silently become an incomplete inquiry');
+  (field(tree,'Quantity').props.onChangeText as(value:string)=>void)('7');
+  assert.equal(inquiry.state.basket.items.find(l=>l.product.id===custom.id&&l.options.Color==='Blue')?.quantity,'7');
+  for(let i=0;i<4;i++){
+    tree=inquiry.render('default',{});
+    const warning=tree.findIndex(n=>name(n)==='Copy'&&n.props.children==='This product is not available for inquiry.');
+    assert.ok(warning>=0);
+    press(button(tree.slice(warning),'Remove'));
+  }
+  assert.equal(inquiry.state.basket.items.length,1);
+  tree=inquiry.render('default',{});press(button(tree,'More options'));
+  tree=inquiry.render('default',{});press(button(tree,'Copy message'));await flush();
+  assert.match(inquiry.state.copied[0],/Current custom table[\s\S]*7/);
+  assert.ok(!inquiry.state.copied[0].includes('Retired repair')&&!inquiry.state.copied[0].includes('Outdated table name'));
+  press(button(tree,'Remove'));assert.equal(inquiry.state.basket.items.length,0);
+  inquiry.state.states=[];inquiry.state.params={handle:shop.handle,mode:'contact'};
+  tree=inquiry.render('default',{});press(button(tree,'Copy message'));await flush();
+  assert.ok(!inquiry.state.copied.at(-1)?.includes('Current custom table'),'A general inquiry excludes saved products');
   inquiry.state.loadError='Unable to connect. Please try again.';tree=inquiry.render('default',{});assert.equal(button(tree,'Copy message').props.disabled,true);assert.ok(!tree.some(node=>text(node)==='Your inquiry list is empty.'),'A failed public refresh is not an empty saved selection');
   inquiry.state.loadError='';inquiry.state.loading=true;tree=inquiry.render('default',{});assert.equal(button(tree,'Copy message').props.disabled,true);inquiry.state.loading=false;
   inquiry.state.params={handle:shop.handle,id:'2'};tree=inquiry.render('default',{});assert.ok(!tree.some(node=>node.props.label==='Copy message'));

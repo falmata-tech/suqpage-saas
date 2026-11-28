@@ -142,7 +142,7 @@ show business names and cities, not internal location-mode terms.
 
 - A public business showroom and geographic/product discovery platform.
 - A dynamic **physical-product** catalog, including ready-made and made-to-order goods.
-- A per-business inquiry list and localized message preparer for external contacts.
+- A multi-business inquiry list and localized per-business message preparer for external contacts.
 - A self-service owner workspace with administrator-authorized staff assistance.
 - Private business Support handled by AfricMade staff.
 
@@ -321,18 +321,12 @@ information and option choices. Missing, foreign or unpublished items fail safel
 
 A direct **Inquire about this product only** action prepares that selection alone.
 It does not merge with, clear or submit the saved list. **Add to inquiry list**
-saves a canonical product/option reference for that business. The floating list
-button appears only on that business's showroom/product pages when selections
-exist, counts only its items and is not a global Market/Featured cart launcher.
-Other businesses retain their own lists. The list is capped at 20 items and is
-rehydrated against the latest eligible canonical products/options before use.
+saves a canonical product/option reference for that business. The public inquiry list groups selections by business and is reachable while browsing the market. Each group holds up to 20 selections. Buyers can request quotes from all listed businesses using one contact form, or open a configured social channel for an individual business. Buyers can also edit a message for one seller, copy the draft or an approved contact, use SMS on a supported phone, or clear the items for one seller. Each recipient receives only its own items. The current public catalog determines which selections are eligible.
 
 Contact prepares a short inquiry in the current interface language, with literal
 merchant data, optional quantity intent and each canonical product link. Offer
 validated, policy-approved WhatsApp and Telegram actions alongside AfricMade Inbox.
-Show the approved public contact identity on desktop with a separate Copy contact
-action; desktop uses Copy message or AfricMade Inbox and does not launch messaging
-apps. Phone/native actions may open the supported channel with the prepared draft.
+The direct showroom composer provides Copy contact, Copy message and AfricMade Inbox on desktop. A buyer reviewing the shared inquiry list can open a configured WhatsApp or Telegram draft for each shop on desktop or phone. Phone/native actions may open the supported channel with the prepared draft.
 Phone web copies the draft before navigating its current tab to the validated
 HTTPS destination; it does not open a blank placeholder tab.
 SMS remains secondary. No external message is sent automatically.
@@ -378,6 +372,8 @@ Details: FE-066/FE-053 and the existing contact/link adapters.
 
 ## 10. Market discovery behavior
 
+Market filter choices reflect available products or map businesses after applying the other active criteria. Selected choices remain removable.
+
 The seven Featured days cover physical goods across industries. Monday covers Technology & energy (including electronics and power equipment). Tuesday covers Health, beauty & household care (including medical supplies and cleaning products). Wednesday covers Food, drink & fresh produce. Thursday covers Industry, tools & transport (including machinery, vehicles, packaging and industrial supplies). Friday covers Home, construction & leisure (including furniture, building products, books, art and sporting goods). Saturday covers Fashion, textiles & accessories. Sunday covers Agriculture & natural resources (including farms, livestock, feed and raw materials). A grower can also appear on Wednesday when it supplies food. Market visitors can narrow a selected department to the active product groups offered by its public businesses. Products match their own group and the business map shows sellers of matching products. Demo videos follow the showroom’s actual work across category changes.
 
 
@@ -408,7 +404,7 @@ bypass them. Do not add polling to discovery.
 
 Category/country/city choices are clearable multi-select: OR within a set, AND
 across filters, with canonical geography validation. Country precedes City;
-changing country removes incompatible cities. Public choices/counts derive from
+changing country removes incompatible cities. Country, city, category, subcategory and made-to-order choices reflect the current query and other active filters across the eligible result set. Selected options stay available to clear. Public choices/counts derive from
 eligible public businesses, not drafts, hidden or excluded records. Preserve literal
 merchant names and same-named cities' country/canonical identities. Search uses
 parameterized Unicode-aware matching and bounded typo candidates after all
@@ -925,8 +921,7 @@ Staff chat puts transcript/reply first with adjacent desktop management and an
 explicit phone Details/Back view that retains the reply draft. Separate reply
 priority from assignment/join/end/resolution state. Read receipts require actual
 visible/focused incoming content, not a fetch or a synthetic successful response.
-Business clients reach Support from their own workspace. The inquiry list uses
-its own showroom and product controls.
+Business clients reach Support from their own workspace. The public market, showroom and product views open the same saved inquiry list. Keep group actions beside their seller and retain direct contact for an individual product or a general business question.
 
 Product/Featured rows use actual available container width, resilient wrap and
 full-width fallback for narrow/enlarged text, not stale measured percentages.

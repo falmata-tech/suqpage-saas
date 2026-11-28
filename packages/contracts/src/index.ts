@@ -90,6 +90,7 @@ export type Market = {
   nearbyGroups?: NearbyGroup[];
   categories: Array<{ key: string; label: string }>;
   subcategories?: string[];
+  hasMadeToOrder?: boolean;
   places: Array<{ key: string; label: string; countryCode?:string }>;
   countries?:Array<{code:string;count:number}>;
   page: number;

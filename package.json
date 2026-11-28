@@ -28,7 +28,7 @@
     "restore": "tsx scripts/restore.ts",
     "typecheck": "node scripts/typecheck.mjs",
     "test": "tsx scripts/test-security.ts",
-    "test:product-inquiry": "node --import tsx scripts/test-product-inquiry.ts && node --import tsx scripts/test-retired-business-inquiry.ts && node --import tsx scripts/test-browser-clipboard.ts && node --import tsx scripts/test-restored-inquiry-postgres.ts",
+    "test:product-inquiry": "node --import tsx --test scripts/test-multi-shop-quotes.ts && node --import tsx scripts/test-product-inquiry.ts && node --import tsx scripts/test-retired-business-inquiry.ts && node --import tsx scripts/test-browser-clipboard.ts && node --import tsx scripts/test-restored-inquiry-postgres.ts",
     "test:account-contacts": "node --import tsx scripts/test-account-contacts.ts",
     "test:account-contacts-postgres": "node --import tsx scripts/test-account-contacts-postgres.ts",
     "test:business-assistance": "node --import tsx scripts/test-business-assistance.ts",

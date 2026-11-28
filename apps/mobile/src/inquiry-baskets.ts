@@ -4,13 +4,13 @@ import {inquiryCatalogProduct} from './catalog-products';
 
 export type BusinessInquiryItem={product:Offering;quantity:string;options:Record<string,string>};
 type SavedItem={productId:number;quantity:string;options:Record<string,string>};
-export type InquiryBasketStorage={read:(businessId:number)=>Promise<string|null>;write:(businessId:number,value:string)=>Promise<void>};
+export type InquiryBasketStorage={ids?:()=>Promise<number[]>;read:(businessId:number)=>Promise<string|null>;write:(businessId:number,value:string)=>Promise<void>};
 type Entry={items:SavedItem[];ready:boolean;loaded:boolean;error:string;loading?:Promise<void>;writing?:Promise<void>;revision:number};
 const MAX_BYTES=65_536;
 export const INQUIRY_STORAGE_ERROR='Your inquiry list is available for this visit, but could not be saved on this device. Try again.';
 function utf8Length(value:string):number {let bytes=0;for(const character of value){const code=character.codePointAt(0)!;bytes+=code<=0x7f?1:code<=0x7ff?2:code<=0xffff?3:4;}return bytes;}
 
-function references(raw:unknown):SavedItem[] {
+function references(raw:unknown,preserveSpacing=false):SavedItem[] {
  if(!Array.isArray(raw))return [];
  const items:SavedItem[]=[],seen=new Set<string>();
  for(const candidate of raw.slice(0,MAX_INQUIRY_SELECTIONS)){
@@ -21,7 +21,8 @@ function references(raw:unknown):SavedItem[] {
   if(entries.length>20||entries.some(([key,item])=>key.length>200||typeof item!=='string'||item.length>500))continue;
   const options=Object.fromEntries(entries) as Record<string,string>,key=selectionKey(Number(value.productId),options);
   if(seen.has(key))continue;seen.add(key);
-  items.push({productId:Number(value.productId),quantity:typeof value.quantity==='string'?value.quantity.replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,80):'',options});
+  const quantity=typeof value.quantity==='string'?value.quantity.replace(/[\u0000-\u001f\u007f]/g,' '):'';
+  items.push({productId:Number(value.productId),quantity:(preserveSpacing?quantity:quantity.trim()).slice(0,80),options});
  }
  return items;
 }
@@ -42,7 +43,9 @@ function parse(raw:string|null,businessId:number):SavedItem[]{
 export function createInquiryBaskets(storage:InquiryBasketStorage) {
  const entries=new Map<number,Entry>(),listeners=new Map<number,Set<()=>void>>(),migrated=new Set<number>();
  const entry=(id:number)=>{let current=entries.get(id);if(!current){current={items:[],ready:false,loaded:false,error:'',revision:0};entries.set(id,current);}return current;};
- const notify=(id:number)=>listeners.get(id)?.forEach(listener=>listener());
+ const subscribers=new Set<()=>void>();
+ let scan:Promise<void>|undefined;
+ const notify=(id:number)=>{listeners.get(id)?.forEach(listener=>listener());subscribers.forEach(fn=>fn());};
  function persist(id:number):Promise<void>{
   const current=entry(id),revision=current.revision,value=JSON.stringify({version:1,businessId:id,items:current.items});
   if(!current.loaded)return Promise.resolve();
@@ -60,6 +63,14 @@ export function createInquiryBaskets(storage:InquiryBasketStorage) {
  }
  return {
   load,
+  scan(){return scan??=(async()=>{
+    const pending=await storage.ids?.()||[];
+    async function worker(){while(pending.length){const id=pending.shift();if(id)await load(id);}}
+    await Promise.all(Array.from({length:Math.min(4,pending.length)},worker));
+  })().catch(error=>{scan=undefined;throw error;});},
+  subscribeAll(fn:()=>void){subscribers.add(fn);return ()=>{subscribers.delete(fn);};},
+  groups:()=>[...entries].filter(([,e])=>e.items.length>0).map(([id,e])=>({id,lines:e.items})),
+  replaceLines(id:number,change:(lines:SavedItem[])=>SavedItem[]){const e=entry(id);e.items=references(change(e.items),true);e.revision++;notify(id);return persist(id);},
   read:(shop:Shop)=>{const current=entry(shop.id);return {items:restoreBusinessInquiry(shop,current.items),ready:current.ready&&current.loaded,error:current.error};},
   subscribe:(id:number,listener:()=>void)=>{const group=listeners.get(id)||new Set<()=>void>();group.add(listener);listeners.set(id,group);return()=>{group.delete(listener);};},
   update,
