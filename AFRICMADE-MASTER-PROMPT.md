@@ -921,8 +921,7 @@ Staff chat puts transcript/reply first with adjacent desktop management and an
 explicit phone Details/Back view that retains the reply draft. Separate reply
 priority from assignment/join/end/resolution state. Read receipts require actual
 visible/focused incoming content, not a fetch or a synthetic successful response.
-Business clients reach Support from their own workspace. The inquiry list uses
-its own showroom and product controls.
+Business clients reach Support from their own workspace. The public market, showroom and product views open the same saved inquiry list. Keep group actions beside their seller and retain direct contact for an individual product or a general business question.
 
 Product/Featured rows use actual available container width, resilient wrap and
 full-width fallback for narrow/enlarged text, not stale measured percentages.

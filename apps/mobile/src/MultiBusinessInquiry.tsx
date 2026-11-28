@@ -246,7 +246,11 @@ export default function MultiBusinessInquiry() {
                 {t('Inquiry sent to')} {sent.join(', ')}
               </Copy>
             )}
-            <Status error={inventory.error} />
+            <Status
+              loading={!inventory.ready && !inventory.error}
+              error={inventory.error}
+              retry={inventory.retry}
+            />
           </View>
         }
         renderItem={({ item: g }) => {
@@ -319,12 +323,15 @@ export default function MultiBusinessInquiry() {
         }}
         ListFooterComponent={
           <View style={{ gap: 12 }}>
-            {!groups.length ? (
-              <Button
-                secondary
-                label={t('Continue browsing')}
-                onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
-              />
+            {!inventory.ready || !blocked.ready ? null : !groups.length ? (
+              <>
+                {!sent.length && <Copy>{t('Your inquiry list is empty.')}</Copy>}
+                <Button
+                  secondary
+                  label={t('Continue browsing')}
+                  onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+                />
+              </>
             ) : form ? (
               <Card>
                 {recipient && <Copy big>{shops[recipient]?.name}</Copy>}

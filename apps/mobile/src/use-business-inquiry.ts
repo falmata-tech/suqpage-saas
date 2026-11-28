@@ -35,11 +35,15 @@ export function useBusinessInquiry(shop:Shop|null){
 }
 
 export function useQuoteInventory(){
- const [,render]=useState(0),[error,setError]=useState('');
+ const [,render]=useState(0),[error,setError]=useState(''),[ready,setReady]=useState(false),[attempt,setAttempt]=useState(0);
  useEffect(()=>{
+  let active=true;
   const off=businessInquiries.subscribeAll(()=>render(v=>v+1));
-  void businessInquiries.scan().catch(()=>setError('Your inquiry list could not be loaded.'));
-  return off;
- },[]);
- return {groups:businessInquiries.groups(),error};
+  setError('');
+  void businessInquiries.scan().then(()=>{if(active)setReady(true);}).catch(()=>{
+    if(active)setError('Your inquiry list could not be loaded.');
+  });
+  return ()=>{active=false;off();};
+ },[attempt]);
+ return {groups:businessInquiries.groups(),error,ready,retry:()=>setAttempt(value=>value+1)};
 }
