@@ -1114,8 +1114,7 @@ belong in engineering readiness; no source merge or production change is claimed
 - Products are the current catalog, including ready/custom-order labels:
   [FE-067]/[BE-056] supersede older service-offering behavior.
 - Business contact supports localized external drafts and restored asynchronous
-  AfricMade Inbox submission under [FE-075]/[BE-062], with business-local saved
-  lists. [FE-066]/[BE-055] retirement is historical. The S189 live unsent composer
+  AfricMade Inbox submission under [FE-075]/[BE-062], with one shared saved list and business-specific recipients. Local multi-shop routing, retry and contextual choices are covered by [the quote tests](../scripts/test-multi-shop-quotes.ts) and [discovery fixture](../scripts/test-independent-discovery.ts). [FE-066]/[BE-055] retirement is historical. The S189 live unsent composer
   review does not establish successful hosted submission or owner handling.
 - Staff business authority is administrator-controlled [FE-072]/[BE-060]; owner
   consent/assignment does not restore revoked authority. Owner account-security

@@ -51,7 +51,8 @@ import { CompositionShowroom, InvalidComposition } from "./bank/CompositionShowr
 import BusinessProfile from "./BusinessProfile";
 import ProductPage from "./ProductPage";
 import PublicBusinessSafety from '../PublicBusinessSafety';
-import { InquiryFloatingAction } from "@/components/PublicActionDock";
+import {openQuoteList,readShopLines,writeShopLines} from "@/lib/web-quote-list";
+import { InquiryFloatingAction, useShowroomInquiryDock } from "@/components/PublicActionDock";
 import inquiryStyles from "./InquiryComposer.module.css";
 import { legacyPublicContacts, type PublicContacts, type PublicContactLink } from "@/lib/business-profile-contacts";
 import { canOpenPublicContact } from "@/lib/demo-inquiry-policy";
@@ -106,7 +107,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
   const storageKey = `suqpage-cart:${catalog.business.handle}${previewMode?":private-preview":""}`;
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
-  const [cart, setCart] = useState<CartLine[]>([]);
+  const [cart, setLocalCart] = useState<CartLine[]>([]);
   const [drawer, setDrawer] = useState(false);
   const [localSelected, setSelected] = useState<Product | null>(null);
   const selected = businessProfile && !previewMode ? linkedProduct(catalog, routedProduct) : localSelected;
@@ -114,6 +115,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
   const [hydratedKey, setHydratedKey] = useState<string | null>(null);
   // Reused routes cannot expose the previous tenant's selections before restore.
   const cartReady = previewMode || hydratedKey === storageKey;
+  const sharedInquiry = useShowroomInquiryDock(businessProfile?.accentColor, drawer && cartReady);
   const savedCart = useMemo(() => cartReady ? restoreInquiry(catalog, cart.map(line => ({ productId: line.product.id, quantity: line.quantity, options: line.options }))) : [], [cartReady, catalog, cart]);
   const activeDirectLine = useMemo(() => directLine ? restoreInquiry(catalog, [{ productId: directLine.product.id, quantity: directLine.quantity, options: directLine.options }])[0] || null : null, [catalog, directLine]);
   const productReturnScroll = useRef<number | null>(null);
@@ -144,30 +146,27 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
   );
 
   useEffect(() => {
-    if(previewMode){setCart([]);return;}
-    try {
-      setCart(restoreInquiry(catalog, JSON.parse(readPlatformState(localStorage, storageKey) || "[]")));
-    } catch { setCart([]); }
-    setHydratedKey(storageKey);
-  }, [storageKey, catalog, previewMode]);
-
+    if(previewMode){setLocalCart([]);return;}
+    const restore = () => {
+      const stored = readShopLines(catalog.business.handle);
+      const current = restoreInquiry(catalog, stored);
+      setLocalCart(current);
+      setHydratedKey(storageKey);
+      if (current.length !== stored.length) {
+        writeShopLines(catalog.business.handle, current.map(l => ({ productId: l.product.id, quantity: l.quantity, options: l.options })));
+      }
+    };
+    restore();
+    window.addEventListener('storage',restore);window.addEventListener('africmade-quote-list-change',restore);
+    return ()=>{window.removeEventListener('storage',restore);window.removeEventListener('africmade-quote-list-change',restore);};
+  }, [storageKey,catalog,previewMode]);
+  function setCart(change:CartLine[]|((current:CartLine[])=>CartLine[])){
+    if(previewMode){setLocalCart(change);return;}
+    const current=restoreInquiry(catalog,readShopLines(catalog.business.handle));
+    const next=typeof change==='function'?change(current):change;
+    writeShopLines(catalog.business.handle,next.map(l=>({productId:l.product.id,quantity:l.quantity,options:l.options})));
+  }
   useEffect(() => { setDrawer(false); setDirectLine(null); }, [storageKey]);
-
-  useEffect(() => {
-    if(previewMode || hydratedKey !== storageKey)return;
-    try {
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify(
-          cart.map((line) => ({
-            productId: line.product.id,
-            quantity: line.quantity,
-            options: line.options,
-          })),
-        ),
-      );
-    } catch {}
-  }, [cart, storageKey, previewMode, hydratedKey]);
 
   useEffect(() => {
     if (!selected || businessProfile) return;
@@ -275,6 +274,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
   const cartCount = savedCart.length;
   const openCart = () => {
     if (!cartReady) return;
+    if(sharedInquiry&&!previewMode&&cartCount){openQuoteList();return;}
     if(previewMode && !businessProfile){show("Private preview only — the inquiry cart is disabled.");return;}
     drawerOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setDirectLine(null);
@@ -285,6 +285,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
     const url = new URL(window.location.href);
     url.searchParams.delete("inquiry");
     window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    if(sharedInquiry){openQuoteList();return;}
     drawerOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setDirectLine(null);
     setDrawer(true);
@@ -422,7 +423,7 @@ export default function ShowroomApp({ catalog, previewMode = false, embedded = f
         <InvalidComposition />
       )}
       {contactFallback && <a href={contactFallback.href} target="_blank" rel="noopener noreferrer">{contactFallback.label} ↗</a>}
-      {!previewMode && !embedded ? <InquiryFloatingAction count={cartCount} handle={catalog.business.handle} accentColor={businessProfile?.accentColor} onOpen={openCart} dialogOpen={drawer && cartReady} /> : null}
+      {!sharedInquiry && !previewMode && !embedded ? <InquiryFloatingAction count={cartCount} handle={catalog.business.handle} accentColor={businessProfile?.accentColor} onOpen={openCart} dialogOpen={drawer && cartReady} /> : null}
       {compositionManifest && !previewMode && !embedded ? (
         <nav className="showroom-mobile-nav" aria-label={t("Page sections")}>
           <a href="#showroom-home"><Home aria-hidden="true" /><span>{t("Home")}</span></a>

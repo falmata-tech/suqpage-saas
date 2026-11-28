@@ -1,4 +1,5 @@
 "use client";
+import MarketAddToInquiry from "./MarketAddToInquiry";
 import MarketSearchControls from './MarketSearchControls';
 import independentStyles from './IndependentMarket.module.css';
 import {useMarketFeed,type MarketBatch} from '@/lib/use-market-feed';
@@ -160,6 +161,7 @@ function MarketplaceSearchResults({discovery,items,loading,hasMore,loadingMore,m
       <span className="discovery-product-result-copy"><small>{product.categoryName}</small><strong>{product.name}</strong><span className={independentStyles.supply}>{t(productSupplyLabel(product.offeringKind || '', product.availability || 'available'))}</span><p>{product.description}</p><em>{discoveryLocationLabel([product.city, product.region])}</em></span>
     </Link>
     <Link className="discovery-product-business" href={`/@${encodeURIComponent(product.businessHandle)}?ref=discovery`} onClick={rememberCurrentPublicWorkspace}>{t("From {business}", { business: product.businessName })}</Link>
+    {['limited','available'].includes(product.availability)&&<MarketAddToInquiry id={product.id} handle={product.businessHandle} remember={rememberCurrentPublicWorkspace}/>}
   </article>;
 
   return <section className="discovery-search-workspace" aria-labelledby="discovery-search-results-title" aria-busy={loading} data-snapshot-current={snapshotCurrent}>
@@ -330,7 +332,7 @@ export default function DiscoveryWorkspace({discovery,productDiscovery,initialEx
    </nav>
    </div>
    <div className={independentStyles.activeControls}>
-    <MarketSearchControls key={panelOpen?'products':'businesses'} ready={ready} scope={panelOpen?'products':'businesses'} value={panelOpen?productSearch:businessSearch} onChange={panelOpen?setProductSearch:setBusinessSearch} metadata={panelOpen?productData:mapData}/>
+    <MarketSearchControls key={panelOpen?'products':'businesses'} ready={ready} optionsCurrent={panelOpen?products.snapshotCurrent:businesses.snapshotCurrent} scope={panelOpen?'products':'businesses'} value={panelOpen?productSearch:businessSearch} onChange={panelOpen?setProductSearch:setBusinessSearch} metadata={panelOpen?productData:mapData}/>
     {!panelOpen&&businesses.error&&<div className={independentStyles.error} role="alert">{t(businesses.error)} <button type="button" onClick={businesses.retry}>{t('Try again')}</button></div>}
    </div>
    <div ref={viewport} className={independentStyles.viewport} data-dragging={moving}>

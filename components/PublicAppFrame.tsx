@@ -30,7 +30,7 @@ function PublicAppFrameContent({ children, signedIn, dashboardHref="/dashboard" 
   const pathname = usePathname();
   const showroomOpen = pathname.startsWith("/@");
 
-  return <PublicActionDockProvider enabled={publicInquiryPlacement(pathname,"web")==="shell"}><div className={`public-app-shell${showroomOpen ? " public-app-shell-showroom" : ""}`}>
+  return <PublicActionDockProvider marketplace enabled={publicInquiryPlacement(pathname,"web")==="shell"}><div className={`public-app-shell${showroomOpen ? " public-app-shell-showroom" : ""}`}>
     <header className="public-app-header">
       <AfricMadeBrand className="public-app-brand" />
       <LanguageSelector />

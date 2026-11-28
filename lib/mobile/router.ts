@@ -189,6 +189,14 @@ async function dispatch(
     if(!revision)throw new MobileError('Business not found.',404);
     return {revision};
   }
+  if(method==='GET'&&path[0]==='shops'&&path[1]==='by-id'&&path.length===3){
+    if(!/^[1-9]\d{0,14}$/.test(path[2]))throw new MobileError('Business not found.',404);
+    const {runtimeBusinessById}=await import('../catalog-runtime');
+    const entry=await runtimeBusinessById(Number(path[2]));
+    const snapshot=entry?.status==='active'&&await runtimePublicShowroom(entry.handle);
+    if(!snapshot||snapshot.catalog.business.id!==Number(path[2]))throw new MobileError('Business not found.',404);
+    return shopDto(snapshot.catalog,snapshot.profile,false,snapshot.pageRevision);
+  }
   if (method === "GET" && path[0] === "shops" && path.length === 2) {
     if (!/^@?[a-z0-9-]{3,80}$/.test(path[1]))
       throw new MobileError("Business not found.", 404);

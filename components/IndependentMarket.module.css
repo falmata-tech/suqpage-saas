@@ -135,3 +135,6 @@
 @media(prefers-reduced-motion:reduce){.updating>i{animation:none}}
 @media(max-width:760px){.resultsHeading{min-height:32px;gap:8px}.resultsHeading>.updating{font-size:10px;max-width:calc(100% - 88px)}}
 @media(max-height:600px){.mapUpdating{top:64px}}
+.quoteAdd {padding:4px 12px 10px;display:grid;gap:4px;}
+.quoteAdd button {justify-self:start;display:inline-flex;align-items:center;gap:5px;min-height:44px;border:1px solid #d9deda;background:white;color:#77350e;border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;}
+.quoteAdd small {color:#40594c;}

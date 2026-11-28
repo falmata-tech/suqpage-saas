@@ -2275,3 +2275,11 @@ Before implementation: add a short ordered task and link its controlling spec;
 identify dependencies, focused evidence, visual gate and rollout boundary. Update
 only changed current state and evidence pointers. Security, tenant isolation,
 privacy and data integrity remain mandatory; a digest is not hosted approval.
+
+## Multi-business inquiry list and contextual discovery filters
+
+- [x] Define visitor grouping, private per-business delivery and filtered choices under FE-075, BE-062 and BE-054. Master brief sections 4, 8, 9, 10 and 19 are affected.
+- [x] Connect saved product selections, per-shop social handoffs and retryable inbox delivery.
+- [x] Compute available choices from eligible businesses/products and retain selected filters.
+- [x] Verify local desktop, phone and Expo journeys, separate seller receipts, response loss and carried-over saved items.
+- [ ] Complete repository-wide qualification and GitHub delivery.

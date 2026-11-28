@@ -169,3 +169,7 @@ and separately reviewed deployment. Rollback retains additive columns/data.
 Local focused evidence and explicit visual approval precede full/release gates.
 DEP-045 controls backup, preservation, scoped commit and any later hosted rollout;
 DEP-042 controls rebuilt Android delivery. No automatic publication or reset.
+
+## Contextual public choices
+
+For the independent product and business searches, available countries, cities, categories, subcategories and made-to-order values use the same published records and search scope as the results. Count distinct businesses for the map and distinct products for listings before pagination. Ignore the facet’s own selections when finding alternatives. Country owns the dependent city selection. Keep selected values available to remove when other criteria exclude them. The mobile projection exposes the same choices. The isolated discovery fixture verifies counts against filtered results, including private and unmappable records.

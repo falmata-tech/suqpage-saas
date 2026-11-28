@@ -57,6 +57,18 @@ async function main() {
    const empty=await get(scope);assert.equal(empty.resultPage.totalItems,scope==='businesses'?3:8);assert.equal(empty.showrooms.length,scope==='businesses'?3:0);assert.equal(empty.searchProducts.length,scope==='products'?8:0);
    assert.deepEqual(empty.countries?.map(c=>c.code),['ET','KE']);assert.equal(empty.places.length,scope==='products'?4:3);
   }
+  const kenyaProducts=await get('products',{country:'KE',q:'Grass'});
+  assert.equal(kenyaProducts.places.length,1);
+  assert.equal(kenyaProducts.places[0].countryCode,'KE');
+  assert.equal(kenyaProducts.places[0].count,1);
+  assert.equal(kenyaProducts.hasMadeToOrder,false);
+  for(const place of kenyaProducts.places){
+    assert.equal((await get('products',{q:'Grass',country:'KE',city:place.key})).resultPage.totalItems,place.count);
+  }
+  const emptyCategory=await get('businesses',{industry:'food-farming'});
+  assert.deepEqual(emptyCategory.places,[]);
+  assert.deepEqual(emptyCategory.countries,[]);
+  assert.ok(emptyCategory.industries.some(c=>c.key==='food-farming'),'Selected empty categories remain removable');
   assert.equal((await get('businesses',{q:'city-only'})).showrooms.length,0,'Area records without a validated city anchor remain off the map');
   assert.equal((await get('businesses',{q:'city-onl'})).showrooms.length,0,'Spelling fallback cannot restore an unanchored area as a map result');
   const cityPinResult=await get('businesses',{q:'city-pin'}),cityPinRow=cityPinResult.showrooms.find(shop=>shop.id===cityPin);

@@ -149,3 +149,7 @@ assertions only after both adapters satisfy this contract. Actual Chrome/Expo
 visitor→correct-owner Inbox→read/status/Back evidence, explicit visual approval,
 full/release/acceptance and scoped release evidence remain separate from unit
 ports. No migration apply or deployment is claimed by this ready spec.
+
+## Shared visitor inquiry list
+
+The grouped buyer review sends an independent canonical command for each recipient. Products, options, quantities, message text and idempotency belong to that recipient. A lost acknowledgment can be retried with the same key. Successful receipts clear only matching submitted selections. The existing validation, rate limit, inbox access and transaction apply separately to every business. Existing shop-scoped device references can restore through the public catalog by numeric ID or handle. No database migration is required.

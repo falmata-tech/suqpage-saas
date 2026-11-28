@@ -8,7 +8,7 @@ import {emptyMarketSearch,hasMarketCriteria,type MarketScope,type MarketSearch} 
 import type {MarketplaceDiscoveryView} from '@/lib/discovery';
 import styles from './IndependentMarket.module.css';
 
-export default function MarketSearchControls({scope,value,onChange,metadata,ready}:{scope:MarketScope;value:MarketSearch;onChange:(value:MarketSearch)=>void;metadata:Pick<MarketplaceDiscoveryView,'places'|'countries'|'industries'|'subcategories'>;ready:boolean}) {
+export default function MarketSearchControls({scope,value,onChange,metadata,ready,optionsCurrent=true}:{scope:MarketScope;value:MarketSearch;onChange:(value:MarketSearch)=>void;metadata:Pick<MarketplaceDiscoveryView,'places'|'countries'|'industries'|'subcategories'|'hasMadeToOrder'>;ready:boolean;optionsCurrent?:boolean}) {
  const t=useUiText(),locale=useLocale(),dialog=useRef<HTMLDialogElement>(null);
  const filterTrigger=useRef<HTMLButtonElement>(null);
  const [picker,setPicker]=useState(''),[filterText,setFilterText]=useState(''),[fromOverview,setFromOverview]=useState(false);
@@ -28,6 +28,7 @@ export default function MarketSearchControls({scope,value,onChange,metadata,read
   :picker==='country'?(metadata.countries||[]).map(c=>({key:c.code,label:countryName(c.code,locale)}))
   :metadata.places.filter(p=>p.countryCode&&value.countries.includes(p.countryCode)).map(p=>({key:p.key,label:`${p.city} · ${countryName(p.countryCode!,locale)}`}));
  const selected=picker==='category'?value.categories:picker==='subcategory'?(value.subcategory?[value.subcategory]:[]):picker==='country'?value.countries:value.cities;
+ for(const key of selected)if(!choices.some(choice=>choice.key===key))choices.push({key,label:picker==='country'?countryName(key,locale):picker==='city'?key.split(':').slice(1).join(':'):t(key)});
  function select(key:string) {
   const next=selected.includes(key)?selected.filter(c=>c!==key):[...selected,key].slice(0,16);
   if(picker==='category')change({categories:next,subcategory:undefined});else if(picker==='subcategory')change({subcategory:value.subcategory===key?undefined:key});
@@ -38,7 +39,7 @@ export default function MarketSearchControls({scope,value,onChange,metadata,read
  const activeCount=value.categories.length+Number(Boolean(value.subcategory))+value.countries.length+value.cities.length+Number(value.madeToOrder);
  const filterButtons=(inOverview=false)=><>
    {[{key:'category',label:'Category',count:value.categories.length,Icon:Grid2X2},...(value.categories.length && (metadata?.subcategories?.length || value.subcategory)?[{key:'subcategory' as const,label:'Subcategory',count:Number(Boolean(value.subcategory)),Icon:Grid2X2}]:[]),{key:'country',label:'Country',count:value.countries.length,Icon:Globe},{key:'city',label:'City',count:value.cities.length,Icon:MapPin}].map(f=><button key={f.key} type="button" disabled={!ready||f.key==='city'&&!value.countries.length} aria-haspopup="dialog" data-active={f.count>0} onClick={()=>openPicker(f.key,inOverview)}><f.Icon size={15} aria-hidden="true"/><span>{t(f.label)}</span>{f.count>0?<b>{f.count}</b>:<ChevronDown size={12} aria-hidden="true"/>}</button>)}
-   <button type="button" disabled={!ready} aria-pressed={value.madeToOrder} data-active={value.madeToOrder} onClick={()=>change({madeToOrder:!value.madeToOrder})}>{value.madeToOrder&&<Check size={15} aria-hidden="true"/>}<span>{t('Made to order')}</span></button>
+   <button type="button" disabled={!ready||(!value.madeToOrder&&(!optionsCurrent||metadata.hasMadeToOrder===false))} aria-pressed={value.madeToOrder} data-active={value.madeToOrder} onClick={()=>change({madeToOrder:!value.madeToOrder})}>{value.madeToOrder&&<Check size={15} aria-hidden="true"/>}<span>{t('Made to order')}</span></button>
   </>;
  return <div className={styles.controls} data-search-scope={scope}>
   <form role="search" aria-label={t(scope==='businesses'?'Search businesses':'Search products')} className={styles.search} onSubmit={event=>event.preventDefault()}>
@@ -52,7 +53,7 @@ export default function MarketSearchControls({scope,value,onChange,metadata,read
    <div className={styles.dialogHeading}>{fromOverview&&!overview&&<button type="button" data-filter-back aria-label={t('Back to filters')} onClick={()=>{setFilterText('');setPicker('filters');}}><ChevronLeft size={20}/></button>}<h2 id={`${scope}-filter-title`}>{t(title)}</h2><button type="button" aria-label={t('Close')} onClick={()=>setPicker('')}><X size={20}/></button></div>
    {overview?<div className={styles.filterMenu} data-filter-menu>{filterButtons(true)}</div>:<>
     {choices.length>8&&<input type="search" disabled={!ready} aria-label={t('Filter options')} placeholder={t('Search')} value={filterText} onChange={event=>setFilterText(event.target.value)}/>}
-    <div className={styles.options} data-filter-options>{choices.filter(c=>c.label.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())).map(c=><label key={c.key}><input type="checkbox" disabled={!ready} checked={selected.includes(c.key)} onChange={()=>select(c.key)}/><span>{c.label}</span></label>)}{!choices.length&&<p>{t('No locations listed yet.')}</p>}</div>
+    <div className={styles.options} data-filter-options>{choices.filter(c=>c.label.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())).map(c=><label key={c.key}><input type="checkbox" disabled={!ready||(!optionsCurrent&&!selected.includes(c.key))} checked={selected.includes(c.key)} onChange={()=>select(c.key)}/><span>{c.label}</span></label>)}{!choices.length&&<p>{t('No matches found')}</p>}</div>
    </>}
    <div className={styles.dialogFooter}><button type="button" disabled={!ready} onClick={()=>{if(overview){if(ready)onChange(emptyMarketSearch());}else if(picker==='category')change({categories:[],subcategory:undefined});else if(picker==='subcategory')change({subcategory:undefined});else if(picker==='country')change({countries:[],cities:[]});else change({cities:[]});}}>{t(overview?'Clear all':'Clear')}</button><button type="button" className="btn brand" onClick={()=>setPicker('')}>{t('Done')}</button></div>
   </dialog>}

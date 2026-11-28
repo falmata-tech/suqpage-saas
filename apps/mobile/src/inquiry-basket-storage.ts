@@ -8,6 +8,12 @@ export function createInquiryBasketStorage(apiOrigin:string):InquiryBasketStorag
  const environment=encodeURIComponent(url.origin),key=prefix+environment+'-';
  const directory=()=>new Directory(Paths.document,'suqpage-inquiries',environment);
  return {
+ async ids(){
+  const dir=Platform.OS==='web'?null:directory();
+  const names=Platform.OS==='web'?Object.keys(localStorage).filter(k=>k.startsWith(key)).map(k=>k.slice(key.length)):
+    dir?.exists?dir.list().filter(f=>f instanceof File&&f.name.endsWith('.json')).map(f=>f.name.slice(0,-5)):[];
+  return names.filter(n=>/^[1-9]\d{0,14}$/.test(n)).map(Number);
+ },
  async read(id){
   if(Platform.OS==='web')return localStorage.getItem(key+id);
   const file=new File(directory(),`${id}.json`);

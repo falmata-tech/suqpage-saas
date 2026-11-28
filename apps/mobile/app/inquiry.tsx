@@ -1,3 +1,4 @@
+import MultiBusinessInquiry from '../src/MultiBusinessInquiry';
 import {copyBrowserText,openCopiedBrowserLink} from "../../../lib/browser-clipboard";
 import React,{useState,useMemo,useEffect,useRef} from "react";
 import {View,Platform,Pressable,Text} from "react-native";
@@ -19,11 +20,15 @@ import ResourceLoading from "../src/ResourceLoading";
 import {Screen,Copy,Field,Card,Button,Status,Icon,s,colors,openLink} from "../src/ui";
 
 export default function Inquiry(){
+ const {handle,id,mode}=useLocalSearchParams<{handle?:string;id?:string;mode?:string}>();
+ return handle&&(id||mode==="contact")?<SingleBusinessInquiry/>:<MultiBusinessInquiry/>;
+}
+function SingleBusinessInquiry(){
  const blocked=useBlockedBusinesses(),{t}=useApp();
  const {handle,id,options}=useLocalSearchParams<{handle?:string;id?:string;options?:string}>();
  const load=usePublicShop(handle);
  const shop=load.data,catalogReady=Boolean(shop&&!load.loading&&!load.error),inquiry=useBusinessInquiry(shop);
- const items=useMemo<BasketItem[]>(()=>{if(id){const p=shop?.products.find(p=>p.id===Number(id)&&inquiryCatalogProduct(p));return shop&&p?restoreCatalogSelections(shop,[{product:p,quantity:"",options:inquiryOptions(options)}]):[];}return inquiry.items;},[id,shop,options,inquiry.items]);
+ const items=useMemo<BasketItem[]>(()=>{if(id){const p=shop?.products.find(p=>p.id===Number(id)&&inquiryCatalogProduct(p));return shop&&p?restoreCatalogSelections(shop,[{product:p,quantity:"",options:inquiryOptions(options)}]):[];}return [];},[id,shop,options]);
  const [name,setName]=useState(""),[phone,setPhone]=useState(""),[inboxMessage,setInboxMessage]=useState(""),[error,setError]=useState(""),[feedback,setFeedback]=useState(""),[busy,setBusy]=useState(false),[receipt,setReceipt]=useState<number|null>(null),[showPlatform,setShowPlatform]=useState(false);
  const submission=useRef<{payload:string;key:string}|null>(null);
  useEffect(()=>{setName("");setPhone("");setInboxMessage("");setError("");setFeedback("");setReceipt(null);setShowPlatform(false);submission.current=null;},[handle,id,options]);
@@ -42,7 +47,6 @@ export default function Inquiry(){
    const result=await request<InquiryReceipt>("inquiries",{body:{...body,idempotencyKey:submission.current.key}});
    if(!Number.isSafeInteger(result.inquiryId)||result.inquiryId<1||result.status!=="received")throw new Error("Your inquiry could not be sent. Please try again.");
    setReceipt(result.inquiryId);setName("");setPhone("");setInboxMessage("");
-   if(!id){const sent=new Set(items.map(item=>selectionKey(item.product.id,item.options)));inquiry.setItems(current=>current.filter(item=>!sent.has(selectionKey(item.product.id,item.options))));}
   }catch(e){setError(e instanceof Error?e.message:"Your inquiry could not be sent. Please try again.");}finally{setBusy(false);}
  }
  async function handoff(link:ReturnType<typeof inquiryHandoffs>[number]){
@@ -54,7 +58,7 @@ export default function Inquiry(){
  return <Screen><ResourceLoading load={load} variant="editor"/><Status error={inquiry.error} retry={inquiry.retry}/>
   {shop&&<><Copy big heading>{shop.name}</Copy>{receipt?<Card><Copy big>{t("Inquiry sent to the business.")}</Copy><Copy>{t("The business can contact you using the phone number you provided.")}</Copy></Card>:id&&catalogReady&&!items.length?<Copy>{t("This product is not available for inquiry.")}</Copy>:<>
    {items.map((item,index)=><Card key={selectionKey(item.product.id,item.options)}><Copy big>{item.product.name}</Copy>{Object.keys(item.options).length>0&&<Copy>{Object.entries(item.options).map(([k,v])=>`${k}: ${v}`).join(" · ")}</Copy>}
-    {!id&&<><Field label={t("Add quantity (optional)")} value={item.quantity} maxLength={80} editable={!busy} onChangeText={quantity=>inquiry.setItems(current=>current.map((line,i)=>i===index?{...line,quantity}:line))}/><Button secondary disabled={busy} label={t("Remove")} onPress={()=>inquiry.setItems(current=>current.filter(line=>selectionKey(line.product.id,line.options)!==selectionKey(item.product.id,item.options)))}/></>}
+
    </Card>)}
    <Card><Copy big heading>{t("Choose how to contact")}</Copy><View style={[s.wrap,{gap:10,marginTop:12}]}>{inquiryChannels.map(link=>{
       const value=publicContactDisplay(link.kind,shop.contacts),label=link.kind==="whatsapp"?t("Send on WhatsApp"):t("Send on Telegram"),color=link.kind==="whatsapp"?"#168454":"#168ac4",surface=link.kind==="whatsapp"?"#f0faf4":"#f1f7fd",icon=link.kind==="whatsapp"?"chat":"send";

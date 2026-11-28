@@ -27,7 +27,7 @@ const bundled=build({entryPoints:['apps/mobile/src/PublicActionDock.tsx','apps/m
     :a.path==='expo-clipboard'?`export const setStringAsync=async value=>{fixture.copied.push(value);return true;};`
     :a.path==='./use-public-shop'?`import{useLoad,request}from'./runtime';export const usePublicShop=handle=>useLoad(()=>handle?request('shops/'+encodeURIComponent(handle)):Promise.resolve(null),[handle]);`
     :a.path==='./runtime'?`export const useApp=()=>({t:fixture.t,basket:fixture.basket,setBasket:value=>{fixture.basket=typeof value==='function'?value(fixture.basket):value;fixture.basketWrites++;}}),useLoad=()=>({data:fixture.shop,loading:false,error:'',reload(){}}),request=async()=>{throw Error('Unexpected API call');},languageNames={en:'English'},locales=['en'],enabledLocales=['en'],API='https://suqpage.com';`
-    :a.path==='./use-business-inquiry'?`import {restoreBusinessInquiry} from ${JSON.stringify(process.cwd()+'/apps/mobile/src/inquiry-baskets.ts')};const restored=(shop,items)=>restoreBusinessInquiry(shop,items.map(item=>({productId:item.product.id,quantity:item.quantity,options:item.options})));export const useBusinessInquiry=shop=>({items:shop?restored(shop,fixture.baskets.get(shop.id)|| (fixture.basket?.shop.id===shop.id?fixture.basket.items:[])):[],ready:fixture.inquiryReady,error:'',retry(){},setItems:change=>{const current=fixture.baskets.get(shop.id)||(fixture.basket?.shop.id===shop.id?fixture.basket.items:[]);const next=change(restored(shop,current));fixture.baskets.set(shop.id,next);fixture.basket={shop,items:next};fixture.basketWrites++;}});`
+    :a.path==='./use-business-inquiry'?`import {restoreBusinessInquiry} from ${JSON.stringify(process.cwd()+'/apps/mobile/src/inquiry-baskets.ts')};const restored=(shop,items)=>restoreBusinessInquiry(shop,items.map(item=>({productId:item.product.id,quantity:item.quantity,options:item.options})));export const useInquiryAccent=handle=>fixture.shop?.handle===handle?fixture.shop?.accentColor:undefined,useQuoteInventory=()=>({groups:fixture.basket?[{id:fixture.basket.shop.id,lines:fixture.basket.items}]:[]}),useBusinessInquiry=shop=>({items:shop?restored(shop,fixture.baskets.get(shop.id)|| (fixture.basket?.shop.id===shop.id?fixture.basket.items:[])):[],ready:fixture.inquiryReady,error:'',retry(){},setItems:change=>{const current=fixture.baskets.get(shop.id)||(fixture.basket?.shop.id===shop.id?fixture.basket.items:[]);const next=change(restored(shop,current));fixture.baskets.set(shop.id,next);fixture.basket={shop,items:next};fixture.basketWrites++;}});`
     :a.path==='./ui'?`export const Icon='Icon',Screen='Screen',Copy='Copy',LinkedText='LinkedText',Card='Card',Button='Button',Chip='Chip',Status='Status',Photo='Photo',Brand='Brand',s={wrap:{}},colors={brand:'#c43a00',line:'#ddd',ink:'#222',soft:'#fff1e9'},useOpenLink=()=>async()=>{throw Error('Unexpected external navigation');};`
     :a.path==='./use-transport-unread'?`export const useTransportUnread=()=>fixture.unread;`
     :a.path==='./blocked-businesses'?`export const useBlockedBusinesses=()=>({ready:true,list:fixture.blocked});`
@@ -72,11 +72,13 @@ test('FE-078 public native dock retains current business selections without tran
   fixture.t=createUiText(messages);fixture.width=width;const tree=render({compact:true}),list=find(tree,'public-inquiry-list');
   assert.ok(list);assert.equal(style(list).minWidth,48);assert.equal(style(list).minHeight,48);assert.equal(text(find(tree,'inquiry-list-count')),'1');
   assert.ok(text(list).includes(fixture.t('Inquiry list')));assert.ok(!find(tree,'public-transport-launcher'));
-  press(list);assert.deepEqual(JSON.parse(JSON.stringify(fixture.routes.at(-1))),{pathname:'/inquiry',params:{handle:first.handle}});
+  press(list);assert.deepEqual(fixture.routes.at(-1),'/inquiry');
  }
- for(const path of ['/','/featured','/about','/inquiry','/buying','/account','/owner/transport']){fixture.path=path;assert.deepEqual(render(),[],path);}
+ for(const path of ['/','/featured']){fixture.path=path;assert.ok(find(render(),'public-inquiry-list'),path);}
+ for(const path of ['/about','/inquiry','/buying','/account','/owner/transport']){fixture.path=path;assert.deepEqual(render(),[],path);}
  fixture.path='/product';fixture.params={handle:first.handle,id:'1'};assert.ok(find(render(),'public-inquiry-list'));
- fixture.params={handle:'another-business',id:'1'};assert.ok(!find(render(),'public-inquiry-list'));
+ fixture.params={handle:'another-business',id:'1'};assert.ok(find(render(),'public-inquiry-list'));
+ fixture.blocked=[{id:first.id}];assert.deepEqual(render(),[]);fixture.blocked=[];
  fixture.path='/shop/'+first.handle;fixture.params={};fixture.modal=true;const before=fixture.routes.length;press(find(render(),'public-inquiry-list'));assert.equal(fixture.routes.length,before,'An open inquiry dialog prevents duplicate navigation');
  assert.equal(fixture.basketWrites,0,'Dock rendering never changes selections');
 });
